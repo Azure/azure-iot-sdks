@@ -168,6 +168,9 @@
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\common\build\windows\common.vcxproj">
+      <Project>{9f55377b-6c37-4700-9866-e070d64ade0f}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\iothub_client\build\windows\iothub_client.vcxproj">
       <Project>{f17f4374-023d-455f-b254-5a87b6691395}</Project>
     </ProjectReference>
