@@ -774,6 +774,7 @@ INPUT                  = mainpage.dox \
                          ../../c/common/inc/httpheaders.h \
                          ../../c/common/inc/threadapi.h \
                          ../../c/common/inc/lock.h \
+                         ../../c/iothub_client/inc/iothub_message.h \
                          ../../c/iothub_client/inc/iothub_client_ll.h \
                          ../../c/iothub_client/inc/iothub_client.h \
                          ../../c/serializer/inc/serializer.h \

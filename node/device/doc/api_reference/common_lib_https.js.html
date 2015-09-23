@@ -1,4 +1,30 @@
-// Copyright (c) Microsoft. All rights reserved.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: common/lib/https.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    <h1 class="page-title">Source: common/lib/https.js</h1>
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 'use strict';
@@ -25,7 +51,7 @@ function constructBatchBody(messages)
     // Get the properties
     var propertyIdx = 0;
     var property = ',\"properties\":{';
-    for (propertyIdx = 0; propertyIdx < message.properties.count(); propertyIdx++) {
+    for (propertyIdx = 0; propertyIdx &lt; message.properties.count(); propertyIdx++) {
       if (propertyIdx > 0)
         property += ',';
       var propItem = message.properties.getItem(propertyIdx);
@@ -100,7 +126,7 @@ function Https() {
       response.on('end', function onResponseEnd() {
         var msg;
         // Save good responses only
-        if (response.statusCode < 300) {
+        if (response.statusCode &lt; 300) {
           msg = new Message(responseBody);
           // Go through the response header
           for(var item in response.headers) {
@@ -134,22 +160,22 @@ function Https() {
         /*SRS_NODE_IOTHUB_HTTPS_05_012: [When getDevice receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
         err - the standard JavaScript Error object
         res - the Node.js http.ServerResponse object returned by the transport]*/
-        /*Codes_SRS_NODE_IOTHUB_HTTPS_05_005: [When sendEvent receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+        /*Codes_SRS_NODE_IOTHUB_HTTPS_05_005: [When sendEvent receives an HTTP response with a status code &lt; 300, it shall invoke the done callback function with the following arguments:
         err - null
         res - the Node.js http.ServerResponse object returned by the transport]*/
-        /*Codes_SRS_NODE_IOTHUB_HTTPS_05_009: [When receive receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+        /*Codes_SRS_NODE_IOTHUB_HTTPS_05_009: [When receive receives an HTTP response with a status code &lt; 300, it shall invoke the done callback function with the following arguments:
         err - null
         res - the Node.js http.ServerResponse object returned by the transport
         msg – the response body, i.e. the content of the message received from IoT Hub, as an iothub.Message object]*/
-        /*Codes_SRS_NODE_IOTHUB_HTTPS_05_013: [When getDevice receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+        /*Codes_SRS_NODE_IOTHUB_HTTPS_05_013: [When getDevice receives an HTTP response with a status code &lt; 300, it shall invoke the done callback function with the following arguments:
         err - null
         res - the Node.js http.ServerResponse object returned by the transport
         msg – the response body, i.e. metadata representing the device, as an iothub.Message object]*/
-        /*Codes_SRS_NODE_IOTHUB_HTTPS_05_013: [When getDevice receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+        /*Codes_SRS_NODE_IOTHUB_HTTPS_05_013: [When getDevice receives an HTTP response with a status code &lt; 300, it shall invoke the done callback function with the following arguments:
         err - null
         res - the Node.js http.ServerResponse object returned by the transport
         msg - the response body, i.e. metadata representing the device, as an iothub.Message object]*/
-        /*Codes_SRS_NODE_IOTHUB_HTTPS_07_008: [When sendEventBatch receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+        /*Codes_SRS_NODE_IOTHUB_HTTPS_07_008: [When sendEventBatch receives an HTTP response with a status code &lt; 300, it shall invoke the done callback function with the following arguments:
         err - null
         res - the Node.js http.ServerResponse object returned by the transport]*/
         /*Codes_SRS_NODE_IOTHUB_HTTPS_07_009: [When sendEventBatch receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
@@ -191,12 +217,12 @@ function Https() {
  */
 Https.prototype.sendEvent = function (message, config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_002: [The sendEvent method shall construct an HTTP request using information supplied by the caller, as follows:
-    POST <config.host>/devices/<config.keyName>/messages/events?api-version=<version> HTTP/1.1
-    Authorization: <token generated from config>
-    iothub-to: /devices/<config.keyName>/messages/events
-  Host: <config.host>
+    POST &lt;config.host>/devices/&lt;config.keyName>/messages/events?api-version=&lt;version> HTTP/1.1
+    Authorization: &lt;token generated from config>
+    iothub-to: /devices/&lt;config.keyName>/messages/events
+  Host: &lt;config.host>
 
-  <message>
+  &lt;message>
   ]*/
   var path = endpoint.eventPath(config.keyName);
   var token = new authorization.DeviceToken(config.host, config.keyName, config.key, anHourFromNow());
@@ -204,7 +230,7 @@ Https.prototype.sendEvent = function (message, config, done) {
     'Authorization': token.toString(),
     'iothub-to': path
   };
-  for (var i = 0; i < message.properties.count(); i++) {
+  for (var i = 0; i &lt; message.properties.count(); i++) {
     var propItem = message.properties.getItem(i);
     httpHeaders[propItem.key] = propItem.value;
   }
@@ -216,7 +242,7 @@ Https.prototype.sendEvent = function (message, config, done) {
 /**
  * The `sendEventBatch` method sends a list of event messages to the IoT Hub
  * as the device indicated in the `config` parameter.
- * @param {array<Message>} messages   Array of [Message]{@linkcode module:common/message.Message}
+ * @param {array&lt;Message>} messages   Array of [Message]{@linkcode module:common/message.Message}
  *                                    objects to be sent as a batch.
  * @param {Object}  config            This is a dictionary containing the
  *                                    following keys and values:
@@ -233,13 +259,13 @@ Https.prototype.sendEvent = function (message, config, done) {
  */
 Https.prototype.sendEventBatch = function (messages, config, done) {
   /* Codes_SRS_NODE_IOTHUB_HTTPS_07_006: [The sendEventBatch method shall construct an HTTP request using information supplied by the caller, as follows:
-  POST <config.host>/devices/<config.keyName>/messages/events?api-version=<version> HTTP/1.1
-  Authorization: <token generated from config>
-  iothub-to: /devices/<config.keyName>/messages/events
+  POST &lt;config.host>/devices/&lt;config.keyName>/messages/events?api-version=&lt;version> HTTP/1.1
+  Authorization: &lt;token generated from config>
+  iothub-to: /devices/&lt;config.keyName>/messages/events
   Content-Type: ‘application/vnd.microsoft.iothub.json’
-  Host: <config.host>
+  Host: &lt;config.host>
 
-  {“body”:”<Base64 Message1>”,”properties”:{“<key>”:”<value”}},{ “body”:<Base64 Message1>”}…]*/
+  {“body”:”&lt;Base64 Message1>”,”properties”:{“&lt;key>”:”&lt;value”}},{ “body”:&lt;Base64 Message1>”}…]*/
   var path = endpoint.eventPath(config.keyName);
   var token = new authorization.DeviceToken(config.host, config.keyName, config.key, anHourFromNow());
   var httpHeaders = {
@@ -272,10 +298,10 @@ Https.prototype.sendEventBatch = function (messages, config, done) {
  */
 Https.prototype.receive = function (config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_006: [The receive method shall construct an HTTP request using information supplied by the caller, as follows:
-  GET <config.host>/devices/<config.keyName>/messages/devicebound?api-version=<version> HTTP/1.1
-  Authorization: <token generated from config>
-  iothub-to: /devices/<config.keyName>/messages/devicebound
-  Host: <config.host>
+  GET &lt;config.host>/devices/&lt;config.keyName>/messages/devicebound?api-version=&lt;version> HTTP/1.1
+  Authorization: &lt;token generated from config>
+  iothub-to: /devices/&lt;config.keyName>/messages/devicebound
+  Host: &lt;config.host>
   ]*/
   var path = endpoint.messagePath(config.keyName);
   var token = new authorization.DeviceToken(config.host, config.keyName, config.key, anHourFromNow());
@@ -327,9 +353,9 @@ Https.prototype.sendFeedback = function (action, lockToken, config, done) {
       path += "/abandon?api-version=2015-08-15-preview";
       method = 'POST';
     }
-    /* Codes_SRS_NODE_IOTHUB_HTTPS_07_002: [On reject the sendFeedback method will send a DELETE message with the following path PATH + lockToken + ‘?api-version=2015-08-15-preview&reject’] */
+    /* Codes_SRS_NODE_IOTHUB_HTTPS_07_002: [On reject the sendFeedback method will send a DELETE message with the following path PATH + lockToken + ‘?api-version=2015-08-15-preview&amp;reject’] */
     else if (action === 'reject') {
-      path += "?api-version=2015-08-15-preview&reject";
+      path += "?api-version=2015-08-15-preview&amp;reject";
       method = 'DELETE';
     }
     /* Codes_SRS_NODE_IOTHUB_HTTPS_07_003: [On complete the sendFeedback method will send a DELETE message with the following path PATH + lockToken + ‘api-version=2015-08-15-preview’] */
@@ -345,11 +371,11 @@ Https.prototype.sendFeedback = function (action, lockToken, config, done) {
 
 Https.prototype.createDevice = function (path, deviceInfo, config, done) {
   /* SRS_NODE_IOTHUB_HTTPS_07_010: [The device methods shall construct an HTTP request using information supplied by the caller, as follows:
-  OPERATION <path>?api-version=<version> HTTP/1.1
-  Authorization: <token generated from config>
+  OPERATION &lt;path>?api-version=&lt;version> HTTP/1.1
+  Authorization: &lt;token generated from config>
   iothub-name: config.hubname
   Content-Type: 'application/json; charset=utf-8'
-  Host: <config.host>]
+  Host: &lt;config.host>]
   */
   var token = new authorization.ServiceToken(config.host, config.keyName, config.key, anHourFromNow());
   var httpHeaders = {
@@ -360,7 +386,7 @@ Https.prototype.createDevice = function (path, deviceInfo, config, done) {
   /*SRS_NODE_IOTHUB_HTTPS_07_012: [When device methods receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
   err - the standard JavaScript Error object
   res - the Node.js http.ServerResponse object returned by the transport]  
-  SRS_NODE_IOTHUB_HTTPS_07_013: [When device methods receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+  SRS_NODE_IOTHUB_HTTPS_07_013: [When device methods receives an HTTP response with a status code &lt; 300, it shall invoke the done callback function with the following arguments:
   err - null
   res - the Node.js http.ServerResponse object returned by the transport
   msg - the response body, i.e. metadata representing the device, as an iothub.Message object]*/
@@ -371,11 +397,11 @@ Https.prototype.createDevice = function (path, deviceInfo, config, done) {
 
 Https.prototype.updateDevice = function (path, deviceInfo, config, done) {
   /* SRS_NODE_IOTHUB_HTTPS_07_010: [The device methods shall construct an HTTP request using information supplied by the caller, as follows:
-  OPERATION <path>?api-version=<version> HTTP/1.1
-  Authorization: <token generated from config>
+  OPERATION &lt;path>?api-version=&lt;version> HTTP/1.1
+  Authorization: &lt;token generated from config>
   iothub-name: config.hubname
   Content-Type: 'application/json; charset=utf-8'
-  Host: <config.host>]
+  Host: &lt;config.host>]
   */
   var token = new authorization.ServiceToken(config.host, config.keyName, config.key, anHourFromNow());
   var httpHeaders = {
@@ -387,7 +413,7 @@ Https.prototype.updateDevice = function (path, deviceInfo, config, done) {
   /*SRS_NODE_IOTHUB_HTTPS_07_012: [When device methods receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
   err - the standard JavaScript Error object
   res - the Node.js http.ServerResponse object returned by the transport]  
-  SRS_NODE_IOTHUB_HTTPS_07_013: [When device methods receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+  SRS_NODE_IOTHUB_HTTPS_07_013: [When device methods receives an HTTP response with a status code &lt; 300, it shall invoke the done callback function with the following arguments:
   err - null
   res - the Node.js http.ServerResponse object returned by the transport
   msg - the response body, i.e. metadata representing the device, as an iothub.Message object]*/
@@ -398,10 +424,10 @@ Https.prototype.updateDevice = function (path, deviceInfo, config, done) {
 
 Https.prototype.getDevice = function (path, config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_010: [The device methods shall construct an HTTP request using information supplied by the caller, as follows:
-  OPERATION <path>?api-version=<version> HTTP/1.1
-  Authorization: <token generated from config>
+  OPERATION &lt;path>?api-version=&lt;version> HTTP/1.1
+  Authorization: &lt;token generated from config>
   iothub-name: config.hubname
-  Host: <config.host>
+  Host: &lt;config.host>
   ]*/
   var token = new authorization.ServiceToken(config.host, config.keyName, config.key, anHourFromNow());
   var httpHeaders = {
@@ -412,7 +438,7 @@ Https.prototype.getDevice = function (path, config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_012: [When device methods receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
   err - the standard JavaScript Error object
   res - the Node.js http.ServerResponse object returned by the transport]*/
-  /* Codes_SRS_NODE_IOTHUB_HTTPS_05_013: [When device methods receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+  /* Codes_SRS_NODE_IOTHUB_HTTPS_05_013: [When device methods receives an HTTP response with a status code &lt; 300, it shall invoke the done callback function with the following arguments:
   err - null
   res - the Node.js http.ServerResponse object returned by the transport
   msg - the response body, i.e. metadata representing the device, as an iothub.Message object]*/
@@ -422,10 +448,10 @@ Https.prototype.getDevice = function (path, config, done) {
 
 Https.prototype.listDevice = function (path, config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_010: [The device methods shall construct an HTTP request using information supplied by the caller, as follows:
-  OPERATION <path>?api-version=<version> HTTP/1.1
-  Authorization: <token generated from config>
+  OPERATION &lt;path>?api-version=&lt;version> HTTP/1.1
+  Authorization: &lt;token generated from config>
   iothub-name: config.hubname
-  Host: <config.host>
+  Host: &lt;config.host>
   ]*/
   var token = new authorization.ServiceToken(config.host, config.keyName, config.key, anHourFromNow());
   var httpHeaders = {
@@ -436,7 +462,7 @@ Https.prototype.listDevice = function (path, config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_012: [When device methods receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
   err - the standard JavaScript Error object
   res - the Node.js http.ServerResponse object returned by the transport]*/
-  /* Codes_SRS_NODE_IOTHUB_HTTPS_05_013: [When device methods receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+  /* Codes_SRS_NODE_IOTHUB_HTTPS_05_013: [When device methods receives an HTTP response with a status code &lt; 300, it shall invoke the done callback function with the following arguments:
   err - null
   res - the Node.js http.ServerResponse object returned by the transport
   msg - the response body, i.e. metadata representing the device, as an iothub.Message object]*/
@@ -446,10 +472,10 @@ Https.prototype.listDevice = function (path, config, done) {
 
 Https.prototype.deleteDevice = function (path, config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_010: [The device methods shall construct an HTTP request using information supplied by the caller, as follows:
-  OPERATION <path>?api-version=<version> HTTP/1.1
-  Authorization: <token generated from config>
+  OPERATION &lt;path>?api-version=&lt;version> HTTP/1.1
+  Authorization: &lt;token generated from config>
   iothub-name: config.hubname
-  Host: <config.host>
+  Host: &lt;config.host>
   ]*/
   var token = new authorization.ServiceToken(config.host, config.keyName, config.key, anHourFromNow());
   var httpHeaders = {
@@ -461,7 +487,7 @@ Https.prototype.deleteDevice = function (path, config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_012: [When device methods receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
   err - the standard JavaScript Error object
   res - the Node.js http.ServerResponse object returned by the transport]*/
-  /* Codes_SRS_NODE_IOTHUB_HTTPS_05_013: [When device methods receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+  /* Codes_SRS_NODE_IOTHUB_HTTPS_05_013: [When device methods receives an HTTP response with a status code &lt; 300, it shall invoke the done callback function with the following arguments:
   err - null
   res - the Node.js http.ServerResponse object returned by the transport
   msg - the response body, i.e. metadata representing the device, as an iothub.Message object]*/
@@ -470,3 +496,26 @@ Https.prototype.deleteDevice = function (path, config, done) {
 };
 
 module.exports = Https;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-azure-iot-device.html">azure-iot-device</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Https.html">Https</a></li><li><a href="Message.html">Message</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Tue Sep 22 2015 18:04:22 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
