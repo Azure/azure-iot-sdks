@@ -1,0 +1,33 @@
+{
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc","closure"]
+  },
+  "source": {
+    "include": [
+      "../build/docs/node-main-page-device.md",
+      "common/common.js",
+      "common/lib/message.js",
+      "common/lib/https.js",
+      "device/device.js",
+      "device/lib/client.js"
+    ],
+    "includePattern": ".+\\.js(doc)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false
+  },
+  "markdown": {
+    "tags": [
+      "module"
+    ]
+  },
+  "opts": {
+    "template": "../build/docs/iot-doc-template"
+  }
+}

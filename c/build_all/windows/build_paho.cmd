@@ -105,7 +105,6 @@ rem ----------------------------------------------------------------------------
 
 pushd %paho-build-root%
 if exist "%programfiles(x86)%\MSBuild\14.0\\." (
-(
 msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Debug;PlatformToolset=v140 
 goto paho_build_done
 )

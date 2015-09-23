@@ -62,7 +62,7 @@
         lint.checkFiles({
             files: deglob(
                 ['Jakefile', '**/*.js'],
-                ['**/node_modules']
+                ['**/node_modules', 'doc/']
             ),
             options: jshintConfig.nodeOptions,
             globals: jshintConfig.nodeGlobals
