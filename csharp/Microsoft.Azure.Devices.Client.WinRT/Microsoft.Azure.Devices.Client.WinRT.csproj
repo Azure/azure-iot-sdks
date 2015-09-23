@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E68DA0B4-2F93-4850-A6AE-1D87DDE7F063}</ProjectGuid>
+    <OutputType>winmdobj</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.Azure.Devices.Client</RootNamespace>
+    <AssemblyName>Microsoft.Azure.Devices.Client.WinRT</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion>10.0.10240.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
+    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <AllowCrossPlatformRetargeting>false</AllowCrossPlatformRetargeting>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
+    <OutputPath>bin\ARM\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <None Include="35MSSharedLib1024.snk" />
+    <None Include="project.json" />
+  </ItemGroup>
+  <PropertyGroup>
+    <DeviceClientDir>..\Microsoft.Azure.Devices.Client</DeviceClientDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(DeviceClientDir)\IAuthenticationMethod.cs" />
+    <Compile Include="$(DeviceClientDir)\AuthenticationMethodFactory.cs" />    
+    <Compile Include="$(DeviceClientDir)\Common\ActionItem.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Api\ClientApiVersionHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Api\IotHubApiResources.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\AsyncResult.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\BufferedInputStream.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\CommonConstants.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\CommonResources.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\CompletedAsyncResult.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Data\AccessRights.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Data\SharedAccessSignatureAuthorizationRule.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\ErrorCode.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\ETagHolder.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\ExceptionDispatcher.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\AssertionFailedException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\CallbackException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceAlreadyExistsException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceDisabledException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceMaximumQueueDepthExceededException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceMessageLockLostException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceNotFoundException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\ExceptionHandlingHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\FatalException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\IotHubCommunicationException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\IotHubException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\IotHubNotFoundException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\IotHubThrottledException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\MessageTooLargeException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\QuotaExceededException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\ServerBusyException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\ServerErrorException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\UnauthorizedException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\ExceptionTrace.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Extensions\CommonExtensions.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Extensions\ExceptionExtensions.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Extensions\StringFormattingExtensions.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Fx.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\FxCop.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\FxTrace.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\HashCode.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\IETagHolder.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\InternalBufferManager.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Interop\SafeEventLogWriteHandle.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\IOThreadScheduler.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\PartialTrustHelpers.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\ReadOnlyDictionary45.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Security\ISharedAccessSignatureCredential.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Security\SecurityConstants.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Security\SecurityHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Security\SharedAccessSignature.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Security\SharedAccessSignatureBuilder.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Security\SharedAccessSignatureConstants.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Security\StringValidationHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\SerializationUtilities.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\SignalGate.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Singleton.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\SynchronizedPool.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\TaskHelpers.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Ticks.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\TimeoutHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Tracing\EventTraceActivity.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\TrackingHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\WaitCallbackActionItem.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\WebApi\CustomHeaderConstants.cs" />
+    <Compile Include="$(DeviceClientDir)\CredentialScope.cs" />
+    <Compile Include="$(DeviceClientDir)\CredentialType.cs" />
+    <Compile Include="$(DeviceClientDir)\DeliveryAcknowledgement.cs" />
+    <Compile Include="$(DeviceClientDir)\DeviceAuthenticationWithRegistrySymmetricKey.cs" />
+    <Compile Include="$(DeviceClientDir)\DeviceAuthenticationWithToken.cs" />
+    <Compile Include="$(DeviceClientDir)\DeviceAuthenticationWithSharedAccessPolicyKey.cs" />
+    <Compile Include="$(DeviceClientDir)\DeviceClient.cs" />
+    <Compile Include="$(DeviceClientDir)\DeviceClientHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\HttpClientHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\HttpDeviceClient.cs" />
+    <Compile Include="$(DeviceClientDir)\IAuthorizationHeaderProvider.cs" />
+    <Compile Include="$(DeviceClientDir)\IHttpClientHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\IotHubConnection.cs" />
+    <Compile Include="$(DeviceClientDir)\IotHubConnectionCache.cs" />
+    <Compile Include="$(DeviceClientDir)\IotHubConnectionString.cs" />
+    <Compile Include="$(DeviceClientDir)\IotHubConnectionStringBuilder.cs" />
+    <Compile Include="$(DeviceClientDir)\MappingType.cs" />
+    <Compile Include="$(DeviceClientDir)\Message.cs" />
+    <Compile Include="$(DeviceClientDir)\MessageConverter.cs" />
+    <Compile Include="$(DeviceClientDir)\MessageSystemPropertyNames.cs" />
+    <Compile Include="$(DeviceClientDir)\PutOperationType.cs" />
+    <Compile Include="$(DeviceClientDir)\WinRTHelpers.cs" />
+    <Compile Include="$(DeviceClientDir)\WinRTResources.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Resources.resw" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+    <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

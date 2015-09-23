@@ -1,0 +1,8 @@
+..\inc\*.h
+..\src\*.c
+..\adapters\agenttime_mbed.c
+..\adapters\httpapi_mbed.cpp
+..\adapters\lock_rtx_mbed.cpp
+..\adapters\threadapi_rtx_mbed.cpp
+..\adapters\wolfssl_connection.h
+..\adapters\wolfssl_connection.cpp

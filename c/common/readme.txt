@@ -1,0 +1,1 @@
+This folder contains the common library used in all the clients.

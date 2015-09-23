@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>$id$</id>
+        <version>$Version$</version>
+        <title>Microsoft Azure Devices Client</title>
+        <authors>Microsoft</authors>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <licenseUrl><![CDATA[http://go.microsoft.com/fwlink/?LinkId=536623]]></licenseUrl>
+        <description>Package for Microsoft Azure Device Client</description>
+        <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
+        <language>en-US</language>
+        <dependencies>
+            <group targetFramework="net45" >
+                <dependency id="Newtonsoft.Json" version="6.0.8" />
+            </group>
+            <group targetFramework="net45" >
+                <dependency id="Microsoft.Azure.Amqp" version="1.0.0-preview-002" />
+            </group>
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\Microsoft.Azure.Devices.Client\bin\Release\Microsoft.Azure.Devices.Client.dll" target="lib\net45\Microsoft.Azure.Devices.Client.dll" />
+        <file src="..\Microsoft.Azure.Devices.Client.WinRT\bin\Release\Microsoft.Azure.Devices.Client.winmd" target="lib\uap10.0\Microsoft.Azure.Devices.Client.winmd" />
+    </files>
+</package>

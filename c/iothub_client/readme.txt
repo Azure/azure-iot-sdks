@@ -1,0 +1,1 @@
+This folder contains the iothub C client.
