@@ -96,7 +96,7 @@ extern "C"
 	*
 	* @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
 	*/
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
+    extern IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
 
 	/**
 	* @brief	Sets up the message callback to be invoked when IoT Hub issues a
