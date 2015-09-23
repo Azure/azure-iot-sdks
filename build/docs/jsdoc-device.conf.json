@@ -5,15 +5,12 @@
   },
   "source": {
     "include": [
-      "package.json",
-      "../build/docs/node-main-page.md",
-      "src/iothub.js",
-      "src/common/message.js",
-      "src/common/properties.js",
-      "src/common/authorization.js",
-      "src/device/client.js",
-      "src/adapters/https.js",
-      "src/service/registry.js"
+      "../build/docs/node-main-page-device.md",
+      "common/common.js",
+      "common/lib/message.js",
+      "common/lib/https.js",
+      "device/device.js",
+      "device/lib/client.js"
     ],
     "includePattern": ".+\\.js(doc)?$",
     "excludePattern": "(^|\\/|\\\\)_"

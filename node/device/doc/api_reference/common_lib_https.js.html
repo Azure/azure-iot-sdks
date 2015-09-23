@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: adapters/https.js</title>
+    <title>JSDoc: Source: common/lib/https.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -16,7 +16,7 @@
 <body>
 
 <div id="main">
-    <h1 class="page-title">Source: adapters/https.js</h1>
+    <h1 class="page-title">Source: common/lib/https.js</h1>
     
 
 
@@ -27,61 +27,11 @@
             <pre class="prettyprint source linenums"><code>// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/**
- * The `https` module provides transport functionality for applications that
- * want to communicate with an Azure IoT Hub.
- *
- * @example
- * 'use strict';
- * var Https = require('./src/iothub_https').Https;
- * var Message = require('./src/iothub').Message;
- *
- * function print(err, res) {
- *   if (err) console.log(err.toString());
- *   if (res) console.log(res.statusCode + ' ' + res.statusMessage);
- * }
- *
- * var deviceConfig = {
- *   host: 'hostname',
- *   keyName: 'deviceId',
- *   key: 'deviceKey'
- * };
- *
- * var devHttps = new Https(deviceConfig);
- *
- * devHttps.sendEvent(new Message('hello world'), print);
- *
- * devHttps.receive(function (err, res, msg) {
- *   print(err, res);
- *   if (msg) console.log('Message: ' + msg);
- *   if (!err &amp;&amp; res.statusCode !== 204) {
- *     devHttps.sendFeedback('complete', msg.lockToken, print);
- *   }
- * });
- *
- * var serviceConfig = {
- *   host: 'hostname',
- *   keyName: 'policy',
- *   key: 'policyKey'
- * };
- *
- * var svcHttps = new Https(config);
- *
- * svcHttps.getDevice('deviceId', function (err, res, dev) {
- *   print(err, res);
- *   if (!err) {
- *     console.log(dev.id);
- *   }
- * });
- *
- * @module adapters/https
- */
-
 'use strict';
 
-var authorization = require('../common/authorization');
-var endpoint = require('../common/endpoint');
-var Message = require('../common/message');
+var authorization = require('./authorization.js');
+var endpoint = require('./endpoint.js');
+var Message = require('./message.js');
 
 function anHourFromNow () {
   var raw = (Date.now() / 1000) + 3600;
@@ -119,7 +69,6 @@ function constructBatchBody(messages)
 
 /**
  * @class Https
- * @alias module:adapters/https.Https
  * @classdesc Constructs an {@linkcode Https} object.
  */
 /*Codes_SRS_NODE_IOTHUB_HTTPS_05_001: [The Https constructor shall accept a config object with three properties:
@@ -420,22 +369,6 @@ Https.prototype.sendFeedback = function (action, lockToken, config, done) {
   }
 };
 
-/**
- * Creates an IoT Hub device.
- * @param {String}    path        The HTTP URL to send the request to
- * @param {String}    deviceInfo  Device metadata serialized as JSON
- * @param {Object}    config      This is a dictionary containing the
- *                                following keys and values:
- *
- * | Key     | Value                                                   |
- * |---------|---------------------------------------------------------|
- * | host    | The host URL of the Azure IoT Hub                       |
- * | hubName | The name of the Azure IoT Hub                           |
- * | keyName | The identifier of the device that is being connected to |
- * | key     | The shared access key auth                              |
- * @param {Function}      done      The callback to be invoked when
- *                                  `createDevice` completes execution.
- */
 Https.prototype.createDevice = function (path, deviceInfo, config, done) {
   /* SRS_NODE_IOTHUB_HTTPS_07_010: [The device methods shall construct an HTTP request using information supplied by the caller, as follows:
   OPERATION &lt;path>?api-version=&lt;version> HTTP/1.1
@@ -462,22 +395,6 @@ Https.prototype.createDevice = function (path, deviceInfo, config, done) {
   request.end();
 };
 
-/**
- * Updates an IoT Hub device.
- * @param {String}    path        The HTTP URL to send the request to
- * @param {String}    deviceInfo  Device metadata serialized as JSON
- * @param {Object}    config      This is a dictionary containing the
- *                                following keys and values:
- *
- * | Key     | Value                                                   |
- * |---------|---------------------------------------------------------|
- * | host    | The host URL of the Azure IoT Hub                       |
- * | hubName | The name of the Azure IoT Hub                           |
- * | keyName | The identifier of the device that is being connected to |
- * | key     | The shared access key auth                              |
- * @param {Function}      done      The callback to be invoked when
- *                                  `updateDevice` completes execution.
- */
 Https.prototype.updateDevice = function (path, deviceInfo, config, done) {
   /* SRS_NODE_IOTHUB_HTTPS_07_010: [The device methods shall construct an HTTP request using information supplied by the caller, as follows:
   OPERATION &lt;path>?api-version=&lt;version> HTTP/1.1
@@ -505,22 +422,6 @@ Https.prototype.updateDevice = function (path, deviceInfo, config, done) {
   request.end();
 };
 
-/**
- * This method requests metadata (in the form of a Device object) about the
- * device with the given ID.
- * @param {String}  path    The HTTP URL to send the request to
- * @param {Object}  config  This is a dictionary containing the
- *                          following keys and values:
- *
- * | Key     | Value                                                   |
- * |---------|---------------------------------------------------------|
- * | host    | The host URL of the Azure IoT Hub                       |
- * | hubName | The name of the Azure IoT Hub                           |
- * | keyName | The identifier of the device that is being connected to |
- * | key     | The shared access key auth                              |
- * @param {Function}      done      The callback to be invoked when
- *                                  `getDevice` completes execution.
- */
 Https.prototype.getDevice = function (path, config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_010: [The device methods shall construct an HTTP request using information supplied by the caller, as follows:
   OPERATION &lt;path>?api-version=&lt;version> HTTP/1.1
@@ -545,22 +446,6 @@ Https.prototype.getDevice = function (path, config, done) {
   request.end();
 };
 
-/**
- * This method requests metadata (in the form of a Device object) for the top
- * 1000 devices in the system.
- * @param {String}  path    The HTTP URL to send the request to
- * @param {Object}  config  This is a dictionary containing the
- *                          following keys and values:
- *
- * | Key     | Value                                                   |
- * |---------|---------------------------------------------------------|
- * | host    | The host URL of the Azure IoT Hub                       |
- * | hubName | The name of the Azure IoT Hub                           |
- * | keyName | The identifier of the device that is being connected to |
- * | key     | The shared access key auth                              |
- * @param {Function}      done      The callback to be invoked when
- *                                  `listDevice` completes execution.
- */
 Https.prototype.listDevice = function (path, config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_010: [The device methods shall construct an HTTP request using information supplied by the caller, as follows:
   OPERATION &lt;path>?api-version=&lt;version> HTTP/1.1
@@ -585,21 +470,6 @@ Https.prototype.listDevice = function (path, config, done) {
   request.end();
 };
 
-/**
- * This method removes a device with the given ID.
- * @param {String}  path    The HTTP URL to send the request to
- * @param {Object}  config  This is a dictionary containing the
- *                          following keys and values:
- *
- * | Key     | Value                                                   |
- * |---------|---------------------------------------------------------|
- * | host    | The host URL of the Azure IoT Hub                       |
- * | hubName | The name of the Azure IoT Hub                           |
- * | keyName | The identifier of the device that is being connected to |
- * | key     | The shared access key auth                              |
- * @param {Function}      done      The callback to be invoked when
- *                                  `deleteDevice` completes execution.
- */
 Https.prototype.deleteDevice = function (path, config, done) {
   /*Codes_SRS_NODE_IOTHUB_HTTPS_05_010: [The device methods shall construct an HTTP request using information supplied by the caller, as follows:
   OPERATION &lt;path>?api-version=&lt;version> HTTP/1.1
@@ -636,13 +506,13 @@ module.exports = Https;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-adapters_https.html">adapters/https</a></li><li><a href="module-common_authorization.html">common/authorization</a></li><li><a href="module-common_message.html">common/message</a></li><li><a href="module-common_properties.html">common/properties</a></li><li><a href="module-device_client.html">device/client</a></li><li><a href="module-iothub.html">iothub</a></li><li><a href="module-service_registry.html">service/registry</a></li></ul><h3>Classes</h3><ul><li><a href="module-adapters_https-Https.html">Https</a></li><li><a href="module-common_authorization-DeviceToken.html">DeviceToken</a></li><li><a href="module-common_authorization-ServiceToken.html">ServiceToken</a></li><li><a href="module-common_authorization-Token.html">Token</a></li><li><a href="module-common_message-Message.html">Message</a></li><li><a href="module-common_properties-Properties.html">Properties</a></li><li><a href="module-device_client-Client.html">Client</a></li><li><a href="module-service_registry-Registry.html">Registry</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-azure-iot-device.html">azure-iot-device</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Https.html">Https</a></li><li><a href="Message.html">Message</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Fri Sep 18 2015 22:09:45 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Tue Sep 22 2015 18:04:22 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

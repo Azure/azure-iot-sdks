@@ -1,44 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/**
- * The `client` module provides a means for devices to send events to and
- * receive notifications from an Azure IoT Hub.  The client handles
- * communication with the IoT Hub through a transport supplied by the caller
- * (e.g., [Https]{@linkcode module:adapters/https.Https}).
- *
- * @example
- * var Client = require('./src/iothub').devices.Client;
- * var Message = require('./src/iothub').Message;
- * var Https = require('./src/iothub_https').Https;
- *
- * function print(err, res) {
- *   if (err) console.log(err.toString());
- *   if (res) console.log(res.statusCode + ' ' + res.statusMessage);
- * }
- *
- * var config = {
- *   host: 'hostname',
- *   keyName: 'deviceId',
- *   key: 'password'
- * };
- *
- * var client = new Client(new Https(config));
- *
- * client.sendEvent(new Message('hello world'), print);
- *
- * client.receive (function (err, res, msg) {
- *   print(err, res);
- *   if (msg) console.log('Notification: ' + msg);
- *   if (!err && res.statusCode !== 204) {
- *     client.complete(msg, print);
- *   }
- * });
- *
- * @module device/client
- * @requires common/message
- */
-
 'use strict';
 
 var HOSTNAME_LEN = "HostName=".length;
