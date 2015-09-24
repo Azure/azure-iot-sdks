@@ -1,6 +1,6 @@
 # Getting started with Azure IoT client application using Java on Windows
 
-This document describes how to create a client application that uses the *Microsoft Azure IoT device SDK for Java* to communicate with the Azure IoT Hubs service. It uses a garage door opener as the example device to implement and shows you how to create a Visual Studio project to build a client to run on Windows.
+This document describes how to create a client application that uses the *Microsoft Azure IoT device SDK for Java* to communicate with the Azure IoT Hubs service. It uses a garage door opener as the example device to implement and shows you how to create project to build a client to run on Windows.
 
 # Table of contents
 - [Installation](#installation)
@@ -42,7 +42,7 @@ or
 IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
 IotHubClient client = new IotHubClient(connString, protocol);
-```	
+```
 
 - Create and set up message callback if you want to handle IoT Hub messages
 
@@ -122,7 +122,7 @@ Include the following line in your `config.properties` file:
 .level = {LOGGING_LEVEL}
 ```
 
-An explanation of the different logging levels can be found 
+An explanation of the different logging levels can be found
 [here](http://docs.oracle.com/javase/7/docs/api/java/util/logging/Level.html).
 
 Then, set the JVM property `java.util.logging.config.file={Path to your config.properties file}`.

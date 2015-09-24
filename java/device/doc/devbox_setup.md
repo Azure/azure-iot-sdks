@@ -146,4 +146,7 @@ in your pom.xml file:_
 
 This repository contains various .Net sample applications that illustrate how to use the Microsoft Azure IoT device SDK for Java. For more information, see the [readme][readme].
 
+To learn how to run a simple *Getting started* Java application that sends messages to an IoT hub, see [Getting started - running a Java sample][lnk-getstarted]. 
+
 [readme]: ../readme.md
+[lnk-getstarted]: run_sample_on_java.md
