@@ -18,6 +18,7 @@ var searchData=
   ['iothubclient_5fdestroy',['IoTHubClient_Destroy',['../iothub__client_8h.html#a47fce212d1c5026e02ccd670242e1d83',1,'iothub_client.h']]],
   ['iothubclient_5fgetlastmessagereceivetime',['IoTHubClient_GetLastMessageReceiveTime',['../iothub__client_8h.html#a4484e3db3c295c66d379b44fc53cfd79',1,'iothub_client.h']]],
   ['iothubclient_5fgetsendstatus',['IoTHubClient_GetSendStatus',['../iothub__client_8h.html#a692ed29a02e5842a60db1b3c0ce1b186',1,'iothub_client.h']]],
+  ['iothubclient_5fgetversionstring',['IoTHubClient_GetVersionString',['../version_8h.html#ad8bb41067344bbe6676b2edf7dc65be4',1,'version.h']]],
   ['iothubclient_5fll_5fcreate',['IoTHubClient_LL_Create',['../iothub__client__ll_8h.html#ad236a781c7fb988216b98be099125447',1,'iothub_client_ll.h']]],
   ['iothubclient_5fll_5fcreatefromconnectionstring',['IoTHubClient_LL_CreateFromConnectionString',['../iothub__client__ll_8h.html#aadecae0b07958725e83cae943250469d',1,'iothub_client_ll.h']]],
   ['iothubclient_5fll_5fdestroy',['IoTHubClient_LL_Destroy',['../iothub__client__ll_8h.html#afc3049dc24e311713ab4735873989a4a',1,'iothub_client_ll.h']]],
