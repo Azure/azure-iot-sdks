@@ -28,7 +28,7 @@ This document describes the process of setting up a [Raspberry Pi 2](https://www
 	- TV/ Monitor that supports HDMI
 	- An Ethernet cable or Wi-Fi dongle
 
-Note: You may wish to consider a Starter Kit such as [CanaKit](http://www.amazon.com/CanaKit-Raspberry-Complete-Original-Preloaded/dp/B008XVAVAW/ref=sr_1_4?ie=UTF8&qid=1429516842&sr=8-4&keywords=raspberry+pi) that includes some of these hardware requirements.
+	> Note: You may wish to consider a Starter Kit such as [CanaKit](http://www.amazon.com/CanaKit-Raspberry-Complete-Original-Preloaded/dp/B008XVAVAW/ref=sr_1_4?ie=UTF8&qid=1429516842&sr=8-4&keywords=raspberry+pi) that includes some of these hardware requirements.
 
 <a name="preparing"/>
 ## Prepare the Raspberry Pi 2 board
@@ -110,7 +110,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
   ```
   If you get errors running sudo, make sure your root password is set as decribed above.
 
-  **Note:** Right-click in a PuTTY terminal window to paste text.
+	> Note: Right-click in a PuTTY terminal window to paste text.
 
 - Navigate to the directory where you want to  install the SDK.  If you're not sure, navigate to your home directory:
   ```

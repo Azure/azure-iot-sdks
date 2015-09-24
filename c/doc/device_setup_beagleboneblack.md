@@ -1,16 +1,13 @@
 # BeagleBone Black Setup
 
-This file contains the following information:
-- How to get a snap running that connects a BeagleBone Black board to Azure IoT Hubs. 
-- Connecting a [BeagleBone Black](http://beagleboard.org/black) device and building the SDK sample that sends data from the board to Azure IoT Hubs.
+This document describes the process of setting up a [BeagleBone Black](http://beagleboard.org/black) device to connect to an Azure IoT hub.
 
 ## Table of Contents
 - [Requirements](#Requirements)
-- [Prerequisites](#Prerequisites)
-	- [Install Linux](#Install-Linux)
-	- [Install Snappy](#Install-Snappy)
-	- [Build QPID Proton](#Build-QPID-Proton)
-	- [Build the Azure client](#Build-the-Azure-client)
+- [Install Linux](#Install-Linux)
+- [Install Snappy](#Install-Snappy)
+- [Build QPID Proton](#Build-QPID-Proton)
+- [Build the Azure client](#Build-the-Azure-client)
 - [Connect the board](#Connect-the-board)
 - [Verify that you can connect to the device](#Verify-that-you-can-connect-to-the-device)
 - [Build and run the Device Explorer tool](#Build-and-run-the-Device-Explorer-tool)
@@ -22,17 +19,11 @@ This file contains the following information:
 <a name="Requirements"/>
 ## Requirements 
 
-- Computer with GitHub installed and access to the [azure-iot-suite-sdks](https://github.com/Azure/azure-iot-suite-sdks) GitHub private repository.
-- SSH client, such as [PuTTY](http://www.putty.org/), so you can access the command line.
-- Either the Chrome or Firefox web browser, so you can browse to the embedded webserver on your your board.
+- SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the BeagleBone device.
+- Required hardware:
+	- [BeagleBone Black](http://www.amazon.com/Beagleboard-Beaglebone-Starter-Case--Power-Supply--Micro/dp/B00P6TV9V4/ref=sr_1_3?ie=UTF8&qid=1426002583&sr=8-3&keywords=beaglebone)
+	- 8GB or larger MicroSD Card
 - The boards come with all the required software; however, to update the board and run the current sample you must use FTP or a USB driver to copy your files. You can also use [WinSCP](http://winscp.net/eng/index.php).
-- Required hardware: [Beagleboard-Beaglebone](http://www.amazon.com/Beagleboard-Beaglebone-Starter-Case--Power-Supply--Micro/dp/B00P6TV9V4/ref=sr_1_3?ie=UTF8&qid=1426002583&sr=8-3&keywords=beaglebone).
-
-
-<a name="Prerequisites"/>
-## Prerequisites
-
-- A microSD card attached to a machine where Linux is (or can be) installed. To prepare a microSD card your Linux installation must be able to access the microSD card.
 
 <a name="Install-Linux"/>
 ### Install Linux
