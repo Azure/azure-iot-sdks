@@ -8,19 +8,21 @@ This step-by-step guide will allow you to familiarize yourself with Windows 10 I
 
 You can leverage the power of the Windows platform and Visual Studio to create innovative solutions on a variety of devices running Windows 10 IoT Core.
 
+## Prerequisites
+
+Before you get started, you should:
+
+- [Setup your IoT Hub][setup-iothub]
+- Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
+
 ## Setting Up You Device
 
 First of all, you need to set up your device. 
 
 - If you’re using Raspberry Pi, set up your device according to instructions [here](http://ms-iot.github.io/content/en-US/win10/SetupRPI.htm).
 - If you’re using MinnowBoard Max set up your device according to instructions [here](http://ms-iot.github.io/content/en-US/win10/SetupMBM.htm).
+- If you’re using Dragonboard setup up instructions should come soon [here](http://ms-iot.github.io/content/en-US/GetStarted.htm).
 
-
-## Sign Up To Azure IoT Hub
-
-Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service.
-
-As part of the sing up process, you will receive the connection string. You will need to use it later for connecting to the service.
 
 ## Install Visual Studio 2015 and Tools
 
@@ -28,7 +30,7 @@ To create Windows IoT Core solutions, you will need to install [Visual Studio 20
 
 Make sure to select the "Universal Windows App Development Tools", the component required for writing apps Windows 10:
 
-![Universal Windows App Development Tools](pngs\install_tools_for_windows10.png)
+![Universal Windows App Development Tools](./pngs/install_tools_for_windows10.png)
 
 ## Create a Visual Studio UWP Solution
 
@@ -36,11 +38,11 @@ UWP (Universal Windows Platform) is an evolution of Windows application model in
 
 To create a UWP solution in Visual Studio, select File -> New -> Project:
 
-![New Project Creation](pngs\new_project_menu.png)
+![New Project Creation](./pngs/new_project_menu.png)
 
 In the New Project dialog that comes up, select "Blank App (Universal Windows) Visual C#. Give your project a name, for example "MyFirstIoTCoreApp": 
 
-![New Solution Dialog](pngs\new_solution.PNG)
+![New Solution Dialog](./pngs/new_solution.PNG)
 
 ## Get Microsoft.Azure.Devices.Client Library
 
@@ -48,28 +50,21 @@ Once the project has been created, we need to include a reference to the Microso
 
 In the Solution Explorer window, right-click on the solution and select "Managed NuGet Packages":
 
-![Manage NuGet Packages...](pngs\manage_NuGet.png)
+![Manage NuGet Packages...](./pngs/manage_NuGet.png)
 
 The NuGet Package Manager will open. Find the package named "Microsoft.Azure.Devices.Client" and click Install:  
 
-![Installing Microsoft.Azure.Devices.Client package](pngs\find_madc.png)
+![Installing Microsoft.Azure.Devices.Client package](./pngs/find_madc.png)
 
 The package will be downloaded and added to your project.
 
 ## Build and run the Device Explorer tool
 
-You can use the Device Explorer sample application on your Windows desktop machine to create and register a device ID and symmetric key for your device. The Device Explorer interfaces with Azure IoT Hubs, and has some basic capabilities such as:
+You can use the Device Explorer sample application on your Windows desktop machine to create and register a device ID and symmetric key for your device. The Device Explorer interfaces with Azure IoT Hubs, and has some basic capabilities. For more info, check out [How to use Device Explorer][device-explorer].
 
 - **Device management**: creates device IDs and obtains a list of registered devices on your IoT Hub.
 - **Monitors and consumes data** sent by your devices to your IoT Hub.
 - **Sends messages** to your devices.
-
-To run this tool, you need connection and configuration information for your IoT Hub.
-
-- Clone or download a copy of the [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub repository on your Windows desktop machine.
-- In Visual Studio, open the DeviceExplorer.sln solution in the tools\\DeviceExplorer folder in your local copy of the repository, then build and run it.
-- Paste the connection string for your IoT Hub and then click **Update**.
-- Click the **Management** tab, then create a device ID for your device and register your device with your IoT Hub by clicking the **Create** button and entering a device name.
 
 ## Sample 1: Sending Data to Azure IoT Hub
 
@@ -103,17 +98,17 @@ This string gives you access to the service, so remember to keep it secret -- in
 
 Finally, it's time to run the app! Add the call to the function `SendDataToAzure` from the constructor of the `MainPage` class:
 
-![](pngs\invoke_function.png)
+![](./pngs/invoke_function.png)
 
 Now choose the right architecture (x86 or ARM, depending on your device) and set the debugging method to "Remote Machine":
 
-![](pngs\select_arch.png)
+![](./pngs/select_arch.png)
 
 If you're using a Raspberry Pi device, select ARM. For other supported devices, consult [windowsondevices.com](http://www.windowsondevices.com). 
 
 You will need to deploy your app to an IoT device so that you can run and debug it remotely. Right-click on the solution in the Solution Explorer, select Properties and navigate to the Debug tab:
 
-![](pngs\select_device.png)
+![](./pngs/select_device.png)
 
 Type in the name of your device. Make sure the "Use authentication" box is unchecked.
 
@@ -127,7 +122,7 @@ Use the Device Explorer to inspect data coming to Azure IoT Hub and manage devic
 
 Navigate to the Data tab in the Device Explorer and make sure you see "Hello, Windows 10" string there:
 
-![](pngs\device_explorer_data.png)
+![](./pngs/device_explorer_data.png)
 
 Congratulations! You have successfully sent your string to Azure IoT Hub.
 
@@ -164,12 +159,15 @@ This function can be invoked from `MainPage` similarly to how we did in the prev
 
 Now, before you run the app, switch to the Device Explorer and open the Notification tab:
 
-![](pngs\device_explorer_notif.png)
+![](./pngs/device_explorer_notif.png)
 
 Select your device in the Device ID list, and type "hello, device!" in the Notification box. Hit Send.
 
 Now set the breakpoint at the `await` statement and start the application. When the control reaches the breakpoint, you should see the value of `messageData` as "hello, device!":
 
-![](pngs\hello_device_received.png)
+![](./pngs/hello_device_received.png)
 
 Congratulations! You have successfully received your string from Azure IoT Hub.
+
+[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[setup-iothub]: ../../doc/setup_iothub.md
