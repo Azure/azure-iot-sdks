@@ -17,7 +17,7 @@ This section shows you how to use Visual Studio to build an IoT Hubs client appl
 
 ## Preparing QPID Proton libraries in Windows
 
-To use the AMQP samples provided your machine must have the QPID Proton-C library.  There are two ways to use the obtain the library, use a Nuget package or build the library from git. 
+To use the AMQP samples provided your machine must have the QPID Proton-C library.  There are two ways to use the obtain the library, use a Nuget package or build the library from git.
 
 ### Using QPID Proton Nuget package in Windows
 
@@ -35,9 +35,9 @@ To use the AMQP samples provided your machine must have the QPID Proton-C librar
 
 2. Create an environment variable **PROTON_PATH=C:\Proton** that points to the folder.
 
-3. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path).
+3. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path, type "cmake -version" to verify).
 
-4. Install  [Python ver. 2.7.9](https://www.python.org/downloads/) (make sure it is installed in your path).
+4. Install  [Python ver. 2.7.9](https://www.python.org/downloads/) (make sure it is installed in your path, type "python -V" to verify).
 
 5. Open a Visual Studio 2015 x86 Native Tools command prompt.
 
@@ -47,7 +47,7 @@ To use the AMQP samples provided your machine must have the QPID Proton-C librar
 
 1. Create the environment variables **OpenSSLDir=c:\OpenSSL** and **PAHO_PATH=c:\Paho**.
 
-2. Ensure that [Perl ver. 5.20.2 or higher](https://www.perl.org/get.html) is installed.
+2. Install [Perl ver. 5.20.2 or higher](https://www.perl.org/get.html) (make sure it is installed in your path, type "perl -v" to verify).
 
 3. Open a Command Prompt.
 
