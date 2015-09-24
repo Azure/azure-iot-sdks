@@ -22,14 +22,7 @@ Each language SDK includes sample code and documentation in addition to the libr
 
 ## Microsoft Azure IoT Service SDKs
 
-The IoT Service SDKs include the following features:
-- A service client you can use to send cloud-to-device commands from IoT Hub to your devices.
-- A registry manager that you can use to manage the contents of the IoT Hub device identity registry. The device identity registry stores information about each device that is permitted to connect to the IoT hub. This device information includes the unique device identifier, the device's access key, and enabled state of the device.
-
-This repository contains the following IoT Service SDKs:
-
-- [Microsoft Azure IoT Service SDK for Java](java/service/readme.md)
-- [Microsoft Azure IoT Service SDK for Node.js](node/service/readme.md)
+The IoT Service SDKs for Java and node.js are coming soon.
 
 **Note:** To manage an IoT hub using a .NET application, use the **Microsoft.Azure.Devices** NuGet package.
 

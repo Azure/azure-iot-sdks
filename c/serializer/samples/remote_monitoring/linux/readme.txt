@@ -8,13 +8,13 @@ sudo apt-get install git cmake uuid-dev libcurl4-openssl-dev g++
 
 4. Once these packages have been installed, clone the repository by using 
 
-git clone https://github.com/Azure/azure-iot-suite-sdks.git
+git clone https://github.com/Azure/azure-iot-sdks.git
 
     It will prompt for a user name and a password. The password needs to be a token from github.com : Personal Settings -> Applications -> Personal access tokens. It cannot be the account password.
 
-5. Switch to directory azure-iot-suite-sdks 
+5. Switch to directory azure-iot-sdks 
 
-cd azure-iot-suite-sdks
+cd azure-iot-sdks
 
 6. Once in that directory, checkout branch develop by
 

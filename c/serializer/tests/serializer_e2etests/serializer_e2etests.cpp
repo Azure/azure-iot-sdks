@@ -79,7 +79,7 @@ EXECUTE_COMMAND_RESULT dataMacroCallback(deviceModel* device, ascii_char_ptr pro
     return EXECUTE_COMMAND_SUCCESS;
 }
 
-/*this functiuon "links" IoTHub to the serialization library*/
+/*this function "links" IoTHub to the serialization library*/
 static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
     const unsigned char* buffer;

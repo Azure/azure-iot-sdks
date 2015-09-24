@@ -66,7 +66,7 @@ You can use the Device Explorer sample application on your Windows desktop machi
 
 To run this tool, you need connection and configuration information for your IoT Hub.
 
-- Clone or download a copy of the [azure-iot-suite-sdks](https://github.com/Azure/azure-iot-suite-sdks) GitHub repository on your Windows desktop machine.
+- Clone or download a copy of the [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub repository on your Windows desktop machine.
 - In Visual Studio, open the DeviceExplorer.sln solution in the tools\\DeviceExplorer folder in your local copy of the repository, then build and run it.
 - Paste the connection string for your IoT Hub and then click **Update**.
 - Click the **Management** tab, then create a device ID for your device and register your device with your IoT Hub by clicking the **Create** button and entering a device name.

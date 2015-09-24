@@ -91,7 +91,7 @@ static void sendMessage(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsign
     messageTrackingId++;
 }
 
-/*this functiuon "links" IoTHub to the serialization library*/
+/*this function "links" IoTHub to the serialization library*/
 static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
     IOTHUBMESSAGE_DISPOSITION_RESULT result;
