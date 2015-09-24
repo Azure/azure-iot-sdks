@@ -44,18 +44,14 @@ If you have successfully [prepared your development environment][devbox-setup] t
 	
 	Note that the double quotes around each argument are required.
 
+## Next Steps
+To learn how to create a Java application that communicates with an IoT hub from scratch, see [How to write an Azure IoT client application from scratch with Java on Windows][create-from-scratch].
 
 ## Documentation
 
-The documentation can be found at:
+The documentation can be found [here](https://azure.github.io/azure-iot-sdks/java/api_reference/index.html).
 
-<!-- This path will need to be updated with the new api docs folder path -->
-```
-{IoT device SDK root}/java/device/iothub-java-client/doc/iothubclient_java_library/index.html
-```
-
-_In the future, the documentation will have a dedicated URL._
-
+[create-from-scratch]: build_java_app_from_scratch.md
 [devbox-setup]: devbox_setup.md
 [setup-iothub]: ../../../doc/setup_iothub.md
 [device-explorer]: ../../../tools/DeviceExplorer/devdoc/how_to_use_device_explorer.md

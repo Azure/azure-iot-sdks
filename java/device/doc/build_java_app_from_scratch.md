@@ -1,6 +1,6 @@
-# Getting started with Azure IoT client application using Java on Windows
+# How to write an Azure IoT client application from scratch with Java on Windows
 
-This document describes how to create a client application that uses the *Microsoft Azure IoT Device SDK for Java* to communicate with the Azure IoT Hubs service. It uses a garage door opener as the example device to implement and shows you how to create a Visual Studio project to build a client to run on Windows.
+This document describes how to create a client application that uses the *Microsoft Azure IoT device SDK for Java* to communicate with the Azure IoT Hubs service. It uses a garage door opener as the example device to implement and shows you how to create project to build a client to run on Windows.
 
 # Table of contents
 - [Installation](#installation)
@@ -13,7 +13,7 @@ This document describes how to create a client application that uses the *Micros
 
 <a name="installation"/>
 # Installation
-For installation instructions please see the **Introducing the Microsoft Azure IoT Device SDK for Java** guide: (devbox_setup.md)
+For installation instructions please see the **Introducing the Microsoft Azure IoT device SDK for Java** guide: (devbox_setup.md)
 
 <a name="createapp"/>
 ## Create application
@@ -26,7 +26,7 @@ import com.microsoft.azure.iothub.IotHubClient;
 import com.microsoft.azure.iothub.IotHubClientProtocol;
 import com.microsoft.azure.iothub.IotHubMessage;
 import com.microsoft.azure.iothub.IotHubMessageResult;
-import com.microsoft.azure.iothub.IotHubMessageCallback;
+import com.microsoft.azure.iothub.MessageCallback;
 import com.microsoft.azure.iothub.IotHubServiceboundMessage;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.IotHubEventCallback;
@@ -65,7 +65,7 @@ client.close;
 - Send events
 
 ```
-String msgStr = "<mMessage string goes here>";
+String msgStr = "<Message string goes here>";
 IotHubServiceboundMessage msg = new IotHubServiceboundMessage(msgStr);
 String messageCount = "1";
 
