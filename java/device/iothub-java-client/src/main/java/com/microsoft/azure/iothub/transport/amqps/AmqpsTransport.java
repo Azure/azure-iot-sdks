@@ -182,6 +182,7 @@ public final class AmqpsTransport implements IotHubTransport
 
                 // Codes_SRS_AMQPSTRANSPORT_11_006: [For each message being sent, the function shall send the message and add the IoT Hub status code along with the callback and context to the callback list.]
                 // Codes_SRS_AMQPSTRANSPORT_11_015: [If the IoT Hub could not be reached, the function shall throw an IOException.]
+                // Codes_SRS_AMQPSTRANSPORT_11_005: [If no AMQPS session exists with the IoT Hub, the function shall establish one.]
                 IotHubStatusCode status =
                         this.session.sendEvent(packet.getMessage());
 
@@ -269,6 +270,7 @@ public final class AmqpsTransport implements IotHubTransport
 
         try
         {
+            // Codes_SRS_AMQPSTRANSPORT_11_014: [If no AMQPS session exists with the IoT Hub, the function shall establish one.] 
             // Codes_SRS_AMQPSTRANSPORT_11_017: [If the IoT Hub could not be reached, the function shall throw an IOException.]
             // Codes_SRS_AMQPSTRANSPORT_11_010: [The function shall attempt to consume a message from the IoT Hub.]
             IotHubMessage message = this.session.receiveMessage();

@@ -84,6 +84,7 @@ public final class HttpsBatchMessage implements HttpsMessage
     public byte[] getBody()
     {
         // Codes_SRS_HTTPSBATCHMESSAGE_11_006: [The function shall return the current batch message body.]
+        // Codes_SRS_HTTPSBATCHMESSAGE_11_007: [The batch message body shall be encoded using UTF-8.]
         return this.batchBody.getBytes(BATCH_CHARSET);
     }
 
@@ -94,6 +95,7 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     public String getContentType()
     {
+        // Codes_SRS_HTTPSBATCHMESSAGE_11_011: [The function shall return 'application/vnd.microsoft.iothub.json'.]
         return HTTPS_BATCH_CONTENT_TYPE;
     }
 
@@ -104,6 +106,7 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     public IotHubMessageProperty[] getProperties()
     {
+        // Codes_SRS_HTTPSBATCHMESSAGE_11_012: [The function shall return an empty array.]
         return new IotHubMessageProperty[0];
     }
 

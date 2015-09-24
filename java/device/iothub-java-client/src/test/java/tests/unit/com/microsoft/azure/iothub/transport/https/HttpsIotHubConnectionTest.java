@@ -54,6 +54,7 @@ public class HttpsIotHubConnectionTest
     IotHubStatusCode mockStatus;
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2015-08-15-preview'.] 
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_001: [The constructor shall save the client configuration.]
     @Test
     public void sendEventHasCorrectUrl(
             @Mocked final IotHubEventUri mockUri) throws IOException
