@@ -1,4 +1,4 @@
-# Microsoft Azure IoT Service SDK for Node.js
+# Microsoft Azure IoT service SDK for Node.js
 
 The Microsoft Azure IoT Service libraries for Node.js contain code to manage your IoT Hub service.
 

@@ -1,4 +1,4 @@
-# Microsoft Azure IoT Device SDK for Node.js
+# Microsoft Azure IoT device SDK for Node.js
 
 The Microsoft Azure IoT device libraries for Node.js contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
 

@@ -21,7 +21,7 @@ The Azure IoT libraries has been tested on the following OS platforms:
 
 ## C libraries
 
-The [Microsoft Azure IoT Device SDK for C](c/device/readme.md) has been tested on the following configurations:
+The [Microsoft Azure IoT device SDK for C](c/device/readme.md) has been tested on the following configurations:
 
 |OS Platform| Version|Protocols|
 |:---------|:----------:|:----------:|
@@ -35,7 +35,7 @@ The [Microsoft Azure IoT Device SDK for C](c/device/readme.md) has been tested o
 
 
 ## Node.js libraries
-The [Microsoft Azure IoT Device SDK for Node.js](node/device/readme.md) has been tested on the following configurations:
+The [Microsoft Azure IoT device SDK for Node.js](node/device/readme.md) has been tested on the following configurations:
 
 
 |Runtime| Version|Protocols|
@@ -45,13 +45,13 @@ The [Microsoft Azure IoT Device SDK for Node.js](node/device/readme.md) has been
 
 
 ## Java libraries
-The [Microsoft Azure IoT Device SDK for Java](java/service/readme.md) has been tested on the following configurations:
+The [Microsoft Azure IoT device SDK for Java](java/service/readme.md) has been tested on the following configurations:
 
 |Runtime| Version|Protocols|
 |:---------|:----------:|----|
 |Java| 1.7 | HTTPS, AMQP |
 
-The [Microsoft Azure IoT Service SDK for Java](java/service/readme.md) has been tested on the following configurations:
+The [Microsoft Azure IoT service SDK for Java](java/service/readme.md) has been tested on the following configurations:
 
 |Runtime| Version|Protocols|
 |:---------|:----------:|:-----|
@@ -59,7 +59,7 @@ The [Microsoft Azure IoT Service SDK for Java](java/service/readme.md) has been 
 
 
 ## CSharp
-The [Microsoft Azure IoT Device SDK for .NET](csharp/readme.md) has been tested on the following configurations:
+The [Microsoft Azure IoT device SDK for .NET](csharp/readme.md) has been tested on the following configurations:
 
 |OS Platform| Version|Protocols|
 |:---------|:----------:|:----------:|

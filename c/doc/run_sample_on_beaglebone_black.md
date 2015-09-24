@@ -6,7 +6,7 @@ This "Getting Started" document shows you how to build and run the **simplesampl
 - [Requirements](#Requirements)
 - [Connect the board](#Connect-the-board)
 - [Verify that you can connect to the device](#Verify-that-you-can-connect-to-the-device)
-- [Install and build the Microsoft Azure IoT Device SDK for C libraries](#Load-the-Azure-IoT-bits-and-prerequisites)
+- [Install and build the Microsoft Azure IoT device SDK for C libraries](#Load-the-Azure-IoT-bits-and-prerequisites)
 - [Build and run the sample client application](#Build-the-Azure-client)
 
 <a name="Requirements"/>
@@ -40,7 +40,7 @@ Follow the [Getting Started](http://beagleboard.org/getting-started) instruction
 - If the ping command doesn't work, reboot your board, log in again using your SSH client, and run the command **ifconfig**. You should see the **eth0**, **lo**, and **usb0** interfaces. The **eth0** interface should have been assigned a valid IP address by a DHCP server on your network.
 
 <a name="Load-the-Azure-IoT-bits-and-prerequisites"/>
-## Install and build the Microsoft Azure IoT Device SDK for C libraries
+## Install and build the Microsoft Azure IoT device SDK for C libraries
 
 - Open an SSH session and connect to the board (as described in the previous section).
 - Install the Git package by issuing the following commands in the SSH session:

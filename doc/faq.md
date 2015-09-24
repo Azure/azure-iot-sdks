@@ -1,16 +1,16 @@
-# Microsoft Azure IoT Device SDK FAQ
+# Microsoft Azure IoT device SDK FAQ
 
-This document contains both general FAQs about the Microsoft Azure IoT Device SDK as a whole, and specific FAQs about the C, .NET, Java, and Node.js SDKs in this repository.
+This document contains both general FAQs about the Microsoft Azure IoT device SDK as a whole, and specific FAQs about the C, .NET, Java, and Node.js SDKs in this repository.
 
 **Microsoft Azure IoT SDKs**
 
 - [Using Visual Studio 2013](#vs2013)
 
-**Microsoft Azure IoT Device SDK for .NET FAQs**
+**Microsoft Azure IoT device SDK for .NET FAQs**
 
 - [UWP support for Microsoft.Azure.Devices.Client](#uwpsupport)
 
-**Microsoft Azure IoT Device SDK for Java FAQs**
+**Microsoft Azure IoT device SDK for Java FAQs**
 
 - [Error when using AMQP on Raspberry Pi2](#javapi2error)
 - [qpid-jms build fails](#qpidjmsbuildfail)

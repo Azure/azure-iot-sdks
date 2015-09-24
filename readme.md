@@ -1,35 +1,35 @@
 # Microsoft Azure IoT SDKs
 
-This repository contains both IoT Device SDKs and IoT Service SDKs. Device SDKs enable you to implement IoT client applications to run on your devices. Service SDKs enable you to manage your IoT Hub service instance.
+This repository contains both IoT device SDKs and IoT service SDKs. Device SDKs enable you to implement IoT client applications to run on your devices. Service SDKs enable you to manage your IoT Hub service instance.
 
 
 
 
-## Microsoft Azure IoT Device SDKs
+## Microsoft Azure IoT device SDKs
 
 The Microsoft Azure IoT device SDKs contain code that facilitate building devices and applications that connect to and are managed by Azure IoT Hub services.
 
-Devices and data sources in an IoT solution can range from a simple network-connected sensor to a powerful, standalone computing device. Devices may have limited processing capability, memory, communication bandwidth, and communication protocol support. The IoT Device SDKs enable you to implement client applications for a wide variety of devices.
+Devices and data sources in an IoT solution can range from a simple network-connected sensor to a powerful, standalone computing device. Devices may have limited processing capability, memory, communication bandwidth, and communication protocol support. The IoT device SDKs enable you to implement client applications for a wide variety of devices.
 
-This repository contains the following IoT Device SDKs:
+This repository contains the following IoT device SDKs:
 
-- [Microsoft Azure IoT Device SDK for C](c/readme.md) written in ANSI C (C99) for portability and broad platform compatibility.
-- [Microsoft Azure IoT Device SDK for .NET](csharp/readme.md) for creating client applications that target the .NET runtime.
-- [Microsoft Azure IoT Device SDK for Java](java/device/readme.md) for portability across the broad range of platforms that support the Java programming language.
-- [Microsoft Azure IoT Device SDK for Node.js](node/device/readme.md) for portability across the broad range of platforms that support Node.js.
+- [Microsoft Azure IoT device SDK for C](c/readme.md) written in ANSI C (C99) for portability and broad platform compatibility.
+- [Microsoft Azure IoT device SDK for .NET](csharp/readme.md) for creating client applications that target the .NET runtime.
+- [Microsoft Azure IoT device SDK for Java](java/device/readme.md) for portability across the broad range of platforms that support the Java programming language.
+- [Microsoft Azure IoT device SDK for Node.js](node/device/readme.md) for portability across the broad range of platforms that support Node.js.
 
 Each language SDK includes sample code and documentation in addition to the library code.
 
-## Microsoft Azure IoT Service SDKs
+## Microsoft Azure IoT service SDKs
 
-The IoT Service SDKs include the following features:
+The IoT service SDKs include the following features:
 - A service client you can use to send cloud-to-device commands from IoT Hub to your devices.
 - A registry manager that you can use to manage the contents of the IoT Hub device identity registry. The device identity registry stores information about each device that is permitted to connect to the IoT hub. This device information includes the unique device identifier, the device's access key, and enabled state of the device.
 
-This repository contains the following IoT Service SDKs:
+This repository contains the following IoT service SDKs:
 
-- [Microsoft Azure IoT Service SDK for Java](java/service/readme.md)
-- [Microsoft Azure IoT Service SDK for Node.js](node/service/readme.md)
+- [Microsoft Azure IoT service SDK for Java](java/service/readme.md)
+- [Microsoft Azure IoT service SDK for Node.js](node/service/readme.md)
 
 **Note:** To manage an IoT hub using a .NET application, use the **Microsoft.Azure.Devices** NuGet package.
 
