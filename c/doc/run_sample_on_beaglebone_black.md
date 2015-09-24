@@ -22,7 +22,7 @@ This file contains the following information:
 <a name="Requirements"/>
 ## Requirements 
 
-- Computer with GitHub installed and access to the [azure-iot-suite-sdks](https://github.com/Azure/azure-iot-suite-sdks) GitHub private repository.
+- Computer with GitHub installed and access to the [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub private repository.
 - SSH client, such as [PuTTY](http://www.putty.org/), so you can access the command line.
 - Either the Chrome or Firefox web browser, so you can browse to the embedded webserver on your your board.
 - The boards come with all the required software; however, to update the board and run the current sample you must use FTP or a USB driver to copy your files. You can also use [WinSCP](http://winscp.net/eng/index.php).
@@ -56,7 +56,7 @@ This file contains the following information:
 
 	This downloads the qpid-proton source code.
 
-		/var/lib/schroot/chroots/vivid-armhf/var/lib/sbuild/build$ git clone https://github.com/Azure/azure-iot-suite-sdks.git
+		/var/lib/schroot/chroots/vivid-armhf/var/lib/sbuild/build$ git clone https://github.com/Azure/azure-iot-sdks.git
 
 	This downloads the Azure IoT Hub device SDK that contains the IoT Hub client library source code and sample applications.
 
@@ -95,7 +95,7 @@ This file contains the following information:
 
 		$ build.sh
 
-- On the qemu machine, in the folder /build/azure-iot-suite-sdks/serializer/samples/vendingmachine/ubuntu_snappy, execute ./build.sh:
+- On the qemu machine, in the folder /build/azure-iot-sdks/serializer/samples/vendingmachine/ubuntu_snappy, execute ./build.sh:
 
 		$ bash ./build.sh
 
@@ -103,8 +103,8 @@ This file contains the following information:
 
 - Return to the real machine.
 
-		/var/lib/sbuild/build/azure-iot-suite-sdks/serializer/samples/vendingmachine/ubuntu_snappy/snap$ snappy build .
-		/var/lib/sbuild/build/azure-iot-suite-sdks/serializer/samples/vendingmachine/ubuntu_snappy/snap$ snappy-remote --url=ssh://10.91.96.133 install ./vendingmachine_84_all.snap
+		/var/lib/sbuild/build/azure-iot-sdks/serializer/samples/vendingmachine/ubuntu_snappy/snap$ snappy build .
+		/var/lib/sbuild/build/azure-iot-sdks/serializer/samples/vendingmachine/ubuntu_snappy/snap$ snappy-remote --url=ssh://10.91.96.133 install ./vendingmachine_84_all.snap
 
 	Make sure to substitute the IP address in this code with the IP of the board. You can determine the IP address by typing `ifconfig` on the board command line. The default user name/password for BeagleBone Black running Ubuntu Snappy is: **ubuntu:ubuntu**.
 
@@ -164,7 +164,7 @@ You can use the Device Explorer sample application on your Windows desktop machi
 
 To run this tool, you need connection and configuration information for your IoT Hub and the Event Hub it is associated with.
 
-- Clone or download a copy of the [azure-iot-suite-sdks](https://github.com/Azure/azure-iot-suite-sdks) GitHub repository on your Windows desktop machine.
+- Clone or download a copy of the [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub repository on your Windows desktop machine.
 - In Visual Studio, open the DeviceExplorer.sln solution in the tools\\DeviceExplorer folder in your local copy of the repository, then build and run it.
 - Paste the two connection strings for your IoT Hub and Event Hub, and then click **Update**.
 - Click the **Management** tab, then create a device ID for your device and register your device with your IoT Hub:
@@ -183,11 +183,11 @@ To run this tool, you need connection and configuration information for your IoT
 
 - Download the SDK to the board by issuing the following command in PuTTY:
 
-		git clone https://github.com/Azure/azure-iot-suite-sdks.git
+		git clone https://github.com/Azure/azure-iot-sdks.git
 
 	You will be prompted for your GitHub username and password -- if you have two-factor authentication enabled for your account, you'll need to generate and use a personal access token in place of your password.
 
-- Verify that you now have a copy of our source code under the directory ~/azure-iot-suite-sdks.
+- Verify that you now have a copy of our source code under the directory ~/azure-iot-sdks.
 
 <a name="Build-the-Azure-client"/>
 ## Update the Send sample
@@ -202,7 +202,7 @@ To run this tool, you need connection and configuration information for your IoT
 
 	- On the board, run the following command:
 
-			nano azure-iot-suite-sdks/c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c
+			nano azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c
 
 	- This launches a console-based text editor. Scroll down to the connection information.
 
@@ -219,11 +219,11 @@ The Azure IoT Hub SDK depends on Apache Qpid Proton (AMQP) to integrate with the
 
 - On the board, run the following command to build/install Apache Proton:
 
-		sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_proton.sh --install /usr
+		sudo ~/azure-iot-sdks/c/build_all/linux/build_proton.sh --install /usr
 
 - Assuming everything went OK on the build\_proton.sh, you can now build the SDK code using the following command:
 
-		~/azure-iot-suite-sdks/c/build_all/linux/build.sh
+		~/azure-iot-sdks/c/build_all/linux/build.sh
 
 	**Note:** If you receive the following error, ignore it: **"crtabstractions\_unittests/crtabstractions\_unittests.cpp:119:5"**.
 
@@ -232,7 +232,7 @@ The Azure IoT Hub SDK depends on Apache Qpid Proton (AMQP) to integrate with the
 
 - Run the **iothub\_client\_sample\_amqp** sample by issuing the following command:
 
-		~/azure-iot-suite-sdks/c/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
+		~/azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
 
 - Verify that the **Confirmation** messages show an **OK**. If not, then you may have incorrectly pasted the device hub connection information.
 
@@ -241,5 +241,5 @@ The Azure IoT Hub SDK depends on Apache Qpid Proton (AMQP) to integrate with the
 
 - If you just want to build iothub\_client, run the following commands:
 
-		cd ~/azure-iot-suite-sdks/c/iothub_client/build/linux
+		cd ~/azure-iot-sdks/c/iothub_client/build/linux
 		make -f makefile.linux all

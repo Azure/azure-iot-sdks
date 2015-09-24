@@ -110,14 +110,14 @@ cd ..
 <a name="installiot"/>
 ## Install Azure IoT Device SDK for Java
 
-- Get a copy of the **Azure IoT Device SDK** from GitHub. You should fetch a copy of the source from the **master** branch of the GitHub repository: <https://github.com/Azure/azure-iot-suite-sdks>
+- Get a copy of the **Azure IoT Device SDK** from GitHub. You should fetch a copy of the source from the **master** branch of the GitHub repository: <https://github.com/Azure/azure-iot-sdks>
 - When you have obtained a copy of the source, you can build the SDK for Java.
 
 Open a command prompt and use the following commands for the steps above:
 
 ```
-	git clone https://github.com/Azure/azure-iot-suite-sdks.git
-	cd azure-iot-suite-sdks/java/device
+	git clone https://github.com/Azure/azure-iot-sdks.git
+	cd azure-iot-sdks/java/device
 	mvn install
 ```
 
