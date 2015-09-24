@@ -1,6 +1,6 @@
-# Microsoft Azure IoT Device SDK for .NET
+# Microsoft Azure IoT device SDK for .NET
 
-The Microsoft Azure IoT Device SDK for .NET facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
+The Microsoft Azure IoT device SDK for .NET facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
 
 The library is available as a NuGet package for you include in your own development projects. This repository contains documentation and samples to help you get started using the SDK.
 
@@ -32,8 +32,8 @@ Other useful documents include:
 
 - [Setup IoT Hub][setup-iothub]
 - [How to use Device Explorer][device-explorer]
-- [Microsoft Azure IoT Device SDK FAQ][faq-doc]
-- [Microsoft Azure IoT Device SDK for .NET API reference][dotnet-api-ref]
+- [Microsoft Azure IoT device SDK FAQ][faq-doc]
+- [Microsoft Azure IoT device SDK for .NET API reference][dotnet-api-ref]
 
 ### /Microsoft.Azure.Devices.Client and /Microsoft.Azure.Devices.Client.WinRT
 

@@ -1,4 +1,4 @@
-# Microsoft Azure IoT Device SDK for C
+# Microsoft Azure IoT device SDK for C
 
 The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
 
@@ -30,8 +30,8 @@ All C specific resources are located in the **azure-iot-sdks\c** folder. A descr
 ### /doc
 
 This directory contains application development guides, such as:
-- [Prepare your development environment to use the Azure IoT Device SDK for C](doc/devbox_setup.md)
-- [Introducing the Microsoft Azure IoT Device SDK for C (Whitepaper)](doc/whitepapers/guide_iot_introducing_c_sdk.md)
+- [Prepare your development environment to use the Azure IoT device SDK for C](doc/devbox_setup.md)
+- [Introducing the Microsoft Azure IoT device SDK for C (Whitepaper)](doc/whitepapers/guide_iot_introducing_c_sdk.md)
 - [Setup IoT Hub](../doc/setup_iot_hub.md)
 - [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
 - [How to use the DeviceExplorer application to tests IoT Hub device connectivity](../tools/DeviceExplorer/doc/tools_device_explorer.md)
@@ -42,11 +42,12 @@ Setup instructions for OS platforms:
 - [Linux](doc/run_sample_on_desktop_linux.md)
 
 Setup instructions for device configurations:
-- [Beaglebone Black](device_setup_beagleboneblack.md)
-- [Beaglebone Green](device_setup_beaglebonegreen.md)
-- [Freescale K64F](device_setup_freescale_k64f_mbed.md)
-- [RasberryPi 2 with Rasbian OS](device_setup_raspberrypi2_rasbian.md)
-- [RasberryPi 2 with Windows 10](device_setup_raspberrypi2_windows10.md)
+- [Beaglebone Black](doc/run_sample_on_beaglebone_black.md)
+- [Beaglebone Green](doc/run_sample_on_beaglebone_green.md)
+- [Freescale K64F](doc/run_sample_on_freescale_k64f_mbed.md)
+- [RasberryPi 2 with Rasbian OS](doc/run_sample_on_raspberrypi2_rasbian.md)
+- [Intel Edison](doc/run_sample_on_intel_edison.md)
+- [CC3200](doc/run_sample_on_ti_cc3200.md)
 
 
 ### /build_all

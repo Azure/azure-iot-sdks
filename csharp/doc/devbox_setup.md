@@ -1,6 +1,6 @@
 # Prepare your development environment
 
-This document describes how to prepare your development environment to use the *Microsoft Azure IoT Device SDK for C#*.
+This document describes how to prepare your development environment to use the *Microsoft Azure IoT device SDK for C#*.
 
 - [Visual Studio](#vs)
 - [NuGet package](#prerequisites)
@@ -19,7 +19,7 @@ If you are creating a client application from scratch, use the Visual Studio pac
 <a name="samplecode"/>
 ## Sample applications
 
-This repository contains various .NET sample applications that illustrate how to use the Microsoft Azure IoT Device SDK for .NET. For more information, see the [readme][readme].
+This repository contains various .NET sample applications that illustrate how to use the Microsoft Azure IoT device SDK for .NET. For more information, see the [readme][readme].
 
 
 [visual-studio]: https://www.visualstudio.com/

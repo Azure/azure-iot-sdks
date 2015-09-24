@@ -1,6 +1,6 @@
-# Microsoft Azure IoT Device SDK for Java
+# Microsoft Azure IoT device SDK for Java
 
-The Microsoft Azure IoT Device SDK for Java facilitates building devices and applications that connect and are managed by Azure IoT Suite services.
+The Microsoft Azure IoT device SDK for Java facilitates building devices and applications that connect and are managed by Azure IoT Suite services.
 
 The device library consists of a set of reusable components with abstract interfaces that enable pluggability between stock and custom modules.
 
@@ -19,7 +19,7 @@ The device library consists of a set of reusable components with abstract interf
 - [Setup your development environment][devbox-setup]
 - [Try some samples][getstarted]
 - [Get started with Azure IoT client application using Java on Windows](guide_getting_started_iot_client_java_windows.md)
-- [How to use Device Explorer for IoT Hub devices](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) 
+- [How to use Device Explorer for IoT Hub devices](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
 
 ## Folder structure of repository
 
