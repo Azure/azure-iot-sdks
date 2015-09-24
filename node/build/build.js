@@ -3,10 +3,8 @@
 
 'use strict';
 
-var common = require('azure-iot-common');
-
 module.exports = {
-    Device: require('./lib/device.js'),
-    Https: common.Https,
-    Registry: require('./lib/registry.js')
+  checkVersion: require('./lib/version_checker.js').check,
+  runTests: require('./lib/mocha_runner.js').runTests,
+  jshintConfig: require('./lib/jshint.conf.js')
 };
