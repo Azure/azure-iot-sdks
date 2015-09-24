@@ -1,36 +1,29 @@
 # Raspberry Pi 2 Raspbian Setup
 
-The following document describes the process of connecting to a [Raspberry Pi 2](https://www.raspberrypi.org/) device and building the IoT SDK sample.
+This document describes the process of setting up a [Raspberry Pi 2](https://www.raspberrypi.org/) device to connect to an Azure IoT hub.
 
 ## Table of Contents
-- [Raspbian OS Setup](#rasbinaos)
-	- [Requirements](#requirements)
-	- [Preparing the Raspberry Pi 2 board](#preparing)
-	- [Provision your device in IoT Hubs](#provision)
-	- [Build and run the Device Explorer tool](#buildrundevexp)
-	- [Build the sample application on the device](#buildrunapp)
-	- [Run the asset monitoring client sample](#buildassetmon)
-	- [Tips](#tips)
+- [Requirements](#requirements)
+- [Prepare the Raspberry Pi 2 board](#preparing)
+- [Provision the device in your IoT hub](#provision)
+	- [Run the provisioning tool](#runprovision)
+	- [Run the Device Explorer tool (optional; Windows-only)](#buildrundevexp)
+- [Build the sample application on the device](#buildrunapp)
+- [Run the AMQP simple sample](#buildsimplesample)
+- [Tips](#tips)
 
-<a name="rasbinaos"/>
-# Raspbian OS Setup
-
-The following procedure describes the process of connecting to a [Raspberry Pi 2](https://www.raspberrypi.org/) device running the Raspbian OS and building the SDK sample.
 
 <a name="requirements"/>
 ## Requirements
-
-- Computer with a Git client installed so that you can access the azure-iot-suite-sdks code on GitHub.
 
 - SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the Raspberry Pi.
 
 - Required hardware:
 	- [Raspberry Pi 2](http://www.amazon.com/Raspberry-Pi-Model-Project-Board/dp/B00T2U7R7I/ref=sr_1_1?ie=UTF8&qid=1429516842&sr=8-1&keywords=raspberry+pi)
-	- 8GB MicroSD Card
-	- A USB keyboard
-	- A USB mouse
-	- A USB Mini cable
-	- A 5 Volt - 1 Amp USB power supply
+	- 8GB or larger MicroSD Card
+	- USB keyboard
+	- USB mouse (optional; you can navigate NOOBS with a keyboard)
+	- USB Mini cable
 	- An HDMI cable
 	- TV/ Monitor that supports HDMI
 	- An Ethernet cable or Wi-Fi dongle
@@ -38,16 +31,15 @@ The following procedure describes the process of connecting to a [Raspberry Pi 2
 Note: You may wish to consider a Starter Kit such as [CanaKit](http://www.amazon.com/CanaKit-Raspberry-Complete-Original-Preloaded/dp/B008XVAVAW/ref=sr_1_4?ie=UTF8&qid=1429516842&sr=8-4&keywords=raspberry+pi) that includes some of these hardware requirements.
 
 <a name="preparing"/>
-## Preparing the Raspberry Pi 2 board
+## Prepare the Raspberry Pi 2 board
 
 - Install the latest Raspbian operating system on your Raspberry Pi 2 by
-following the instructions in the [NOOBS setup
-guide](http://www.raspberrypi.org/help/noobs-setup/).
+following the instructions in the [NOOBS setup guide](http://www.raspberrypi.org/help/noobs-setup/).
 
-- When the install process is complete, the Raspberry Pi configuration menu
+- When the installation process is complete, the Raspberry Pi configuration menu
 (raspi-config) loads. Here you are able to set the time and date for your region
 and enable a Raspberry Pi camera board, or even create users. Under **Advanced
-Options** make sure to enable **ssh** so you can access the device remotely with
+Options**, enable **ssh** so you can access the device remotely with
 PuTTY or WinSCP. For more information, see
 https://www.raspberrypi.org/documentation/remote-access/ssh/.
 
@@ -58,7 +50,7 @@ a WiFi dongle on the device.
 connect using PuTTY. For more information see
 https://www.raspberrypi.org/documentation/troubleshooting/hardware/networking/ip-address.md.
 
-- Once you see that your board is alive, open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine.
+- Once you see that your board is working, open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine.
 
 - Use the IP address from step 4 as the Host name, Port=22, and Connection type=SSH to complete the connection.
 
@@ -68,95 +60,107 @@ https://www.raspberrypi.org/documentation/troubleshooting/hardware/networking/ip
 
   ![][1]
 
+The root account is necessary in order to install some libraries required by the device SDK.
+
 <a name="provision"/>
-## Provision your device in IoT Hubs
+## Provision the device in your IoT hub
 
-You have two options for provisioning your Raspberry Pi device in IoT Hubs. Both options enable you to provision a new device and obtain the **Device ID** and **connection string** you need to connect your device to your IoT Hub.
-- (Recommended) Use the IoT Device Administration Portal you deployed when you followed the [Asset Monitoring Sample Solution Walkthrough](https://github.com/Azure/azure-iot-solution/blob/master/Docs/iot-asset-monitoring-sample-walkthrough.md).
+IoT Hub only allows connections from known devices that present proper credentials.  While IoT Hub supports multiple authentication scenarios, we will
+ use pre-shared keys in our example. There are three steps to properly set up a device to connect to an IoT Hub with pre-shared keys.
+ 1. Register the device in your IoT hub
+ 1. Generate a secret key for that device
+ 1. Provision the device with the secret key generated in step 2
+  
+<a name="runprovision"/>
+#### Run the device provisioning tool
 
-- Alternatively, use the Device Explorer tool in the tools/DeviceExplorer folder in this repository.
+TODO: ***insert instructions for using the node-based Device Explorer replacement tool***
+
+
+*** -or- ***
 
 <a name="buildrundevexp"/>
-### Build and run the Device Explorer tool
+#### Run the Device Explorer tool (Windows-only)
+If you are running on a Windows-based PC, you also have the option of using the Device Explorer tool in the tools/DeviceExplorer folder in this repository.
+TODO:  ***need link to instructions***
 
-We recommend you use the IoT Device Administration Portal (see [Asset Monitoring Sample Solution Walkthrough](https://github.com/Azure/azure-iot-solution/blob/master/Docs/iot-asset-monitoring-sample-walkthrough.md)) to provision and manage your device, but you can also use the Device Explorer sample application on your Windows desktop machine to create and register a device ID and symmetric key for your device. The Device Explorer interfaces with Azure IoT Hubs, and has some basic capabilities such as:
+To run this tool, you need connection and configuration information for your IoT Hub and the Event Hub it is associated with. You can get this information from
+the Azure Portal by selecting your IoT Hub.  If you have not already set up an IoT hub, TODO: ***follow these instructions*** before continuing.
 
-- **Device management**: creates device IDs and obtains a list of registered devices on your IoT Hub.
+- Install Device Explorer from TODO: (location)
+- Run Device Explorer
+- Paste in the two connection strings for your IoT hub and associated event hub, and then click **Update**.
 
-- **Monitors and consumes data** sent by your devices to your IoT Hub.
-
-- **Sends messages** to your devices.
-
-To run this tool, you need connection and configuration information for your IoT Hub and the Event Hub it is associated with.
-
-- The Device Explorer sample solution can be found at **\azure-iot-suite-sdks\tools\DeviceExplorer\DeviceExplorer.sln**.
-
-- Open the solution in Visual Studio, then build and run it.
-
-- Paste in the two connection strings for your IoT Hub and Event Hub, and then click **Update**.
-
-- Click the **Management** tab, then create a device ID for your device and register your device with your IoT Hub:
-	- Click **List** to call the device hub and retrieve a list of devices. If this is your first time, then you shouldn't retrieve anything!
-	- Click **Create** to create a device ID and key.
-	- Save this information in Notepad (or just keep the sample running). You will need this when you configure your device.
+- Click the **Management** tab, then create a device ID for your device and register your device with your IoT hub:
+	- Click **List** to retrieve a list of devices. If this is your first time, then you shouldn't retrieve anything!
+	- Click **Create** to create a device ID and secret key.
+	- Save this information. You will need this when configuring your device.
 
 
 <a name="buildrunapp"/>
 ## Build the sample application on the device
 
-- Install the prerequisite packages for the Microsoft Azure IoT Device SDK for C by issuing the following commands from the command line on the board in your PuTTY terminal window:
+Run the following commands in the terminal window connected to your Raspberry Pi.
+
+- Install the prerequisite packages for the device SDK:
 
   ```
   sudo apt-get update
   sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git
   ```
+  If you get errors running sudo, make sure your root password is set as decribed above.
 
-  **Note:** You can paste into a PuTTY terminal window in Windows by using mouse right-click.
+  **Note:** Right-click in a PuTTY terminal window to paste text.
 
-- Download the Microsoft Azure IoT Device SDK for C by issuing the following command on the board:
+- Navigate to the directory where you want to  install the SDK.  If you're not sure, navigate to your home directory:
+  ```
+  cd ~
+  ```
+- Download the Azure IoT device SDK to your Raspberry Pi:
 
   ```
-  git clone https://github.com/Azure/azure-iot-suite-sdks.git
+  git clone https://github.com/Azure/azure-iot-sdks.git
   ```
 
-  You will be prompted for your GitHub username and password -- if you have two-factor authentication enabled for your account, you'll need to generate/use a personal access token in place of your password.
-
-- Verify that you now have a copy of the SDK under the directory ~/azure-iot-suite-sdks.
-
-
-- Edit the file ~/azure-iot-suite-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace the placeholders in the following lines of code with your IoT Hub name, device ID, and device key values (you can find these values in the IoT Device Administration portal). You can use the console-based text editor **nano** to edit the file:
-
+- Confirm that you now have a copy of the SDK under the directory ./azure-iot-sdks.
+Then cd to the directory:
   ```
-  static const char* iotHubName = "[IoT Hub name goes here]";
-  static const char* iotHubSuffix = "[IoT Hub suffix goes here, e.g., private.azure-devices-int.net]";
-  static const char* deviceId = "[Device ID goes here]";
-  static const char* deviceKey = "[Device key goes here]";
+  cd azure-iot-sdks
   ```
 
-- On the board, run the following command to build and install Apache Proton library:
+
+- Edit the file ./c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace connection string placeholder with the connection string 
+you obtained in the "Provision the device in your IoT hub" above.
+(You can use the console-based text editor **nano** to edit the file):
 
   ```
-    sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_proton.sh --install /usr
+  static const char* connectionString = "[device connection string]";
   ```
 
-- Assuming everything went OK on the build_proton.sh, you can now build the SDK samples using the following command:
+- Build and install the Apache Proton library:
 
   ```
-  ~/azure-iot-suite-sdks/c/build_all/linux/build.sh
+    sudo ./c/build_all/linux/build_proton.sh --install /usr
   ```
 
-  **Note:** If you receive the following error, ignore it: **"crtabstractions_unittests/crtabstractions_unittests.cpp:119:5"**.
-
-<a name="buildassetmon"/>
-## Run the asset monitoring client sample
-
-- Now run the **simplesample_amqp** sample by issuing the following commands:
+- Finally, build the sample applications:
 
   ```
-  ~/azure-iot-suite-sdks/serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ./c/build_all/linux/build.sh
   ```
 
-- This sample application sends simulated sensor data to your IoT Hub. See the [Asset Monitoring Sample Solution Walkthrough](https://github.com/Azure/azure-iot-solution/blob/master/Docs/iot-asset-monitoring-sample-walkthrough.md) for information about how you can verify that the sensor data is reaching your IoT Hub.
+<a name="buildsimplesample"/>
+## Run the AMQP simple sample
+
+- Run the **simplesample_amqp** sample:
+
+  ```
+  ./serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ```
+
+This sample application sends simulated sensor data to your IoT Hub. 
+
+(TODO: how to see that the data is getting through without Device Explorer?)
 
 <a name="tips"/>
 ## Tips
@@ -164,10 +168,10 @@ To run this tool, you need connection and configuration information for your IoT
 - If you just want to build the serializer samples, run the following commands:
 
   ```
-  cd ~/azure-iot-suite-sdks/c/serializer/build/linux
+  cd ./c/serializer/build/linux
   make -f makefile.linux all
   ```
 
-- You can use the DeviceExplorer tool on your desktop machine to see the data your device is sending and receiving.
+- On Windows, you can use the Device Explorer tool to see the data your device is sending and receiving.
 
 [1]: ./media/service-bus-iot-raspberrypi-raspbian-setup/raspbian01.png
