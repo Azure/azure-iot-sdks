@@ -31,16 +31,6 @@
     <ClCompile Include="..\..\src\iothub_message.c" />
     <ClCompile Include="..\..\src\version.c" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\common\build\windows\common.vcxproj">
-      <Project>{9f55377b-6c37-4700-9866-e070d64ade0f}</Project>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F17F4374-023D-455F-B254-5A87B6691395}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

@@ -353,8 +353,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_HOSTNAME_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_HOSTNAME_VALUE);
         EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
         EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
             .SetReturn(0);
@@ -374,8 +372,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_DEVICEID_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEID_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_CHAR);
 
         /* loop 3*/
@@ -385,8 +381,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
@@ -515,8 +509,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_HOSTNAME_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_HOSTNAME_VALUE);
         EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
         EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
             .SetReturn(0);
@@ -536,8 +528,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEID_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_CHAR);
 
         /* loop 3*/
@@ -549,8 +539,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(TEST_DEVICEKEY_TOKEN);
         STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_CHAR);
 
@@ -623,8 +611,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_DEVICEID_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEID_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_CHAR);
 
         /* loop 2*/
@@ -634,8 +620,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
@@ -693,8 +677,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_HOSTNAME_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_HOSTNAME_VALUE);
         EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
         EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
             .SetReturn(0);
@@ -711,8 +693,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
@@ -770,8 +750,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_HOSTNAME_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_HOSTNAME_VALUE);
         EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
         EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
             .SetReturn(0);
@@ -788,8 +766,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEID_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_DEVICEID_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
@@ -846,8 +822,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_HOSTNAME_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_HOSTNAME_VALUE);
         EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
         EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
             .SetReturn(0);
@@ -868,8 +842,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_DEVICEID_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEID_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_CHAR);
 
         /* loop 3*/
@@ -879,8 +851,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
@@ -938,8 +908,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_HOSTNAME_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_HOSTNAME_VALUE);
         EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
         EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
             .SetReturn(0);
@@ -960,8 +928,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_DEVICEID_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEID_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_CHAR);
 
         /* loop 3*/
@@ -971,8 +937,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_DEVICEKEY_TOKEN);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
@@ -1088,8 +1052,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_HOSTNAME_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_HOSTNAME_VALUE);
         STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
             .IgnoreArgument(1)
             .SetReturn((STRING_TOKENIZER_HANDLE)NULL);
@@ -1369,8 +1331,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_HOSTNAME_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_HOSTNAME_VALUE);
         EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
         EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
             .SetReturn(1);
@@ -1422,8 +1382,6 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .SetReturn(0);
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn(TEST_HOSTNAME_TOKEN);
-        EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .SetReturn(TEST_HOSTNAME_VALUE);
         EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
         EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG));
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));

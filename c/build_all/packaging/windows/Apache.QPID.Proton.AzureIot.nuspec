@@ -16,7 +16,7 @@
 		Please see http://qpid.apache.org/proton for a more info.</summary>
     <releaseNotes>Apache Qpid Proton C AMPQ 1.0 Windows native libraries for Azure Iot Hub. This project is forked from release 0.9.0 with additional changes to support the Azure IoT Hub Client. See project site for details.</releaseNotes>
     <copyright>Copyright 2015</copyright>
-    <tags>AMQP Qpid Proton Azure IoT Native x86 x64 nativepackage</tags>
+    <tags>AMQP Qpid Proton Azure IoT Native x86 x64 native package</tags>
     <dependencies>
     </dependencies>
   </metadata>

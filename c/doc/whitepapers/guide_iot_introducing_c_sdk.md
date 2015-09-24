@@ -6,7 +6,7 @@ The **Azure IoT Device SDK for C** is a set of a libraries designed to make it e
 
 Rather than using the SDK you could write your own software to communicate directly with **IoT Hubs** using one of the communications protocols that it supports. However, taking on an effort like this involves a lot of "plumbing" code that is probably not relevant to your solution; this is why you should use the **Azure IoT Device SDK for C**. The libraries that the SDK includes implement the common functions that you need when you communicate with **IoT Hubs**. These libraries abstract the technical details of communicating with **IoT Hubs** using a simple set of APIs that enable you to send and receive data.
 
-The **Azure IoT Device SDK for C** includes support for a variety of hardware and software platforms. A complete list can be found in the [readme](https://github.com/Azure/azure-iot-suite-sdks/blob/master/readme.md) in the  GitHub repository. At the time of this writing, the supported platforms include Windows desktop and [Windows IoT](http://ms-iot.github.io/content/en-US/GetStarted.htm), various flavors of Linux, and mbed. The supported programming language is C and the libraries themselves are written to the C99 standard to ensure portability. The list is just the start. The number of supported operating systems will grow in the future.
+The **Azure IoT Device SDK for C** includes support for a variety of hardware and software platforms. A complete list can be found in the [readme](https://github.com/Azure/azure-iot-sdks/blob/master/readme.md) in the  GitHub repository. At the time of this writing, the supported platforms include Windows desktop and [Windows IoT](http://ms-iot.github.io/content/en-US/GetStarted.htm), various flavors of Linux, and mbed. The supported programming language is C and the libraries themselves are written to the C99 standard to ensure portability. The list is just the start. The number of supported operating systems will grow in the future.
 
 This article focuses more on the Windows platform. But check back here again, as future articles will address other platforms.
 
@@ -42,7 +42,7 @@ This article focuses more on the Windows platform. But check back here again, as
 <a name="sdk_architecture"/>
 # SDK architecture
 
-You can find the **Azure IoT Device SDK for C** in the GitHub repository <https://github.com/Azure/azure-iot-suite-sdks>.
+You can find the **Azure IoT Device SDK for C** in the GitHub repository <https://github.com/Azure/azure-iot-sdks>.
 
 You should always use the code in the **master** branch of this repository:
 ![](media/introducing_iot_c_sdk/image5.png)
@@ -65,9 +65,9 @@ Before you can run the samples in the **Azure IoT Device SDK for C** repository 
 
 ### Build the SDK
 
-First, you’ll need to get a copy of the **Azure IoT Device SDK for C** from GitHub and then build the source. You should fetch a copy of the source from the **master** branch of the GitHub repository: <https://github.com/Azure/azure-iot-suite-sdks>
+First, you’ll need to get a copy of the **Azure IoT Device SDK for C** from GitHub and then build the source. You should fetch a copy of the source from the **master** branch of the GitHub repository: <https://github.com/Azure/azure-iot-sdks>
 
-When you have obtained a copy of the source, you can build the SDK. There are build instructions for each of the supported platforms in the [doc](https://github.com/Azure/azure-iot-suite-sdks/tree/master/doc) folder of the repository. As an example, you can find the setup instructions for Windows here: <https://github.com/Azure/azure-iot-suite-sdks/blob/master/c/doc/windows_setup.md>
+When you have obtained a copy of the source, you can build the SDK. There are build instructions for each of the supported platforms in the [doc](https://github.com/Azure/azure-iot-sdks/tree/master/doc) folder of the repository. As an example, you can find the setup instructions for Windows here: <https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/windows_setup.md>
 
 > Be sure to follow the procedure **To install and build Proton on Windows** in the installation guide.
 
@@ -119,7 +119,7 @@ When you have built the SDK and obtained your device credentials, you are ready 
 <a name="iothubclient"/>
 ## IoTHub\_Client
 
-Within the **iothub\_client** folder in the **azure-iot-suite-sdks** repository there is a **samples** folder that contains a sample called **iothub\_client\_sample\_amqp**.
+Within the **iothub\_client** folder in the **azure-iot-sdks** repository there is a **samples** folder that contains a sample called **iothub\_client\_sample\_amqp**.
 
 The Windows version of the **iothub\_client\_sample\_ampq** application includes the following Visual Studio solution:
 
@@ -277,7 +277,7 @@ The **iothub\_client** library also provides you with precise control over how t
 
 The **IoTHub\_Schema\_Client** is a layer that sits on top of the **IoTHub\_Client** layer. It uses the **IoTHub\_Client** layer for the underlying communication with IoT Hubs, but it adds modeling capabilities that remove the burden of dealing with message serialization from the developer. How this layer works is best seen in an example.
 
-Within the **iothub\_schema\_client** folder in the **azure-iot-suite-sdks** repository is a **samples** folder that contains a sample called **simplesample\_http**. The Windows version of this sample includes the following Visual Studio solution:
+Within the **iothub\_schema\_client** folder in the **azure-iot-sdks** repository is a **samples** folder that contains a sample called **simplesample\_http**. The Windows version of this sample includes the following Visual Studio solution:
 
 ![](media/introducing_iot_c_sdk/image14.png)
 
