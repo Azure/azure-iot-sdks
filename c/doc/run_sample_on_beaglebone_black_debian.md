@@ -3,11 +3,12 @@
 The following document describes the process of connecting a [BeagleBone Black](http://beagleboard.org/black) device running Linux to Azure IoT Hub.
 
 ## Table of Contents
-	- [Requirements](#requirements)
-	- [Preparing the BeagleBone Black board](#preparing)
-	- [Build the sample application on the device](#buildrunapp)
-	- [Run the client simple sample](#buildandrun)
-	- [Tips](#tips)
+
+- [Requirements](#requirements)
+- [Preparing the BeagleBone Black board](#preparing)
+- [Build the sample application on the device](#buildrunapp)
+- [Run the client simple sample](#buildandrun)
+- [Tips](#tips)
 
 <a name="requirements"/>
 ## Requirements
