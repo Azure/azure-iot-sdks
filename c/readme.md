@@ -42,11 +42,12 @@ Setup instructions for OS platforms:
 - [Linux](doc/run_sample_on_desktop_linux.md)
 
 Setup instructions for device configurations:
-- [Beaglebone Black](device_setup_beagleboneblack.md)
-- [Beaglebone Green](device_setup_beaglebonegreen.md)
-- [Freescale K64F](device_setup_freescale_k64f_mbed.md)
-- [RasberryPi 2 with Rasbian OS](device_setup_raspberrypi2_rasbian.md)
-- [RasberryPi 2 with Windows 10](device_setup_raspberrypi2_windows10.md)
+- [Beaglebone Black](doc/run_sample_on_beaglebone_black.md)
+- [Beaglebone Green](doc/run_sample_on_beaglebone_green.md)
+- [Freescale K64F](doc/run_sample_on_freescale_k64f_mbed.md)
+- [RasberryPi 2 with Rasbian OS](doc/run_sample_on_raspberrypi2_rasbian.md)
+- [Intel Edison](doc/run_sample_on_intel_edison.md)
+- [CC3200](doc/run_sample_on_ti_cc3200.md)
 
 
 ### /build_all

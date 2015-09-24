@@ -17,7 +17,7 @@ This section shows you how to use Visual Studio to build an IoT Hubs client appl
 
 ## Preparing QPID Proton libraries in Windows
 
-To use the AMQP samples provided your machine must have the QPID Proton-C library.  There are two ways to use the obtain the library, use a Nuget package or build the library from git. 
+To use the AMQP samples provided your machine must have the QPID Proton-C library.  There are two ways to use the obtain the library, use a Nuget package or build the library from git.
 
 ### Using QPID Proton Nuget package in Windows
 
@@ -65,9 +65,9 @@ You can build the Windows samples to verify that your environment is setup corre
 
 3. Run the `build.cmd` script.
 
-This script builds the **iothub_client** and **serializer** libraries and their associated samples.
+This script builds the **iothub_client** and **serializer** libraries and their associated samples. It also runs the test suite.
 
-**Note:** you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Windows](run_sample_on_Windows.md).
+**Note:** You will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Windows](run_sample_on_Windows.md) or [Run sample on desktop Linux](run_sample_on_desktop_linux.md).
 
 To view the projects and examine the source code, open the **c\\iothubclient\\build\\windows\\iothub_client.sln** or **c\\serializer\\build\\windows\\serializer.sln** solution files.
 
