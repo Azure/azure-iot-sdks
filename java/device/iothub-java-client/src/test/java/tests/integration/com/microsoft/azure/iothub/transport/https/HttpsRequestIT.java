@@ -38,7 +38,7 @@ public class HttpsRequestIT
                 + "  font-family: 'Inconsolata';\n"
                 + "  font-style: normal;\n"
                 + "  font-weight: 400;\n"
-                + "  src: local('Inconsolata'), url(https://fonts.gstatic.com/s/inconsolata/v11/";
+                + "  src: local('Inconsolata'), url(https://fonts.gstatic.com/s/inconsolata/v12/";
         assertThat(testStatus, is(expectedStatus));
         assertThat(testBody, is(startsWith(expectedBodyPrefix)));
     }
