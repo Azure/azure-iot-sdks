@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>Microsoft Azure IoT Device SDK for C: c/iothub_client/inc Directory Reference</title>
+<title>Microsoft Azure IoT Device SDK for C: c/iothub_client/inc/version.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -41,7 +41,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
-      <li><a href="files.html"><span>Files</span></a></li>
+      <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -58,6 +58,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
           </span>
         </div>
       </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>Globals</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -80,26 +86,46 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 </div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">inc Directory Reference</div>  </div>
+<div class="title">version.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Functions for managing the client SDK version.  
+<a href="#details">More...</a></p>
+
+<p><a href="version_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="files"></a>
-Files</h2></td></tr>
-<tr class="memitem:iothub__client_8h"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html">iothub_client.h</a> <a href="iothub__client_8h_source.html">[code]</a></td></tr>
-<tr class="memdesc:iothub__client_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extends the IoTHubCLient_LL module with additional features. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:iothub__client__ll_8h"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html">iothub_client_ll.h</a> <a href="iothub__client__ll_8h_source.html">[code]</a></td></tr>
-<tr class="memdesc:iothub__client__ll_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">APIs that allow a user (usually a device) to communicate with an Azure IoTHub. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:iothub__message_8h"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html">iothub_message.h</a> <a href="iothub__message_8h_source.html">[code]</a></td></tr>
-<tr class="memdesc:iothub__message_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <code>IoTHub_Message</code> component encapsulates one message that can be transferred by an IoT hub client. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:version_8h"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="version_8h.html">version.h</a> <a href="version_8h_source.html">[code]</a></td></tr>
-<tr class="memdesc:version_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for managing the client SDK version. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ad8bb41067344bbe6676b2edf7dc65be4"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="version_8h.html#ad8bb41067344bbe6676b2edf7dc65be4">IoTHubClient_GetVersionString</a> (void)</td></tr>
+<tr class="memdesc:ad8bb41067344bbe6676b2edf7dc65be4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a pointer to a null terminated string containing the current IoT Hub Client SDK version.  <a href="#ad8bb41067344bbe6676b2edf7dc65be4">More...</a><br /></td></tr>
+<tr class="separator:ad8bb41067344bbe6676b2edf7dc65be4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Functions for managing the client SDK version. </p>
+</div><h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="ad8bb41067344bbe6676b2edf7dc65be4"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* IoTHubClient_GetVersionString </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns a pointer to a null terminated string containing the current IoT Hub Client SDK version. </p>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to a null terminated string containing the current IoT Hub Client SDK version. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
