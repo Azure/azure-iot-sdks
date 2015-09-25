@@ -3,8 +3,8 @@
 
 package com.microsoft.azure.iothub.transport;
 
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
 import com.microsoft.azure.iothub.IotHubEventCallback;
+import com.microsoft.azure.iothub.Message;
 
 /**
  * A packet containing the data needed for an IoT Hub transport to send a
@@ -12,7 +12,7 @@ import com.microsoft.azure.iothub.IotHubEventCallback;
  */
 public final class IotHubOutboundPacket
 {
-    protected final IotHubServiceboundMessage message;
+    protected final Message message;
     protected final IotHubEventCallback callback;
     protected final Object callbackContext;
 
@@ -24,7 +24,7 @@ public final class IotHubOutboundPacket
      * Hub is received.
      * @param callbackContext the context to be passed to the callback.
      */
-    public IotHubOutboundPacket(IotHubServiceboundMessage message,
+    public IotHubOutboundPacket(Message message,
             IotHubEventCallback callback,
             Object callbackContext)
     {
@@ -39,7 +39,7 @@ public final class IotHubOutboundPacket
      *
      * @return the message to be sent.
      */
-    public IotHubServiceboundMessage getMessage()
+    public Message getMessage()
     {
         // Codes_SRS_IOTHUBOUTBOUNDPACKET_11_002: [The function shall return the message given in the constructor.]
         return message;

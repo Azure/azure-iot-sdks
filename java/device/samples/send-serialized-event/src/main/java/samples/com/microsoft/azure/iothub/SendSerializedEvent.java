@@ -3,9 +3,9 @@
 
 package samples.com.microsoft.azure.iothub;
 
-import com.microsoft.azure.iothub.IotHubClient;
+import com.microsoft.azure.iothub.DeviceClient;
 import com.microsoft.azure.iothub.IotHubClientProtocol;
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
+import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.IotHubEventCallback;
 
@@ -118,7 +118,7 @@ public class SendSerializedEvent {
         System.out.format("Using communication protocol %s.\n", arguments.protocol.name());
 
         try {
-            IotHubClient client = new IotHubClient(arguments.connectionString, arguments.protocol);
+            DeviceClient client = new DeviceClient(arguments.connectionString, arguments.protocol);
 
             System.out.println("Successfully created an IoT Hub client.");
 
@@ -132,7 +132,7 @@ public class SendSerializedEvent {
 
             String msgStr = data.serialize();
 
-            IotHubServiceboundMessage msg = new IotHubServiceboundMessage(msgStr);
+            Message msg = new Message(msgStr);
 
             Object lockobj = new Object();
             EventCallback callback = new EventCallback();

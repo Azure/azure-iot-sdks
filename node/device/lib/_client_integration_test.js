@@ -4,7 +4,7 @@
 'use strict';
 
 var runTests = require('./_client_test.js');
-var Https = require('_common').Https;
+var Https = require('azure-iot-common').Https;
 
 function createTransport() {
   return new Https();

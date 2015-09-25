@@ -1,101 +1,99 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-(function() {
-    'use strict';
+(function () {
+  'use strict';
 
-    var version = require('../build/lib/version_checker.js');
-    var mocha = require('../build/lib/mocha_runner.js');
-    var lint = require('simplebuild-jshint');
-    var jshintConfig = require('../build/lib/jshint.conf.js');
-    var jake = require("jake");
-	
-    var MOCHA_CONFIG = {
-        ui: 'bdd',
-        reporter: 'dot'
-    };
+  var build = require('azure-iot-build');
+  var lint = require('simplebuild-jshint');
+  var jake = require("jake");
 
-    var startTime = Date.now();
-    
-    function endBuild() {
-        var elapsedSeconds = (Date.now() - startTime) / 1000;
-        process.stdout.write('\n\nBUILD OK (' + elapsedSeconds.toFixed(2) + 's)');
-    }
-    
-    function deglob(include, exclude) {
-        var files = new jake.FileList();
-        if (include) files.include(include);
-        if (exclude) files.exclude(exclude);
-        return files.toArray();
-    }
+  var MOCHA_CONFIG = {
+    ui: 'bdd',
+    reporter: 'dot'
+  };
 
-    desc('Lint and run unit tests');
-    task('default', ['lintAndUnitTest'], function () {
-        endBuild();
-    });
-    
-    desc('Lint and run unit tests');
-    task('lintAndUnitTest', ['version', 'lint', 'unitTest'], function () {});
+  var startTime = Date.now();
 
-    desc('Lint and run unit + integration tests');
-    task('lintAndAllTests', ['lintAndUnitTest', 'integrationTest'], function () {
-        endBuild();
-    });
-	
-	// VERSION
+  function endBuild() {
+    var elapsedSeconds = (Date.now() - startTime) / 1000;
+    process.stdout.write('\n\nBUILD OK (' + elapsedSeconds.toFixed(2) + 's)');
+  }
 
-    desc('Check Node.js version');
-    task('version', function () {
-        process.stdout.write('Checking Node.js version: .\n');
-        version.check({
-            name: 'Node',
-            expected: require('./package.json').engines.node,
-            actual: process.version,
-        }, complete, fail);
-    }, { async: true });
-	
-	// LINT
+  function deglob(include, exclude) {
+    var files = new jake.FileList();
+    if (include) files.include(include);
+    if (exclude) files.exclude(exclude);
+    return files.toArray();
+  }
 
-    desc('Lint source code in current directory');
-    task('lint', [], function () {
-        process.stdout.write('Linting source code: ');
-        lint.checkFiles({
-            files: deglob(
-                ['Jakefile', '**/*.js'],
-                ['**/node_modules']
-            ),
-            options: jshintConfig.nodeOptions,
-            globals: jshintConfig.nodeGlobals
-        }, complete, fail);
-    }, { async: true });
+  desc('Lint and run unit tests');
+  task('default', ['lintAndUnitTest'], function () {
+    endBuild();
+  });
 
-	// TEST
-    
-    function runTests(files, complete, fail) {
-        mocha.runTests({
-            files: files,
-            options: MOCHA_CONFIG
-        }, complete, fail);
-    }
-	
-	desc('Run unit tests');
-	task('unitTest', [], function () {
-        process.stdout.write('Running unit tests: ');
-        var files = deglob(
-            ['**/_*_test.js'],
-            ['**/_*_integration_test.js', '**/node_modules']
-            );
-        runTests(files, complete, fail);
-    }, { async: true });
-    
-    desc('Run integration tests');
-    task('integrationTest', [], function () {
-        process.stdout.write('Running integration tests: ');
-        var files = deglob(
-            ['**/_*_integration_test.js'],
-            ['**/node_modules']
-            );
-        runTests(files, complete, fail);
-    }, { async: true });
+  desc('Lint and run unit tests');
+  task('lintAndUnitTest', ['version', 'lint', 'unitTest'], function () { });
 
-}());
+  desc('Lint and run unit + integration tests');
+  task('lintAndAllTests', ['lintAndUnitTest', 'integrationTest'], function () {
+    endBuild();
+  });
+
+  // VERSION
+
+  desc('Check Node.js version');
+  task('version', function () {
+    process.stdout.write('Checking Node.js version: .\n');
+    build.checkVersion({
+      name: 'Node',
+      expected: require('./package.json').engines.node,
+      actual: process.version,
+    }, complete, fail);
+  }, { async: true });
+
+  // LINT
+
+  desc('Lint source code in current directory');
+  task('lint', [], function () {
+    process.stdout.write('Linting source code: ');
+    lint.checkFiles({
+      files: deglob(
+        ['Jakefile', '**/*.js'],
+        ['**/node_modules']
+        ),
+      options: build.jshintConfig.nodeOptions,
+      globals: build.jshintConfig.nodeGlobals
+    }, complete, fail);
+  }, { async: true });
+
+  // TEST
+
+  function runTests(files, complete, fail) {
+    build.runTests({
+      files: files,
+      options: MOCHA_CONFIG
+    }, complete, fail);
+  }
+
+  desc('Run unit tests');
+  task('unitTest', [], function () {
+    process.stdout.write('Running unit tests: ');
+    var files = deglob(
+      ['**/_*_test.js'],
+      ['**/_*_integration_test.js', '**/node_modules']
+      );
+    runTests(files, complete, fail);
+  }, { async: true });
+
+  desc('Run integration tests');
+  task('integrationTest', [], function () {
+    process.stdout.write('Running integration tests: ');
+    var files = deglob(
+      ['**/_*_integration_test.js'],
+      ['**/node_modules']
+      );
+    runTests(files, complete, fail);
+  }, { async: true });
+
+} ());
