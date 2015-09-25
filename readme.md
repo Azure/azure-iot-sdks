@@ -32,7 +32,7 @@ The IoT Service SDKs for Java and node.js are coming soon.
 
 ## Additional resources
 
-In addition to the language SDKs, this repository contains the following folders:
+In addition to the language SDKs, this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) contains the following folders:
 
 ### /build
 

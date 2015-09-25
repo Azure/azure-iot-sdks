@@ -13,11 +13,11 @@ Complete the following steps to setup your development environment:
 
   You may choose to develop directly on your target device, in which case you must ensure that the correct version of Node.js is installed on the device. To download Node.js and to learn how to install it, visit [Node.js][node-site]. Make sure you download the correct version (0.12.x) from the [Previous Releases][node-prev] page. For information about using a package manager to install on Linux, see [Installing Node.js via package manager][node-linux].
 
-- When you have installed Node.js, clone the latest version of this repository to your development machine or device. You should always use the **master** branch for the latest version of the libraries and samples.
+- When you have installed Node.js, clone the latest version of this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to your development machine or device. You should always use the **master** branch for the latest version of the libraries and samples.
 
-- If you are using Windows, open the **Node.js command prompt**, then navigate to the **node\\build** folder in your local copy of this repository. Then run the `build.cmd` script to verify your installation.
+- If you are using Windows, open the **Node.js command prompt**, then navigate to the **node\\build** folder in your local copy of this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)). Then run the `build.cmd` script to verify your installation.
 
-- If you are using Linux, open a shell, then navigate to the **node/build** folder in your local copy of this repository. Then run the `build.sh` script to verify your installation.
+- If you are using Linux, open a shell, then navigate to the **node/build** folder in your local copy of this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)). Then run the `build.sh` script to verify your installation.
 
 <a name="samplecode"/>
 ## Sample applications

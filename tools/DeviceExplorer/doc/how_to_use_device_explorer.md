@@ -26,7 +26,7 @@ A pre-built version of the Device Explorer application for Windows can be downlo
 
 ### Build the Device Explorer application
 
-To build Device Explorer yourself, open the **tools\\DeviceExplorer\\DeviceExplorer.sln** file in your local copy of this repository in Visual Studio 2015. Then build and run the solution.
+To build Device Explorer yourself, open the **tools\\DeviceExplorer\\DeviceExplorer.sln** file in your local copy of this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) in Visual Studio 2015. Then build and run the solution.
 
 <a name="configure"/>
 ## Configure an IoT Hub connection
@@ -87,7 +87,7 @@ The following steps describe how to use Device Explorer to monitor device-to-clo
 
 ### Obtain the device connection string and setup monitoring
 
-You can use one of the sample applications included in this repository to send device-to-cloud events to your IoT Hub. Use Device Explorer to [create a device](#createdevice) and generate a connection string.
+You can use one of the sample applications included in this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to send device-to-cloud events to your IoT Hub. Use Device Explorer to [create a device](#createdevice) and generate a connection string.
 
 -  You can obtain the IoT Hub connection string from Device Explorer. In the Management tab, right-click on the selected device and select "Copy connection string for selected device". The device connection string is silently copied to the clipboard.
 

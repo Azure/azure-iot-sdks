@@ -1,6 +1,6 @@
 # Microsoft Azure IoT device SDK FAQ
 
-This document contains both general FAQs about the Microsoft Azure IoT device SDK as a whole, and specific FAQs about the C, .NET, Java, and Node.js SDKs in this repository.
+This document contains both general FAQs about the Microsoft Azure IoT device SDK as a whole, and specific FAQs about the C, .NET, Java, and Node.js SDKs in this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)).
 
 **Microsoft Azure IoT SDKs**
 
@@ -18,7 +18,7 @@ This document contains both general FAQs about the Microsoft Azure IoT device SD
 <a name="vs2013"/>
 ## Using Visual Studio 2013
 
-The Visual Studio native C projects included in this repository are Visual Studio 2015 projects. The following steps describe how to use Visual Studio 2013 if you are unable to install Visual Studio 2015 on your development machine.
+The Visual Studio native C projects included in this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) are Visual Studio 2015 projects. The following steps describe how to use Visual Studio 2013 if you are unable to install Visual Studio 2015 on your development machine.
 
 Note: You can download the free Community edition of Visual Studio 2015 [here](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx).
 

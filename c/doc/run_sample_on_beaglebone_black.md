@@ -50,11 +50,11 @@ Follow the [Getting Started](http://beagleboard.org/getting-started) instruction
   sudo apt-get install git
   ```
 
-- Download a copy of this repository to the board using the `git clone` command.
+- Download a copy of this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the board using the `git clone` command.
 
 - You now should have a complete copy of the Azure IoT Hub SDKs repository on your BeagleBone. You should always use the **master** branch which contains the latest release of the software.
 
-- Navigate to the folder **c/build_all/linux** in your local copy of this repository.
+- Navigate to the folder **c/build_all/linux** in your local copy of this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)).
 
 3. Execute the `setup.sh` script to install the prerequisite packages and the dependent libraries.
 
