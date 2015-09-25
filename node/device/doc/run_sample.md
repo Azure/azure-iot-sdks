@@ -32,7 +32,7 @@ Before you get started, you should:
 
 - The section "Send events" in the document [How to use Device Explorer][device-explorer] describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
 
-- Open a shell (Linux) or Node.js command prompt (Windows) and navigate to the folder you placed the sample files in. Then run the sample application using the following command:
+- Open a shell (Linux) or Node.js command prompt (Windows) and navigate to the folder you placed the sample files in. Then run the sample application using the following commands:
 
     ```
     npm install
