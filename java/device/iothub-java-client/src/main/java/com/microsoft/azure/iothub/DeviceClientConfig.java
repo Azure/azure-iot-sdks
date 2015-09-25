@@ -10,7 +10,7 @@ import java.net.URISyntaxException;
  * Configuration settings for an IoT Hub client. Validates all user-defined
  * settings.
  */
-public final class IotHubClientConfig
+public final class DeviceClientConfig
 {
     /**
      * The number of seconds after which the generated SAS token for a message
@@ -34,18 +34,18 @@ public final class IotHubClientConfig
     /**
      * Indicates if the client connection will be towards an IoT Hub or an Event Hub.
      */
-    // Codes_SRS_IOTHUBCLIENTCONFIG_08_012: [Configuration shall expose an option to define if client will connect to an IoT Hub or an Event Hub directly]
+    // Codes_SRS_DEVICECLIENTCONFIG_08_012: [Configuration shall expose an option to define if client will connect to an IoT Hub or an Event Hub directly]
     public AzureHubType targetHubType;
 
     /**
      * The callback to be invoked if a message is received.
      */
-    protected IotHubMessageCallback messageCallback;
+    protected MessageCallback messageCallback;
     /** The context to be passed in to the message callback. */
     protected Object messageContext;
 
     /**
-     * Constructs an {@code IotHubClientConfig} instance.
+     * Constructor.
      *
      * @param iotHubHostname the IoT Hub hostname.
      * @param deviceId the device ID.
@@ -56,12 +56,12 @@ public final class IotHubClientConfig
      * @throws IllegalArgumentException if the IoT Hub hostname does not contain
      * a valid IoT Hub name as its prefix.
      */
-    public IotHubClientConfig(String iotHubHostname, String deviceId,
-            String deviceKey) throws URISyntaxException
+    public DeviceClientConfig(String iotHubHostname, String deviceId,
+                              String deviceKey) throws URISyntaxException
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_014: [If the IoT Hub hostname is not a valid URI, the constructor shall throw a URISyntaxException.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_014: [If the IoT Hub hostname is not a valid URI, the constructor shall throw a URISyntaxException.]
         new URI(iotHubHostname);
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_015: [If the IoT Hub hostname does not contain a '.', the function shall throw an IllegalArgumentException.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_015: [If the IoT Hub hostname does not contain a '.', the function shall throw an IllegalArgumentException.]
         int iotHubNameEndIdx = iotHubHostname.indexOf(".");
         if (iotHubNameEndIdx == -1)
         {
@@ -73,7 +73,7 @@ public final class IotHubClientConfig
             throw new IllegalArgumentException(errStr);
         }
 
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_001: [The constructor shall save the IoT Hub hostname, device ID, and device key.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_001: [The constructor shall save the IoT Hub hostname, device ID, and device key.]
         this.iotHubHostname = iotHubHostname;
         this.iotHubName = iotHubHostname.substring(0, iotHubNameEndIdx);
         this.deviceId = deviceId;
@@ -87,10 +87,10 @@ public final class IotHubClientConfig
      * @param callback the message callback. Can be {@code null}.
      * @param context the context to be passed in to the callback.
      */
-    public void setMessageCallback(IotHubMessageCallback callback,
+    public void setMessageCallback(MessageCallback callback,
             Object context)
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
         this.messageCallback = callback;
         this.messageContext = context;
     }
@@ -102,7 +102,7 @@ public final class IotHubClientConfig
      */
     public String getIotHubHostname()
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
         return this.iotHubHostname;
     }
 
@@ -113,7 +113,7 @@ public final class IotHubClientConfig
      */
     public String getIotHubName()
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_002: [The function shall return the IoT Hub name given in the constructor, where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub name given in the constructor, where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.]
         return this.iotHubName;
     }
 
@@ -124,7 +124,7 @@ public final class IotHubClientConfig
      */
     public String getDeviceId()
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_003: [The function shall return the device ID given in the constructor.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_003: [The function shall return the device ID given in the constructor.]
         return this.deviceId;
     }
 
@@ -135,7 +135,7 @@ public final class IotHubClientConfig
      */
     public String getDeviceKey()
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_004: [The function shall return the device key given in the constructor.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_004: [The function shall return the device key given in the constructor.]
         return this.deviceKey;
     }
 
@@ -149,7 +149,7 @@ public final class IotHubClientConfig
      */
     public long getTokenValidSecs()
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_005: [The function shall return 600.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_005: [The function shall return 600.]
         return TOKEN_VALID_SECS;
     }
 
@@ -162,7 +162,7 @@ public final class IotHubClientConfig
      */
     public int getReadTimeoutMillis()
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_012: [The function shall return 240000ms.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_012: [The function shall return 240000ms.]
         return DEFAULT_READ_TIMEOUT_MILLIS;
     }
 
@@ -171,9 +171,9 @@ public final class IotHubClientConfig
      *
      * @return the message callback.
      */
-    public IotHubMessageCallback getMessageCallback()
+    public MessageCallback getMessageCallback()
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_010: [The function shall return the current message callback.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_010: [The function shall return the current message callback.]
         return this.messageCallback;
     }
 
@@ -184,7 +184,7 @@ public final class IotHubClientConfig
      */
     public Object getMessageContext()
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_011: [The function shall return the current message context.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_011: [The function shall return the current message context.]
         return this.messageContext;
     }
 
@@ -196,11 +196,11 @@ public final class IotHubClientConfig
      */
     public int getMessageLockTimeoutSecs()
     {
-        // Codes_SRS_IOTHUBCLIENTCONFIG_11_013: [The function shall return 180s.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_013: [The function shall return 180s.]
         return DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS;
     }
 
-    protected IotHubClientConfig()
+    protected DeviceClientConfig()
     {
         this.iotHubHostname = null;
         this.iotHubName = null;

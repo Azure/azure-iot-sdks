@@ -7,10 +7,10 @@ package com.microsoft.azure.iothub;
  * An interface for an IoT Hub message callback.
  * <p>
  * The developer is expected to create an implementation of this interface,
- * and the transport will call {@link IotHubMessageCallback#execute(IotHubMessage, Object)}
+ * and the transport will call {@link MessageCallback#execute(Message, Object)}
  * upon receiving a message from an IoT Hub.
  */
-public interface IotHubMessageCallback
+public interface MessageCallback
 {
     /**
      * Executes the callback. The callback should return a response that
@@ -22,6 +22,5 @@ public interface IotHubMessageCallback
      * @return whether the IoT Hub should complete, abandon, or reject the
      * message.
      */
-    IotHubMessageResult execute(IotHubMessage message,
-            Object callbackContext);
+    IotHubMessageResult execute(Message message, Object callbackContext);
 }

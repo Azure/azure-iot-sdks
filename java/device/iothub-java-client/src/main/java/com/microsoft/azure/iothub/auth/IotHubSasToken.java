@@ -73,14 +73,14 @@ public final class IotHubSasToken
      * For future use, when the device ID (keyName) will possibly be passed on the SAS token string.
      */
     protected String buildSasToken() {
-        // Codes_SRS_IOTHUBSASTOKEN_11_001: [The SAS token shall have the format "SharedAccessSignature sig=<signature >&se=<expiryTime>&skn=&sr=<resourceURI>". The params can be in any order.]
         String keyName = "";
 
         // Codes_SRS_IOTHUBSASTOKEN_08_012: [The skn key value shall be empty if connecting to IoT Hub, or the device Id if connecting to the Event Hub directly]
         if (appendSknValue == true) {
             keyName = this.keyName;
         }
-
+        
+        // Codes_SRS_IOTHUBSASTOKEN_11_001: [The SAS token shall have the format "SharedAccessSignature sig=<signature >&se=<expiryTime>&skn=&sr=<resourceURI>". The params can be in any order.]
         return String.format(TOKEN_FORMAT, this.signature, this.expiryTime, keyName, this.resourceUri);
     }
 

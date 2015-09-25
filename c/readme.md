@@ -1,4 +1,4 @@
-# Microsoft Azure IoT Device SDK for C
+# Microsoft Azure IoT device SDK for C
 
 The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
 
@@ -31,7 +31,8 @@ All C specific resources are located in the **azure-iot-sdks\c** folder. A descr
 
 This directory contains application development guides, such as:
 
-- [Prepare your development environment to use the Azure IoT Device SDK for C](doc/devbox_setup.md)
+- [Prepare your development environment to use the Azure IoT device SDK for C](doc/devbox_setup.md)
+
 - [Setup IoT Hub](../doc/setup_iot_hub.md)
 - [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
 - [How to use the DeviceExplorer application to tests IoT Hub device connectivity](../tools/DeviceExplorer/doc/tools_device_explorer.md)
@@ -44,15 +45,14 @@ Setup instructions for OS platforms:
 
 Run the sample application on:
 
-- [Beaglebone Black with Debian OS](doc/run_sample_on_beaglebone_black_debian.md)
-- [Beaglebone Black with Snappy OS](doc/run_sample_on_beaglebone_black_snappy.md)
-- [Beaglebone Green](doc/run_sample_on_beaglebone_green.md)
+- [BeagleBone Black with Debian OS](doc/run_sample_on_beaglebone_black_debian.md)
+- [BeagleBone Black with Snappy OS](doc/run_sample_on_beaglebone_black_snappy.md)
+- [BeagleBone Green](doc/run_sample_on_beaglebone_green.md)
 - [Desktop Linux](doc/run_sample_on_desktop_linux.md)
 - [Freescale K64F](doc/run_sample_on_freescale_k64f_mbed.md)
 - [RasberryPi 2 with Raspbian OS](doc/run_sample_on_raspberrypi2_raspbian.md)
 - [Desktop Windows](doc/run_sample_on_windows.md)
 - [TI CC3200](doc/run_sample_on_ti_cc3200.md)
-
 
 ### /build_all
 
@@ -99,3 +99,11 @@ Contains tools that are currently used in testing the client libraries: Mocking 
 ### /tools
 
 Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requirements vs code implementation).
+
+## API reference
+
+API documentation can be found here:
+
+```
+{IoT device SDK root}/c/doc/api_reference/html/index.html
+```

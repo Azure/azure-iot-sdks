@@ -3,11 +3,10 @@
 
 package com.microsoft.azure.iothub.transport.amqps;
 
-import com.microsoft.azure.iothub.IotHubClientConfig;
-import com.microsoft.azure.iothub.IotHubMessage;
-import com.microsoft.azure.iothub.IotHubMessageCallback;
+import com.microsoft.azure.iothub.DeviceClientConfig;
+import com.microsoft.azure.iothub.Message;
+import com.microsoft.azure.iothub.MessageCallback;
 import com.microsoft.azure.iothub.IotHubMessageResult;
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.IotHubEventCallback;
 import com.microsoft.azure.iothub.transport.IotHubCallbackPacket;
@@ -15,7 +14,6 @@ import com.microsoft.azure.iothub.transport.IotHubOutboundPacket;
 import com.microsoft.azure.iothub.transport.IotHubTransport;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -47,16 +45,16 @@ public final class AmqpsTransport implements IotHubTransport
     /** Messages whose callbacks that are waiting to be invoked. */
     protected final Queue<IotHubCallbackPacket> callbackList;
 
-    protected final IotHubClientConfig config;
+    protected final DeviceClientConfig config;
 
     /**
-     * Constructs an instance from the given {@link IotHubClientConfig}
+     * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
      *
      * @param config configuration parameters for an AMQPS session with an IoT
      * Hub.
      */
-    public AmqpsTransport(IotHubClientConfig config)
+    public AmqpsTransport(DeviceClientConfig config)
     {
         // Codes_SRS_AMQPSTRANSPORT_11_001: [The function shall initialize an empty queue for messages waiting to be sent.]
         this.waitingList = new LinkedList<>();
@@ -111,7 +109,7 @@ public final class AmqpsTransport implements IotHubTransport
     /**
      * Adds a message to the transport queue.
      *
-     * @param msg the message to be sent.
+     * @param message the message to be sent.
      * @param callback the callback to be invoked when a response for the
      * message is received.
      * @param callbackContext the context to be passed in when the callback is
@@ -120,7 +118,7 @@ public final class AmqpsTransport implements IotHubTransport
      * @throws IllegalStateException if the transport has not been opened or is
      * already closed.
      */
-    public void addMessage(IotHubServiceboundMessage msg,
+    public void addMessage(Message message,
             IotHubEventCallback callback,
             Object callbackContext)
     {
@@ -134,7 +132,7 @@ public final class AmqpsTransport implements IotHubTransport
 
         // Codes_SRS_AMQPSTRANSPORT_11_003: [The function shall add a packet containing the message, callback, and callback context to the transport queue.]
         IotHubOutboundPacket packet =
-                new IotHubOutboundPacket(msg, callback, callbackContext);
+                new IotHubOutboundPacket(message, callback, callbackContext);
         this.waitingList.add(packet);
     }
 
@@ -182,6 +180,7 @@ public final class AmqpsTransport implements IotHubTransport
 
                 // Codes_SRS_AMQPSTRANSPORT_11_006: [For each message being sent, the function shall send the message and add the IoT Hub status code along with the callback and context to the callback list.]
                 // Codes_SRS_AMQPSTRANSPORT_11_015: [If the IoT Hub could not be reached, the function shall throw an IOException.]
+                // Codes_SRS_AMQPSTRANSPORT_11_005: [If no AMQPS session exists with the IoT Hub, the function shall establish one.]
                 IotHubStatusCode status =
                         this.session.sendEvent(packet.getMessage());
 
@@ -251,7 +250,7 @@ public final class AmqpsTransport implements IotHubTransport
                     "AMQPS transport is already closed.");
         }
 
-        IotHubMessageCallback callback =
+        MessageCallback callback =
                 this.config.getMessageCallback();
         Object context = this.config.getMessageContext();
         if (callback == null)
@@ -269,9 +268,10 @@ public final class AmqpsTransport implements IotHubTransport
 
         try
         {
+            // Codes_SRS_AMQPSTRANSPORT_11_014: [If no AMQPS session exists with the IoT Hub, the function shall establish one.] 
             // Codes_SRS_AMQPSTRANSPORT_11_017: [If the IoT Hub could not be reached, the function shall throw an IOException.]
             // Codes_SRS_AMQPSTRANSPORT_11_010: [The function shall attempt to consume a message from the IoT Hub.]
-            IotHubMessage message = this.session.receiveMessage();
+            Message message = this.session.receiveMessage();
             // Codes_SRS_AMQPSTRANSPORT_11_011: [If a message is found and a message callback is registered, the function shall invoke the callback on the message.]
             if (message != null)
             {

@@ -188,9 +188,9 @@ java/**/*.iml
 java/**/*dependency-reduced-pom.xml
 
 # Node.js
-node/**/.settings/
-node/**/node_modules/
-node/**/.idea/
+**/.settings/
+**/node_modules/
+**/.idea/
 
 csharp/NuGet/*.exe
 csharp/NuGet/*.nupkg

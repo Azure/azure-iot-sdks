@@ -54,6 +54,8 @@ public final class IotHubUri
 
         String rawPath = String.format(
                 PATH_FORMAT, deviceId, iotHubMethodPath);
+        // Codes_SRS_IOTHUBURI_11_011: [The constructor shall URL-encode the device ID.]
+        // Codes_SRS_IOTHUBURI_11_012: [The constructor shall URL-encode the IoT Hub method path.]
         this.path = urlEncodePath(rawPath);
 
         // Codes_SRS_IOTHUBURI_11_008: [If queryParams is not empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]? api-version=2015-08-15-preview &[queryFragment] '.]

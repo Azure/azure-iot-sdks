@@ -1,6 +1,6 @@
 # Prepare your development environment
 
-This document describes how to prepare your development environment to use the *Microsoft Azure IoT Device SDK for C*. It describes preparing a development environment in Windows using Visual Studio and in Linux.
+This document describes how to prepare your development environment to use the *Microsoft Azure IoT device SDK for C*. It describes preparing a development environment in Windows using Visual Studio and in Linux.
 
 - [Setup a Windows development environment](#windows)
 - [Setup a Linux development environment](#linux)
@@ -67,9 +67,9 @@ You can build the Windows samples to verify that your environment is setup corre
 
 3. Run the `build.cmd` script.
 
-This script builds the **iothub_client** and **serializer** libraries and their associated samples.
+This script builds the **iothub_client** and **serializer** libraries and their associated samples. It also runs the test suite.
 
-**Note:** you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Windows](run_sample_on_Windows.md).
+**Note:** You will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Windows](run_sample_on_Windows.md) or [Run sample on desktop Linux](run_sample_on_desktop_linux.md).
 
 To view the projects and examine the source code, open the **c\\iothubclient\\build\\windows\\iothub_client.sln** or **c\\serializer\\build\\windows\\serializer.sln** solution files.
 
@@ -80,9 +80,9 @@ You should use one of the sample applications as a template to get started when 
 <a name="linux"/>
 ## Setup a Linux development environment
 
-This section shows you how to setup a development environment for the *Microsoft Azure IoT Device SDK for C* on a clean installation of Ubuntu Linux.
+This section shows you how to setup a development environment for the *Microsoft Azure IoT device SDK for C* on a clean installation of Ubuntu Linux.
 
-1. Clone this repository to the Ubuntu machine you are using.
+1. Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the Ubuntu machine you are using.
 
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
@@ -97,7 +97,7 @@ This script builds the **iothub_client** and **serializer** libraries and their 
 <a name="samplecode"/>
 ## Sample applications
 
-This repository contains various C sample applications that illustrate how to use the Microsoft Azure IoT Device SDK for C. For more information, see the [readme][readme].
+This repository contains various C sample applications that illustrate how to use the Microsoft Azure IoT device SDK for C. For more information, see the [readme][readme].
 
 To run the sample applications and send device-to-cloud messages to IoT Hub, and receive cloud-to-device messages from IoT Hub, use the [device explorer tool](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) utility. This utility only runs on Windows.
 
