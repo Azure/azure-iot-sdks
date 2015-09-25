@@ -17,7 +17,7 @@ This section shows you how to use Visual Studio to build an IoT Hubs client appl
 
 - Install [nuget](www.nuget.org). nuget.exe must be in your PATH so it is executable from any location.
 
-- Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest release version.
+- Clone the latest version of this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to your local machine. Use the **master** branch to ensure you fetch the latest release version.
 
 ## Preparing QPID Proton libraries in Windows
 
@@ -84,7 +84,7 @@ You should use one of the sample applications as a template to get started when 
 
 This section shows you how to setup a development environment for the *Microsoft Azure IoT device SDK for C* on a clean installation of Ubuntu Linux.
 
-1. Clone this repository to the Ubuntu machine you are using.
+1. Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the Ubuntu machine you are using.
 
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
