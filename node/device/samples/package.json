@@ -3,7 +3,7 @@
 
 {
   "name": "simple_sample_http",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Simple sample showing how to connect a nodejs app to Azure IoT Hub",
   "main": "simple_sample_http.js",
   "scripts": {
@@ -15,7 +15,6 @@
   },
   "keywords": [
     "Azure",
-    "IoT",
     "IoT",
     "Hub"
   ],
