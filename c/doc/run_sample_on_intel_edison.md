@@ -1,4 +1,4 @@
-# Run a simple c sample on Intel Edison
+# Run a simple C sample on Intel Edison
 
 The following describes how to build and run the **simplesample_amqp** application on an Intel Edison.
 
@@ -53,7 +53,7 @@ You should see the following:
 
   ```
   $ opkg install git
-  $ git clone git@github.com<mailto:git@github.com>:Azure/azure-iot-suite-sdks.git
+  $ git clone github.com/Azure/azure-iot-suite-sdks.git
   ```
   
 - You may be prompted to add an RSA key to your device, respond with “yes.”
@@ -70,11 +70,11 @@ You should see the following:
 We will build a sample application which relies on the SDK.
 We first need to update the credentials in the sample AMPQ app to match those of our Azure IoT Hub application. When we build the Azure IoT SDK, the sample C applications are automatically built by default, we need to include our credentials into the sample app while we build the SDK so that they are ready to function after we build.
 
-- Edit "/c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c" in the following way using vi or other text editor:
- - Replace the "IoT Hub connection” aka “connectionString” string placeholder with your info as below (static const char* ….), when you are finished the result should look like the below connection string with your own credentials instead of the placeholders in brackets.
+- Edit "/c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c" as given below using vi or your favorite text editor:
+ - Replace the "IoT Hub connection” aka “connectionString” string placeholder with your info as below (static const char* ….) When you are finished the result should look like the below connection string with your own credentials instead of the placeholders in brackets.
   **IMPORTANT**: Replace items in brackets with your credentials or the sample will not function
   ```
-  static const char* connectionString = “HostName=[YOUR-HOST-NAME];CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId=[YOUR-DEVICE-ID];SharedAccessKey=[YOUR-ACCESS-KEY";
+  static const char* connectionString = “HostName=[YOUR-HOST-NAME];CredentialScope=Device;DeviceId=[YOUR-DEVICE-ID];SharedAccessKey=[YOUR-ACCESS-KEY";
   ```
   
 - In the terminal, enter /c/build_all/linux and execute the following steps:
