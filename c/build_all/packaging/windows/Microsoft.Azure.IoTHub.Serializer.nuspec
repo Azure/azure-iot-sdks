@@ -4,7 +4,7 @@
     <id>Microsoft.Azure.IoTHub.Serializer</id>
     <version>0.0.001-preview-000</version>
     <title>Microsoft Azure IoTHub Serializer</title>
-    <authors>Microsoft, Azure</authors>
+    <authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
     <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/develop/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Azure/azure-iot-sdks</projectUrl>
@@ -16,7 +16,7 @@
     <copyright>Copyright 2015</copyright>
     <tags>Microsoft Azure IoT Native x86 x64 native package</tags>
     <dependencies>
-	  
+	  	  <dependency id ="Microsoft.Azure.IoTHub.Common" version="0.0.001-preview-000"></dependency>
     </dependencies>
   </metadata>
     <files>
