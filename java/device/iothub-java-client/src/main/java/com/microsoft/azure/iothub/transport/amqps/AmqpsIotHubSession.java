@@ -4,6 +4,7 @@
 package com.microsoft.azure.iothub.transport.amqps;
 
 import com.microsoft.azure.iothub.*;
+import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.net.IotHubMessageUri;
 import com.microsoft.azure.iothub.net.IotHubEventUri;
@@ -52,7 +53,7 @@ public final class AmqpsIotHubSession
     protected static final Object AMQPS_SESSION_LOCK = new Object();
 
     /** The client configuration. */
-    protected final IotHubClientConfig config;
+    protected final DeviceClientConfig config;
     /** The underlying AMQPS connection. */
     protected Connection connection;
     /** The AMQPS session. */
@@ -63,12 +64,12 @@ public final class AmqpsIotHubSession
 
 
     /**
-     * Constructs an instance from the given {@link IotHubClientConfig}
+     * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
      *
      * @param config the client configuration.
      */
-    public AmqpsIotHubSession(IotHubClientConfig config)
+    public AmqpsIotHubSession(DeviceClientConfig config)
     {
         synchronized (AMQPS_SESSION_LOCK)
         {
@@ -161,13 +162,13 @@ public final class AmqpsIotHubSession
     /**
      * Sends an event message.
      *
-     * @param msg the event message.
+     * @param message the event message.
      *
      * @return the status code from sending the event message.
      *
      * @throws IOException if a message producer could not be created.
      */
-    public IotHubStatusCode sendEvent(IotHubServiceboundMessage msg)
+    public IotHubStatusCode sendEvent(Message message)
             throws IOException
     {
         synchronized (AMQPS_SESSION_LOCK)
@@ -197,9 +198,9 @@ public final class AmqpsIotHubSession
 
                 eventMsg = this.session.createBytesMessage();
                 // Codes_SRS_AMQPSIOTHUBSESSION_11_005: [The function shall send the message body.]
-                eventMsg.writeBytes(msg.getBody());
+                eventMsg.writeBytes(message.getBytes());
                 // Codes_SRS_AMQPSIOTHUBSESSION_11_007: [The function shall send all message properties.]
-                for (IotHubMessageProperty property : msg.getProperties())
+                for (MessageProperty property : message.getProperties())
                 {
                     eventMsg.setStringProperty(property.getName(),
                             property.getValue());
@@ -248,7 +249,7 @@ public final class AmqpsIotHubSession
      *
      * @throws IOException if the IoT Hub could not be reached.
      */
-    public IotHubMessage receiveMessage() throws IOException
+    public Message receiveMessage() throws IOException
     {
         synchronized (AMQPS_SESSION_LOCK)
         {
@@ -269,7 +270,7 @@ public final class AmqpsIotHubSession
 
             // Codes_SRS_AMQPSIOTHUBSESSION_11_014: [If the IoT Hub could not be reached, the function shall throw an IOException.]
             MessageConsumer msgConsumer = null;
-            IotHubMessage msg = null;
+            Message msg = null;
             try
             {
                 msgConsumer = this.session.createConsumer(messageDest);
@@ -380,20 +381,20 @@ public final class AmqpsIotHubSession
      *
      * @throws JMSException if the AMQPS message could not be parsed.
      */
-    protected static IotHubMessage amqpsMessageToMessage(BytesMessage amqpsMsg)
+    protected static Message amqpsMessageToMessage(BytesMessage amqpsMsg)
             throws JMSException
     {
         // Codes_SRS_AMQPSIOTHUBSESSION_11_012: [If a message is found, the function shall include the message body in the returned message.]
         byte[] msgBody = new byte[(int) amqpsMsg.getBodyLength()];
         amqpsMsg.readBytes(msgBody);
-        IotHubMessage msg = new IotHubMessage(msgBody);
+        Message msg = new Message(msgBody);
         // Codes_SRS_AMQPSIOTHUBSESSION_11_013: [If a message is found, the function shall include all valid application properties in the returned message.]
         Enumeration amqpsMsgProperties = amqpsMsg.getPropertyNames();
         while (amqpsMsgProperties.hasMoreElements())
         {
             String propertyName = (String) amqpsMsgProperties.nextElement();
             String propertyValue = amqpsMsg.getStringProperty(propertyName);
-            if (IotHubMessageProperty.isValidAppProperty(
+            if (MessageProperty.isValidAppProperty(
                     propertyName, propertyValue))
             {
                 msg.setProperty(propertyName, propertyValue);

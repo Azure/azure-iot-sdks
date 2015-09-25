@@ -26,7 +26,7 @@ import com.microsoft.azure.iothub.IotHubClient;
 import com.microsoft.azure.iothub.IotHubClientProtocol;
 import com.microsoft.azure.iothub.IotHubMessage;
 import com.microsoft.azure.iothub.IotHubMessageResult;
-import com.microsoft.azure.iothub.IotHubMessageCallback;
+import com.microsoft.azure.iothub.MessageCallback;
 import com.microsoft.azure.iothub.IotHubServiceboundMessage;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.IotHubEventCallback;
