@@ -12,7 +12,7 @@ This topic describes how to download, build and use the Device Explorer tool for
   - [Delete device](#deletedevice)
   - [Get device connection string or data](#getdatadevice)
 - [Monitor device-to-cloud events](#monitor)
-- [Send cloud-to-device notifications](#send)
+- [Send cloud-to-device messages](#send)
 
 <a name="download"/>
 ## Download a pre-built version of the Device Explorer application
@@ -116,13 +116,13 @@ You can use one of the sample applications included in this repository to send d
   ![](media/device_explorer/iotgetstart7.png)
 
 <a name="send"/>
-## Send cloud-to-device notifications
+## Send cloud-to-device messages
 
--  To verify that you can send notifications from the IoT Hub to your device, go to the **Notification** tab in Device Explorer.
+-  To verify that you can send messages from the IoT Hub to your device, go to the **Messages To Device** tab in Device Explorer.
 
 -  Select the device you created.
 
--  Add some text to the **Notification** field, then click **Send**.
+-  Add some text to the **Message** field, then click **Send**.
 
   ![](media/device_explorer/iotgetstart8.png)
 
