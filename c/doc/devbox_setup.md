@@ -10,7 +10,6 @@ This document describes how to prepare your development environment to use the *
 ## Setup a Windows development environment
 
 This section shows you how to use Visual Studio to build an IoT Hubs client application to run on Windows.
-
 - Install [Visual Studio 2015][visual-studio]. You should ensure that your Visual Studio installation includes Visual C++ 2015 and NuGet Package Manager.
 
 - Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest release version.
@@ -41,7 +40,7 @@ To use the AMQP samples provided your machine must have the QPID Proton-C librar
 
 5. Open a Visual Studio 2015 x86 Native Tools command prompt.
 
-6. To build the proton libraries, run the script **build_proton.cmd** in the **\build_all\windows** directory.
+6. Run the script **build_proton.cmd** in the **\build_all\windows** directory to build the proton libraries. You need to complete this step before continuing to the next section.
 
 ### Building the Apache MQTT library in Windows
 
