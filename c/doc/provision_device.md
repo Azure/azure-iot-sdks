@@ -18,8 +18,7 @@ The iothub-explorer tool enables you to provision devices in your IoT hub.  It r
 1. Run the following command in a terminal/shell window, using the connection string you got in the previous step and replacing "mydevice" with your desired device name.
 
 ```
-  > node ./tools/iothub-explorer.js <iothub-connection-string>
-  create mydevice --show="connection-string"
+  > node ./tools/iothub-explorer.js <iothub-connection-string> create mydevice --show="connection-string"
 ```
 
 You should see a response like this:
