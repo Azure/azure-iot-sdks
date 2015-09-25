@@ -8,7 +8,8 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 
-import com.microsoft.azure.iothub.IotHubMessageProperty;
+import com.microsoft.azure.iothub.Message;
+import com.microsoft.azure.iothub.MessageProperty;
 import com.microsoft.azure.iothub.transport.https.HttpsSingleMessage;
 import com.microsoft.azure.iothub.transport.https.HttpsBatchMessage;
 
@@ -100,14 +101,14 @@ public class HttpsBatchMessageTest
     @Test
     public void addMessageSetsPropertiesCorrectly(
             @Mocked final HttpsSingleMessage mockMsg,
-            @Mocked final IotHubMessageProperty mockProperty) throws
+            @Mocked final MessageProperty mockProperty) throws
             SizeLimitExceededException
     {
         final String msgBody = "test-msg-body";
         final boolean isBase64Encoded = false;
         final String propertyHttpsName = "test-property-name";
         final String propertyValue = "test-property-value";
-        final IotHubMessageProperty[] properties = { mockProperty };
+        final MessageProperty[] properties = { mockProperty };
         new NonStrictExpectations()
         {
             {
@@ -134,31 +135,6 @@ public class HttpsBatchMessageTest
                         + propertyHttpsName + "\":\"" + propertyValue
                         + "\"}";
         assertThat(testBatchBody, containsString(expectedMsgProperties));
-    }
-
-    // Tests_SRS_HTTPSBATCHMESSAGE_11_008: [If adding the message causes the batched message to exceed 256 kb in size, the function shall throw a SizeLimitExceededException.]
-    @Test(expected = SizeLimitExceededException.class)
-    public void addMessageRejectsOverflowingMessage(
-            @Mocked final HttpsSingleMessage mockMsg) throws
-            SizeLimitExceededException
-    {
-        final int msgBodySize = SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES / 2 + 1;
-        final byte[] msgBodyBytes = new byte[msgBodySize];
-        final String msgBody = new String(msgBodyBytes, UTF8);
-        final boolean isBase64Encoded = false;
-        new NonStrictExpectations()
-        {
-            {
-                mockMsg.getBodyAsString();
-                result = msgBody;
-                mockMsg.isBase64Encoded();
-                result = isBase64Encoded;
-            }
-        };
-
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
-        batchMsg.addMessage(mockMsg);
-        batchMsg.addMessage(mockMsg);
     }
 
     // Tests_SRS_HTTPSBATCHMESSAGE_11_009: [If the function throws a SizeLimitExceededException, the batched message shall remain as if the message was never added.]
@@ -212,10 +188,10 @@ public class HttpsBatchMessageTest
     public void getPropertiesReturnsNoProperties()
     {
         HttpsBatchMessage batchMsg = new HttpsBatchMessage();
-        IotHubMessageProperty[] testProperties = batchMsg.getProperties();
+        MessageProperty[] testProperties = batchMsg.getProperties();
 
-        IotHubMessageProperty[] expectedProperties =
-                new IotHubMessageProperty[0];
+        MessageProperty[] expectedProperties =
+                new MessageProperty[0];
         assertThat(testProperties, is(expectedProperties));
     }
 
@@ -258,5 +234,36 @@ public class HttpsBatchMessageTest
 
         final int expectedNumMessages = 3;
         assertThat(testNumMessages, is(expectedNumMessages));
+    }
+
+    // Tests_SRS_HTTPSBATCHMESSAGE_11_008: [If adding the message causes the batched message to exceed 256 kb in size, the function shall throw a SizeLimitExceededException.]
+    // Tests_SRS_HTTPSBATCHMESSAGE_11_009: [If the function throws a SizeLimitExceedException, the batched message shall remain as if the message was never added.]
+    @Test
+    public void testAddMessage(
+            @Mocked final HttpsSingleMessage mockMsg) throws
+            SizeLimitExceededException {
+
+        // Note: this will currently result on a message size of 261154 bytes, considering the extra attributes contained on the json-serialized message.
+        // Note: so the current body size limit alone actually is (255 * 1024  - 36) bytes.
+        final byte[] validSizeBody = new byte[255 * 1024 - 1];
+
+        new NonStrictExpectations()
+        {
+            {
+                mockMsg.getBodyAsString();
+                result = new String(validSizeBody, Message.DEFAULT_IOTHUB_MESSAGE_CHARSET);
+            }
+        };
+
+        boolean httpsBatchMessageSizeLimitVerified = false;
+
+        try {
+            HttpsBatchMessage batchMsg = new HttpsBatchMessage();
+            batchMsg.addMessage(mockMsg);
+        } catch (SizeLimitExceededException ex) {
+            httpsBatchMessageSizeLimitVerified = true;
+        }
+
+        assertThat(httpsBatchMessageSizeLimitVerified, is(true));
     }
 }

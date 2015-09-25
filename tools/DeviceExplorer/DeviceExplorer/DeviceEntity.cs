@@ -18,7 +18,7 @@
 
         public int CompareTo(DeviceEntity other)
         {
-            return string.Compare(this.Id, other.Id, StringComparison.Ordinal);
+            return string.Compare(this.Id, other.Id, StringComparison.OrdinalIgnoreCase);
         }
 
         public override string ToString()

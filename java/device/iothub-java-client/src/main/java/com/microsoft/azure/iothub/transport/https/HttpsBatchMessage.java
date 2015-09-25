@@ -3,8 +3,8 @@
 
 package com.microsoft.azure.iothub.transport.https;
 
-import com.microsoft.azure.iothub.IotHubMessageProperty;
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
+import com.microsoft.azure.iothub.Message;
+import com.microsoft.azure.iothub.MessageProperty;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -17,12 +17,14 @@ import javax.naming.SizeLimitExceededException;
  */
 public final class HttpsBatchMessage implements HttpsMessage
 {
+    // Note: this limit is defined by the IoT Hub.
+    public static final int SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES = 255 * 1024 - 1;
+
     /**
      * The value for the "content-type" header field in a batched HTTPS
      * request.
      */
-    public static String HTTPS_BATCH_CONTENT_TYPE =
-            "application/vnd.microsoft.iothub.json";
+    public static String HTTPS_BATCH_CONTENT_TYPE = "application/vnd.microsoft.iothub.json";
 
     /**
      * The charset used to encode IoT Hub messages. The server will interpret
@@ -62,13 +64,10 @@ public final class HttpsBatchMessage implements HttpsMessage
         // Codes_SRS_HTTPSBATCHMESSAGE_11_008: [If adding the message causes the batched message to exceed 256 kb in size, the function shall throw a SizeLimitExceededException.]
         // Codes_SRS_HTTPSBATCHMESSAGE_11_009: [If the function throws a SizeLimitExceedException, the batched message shall remain as if the message was never added.]
         byte[] newBatchBodyBytes = newBatchBody.getBytes(BATCH_CHARSET);
-        if (newBatchBodyBytes.length
-                > IotHubServiceboundMessage.SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES)
-        {
-            String errMsg = String.format("Service-bound message body "
-                            + "cannot exceed %d bytes.\n",
-                    IotHubServiceboundMessage.
-                            SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES);
+
+        if (newBatchBodyBytes.length > SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES) {
+            String errMsg = String.format("Service-bound message size (%d bytes) cannot exceed %d bytes.\n",
+                    newBatchBodyBytes.length, SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES);
             throw new SizeLimitExceededException(errMsg);
         }
 
@@ -84,6 +83,7 @@ public final class HttpsBatchMessage implements HttpsMessage
     public byte[] getBody()
     {
         // Codes_SRS_HTTPSBATCHMESSAGE_11_006: [The function shall return the current batch message body.]
+        // Codes_SRS_HTTPSBATCHMESSAGE_11_007: [The batch message body shall be encoded using UTF-8.]
         return this.batchBody.getBytes(BATCH_CHARSET);
     }
 
@@ -94,6 +94,7 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     public String getContentType()
     {
+        // Codes_SRS_HTTPSBATCHMESSAGE_11_011: [The function shall return 'application/vnd.microsoft.iothub.json'.]
         return HTTPS_BATCH_CONTENT_TYPE;
     }
 
@@ -102,9 +103,10 @@ public final class HttpsBatchMessage implements HttpsMessage
      *
      * @return an empty list of properties for the batched message.
      */
-    public IotHubMessageProperty[] getProperties()
+    public MessageProperty[] getProperties()
     {
-        return new IotHubMessageProperty[0];
+        // Codes_SRS_HTTPSBATCHMESSAGE_11_012: [The function shall return an empty array.]
+        return new MessageProperty[0];
     }
 
     /**
@@ -136,7 +138,7 @@ public final class HttpsBatchMessage implements HttpsMessage
         jsonMsg.append("\"base64Encoded\":");
         jsonMsg.append(Boolean.toString(msg.isBase64Encoded()));
         // Codes_SRS_HTTPSBATCHMESSAGE_11_005: [The JSON object shall have the field "properties" set to a JSON object which has the field "content-type" set to the content type of the raw message.]
-        IotHubMessageProperty[] properties = msg.getProperties();
+        MessageProperty[] properties = msg.getProperties();
         int numProperties = properties.length;
         if (numProperties > 0)
         {
@@ -145,13 +147,13 @@ public final class HttpsBatchMessage implements HttpsMessage
             jsonMsg.append("{");
             for (int i = 0; i < numProperties - 1; ++i)
             {
-                IotHubMessageProperty property = properties[i];
+                MessageProperty property = properties[i];
                 jsonMsg.append("\"" + property.getName() + "\":");
                 jsonMsg.append("\"" + property.getValue() + "\",");
             }
             if (numProperties > 0)
             {
-                IotHubMessageProperty property = properties[numProperties - 1];
+                MessageProperty property = properties[numProperties - 1];
                 jsonMsg.append("\"" + property.getName() + "\":");
                 jsonMsg.append("\"" + property.getValue() + "\"");
             }
