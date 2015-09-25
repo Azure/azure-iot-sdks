@@ -1,2 +1,0 @@
-# Intel Edison Setup
-
