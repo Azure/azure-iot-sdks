@@ -89,18 +89,18 @@ This section shows you how to set up a development environment for the Azure IoT
 
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
-3. Execute the `setup.sh` script to install the prerequisite packages and the dependant libraries.
+3. Run the `setup.sh` script to install the prerequisite packages and the dependent libraries.
 
 4. Run the `build.sh` script.
 
 This script builds the **iothub_client** and **serializer** libraries and their associated samples.
 
-**Note:** you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
+ > Note: you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
 
 <a name="samplecode"/>
 ## Sample applications
 
-This repository contains various C sample applications that illustrate how to use the Azure IoT device SDK for C. For more information, see the [ReadMe][readme].
+This repository contains various C sample applications that illustrate how to use the Azure IoT device SDK for C. For more information, see the [Read Me][readme].
 
 
 [visual-studio]: https://www.visualstudio.com/
