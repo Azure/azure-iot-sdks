@@ -84,6 +84,7 @@ public final class HttpsTransport implements IotHubTransport
         }
 
         // Codes_SRS_HTTPSTRANSPORT_11_023: [If the transport is already closed, the function shall throw an IllegalStateException.]
+        // Codes_SRS_HTTPSTRANSPORT_11_021: [The function shall establish an HTTPS connection with the IoT Hub given in the configuration.]
         this.connection = new HttpsIotHubConnection(this.config);
         this.state = HttpsTransportState.OPEN;
     }
@@ -160,6 +161,7 @@ public final class HttpsTransport implements IotHubTransport
         HttpsMessage msg;
         try
         {
+            // Codes_SRS_HTTPSTRANSPORT_11_013: [If no messages fit using the batch format, the function shall send a single message without the batch format.] 
             msg = this.inProgressListToMessage();
         }
         catch (SizeLimitExceededException e)
@@ -243,6 +245,7 @@ public final class HttpsTransport implements IotHubTransport
         }
 
         // Codes_SRS_HTTPSTRANSPORT_11_009: [The function shall poll the IoT Hub for messages.]
+        // Codes_SRS_HTTPSTRANSPORT_11_010: [If a message is found and a message callback is registered, the function shall invoke the callback on the message.] 
         // Codes_SRS_HTTPSTRANSPORT_11_018: [If an invalid URI is generated from the configuration given in the constructor, the function shall throw a URISyntaxException.]
         // Codes_SRS_HTTPSTRANSPORT_11_019: [If the IoT Hub could not be reached, the function shall throw an IOException.]
         Message message = this.connection.receiveMessage();
@@ -251,6 +254,8 @@ public final class HttpsTransport implements IotHubTransport
             IotHubMessageResult result =
                     callback.execute(message, context);
 
+            // Codes_SRS_HTTPSTRANSPORT_11_011: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
+            // Codes_SRS_HTTPSTRANSPORT_11_020: [If the response from sending the IoT Hub message result does not have status code OK_EMPTY, the function shall throw an IOException.] 
             this.connection.sendMessageResult(result);
         }
     }

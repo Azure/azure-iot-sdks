@@ -3,12 +3,12 @@
 This document describes the process of setting up a [Raspberry Pi 2](https://www.raspberrypi.org/) device to connect to an Azure IoT hub.
 
 ## Table of Contents
-- [Requirements](#requirements)
+	- [Requirements](#requirements)
 - [Before you begin](#beforebegin)
 - [Prepare the Raspberry Pi 2 board](#preparing)
-- [Build the sample application on the device](#buildrunapp)
+	- [Build the sample application on the device](#buildrunapp)
 - [Run the AMQP simple sample](#buildsimplesample)
-- [Tips](#tips)
+	- [Tips](#tips)
 
 
 <a name="requirements"/>
