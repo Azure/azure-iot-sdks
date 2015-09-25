@@ -15,6 +15,7 @@ The Azure IoT libraries has been tested on the following OS platforms:
 |mbed OS| 2.0 |
 |Raspbian Linux| 3.18 |
 |Ubuntu Linux| 14.04 |
+|TI-RTOS | 2.x |
 |Windows desktop| 7,8,10 |
 |Windows IoT Core| 10 |
 |Windows Server| 2012 R2|
@@ -31,6 +32,7 @@ The [Microsoft Azure IoT Device SDK for C](c/device/readme.md) has been tested o
 |Debian Linux| 7.5 | HTTPS, AMQP, MQTT |
 |Fedora Linux| 20 | HTTPS, AMQP, MQTT |
 |mbed OS| 2.0 | HTTPS, AMQP |
+|TI-RTOS| 2.x | HTTPS |
 |Ubuntu Linux| 14.04 | HTTPS, AMQP, MQTT |
 |Windows desktop| 7,8,10 | HTTPS, AMPQ, MQTT |
 |Yocto Linux|2.1  | HTTPS, AMQP|
@@ -48,11 +50,12 @@ The [Microsoft Azure IoT Device SDK for Node.js](node/device/readme.md) has been
 
 
 ## Java libraries
-The [Microsoft Azure IoT Device SDK for Java](java/service/readme.md) has been tested on the following configurations:
+The [Microsoft Azure IoT Device SDK for Java](java/device/readme.md) has been tested on the following configurations:
 
 |Runtime| Version|Protocols|
 |:---------|:----------:|----|
-|Java SE| 1.7 | HTTPS, AMQP |
+|Java SE (Windows)| 1.7 | HTTPS, AMQP |
+|Java SE (Linux)| 1.8 | HTTPS, AMQP|
 
 The [Microsoft Azure IoT Service SDK for Java](java/service/readme.md) has been tested on the following configurations:
 
@@ -93,7 +96,7 @@ Certified for IoT Devices have tested compatibility with the Azure IoT SDKs and 
 |Raspberry Pi 2| Windows 10 IoT Core|  C, Javascript, C#|
 |Beaglebone Black| Debian |C, Javascript, Java|
 |Beaglebone Green|Debian |C, Javascript, Java|
-|TI CC3200 | TI RTOS |C|
+|TI CC3200 | TI-RTOS 2.x|C|
 |Intel Edison |Yocto |C, Javascript|
 |Minnowboard Max |Windows 7,8, 10 |C#|
 |Arrow Dragonboard |Windows 10 IoT Core | C#|
