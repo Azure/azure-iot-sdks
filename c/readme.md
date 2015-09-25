@@ -99,3 +99,11 @@ Contains tools that are currently used in testing the client libraries: Mocking 
 ### /tools
 
 Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requirements vs code implementation).
+
+## API reference
+
+API documentation can be found here:
+
+```
+{IoT device SDK root}/c/doc/api_reference/html/index.html
+```
