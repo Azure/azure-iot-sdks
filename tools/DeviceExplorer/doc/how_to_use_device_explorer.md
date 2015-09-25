@@ -1,6 +1,8 @@
 # How to use Device Explorer for IoT Hub devices
 This topic describes how to download, build and use the Device Explorer tool. You can use this tool to manage devices connecting to your IoT hub. For example, you can register a device with your IoT hub, monitor messages from your devices, and send messages to your devices.
 
+> **Note:** The Device Explorer utility only runs on Windows.
+
 ## Table of Contents
 - [Getting Device Explorer](#download)
 - [Configure an IoT Hub connection](#configure)

@@ -46,7 +46,7 @@ If you have successfully [prepared your development environment][devbox-setup] t
 
 ## Next steps
 
-To learn how to create a Java application that communicates with an IoT hub from scratch, see [Getting started with Azure IoT client application using Java on Windows][lnk-getstarted]
+To learn how to create a Java application that communicates with an IoT hub from scratch, see [How to write an Azure IoT client application from scratch with Java on Windows][lnk-getstarted].
 
 ## Documentation
 

@@ -92,7 +92,7 @@ Microsoft Azure Certified for IoT is the partner program that connects the broad
 Certified for IoT devices have tested compatibility with the Azure IoT SDKs and are ready to be used in your IoT application. Specifically, we identify compatibility based on OS Platform and code language.
 
 #### Devices list
- Each device has been certified to work with our SDK in the OS and language chosen by the device manufacturer. For example, Beaglebone Black works on Debian using our C, Javascript and Java language. This means that developers will be able to build applications in any of those languages and OS combinations on the specific devices.
+ Each device has been certified to work with our SDK in the OS and language chosen by the device manufacturer. For example, BeagleBone Black works on Debian using our C, Javascript and Java language. This means that developers will be able to build applications in any of those languages and OS combinations on the specific devices.
 
  Learn more about developing solutions using Certified for IoT devices [here](http://azure.com/iotdev).
 
@@ -100,8 +100,8 @@ Certified for IoT devices have tested compatibility with the Azure IoT SDKs and 
 |:---------|:----------|:----------|
 |Raspberry Pi 2| Raspbian | C, Javascript, Java |
 |Raspberry Pi 2| Windows 10 IoT Core|  C, Javascript, C#|
-|Beaglebone Black| Debian |C, Javascript, Java|
-|Beaglebone Green|Debian |C, Javascript, Java|
+|BeagleBone Black| Debian |C, Javascript, Java|
+|BeagleBone Green|Debian |C, Javascript, Java|
 |TI CC3200 | TI-RTOS 2.x|C|
 |Intel Edison |Yocto |C, Javascript|
 |Minnowboard Max |Windows 7,8, 10 |C#|

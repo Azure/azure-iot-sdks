@@ -1,4 +1,4 @@
-# Getting started with Azure IoT client application using Java on Windows
+# How to write an Azure IoT client application from scratch with Java on Windows
 
 This document describes how to create a client application that uses the *Microsoft Azure IoT device SDK for Java* to communicate with the Azure IoT Hubs service. It uses a garage door opener as the example device to implement and shows you how to create project to build a client to run on Windows.
 

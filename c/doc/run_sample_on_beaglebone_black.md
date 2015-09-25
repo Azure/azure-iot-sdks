@@ -1,6 +1,6 @@
-# Getting started - running a C sample application on a Beaglebone Black device
+# Getting started - running a C sample application on a BeagleBone Black device
 
-This "Getting Started" document shows you how to build and run the **simplesample_amqp** application on a Beaglebone Black device. This sample application connects your Beaglebone to an IoT hub.
+This "Getting Started" document shows you how to build and run the **simplesample_amqp** application on a BeagleBone Black device. This sample application connects your BeagleBone to an IoT hub.
 
 **Table of Contents**
 - [Requirements](#Requirements)
@@ -13,10 +13,10 @@ This "Getting Started" document shows you how to build and run the **simplesampl
 ## Requirements
 
 You should have available:
-- An SSH client, such as [PuTTY](http://www.putty.org/) on Windows, so you can access the command line on the Beaglebone.
-- Either the Chrome or Firefox web browser, so you can browse to the embedded webserver on your your Beaglebone.
-- Required hardware: This [Beagleboard-Beaglebone Starter Kit](http://www.amazon.com/Beagleboard-Beaglebone-Starter-Case--Power-Supply--Micro/dp/B00P6TV9V4/ref=sr_1_3?ie=UTF8&qid=1426002583&sr=8-3&keywords=beaglebone) contains a Beaglebone Black board and other useful accessories.
-- A network router configured to allow the Beaglebone to connect to the internet over a wired Ethernet connection.
+- An SSH client, such as [PuTTY](http://www.putty.org/) on Windows, so you can access the command line on the BeagleBone.
+- Either the Chrome or Firefox web browser, so you can browse to the embedded webserver on your your BeagleBone.
+- A BeagleBone Black device You can find a list of distributors to buy a board from at [beagleboard.org](http://beagleboard.org/black) .
+- A network router configured to allow the BeagleBone to connect to the internet over a wired Ethernet connection.
 
 These instructions assume that you have done the following:
 - [Setup your IoT Hub][setup-iothub]
@@ -24,7 +24,7 @@ These instructions assume that you have done the following:
 
 ## Connect the board
 
-Follow the [Getting Started](http://beagleboard.org/getting-started) instructions at [beagleboard.org](http://beagleboard.org/) to connect your Beaglebone to your computer.
+Follow the [Getting Started](http://beagleboard.org/getting-started) instructions at [beagleboard.org](http://beagleboard.org/) to connect your BeagleBone to your computer.
 
 > Note: Although it is not necessary in order to complete the following steps, you may want to consider [updating your board](http://beagleboard.org/getting-started#update) to the latest software revision.
 
@@ -52,13 +52,13 @@ Follow the [Getting Started](http://beagleboard.org/getting-started) instruction
 
 - Download a copy of this repository to the board using the `git clone` command.
 
-- You now should have a complete copy of the Azure IoT Hub SDKs repository on your Beaglebone. You should always use the **master** branch which contains the latest release of the software.
+- You now should have a complete copy of the Azure IoT Hub SDKs repository on your BeagleBone. You should always use the **master** branch which contains the latest release of the software.
 
 - Navigate to the folder **c/build_all/linux** in your local copy of this repository.
 
 3. Execute the `setup.sh` script to install the prerequisite packages and the dependent libraries.
 
-4. Run the `build.sh` script to verify that the SDK libraries and samples build successfully on the Beaglebone board.
+4. Run the `build.sh` script to verify that the SDK libraries and samples build successfully on the BeagleBone board.
 
 <a name="Build-the-Azure-client"/>
 ## Build and run the sample client application
@@ -72,6 +72,7 @@ Follow the [Getting Started](http://beagleboard.org/getting-started) instruction
 3. Replace "[device connection string]" with your connection string (to learn how to obtain this device connection string using the device explorer, read [this](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)).
 
 4. The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
+
 
 5. Save your changes and build the samples. To build your sample you can run the `build.sh` script in the **c/build_all/linux** directory. To skip running the unit tests, use:
 

@@ -45,9 +45,9 @@ Setup instructions for OS platforms:
 
 Run the sample application on:
 
-- [Beaglebone Black with Debian OS](doc/run_sample_on_beaglebone_black_debian.md)
-- [Beaglebone Black with Snappy OS](doc/run_sample_on_beaglebone_black_snappy.md)
-- [Beaglebone Green](doc/run_sample_on_beaglebone_green.md)
+- [BeagleBone Black with Debian OS](doc/run_sample_on_beaglebone_black_debian.md)
+- [BeagleBone Black with Snappy OS](doc/run_sample_on_beaglebone_black_snappy.md)
+- [BeagleBone Green](doc/run_sample_on_beaglebone_green.md)
 - [Desktop Linux](doc/run_sample_on_desktop_linux.md)
 - [Freescale K64F](doc/run_sample_on_freescale_k64f_mbed.md)
 - [RasberryPi 2 with Raspbian OS](doc/run_sample_on_raspberrypi2_raspbian.md)

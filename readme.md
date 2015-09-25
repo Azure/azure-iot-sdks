@@ -22,7 +22,7 @@ Each language SDK includes sample code and documentation in addition to the libr
 
 ## OS platforms and hardware compatibility
 
-Azure IoT device SDKs can be used with a broad range of OS platforms and devices. For a list of tested configurations [click here](doc/tested_configurations.md).
+Azure IoT device SDKs can be used with a broad range of OS platforms and devices. See [OS Platforms and hardware compatibility](doc/tested_configurations.md).
 
 ## Microsoft Azure IoT service SDKs
 
@@ -44,6 +44,7 @@ This folder contains the following documents that are relevant to all the langua
 
 - [Set up IoT Hub](doc/setup_iothub.md) describes how to configure your Azure IoT Hub service.
 - [FAQ](doc/faq.md) contains frequently asked questions about the SDKs and libraries.
+- [OS Platforms and hardware compatibility](doc\tested_configurations.md) describes the SDK compatibility with different OS platforms as well as specific device configurations.
 
 ### /tools
 
