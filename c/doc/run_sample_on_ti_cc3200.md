@@ -69,7 +69,7 @@ In Windows, run 'cmd' from the search box under the Start Menu
 ##Build the sample simplesample_http
 Before building the application, do the following steps:
 
-- Open `simplesample_http.c` from the directory `<AZURE_INSTALL_DIR>\azure-iot-sdks-latest\c\serializer\samples\simplesample_http`
+- Open `simplesample_http.c` from the directory `<AZURE_INSTALL_DIR>\azure-iot-sdks\c\serializer\samples\simplesample_http`
   and update the "connectionString". This string can be obtained from the Device Explorer.
 
 - Open `tirtos/cc3200/main.c`. Search for "USER STEP" and update the current
@@ -80,7 +80,7 @@ Before building the application, do the following steps:
 
 In the Windows Command Prompt, enter the following to build the application:
 
-    > cd <AZURE_INSTALL_DIR>\azure-iot-sdks-latest\c\serializer\samples\simplesample_http\tirtos\cc3200
+    > cd <AZURE_INSTALL_DIR>\azure-iot-sdks\c\serializer\samples\simplesample_http\tirtos\cc3200
     > C:\ti\xdctools_3_31_01_33_core\gmake.exe clean
     > C:\ti\xdctools_3_31_01_33_core\gmake.exe all
 
