@@ -4,7 +4,7 @@
     <id>Microsoft.Azure.IoTHub.MqttTransport</id>
     <version>0.0.001-preview-000</version>
     <title>Microsoft Azure IoTHub MQTT transport</title>
-    <authors>Microsoft, Azure</authors>
+    <authors>Microsoft Corp, Eclipse Foundation, The OpenSSL Project</authors>
     <owners>Azure-IoT</owners>
     <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/develop/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Azure/azure-iot-sdks</projectUrl>
@@ -22,6 +22,9 @@
     </dependencies>
   </metadata>
     <files>
+	
+	<file src="Microsoft.Azure.IoTHub.MqttTransport_thirdpartynotice.txt" target="thirdpartynotice.txt" />
+	
     <!-- these are files for x86 plaform -->
     <file src="..\..\..\iothub_client\build\windows\Win32\Debug\iothub_mqtt_transport.lib" target="build\native\Win32\Debug" />
     <file src="..\..\..\iothub_client\build\windows\Win32\Debug\iothub_mqtt_transport.pdb" target="build\native\Win32\Debug" />
