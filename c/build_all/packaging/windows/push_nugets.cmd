@@ -6,6 +6,11 @@ if not defined NUGET_API_KEY (
 	echo script need to find an environment variable called NUGET_API_KEY.
 	exit /b 1
 ) else (
+	Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
+	if not exist .\nuget.exe (
+		echo nuget does not exist
+		exit /b 1
+	)
 	nuget push *.nupkg %NUGET_API_KEY% -NonInteractive
 	if not %errorlevel%==0 exit /b %errorlevel%
 )

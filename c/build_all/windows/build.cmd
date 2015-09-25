@@ -24,6 +24,13 @@ if not exist %PROTON_PATH% (
     exit /b 1
 )
 
+rem ensure nuget.exe exists
+Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
+if not exist .\nuget.exe (
+	echo nuget does not exist
+	exit /b 1
+)
+
 rem -----------------------------------------------------------------------------
 rem -- parse script arguments
 rem -----------------------------------------------------------------------------

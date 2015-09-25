@@ -102,5 +102,12 @@ if not exist %package-id%.targets (
     exit /b 1
 )
 
+rem ensure nuget.exe exists
+Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
+if not exist .\nuget.exe (
+	echo nuget does not exist
+	exit /b 1
+)
+
 nuget.exe pack %package-id%.nuspec
 if not %errorlevel%==0 exit /b %errorlevel%

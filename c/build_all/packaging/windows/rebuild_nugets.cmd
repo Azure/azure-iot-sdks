@@ -1,6 +1,12 @@
 @REM Copyright (c) Microsoft. All rights reserved.
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
+if not exist .\nuget.exe (
+	echo nuget does not exist
+	exit /b 1
+)
+
 del *.nupkg
 nuget pack Microsoft.Azure.IoTHub.HttpTransport.nuspec
 nuget pack Microsoft.Azure.IoTHub.AmqpTransport.nuspec

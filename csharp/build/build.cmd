@@ -9,6 +9,13 @@ set build-root=%current-path%\..\..
 rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
+rem ensure nuget.exe exists
+Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
+if not exist .\nuget.exe (
+	echo nuget does not exist
+	exit /b 1
+)
+
 rem -----------------------------------------------------------------------------
 rem -- parse script arguments
 rem -----------------------------------------------------------------------------
