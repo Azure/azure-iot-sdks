@@ -1,6 +1,6 @@
-# Microsoft Azure IoT Device SDK for .NET
+# Microsoft Azure IoT device SDK for .NET
 
-The Microsoft Azure IoT Device SDK for .NET facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
+The Microsoft Azure IoT device SDK for .NET facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
 
 The library is available as a NuGet package for you include in your own development projects. This repository contains documentation and samples to help you get started using the SDK.
 
@@ -26,14 +26,18 @@ This folder contains build scripts for the .NET client libraries and samples.
 This folder contains setup and getting started documents for .NET.
 
 - [Preparing your Windows development environment][devbox-setup]
-- [Getting started - running a C# sample application on Windows][getstarted-windows]
+
+Run the C# sample application on:
+
+- [Windows][run-sample-on-windows]
+- [Windows IoT Core][run-sample-on-windows-iot-core]
 
 Other useful documents include:
 
 - [Setup IoT Hub][setup-iothub]
 - [How to use Device Explorer][device-explorer]
-- [Microsoft Azure IoT Device SDK FAQ][faq-doc]
-- [Microsoft Azure IoT Device SDK for .NET API reference][dotnet-api-ref]
+- [Microsoft Azure IoT device SDK FAQ][faq-doc]
+- [Microsoft Azure IoT device SDK for .NET API reference][dotnet-api-ref]
 
 ### /Microsoft.Azure.Devices.Client and /Microsoft.Azure.Devices.Client.WinRT
 
@@ -57,7 +61,8 @@ This Visual Studio solution contains the client library and sample projects.
 
 [setup-iothub]: ../doc/setup_iothub.md
 [devbox-setup]: doc/devbox_setup.md
-[getstarted-windows]: doc/run_sample_on_Windows.md
+[run-sample-on-windows]: doc/run_sample_on_windows.md
+[run-sample-on-windows-iot-core]: doc/run_sample_on_windows_iot_core.md
 [device-explorer]: ../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [faq-doc]: ../doc/faq.md
-[dotnet-api-ref]: TBD
+[dotnet-api-ref]: https://msdn.microsoft.com/library/microsoft.azure.devices.aspx

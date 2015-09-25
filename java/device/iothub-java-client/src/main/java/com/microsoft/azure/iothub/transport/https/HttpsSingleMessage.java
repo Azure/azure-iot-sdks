@@ -3,9 +3,8 @@
 
 package com.microsoft.azure.iothub.transport.https;
 
-import com.microsoft.azure.iothub.IotHubMessage;
-import com.microsoft.azure.iothub.IotHubMessageProperty;
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
+import com.microsoft.azure.iothub.Message;
+import com.microsoft.azure.iothub.MessageProperty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,35 +18,31 @@ public final class HttpsSingleMessage implements HttpsMessage
 
     protected byte[] body;
     protected boolean base64Encoded;
-    protected IotHubMessageProperty[] properties;
+    protected MessageProperty[] properties;
 
     /**
      * Returns the HTTPS message represented by the service-bound message.
      *
-     * @param msg the service-bound message to be mapped to its HTTPS message
+     * @param message the service-bound message to be mapped to its HTTPS message
      * equivalent.
      *
      * @return the HTTPS message represented by the service-bound message.
      */
-    public static HttpsSingleMessage parseHttpsMessage(
-            IotHubServiceboundMessage msg)
-    {
+    public static HttpsSingleMessage parseHttpsMessage(Message message) {
         HttpsSingleMessage httpsMsg = new HttpsSingleMessage();
 
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_001: [The parsed HttpsSingleMessage shall have a copy of the original message body as its body.]
-        byte[] msgBody = msg.getBody();
+        byte[] msgBody = message.getBytes();
         httpsMsg.body = Arrays.copyOf(msgBody, msgBody.length);
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_002: [The parsed HttpsSingleMessage shall have the same base64Encoded value as that of the original message.]
-        httpsMsg.base64Encoded = msg.isBase64Encoded();
 
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_003: [The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.]
-        IotHubMessageProperty[] msgProperties = msg.getProperties();
-        httpsMsg.properties = new IotHubMessageProperty[msgProperties.length];
+        MessageProperty[] msgProperties = message.getProperties();
+        httpsMsg.properties = new MessageProperty[msgProperties.length];
         for (int i = 0; i < msgProperties.length; ++i)
         {
-            IotHubMessageProperty property = msgProperties[i];
+            MessageProperty property = msgProperties[i];
 
-            httpsMsg.properties[i] = new IotHubMessageProperty(
+            httpsMsg.properties[i] = new MessageProperty(
                     HTTPS_APP_PROPERTY_PREFIX + property.getName(),
                     property.getValue());
         }
@@ -63,18 +58,14 @@ public final class HttpsSingleMessage implements HttpsMessage
      *
      * @return the HTTPS message represented by the HTTPS response.
      */
-    public static HttpsSingleMessage parseHttpsMessage(
-            HttpsResponse response)
-    {
+    public static HttpsSingleMessage parseHttpsMessage(HttpsResponse response) {
         HttpsSingleMessage msg = new HttpsSingleMessage();
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_004: [The parsed HttpsSingleMessage shall have a copy of the original response body as its body.]
         byte[] responseBody = response.getBody();
         msg.body = Arrays.copyOf(responseBody, responseBody.length);
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_005: [The parsed HttpsSingleMessage shall not be Base64-encoded.]
-        msg.base64Encoded = false;
 
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_006: [The parsed HttpsSingleMessage shall include all valid HTTPS application-defined properties in the response header as message properties.]
-        ArrayList<IotHubMessageProperty> properties = new ArrayList<>();
+        ArrayList<MessageProperty> properties = new ArrayList<>();
         Map<String, String> headerFields = response.getHeaderFields();
         for (Map.Entry<String, String> field : headerFields.entrySet())
         {
@@ -82,11 +73,11 @@ public final class HttpsSingleMessage implements HttpsMessage
             String propertyValue = field.getValue();
             if (isValidHttpsAppProperty(propertyName, propertyValue))
             {
-                properties.add(new IotHubMessageProperty(propertyName,
+                properties.add(new MessageProperty(propertyName,
                         propertyValue));
             }
         }
-        msg.properties = new IotHubMessageProperty[properties.size()];
+        msg.properties = new MessageProperty[properties.size()];
         msg.properties = properties.toArray(msg.properties);
 
         return msg;
@@ -97,12 +88,12 @@ public final class HttpsSingleMessage implements HttpsMessage
      *
      * @return the IoT Hub message represented by the HTTPS message.
      */
-    public IotHubMessage toMessage()
+    public Message toMessage()
     {
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_007: [The function shall return an IoT Hub message with a copy of the message body as its body.]
-        IotHubMessage msg = new IotHubMessage(this.getBody());
+        Message msg = new Message(this.getBody());
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_008: [The function shall return an IoT Hub message with application-defined properties that have the prefix 'iothub-app' removed.]
-        for (IotHubMessageProperty property : this.properties)
+        for (MessageProperty property : this.properties)
         {
             String propertyName =
                     httpsAppPropertyToAppProperty(property.getName());
@@ -129,11 +120,9 @@ public final class HttpsSingleMessage implements HttpsMessage
      *
      * @return the message body as a string.
      */
-    public String getBodyAsString()
-    {
+    public String getBodyAsString() {
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_010: [The function shall return the message body as a string encoded using charset UTF-8.]
-        return new String(this.body,
-                IotHubMessage.IOTHUB_MESSAGE_DEFAULT_CHARSET);
+        return new String(this.body, Message.DEFAULT_IOTHUB_MESSAGE_CHARSET);
     }
 
     /**
@@ -163,18 +152,18 @@ public final class HttpsSingleMessage implements HttpsMessage
      *
      * @return a copy of the message properties.
      */
-    public IotHubMessageProperty[] getProperties()
+    public MessageProperty[] getProperties()
     {
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_013: [The function shall return a copy of the message properties.]
         int propertiesSize = this.properties.length;
-        IotHubMessageProperty[] propertiesCopy =
-                new IotHubMessageProperty[propertiesSize];
+        MessageProperty[] propertiesCopy =
+                new MessageProperty[propertiesSize];
 
         for (int i = 0; i < propertiesSize; ++i)
         {
-            IotHubMessageProperty property = this.properties[i];
-            IotHubMessageProperty propertyCopy =
-                    new IotHubMessageProperty(property.getName(),
+            MessageProperty property = this.properties[i];
+            MessageProperty propertyCopy =
+                    new MessageProperty(property.getName(),
                             property.getValue());
             propertiesCopy[i] = propertyCopy;
         }
@@ -195,7 +184,7 @@ public final class HttpsSingleMessage implements HttpsMessage
     protected static boolean isValidHttpsAppProperty(String name, String value)
     {
         String lowercaseName = name.toLowerCase();
-        if (IotHubMessageProperty.isValidAppProperty(name, value)
+        if (MessageProperty.isValidAppProperty(name, value)
                 && lowercaseName.startsWith(HTTPS_APP_PROPERTY_PREFIX))
         {
             return true;

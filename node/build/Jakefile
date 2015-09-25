@@ -1,52 +1,52 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-(function() {
-    'use strict';
+(function () {
+  'use strict';
 
-    var version = require('./lib/version_checker.js');
-    var lint = require('simplebuild-jshint');
-    var jshintConfig = require('./lib/jshint.conf.js');
-	
-    var startTime = Date.now();
-    
-    function deglob(include, exclude) {
-        var files = new jake.FileList();
-        if (include) files.include(include);
-        if (exclude) files.exclude(exclude);
-        return files.toArray();
-    }
+  var version = require('./lib/version_checker.js');
+  var lint = require('simplebuild-jshint');
+  var jshintConfig = require('./lib/jshint.conf.js');
 
-    desc('Check Node version and lint source code');
-    task('default', ['version', 'lint'], function () {
-        var elapsedSeconds = (Date.now() - startTime) / 1000;
-        process.stdout.write('\n\nBUILD OK (' + elapsedSeconds.toFixed(2) + 's)');
-    });
-    
-	// VERSION
+  var startTime = Date.now();
 
-    desc('Check Node.js version');
-    task('version', function () {
-        process.stdout.write('Checking Node.js version: .\n');
-        version.check({
-            name: 'Node',
-            expected: require('./package.json').engines.node,
-            actual: process.version,
-        }, complete, fail);
-    }, { async: true });
-	
-	// LINT
+  function deglob(include, exclude) {
+    var files = new jake.FileList();
+    if (include) files.include(include);
+    if (exclude) files.exclude(exclude);
+    return files.toArray();
+  }
 
-    desc('Lint source code');
-    task('lint', [], function () {
-        process.stdout.write('Linting source code: ');
-        lint.checkFiles({
-            files: deglob(
-                ['Jakefile', '**/*.js'],
-                ['**/node_modules']
-            ),
-            options: jshintConfig.nodeOptions,
-            globals: jshintConfig.nodeGlobals
-        }, complete, fail);
-    }, { async: true });
-}());
+  desc('Check Node version and lint source code');
+  task('default', ['version', 'lint'], function () {
+    var elapsedSeconds = (Date.now() - startTime) / 1000;
+    process.stdout.write('\n\nBUILD OK (' + elapsedSeconds.toFixed(2) + 's)');
+  });
+
+  // VERSION
+
+  desc('Check Node.js version');
+  task('version', function () {
+    process.stdout.write('Checking Node.js version: .\n');
+    version.check({
+      name: 'Node',
+      expected: require('./package.json').engines.node,
+      actual: process.version,
+    }, complete, fail);
+  }, { async: true });
+
+  // LINT
+
+  desc('Lint source code');
+  task('lint', [], function () {
+    process.stdout.write('Linting source code: ');
+    lint.checkFiles({
+      files: deglob(
+        ['Jakefile', '**/*.js'],
+        ['**/node_modules']
+        ),
+      options: jshintConfig.nodeOptions,
+      globals: jshintConfig.nodeGlobals
+    }, complete, fail);
+  }, { async: true });
+} ());

@@ -41,7 +41,7 @@
 
 'use strict';
 
-var common = require('_common');
+var common = require('azure-iot-common');
 
 module.exports = {
     Client: require('./lib/client.js'),

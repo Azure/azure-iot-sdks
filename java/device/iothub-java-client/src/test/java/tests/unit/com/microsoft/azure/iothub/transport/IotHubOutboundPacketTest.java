@@ -8,9 +8,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.isIn;
 
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
 import com.microsoft.azure.iothub.IotHubEventCallback;
 
+import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.transport.IotHubOutboundPacket;
 import mockit.Mocked;
 import org.junit.Test;
@@ -23,7 +23,7 @@ import java.util.Set;
 public class IotHubOutboundPacketTest
 {
     @Mocked
-    IotHubServiceboundMessage mockMsg;
+    Message mockMsg;
     @Mocked
     IotHubEventCallback mockCallback;
 
@@ -36,9 +36,9 @@ public class IotHubOutboundPacketTest
 
         IotHubOutboundPacket packet =
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
-        IotHubServiceboundMessage testMsg = packet.getMessage();
+        Message testMsg = packet.getMessage();
 
-        final IotHubServiceboundMessage expectedMsg = mockMsg;
+        final Message expectedMsg = mockMsg;
         assertThat(testMsg, is(expectedMsg));
     }
 
