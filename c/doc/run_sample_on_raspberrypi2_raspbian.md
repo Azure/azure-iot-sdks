@@ -104,7 +104,7 @@ To run this tool, you need connection and configuration information for your IoT
 <a name="buildrunapp"/>
 ## Build the sample application on the device
 
-- Install the prerequisite packages for the Microsoft Azure IoT Device SDK for C by issuing the following commands from the command line on the board in your PuTTY terminal window:
+- Install the prerequisite packages for the Microsoft Azure IoT device SDK for C by issuing the following commands from the command line on the board in your PuTTY terminal window:
 
   ```
   sudo apt-get update
@@ -113,7 +113,7 @@ To run this tool, you need connection and configuration information for your IoT
 
   **Note:** You can paste into a PuTTY terminal window in Windows by using mouse right-click.
 
-- Download the Microsoft Azure IoT Device SDK for C by issuing the following command on the board:
+- Download the Microsoft Azure IoT device SDK for C by issuing the following command on the board:
 
   ```
   git clone https://github.com/Azure/azure-iot-sdks.git
