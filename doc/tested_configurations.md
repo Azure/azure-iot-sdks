@@ -1,6 +1,9 @@
 # OS Platforms and hardware compatibility
 
-## OS Platforms
+The following document describes Azure IoT library compatibility with a variety of OS platforms as well as the specific tested device configurations included as part of the [Microsoft Azure Certified for IoT program](Azure_Certified). If you already have a device, please take a look at the list of included devices in the certification program. You will get device-specific information on compatibility. If you are unsure which device to use, please take a look at the [OS Platform and Azure IoT libraries](OS_platforms) compatibility section.
+
+<a name="OS_Platforms"/>
+## OS Platforms and library compatibility
 
 The Azure IoT libraries has been tested on the following OS platforms:
 
@@ -49,13 +52,13 @@ The [Microsoft Azure IoT Device SDK for Java](java/service/readme.md) has been t
 
 |Runtime| Version|Protocols|
 |:---------|:----------:|----|
-|Java| 1.7 | HTTPS, AMQP |
+|Java SE| 1.7 | HTTPS, AMQP |
 
 The [Microsoft Azure IoT Service SDK for Java](java/service/readme.md) has been tested on the following configurations:
 
 |Runtime| Version|Protocols|
 |:---------|:----------:|:-----|
-|Java| 1.8 | HTTPS, AMQP |
+|Java SE| 1.8 | HTTPS, AMQP |
 
 
 ## CSharp
@@ -69,9 +72,8 @@ The [Microsoft Azure IoT Device SDK for .NET](csharp/readme.md) has been tested 
 Managed agent code requires Microsoft .NET Framework 4.5
 
 
-
+<a name="Azure_Certified"/>
 # Microsoft Azure Certified for IoT
-
 
 
 Microsoft Azure Certified for IoT is the partner program that connects the broader IoT ecosystem  with Microsoft Azure so that developers and architects understand the compatibility scenarios. Specifically, it provides a trusted list of OS/device combinations to help you getting started quickly with an IoT project – whether you’re in a proof of concept or pilot phase. With certified device and operating system combinations, your IoT project can get started quickly, with less work and customization required to make sure devices are compatible with  Azure IoT Suite and Azure IoT Hub.

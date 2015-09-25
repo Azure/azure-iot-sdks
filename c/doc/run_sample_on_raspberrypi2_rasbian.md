@@ -20,7 +20,7 @@ The following procedure describes the process of connecting to a [Raspberry Pi 2
 <a name="requirements"/>
 ## Requirements
 
-- Computer with a Git client installed so that you can access the azure-iot-suite-sdks code on GitHub.
+- Computer with a Git client installed so that you can access the azure-iot-sdks code on GitHub.
 
 - SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the Raspberry Pi.
 
@@ -89,7 +89,7 @@ We recommend you use the IoT Device Administration Portal (see [Asset Monitoring
 
 To run this tool, you need connection and configuration information for your IoT Hub and the Event Hub it is associated with.
 
-- The Device Explorer sample solution can be found at **\azure-iot-suite-sdks\tools\DeviceExplorer\DeviceExplorer.sln**.
+- The Device Explorer sample solution can be found at **\azure-iot-sdks\tools\DeviceExplorer\DeviceExplorer.sln**.
 
 - Open the solution in Visual Studio, then build and run it.
 
@@ -116,15 +116,15 @@ To run this tool, you need connection and configuration information for your IoT
 - Download the Microsoft Azure IoT Device SDK for C by issuing the following command on the board:
 
   ```
-  git clone https://github.com/Azure/azure-iot-suite-sdks.git
+  git clone https://github.com/Azure/azure-iot-sdks.git
   ```
 
   You will be prompted for your GitHub username and password -- if you have two-factor authentication enabled for your account, you'll need to generate/use a personal access token in place of your password.
 
-- Verify that you now have a copy of the SDK under the directory ~/azure-iot-suite-sdks.
+- Verify that you now have a copy of the SDK under the directory ~/azure-iot-sdks.
 
 
-- Edit the file ~/azure-iot-suite-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace the placeholders in the following lines of code with your IoT Hub name, device ID, and device key values (you can find these values in the IoT Device Administration portal). You can use the console-based text editor **nano** to edit the file:
+- Edit the file ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace the placeholders in the following lines of code with your IoT Hub name, device ID, and device key values (you can find these values in the IoT Device Administration portal). You can use the console-based text editor **nano** to edit the file:
 
   ```
   static const char* iotHubName = "[IoT Hub name goes here]";
@@ -136,13 +136,13 @@ To run this tool, you need connection and configuration information for your IoT
 - On the board, run the following command to build and install Apache Proton library:
 
   ```
-    sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_proton.sh --install /usr
+    sudo ~/azure-iot-sdks/c/build_all/linux/build_proton.sh --install /usr
   ```
 
 - Assuming everything went OK on the build_proton.sh, you can now build the SDK samples using the following command:
 
   ```
-  ~/azure-iot-suite-sdks/c/build_all/linux/build.sh
+  ~/azure-iot-sdks/c/build_all/linux/build.sh
   ```
 
   **Note:** If you receive the following error, ignore it: **"crtabstractions_unittests/crtabstractions_unittests.cpp:119:5"**.
@@ -153,7 +153,7 @@ To run this tool, you need connection and configuration information for your IoT
 - Now run the **simplesample_amqp** sample by issuing the following commands:
 
   ```
-  ~/azure-iot-suite-sdks/serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ~/azure-iot-sdks/serializer/samples/simplesample_amqp/linux/simplesample_amqp
   ```
 
 - This sample application sends simulated sensor data to your IoT Hub. See the [Asset Monitoring Sample Solution Walkthrough](https://github.com/Azure/azure-iot-solution/blob/master/Docs/iot-asset-monitoring-sample-walkthrough.md) for information about how you can verify that the sensor data is reaching your IoT Hub.
@@ -164,7 +164,7 @@ To run this tool, you need connection and configuration information for your IoT
 - If you just want to build the serializer samples, run the following commands:
 
   ```
-  cd ~/azure-iot-suite-sdks/c/serializer/build/linux
+  cd ~/azure-iot-sdks/c/serializer/build/linux
   make -f makefile.linux all
   ```
 
