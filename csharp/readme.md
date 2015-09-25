@@ -26,7 +26,11 @@ This folder contains build scripts for the .NET client libraries and samples.
 This folder contains setup and getting started documents for .NET.
 
 - [Preparing your Windows development environment][devbox-setup]
-- [Getting started - running a C# sample application on Windows][getstarted-windows]
+
+Run the C# sample application on:
+
+- [Windows][run-sample-on-windows]
+- [Windows IoT Core][run-sample-on-windows-iot-core]
 
 Other useful documents include:
 
@@ -57,7 +61,8 @@ This Visual Studio solution contains the client library and sample projects.
 
 [setup-iothub]: ../doc/setup_iothub.md
 [devbox-setup]: doc/devbox_setup.md
-[getstarted-windows]: doc/run_sample_on_Windows.md
+[run-sample-on-windows]: doc/run_sample_on_windows.md
+[run-sample-on-windows-iot-core]: doc/run_sample_on_windows_iot_core.md
 [device-explorer]: ../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [faq-doc]: ../doc/faq.md
 [dotnet-api-ref]: TBD
