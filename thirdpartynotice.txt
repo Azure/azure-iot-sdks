@@ -610,7 +610,31 @@ This Agreement is governed by the laws of the State of New York and
 
 */
 
-4. Json.NET v7.0.1, obtained from https://www.nuget.org/packages/Newtonsoft.Json
+4. Json.NET v6.0.8, obtained from https://www.nuget.org/packages/Newtonsoft.Json
+ /*
+ The MIT License (MIT)
+
+Copyright (c) 2007 James Newton-King
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+ 
+ 5. Json.NET v7.0.1, obtained from https://www.nuget.org/packages/Newtonsoft.Json
  /*
  The MIT License (MIT)
 
@@ -634,7 +658,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-5. Automatopia, obtained from http://github.com/jamesshore/automatopia
+6. Automatopia, obtained from http://github.com/jamesshore/automatopia
  /*
 License (The MIT License)
 -------
@@ -659,7 +683,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  */
 
-6. OpenSSL, obtained from https://github.com/openssl/openssl.git
+7. OpenSSL, obtained from https://github.com/openssl/openssl.git
 
  LICENSE ISSUES
   ==============
