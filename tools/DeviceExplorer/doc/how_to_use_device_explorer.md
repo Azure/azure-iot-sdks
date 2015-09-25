@@ -1,9 +1,8 @@
 # How to use Device Explorer for IoT Hub devices
-This topic describes how to download, build and use the Device Explorer tool for managing and using IoT Hub devices.
+This topic describes how to download, build and use the Device Explorer tool. You can use this tool to manage devices connecting to your IoT hub. For example, you can register a device with your IoT hub, monitor messages from your devices, and send messages to your devices.
 
 ## Table of Contents
-- [Download a pre-built version of the Device Explorer application](#download)
-- [Build the Device Explorer application](#build)
+- [Getting Device Explorer](#download)
 - [Configure an IoT Hub connection](#configure)
 - [Manage devices](#managedevices)
   - [List registered devices](#listdevices)
@@ -15,52 +14,47 @@ This topic describes how to download, build and use the Device Explorer tool for
 - [Send cloud-to-device messages](#send)
 
 <a name="download"/>
-## Download a pre-built version of the Device Explorer application
+## Getting Device Explorer
 
--  A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link [DeviceExplorer.msi](placeholder)
+You can either download a pre-built version of Device Explorer or build it yourself.
 
-<a name="build"/>
-## Build the Device Explorer application
+### Download a pre-built version of the Device Explorer application
 
--  Start a new instance of Visual Studio 2015 and open the DeviceExplorer.sln solution, which is located in the **tools\\DeviceExplorer** directory.
+A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link [DeviceExplorer.msi](placeholder).
 
--  Build the solution.
+### Build the Device Explorer application
 
--  Run the Device Explorer application you created above.
+To build Device Explorer yourself, open the **tools\\DeviceExplorer\\DeviceExplorer.sln** file in your local copy of this repository in Visual Studio 2015. Then build and run the solution.
 
 <a name="configure"/>
-## Configure an Iot Hub connection
+## Configure an IoT Hub connection
 
 
 -  In the **Configuration** tab, add the connection string for your IoT Hub. For information about how to find this connection string, see the document [Setup your IoT Hub][setup-iothub]. Then click **Update**.
--  If you are using a Protocol Gateway (For example, MQTT Protocol Gateway), make sure you fill the **Protocol Gateway HostName** field with the address of your protocol gateway (i.e. localhost if it is deployed locally to your dev box) before getting a device Connection String.
+-  If you are using a Protocol Gateway (For example, MQTT Protocol Gateway), make sure you fill the **Protocol Gateway HostName** field with the address of your protocol gateway (for example **localhost** if it is deployed locally to your developmemt box) before getting a device connection string.
 
   ![](media/device_explorer/iotgetstart1.png)
 
 
 <a name="managedevices"/>
 ## Manage devices
--  Click the **Management** tab.
+-  Click the **Management** tab to manage the devices connected to the IoT hub.
 
   ![](media/device_explorer/iotgetstart2.png)
 
 <a name="listdevices"/>
-### List devices
-
 -  Click **List** to query the list of registered devices with the connected IoT Hub.
 
 <a name="createdevice"/>
 ### Create device
 
--  Click the **Management** tab.
+Creating a device adds device details to the device identity registry. IoT Hub uses this information to generate a device-specific connection string that enables the device to connect to the IoT hub.
 
   ![](media/device_explorer/iotgetstart2.png)
 
--  Click **Create** to register a new device with that IoT Hub. The **Create Device** dialog appears.
+-  On the **Management** tab, click **Create** to register a new device with that IoT Hub. The **Create Device** dialog appears. In the **Device ID** field, type a unique name for your device (or select **Auto Generate ID** to generate a unique ID instead). Then click **Create**.
 
   ![](media/device_explorer/iotgetstart3.png)
-
--  In the **Device ID** field, type a unique name for your device (or select **Auto Generate ID** to generate a unique ID instead). Then click **Create**.
 
 -  A **Device Created** window appears, indicating that your device has been successfully registered with this IoT Hub.
 
@@ -69,13 +63,13 @@ This topic describes how to download, build and use the Device Explorer tool for
 <a name="updatedevice"/>
 ### Update device
 
-- Click **Update** to change the primary or secondary key for the selected device.
+- Click **Update** to change the primary or secondary key for the selected device. You will need to update your device to use any new keys you generate.
 
 
 <a name="deletedevice"/>
 ### Delete device
 
-- Click **Delete** to delete the selected devices from the connected IoT Hub.
+- Click **Delete** to delete the selected devices from the connected IoT hub.
 
 <a name="getdatadevice"/>
 ### Get device connection string or configuration data
@@ -84,41 +78,39 @@ This topic describes how to download, build and use the Device Explorer tool for
 
   ![](media/device_explorer/connstr.png)
 
-> Note: The device connection string or data is silently copied to the clipboard.
-
 <a name="monitor"/>
 ## Monitor device-to-cloud events
 
-The following steps describe how to use Device Explorer to monitor device-to-cloud events sent from a sample application to IoT Hub and use the **Device Explorer** utility to observe as IoT Hub receives the event data.
+The following steps describe how to use Device Explorer to monitor device-to-cloud events sent from a sample application on a client to an IoT hub and use the **Device Explorer** utility to observe as the IoT hub receives the event data.
 
 ### Obtain the device connection string and setup monitoring
 
 You can use one of the sample applications included in this repository to send device-to-cloud events to your IoT Hub. Use Device Explorer to [create a device](#createdevice) and generate a connection string.
 
--  You can obtain the IoT Hub connection string from Device Explorer. In the Management tab, right-click on the selected device and select "Copy connection string for selected device".
+-  You can obtain the IoT Hub connection string from Device Explorer. In the Management tab, right-click on the selected device and select "Copy connection string for selected device". The device connection string is silently copied to the clipboard.
 
-- Update the connection string placeholder in the sample application you are using with the connection string from Device Explorer.
+> Note: Device Explorer requires an IoT hub connection string obtained from the Azure portal to enable it to connect to the hub. You can then use Device Explorer to generate device-specific connection strings that enable devices to communicate with the hub.
 
--  In the Device Explorer **Data** tab, select the device name you created from the drop-down list of device IDs and leave everything else as the default for now.
+- Update the device connection string placeholder in the sample application you are using with the connection string from Device Explorer.
+
+-  In the Device Explorer **Data** tab, select the device name you created from the drop-down list of device IDs and leave the other fields with their default values for now.
 
 -  Click **Monitor**.
 
   ![](media/device_explorer/iotgetstart5.png)
 
--  Device Explorer is now monitoring data sent from that device to the IoT Hub.
+-  Device Explorer is now monitoring data sent from that device to the IoT hub.
 
 ### Run the sample application
 
--  Run your sample application.
-
--  Device Explorer should now show that IoT Hub has successfully received device-to-cloud data from this device.
+Run your sample application. Device Explorer should now show that the IoT hub has successfully received device-to-cloud data from this device.
 
   ![](media/device_explorer/iotgetstart7.png)
 
 <a name="send"/>
 ## Send cloud-to-device messages
 
--  To verify that you can send messages from the IoT Hub to your device, go to the **Messages To Device** tab in Device Explorer.
+-  To verify that you can send cloud-to-device messages from the IoT hub to your device, go to the **Messages To Device** tab in Device Explorer.
 
 -  Select the device you created.
 

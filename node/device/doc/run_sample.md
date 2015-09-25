@@ -14,7 +14,7 @@ Before you get started, you should:
 
 ## Build and run the sample
 
-1.  Open the file **node\\samples\\simple_sample_http.js** in a text editor.
+1.  Open the file **node\\device\\samples\\simple_sample_http.js** in a text editor.
 
 2.  Locate the following code in the file:
 
@@ -26,7 +26,7 @@ Before you get started, you should:
 
 4. The section "Send events" in the document [How to use Device Explorer][device-explorer] describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
 
-5. Open a shell (Linux) or Node.js command prompt (Windows) and navigate to the **node\\samples** folder. Then run the sample application using the following command:
+5. Open a shell (Linux) or Node.js command prompt (Windows) and navigate to the **node\\device\\samples** folder. Then run the sample application using the following command:
 
     ```
     node simple_sample_http.js
@@ -35,5 +35,5 @@ Before you get started, you should:
 6. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_amqp** application.
 
 [setup-devbox]: devbox_setup.md
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
-[setup-iothub]: ../../doc/setup_iothub.md
+[device-explorer]: ../../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[setup-iothub]: ../../../doc/setup_iothub.md
