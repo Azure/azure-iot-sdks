@@ -93,11 +93,6 @@ if not %errorlevel%==0 exit /b %errorlevel%
 
 pushd %proton-root%
 
-Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe 
-if not exist .\nuget.exe (
-    echo nuget does not exist
-    exit /b 1
-)
 if not exist %package-id%.nuspec (
     echo nuspec does not exist
     exit /b 1
@@ -107,5 +102,5 @@ if not exist %package-id%.targets (
     exit /b 1
 )
 
-.\nuget.exe pack %package-id%.nuspec
+nuget.exe pack %package-id%.nuspec
 if not %errorlevel%==0 exit /b %errorlevel%

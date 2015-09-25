@@ -10,7 +10,12 @@ This document describes how to prepare your development environment to use the *
 ## Setup a Windows development environment
 
 This section shows you how to use Visual Studio to build an IoT Hubs client application to run on Windows.
+
 - Install [Visual Studio 2015][visual-studio]. You should ensure that your Visual Studio installation includes Visual C++ 2015 and NuGet Package Manager.
+
+- Install [git](www.git-scm.com) making sure git.exe can be run from a command line.
+
+- Install [nuget](www.nuget.org). nuget.exe must be in your PATH so it is executable from any location.
 
 - Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest release version.
 
