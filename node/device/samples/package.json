@@ -10,7 +10,6 @@
     "author": "Microsoft Corp.",
   "license": "MIT",
   "dependencies": {
-    "azure-iot-device": "^0.0.1",
-    "crypto":"^0.0.3"
+    "azure-iot-device": "^0.0.1"
   }
 }

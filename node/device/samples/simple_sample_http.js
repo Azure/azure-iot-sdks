@@ -9,7 +9,7 @@ var connectionString = '[IoT Device Connection String]';
 
 var client = new device.Client(connectionString, new device.Https());
 
-// Create a message and send it to the IoT Hub everysecond
+// Create a message and send it to the IoT Hub every second
 setInterval(function(){
   var windSpeed = 10 + (Math.random() * 4); // range: [10, 14]
   var data = JSON.stringify({ deviceId: 'myFirstDevice', windSpeed: windSpeed });
@@ -25,7 +25,8 @@ setInterval(function(){
     if (!err && res.statusCode !== 204) {
       console.log('Received data: ' + msg.getData());
       client.complete(msg, printResultFor('complete'));
-    } else if (err)
+    }
+    else if (err)
     {
       printResultFor('receive')(err, res);
     }
