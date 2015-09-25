@@ -106,7 +106,7 @@ public final class HttpsBatchMessage implements HttpsMessage
     public MessageProperty[] getProperties()
     {
         // Codes_SRS_HTTPSBATCHMESSAGE_11_012: [The function shall return an empty array.]
-        return new IotHubMessageProperty[0];
+        return new MessageProperty[0];
     }
 
     /**
