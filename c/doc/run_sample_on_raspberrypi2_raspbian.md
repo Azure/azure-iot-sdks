@@ -5,10 +5,10 @@ This document describes the process of setting up a [Raspberry Pi 2](https://www
 ## Table of Contents
 - [Requirements](#requirements)
 - [Before you begin](#beforebegin)
-- [Prepare the Raspberry Pi 2 board](#preparing)
+- [Prepare the Raspberry Pi 2](#preparing)
 	- [Build the sample application on the device](#buildrunapp)
 - [Run the AMQP simple sample](#buildsimplesample)
-	- [Tips](#tips)
+- [Tips](#tips)
 
 
 <a name="requirements"/>
@@ -22,11 +22,13 @@ This document describes the process of setting up a [Raspberry Pi 2](https://www
 	- USB keyboard
 	- USB mouse (optional; you can navigate NOOBS with a keyboard)
 	- USB Mini cable
-	- An HDMI cable
+	- HDMI cable
 	- TV/ Monitor that supports HDMI
-	- An Ethernet cable or Wi-Fi dongle
+	- Ethernet cable or Wi-Fi dongle
 
-	> Note: You may wish to consider a Starter Kit such as [CanaKit](http://www.amazon.com/CanaKit-Raspberry-Complete-Original-Preloaded/dp/B008XVAVAW/ref=sr_1_4?ie=UTF8&qid=1429516842&sr=8-4&keywords=raspberry+pi) that includes some of these hardware requirements.
+
+You may wish to consider a Starter Kit such as [CanaKit](http://www.amazon.com/CanaKit-Raspberry-Complete-Original-Preloaded/dp/B008XVAVAW/ref=sr_1_4?ie=UTF8&qid=1429516842&sr=8-4&keywords=raspberry+pi) that
+	 includes some of these hardware requirements.
 
 <a name="beforebegin"/>
 ## Before you begin
@@ -38,32 +40,31 @@ Before you begin you will need to create and configure an IoT hub to connect to.
   > Note: You can skip this step if you just want to build the sample application without running it.
 
 <a name="preparing"/>
-## Prepare the Raspberry Pi 2 board
+## Prepare the Raspberry Pi 2
 
-- Install the latest Raspbian operating system on your Raspberry Pi 2 by
+1. Install the latest Raspbian operating system on your Raspberry Pi 2 by
 following the instructions in the [NOOBS setup guide](http://www.raspberrypi.org/help/noobs-setup/).
 
-- When the installation process is complete, the Raspberry Pi configuration menu
+1. When the installation process is complete, the Raspberry Pi configuration menu
 (raspi-config) loads. Here you are able to set the time and date for your region
 and enable a Raspberry Pi camera board, or even create users. Under **Advanced
 Options**, enable **ssh** so you can access the device remotely with
 PuTTY or WinSCP. For more information, see
 https://www.raspberrypi.org/documentation/remote-access/ssh/.
 
-- Connect your Raspberry Pi to your network using an ethernet cable or by using
+1. Connect your Raspberry Pi to your network using an ethernet cable or by using
 a WiFi dongle on the device.
 
-- You need to discover the IP address of your Raspberry Pi before your can
-connect using PuTTY. For more information, see
+1. You need to determine the IP address of your Raspberry Pi in order to connect over the network. For more information, see
 https://www.raspberrypi.org/documentation/troubleshooting/hardware/networking/ip-address.md.
 
-- Once you see that your board is working, open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine.
+1. Once you see that your board is working, open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine.
 
-- Use the IP address from step 4 as the Host name, Port=22, and Connection type=SSH to complete the connection.
+1. Use the IP address from step 4 as the Host name, Port=22, and Connection type=SSH to complete the connection.
 
-- When prompted, log in with username **pi**, and password **raspberry**.
+1. When prompted, log in with username **pi**, and password **raspberry**.
 
-- Create a **root** account using the following command `sudo passwd root` and choosing a new password:
+1. Create a **root** account using the following command `sudo passwd root` and choosing a new password:
 
   ![][1]
 
@@ -133,7 +134,6 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 
 This sample application sends simulated sensor data to your IoT Hub.
 
-(TODO: how to see that the data is getting through without Device Explorer?)
 
 <a name="tips"/>
 ## Tips
@@ -145,7 +145,7 @@ This sample application sends simulated sensor data to your IoT Hub.
   make -f makefile.linux all
   ```
 
-- On Windows, you can use the [Device Explorer tool][device-explorer] to see the data your device is sending and receiving.
+- On Windows, you can use the [Device Explorer][device-explorer] to see the data your device is sending and receiving.
 
 [1]: ./media/service-bus-iot-raspberrypi-raspbian-setup/raspbian01.png
 
