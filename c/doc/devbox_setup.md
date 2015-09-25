@@ -2,33 +2,35 @@
 
 This document describes how to prepare your development environment to use the Microsoft Azure IoT device SDK for C. It describes preparing a development environment in Windows using Visual Studio and in Linux.
 
-- [Set up a Windows development environment](#windows)
-- [Set up a Linux development environment](#linux)
+- [Setting up a Windows development environment](#windows)
+- [Setting up a Linux development environment](#linux)
 - [Sample applications](#samplecode)
 
 <a name="windows"/>
 ## Setting up a Windows development environment
 
-- Install [Visual Studio 2015][visual-studio]. You can use the free Community edition if you meet the requirements.
+- Install [Visual Studio 2015][visual-studio]. You can use the free Community edition if you meet the licensing requirements.
 Be sure to include Visual C++ and NuGet Package Manager.
 
 - Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest released version.
 
-### Preparing QPID Proton libraries in Windows
+### Preparing Qpid Proton libraries in Windows
 
-The AMQP samples require the QPID Proton-C library.  There are two ways to obtain the library-- via Nuget or by downloading the source from GitHub and building it yourself.
+The AMQP samples require the Qpid Proton-C library.  There are two ways to obtain the library-- via NuGet or by downloading the source from GitHub and building it yourself.
 
-#### Getting QPID Proton via Nuget
+#### Getting Qpid Proton via NuGet
 
- 1. In Visual Studio 2015 right click on the iothub_client solution and select "Manage NuGet Package for Solutions"
+ 1. In Visual Studio 2015 right click on the iothub_client solution and select "Manage NuGet Package for Solutions".
 
- 2. Enter Apache.QPID.Proton.AzureIot in the Search box (Ctrl+E) to find the Proton NuGet Package.
+ 1. Click the "Include prerelease" check box.
 
- 3. Select the Apache.QPID.Proton.AzureIot package and on the right pane click the Install button.
+ 2. Enter Apache.Qpid.Proton.AzureIot in the Search box (Ctrl+E) to find the Proton NuGet Package.
+
+ 3. Select the Apache.Qpid.Proton.AzureIot package and on the right pane click the Install button.
 
  4. Enter OK at the dialog and Accept the license terms to continue.
 
-#### Building the QPID Proton library
+#### Building the Qpid Proton library
 
 1. Create a folder on your development machine in which to download the proton libraries. This example uses the location **C:\Proton**.
 
@@ -68,13 +70,13 @@ You can build the Windows samples to verify that your environment is setup corre
 
 This script builds the **iothub_client** and **serializer** libraries and their associated samples.
 
-**Note:** you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [Run sample on Windows](run_sample_on_Windows.md).
+  > Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [Run sample on Windows](run_sample_on_Windows.md).
 
-To view the projects and examine the source code, open the **c\\iothubclient\\build\\windows\\iothub_client.sln** or **c\\serializer\\build\\windows\\serializer.sln** solution files.
+To view the projects and examine the source code, open the **c\\iothubclient\\build\\windows\\iothub_client.sln** or **c\\serializer\\build\\windows\\serializer.sln** solution files in Visual Studio.
 
 You can use one of the sample applications as a template to get started when you are creating your own client applications.
 
-**Note:** some of the projects in these solutions use the **Apache.QPID.Proton.AzureIot** NuGet package to reference the QPID Proton libraries, some use the QPID Proton libraries referenced by the **PROTON_PATH** environment variable.
+  > Note: some of the projects in these solutions use the **Apache.Qpid.Proton.AzureIot** NuGet package to reference the Qpid Proton libraries, some use the Qpid Proton libraries referenced by the **PROTON_PATH** environment variable.
 
 <a name="linux"/>
 ## Set up a Linux development environment
