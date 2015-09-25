@@ -18,6 +18,10 @@ var connString = parsed.argv.remain[0];
 var command = parsed.argv.remain[1];
 var arg = parsed.argv.remain[2];
 
+if (!connString) {
+  usage();
+  process.exit(1);
+}
 var registry = new Registry(connString, new Https());
 
 if (command == 'help') {
@@ -44,7 +48,7 @@ else if (command == 'create') {
     if (e instanceof SyntaxError) inputError('Device information isn\'t valid JSON');
     else throw e;
   }
-  
+
   registry.create(info, function (err, res, device) {
     if (err) serviceError(err);
     else {
