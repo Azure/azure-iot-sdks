@@ -47,8 +47,8 @@ While not strictly required, it is suggested to install the following tools from
 [TI ARM Compiler](http://software-dl.ti.com/ccs/esd/test/ti_cgt_tms470_5.2.5_windows_installer.exe)
 
 <a name="Build-SDK"></a>
-## Build the Azure SDK
-1. Update `products.mak` in `<AZURE_INSTALL_DIR>\azure-iot-suite-sdks\c\build_all\tirtos`. Edit the file in your favorite text editor. The variables `XDCTOOLS_INSTALLATION_DIR, TIRTOS_INSTALLATION_DIR, CC3200SDK_INSTALLATION_DIR` and `NS_INSTALLATION_DIR` should point to the locations where you have these products installed. The variable `ti.targets.arm.elf.M4` should point to the installation location of the TI ARM compiler. After modification, they should look roughly as follow. Please note the use of "/" in the path.
+## Build the Azure IoT SDK
+1. Update `products.mak` in `<AZURE_INSTALL_DIR>\azure-iot-sdks\c\build_all\tirtos`. Edit the file in your favorite text editor. The variables `XDCTOOLS_INSTALLATION_DIR, TIRTOS_INSTALLATION_DIR, CC3200SDK_INSTALLATION_DIR` and `NS_INSTALLATION_DIR` should point to the locations where you have these products installed. The variable `ti.targets.arm.elf.M4` should point to the installation location of the TI ARM compiler. After modification, they should look roughly as follow. Please note the use of "/" in the path.
 
         XDCTOOLS_INSTALLATION_DIR ?= C:/ti/xdctools_3_31_01_33_core
         TIRTOS_INSTALLATION_DIR ?= C:/ti/tirtos_simplelink_2_14_01_20
@@ -61,7 +61,7 @@ In Windows, run 'cmd' from the search box under the Start Menu
 
 3. In the Windows command prompt, run the following commands (replace the paths with your actual installation paths)
 
-        > cd <AZURE_INSTALL_DIR>\azure-iot-suite-sdks\c\build_all\tirtos
+        > cd <AZURE_INSTALL_DIR>\azure-iot-sdks\c\build_all\tirtos
         > C:\ti\xdctools_3_31_01_33_core\gmake.exe clean
         > C:\ti\xdctools_3_31_01_33_core\gmake.exe all
 
@@ -69,7 +69,7 @@ In Windows, run 'cmd' from the search box under the Start Menu
 ##Build the sample simplesample_http
 Before building the application, do the following steps:
 
-- Open `simplesample_http.c` from the directory `<AZURE_INSTALL_DIR>\azure-iot-suite-sdks-latest\c\serializer\samples\simplesample_http`
+- Open `simplesample_http.c` from the directory `<AZURE_INSTALL_DIR>\azure-iot-sdks\c\serializer\samples\simplesample_http`
   and update the "connectionString". This string can be obtained from the Device Explorer.
 
 - Open `tirtos/cc3200/main.c`. Search for "USER STEP" and update the current
@@ -80,7 +80,7 @@ Before building the application, do the following steps:
 
 In the Windows Command Prompt, enter the following to build the application:
 
-    > cd <AZURE_INSTALL_DIR>\azure-iot-suite-sdks-latest\c\serializer\samples\simplesample_http\tirtos\cc3200
+    > cd <AZURE_INSTALL_DIR>\azure-iot-sdks\c\serializer\samples\simplesample_http\tirtos\cc3200
     > C:\ti\xdctools_3_31_01_33_core\gmake.exe clean
     > C:\ti\xdctools_3_31_01_33_core\gmake.exe all
 

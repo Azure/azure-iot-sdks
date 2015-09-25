@@ -65,4 +65,4 @@ This Visual Studio solution contains the client library and sample projects.
 [run-sample-on-windows-iot-core]: doc/run_sample_on_windows_iot_core.md
 [device-explorer]: ../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [faq-doc]: ../doc/faq.md
-[dotnet-api-ref]: TBD
+[dotnet-api-ref]: https://msdn.microsoft.com/library/microsoft.azure.devices.aspx
