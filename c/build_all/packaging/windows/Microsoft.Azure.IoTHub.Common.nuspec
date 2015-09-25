@@ -4,7 +4,7 @@
     <id>Microsoft.Azure.IoTHub.Common</id>
     <version>0.0.001-preview-000</version>
     <title>Microsoft Azure IoTHub Common</title>
-    <authors>Microsoft, Azure</authors>
+    <authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
     <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/develop/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Azure/azure-iot-sdks</projectUrl>
@@ -21,15 +21,15 @@
   </metadata>
     <files>
     <!-- these are files for x86 plaform -->
-    <file src="..\..\..\iothub_client\build\windows\Win32\Debug\common.lib" target="build\native\Win32\Debug" />
-    <file src="..\..\..\iothub_client\build\windows\Win32\Debug\common.pdb" target="build\native\Win32\Debug" />
+    <file src="..\..\..\common\build\windows\Win32\Debug\common.lib" target="build\native\Win32\Debug" />
+    <file src="..\..\..\common\build\windows\Win32\Debug\common.pdb" target="build\native\Win32\Debug" />
       
-    <file src="..\..\..\iothub_client\build\windows\Win32\Release\common.lib" target="build\native\Win32\Release" /> 
+    <file src="..\..\..\common\build\windows\Win32\Release\common.lib" target="build\native\Win32\Release" /> 
       
     <!-- these are files for x64 plaform -->
-    <file src="..\..\..\iothub_client\build\windows\x64\Debug\common.lib" target="build\native\x64\Debug" /> 
-    <file src="..\..\..\iothub_client\build\windows\x64\Debug\common.pdb" target="build\native\x64\Debug" /> 
-    <file src="..\..\..\iothub_client\build\windows\x64\Release\common.lib" target="build\native\x64\Release" /> 
+    <file src="..\..\..\common\build\windows\x64\Debug\common.lib" target="build\native\x64\Debug" /> 
+    <file src="..\..\..\common\build\windows\x64\Debug\common.pdb" target="build\native\x64\Debug" /> 
+    <file src="..\..\..\common\build\windows\x64\Release\common.lib" target="build\native\x64\Release" /> 
 
     <file src="Microsoft.Azure.IoTHub.Common.targets" target="build\native" />
     <file src="..\..\..\common\inc\*.h" target="build\native\include" />

@@ -20,6 +20,7 @@
         </dependencies>
     </metadata>
     <files>
+        <file src="..\thirdpartynotice.txt" target="thirdpartynotice.txt" />
         <file src="..\Microsoft.Azure.Devices.Client\bin\Release\Microsoft.Azure.Devices.Client.dll" target="lib\net45\Microsoft.Azure.Devices.Client.dll" />
         <file src="..\Microsoft.Azure.Devices.Client.WinRT\bin\Release\Microsoft.Azure.Devices.Client.winmd" target="lib\uap10.0\Microsoft.Azure.Devices.Client.winmd" />
     </files>

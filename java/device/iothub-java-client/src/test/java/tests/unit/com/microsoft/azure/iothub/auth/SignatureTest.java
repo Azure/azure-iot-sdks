@@ -43,6 +43,7 @@ public class SignatureTest
     }
 
     // Tests_SRS_SIGNATURE_11_002: [The device key shall be decoded using Base64 before the signature computation begins, excluding buildRawSignature().]
+    // Tests_SRS_SIGNATURE_11_003: [The signature string shall be encoded using charset UTF-8.]
     @Test
     public void deviceKeyDecodedBeforeSignatureComputation()
     {
@@ -65,7 +66,7 @@ public class SignatureTest
         };
     }
 
-    // Tests_SRS_SIGNATURE_11_003: [The function shall return the string representation of the signature.]
+    // Tests_SRS_SIGNATURE_11_005: [The function shall return the string representation of the signature.]
     @Test
     public void toStringReturnsCorrectString()
     {
