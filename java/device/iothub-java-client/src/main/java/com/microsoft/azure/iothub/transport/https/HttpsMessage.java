@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.iothub.transport.https;
 
-import com.microsoft.azure.iothub.IotHubMessageProperty;
+import com.microsoft.azure.iothub.MessageProperty;
 
 /**
  * An HTTPS message. An HTTPS message is distinguished from a plain IoT Hub
@@ -27,5 +27,5 @@ public interface HttpsMessage
 
     /**Gets the collection of message properties.
      * @return Returns the message properties. */
-    IotHubMessageProperty[] getProperties();
+    MessageProperty[] getProperties();
 }

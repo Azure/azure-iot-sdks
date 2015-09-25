@@ -3,15 +3,13 @@
 
 package samples.com.microsoft.azure.iothub;
 
-import com.microsoft.azure.iothub.IotHubClient;
+import com.microsoft.azure.iothub.DeviceClient;
 import com.microsoft.azure.iothub.IotHubClientProtocol;
-import com.microsoft.azure.iothub.IotHubMessage;
+import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.IotHubMessageResult;
-import com.microsoft.azure.iothub.IotHubMessageCallback;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.Scanner;
 
 
@@ -49,15 +47,15 @@ public class HandleMessages
     }
 
     protected static class MessageCallback
-            implements IotHubMessageCallback
+            implements com.microsoft.azure.iothub.MessageCallback
     {
-        public IotHubMessageResult execute(IotHubMessage msg,
+        public IotHubMessageResult execute(Message msg,
                 Object context)
         {
             Counter counter = (Counter) context;
             System.out.println(
                     "Received message " + counter.toString()
-                            + " with content: " + msg.getBodyAsString());
+                            + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
 
             int switchVal = counter.get() % 3;
             IotHubMessageResult res;
@@ -146,7 +144,7 @@ public class HandleMessages
         System.out.format("Using communication protocol %s.\n",
                 protocol.name());
 
-        IotHubClient client = new IotHubClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
 
         System.out.println("Successfully created an IoT Hub client.");
 

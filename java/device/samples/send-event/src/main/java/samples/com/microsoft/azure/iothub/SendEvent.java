@@ -3,9 +3,9 @@
 
 package samples.com.microsoft.azure.iothub;
 
-import com.microsoft.azure.iothub.IotHubClient;
+import com.microsoft.azure.iothub.DeviceClient;
 import com.microsoft.azure.iothub.IotHubClientProtocol;
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
+import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.IotHubEventCallback;
 
@@ -103,7 +103,7 @@ public class SendEvent
         System.out.format("Using communication protocol %s.\n",
                 protocol.name());
 
-        IotHubClient client = new IotHubClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
 
         System.out.println("Successfully created an IoT Hub client.");
 
@@ -118,15 +118,14 @@ public class SendEvent
             String msgStr = "Event Message " + Integer.toString(i);
             try
             {
-                IotHubServiceboundMessage msg =
-                        new IotHubServiceboundMessage(msgStr);
+                Message msg = new Message(msgStr);
                 msg.setProperty("messageCount", Integer.toString(i));
                 System.out.println(msgStr);
 
                 EventCallback callback = new EventCallback();
                 client.sendEventAsync(msg, callback, i);
             }
-            catch (SizeLimitExceededException e)
+            catch (Exception e)
             {
             }
         }

@@ -4,7 +4,7 @@
     <id>Apache.QPID.Proton.AzureIot</id>
     <version>0.9.0.1-preview</version>
     <title>Apache Qpid Proton C for Azure IoTHub</title>
-    <authors>Apache, Microsoft, Azure-IoT</authors>
+    <authors>>Apache Software Foundation, Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
     <licenseUrl>https://github.com/Azure/qpid-proton/blob/0.9-IoTClient/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Azure/qpid-proton/tree/0.9-IoTClient</projectUrl>
@@ -22,6 +22,9 @@
   </metadata>
     <files>
     <!-- these are files for x86 plaform -->
+	
+	<file src="Apache.QPID.Proton.AzureIot_thirdpartynotice.txt" target="thirdpartynotice.txt" />
+	
     <file src="qpid-proton\build\proton-c\Debug\*.lib" target="build\native\Win32\Debug" /> 
     <file src="qpid-proton\build\proton-c\Debug\*.dll" target="build\native\Win32\Debug" /> 
     <file src="qpid-proton\build\proton-c\Debug\*.pdb" target="build\native\Win32\Debug" /> 

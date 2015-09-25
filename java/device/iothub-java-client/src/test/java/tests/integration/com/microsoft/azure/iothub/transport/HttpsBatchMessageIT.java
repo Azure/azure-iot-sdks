@@ -6,7 +6,7 @@ package tests.integration.com.microsoft.azure.iothub.transport;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
+import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.transport.https.HttpsSingleMessage;
 import com.microsoft.azure.iothub.transport.https.HttpsBatchMessage;
 
@@ -27,34 +27,31 @@ public class HttpsBatchMessageIT
             SizeLimitExceededException
     {
         String msgBytes0 = "abc";
-        IotHubServiceboundMessage msg0 =
-                new IotHubServiceboundMessage(msgBytes0);
+        Message msg0 = new Message(msgBytes0);
         msg0.setProperty("prop-0", "value-0");
-        HttpsSingleMessage httpsMsg0 =
-                HttpsSingleMessage.parseHttpsMessage(msg0);
+        HttpsSingleMessage httpsMsg0 = HttpsSingleMessage.parseHttpsMessage(msg0);
 
-        byte[] msgBytes1 = { 4, 5, 6 };
-        IotHubServiceboundMessage msg1 =
-                new IotHubServiceboundMessage(msgBytes1);
+        byte[] msgBytes1 = { 48, 49, 50 };
+        Message msg1 = new Message(msgBytes1);
         msg1.setProperty("prop-1", "value-1");
-        HttpsSingleMessage httpsMsg1 =
-                HttpsSingleMessage.parseHttpsMessage(msg1);
+        HttpsSingleMessage httpsMsg1 = HttpsSingleMessage.parseHttpsMessage(msg1);
         HttpsBatchMessage batch = new HttpsBatchMessage();
         batch.addMessage(httpsMsg0);
         batch.addMessage(httpsMsg1);
 
         // JSON body with whitespace removed.
-        String testBatchBody =
-                new String(batch.getBody(), UTF8).replaceAll("\\s", "");
+        String testBatchBody = new String(batch.getBody(), UTF8).replaceAll("\\s", "");
 
         String expectedBatchBody = "["
                 + "{\"body\":\"abc\","
                 + "\"base64Encoded\":false,"
                 + "\"properties\":{\"iothub-app-prop-0\":\"value-0\"}},"
-                + "{\"body\":\"BAUG\","
-                + "\"base64Encoded\":true,"
+                + "{\"body\":\"012\","
+                + "\"base64Encoded\":false,"
                 + "\"properties\":{\"iothub-app-prop-1\":\"value-1\"}}"
                 + "]";
+
+
         assertThat(testBatchBody, is(expectedBatchBody));
     }
 }

@@ -32,7 +32,7 @@
 'use strict';
 
 var Device = require('./device.js');
-var endpoint = require('_common').endpoint;
+var endpoint = require('azure-iot-common').endpoint;
 
 var HOSTNAME_LEN = "HostName=".length;
 var SAKN_LEN = "SharedAccessKeyName=".length;
@@ -45,14 +45,14 @@ function parseConnString(connString)
     hubName: '',
     keyName: '',
     key: ''
-  }; 
+  };
   var configArray = connString.split(';');
   configArray.forEach(function(element) {
     var pos = element.indexOf("HostName=");
     if (pos >= 0) {
       config.host = element.substring(pos+HOSTNAME_LEN);
       // Look for the first period
-      var periodSeparator = config.host.indexOf('.'); 
+      var periodSeparator = config.host.indexOf('.');
       config.hubName = config.host.substring(0, periodSeparator);
     }
     else if ( (pos = element.indexOf("SharedAccessKeyName=") ) >= 0) {

@@ -7,12 +7,12 @@ var assert = require('chai').assert;
 
 var Device = require('./device.js');
 var Registry = require('./registry.js');
-var SimulatedHttps = require('_common').SimulatedHttps;
+var SimulatedHttps = require('azure-iot-common').SimulatedHttps;
 
 var deviceJson = JSON.stringify(
   {
      deviceId: 'testDevice',
-     status: 'Disabled' 
+     status: 'Disabled'
   }
 );
 
@@ -27,7 +27,7 @@ function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
       done();
     });
   }
-  
+
   /*Tests_SRS_NODE_IOTHUB_HTTPS_05_011: [If getDevice encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
   function expectNotFoundError(err) {
       assert.equal(err.message, 'getaddrinfo ENOTFOUND bad');
@@ -46,7 +46,7 @@ function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
     { name: 'policy does not exist', expect: expect401Response },
     { name: 'key is wrong', expect: expect401Response }
   ];
-  
+
   badConnStrings.forEach(function (test, index, array) {
     it('fails to ' + opName + ' when the ' + tests[index].name, function (done) {
       makeRequestWith(test, tests[index].expect, done);
@@ -86,7 +86,7 @@ function runTests(transportFactory, goodConfig, badConfigs, deviceId) {
           done();
         });
       });
-      
+
       badConfigTests('create device information', badConfigs, transportFactory, function (registry, done) {
         var deviceInfo = new Device(deviceJson);
         registry.create(deviceInfo, done);
@@ -136,7 +136,7 @@ function runTests(transportFactory, goodConfig, badConfigs, deviceId) {
           done();
         });
       });
-      
+
       badConfigTests('list device information', badConfigs, transportFactory, function (registry, done) {
         registry.list(done);
       });
@@ -160,7 +160,7 @@ function runTests(transportFactory, goodConfig, badConfigs, deviceId) {
         }, ReferenceError, 'Invalid argument \'deviceId\'');
         done();
       });
-      
+
       /*Test_SRS_NODE_IOTHUB_REGISTRY_07_004: [When the update method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback, plus a Device object representing the updated device information created from IoT Hub.]*/
       it('updates information about a devices', function(done) {
         var registry = new Registry(goodConfig, transportFactory());
@@ -172,7 +172,7 @@ function runTests(transportFactory, goodConfig, badConfigs, deviceId) {
           done();
         });
       });
-      
+
       badConfigTests('update device information', badConfigs, transportFactory, function (registry, done) {
         var device = new Device(deviceJson);
         registry.update(device, done);
