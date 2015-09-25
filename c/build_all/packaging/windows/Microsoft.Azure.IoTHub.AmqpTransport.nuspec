@@ -4,7 +4,7 @@
     <id>Microsoft.Azure.IoTHub.AmqpTransport</id>
     <version>0.0.001-preview-000</version>
     <title>Microsoft Azure IoTHub AMQP transport</title>
-    <authors>Microsoft, Azure</authors>
+    <authors>Apache Software Foundation, Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
     <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/develop/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Azure/azure-iot-sdks</projectUrl>
@@ -23,6 +23,9 @@
     </dependencies>
   </metadata>
     <files>
+	
+	<file src="Microsoft.Azure.IoTHub.AmqpTransport_thirdpartynotice.txt" target="thirdpartynotice.txt" />
+	
     <!-- these are files for x86 plaform -->
     <file src="..\..\..\iothub_client\build\windows\Win32\Debug\iothub_amqp_transport.lib" target="build\native\Win32\Debug" />
     <file src="..\..\..\iothub_client\build\windows\Win32\Debug\iothub_amqp_transport.pdb" target="build\native\Win32\Debug" />

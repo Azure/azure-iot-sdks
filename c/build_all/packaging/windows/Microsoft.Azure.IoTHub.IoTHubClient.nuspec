@@ -4,7 +4,7 @@
     <id>Microsoft.Azure.IoTHub.IoTHubClient</id>
     <version>0.0.001-preview-000</version>
     <title>Microsoft Azure IoTHub IoTHubClient</title>
-    <authors>Microsoft, Azure</authors>
+	<authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
     <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/develop/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Azure/azure-iot-sdks</projectUrl>
