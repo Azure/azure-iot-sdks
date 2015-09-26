@@ -18,6 +18,12 @@
   "engines": {
     "node": "0.12.x"
   },
+  "files": [
+    "lib/",
+    "ThirdPartyNotices.txt",
+    "build.js",
+    "Jakefile"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Azure/azure-iot-sdks.git"
