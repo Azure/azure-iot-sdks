@@ -652,15 +652,7 @@ namespace DeviceExplorer
         {
             if (checkBoxMonitorFeedbackEndpoint.CheckState == CheckState.Checked)
             {
-                if (!dhConStringTextBox.Text.Contains("df.azure-devices-int.net"))
-                {
-                    MessageBox.Show("can only read feedback endpoint from dogfood environment");
-                    checkBoxMonitorFeedbackEndpoint.CheckState = CheckState.Unchecked;
-                }
-                else
-                {
-                    await StartMonitoringFeedback();
-                }
+                await StartMonitoringFeedback();
             }
             else
             {
