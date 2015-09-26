@@ -23,8 +23,4 @@ using System.Runtime.InteropServices;
 
 // Version information for an assembly follows semantic versioning 1.0.0 (because
 // NuGet didn't support semver 2.0.0 before VS 2015). See semver.org for details.
-[assembly: AssemblyInformationalVersion("1.0.0-preview-002")]
-
-// For Delay Signing
-[assembly: AssemblyKeyFileAttribute(@"\\cp1pd2cdscvlt01\Public\StrongNamePublicKeys\35MSSharedLib1024.snk")]
-[assembly: AssemblyDelaySignAttribute(true)]
+[assembly: AssemblyInformationalVersion("1.0.0-preview-003")]
