@@ -1,10 +1,10 @@
 {
   "name": "iothub-explorer",
-  "version": "0.0.0",
+  "version": "1.0.0-preview.3",
   "main": "iothub-explorer.js",
   "private": true,
   "dependencies": {
-    "azure-iothub": "0.0.1",
+    "azure-iothub": "1.0.0-preview.3",
     "colors-tmpl": "^1.0.0",
     "nopt": "^3.0.4"
   },

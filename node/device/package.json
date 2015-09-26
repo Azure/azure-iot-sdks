@@ -1,18 +1,18 @@
 {
   "name": "azure-iot-device",
-  "version": "0.0.1",
+  "version": "1.0.0-preview.3",
   "description": "Azure IoT SDK - Device",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "main": "device.js",
   "dependencies": {
-    "azure-iot-common": "^0.0.1"
+    "azure-iot-common": "^1.0.0-preview.3"
   },
   "devDependencies": {
     "chai": "^3.3.0",
     "jake": "^8.0.12",
     "jshint": "^2.8.0",
-    "azure-iot-build": "^0.0.1",
+    "azure-iot-build": "^1.0.0-preview.3",
     "simplebuild-jshint": "^1.1.0"
   },
   "engines": {

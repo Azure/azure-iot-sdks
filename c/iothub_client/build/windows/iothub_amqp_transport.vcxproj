@@ -110,7 +110,7 @@
       <AdditionalDependencies>qpid-protond.lib</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\Win32\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Win32\Debug</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -127,7 +127,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\x64\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\x64\Debug</AdditionalLibraryDirectories>
       <AdditionalDependencies>qpid-protond.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -150,7 +150,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>qpid-proton.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\Win32\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Win32\Release</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -174,15 +174,15 @@
       <AdditionalDependencies>qpid-proton.lib</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\x64\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\x64\Release</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\Apache.QPID.Proton.AzureIot.targets" Condition="Exists('$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\Apache.QPID.Proton.AzureIot.targets')" />
+  <Import Project="$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets" Condition="Exists('$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\Apache.QPID.Proton.AzureIot.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\Apache.QPID.Proton.AzureIot.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets'))" />
   </Target>
 </Project>

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Microsoft.Azure.IoTHub.MqttTransport</id>
-    <version>0.0.001-preview-000</version>
+    <version>1.0.0-preview-003</version>
     <title>Microsoft Azure IoTHub MQTT transport</title>
     <authors>Microsoft Corp, Eclipse Foundation, The OpenSSL Project</authors>
     <owners>Azure-IoT</owners>
@@ -16,8 +16,8 @@
     <copyright>Copyright 2015</copyright>
     <tags>MQTT Microsoft Azure IoT Native x86 native package</tags>
     <dependencies>
-	  <dependency id ="Microsoft.Azure.IoTHub.IoTHubClient" version="0.0.001-preview-000"></dependency>
-	  <dependency id ="Microsoft.Azure.IoTHub.Common" version="0.0.001-preview-000"></dependency>
+	  <dependency id ="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.0-preview-003"></dependency>
+	  <dependency id ="Microsoft.Azure.IoTHub.Common" version="1.0.0-preview-003"></dependency>
 	  
     </dependencies>
   </metadata>

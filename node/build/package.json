@@ -1,6 +1,6 @@
 {
   "name": "azure-iot-build",
-  "version": "0.0.1",
+  "version": "1.0.0-preview.3",
   "description": "Azure IoT SDK - Build",
   "author": "Microsoft Corporation",
   "license": "MIT",

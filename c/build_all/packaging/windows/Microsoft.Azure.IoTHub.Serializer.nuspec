@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Microsoft.Azure.IoTHub.Serializer</id>
-    <version>0.0.001-preview-000</version>
+    <version>1.0.0-preview-003</version>
     <title>Microsoft Azure IoTHub Serializer</title>
     <authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
@@ -16,7 +16,7 @@
     <copyright>Copyright 2015</copyright>
     <tags>Microsoft Azure IoT Native x86 x64 native package</tags>
     <dependencies>
-	  	  <dependency id ="Microsoft.Azure.IoTHub.Common" version="0.0.001-preview-000"></dependency>
+	  	  <dependency id ="Microsoft.Azure.IoTHub.Common" version="1.0.0-preview-003"></dependency>
     </dependencies>
   </metadata>
     <files>
