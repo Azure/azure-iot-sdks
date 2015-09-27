@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Microsoft Azure IoT Device SDKs</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Azure IoT Hub Services</h1>
+        <p>Client SDKs</p>
+
+        <p class="view"><a href="https://github.com/Azure/azure-iot-sdks">View the Project on GitHub <small>Azure/azure-iot-sdks</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/Azure/azure-iot-sdks/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/Azure/azure-iot-sdks/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/Azure/azure-iot-sdks">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="microsoft-azure-iot-services" class="anchor" href="#microsoft-azure-iot-services" aria-hidden="true"><span class="octicon octicon-link"></span></a>Microsoft Azure IoT Device SDKs</h1>
+
+<p>The Microsoft Azure IoT device libraries contain code that facilitates building devices and applications that connect and are managed by Azure IoT Suite services.</p>
+
+<p>Devices and data sources in an IoT solution can range from a simple network-connected sensor to a powerful, standalone computing device. Devices may have limited processing capability, memory, communication bandwidth, and communication protocol support. The IoT Device SDKs enable you to implement client applications for a wide variety of devices.</p>
+
+<h2>
+<a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+
+<h4>
+<a id="azure-iot-hub-setup-iot-hub" class="anchor" href="#azure-iot-hub-setup-iot-hub" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup IoT Hub</h4>
+<p><a href="http://azure.microsoft.com/en-us/documentation/services/iot-hub/">Azure IoT Hub</a> is a fully managed service that enables reliable and secure bi-directional communications between millions of IoT devices and an application back end. Azure IoT Hub offers reliable device-to-cloud and cloud-to-device hyper-scale messaging, enables secure communications using per-device security credentials and access control, and includes device libraries for the most popular languages and platforms.
+
+Before you can communicate with IoT Hub from a device you must create an IoT hub instance in your Azure subscription and then provision your device in your IoT hub. You must complete these steps before you try to run any of the sample IoT Hub device client applications in this repository.</p>
+
+<h5><a id="azure-iot-hub-create-iot-hub" class="anchor" href="#azure-iot-hub-create-iot-hub" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create an IoT hub</h4>
+
+<p>You can use the <a href="https://portal.azure.com/">Azure Portal</a> to create an IoT hub to use with your devices. For more information about creating and managing an IoT hub in the Azure portal, see <a href="http://azure.microsoft.com/en-us/documentation/articles/iot-hub-manage-portal/">Manage IoT Hub through the Azure Portal</a>.</p>
+
+<p>You can obtain a connection string for your IoT hub from the Azure Portal. This connection string enables client applications to perform management operations on the IoT hub such as adding a new device to the IoT hub. The <a href="https://github.com/Azure/azure-iot-sdks/blob/develop/tools/DeviceExplorer/doc/how_to_use_device_explorer.md">Device Explorer</a> utility in this repository is an example of such an IoT hub management application.</p>
+
+<h5><a id="azure-iot-hub-add-device" class="anchor" href="#azure-iot-hub-add-device" aria-hidden="true"><span class="octicon octicon-link"></span></a>Add devices to IoT Hub</h4>
+
+<p>You must details of your device to IoT Hub before that device can communicate with the hub. When you add a device to an IoT hub, the hub generates the connection string that the device must use when it establishes the secure connection to the IoT hub.</p>
+
+<p>To add a device to your IoT hub, you can use the <a href="https://github.com/Azure/azure-iot-sdks/blob/develop/tools/DeviceExplorer/doc/how_to_use_device_explorer.md">Device Explorer</a> utility in this repository. This utility enables you to copy and paste the device specific connection string into the source code of application you will run on the device.</p>
+
+<h2>
+<a id="download-source-code" class="anchor" href="#download-source-code" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download Source Code</h2>
+
+<p>To get the source code of our SDKs and samples via <strong>git</strong> just type:</p>
+
+<pre><code>git clone https://github.com/Azure/azure-iot-sdks.git
+cd ./azure-iot-sdks/
+</code></pre>
+
+<h2>
+<a id="reference-documentation" class="anchor" href="#reference-documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reference Documentation</h2>
+
+<h4>
+<a id="azure-iot-hub-client-sdks" class="anchor" href="#azure-iot-hub-client-sdks" aria-hidden="true"><span class="octicon octicon-link"></span></a>Azure IoT Hub Client SDKs</h4>
+
+<ul>
+<li><a href="c/api_reference/index.html">C SDK</a></li>
+<li><a href="node/device/api_reference/index.html">Node JS SDK</a></li>
+<li><a href="java/device/api_reference/index.html">Java Device SDK</a></li>
+</ul>
+
+<h2>
+<a id="useful-resources" class="anchor" href="#useful-resources" aria-hidden="true"><span class="octicon octicon-link"></span></a>Useful Resources</h2>
+
+<ul>
+<li>Samples:
+  <ul>
+    <li><a href="https://github.com/Azure/azure-iot-sdks/tree/develop/c/iothub_client/samples">C</a></li>
+    <li><a href="https://github.com/Azure/azure-iot-sdks/tree/develop/java/device/samples">Java</a></li>
+    <li><a href="https://github.com/Azure/azure-iot-sdks/tree/develop/node/device/samples">Node JS</a></li>
+  </ul>
+</li>
+<li>Our product team actively monitors the <a href="#" class="todo">Azure IoT Hub Developer Forum</a> to assist you with any troubles.</li>
+</ul>
+
+<h2>
+<a id="contribute-code-or-provide-feedback" class="anchor" href="#contribute-code-or-provide-feedback" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contribute Code or Provide Feedback</h2>
+
+<p>If you would like to become an active contributor to this project please follow the instructions provided in <a href="http://azure.github.com/guidelines.html">Microsoft Azure Projects Contribution Guidelines</a>.</p>
+
+<p>If you encounter any bugs with the library please file an issue in the <a href="https://github.com/Azure/azure-iot-sdks/issues">Issues</a> section of the project.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/Azure">Azure</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+  </body>
+</html>
