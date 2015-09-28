@@ -38,11 +38,6 @@ This directory contains application development guides, such as:
 - [How to use the DeviceExplorer application to tests IoT Hub device connectivity](../tools/DeviceExplorer/doc/tools_device_explorer.md)
 - [How to Port the C Libraries to other OS platforms](doc/porting_guide.md)
 
-Setup instructions for OS platforms:
-
-- [Windows](doc/run_sample_on_Windows.md)
-- [Linux](doc/run_sample_on_desktop_linux.md)
-
 Run the sample application on:
 
 - [BeagleBone Black with Debian OS](doc/run_sample_on_beaglebone_black_debian.md)
@@ -51,7 +46,7 @@ Run the sample application on:
 - [Desktop Linux](doc/run_sample_on_desktop_linux.md)
 - [Freescale K64F](doc/run_sample_on_freescale_k64f_mbed.md)
 - [RasberryPi 2 with Raspbian OS](doc/run_sample_on_raspberrypi2_raspbian.md)
-- [Desktop Windows](doc/run_sample_on_windows.md)
+- [Desktop Windows](doc/run_sample_on_desktop_windows.md)
 - [TI CC3200](doc/run_sample_on_ti_cc3200.md)
 
 ### /build_all
