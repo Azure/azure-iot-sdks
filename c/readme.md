@@ -23,7 +23,7 @@ The library code:
 * Avoids compiler extensions.
 * Exposes a platform abstraction layer to isolate OS dependencies (threading and mutual exclusion mechanisms, communications protocol e.g. HTTP). Refer to [porting guide](doc/porting_guide.md) for more information.
 
-Azure IoT device SDK for C can be used with a broad range of OS platforms and devices. For a list of tested configurations [click here](../doc/tested_configurations.md)
+Azure IoT device SDK for C can be used with a broad range of OS platforms and devices. For a list of tested configurations [click here](../doc/tested_configurations.md).
 
 ## SDK directory structure
 All C specific resources are located in the **azure-iot-sdks\c** folder. A description of the directories follows:
@@ -32,7 +32,6 @@ All C specific resources are located in the **azure-iot-sdks\c** folder. A descr
 This directory contains application development guides, such as:
 
 - [Prepare your development environment to use the Azure IoT device SDK for C](doc/devbox_setup.md)
-
 - [Setup IoT Hub](../doc/setup_iot_hub.md)
 - [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
 - [How to use the DeviceExplorer application to tests IoT Hub device connectivity](../tools/DeviceExplorer/doc/tools_device_explorer.md)
