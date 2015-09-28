@@ -15,7 +15,6 @@ This document describes the process of setting up a [Raspberry Pi 2](https://www
 ## Requirements
 
 - SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the Raspberry Pi.
-
 - Required hardware:
 	- [Raspberry Pi 2](http://www.amazon.com/Raspberry-Pi-Model-Project-Board/dp/B00T2U7R7I/ref=sr_1_1?ie=UTF8&qid=1429516842&sr=8-1&keywords=raspberry+pi)
 	- 8GB or larger MicroSD Card
