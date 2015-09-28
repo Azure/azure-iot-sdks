@@ -1,10 +1,12 @@
 # Run End to End Tests
 
-This document describes how to run the end to end tests located under the c\iothub_client\tests\ folder in your local copy of the repository.
+This document describes how to run the end to end tests located under the c\iothub_client\tests\  & c\serializer\tests\ folders in your local copy of the repository.
 
 - [Setup the test parameters](#testparams)
-- [Run end to end tests on a Windows development environment](#windows)
-- [Run end to end tests on a Linux development environment](#linux)
+- [Run end to end tests for "iothub_client" on a Windows development environment](#windows_client)
+- [Run end to end tests for "iothub_client" on a Linux development environment](#linux_client)
+- [Run end to end tests for "serializer" on a Windows development environment](#windows_serializer)
+- [Run end to end tests for "serializer" on a Linux development environment](#linux_serializer)
 
 <a name="testparams"/>
 ## Setup the test parameters
@@ -50,21 +52,40 @@ This document describes how to run the end to end tests located under the c\ioth
     ![](../../tools/DeviceExplorer/doc/media/device_explorer/iotgetstart1.png)
 
 
-<a name="windows"/>
-## Run end to end tests on a Windows development environment
+<a name="windows_client"/>
+## Run end to end tests for "iothub_client" on a Windows development environment
 
 - Start the Windows PowerShell in Administrator mode.
 - Navigate to the folder tools\iot_hub_e2e_tests_params in your local copy of the repository.
 - Run the script "Set-IOTDeviceParametersForE2ETests.ps1" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
-- Start the Visual Studio solution "iothub_client_dev" located under the folder c\iothub_client\build\windows in your local copy of the repository. 
+- Start the Visual Studio solution "iothub_client_dev.sln" located under the folder c\iothub_client\build\windows in your local copy of the repository. 
 - Build the solution
 - Run the tests by selecting the project "iothubclient_e2etests" in the Test Explorer window inside of Visual Studio.
 
-<a name="linux"/>
-## Run end to end tests on a Linux development environment
+<a name="linux_client"/>
+## Run end to end tests for "iothub_client" on a Linux development environment
 
 - Navigate to the folder c/build_all/linux in your local copy of the repository.
 - Run the build.sh script.
 - Execute the command "sudo ./setiotdeviceparametersfore2etests.sh" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
 - Restart the Linux machine.
 - Run the "./iothubclient_e2etests" located under the folder under the folder c/iothub_client/build/linux
+
+<a name="windows_serializer"/>
+## Run end to end tests for "serializer" on a Windows development environment
+
+- Start the Windows PowerShell in Administrator mode.
+- Navigate to the folder tools\iot_hub_e2e_tests_params in your local copy of the repository.
+- Run the script "Set-IOTDeviceParametersForE2ETests.ps1" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
+- Start the Visual Studio solution "serializer_dev.sln" located under the folder c\serializer\build\windows in your local copy of the repository. 
+- Build the solution
+- Run the tests by selecting the project "serializer_e2etests" in the Test Explorer window inside of Visual Studio.
+
+<a name="linux_serializer"/>
+## Run end to end tests for "serializer" on a Linux development environment
+
+- Navigate to the folder c/build_all/linux in your local copy of the repository.
+- Run the build.sh script.
+- Execute the command "sudo ./setiotdeviceparametersfore2etests.sh" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
+- Restart the Linux machine.
+- Run the "./serializer_e2etests" located under the folder under the folder c/serializer/build/linux.
