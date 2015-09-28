@@ -6109,12 +6109,9 @@ responseContent: a new instance of buffer]
             .IgnoreArgument(6)
             .CopyOutArgumentBuffer(7, &httpStatus404, sizeof(httpStatus404));
 
-        STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG)) /*RemoveHeadLis called twice because it also plays the role of "loop condition*/
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, DList_InsertHeadList(IGNORED_PTR_ARG, &(message1.entry)))
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, DList_AppendTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG)).IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
 
         ENABLE_BATCHING();
 
@@ -6233,12 +6230,9 @@ responseContent: a new instance of buffer]
             .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200))
             .SetReturn(HTTPAPIEX_ERROR);
 
-        STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG)) /*RemoveHeadLis called twice because it also plays the role of "loop condition*/
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, DList_InsertHeadList(IGNORED_PTR_ARG, &(message1.entry)))
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, DList_AppendTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG)).IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
 
         ENABLE_BATCHING();
 
@@ -6338,12 +6332,9 @@ responseContent: a new instance of buffer]
                 .SetReturn(__LINE__);
         }
 
-        STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG)) /*RemoveHeadLis called twice because it also plays the role of "loop condition*/
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, DList_InsertHeadList(IGNORED_PTR_ARG, &(message1.entry)))
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, DList_AppendTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG)).IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
 
         ENABLE_BATCHING();
 
@@ -6431,12 +6422,9 @@ responseContent: a new instance of buffer]
             STRICT_EXPECTED_CALL(mocks, BUFFER_new());
         }
 
-        STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG)) /*RemoveHeadLis called twice because it also plays the role of "loop condition*/
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, DList_InsertHeadList(IGNORED_PTR_ARG, &(message1.entry)))
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, DList_AppendTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG)).IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
 
         ENABLE_BATCHING();
 
