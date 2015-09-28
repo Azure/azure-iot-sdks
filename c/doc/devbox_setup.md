@@ -83,8 +83,8 @@ You can use one of the sample applications as a template to get started when you
 ## Set up a Linux development environment
 
 This section shows you how to set up a development environment for the Azure IoT device SDK for C on Ubuntu.
-1. Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the Ubuntu machine you are using.
 
+1. Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the Ubuntu machine you are using.
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
 3. Run the `setup.sh` script to install the prerequisite packages and the dependent libraries.
