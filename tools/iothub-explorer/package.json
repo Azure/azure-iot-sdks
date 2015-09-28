@@ -1,19 +1,32 @@
 {
   "name": "iothub-explorer",
   "version": "1.0.0-preview.3",
+  "description": "Azure IoT Hub Explorer",
+  "author": "Microsoft Corporation",
+  "license": "MIT",
   "main": "iothub-explorer.js",
-  "private": true,
   "dependencies": {
     "azure-iothub": "1.0.0-preview.3",
     "colors-tmpl": "^1.0.0",
     "nopt": "^3.0.4",
     "prettyjson": "^1.1.3"
   },
+  "devDependencies": {
+    "jshint": "^2.8.0"
+  },
   "scripts": {
     "jshint": "jshint iothub-explorer.js",
     "test": "npm -s run-script jshint"
   },
-  "devDependencies": {
-    "jshint": "^2.8.0"
-  }
+  "engines": {
+    "node": "0.12.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Azure/azure-iot-sdks.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Azure/azure-iot-sdks/issues"
+  },
+  "homepage": "https://github.com/Azure/azure-iot-sdks#readme"
 }
