@@ -539,7 +539,7 @@ HTTPAPI_RESULT HTTPAPI_SetOption(HTTP_HANDLE handle, const char* optionName, con
         }
         else
         {
-            if (strcpy_s(h->certificate, len, value) != 0)
+            if (strcpy_s(h->certificate, len, (const char*)value) != 0)
             {
                 result = HTTPAPI_ERROR;
                 LogError("HTTPAPI_SetOption::Could not strcpy_s certificate\r\n");
