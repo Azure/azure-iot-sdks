@@ -44,6 +44,7 @@ int main(void)
 {
     (void)printf("Initializing mbed specific things...\r\n");
 
+    /* These are needed in order to initialize the time provider for Proton-C */
     mbed_log_init();
     mbedtime_init();
 
