@@ -40,7 +40,6 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
 <a name="preparing"/>
 ## Prepare the Raspberry Pi 2
-
 1. Install the latest Raspbian operating system on your Raspberry Pi 2 by
 following the instructions in the [NOOBS setup guide](http://www.raspberrypi.org/help/noobs-setup/).
 
@@ -143,7 +142,6 @@ This sample application sends simulated sensor data to your IoT Hub.
   cd ./c/serializer/build/linux
   make -f makefile.linux all
   ```
-
 - On Windows, you can use the [Device Explorer][device-explorer] to see the data your device is sending and receiving.
 
 [1]: ./media/service-bus-iot-raspberrypi-raspbian-setup/raspbian01.png
