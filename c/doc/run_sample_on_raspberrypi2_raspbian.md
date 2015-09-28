@@ -40,9 +40,9 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
 <a name="preparing"/>
 ## Prepare the Raspberry Pi 2
+
 1. Install the latest Raspbian operating system on your Raspberry Pi 2 by
 following the instructions in the [NOOBS setup guide](http://www.raspberrypi.org/help/noobs-setup/).
-
 1. When the installation process is complete, the Raspberry Pi configuration menu
 (raspi-config) loads. Here you are able to set the time and date for your region
 and enable a Raspberry Pi camera board, or even create users. Under **Advanced
