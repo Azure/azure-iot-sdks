@@ -18,12 +18,12 @@
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simplesample_mqtt.c">
+    <ClCompile Include="..\remote_monitoring.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\simplesample_mqtt.h">
+    <ClInclude Include="..\remote_monitoring.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6015311A-361A-4849-BF7B-1D3E461FE6B7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>sendtelemetryasync</RootNamespace>
+    <RootNamespace>iothub_client_sample_mqtt</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -34,7 +34,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CFA7DCBE-66A2-47DB-8E8A-D4F67E79E547}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>SimpleSample</RootNamespace>
+    <RootNamespace>simplesample_amqp</RootNamespace>
     <ProjectName>simplesample_amqp</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

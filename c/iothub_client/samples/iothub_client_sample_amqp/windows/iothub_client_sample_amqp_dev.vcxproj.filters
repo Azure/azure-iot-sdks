@@ -18,12 +18,12 @@
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\simplesample_mqtt.c">
+    <ClCompile Include="..\iothub_client_sample_amqp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\simplesample_mqtt.h">
+    <ClInclude Include="..\iothub_client_sample_amqp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
