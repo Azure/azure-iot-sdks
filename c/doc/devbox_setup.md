@@ -11,7 +11,6 @@ This document describes how to prepare your development environment to use the *
 
 - Install [Visual Studio 2015][visual-studio]. You can use the free Community Edition if you meet the licensing requirements.
 Be sure to include Visual C++ and NuGet Package Manager.
-
 - Install [git](http://www.git-scm.com) making sure git.exe can be run from a command line.
 
 - Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest release version.
@@ -84,7 +83,6 @@ You can use one of the sample applications as a template to get started when you
 ## Set up a Linux development environment
 
 This section shows you how to set up a development environment for the Azure IoT device SDK for C on Ubuntu.
-
 1. Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the Ubuntu machine you are using.
 
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
