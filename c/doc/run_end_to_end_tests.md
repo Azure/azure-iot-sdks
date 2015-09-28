@@ -54,10 +54,16 @@ This document describes how to run the end to end tests located under the c\ioth
 ## Run end to end tests on a Windows development environment
 
 - Start the Windows PowerShell in Administrator mode.
+- Navigate to the folder tools\iot_hub_e2e_tests_params in your local copy of the repository.
 - Run the script "Set-IOTDeviceParametersForE2ETests.ps1" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
-- Start the Visual Studio solution 
+- Start the Visual Studio solution "iothub_client_dev" located under the folder c\iothub_client\build\windows in your local copy of the repository. 
+- Build the solution
+- Run the tests by selecting the project "iothubclient_e2etests" in the Test Explorer window inside of Visual Studio.
 
 <a name="linux"/>
 ## Run end to end tests on a Linux development environment
 
-- Run the script "setiotdeviceparametersfore2etests.sh" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
+- Navigate to the folder c/build_all/linux in your local copy of the repository.
+- Run the build.sh script.
+- Execute the command "sudo ./setiotdeviceparametersfore2etests.sh" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
+- Run the "./iothubclient_e2etests" located under the folder under the folder c/iothub_client/build/linux
