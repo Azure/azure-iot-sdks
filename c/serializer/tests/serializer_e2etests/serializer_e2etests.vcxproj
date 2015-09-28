@@ -126,11 +126,11 @@
     <ClInclude Include="MacroE2EModelAction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\Apache.QPID.Proton.AzureIot.targets" Condition="Exists('$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\Apache.QPID.Proton.AzureIot.targets')" />
+  <Import Project="$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets" Condition="Exists('$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\Apache.QPID.Proton.AzureIot.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview\build\native\Apache.QPID.Proton.AzureIot.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets'))" />
   </Target>
 </Project>

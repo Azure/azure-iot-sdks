@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6015311A-361A-4849-BF7B-1D3E461FE6B7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>sendtelemetryasync</RootNamespace>
+    <RootNamespace>iothub_client_sample_mqtt</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -182,16 +182,16 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.Common.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.Common.targets')" />
-    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
-    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.MqttTransport.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.MqttTransport.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" />
+    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" />
+    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
+    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.Common.targets'))" />
-    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
-    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.MqttTransport.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.MqttTransport.0.0.001-preview-000\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets'))" />
+    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets'))" />
+    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
+    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets'))" />
   </Target>
 </Project>

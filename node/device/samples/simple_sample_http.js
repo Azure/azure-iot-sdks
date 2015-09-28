@@ -37,6 +37,6 @@ setInterval(function(){
 function printResultFor(op) {
   return function printResult(err, res) {
     if (err) console.log(op + ' error: ' + err.toString());
-    if (res && (res.statusCode != 204)) console.log(op + ' status: ' + res.statusCode + ' ' + res.statusMessage);
+    if (res && (res.statusCode !== 204)) console.log(op + ' status: ' + res.statusCode + ' ' + res.statusMessage);
   };
 }

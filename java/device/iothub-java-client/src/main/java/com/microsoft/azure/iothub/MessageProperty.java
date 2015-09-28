@@ -125,7 +125,7 @@ public final class MessageProperty {
     /**
      * Returns whether the property is a valid application property. The
      * property is valid if it is not one of the reserved properties, only uses
-     * US-ASCII printable chars, and does not contain: ()<>@,;:\"/[]?={} (space)
+     * US-ASCII printable chars, and does not contain: <code>()&lt;&gt;@,;:\"/[]?={}</code> (space)
      * (horizontal tab).
      *
      * @param name the property name.
@@ -148,12 +148,12 @@ public final class MessageProperty {
 
     /**
      * Returns true if the string only uses US-ASCII printable chars and does
-     * not contain: ()<>@,;:\"/[]?={} (space) (horizontal tab)
+     * not contain: <code>()&lt;&gt;@,;:\"/[]?={}</code> (space) (horizontal tab)
      *
      * @param s the string.
      *
      * @return whether the string only uses US-ASCII printable chars and does
-     * not contain: ()<>@,;:\"/[]?={} (space) (horizontal tab)
+     * not contain: <code>()&lt;&gt;@,;:\"/[]?={}</code> (space) (horizontal tab)
      */
     protected static boolean usesValidChars(String s) {
         boolean isValid = false;

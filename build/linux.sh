@@ -31,3 +31,8 @@ cd ../service
 npm install
 ./build.sh lintAndAllTests
 [ $? -eq 0 ] || exit $?
+
+cd ../../tools/iothub-explorer
+npm install
+npm test
+[ $? -eq 0 ] || exit $?

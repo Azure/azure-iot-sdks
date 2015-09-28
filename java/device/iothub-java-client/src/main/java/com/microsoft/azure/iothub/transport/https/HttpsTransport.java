@@ -51,7 +51,7 @@ public final class HttpsTransport implements IotHubTransport
     protected final DeviceClientConfig config;
 
     /**
-     * Constructs an instance from the given {@link IotHubClientConfig}
+     * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
      *
      * @param config configuration parameters for an IoT Hub connection.
