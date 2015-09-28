@@ -18,7 +18,7 @@ The device library consists of a set of reusable components with abstract interf
 
 - [Setup your development environment][devbox-setup]
 - [Run the Java sample][run-java-sample]
-- [How to build an IoTHub Java application from scrtach on Windows](how_to_build_a_java_app_from_scratch.md)
+- [How to build an IoTHub Java application from scrtach on Windows][how-to-build-a-java-app-from-scratch]
 - [How to use Device Explorer for IoT Hub devices](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
 
 ## Folder structure of repository
@@ -50,3 +50,4 @@ API documentation can be found here:
 
 [devbox-setup]: doc/devbox_setup.md
 [run-java-sample]: doc/run_sample_on_java.md
+[how-to-build-a-java-app-from-scratch]: doc/how_to_build_a_java_app_from_scratch.md
