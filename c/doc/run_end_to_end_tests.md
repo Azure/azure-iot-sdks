@@ -66,4 +66,5 @@ This document describes how to run the end to end tests located under the c\ioth
 - Navigate to the folder c/build_all/linux in your local copy of the repository.
 - Run the build.sh script.
 - Execute the command "sudo ./setiotdeviceparametersfore2etests.sh" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
+- Restart the Linux machine.
 - Run the "./iothubclient_e2etests" located under the folder under the folder c/iothub_client/build/linux
