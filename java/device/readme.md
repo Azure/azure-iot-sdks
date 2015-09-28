@@ -17,8 +17,8 @@ The device library consists of a set of reusable components with abstract interf
 ## Application development guidelines
 
 - [Setup your development environment][devbox-setup]
-- [Try some samples][getstarted]
-- [Get started with Azure IoT client application using Java on Windows](guide_getting_started_iot_client_java_windows.md)
+- [Run the Java sample][run-java-sample]
+- [How to build an IoTHub Java application from scrtach on Windows][how-to-build-a-java-app-from-scratch]
 - [How to use Device Explorer for IoT Hub devices](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
 
 ## Folder structure of repository
@@ -49,4 +49,5 @@ API documentation can be found here:
 ```
 
 [devbox-setup]: doc/devbox_setup.md
-[getstarted]: doc/run_sample_on_java.md
+[run-java-sample]: doc/run_sample_on_java.md
+[how-to-build-a-java-app-from-scratch]: doc/how_to_build_a_java_app_from_scratch.md

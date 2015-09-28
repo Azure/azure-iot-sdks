@@ -34,7 +34,7 @@ public class HttpsIotHubConnection
     protected String messageEtag;
 
     /**
-     * Constructs an instance from the given {@link IotHubClientConfig}
+     * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
      *
      * @param config the client configuration.

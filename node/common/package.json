@@ -1,6 +1,6 @@
 {
   "name": "azure-iot-common",
-  "version": "0.0.1",
+  "version": "1.0.0-preview.3",
   "description": "Azure IoT SDK - Common",
   "author": "Microsoft Corporation",
   "license": "MIT",
@@ -12,7 +12,7 @@
     "chai": "^3.3.0",
     "jake": "^8.0.12",
     "jshint": "^2.8.0",
-    "azure-iot-build": "file:../build",
+    "azure-iot-build": "^1.0.0-preview.3",
     "simplebuild-jshint": "^1.1.0"
   },
   "engines": {

@@ -4,17 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "remote_monitoring", "remote_monitoring.vcxproj", "{195BC2F3-5CD0-4C33-A3A3-6691447EC682}"
-	ProjectSection(ProjectDependencies) = postProject
-		{FB9BA033-A21B-4790-A97C-D36C0FEF9121} = {FB9BA033-A21B-4790-A97C-D36C0FEF9121}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "serializer", "..\..\..\build\windows\serializer.vcxproj", "{0BA575E1-35F2-4631-9761-E55DCF8FE9D5}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iothub_client", "..\..\..\..\iothub_client\build\windows\iothub_client.vcxproj", "{F17F4374-023D-455F-B254-5A87B6691395}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "..\..\..\..\common\build\windows\common.vcxproj", "{9F55377B-6C37-4700-9866-E070D64ADE0F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iothub_amqp_transport", "..\..\..\..\iothub_client\build\windows\iothub_amqp_transport.vcxproj", "{FB9BA033-A21B-4790-A97C-D36C0FEF9121}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,38 +21,6 @@ Global
 		{195BC2F3-5CD0-4C33-A3A3-6691447EC682}.Release|Win32.Build.0 = Release|Win32
 		{195BC2F3-5CD0-4C33-A3A3-6691447EC682}.Release|x64.ActiveCfg = Release|x64
 		{195BC2F3-5CD0-4C33-A3A3-6691447EC682}.Release|x64.Build.0 = Release|x64
-		{0BA575E1-35F2-4631-9761-E55DCF8FE9D5}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0BA575E1-35F2-4631-9761-E55DCF8FE9D5}.Debug|Win32.Build.0 = Debug|Win32
-		{0BA575E1-35F2-4631-9761-E55DCF8FE9D5}.Debug|x64.ActiveCfg = Debug|x64
-		{0BA575E1-35F2-4631-9761-E55DCF8FE9D5}.Debug|x64.Build.0 = Debug|x64
-		{0BA575E1-35F2-4631-9761-E55DCF8FE9D5}.Release|Win32.ActiveCfg = Release|Win32
-		{0BA575E1-35F2-4631-9761-E55DCF8FE9D5}.Release|Win32.Build.0 = Release|Win32
-		{0BA575E1-35F2-4631-9761-E55DCF8FE9D5}.Release|x64.ActiveCfg = Release|x64
-		{0BA575E1-35F2-4631-9761-E55DCF8FE9D5}.Release|x64.Build.0 = Release|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|Win32.Build.0 = Debug|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|x64.ActiveCfg = Debug|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|x64.Build.0 = Debug|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|Win32.ActiveCfg = Release|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|Win32.Build.0 = Release|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|x64.ActiveCfg = Release|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|x64.Build.0 = Release|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|Win32.ActiveCfg = Debug|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|Win32.Build.0 = Debug|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|x64.ActiveCfg = Debug|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|x64.Build.0 = Debug|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|Win32.ActiveCfg = Release|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|Win32.Build.0 = Release|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|x64.ActiveCfg = Release|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|x64.Build.0 = Release|x64
-		{FB9BA033-A21B-4790-A97C-D36C0FEF9121}.Debug|Win32.ActiveCfg = Debug|Win32
-		{FB9BA033-A21B-4790-A97C-D36C0FEF9121}.Debug|Win32.Build.0 = Debug|Win32
-		{FB9BA033-A21B-4790-A97C-D36C0FEF9121}.Debug|x64.ActiveCfg = Debug|x64
-		{FB9BA033-A21B-4790-A97C-D36C0FEF9121}.Debug|x64.Build.0 = Debug|x64
-		{FB9BA033-A21B-4790-A97C-D36C0FEF9121}.Release|Win32.ActiveCfg = Release|Win32
-		{FB9BA033-A21B-4790-A97C-D36C0FEF9121}.Release|Win32.Build.0 = Release|Win32
-		{FB9BA033-A21B-4790-A97C-D36C0FEF9121}.Release|x64.ActiveCfg = Release|x64
-		{FB9BA033-A21B-4790-A97C-D36C0FEF9121}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

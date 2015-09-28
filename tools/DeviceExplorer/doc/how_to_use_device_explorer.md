@@ -22,7 +22,7 @@ You can either download a pre-built version of Device Explorer or build it yours
 
 ### Download a pre-built version of the Device Explorer application
 
-A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link [DeviceExplorer.msi](placeholder).
+A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link [DeviceExplorer.msi](https://github.com/Azure/azure-iot-sdks/releases/download/v1.0.0-preview.3/SetupDeviceExplorer.msi).
 
 ### Build the Device Explorer application
 

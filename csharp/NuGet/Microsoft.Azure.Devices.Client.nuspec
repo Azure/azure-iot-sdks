@@ -4,11 +4,14 @@
         <id>$id$</id>
         <version>$Version$</version>
         <title>Microsoft Azure Devices Client</title>
-        <authors>Microsoft</authors>
+        <authors>Microsoft Corp</authors>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
-        <licenseUrl><![CDATA[http://go.microsoft.com/fwlink/?LinkId=536623]]></licenseUrl>
+        <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/master/LICENSE</licenseUrl>
         <description>Package for Microsoft Azure Device Client</description>
         <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
+        <releaseNotes>initial version</releaseNotes>
+        <copyright>Copyright 2015</copyright>
+        <tags>Microsoft Azure IoT IoTHub Device Client .net AMQP HTTP</tags>
         <language>en-US</language>
         <dependencies>
             <group targetFramework="net45" >

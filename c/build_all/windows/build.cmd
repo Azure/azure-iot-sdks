@@ -133,12 +133,32 @@ if %build-clean%==1 (
     call :clean-a-solution "%build-root%\testtools\micromock\build\windows\micromock.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
     
-	call nuget restore "%build-root%\iothub_client\build\windows\iothub_client.sln"
+    call nuget restore "%build-root%\iothub_client\build\windows\iothub_client.sln"
     call :clean-a-solution "%build-root%\iothub_client\build\windows\iothub_client.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
+
+    call nuget restore "%build-root%\iothub_client\build\windows\iothub_client_dev.sln"
+    call :clean-a-solution "%build-root%\iothub_client\build\windows\iothub_client_dev.sln"
+    if not %errorlevel%==0 exit /b %errorlevel%
+
+    call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+    call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+    if not %errorlevel%==0 exit /b %errorlevel%
+
+    call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
+    call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
+    if not %errorlevel%==0 exit /b %errorlevel%
+
+    call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+    call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+    if not %errorlevel%==0 exit /b %errorlevel%
     
-	call nuget restore "%build-root%\serializer\build\windows\serializer.sln"
+    call nuget restore "%build-root%\serializer\build\windows\serializer.sln"
     call :clean-a-solution "%build-root%\serializer\build\windows\serializer.sln"
+    if not %errorlevel%==0 exit /b %errorlevel%
+
+    call nuget restore "%build-root%\serializer\build\windows\serializer_dev.sln"
+    call :clean-a-solution "%build-root%\serializer\build\windows\serializer_dev.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
     
     call :clean-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
@@ -156,9 +176,15 @@ rem ----------------------------------------------------------------------------
 
 call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\common\build\windows\common.sln"
 call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\build\windows\iothub_client.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\build\windows\iothub_client_dev.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
 call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\build\windows\serializer.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\build\windows\serializer_dev.sln"
 call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
 call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
 
 
 rem -----------------------------------------------------------------------------
@@ -171,13 +197,31 @@ if not %errorlevel%==0 exit /b %errorlevel%
 call :build-a-solution "%build-root%\iothub_client\build\windows\iothub_client.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
+call :build-a-solution "%build-root%\iothub_client\build\windows\iothub_client_dev.sln"
+if not %errorlevel%==0 exit /b %errorlevel%
+
+call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+rem if not %errorlevel%==0 exit /b %errorlevel%
+
+call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
+rem if not %errorlevel%==0 exit /b %errorlevel%
+
+call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+rem if not %errorlevel%==0 exit /b %errorlevel%
+
 call :build-a-solution "%build-root%\serializer\build\windows\serializer.sln"
+if not %errorlevel%==0 exit /b %errorlevel%
+
+call :build-a-solution "%build-root%\serializer\build\windows\serializer_dev.sln"
+if not %errorlevel%==0 exit /b %errorlevel%
+
+call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
 rem if not %errorlevel%==0 exit /b %errorlevel%
 
-call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
+call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
