@@ -26,7 +26,7 @@ This document describes how to run the end to end tests located under the c\ioth
       - IOTHUB_NAME=[IOTHUB_NAME]
       - IOTHUB_EVENTHUB_LISTEN_NAME=[samne as IOTHUB_NAME]
       - IOTHUB_SUFFIX=[IOTHUB_SUFFIX]
-      - IOTHUB_POLICY_NAME=iothubowner
+      - IOTHUB_POLICY_NAME=[IOTHUB_POLICY_NAME]
       - IOTHUB_POLICY_KEY=[IOTHUB_POLICY_KEY]
       - IOTHUB_EVENTHUB_ACCESS_KEY=[same as IOTHUB_POLICY_KEY]
      
@@ -41,7 +41,7 @@ This document describes how to run the end to end tests located under the c\ioth
       - IOTHUB_EVENTHUB_CONSUMER_GROUP=$Default
       - IOTHUB_PARTITION_COUNT=[Partition count from portal]
 
-    - Populate the following variables in the "iot_device_params.txt" by exracting the information from Device Explorer.
+    - Populate the following variables in the "iot_device_params.txt" by extracting the information from Device Explorer.
 
       - IOTHUB_DEVICE_ID=[The ID for the devie you created under the Management tab]
       - IOTHUB_DEVICE_KEY=[The key for the devie you created under the Management tab]
