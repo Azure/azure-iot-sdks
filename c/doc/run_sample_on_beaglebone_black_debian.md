@@ -24,7 +24,7 @@ This document describes the process of setting up a [BeagleBone Black](http://be
 <a name="beforebegin"/>
 ## Before you begin
 Before you begin you will need to create and configure an IoT hub to connect to.
-  1. [Set up your IoT Hub][setup-iothub]
+  1. [Set up your IoT Hub][setup-iothub].
   1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
   1. Make note of the Connection String for your device from the previous step.
 
@@ -116,5 +116,5 @@ This sample application sends simulated sensor data to your IoT Hub.
 
 - On Windows, you can use the Device Explorer tool to see the data your device is sending and receiving.
 
-[provision-device]: ./provision_device.md
 [setup-iothub]: ../../doc/setup_iothub.md
+[provision-device]: ./provision_device.md

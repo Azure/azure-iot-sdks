@@ -32,7 +32,7 @@ You may wish to consider a Starter Kit such as [CanaKit](http://www.amazon.com/C
 <a name="beforebegin"/>
 ## Before you begin
 Before you begin you will need to create and configure an IoT hub to connect to.
-  1. [Set up your IoT hub][setup-iothub]
+  1. [Set up your IoT hub][setup-iothub].
   1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
   1. Make note of the Connection String for your device from the previous step.
 
@@ -127,7 +127,7 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 - Run the **simplesample_amqp** sample:
 
   ```
-  ./serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ./c/serializer/samples/simplesample_amqp/linux/simplesample_amqp
   ```
 
 This sample application sends simulated sensor data to your IoT Hub.

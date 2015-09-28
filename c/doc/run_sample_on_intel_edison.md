@@ -2,12 +2,13 @@
 
 The following describes how to build and run the **simplesample_amqp** application on an Intel Edison.
 
-## Prerequisites
+## Before you begin
+Before you begin you will need to create and configure an IoT hub to connect to.
+  1. [Set up your IoT Hub][setup-iothub].
+  1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
+  1. Make note of the Connection String for your device from the previous step.
 
-  - Setup your IoT Hub (follow the link in previous section)
-  - Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
-
-**Note:** The Device Explorer utility only runs on Windows. You can run it on a different machine from your Node.js development environment.
+  > Note: You can skip this step if you just want to build the sample application without running it.
 
 ## Preparing the Intel Edison board
 
@@ -16,7 +17,7 @@ The following describes how to build and run the **simplesample_amqp** applicati
 - Once you have established a serial connection (command line) to your Intel Edison board, you can proceed to install Azure IoT SDK using the below instructions.
 - Make sure you have run the “configure_edison —setup” command to set up your board
 - Make sure your Intel Edison is online via your local Wi-Fi network (should occur during configure_edison setup)
-  
+
 ## Installing Git on your Intel Edison
 
 Git is a widely used distributed version control tool, we will need to install Git on the Intel Edison in order to clone the Azure IoT SDK and build it locally. To do that, we must first add extended packages to Intel Edison which include Git. Intel Edison’s build of [Yocto Linux][yocto] uses the “opkg” manager which doesn’t, by default, include Git support.
@@ -26,7 +27,7 @@ Git is a widely used distributed version control tool, we will need to install G
 	```
     $ vi /etc/opkg/base-feeds.conf
     ```
-   
+
 - Add the following lines to the base-feeds.conf file:
 
   ```
@@ -34,7 +35,7 @@ Git is a widely used distributed version control tool, we will need to install G
   src/gz edison http://repo.opkg.net/edison/repo/edison/
   src/gz core2-32 http://repo.opkg.net/edison/repo/core2-32/
   ```
-  
+
 - Exit by hitting “esc,” “SHIFT+:" and typing “wq” then hitting Enter. If you are unfamiliar with vi editing, read [this][vi].
 
 - Next, update and upgrade your opkg base-feeds on your command line:
@@ -42,7 +43,7 @@ Git is a widely used distributed version control tool, we will need to install G
     ```
     $ opkg update
     ```
-	
+
 You should see the following:
 
 ![][img1]
@@ -55,7 +56,7 @@ You should see the following:
   $ opkg install git
   $ git clone github.com/Azure/azure-iot-suite-sdks.git
   ```
-  
+
 - You may be prompted to add an RSA key to your device, respond with “yes.”
 
 - Alternate Deploy Method
@@ -76,14 +77,14 @@ We first need to update the credentials in the sample AMPQ app to match those of
   ```
   static const char* connectionString = “HostName=[YOUR-HOST-NAME];CredentialScope=Device;DeviceId=[YOUR-DEVICE-ID];SharedAccessKey=[YOUR-ACCESS-KEY";
   ```
-  
+
 - In the terminal, enter /c/build_all/linux and execute the following steps:
   ```
   $ opkg install util-linux-libuuid-dev
   $ ./build_proton.sh
   $ ./build.sh
   ```
-  
+
 - Update the ldconfig cache
   While building the Azure IoT SDK, we needed to first build a dependency called [Qpid Proton][qpidproton].
   However, we need to register the resulting library with [ldconfig][ldcconfig] before we can proceed to testing and building our C-language samples.
@@ -142,4 +143,5 @@ Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT
 [img1]: ./media/edison01.png
 [img2]: ./media/edison02.png
 
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[setup-iothub]: ../../doc/setup_iothub.md
+[provision-device]: ./provision_device.md

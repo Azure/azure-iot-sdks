@@ -5,6 +5,7 @@ The following document describes the process of connecting a [BeagleBone Green](
 ## Table of Contents
 
 - [Requirements](#requirements)
+- [Before you begin](#beforebegin)
 - [Preparing the BeagleBone Green board](#preparing)
 - [Build the sample application on the device](#buildrunapp)
 - [Run the client simple sample](#buildandrun)
@@ -17,19 +18,24 @@ The following document describes the process of connecting a [BeagleBone Green](
   - SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the BeagleBone Green.
   - Required hardware:
 	  - [BeagleBone Green](http://beagleboard.org/Green)
-	  - An USB Mini cable
-	  - An Ethernet cable or Wi-Fi dongle
-  - [Setup your IoT Hub][setup-iothub]
-  - Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
+	  - USB Mini cable
+	  - Ethernet cable or Wi-Fi dongle
 
-**Note:** The Device Explorer utility only runs on Windows. You can run it on a different machine from your Linux desktop development environment.
+<a name="beforebegin"/>
+## Before you begin
+Before you begin you will need to create and configure an IoT hub to connect to.
+  1. [Set up your IoT Hub][setup-iothub].
+  1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
+  1. Make note of the Connection String for your device from the previous step.
+
+  > Note: You can skip this step if you just want to build the sample application without running it.
 
 <a name="preparing"/>
 ## Preparing the BeagleBone Green board
 
 - To setup your BeagleBone Green device and connect it to your machine, follow the instructions on the [beagleboard.org](http://beagleboard.org/getting-started) site
 - Connect your BeagleBone Green to your network using an ethernet cable or by using a WiFi dongle on the device.
-- You need to discover the IP address of your BeagleBone Green before your can connect using PuTTY. To do this you can find instructions on this [wiki](http://elinux.org/Beagleboard:Terminal_Shells). 
+- You need to discover the IP address of your BeagleBone Green before your can connect using PuTTY. To do this you can find instructions on this [wiki](http://elinux.org/Beagleboard:Terminal_Shells).
 - Once you see that your board is alive, open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine.
 - Use the IP address from step 4 as the Host name, Port=22, and Connection type=SSH to complete the connection.
 - When prompted, log in with username **root** (no password by default).
@@ -96,5 +102,5 @@ The following document describes the process of connecting a [BeagleBone Green](
 
 - You can use the DeviceExplorer tool on your desktop machine to see the data your device is sending and receiving.
 
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [setup-iothub]: ../../doc/setup_iothub.md
+[provision-device]: ./provision_device.md

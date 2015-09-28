@@ -7,8 +7,14 @@ This "Getting Started" document shows you how to build and run the **simplesampl
 These instructions assume that you have done the following:
 
 - [Prepare your development environment][devbox-setup]
-- [Setup your IoT Hub][setup-iothub]
-- Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
+
+## Before you begin
+Before you begin you will need to create and configure an IoT hub to connect to.
+  1. [Set up your IoT Hub][setup-iothub].
+  1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
+  1. Make note of the Connection String for your device from the previous step.
+
+  > Note: You can skip this step if you just want to build the sample application without running it.
 
 ## Build and run the sample
 
@@ -20,7 +26,7 @@ These instructions assume that you have done the following:
     ```
    static const char* connectionString = "[device connection string]";
     ```
-4. Replace "[device connection string]" with the connection string for your device. The section "Get device connection string or data" in the document [How to use Device Explorer][device-explorer] explains how to retrieve the connection string for your device. Save the changes.
+4. Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
 
 5. The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
 
@@ -34,3 +40,4 @@ These instructions assume that you have done the following:
 [devbox-setup]: devbox_setup.md
 [device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [setup-iothub]: ../../doc/setup_iothub.md
+[provision-device]: ./provision_device.md
