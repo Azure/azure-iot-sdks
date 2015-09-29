@@ -5,6 +5,7 @@
   "author": "Microsoft Corporation",
   "license": "MIT",
   "main": "iothub-explorer.js",
+  "bin": "iothub-explorer.js",
   "dependencies": {
     "azure-iothub": "1.0.0-preview.3",
     "colors-tmpl": "^1.0.0",
