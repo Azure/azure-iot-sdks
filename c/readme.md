@@ -94,9 +94,11 @@ Contains tools that are currently used in testing the client libraries: Mocking 
 
 Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requirements vs code implementation).
 
-## API reference
+## API reference documentation
 
-API documentation can be found here:
+API reference documentation can be found online at http://azure.github.io/azure-iot-sdks/c/api_reference/index.html.
+
+If you clone the repository to your local machine, you can also find a copy of the API reference documents here:
 
 ```
 {IoT device SDK root}/c/doc/api_reference/html/index.html

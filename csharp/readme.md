@@ -59,6 +59,10 @@ This folder contains various .NET samples that illustrate how to use the client 
 
 This Visual Studio solution contains the client library and sample projects.
 
+## API reference
+
+API reference documentation can be found online at https://msdn.microsoft.com/library/microsoft.azure.devices.aspx.
+
 [setup-iothub]: ../doc/setup_iothub.md
 [devbox-setup]: doc/devbox_setup.md
 [run-sample-on-desktop-windows]: doc/run_sample_on_desktop_windows.md

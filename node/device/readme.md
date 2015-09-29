@@ -40,9 +40,11 @@ This folder contains the device SDK library code.
 
 This folder contains various sample applications that illustrate how to use the device features of the Microsoft Azure IoT SDK for Node.js.
 
-## API reference
+## API reference documentation
 
-API documentation can be found here:
+API reference documentation can be found online at http://azure.github.io/azure-iot-sdks/node/api_reference/index.html.
+
+If you clone the repository to your local machine, you can also find a copy of the API reference documents here:
 
 ```
 {IoT device SDK root}/node/device/doc/api_reference/index.html
