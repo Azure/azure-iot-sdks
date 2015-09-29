@@ -13,6 +13,7 @@ IOTHUB_TEST_FILES_LOCATION=../../../testtools/iothub_test/src
 #setting the sources to be all the .c files in IOTHUB_FILES_LOCATION
 SOURCES__2=\
 	../../src/iothubtransportmqtt.c \
+	../../adapters/mqttapi_paho.c
 
 SOURCES=$(filter-out $(wildcard $(IOTHUB_FILES_LOCATION)/*_2*) , $(SOURCES__2))
 

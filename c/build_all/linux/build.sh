@@ -28,9 +28,9 @@ usage ()
     echo " --run-e2e-tests               run end-to-end tests (e2e tests are not run by default)"
     echo " --run-longhaul-tests          run long haul tests (long haul tests are not run by default)"
     echo ""
-    echo " --no_amqp                     do no build AMQP transport and samples"
-    echo " --no_http                     do no build HTTP transport and samples"
-    echo " --no_mqtt                     do no build MQTT transport and samples"
+    echo " --no-amqp                     do no build AMQP transport and samples"
+    echo " --no-http                     do no build HTTP transport and samples"
+    echo " --no-mqtt                     do no build MQTT transport and samples"
     exit 1
 }
 

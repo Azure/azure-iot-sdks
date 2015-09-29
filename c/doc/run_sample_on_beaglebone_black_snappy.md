@@ -1,11 +1,12 @@
 # BeagleBone Black Setup
 
 This file contains the following information:
-- How to get a snap running that connects a BeagleBone Black board to Azure IoT Hubs. 
+- How to get a snap running that connects a BeagleBone Black board to Azure IoT Hubs.
 - Connecting a [BeagleBone Black](http://beagleboard.org/black) device and building the SDK sample that sends data from the board to Azure IoT Hubs.
 
 ## Table of Contents
 - [Requirements](#Requirements)
+- [Before you begin](#beforebegin)
 - [Prerequisites](#Prerequisites)
 	- [Install Linux](#Install-Linux)
 	- [Install Snappy](#Install-Snappy)
@@ -20,19 +21,26 @@ This file contains the following information:
 - [Tips](#Tips)
 
 <a name="Requirements"/>
-## Requirements 
+## Requirements
 
 - Computer with GitHub installed and access to the [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub private repository.
 - SSH client, such as [PuTTY](http://www.putty.org/), so you can access the command line.
 - Either the Chrome or Firefox web browser, so you can browse to the embedded webserver on your your board.
 - The boards come with all the required software; however, to update the board and run the current sample you must use FTP or a USB driver to copy your files. You can also use [WinSCP](http://winscp.net/eng/index.php).
 - Required hardware: [Beagleboard-BeagleBone](http://www.amazon.com/Beagleboard-BeagleBone-Starter-Case--Power-Supply--Micro/dp/B00P6TV9V4/ref=sr_1_3?ie=UTF8&qid=1426002583&sr=8-3&keywords=beaglebone).
+- A microSD card attached to a machine where Linux is (or can be) installed. To prepare a microSD card your Linux installation must be able to access the microSD card.
 
+<a name="beforebegin"/>
+## Before you begin
+Before you begin you will need to create and configure an IoT hub to connect to.
+  1. [Set up your IoT Hub][setup-iothub].
+  1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
+  1. Make note of the Connection String for your device from the previous step.
+
+  > Note: You can skip this step if you just want to build the sample application without running it.
 
 <a name="Prerequisites"/>
 ## Prerequisites
-
-- A microSD card attached to a machine where Linux is (or can be) installed. To prepare a microSD card your Linux installation must be able to access the microSD card.
 
 <a name="Install-Linux"/>
 ### Install Linux
@@ -243,3 +251,6 @@ The Azure IoT Hub SDK depends on Apache Qpid Proton (AMQP) to integrate with the
 
 		cd ~/azure-iot-sdks/c/iothub_client/build/linux
 		make -f makefile.linux all
+
+[setup-iothub]: ../../doc/setup_iothub.md
+[provision-device]: ./provision_device.md

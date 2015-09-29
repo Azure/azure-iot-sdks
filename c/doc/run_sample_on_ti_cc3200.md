@@ -5,24 +5,29 @@ This file contains the following information:
 - How to run the sample.
 
 ## Table of Contents
+- [Before you begin](#beforebegin)
 - [Prerequisites](#Prerequisites)
 - [Build the Azure SDK](#Build-SDK)
 - [Build the sample simplesample_http application](#Build-SAMPLE)
 - [Flash the sample simplesample_http and the root certificate](#Flash-SAMPLE)
 - [Run the sample simplesample_http](#Run-SAMPLE)
 
+<a name="beforebegin"/>
+## Before you begin
+Before you begin you will need to create and configure an IoT hub to connect to.
+  1. [Set up your IoT Hub][setup-iothub].
+  1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
+  1. Make note of the Connection String for your device from the previous step.
+
+  > Note: You can skip this step if you just want to build the sample application without running it.
+
 <a name="Prerequisites"></a>
 ## Prerequisites
 Required hardware: [CC3200 Launchpad](http://www.ti.com/tool/cc3200-launchxl).
 
-Before you start, you should:
-
-- [Setup your IoT Hub][setup-iothub]
-- Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
-
 This procedure assumes you have already installed the Azure IoT SDK on your development machine. These instructions refer to the folder that contains the Azure IoT SDK on your local machine as `<AZURE_INSTALL_DIR>`.
 
-> **Note:** You can install the Azure IoT SDK using  
+> **Note:** You can install the Azure IoT SDK using
 `git clone https://github.com/Azure/azure-iot-sdks.git`
 
 While not strictly required, we recommend that you install the following tools from TI in the same directory and that you use directory names without any whitespace. This documentation assumes that you install everything in `C:\ti`.
@@ -64,7 +69,7 @@ While not strictly required, we recommend that you install the following tools f
 ## Build the sample simplesample_http application
 Before building the application, complete the following steps:
 
-1. Open the `simplesample_http.c` file from the directory `<AZURE_INSTALL_DIR>\azure-iot-sdks\c\serializer\samples\simplesample_http` in a text editor and update the "connectionString" variable. You can use [Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to create a device-specific connection string for your device to connect to your IoT hub.
+1. Open the `simplesample_http.c` file from the directory `<AZURE_INSTALL_DIR>\azure-iot-sdks\c\serializer\samples\simplesample_http` in a text editor and replace the value of the "connectionString" variable with the device connection string you noted [earlier](#beforebegin).
 
 2. Open the file `tirtos/cc3200/main.c`. Search for "USER STEP" and update the current date-time macros.
 
@@ -118,5 +123,5 @@ The Device Explorer can be used to monitor the data sent by the application. Und
 9/17/2015 7:28:28 PM> Data:[{"Temperature":67, "Humidity":42}]
 ```
 
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [setup-iothub]: ../../doc/setup_iothub.md
+[provision-device]: ./provision_device.md

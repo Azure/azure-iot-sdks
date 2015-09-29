@@ -5,11 +5,17 @@ The following instructions describe the steps for connecting an [mbed-enabled Fr
 
 ## Requirements
 
-- These instructions assume that you have created an Azure IoT Hub instance. To learn how to do this, visit [this page](LINK TO AZURE IOT HUB SETUP PAGE ON AZURE.COM).
-
 - SSH client, such as [PuTTY](http://www.putty.org/), so you can access the command line.
 
 - Required hardware: [mbed-enabled Freescale K64F](http://developer.mbed.org/platforms/IBMEthernetKit).
+
+## Before you begin
+Before you begin you will need to create and configure an IoT hub to connect to.
+  1. [Set up your IoT Hub][setup-iothub].
+  1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
+  1. Make note of the Connection String for your device from the previous step.
+
+  > Note: You can skip this step if you just want to build the sample application without running it.
 
 ## Connect the device
 
@@ -37,10 +43,11 @@ The following instructions describe the steps for connecting an [mbed-enabled Fr
 
 	![][3]
 
-- Open iothub_client_sample_amqp\iothub_client_sample_amqp.c, and replace the highlighted code with your device connection string (to learn how to obtain this device connection string using the device explorer, read [this](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)):
+- Open iothub_client_sample_amqp/iothub_client_sample_amqp.c, and replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin):
 
 	![][4]
 
+- Save the changes.
 
 ## Build and run the program
 
@@ -54,7 +61,7 @@ The following instructions describe the steps for connecting an [mbed-enabled Fr
 
 	![][6]
 
-- In PuTTY, click the **Serial** connection type. The device most likely connects at 115200, so enter that value in the **Speed** box. Then click **Open**: 
+- In PuTTY, click the **Serial** connection type. The device most likely connects at 115200, so enter that value in the **Speed** box. Then click **Open**:
 
 	![][7]
 
@@ -65,7 +72,8 @@ The program starts executing. You may have to reset the board (press CTRL+Break 
 - Now  your device is sending telemetry data to Azure IoT Hub and you can monitor this data and send notifications to your device using the [device explorer tool](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
 
 
-
+[setup-iothub]: ../../doc/setup_iothub.md
+[provision-device]: ./provision_device.md
 [1]: ./media/mbed1.png
 [2]: ./media/mbed2.png
 [3]: ./media/mbed3.png
@@ -73,4 +81,3 @@ The program starts executing. You may have to reset the board (press CTRL+Break 
 [5]: ./media/mbed5.png
 [6]: ./media/mbed6.png
 [7]: ./media/mbed7.png
-

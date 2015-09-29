@@ -120,7 +120,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(DeviceClientDir)\IAuthenticationMethod.cs" />
-    <Compile Include="$(DeviceClientDir)\AuthenticationMethodFactory.cs" />    
+    <Compile Include="$(DeviceClientDir)\AuthenticationMethodFactory.cs" />
     <Compile Include="$(DeviceClientDir)\Common\ActionItem.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Api\ClientApiVersionHelper.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Api\IotHubApiResources.cs" />
@@ -216,10 +216,10 @@
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <DelaySign>true</DelaySign>
+    <DelaySign>false</DelaySign>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>

@@ -1,10 +1,11 @@
 # BeagleBone Black Debian Setup
 
-The following document describes the process of connecting a [BeagleBone Black](http://beagleboard.org/black) device running Linux to Azure IoT Hub.
+This document describes the process of setting up a [BeagleBone Black](http://beagleboard.org/black) device to connect to an Azure IoT hub.
 
 ## Table of Contents
 
 - [Requirements](#requirements)
+- [Before you begin](#beforebegin)
 - [Preparing the BeagleBone Black board](#preparing)
 - [Build the sample application on the device](#buildrunapp)
 - [Run the client simple sample](#buildandrun)
@@ -17,72 +18,91 @@ The following document describes the process of connecting a [BeagleBone Black](
   - SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the BeagleBone Black.
   - Required hardware:
 	  - [BeagleBone Black](http://beagleboard.org/black)
-	  - An USB Mini cable
-	  - An Ethernet cable or Wi-Fi dongle
-  - [Setup your IoT Hub][setup-iothub]
-  - Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
+	  - USB Mini cable
+	  - Ethernet cable or Wi-Fi dongle
 
-**Note:** The Device Explorer utility only runs on Windows. You can run it on a different machine from your Linux desktop development environment.
+<a name="beforebegin"/>
+## Before you begin
+Before you begin you will need to create and configure an IoT hub to connect to.
+  1. [Set up your IoT Hub][setup-iothub].
+  1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
+  1. Make note of the Connection String for your device from the previous step.
+
+  > Note: You can skip this step if you just want to build the sample application without running it.
 
 <a name="preparing"/>
-## Preparing the BeagleBone Black board
+## Preparing the BeagleBone Black
 
-- To setup your BeagleBone Black device and connect it to your machine, follow the instructions on the [beagleboard.org](http://beagleboard.org/getting-started) site
+- Follow the instructions on the [beagleboard.org](http://beagleboard.org/getting-started) site to set up your BeagleBone Black device and connect it to your computer.
 - Connect your BeagleBone Black to your network using an ethernet cable or by using a WiFi dongle on the device.
-- You need to discover the IP address of your BeagleBone Black before your can connect using PuTTY. To do this you can find instructions on this [wiki](http://elinux.org/Beagleboard:Terminal_Shells). 
-- Once you see that your board is alive, open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine.
-- Use the IP address from step 4 as the Host name, Port=22, and Connection type=SSH to complete the connection.
+- Follow the instructions on this [wiki](http://elinux.org/Beagleboard:Terminal_Shells) to obtain your device's IP address.
+- Open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine and connect to your
+device using the IP address from the previous step.  Use Port=22 and Connection Type=SSH.
 - When prompted, log in with username **root** (no password by default).
 
 <a name="buildrunapp"/>
 ## Build the sample application on the device
 
-- Install the prerequisite packages for the Microsoft Azure IoT Device SDK for C by issuing the following commands from the command line on the board in your PuTTY terminal window:
+Run the following commands in the terminal window connected to your BeagleBone Black.
+
+- Install the prerequisite packages for the device SDK:
 
   ```
   sudo apt-get update
   sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git
   ```
+  If you get errors running sudo, make sure your root password is set as decribed above.
 
-  **Note:** You can paste into a PuTTY terminal window in Windows by using mouse right-click.
+	> Note: Right-click in a PuTTY terminal window to paste text.
 
-- Download the Microsoft Azure IoT Device SDK for C by issuing the following command on the board:
+- Navigate to the directory where you want to  install the SDK.  If you're not sure, navigate to your home directory:
+  ```
+  cd ~
+  ```
+- Download the Azure IoT device SDK to your BeagleBone Black:
 
   ```
   git clone https://github.com/Azure/azure-iot-sdks.git
   ```
 
-  You will be prompted for your GitHub username and password -- if you have two-factor authentication enabled for your account, you'll need to generate/use a personal access token in place of your password.
+- Confirm that you now have a copy of the SDK under the directory ./azure-iot-sdks.
+Then cd to the directory:
+  ```
+  cd azure-iot-sdks
+  ```
 
-- Verify that you now have a copy of the SDK under the directory ~/azure-iot-sdks.
-
-
-- Edit the file ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace the placeholder in the following lines of code with your IoT Hub device connection string (see requirements section for how to setup your IoT Hub instance and provision your device info). You can use the console-based text editor **nano** to edit the file:
+- Edit the file ./c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace connection string placeholder with the connection string
+you obtained in the "Connecting your device to an IoT hub" step above.
+(You can use the console-based text editor **nano** to edit the file):
 
   ```
   static const char* connectionString = "[device connection string]";
   ```
+  > Note: You can skip this step if you only want to build the samples without running them.
 
-- On the board, run the following command to build and install Apache Proton library:
-
-  ```
-  ~/azure-iot-sdks/c/build_all/linux/build_proton.sh --install
-  ```
-
-- Assuming everything went OK on the build_proton.sh, you can now build the SDK samples using the following command:
+- Build and install the Apache Proton library:
 
   ```
-  ~/azure-iot-sdks/c/build_all/linux/build.sh
+    sudo ./c/build_all/linux/build_proton.sh --install /usr
   ```
 
-<a name="#buildandrun"/>
-## Run the sample
-
-- Now run the **simplesample_amqp** sample by issuing the following commands:
+- Finally, build the sample applications:
 
   ```
-  ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ./c/build_all/linux/build.sh
   ```
+
+<a name="buildsimplesample"/>
+## Run the AMQP simple sample
+
+- Run the **simplesample_amqp** sample:
+
+  ```
+  ./serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ```
+
+This sample application sends simulated sensor data to your IoT Hub.
+
 
 <a name="tips"/>
 ## Tips
@@ -90,11 +110,11 @@ The following document describes the process of connecting a [BeagleBone Black](
 - If you just want to build the serializer samples, run the following commands:
 
   ```
-  cd ~/azure-iot-sdks/c/serializer/build/linux
+  cd ./c/serializer/build/linux
   make -f makefile.linux all
   ```
 
-- You can use the DeviceExplorer tool on your desktop machine to see the data your device is sending and receiving.
+- On Windows, you can use the Device Explorer tool to see the data your device is sending and receiving.
 
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [setup-iothub]: ../../doc/setup_iothub.md
+[provision-device]: ./provision_device.md
