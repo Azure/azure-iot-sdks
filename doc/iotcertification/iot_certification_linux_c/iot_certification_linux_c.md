@@ -29,8 +29,8 @@ How to certify IoT devices running Linux with Azure IoT SDK
 
 This document provides step-by-step guidance to IoT hardware publishers on how
 to certify an IoT enabled hardware with Azure IoT SDK. This multi-step process
-includes: 
--   Configuring Azure IoT Hub 
+includes:
+-   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
 -   Packaging and sharing the logs
@@ -50,12 +50,12 @@ You should have the following items ready before beginning the process:
 -   Required hardware to certify.
 
 ***Note:*** *If you haven’t contacted Microsoft about being an Azure Certified for IoT partner, please submit this [form](<https://iotcert.cloudapp.net/>) first to request it and then follow these instructions.*
-    
+
 <a name="Step_1:_Configure"/>
 
 # Step 1: Sign Up To Azure IoT Hub
 
-Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service. As part of the sign up process, you will receive the connection string. 
+Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service. As part of the sign up process, you will receive the connection string.
 
 -   **IoT Hub Connection String**: An example of IoT Hub Connection String is as below:
 
@@ -81,7 +81,7 @@ To run Device Explorer tool, use following configuration string as described in
 [Step1](#Step_1:_Configure):
 
 -   IoT Hub Connection String
-    
+
 
 **Steps:**
 1.  Click [here](<https://github.com/Azure/azure-iot-sdks/blob/develop/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) to download and install Device Explorer.
@@ -131,17 +131,15 @@ Azure IoT SDK.
 
     **Debian or Ubuntu**
 
-        sudo apt-get update 
+        sudo apt-get update
 
-        sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git 
-
-        sudo apt-get install -y uuid-dev uuid 
+        sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake unzip openjdk-7-jre
 
     **Fedora**
 
-        sudo dnf check-update -y 
+        sudo dnf check-update -y
 
-        sudo dnf install libcurl-devel openssl-devel libuuid-devel uuid-devel gcc-c++ make cmake git      
+        sudo dnf install libcurl-devel openssl-devel libuuid-devel uuid-devel gcc-c++ make cmake unzip java-1.7.0-openjdk
 
     **Any Other Linux OS**
 
@@ -234,19 +232,19 @@ In this section you will run the end to end test cases for Azure IoT client SDK 
     -   **IOTHUB_EVENTHUB_LISTEN_NAME:** Name of your Event Hub
     -   **IOTHUB_NAME:** Name of your IoT Hub
     -   **IOTHUB_SHARED_ACCESS_SIGNATURE:** this value can be generated from Device Explorer
-    
+
         Go to **Configuration** tab &minus;&gt; Click **Generate SAS** button
     -   **IOTHUB_SUFFIX:** Suffix of your IoT Hub hostname in connection string
     -   **IOTHUB_PARTITION_COUNT:** Set value as **16**
-    -   **IOTHUB_POLICY_NAME:** ToDo 
+    -   **IOTHUB_POLICY_NAME:** ToDo
     -   **IOTHUB_POLICY_KEY:** ToDo
-    
+
 
 -   Set environment variables by running following command on your device:
 
         cd ./azure-iot-sdks/tools/iot_hub_e2e_tests_params/
         chmod +x setiotdeviceparametersfore2etests.sh
-        sudo setiotdeviceparametersfore2etests.sh 
+        sudo setiotdeviceparametersfore2etests.sh
 
 ### 3.3.2 Run End to End test cases
 
