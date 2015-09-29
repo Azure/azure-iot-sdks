@@ -221,7 +221,8 @@ HTTPAPI_RESULT HTTPAPI_ExecuteRequest(HTTP_HANDLE handle, HTTPAPI_REQUEST_TYPE r
     if (!con->is_connected())
     {
         // Load the certificate
-        if (!con->load_certificate((const unsigned char*)httpHandle->certificate, strlen(httpHandle->certificate)))
+        if ((httpHandle->certificate != NULL) &&
+			(!con->load_certificate((const unsigned char*)httpHandle->certificate, strlen(httpHandle->certificate) + 1)))
         {
             result = HTTPAPI_ERROR;
             LogError("Could not load certificate (result = %s)\r\n", ENUM_TO_STRING(HTTPAPI_RESULT, result));
@@ -229,7 +230,7 @@ HTTPAPI_RESULT HTTPAPI_ExecuteRequest(HTTP_HANDLE handle, HTTPAPI_REQUEST_TYPE r
         }
 
         // Make the connection
-        if (!con->connect(httpHandle->host, 443))
+        if (con->connect(httpHandle->host, 443) != 0)
         {
             result = HTTPAPI_ERROR;
             LogError("Could not connect (result = %s)\r\n", ENUM_TO_STRING(HTTPAPI_RESULT, result));
@@ -539,15 +540,8 @@ HTTPAPI_RESULT HTTPAPI_SetOption(HTTP_HANDLE handle, const char* optionName, con
         }
         else
         {
-            if (strcpy_s(h->certificate, len, (const char*)value) != 0)
-            {
-                result = HTTPAPI_ERROR;
-                LogError("HTTPAPI_SetOption::Could not strcpy_s certificate\r\n");
-            }
-            else
-            {
-                result = HTTPAPI_OK;
-            }
+            (void)strcpy(h->certificate, (const char*)value);
+            result = HTTPAPI_OK;
         }
     }
     else
@@ -569,6 +563,22 @@ HTTPAPI_RESULT HTTPAPI_CloneOption(const char* optionName, const void* value, co
     {
         result = HTTPAPI_INVALID_ARG;
         LogError("invalid argument(NULL) passed to HTTPAPI_CloneOption\r\n");
+    }
+    else if (strcmp("TrustedCerts", optionName) == 0)
+    {
+        size_t certLen = strlen((const char*)value);
+        char* tempCert = (char*)malloc(certLen+1);
+        if (tempCert == NULL)
+        {
+            result = HTTPAPI_INVALID_ARG;
+            LogError("unable to allocate certificate memory in HTTPAPI_CloneOption\r\n");
+        }
+        else
+        {
+            (void)strcpy(tempCert, (const char*)value);
+            *savedValue = tempCert;
+            result = HTTPAPI_OK;
+        }
     }
     else
     {
