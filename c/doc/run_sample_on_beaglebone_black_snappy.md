@@ -187,7 +187,7 @@ To run this tool, you need connection and configuration information for your IoT
 - Install the prerequisite packages by issuing the following commands from the command line on the board:
 
 		sudo apt-get update
-		sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git
+		sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
 
 - Download the SDK to the board by issuing the following command in PuTTY:
 

@@ -47,7 +47,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
   ```
   sudo apt-get update
-  sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git
+  sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
   ```
 
   **Note:** You can paste into a PuTTY terminal window in Windows by using mouse right-click.
