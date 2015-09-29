@@ -10,8 +10,7 @@ IOTHUB_FILES_LOCATION=../../src
 
 #setting the sources to be all the .c files in IOTHUB_FILES_LOCATION
 SOURCES__2=\
-	$(wildcard $(IOTHUB_FILES_LOCATION)/*.c) \
-	../../adapters/mqttapi_paho.c \
+	$(wildcard $(IOTHUB_FILES_LOCATION)/*.c)
 
 SOURCES=$(filter-out $(wildcard $(IOTHUB_FILES_LOCATION)/*_2*) , $(SOURCES__2))
 	
