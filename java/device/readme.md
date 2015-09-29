@@ -40,9 +40,11 @@ This folder contains the client library for Java.
 
 This folder contains various Java samples that illustrate how to use the client library.
 
-## API reference
+## API reference documentation
 
-API documentation can be found here:
+API reference documentation can be found online at http://azure.github.io/azure-iot-sdks/java/api_reference/index.html.
+
+If you clone the repository to your local machine, you can also find a copy of the API reference documents here:
 
 ```
 {IoT device SDK root}/java/device/doc/api_reference/index.html

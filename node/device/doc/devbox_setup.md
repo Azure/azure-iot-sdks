@@ -8,7 +8,7 @@ This document describes how to prepare your development environment to use the *
 <a name="devenv"/>
 ## Setup your development environment
 
-Complete the following steps to setup your development environment:
+Complete the following steps to set up your development environment:
 - Ensure that the 0.12.x version of Node.js is installed. Run `node --version` at the command line to check the version.
 
   You may choose to develop directly on your target device, in which case you must ensure that the correct version of Node.js is installed on the device. To download Node.js and to learn how to install it, visit [Node.js][node-site]. Make sure you download the correct version (0.12.x) from the [Previous Releases][node-prev] page. For information about using a package manager to install on Linux, see [Installing Node.js via package manager][node-linux].

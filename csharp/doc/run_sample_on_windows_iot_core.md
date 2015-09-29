@@ -17,11 +17,11 @@ Before you get started, you should:
 
 ## Setting Up You Device
 
-First of all, you need to set up your device. 
+First of all, you need to set up your device.
 
 - If you’re using Raspberry Pi, set up your device according to instructions [here](http://ms-iot.github.io/content/en-US/win10/SetupRPI.htm).
 - If you’re using MinnowBoard Max set up your device according to instructions [here](http://ms-iot.github.io/content/en-US/win10/SetupMBM.htm).
-- If you’re using Dragonboard setup up instructions should come soon [here](http://ms-iot.github.io/content/en-US/GetStarted.htm).
+- If you’re using Dragonboard setup instructions should come soon [here](http://ms-iot.github.io/content/en-US/GetStarted.htm).
 
 
 ## Install Visual Studio 2015 and Tools
@@ -40,7 +40,7 @@ To create a UWP solution in Visual Studio, select File -> New -> Project:
 
 ![New Project Creation](./pngs/new_project_menu.png)
 
-In the New Project dialog that comes up, select "Blank App (Universal Windows) Visual C#. Give your project a name, for example "MyFirstIoTCoreApp": 
+In the New Project dialog that comes up, select "Blank App (Universal Windows) Visual C#. Give your project a name, for example "MyFirstIoTCoreApp":
 
 ![New Solution Dialog](./pngs/new_solution.PNG)
 
@@ -74,17 +74,17 @@ At last, you can start writing code! Open the file named `MainPage.xampl.cs` and
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client;
 
-In our first sample, we will try to send a simple string to Azure IoT Hub. 
+In our first sample, we will try to send a simple string to Azure IoT Hub.
 
 Add the following function to class `MainPage`:
 
     private async Task SendDataToAzure()
     {
         DeviceClient deviceClient = DeviceClient.CreateFromConnectionString("<replace>", TransportType.Http1);
-    
+
         var text = "Hellow, Windows 10!";
         var msg = new Message(Encoding.UTF8.GetBytes(text));
-    
+
         await deviceClient.SendEventAsync(msg);
     }
 
@@ -104,7 +104,7 @@ Now choose the right architecture (x86 or ARM, depending on your device) and set
 
 ![](./pngs/select_arch.png)
 
-If you're using a Raspberry Pi device, select ARM. For other supported devices, consult [windowsondevices.com](http://www.windowsondevices.com). 
+If you're using a Raspberry Pi device, select ARM. For other supported devices, consult [windowsondevices.com](http://www.windowsondevices.com).
 
 You will need to deploy your app to an IoT device so that you can run and debug it remotely. Right-click on the solution in the Solution Explorer, select Properties and navigate to the Debug tab:
 
@@ -133,14 +133,14 @@ In this sample, we will learn how to receive data from Azure IoT Hub. Define the
     public async static Task ReceiveDataFromAzure()
     {
         DeviceClient deviceClient = DeviceClient.CreateFromConnectionString("<replace>", TransportType.Http1);
-    
+
         Message receivedMessage;
         string messageData;
-    
+
         while (true)
         {
             receivedMessage = await deviceClient.ReceiveAsync();
-    
+
             if (receivedMessage != null)
             {
                 messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
