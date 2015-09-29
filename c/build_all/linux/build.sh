@@ -1,4 +1,3 @@
-
 #!/bin/bash
 #set -o pipefail
 #
@@ -94,7 +93,7 @@ color ()
         tty -s && tput setaf 2
         return 0
     fi
-    
+
     if [ "$1" == "cyan" ]
     then
         tty -s && tput setaf 6
