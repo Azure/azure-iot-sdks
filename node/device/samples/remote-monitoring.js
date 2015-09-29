@@ -42,7 +42,7 @@ function sendTelemetryData(){
   var data = JSON.stringify({ "DeviceID":deviceID, "Temperature":temperature, "Humidity":humidity, "ExternalTemperature":externalTemperature });
   console.log("Sending device telemetry data:\n"+data);
   client.sendEvent(new device.Message(data), printResultFor('send'));
-};
+}
 
 // function to wait on notifications
 var isWaiting = false;
@@ -53,17 +53,17 @@ function waitForNotifications(){
     if (!err && res.statusCode !== 204) {
       console.log('receive data: ' + msg.getData());
       var command = JSON.parse(msg.getData());
-      if (command.Name == "SetTemperature")
+      if (command.Name === "SetTemperature")
       {
         temperature = command.Parameters.Temperature;
         console.log("New temperature set to :" + temperature + "F");
       }
-      
+
       client.complete(msg, printResultFor('complete'));
     }
     isWaiting = false;
   });
-};
+}
 
 // Send device meta data
 var deviceMetaData = {
