@@ -52,8 +52,6 @@ To build Device Explorer yourself, open the **tools\\DeviceExplorer\\DeviceExplo
 
 Creating a device adds device details to the device identity registry. IoT Hub uses this information to generate a device-specific connection string that enables the device to connect to the IoT hub.
 
-  ![](media/device_explorer/iotgetstart2.png)
-
 -  On the **Management** tab, click **Create** to register a new device with that IoT Hub. The **Create Device** dialog appears. In the **Device ID** field, type a unique name for your device (or select **Auto Generate ID** to generate a unique ID instead). Then click **Create**.
 
   ![](media/device_explorer/iotgetstart3.png)
