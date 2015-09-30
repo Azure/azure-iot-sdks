@@ -37,18 +37,21 @@ You can use the [Azure Preview Portal][azure-portal] to create an IoT hub to use
 
     ![][5]
 
-Your IoT hub is now created, and you have the connection string you need to configure the [Device Explorer][use-device-explorer]. This connection string enables client applications to perform management operations on the IoT hub such as adding a new device to the IoT hub. The [Device Explorer][use-device-explorer] utility in this repository is an example of such an IoT hub management application.
+Your IoT hub is now created, and you have the connection string you need to use the [iothub-explorer][use-iothub-explorer] or the [Device Explorer][use-device-explorer] tool. This connection string enables applications to perform management operations on the IoT hub such as adding a new device to the IoT hub.
+
 
 ## Add devices to IoT Hub
 
-You must details of your device to IoT Hub before that device can communicate with the hub. When you add a device to an IoT hub, the hub generates the connection string that the device must use when it establishes the secure connection to the IoT hub.
+You must add details your device to IoT Hub before that device can communicate with the hub. When you add a device to an IoT hub, the hub generates the connection string that the device must use when it establishes the secure connection to the IoT hub.
 
-To add a device to your IoT hub, you can use the [Device Explorer][use-device-explorer] utility in this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)). This utility enables you to copy and paste the device specific connection string into the source code of application you will run on the device.
+To add a device to your IoT hub, you can use the [iothub-explorer][use-iothub-explorer] or the [Device Explorer][use-device-explorer] utility in this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)). These tools will generate a device specific connection string that you need to copy and paste in the source code of the application running on the device.
+
 
 [iothub-landing]: http://azure.microsoft.com/en-us/documentation/services/iot-hub/
 [azure-portal]: https://portal.azure.com
 [manage-iothub-portal]: http://azure.microsoft.com/en-us/documentation/articles/iot-hub-manage-portal/
 [use-device-explorer]: ../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[use-iothub-explorer]: ../c/doc/provision_device.md
 
 [1]: media/create-iot-hub1.png
 [2]: media/create-iot-hub2.png

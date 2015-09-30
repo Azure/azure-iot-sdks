@@ -2,15 +2,29 @@
 
 The Microsoft Azure IoT device SDK for .NET facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
 
-The library is available as a NuGet package for you include in your own development projects. This repository contains documentation and samples to help you get started using the SDK.
+The library is available as a NuGet package for you include in your own development projects. This repository contains documentation and samples to help you get started using this SDK.
 
 ## Features
 
  * Sends event data to Azure IoT based services.
  * Maps server commands to device functions.
- * Buffers data when network connection is down.
  * Batches messages to improve communication efficiency.
- * Supports pluggable transport protocols. Both HTTPS and AMQP protocols are available now for .NET. For the UWP, only HTTPS is available at this time.
+ * Supports pluggable transport protocols.
+
+Note the library Microsoft.Azure.Devices.Client supports both HTTPS and AMQP protocols. The Microsoft.Azure.Devices.Client.WinRT library currently supports HTTPS at this time.
+
+
+## Application development guidelines
+For more information on how to use this library refer to the documents below:
+- [Preparing your Windows development environment][devbox-setup]
+- [Running the C# samples on Windows][run-sample-on-desktop-windows]
+- [Running the C# samples on Windows IoT Core][run-sample-on-windows-iot-core]
+
+Other useful documents include:
+- [Setup IoT Hub][setup-iothub]
+- [How to use Device Explorer][device-explorer]
+- [Microsoft Azure IoT device SDK FAQ][faq-doc]
+- [Microsoft Azure IoT device SDK for .NET API reference][dotnet-api-ref]
 
 
 ## Folder structure of repository
@@ -25,25 +39,11 @@ This folder contains build scripts for the .NET client libraries and samples.
 
 This folder contains setup and getting started documents for .NET.
 
-- [Preparing your Windows development environment][devbox-setup]
-
-Run the C# sample application on:
-
-- [Windows][run-sample-on-desktop-windows]
-- [Windows IoT Core][run-sample-on-windows-iot-core]
-
-Other useful documents include:
-
-- [Setup IoT Hub][setup-iothub]
-- [How to use Device Explorer][device-explorer]
-- [Microsoft Azure IoT device SDK FAQ][faq-doc]
-- [Microsoft Azure IoT device SDK for .NET API reference][dotnet-api-ref]
-
-### /Microsoft.Azure.Devices.Client and /Microsoft.Azure.Devices.Client.WinRT
+### /Microsoft.Azure.Devices.Client  /Microsoft.Azure.Devices.Client.WinRT
 
 These folders contain the .NET client library source code.
 
-The Microsoft.Azure.Devices.Client.WinRT project is for building the UWP (Universal Windows Platform) version of the client library. For more information about the UWP version refer to the [FAQ][faq-doc].
+The Microsoft.Azure.Devices.Client.WinRT project is for building the UWP (Universal Windows Platform) version of the client library. For more information about the UWP version of this library refer to the [FAQ][faq-doc].
 
 These projects are useful if you want to modify or extend the .NET libraries.
 
