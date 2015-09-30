@@ -27,7 +27,7 @@ Note: You can download the free Community edition of Visual Studio 2015 [here](h
 3. Expand **Configuration Properties**, and then select **General**.
 4. Change the **Platform Toolset** to **Visual Studio 2013 (v120)**, then click **OK**.
 
-  ![Change Platform Toolset](media/platformtoolset.png)
+   ![][1]
 
 <a name="uwpsupport"/>
 ## UWP support for Microsoft.Azure.Devices.Client
@@ -104,3 +104,5 @@ If you get a build error when you try to [build qpid-jms](../java/device/doc/dev
 Windows: `set _JAVA_OPTIONS=-Xmx512M`
 
 Linux: `export _JAVA_OPTIONS=-Xmx512M`
+
+[1]: media/platformtoolset.png

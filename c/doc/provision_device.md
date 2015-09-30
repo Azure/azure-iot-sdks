@@ -12,7 +12,7 @@ IoT Hub only allows connections from known devices that present proper credentia
 <a name="provision"/>
 ## Provision the device in your IoT hub
 
-The iothub-explorer tool enables you to provision devices in your IoT hub.  It runs on any desktop computer where Node.js is available. To provision a new device:
+The iothub-explorer tool enables you to provision devices in your IoT hub.  It runs on any computer where Node.js is available. To provision a new device:
 
 1. [Get the connection string for your IoT Hub][setup-iothub]
 2. Run the following commands in a terminal/shell window from the tools/iothub-explorer folder, using the connection string you got in the previous step and replacing "mydevice" with your desired device name.

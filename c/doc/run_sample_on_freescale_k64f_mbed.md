@@ -21,9 +21,9 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
 - Connect the board to your network using an Ethernet cable. This step is required, as the sample depends on internet access.
 
-- Plug the device into your computer using a micro-USB cable. Be sure to attach the cable to the correct USB port on the device, as pictured [here](https://developer.mbed.org/platforms/IBMEthernetKit/), in the "Getting started" section.
+- Plug the device into your computer using a micro-USB cable. Be sure to attach the cable to the USB port next to the reset button on the FRDM-K64F device.
 
-- Follow the [instructions on the mbed handbook](https://developer.mbed.org/handbook/SerialPC) to setup the serial connection with your device from your development machine. If you are on Windows, install the Windows serial port drivers located [here](http://developer.mbed.org/handbook/Windows-serial-configuration#1-download-the-mbed-windows-serial-port).
+- Follow the [instructions on the mbed handbook](https://developer.mbed.org/handbook/SerialPC) to set up the serial connection with your device from your development machine. If you are on Windows, install the Windows serial port drivers located [here](http://developer.mbed.org/handbook/Windows-serial-configuration#1-download-the-mbed-windows-serial-port).
 
 ## Create mbed project and import the sample code
 

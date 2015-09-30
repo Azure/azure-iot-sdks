@@ -61,7 +61,7 @@ To build the MQTT-based samples you must install the Paho open source library.
 
 ### Verify your environment
 
-You can build the Windows samples to verify that your environment is setup correctly.
+You can build the Windows samples to verify that your environment is set up correctly.
 
 1. Open a Visual Studio 2015 x86 Native Tools command prompt.
 

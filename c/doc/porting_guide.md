@@ -72,7 +72,7 @@ Sends the HTTP request to the host and handles the response for the HTTP call.
 
 -   *relativePath* specifies the relative path of the URL excluding the host name.
 
--   *httpHeadersHandle* specifies a set of HTTP headers name-value pairs to be added to the HTTP request. The *httpHeadersHandle* handle can be created and setup with the proper name-value pairs by using the **HTTPHeaders** APIs available in HTTPHeaders.h.
+-   *httpHeadersHandle* specifies a set of HTTP headers name-value pairs to be added to the HTTP request. The *httpHeadersHandle* handle can be created and set up with the proper name-value pairs by using the **HTTPHeaders** APIs available in HTTPHeaders.h.
 
 -   The *content* argument specifies a pointer to the request body. This value is optional and can be **NULL**.
 

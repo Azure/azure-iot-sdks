@@ -33,7 +33,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 <a name="preparing"/>
 ## Preparing the BeagleBone Green board
 
-- To setup your BeagleBone Green device and connect it to your machine, follow the instructions on the [beagleboard.org](http://beagleboard.org/getting-started) site
+- To set up your BeagleBone Green device and connect it to your machine, follow the instructions on the [beagleboard.org](http://beagleboard.org/getting-started) site
 - Connect your BeagleBone Green to your network using an ethernet cable or by using a WiFi dongle on the device.
 - You need to discover the IP address of your BeagleBone Green before your can connect using PuTTY. To do this you can find instructions on this [wiki](http://elinux.org/Beagleboard:Terminal_Shells).
 - Once you see that your board is alive, open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine.
@@ -63,7 +63,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - Verify that you now have a copy of the SDK under the directory ~/azure-iot-sdks.
 
 
-- Edit the file ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace the placeholder in the following lines of code with your IoT Hub device connection string (see requirements section for how to setup your IoT Hub instance and provision your device info). You can use the console-based text editor **nano** to edit the file:
+- Edit the file ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace the placeholder in the following lines of code with your IoT Hub device connection string (see requirements section for how to set up your IoT Hub instance and provision your device info). You can use the console-based text editor **nano** to edit the file:
 
   ```
   static const char* connectionString = "[device connection string]";
