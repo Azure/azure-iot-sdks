@@ -30,7 +30,7 @@ function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
 
   /*Tests_SRS_NODE_IOTHUB_HTTPS_05_011: [If getDevice encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
   function expectNotFoundError(err) {
-      assert.equal(err.message, 'getaddrinfo ENOTFOUND bad');
+      assert.include(err.message, 'getaddrinfo ENOTFOUND bad');
   }
 
   /*Tests_SRS_NODE_IOTHUB_HTTPS_05_012: [When getDevice receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
@@ -209,7 +209,7 @@ function createTransport() {
 }
 
 function makeConnectionString(host, policy, key) {
-  return 'HostName='+host+';CredentialType=type;CredentialScope=scope;SharedAccessKeyName='+policy+';SharedAccessKey='+key;
+  return 'HostName='+host+';SharedAccessKeyName='+policy+';SharedAccessKey='+key;
 }
 
 var connectionString = makeConnectionString('host', 'policy', 'key');

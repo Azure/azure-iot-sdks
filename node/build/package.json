@@ -16,7 +16,7 @@
     "simplebuild-jshint": "^1.1.0"
   },
   "engines": {
-    "node": "0.12.x"
+    "node": "^0.12 || ^4"
   },
   "files": [
     "lib/",
