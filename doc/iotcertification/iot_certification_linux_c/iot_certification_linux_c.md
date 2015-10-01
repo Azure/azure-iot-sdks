@@ -59,7 +59,7 @@ Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-
 
 -   **IoT Hub Connection String**: An example of IoT Hub Connection String is as below:
 
-         HostName=[YourIoTHubName];CredentialType=SharedAccessSignature;CredentialScope=[ContosoIotHub];SharedAccessKeyName=[YourAccessKeyName];SharedAccessKey=[YourAccessKey]
+         HostName=[YourIoTHubName];SharedAccessKeyName=[YourAccessKeyName];SharedAccessKey=[YourAccessKey]
 
 <a name="Step_2:_Register"/>
 
@@ -151,16 +151,8 @@ Azure IoT SDK.
 
         git clone https://github.com/Azure/azure-iot-sdks.git
 
--   You will be prompted for your GitHub user name and password.
-
-    ***Note:*** *If you have two-factor authentication enabled for your account,
-    you'll need to generate/use a personal access token in place of
-    your password. To generate token, navigate to
-    <https://github.com/settings/tokens/new> and follow the on
-    screen instructions.*
-
 -   Verify that you now have a copy of the source code under the
-    directory ~/azure-iot-suite-sdks.
+    directory ~/azure-iot-sdks.
 
 <a name="Step_3_2:_Build"/>
 
@@ -238,15 +230,15 @@ In this section you will run the end to end test cases for Azure IoT client SDK 
         Go to **Configuration** tab &minus;&gt; Click **Generate SAS** button
     -   **IOTHUB_SUFFIX:** Suffix of your IoT Hub hostname in connection string
     -   **IOTHUB_PARTITION_COUNT:** Set value as **16**
-    -   **IOTHUB_POLICY_NAME:** ToDo 
-    -   **IOTHUB_POLICY_KEY:** ToDo
+    -   **IOTHUB_POLICY_NAME:** Keep it blank
+    -   **IOTHUB_POLICY_KEY:** Keep it blank
     
 
 -   Set environment variables by running following command on your device:
 
         cd ./azure-iot-sdks/tools/iot_hub_e2e_tests_params/
         chmod +x setiotdeviceparametersfore2etests.sh
-        sudo setiotdeviceparametersfore2etests.sh 
+        sudo ./setiotdeviceparametersfore2etests.sh 
 
 ### 3.3.2 Run End to End test cases
 
