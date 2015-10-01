@@ -32,7 +32,7 @@ var Pkg = xdc.useModule('xdc.bld.PackageContents');
  * Linux86 => -std=c99 for (at least sscanf() and strtof())
  */
 var ccOpts = {
-    "ti.targets.arm.elf.M4"           : " -ms -g --c99 ",
+    "ti.targets.arm.elf.M4"           : " -ms -g --c99 -DTI_RTOS ",
 };
 
 var lnkOpts = {
