@@ -28,7 +28,7 @@ export XDCOPTIONS
 #     http://rtsc.eclipse.org/docs-tip/Command_-_xdc#Environment_Variables
 #
 XDCARGS= \
-    TIRTOS=$(TIRTOS_INSTALLATION_DIR) \
+    CC3200SDK=$(CC3200SDK_INSTALLATION_DIR) \
     BIOS=$(BIOS_INSTALLATION_DIR) \
     ti.targets.arm.elf.M4=\"$(ti.targets.arm.elf.M4)\"
 
