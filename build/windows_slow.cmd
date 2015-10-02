@@ -7,6 +7,12 @@ set build-root=%~dp0..
 rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
+REM -- C# --
+cd %build-root%\csharp\build
+call build.cmd
+if errorlevel 1 goto :eof
+cd %build-root%
+
 REM -- Java --
 cd %build-root%\java\device
 call mvn verify
@@ -18,28 +24,6 @@ call c\build_all\windows\build.cmd
 if errorlevel 1 goto :eof
 
 REM -- Node.js --
-cd %build-root%\node
-
-cd build
-call npm install
-call build.cmd
+cd %build-root%
+call windows_node.cmd
 if errorlevel 1 goto :eof
-
-cd ..\common
-call npm install
-call build.cmd lintAndAllTests
-if errorlevel 1 goto :eof
-
-cd ..\device
-call npm install
-call build.cmd lintAndAllTests
-if errorlevel 1 goto :eof
-
-cd ..\service
-call npm install
-call build.cmd lintAndAllTests
-if errorlevel 1 goto :eof
-
-cd ..\..\tools\iothub-explorer
-call npm install
-call npm test
