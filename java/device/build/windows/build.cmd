@@ -7,6 +7,8 @@ set build-root=%~dp0..
 rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
-REM -- C# --
-call csharp\build\build.cmd
+REM -- Java --
+cd %build-root%\java\device
+call mvn verify
 if errorlevel 1 goto :eof
+cd %build-root%
