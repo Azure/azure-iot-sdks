@@ -47,6 +47,7 @@ How to run the sample applications on:
 - [RasberryPi 2 with Raspbian OS](doc/run_sample_on_raspberrypi2_raspbian.md)
 - [Desktop Windows](doc/run_sample_on_desktop_windows.md)
 - [TI CC3200](doc/run_sample_on_ti_cc3200.md)
+- [openSUSE](doc/run_sample_opensuse.md)
 
 
 ## SDK directory structure
