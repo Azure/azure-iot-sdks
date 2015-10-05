@@ -106,12 +106,15 @@ rem ----------------------------------------------------------------------------
 pushd %paho-build-root%
 if exist "%programfiles(x86)%\MSBuild\14.0\\." (
 msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Debug;PlatformToolset=v140 
+msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Release;PlatformToolset=v140
 goto paho_build_done
 )
 if exist "%programfiles(x86)%\MSBuild\12.0\\." (
 msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Debug
+msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Release
 goto paho_build_done
 )
+
 @Echo Paho MQTT needs Visual Studio 2013 or higher in order to build.
 exit /b 1
 :paho_build_done
