@@ -16,12 +16,14 @@ The following document describes the process of connecting OpenSuse system to Az
 
 <a name="beforebegin"/>
 ## Before you begin
+
 Before you begin you will need to create and configure an IoT hub to connect to.
   1. [Set up your IoT Hub][setup-iothub].
   1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
   1. Make note of the Connection String for your device from the previous step.
 
   > Note: You can skip this step if you just want to build the sample application without running it.
+
 <a name="setup"/>
 ## Setup the development environment
 
