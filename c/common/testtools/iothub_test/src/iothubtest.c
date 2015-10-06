@@ -200,7 +200,7 @@ void ComputeHash(const unsigned char pszData[], size_t dataLen, unsigned int nSe
     *hash2 = nVal2;
 }
 
-static size_t ResolvePartitionIndex(const char* partitionKey, int maxPartition)
+static size_t ResolvePartitionIndex(const char* partitionKey, size_t maxPartition)
 {
     size_t result;
 
@@ -237,7 +237,7 @@ static size_t ResolvePartitionIndex(const char* partitionKey, int maxPartition)
 static bool AddPropertyToMessage(pn_messenger_t* messenger, pn_message_t* message, const char* pszDeviceId, const char* pszAddress)
 {
     bool result;
-    int addressLen = strlen(AMQP_ADDRESS_PATH_FMT)+strlen(pszDeviceId)+1;
+    size_t addressLen = strlen(AMQP_ADDRESS_PATH_FMT)+strlen(pszDeviceId)+1;
     char* deviceDest = (char*)malloc(addressLen+1);
     if (deviceDest == NULL)
     {
@@ -439,14 +439,14 @@ void IoTHubTest_Deinit(IOTHUB_TEST_HANDLE devhubHandle)
     }
 }
 
-static char* CreateReceiveAddress(IOTHUB_VALIDATION_INFO* devhubValInfo, int partitionCount)
+static char* CreateReceiveAddress(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount)
 {
     char* result;
-    int addressLen = strlen(AMQP_RECV_ADDRESS_FMT) + STRING_length(devhubValInfo->eventhubAccessKey) + STRING_length(devhubValInfo->eventhubName) + strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + STRING_length(devhubValInfo->consumerGroup) + 5;
+    size_t addressLen = strlen(AMQP_RECV_ADDRESS_FMT) + STRING_length(devhubValInfo->eventhubAccessKey) + STRING_length(devhubValInfo->eventhubName) + strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + STRING_length(devhubValInfo->consumerGroup) + 5;
     result = (char*)malloc(addressLen + 1);
     if (result != NULL)
     {
-        int targetPartition = ResolvePartitionIndex(STRING_c_str(devhubValInfo->deviceId), partitionCount);
+        size_t targetPartition = ResolvePartitionIndex(STRING_c_str(devhubValInfo->deviceId), partitionCount);
         sprintf_s(result, addressLen+1, AMQP_RECV_ADDRESS_FMT, STRING_c_str(devhubValInfo->eventhubAccessKey), devhubValInfo->partnerName, devhubValInfo->partnerHost, STRING_c_str(devhubValInfo->eventhubName), STRING_c_str(devhubValInfo->consumerGroup), targetPartition);
     }
     else
@@ -462,7 +462,7 @@ static char* CreateSendAddress(IOTHUB_VALIDATION_INFO* devhubValInfo)
     STRING_HANDLE encodedSig = URL_Encode(devhubValInfo->iotSharedSig);
     if (encodedSig != NULL)
     {
-        int addressLen = strlen(AMQP_SEND_ADDRESS_FMT)+(strlen(devhubValInfo->iotHubName)*2)+strlen(devhubValInfo->hostName)+(STRING_length(encodedSig) );
+        size_t addressLen = strlen(AMQP_SEND_ADDRESS_FMT)+(strlen(devhubValInfo->iotHubName)*2)+strlen(devhubValInfo->hostName)+(STRING_length(encodedSig) );
         result = (char*)malloc(addressLen+1);
         if (result != NULL)
         {

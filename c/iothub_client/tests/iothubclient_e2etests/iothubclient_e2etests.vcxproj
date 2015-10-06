@@ -47,7 +47,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <UseFullPaths>true</UseFullPaths>
-      <AdditionalIncludeDirectories>..\..\..\testtools\iothub_test\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\common\testtools\iothub_test\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CPP_UNITTEST;WIN32;_DEBUG%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -62,7 +62,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <UseFullPaths>true</UseFullPaths>
-      <AdditionalIncludeDirectories>..\..\..\testtools\iothub_test\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\common\testtools\iothub_test\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -96,8 +96,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\testtools\iothub_test\src\iothubtest.c" />
-    <ClCompile Include="..\..\..\testtools\iothub_test\src\iothub_account.c" />
+    <ClCompile Include="..\..\..\common\testtools\iothub_test\src\iothubtest.c" />
+    <ClCompile Include="..\..\..\common\testtools\iothub_test\src\iothub_account.c" />
     <ClCompile Include="iothubclient_e2etests.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -111,8 +111,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\testtools\iothub_test\inc\iothubtest.h" />
-    <ClInclude Include="..\..\..\testtools\iothub_test\inc\iothub_account.h" />
+    <ClInclude Include="..\..\..\common\testtools\iothub_test\inc\iothubtest.h" />
+    <ClInclude Include="..\..\..\common\testtools\iothub_test\inc\iothub_account.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets" Condition="Exists('$(SolutionDir)\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets')" />

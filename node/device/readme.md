@@ -15,7 +15,7 @@ For more information on how to use this library refer to the documents below:
 - [Prepare your node.js development environment](doc/devbox_setup.md)
 - [Setup IoT Hub](../../doc/setup_iothub.md)
 - [Provision devices](../../c/doc/provision_device.md)
-- [Using the DeviceExplorer application to tests IoT Hub device connectivity](../../tools/DeviceExplorer/doc/tools_device_explorer.md)
+- [Using the DeviceExplorer application to tests IoT Hub device connectivity](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
 - [Run the node.js sample application](doc/run_sample.md)
 - [Node API reference](http://azure.github.io/azure-iot-sdks/node/api_reference/index.html)
 

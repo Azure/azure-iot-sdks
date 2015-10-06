@@ -38,16 +38,10 @@
     <ClCompile Include="NULLArgsStringificationUnitTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TimeDiscreteMicroMockTest_Stim.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TimeDiscreteMicroMockTestVoidVoid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TimeDiscreteMicroMockWithReturnAndParameters.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="hypothetic_module.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CMockValueUnitTests.cpp">

@@ -14,10 +14,12 @@ SOURCES=\
 	$(COMMON_FILES_LOCATION)/adapters/threadapi_pthreads.c \
 	$(COMMON_FILES_LOCATION)/adapters/lock_pthreads.c \
 	$(COMMON_FILES_LOCATION)/adapters/httpapi_curl.c \
+	$(COMMON_FILES_LOCATION)/testtools/iothub_test/src/iothub_account.c \
+	$(COMMON_FILES_LOCATION)/testtools/iothub_test/src/iothubtest.c \
 
 #INCLUDES is the list of folders (relative to the location of the makefile) that are used for include path search
 #in this case, they are the same as COMMON_FILES_LOCATION
-INCLUDES=../../inc
+INCLUDES=../../inc ../../testtools/iothub_test/inc
 
 #this is the name of the compiler we use
 CC=gcc

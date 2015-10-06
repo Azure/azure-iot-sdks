@@ -49,7 +49,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\inc\;..\..\..\common\inc;..\..\..\serializer\inc;..\..\..\testtools\micromock\inc;..\..\..\testtools\testrunnerswitcher\inc;$(VCInstallDir)UnitTest\include;..\..\..\iothub_client\inc;..\..\..\testtools\iothub_test\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\inc\;..\..\..\common\inc;..\..\..\serializer\inc;..\..\..\testtools\micromock\inc;..\..\..\testtools\testrunnerswitcher\inc;$(VCInstallDir)UnitTest\include;..\..\..\iothub_client\inc;..\..\..\common\testtools\iothub_test\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -67,7 +67,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\inc\;..\..\..\common\inc;..\..\..\serializer\inc;..\..\..\testtools\micromock\inc;..\..\..\testtools\testrunnerswitcher\inc;$(VCInstallDir)UnitTest\include;..\..\..\iothub_client\inc;..\..\..\testtools\iothub_test\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\inc\;..\..\..\common\inc;..\..\..\serializer\inc;..\..\..\testtools\micromock\inc;..\..\..\testtools\testrunnerswitcher\inc;$(VCInstallDir)UnitTest\include;..\..\..\iothub_client\inc;..\..\..\common\testtools\iothub_test\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -108,8 +108,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\testtools\iothub_test\src\iothubtest.c" />
-    <ClCompile Include="..\..\..\testtools\iothub_test\src\iothub_account.c" />
+    <ClCompile Include="..\..\..\common\testtools\iothub_test\src\iothubtest.c" />
+    <ClCompile Include="..\..\..\common\testtools\iothub_test\src\iothub_account.c" />
     <ClCompile Include="serializer_e2etests.cpp" />
     <ClCompile Include="main.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -121,8 +121,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\testtools\iothub_test\inc\iothubtest.h" />
-    <ClInclude Include="..\..\..\testtools\iothub_test\inc\iothub_account.h" />
+    <ClInclude Include="..\..\..\common\testtools\iothub_test\inc\iothubtest.h" />
+    <ClInclude Include="..\..\..\common\testtools\iothub_test\inc\iothub_account.h" />
     <ClInclude Include="MacroE2EModelAction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

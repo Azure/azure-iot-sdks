@@ -21,13 +21,13 @@
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\testtools\iothub_test\src\iothub_account.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\testtools\iothub_test\src\iothubtest.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="serializer_e2etests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\testtools\iothub_test\src\iothub_account.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\testtools\iothub_test\src\iothubtest.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,13 +38,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\testtools\iothub_test\inc\iothub_account.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\testtools\iothub_test\inc\iothubtest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MacroE2EModelAction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\common\testtools\iothub_test\inc\iothub_account.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\common\testtools\iothub_test\inc\iothubtest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

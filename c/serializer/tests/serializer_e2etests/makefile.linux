@@ -15,7 +15,7 @@
 COMMON_OBJECT_DIR=../../../common/src
 
 #this is the IOTHUB_TEST file location
-IOTHUB_TEST_FILES_LOCATION=../../../testtools/iothub_test/src
+IOTHUB_TEST_FILES_LOCATION=../../../common/testtools/iothub_test/src
 
 #these are other libraries that we need
 OTHER_LIBRARIES=curl pthread qpid-proton

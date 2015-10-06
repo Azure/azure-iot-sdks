@@ -18,7 +18,7 @@ For more information on how to use this library refer to the documents below:
 - [Setup your development environment][devbox-setup]
 - [Setup IoT Hub](../../doc/setup_iothub.md)
 - [Provision devices](../../c/doc/provision_device.md)
-- [Using the DeviceExplorer application to tests IoT Hub device connectivity](../../tools/DeviceExplorer/doc/tools_device_explorer.md)
+- [Using the DeviceExplorer application to tests IoT Hub device connectivity](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
 - [Run the Java sample][run-java-sample]
 - [How to build an IoTHub Java application from scratch on Windows][how-to-build-a-java-app-from-scratch]
 - [Java API reference](http://azure.github.io/azure-iot-sdks/java/api_reference/index.html)
