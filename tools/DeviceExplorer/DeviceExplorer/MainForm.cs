@@ -104,7 +104,7 @@ namespace DeviceExplorer
         {
             try
             {
-                var builder = IotHubConnectionStringBuilder.Create(dhConStringTextBox.Text);
+                var builder = IotHubConnectionStringBuilder.Create(connectionString);
 
                 targetTextBox.Text = builder.HostName;
                 keyValueTextBox.Text = builder.SharedAccessKey;
@@ -157,6 +157,14 @@ namespace DeviceExplorer
 
             Properties.Settings.Default.Save();
         }
+
+        private string sanitizeConnectionString(string connectionString)
+        {
+            // Does the following:
+            //  - trim leading/trailing white space from the connection string
+            //  - scan and remove CR and LF characters
+            return connectionString.Trim().Replace("\r", "").Replace("\n", "");
+        }
         #endregion
 
         #region ConfigurationsTab
@@ -171,6 +179,9 @@ namespace DeviceExplorer
                 targetTextBox.Text = String.Empty;
                 eventHubNameTextBoxForDataTab.Text = String.Empty;
                 iotHubNameTextBox.Text = String.Empty;
+
+                // scrub the connection string
+                dhConStringTextBox.Text = sanitizeConnectionString(dhConStringTextBox.Text);
 
                 // Attempt to apply the new settings
                 parseIoTHubConnectionString(dhConStringTextBox.Text);

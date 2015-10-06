@@ -138,10 +138,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\$(Configuration)\paho-mqtt3cs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\..\build\output\paho-mqtt3cs.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\$(Configuration)\paho-mqtt3cs.dll" "$(OutDir)"</Command>
+      <Command>xcopy /Y "$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\..\build\output\paho-mqtt3cs.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <CustomBuildStep>
       <Command>

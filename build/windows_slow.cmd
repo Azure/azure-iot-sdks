@@ -8,5 +8,22 @@ rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- C# --
-call csharp\build\build.cmd
+cd %build-root%\csharp\build
+call build.cmd
+if errorlevel 1 goto :eof
+cd %build-root%
+
+REM -- Java --
+cd %build-root%\java\device
+call mvn verify
+if errorlevel 1 goto :eof
+cd %build-root%
+
+REM -- C --
+call c\build_all\windows\build.cmd
+if errorlevel 1 goto :eof
+
+REM -- Node.js --
+cd %build-root%
+call windows_node.cmd
 if errorlevel 1 goto :eof
