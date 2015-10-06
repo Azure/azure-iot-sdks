@@ -30,9 +30,9 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 This section shows you how to set up a development environment for the Azure IoT device SDK for C on OpenSuse.
 
 1. Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the machine you are using.
-2. Open a shell and navigate to the folder **c/build_all/opensuse** in your local copy of the repository.
+2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
-3. Run the `setup.sh` script to install the prerequisite packages and the dependent libraries.
+3. Run the `setup_opensuse.sh` script to install the prerequisite packages and the dependent libraries.
 
 4. Run the `build.sh` script.
 
@@ -53,7 +53,7 @@ This script builds the **iothub_client** and **serializer** libraries and their 
 
 4. The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
 
-5. Save your changes and build the samples.  To build your sample you can run the the build.sh script in the **c/build_all/opensuse** directory. To skip running the unit tests, use:
+5. Save your changes and build the samples.  To build your sample you can run the the build.sh script in the **c/build_all/linux** directory. To skip running the unit tests, use:
 
   ```
   ./build.sh --skip-unit-tests
