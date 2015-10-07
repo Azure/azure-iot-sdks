@@ -13,9 +13,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
-import javax.naming.SizeLimitExceededException;
-
-
 /** Sends a number of event messages to an IoT Hub. */
 public class SendEvent
 {
