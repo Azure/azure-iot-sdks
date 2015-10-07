@@ -5,12 +5,6 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iothub_client_sample_http", "iothub_client_sample_http.vcxproj", "{8BE6464E-75F3-4748-B33D-85598A74B18B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iothub_client", "..\..\..\build\windows\iothub_client.vcxproj", "{F17F4374-023D-455F-B254-5A87B6691395}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "..\..\..\..\common\build\windows\common.vcxproj", "{9F55377B-6C37-4700-9866-E070D64ADE0F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iothub_http_transport", "..\..\..\build\windows\iothub_http_transport.vcxproj", "{6FF0978A-BED1-4BD2-A17D-AC3298D623CC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -27,30 +21,6 @@ Global
 		{8BE6464E-75F3-4748-B33D-85598A74B18B}.Release|Win32.Build.0 = Release|Win32
 		{8BE6464E-75F3-4748-B33D-85598A74B18B}.Release|x64.ActiveCfg = Release|x64
 		{8BE6464E-75F3-4748-B33D-85598A74B18B}.Release|x64.Build.0 = Release|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|Win32.Build.0 = Debug|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|x64.ActiveCfg = Debug|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|x64.Build.0 = Debug|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|Win32.ActiveCfg = Release|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|Win32.Build.0 = Release|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|x64.ActiveCfg = Release|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|x64.Build.0 = Release|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|Win32.ActiveCfg = Debug|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|Win32.Build.0 = Debug|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|x64.ActiveCfg = Debug|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|x64.Build.0 = Debug|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|Win32.ActiveCfg = Release|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|Win32.Build.0 = Release|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|x64.ActiveCfg = Release|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|x64.Build.0 = Release|x64
-		{6FF0978A-BED1-4BD2-A17D-AC3298D623CC}.Debug|Win32.ActiveCfg = Debug|Win32
-		{6FF0978A-BED1-4BD2-A17D-AC3298D623CC}.Debug|Win32.Build.0 = Debug|Win32
-		{6FF0978A-BED1-4BD2-A17D-AC3298D623CC}.Debug|x64.ActiveCfg = Debug|x64
-		{6FF0978A-BED1-4BD2-A17D-AC3298D623CC}.Debug|x64.Build.0 = Debug|x64
-		{6FF0978A-BED1-4BD2-A17D-AC3298D623CC}.Release|Win32.ActiveCfg = Release|Win32
-		{6FF0978A-BED1-4BD2-A17D-AC3298D623CC}.Release|Win32.Build.0 = Release|Win32
-		{6FF0978A-BED1-4BD2-A17D-AC3298D623CC}.Release|x64.ActiveCfg = Release|x64
-		{6FF0978A-BED1-4BD2-A17D-AC3298D623CC}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

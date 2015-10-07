@@ -39,3 +39,7 @@ cd ..\service
 call npm install
 call build.cmd lintAndAllTests
 if errorlevel 1 goto :eof
+
+cd ..\..\tools\iothub-explorer
+call npm install
+call npm test

@@ -6,14 +6,9 @@ package tests.unit.com.microsoft.azure.iothub.transport.https;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
-import com.microsoft.azure.iothub.IotHubClientConfig;
+import com.microsoft.azure.iothub.*;
 
-import com.microsoft.azure.iothub.IotHubMessage;
-import com.microsoft.azure.iothub.IotHubMessageCallback;
-import com.microsoft.azure.iothub.IotHubMessageResult;
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
-import com.microsoft.azure.iothub.IotHubStatusCode;
-import com.microsoft.azure.iothub.IotHubEventCallback;
+import com.microsoft.azure.iothub.MessageCallback;
 import com.microsoft.azure.iothub.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.iothub.transport.https.HttpsBatchMessage;
 import com.microsoft.azure.iothub.transport.https.HttpsMessage;
@@ -41,7 +36,7 @@ import javax.naming.SizeLimitExceededException;
 public class HttpsTransportTest
 {
     @Mocked
-    IotHubClientConfig mockConfig;
+    DeviceClientConfig mockConfig;
     @Mocked
     HttpsIotHubConnection mockConn;
 
@@ -52,7 +47,7 @@ public class HttpsTransportTest
         HttpsTransport transport = new HttpsTransport(mockConfig);
         transport.open();
 
-        final IotHubClientConfig expectedConfig = mockConfig;
+        final DeviceClientConfig expectedConfig = mockConfig;
         new Verifications()
         {
             {
@@ -69,7 +64,7 @@ public class HttpsTransportTest
         transport.open();
         transport.open();
 
-        final IotHubClientConfig expectedConfig = mockConfig;
+        final DeviceClientConfig expectedConfig = mockConfig;
         new Verifications()
         {
             {
@@ -91,7 +86,7 @@ public class HttpsTransportTest
         new Verifications()
         {
             {
-                new HttpsIotHubConnection((IotHubClientConfig) any);
+                new HttpsIotHubConnection((DeviceClientConfig) any);
                 times = 2;
             }
         };
@@ -100,7 +95,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_003: [The function shall add a packet containing the message, callback, and callback context to the transport queue.]
     @Test
     public <T extends Queue> void addMessageAddsToTransportQueue(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final IotHubOutboundPacket mockPacket) throws IOException
     {
@@ -126,7 +121,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_027: [If the transport is closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void addMessageFailsIfTransportNeverOpened(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final IotHubOutboundPacket mockPacket) throws IOException
     {
@@ -139,7 +134,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_027: [If the transport is closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void addMessageFailsIfTransportAlreadyClosed(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final IotHubOutboundPacket mockPacket) throws IOException
     {
@@ -154,7 +149,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_008: [The request shall be sent to the IoT Hub given in the configuration from the constructor.]
     @Test
     public void sendMessagesInitializesHttpsConnection(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
@@ -168,7 +163,7 @@ public class HttpsTransportTest
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
 
-        final IotHubClientConfig expectedConfig = mockConfig;
+        final DeviceClientConfig expectedConfig = mockConfig;
         new Verifications()
         {
             {
@@ -181,7 +176,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_005: [The function shall configure a valid HTTPS request and send it to the IoT Hub.]
     @Test
     public void sendMessagesSendsAllMessages(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
@@ -221,7 +216,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_012: [If a previous send request had failed while in progress, the function shall resend the request.]
     @Test
     public void sendMessagesResendsFailedBatch(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
@@ -275,7 +270,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_013: [If no messages fit using the batch format, the function shall send a single message without the batch format.]
     @Test
     public void sendMessagesSendsSingleMesssageIfBatchFormatExceedsMaxSize(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
@@ -314,7 +309,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_014: [If the send request fails while in progress, the function shall throw an IOException.]
     @Test(expected = IOException.class)
     public void sendMessagesThrowsIOExceptionIfRequestFails(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
@@ -343,7 +338,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_006: [The function shall add a packet containing the callbacks, contexts, and response for all sent messages to the callback queue.]
     @Test
     public <T extends Queue> void sendMessagesAddsToCompletedQueue(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
@@ -409,7 +404,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_007: [The function shall invoke all callbacks on the callback queue.]
     @Test
     public <T extends Queue> void invokeCallbacksInvokesAllEventCallbacks(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
@@ -498,8 +493,8 @@ public class HttpsTransportTest
     @Test
     public void handleMessageInvokesCallback(
             @Mocked final IotHubStatusCode mockStatus,
-            @Mocked final IotHubMessageCallback mockCallback,
-            @Mocked final IotHubMessage mockMessage)
+            @Mocked final MessageCallback mockCallback,
+            @Mocked final Message mockMessage)
             throws URISyntaxException, IOException
     {
         final HashMap<String, Object> context = new HashMap<>();
@@ -531,8 +526,8 @@ public class HttpsTransportTest
     @Test
     public void handleMessageSendsMessageResult(
             @Mocked final IotHubStatusCode mockStatus,
-            @Mocked final IotHubMessageCallback mockCallback,
-            @Mocked final IotHubMessage mockMessage)
+            @Mocked final MessageCallback mockCallback,
+            @Mocked final Message mockMessage)
             throws URISyntaxException, IOException
     {
         final IotHubMessageResult messageResult =
@@ -540,7 +535,7 @@ public class HttpsTransportTest
         new NonStrictExpectations()
         {
             {
-                mockCallback.execute((IotHubMessage) any, any);
+                mockCallback.execute((Message) any, any);
                 result = messageResult;
             }
         };
@@ -562,8 +557,8 @@ public class HttpsTransportTest
     @Test(expected = IOException.class)
     public void handleMessageThrowsIOExceptionIfSendResultFails(
             @Mocked final IotHubStatusCode mockStatus,
-            @Mocked final IotHubMessageCallback mockCallback,
-            @Mocked final IotHubMessage mockMessage)
+            @Mocked final MessageCallback mockCallback,
+            @Mocked final Message mockMessage)
             throws URISyntaxException, IOException
     {
         new NonStrictExpectations()
@@ -601,7 +596,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_015: [The function shall return true if the waiting list, in progress list, and callback list are all empty, and false otherwise.]
     @Test
     public void isEmptyReturnsFalseIfWaitingListIsNotEmpty(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback)
             throws IOException
     {
@@ -619,7 +614,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_015: [The function shall return true if the waiting list, in progress list, and callback list are all empty, and false otherwise.]
     @Test
     public void isEmptyReturnsFalseIfCallbackListIsNotEmpty(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
@@ -652,7 +647,7 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_015: [The function shall return true if the waiting list, in progress list, and callback list are all empty, and false otherwise.]
     @Test
     public void isEmptyReturnsTrueIfEmpty(
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,

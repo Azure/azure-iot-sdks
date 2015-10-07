@@ -14,26 +14,33 @@ Before you get started, you should:
 
 ## Build and run the sample
 
-1.  Open the file **node\\samples\\simple_sample_http.js** in a text editor.
+- Get the following sample files from https://github.com/Azure/azure-iot-sdks/node/device/samples
+    - **package.json**
+    - **simple_sample_http.js**
 
-2.  Locate the following code in the file:
+- Place the files in the folder of your choice on the target machine/device
+
+- Open the file **simple_sample_http.js** in a text editor.
+
+- Locate the following code in the file:
 
     ```
     var connectionString = '[IoT Device Connection String]';
     ```
 
-3.  Replace `[IoT Device Connection String]` with the connection string for your device. The section "Get device connection string or data" in the document [How to use Device Explorer][device-explorer] explains how to retrieve the connection string for your device. Save the changes.
+- Replace `[IoT Device Connection String]` with the connection string for your device. The section "Get device connection string or data" in the document [How to use Device Explorer][device-explorer] explains how to retrieve the connection string for your device. Save the changes.
 
-4. The section "Send events" in the document [How to use Device Explorer][device-explorer] describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
+- The section "Send events" in the document [How to use Device Explorer][device-explorer] describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
 
-5. Open a shell (Linux) or Node.js command prompt (Windows) and navigate to the **node\\samples** folder. Then run the sample application using the following command:
+- Open a shell (Linux) or Node.js command prompt (Windows) and navigate to the folder you placed the sample files in. Then run the sample application using the following commands:
 
     ```
-    node simple_sample_http.js
+    npm install
+    node .
     ```
 
 6. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_amqp** application.
 
 [setup-devbox]: devbox_setup.md
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
-[setup-iothub]: ../../doc/setup_iothub.md
+[device-explorer]: ../../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[setup-iothub]: ../../../doc/setup_iothub.md

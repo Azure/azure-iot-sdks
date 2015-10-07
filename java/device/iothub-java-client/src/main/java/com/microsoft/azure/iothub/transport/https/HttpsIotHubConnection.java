@@ -25,7 +25,7 @@ public class HttpsIotHubConnection
     protected static final Object HTTPS_CONNECTION_LOCK = new Object();
 
     /** The client configuration. */
-    protected final IotHubClientConfig config;
+    protected final DeviceClientConfig config;
     /**
      * The message e-tag. Obtained when the device receives a
      * message and used when sending a message result back to
@@ -34,12 +34,12 @@ public class HttpsIotHubConnection
     protected String messageEtag;
 
     /**
-     * Constructs an instance from the given {@link IotHubClientConfig}
+     * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
      *
      * @param config the client configuration.
      */
-    public HttpsIotHubConnection(IotHubClientConfig config)
+    public HttpsIotHubConnection(DeviceClientConfig config)
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
@@ -76,7 +76,7 @@ public class HttpsIotHubConnection
             HttpsRequest request =
                     new HttpsRequest(eventUrl, HttpsMethod.POST, msg.getBody());
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_005: [The function shall write each message property as a request header.]
-            for (IotHubMessageProperty property : msg.getProperties())
+            for (MessageProperty property : msg.getProperties())
             {
                 request.setHeaderField(property.getName(),
                         property.getValue());
@@ -106,7 +106,7 @@ public class HttpsIotHubConnection
      *
      * @throws IOException if the IoT Hub could not be reached.
      */
-    public IotHubMessage receiveMessage() throws IOException
+    public Message receiveMessage() throws IOException
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
@@ -140,7 +140,7 @@ public class HttpsIotHubConnection
             HttpsResponse response = request.send();
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_021: [If a response with IoT Hub status code OK is not received, the function shall return null.]
-            IotHubMessage msg = null;
+            Message msg = null;
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_019: [If a response with IoT Hub status code OK is received, the function shall return the IoT Hub message included in the response.]
             IotHubStatusCode messageStatus =
                     IotHubStatusCode.getIotHubStatusCode(

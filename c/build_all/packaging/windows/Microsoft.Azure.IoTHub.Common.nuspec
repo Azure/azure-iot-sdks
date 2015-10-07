@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.Azure.IoTHub.Common</id>
+    <version>1.0.0-preview-003</version>
+    <title>Microsoft Azure IoTHub Common</title>
+    <authors>Microsoft Corp</authors>
+    <owners>Azure-IoT</owners>
+    <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/develop/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Azure/azure-iot-sdks</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>Microsoft Azure IoTHub Common</description>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
+    <summary>This nuget package contains common functionalities shared between AMQP, MQTT and HTTP transports to IoTHub</summary>
+    <releaseNotes>initial version</releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>Microsoft Azure IoT Native x86 x64 native package</tags>
+    <dependencies>
+	  
+    </dependencies>
+  </metadata>
+    <files>
+    <!-- these are files for x86 plaform -->
+    <file src="..\..\..\common\build\windows\Win32\Debug\common.lib" target="build\native\Win32\Debug" />
+    <file src="..\..\..\common\build\windows\Win32\Debug\common.pdb" target="build\native\Win32\Debug" />
+      
+    <file src="..\..\..\common\build\windows\Win32\Release\common.lib" target="build\native\Win32\Release" /> 
+      
+    <!-- these are files for x64 plaform -->
+    <file src="..\..\..\common\build\windows\x64\Debug\common.lib" target="build\native\x64\Debug" /> 
+    <file src="..\..\..\common\build\windows\x64\Debug\common.pdb" target="build\native\x64\Debug" /> 
+    <file src="..\..\..\common\build\windows\x64\Release\common.lib" target="build\native\x64\Release" /> 
+
+    <file src="Microsoft.Azure.IoTHub.Common.targets" target="build\native" />
+    <file src="..\..\..\common\inc\*.h" target="build\native\include" />
+</files>
+</package>

@@ -3,8 +3,8 @@
 
 package com.microsoft.azure.iothub.transport;
 
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
 import com.microsoft.azure.iothub.IotHubEventCallback;
+import com.microsoft.azure.iothub.Message;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -33,13 +33,13 @@ public interface IotHubTransport
     /**
      * Adds a message to the transport queue.
      *
-     * @param msg the message to be sent.
+     * @param message the message to be sent.
      * @param callback the callback to be invoked when a response for the
      * message is received.
      * @param callbackContext the context to be passed in when the callback is
      * invoked.
      */
-    void addMessage(IotHubServiceboundMessage msg,
+    void addMessage(Message message,
             IotHubEventCallback callback,
             Object callbackContext);
 

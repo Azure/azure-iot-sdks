@@ -1,15 +1,29 @@
 {
-  "name": "_common",
-  "version": "0.0.0",
+  "name": "azure-iot-common",
+  "version": "1.0.0-preview.3",
+  "description": "Azure IoT SDK - Common",
+  "author": "Microsoft Corporation",
+  "license": "MIT",
   "main": "common.js",
-  "private": true,
+  "dependencies": {
+    "crypto":"^0.0.3"
+  },
   "devDependencies": {
     "chai": "^3.3.0",
     "jake": "^8.0.12",
     "jshint": "^2.8.0",
+    "azure-iot-build": "^1.0.0-preview.3",
     "simplebuild-jshint": "^1.1.0"
   },
   "engines": {
     "node": "0.12.x"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Azure/azure-iot-sdks.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Azure/azure-iot-sdks/issues"
+  },
+  "homepage": "https://github.com/Azure/azure-iot-sdks#readme"
 }

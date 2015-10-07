@@ -35,7 +35,7 @@ extern "C"
 	*					<pre>HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessKey=[Device key goes here];</pre>
 	*				</blockquote>
 	*
-	* @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
+	* @return	A non-NULL @c IOTHUB_CLIENT_HANDLE value that is used when
 	* 			invoking other functions for IoT Hub client and @c NULL on failure.
 	*/
     extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
@@ -49,7 +49,7 @@ extern "C"
 	*			The API does not allow sharing of a connection across multiple
 	*			devices. This is a blocking call.
 	*
-	* @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
+	* @return	A non-NULL @c IOTHUB_CLIENT_HANDLE value that is used when
 	* 			invoking other functions for IoT Hub client and @c NULL on failure.
 	*/
     extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config);
@@ -70,7 +70,7 @@ extern "C"
 	* @param	eventConfirmationCallback  	The callback specified by the device for receiving
 	* 										confirmation of the delivery of the IoT Hub message.
 	* 										This callback can be expected to invoke the
-	* 										::IoTHubClient_LL_SendEventAsync function for the
+	* 										::IoTHubClient_SendEventAsync function for the
 	* 										same message in an attempt to retry sending a failing
 	* 										message. The user can specify a @c NULL value here to
 	* 										indicate that no callback is required.
@@ -78,7 +78,7 @@ extern "C"
 	* 										callback. This can be @c NULL.
 	*
 	*			@b NOTE: The application behavior is undefined if the user calls
-	*			the ::IoTHubClient_LL_Destroy function from within any callback.
+	*			the ::IoTHubClient_Destroy function from within any callback.
 	*
 	* @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
 	*/
@@ -96,7 +96,7 @@ extern "C"
 	*
 	* @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
 	*/
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
+    extern IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
 
 	/**
 	* @brief	Sets up the message callback to be invoked when IoT Hub issues a
@@ -109,7 +109,7 @@ extern "C"
 	* 										callback. This can be @c NULL.
 	*
 	*			@b NOTE: The application behavior is undefined if the user calls
-	*			the ::IoTHubClient_LL_Destroy function from within any callback.
+	*			the ::IoTHubClient_Destroy function from within any callback.
 	*
 	* @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
 	*/

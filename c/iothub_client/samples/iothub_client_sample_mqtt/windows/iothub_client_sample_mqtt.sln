@@ -5,12 +5,6 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iothub_client_sample_mqtt", "iothub_client_sample_mqtt.vcxproj", "{6015311A-361A-4849-BF7B-1D3E461FE6B7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iothub_client", "..\..\..\build\windows\iothub_client.vcxproj", "{F17F4374-023D-455F-B254-5A87B6691395}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iothub_mqtt_transport", "..\..\..\build\windows\iothub_mqtt_transport.vcxproj", "{79EE24A3-AD36-4737-9A99-892FA228DD79}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "..\..\..\..\common\build\windows\common.vcxproj", "{9F55377B-6C37-4700-9866-E070D64ADE0F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -27,30 +21,6 @@ Global
 		{6015311A-361A-4849-BF7B-1D3E461FE6B7}.Release|x64.Build.0 = Release|x64
 		{6015311A-361A-4849-BF7B-1D3E461FE6B7}.Release|x86.ActiveCfg = Release|Win32
 		{6015311A-361A-4849-BF7B-1D3E461FE6B7}.Release|x86.Build.0 = Release|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|x64.ActiveCfg = Debug|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|x64.Build.0 = Debug|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|x86.ActiveCfg = Debug|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Debug|x86.Build.0 = Debug|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|x64.ActiveCfg = Release|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|x64.Build.0 = Release|x64
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|x86.ActiveCfg = Release|Win32
-		{F17F4374-023D-455F-B254-5A87B6691395}.Release|x86.Build.0 = Release|Win32
-		{79EE24A3-AD36-4737-9A99-892FA228DD79}.Debug|x64.ActiveCfg = Debug|x64
-		{79EE24A3-AD36-4737-9A99-892FA228DD79}.Debug|x64.Build.0 = Debug|x64
-		{79EE24A3-AD36-4737-9A99-892FA228DD79}.Debug|x86.ActiveCfg = Debug|Win32
-		{79EE24A3-AD36-4737-9A99-892FA228DD79}.Debug|x86.Build.0 = Debug|Win32
-		{79EE24A3-AD36-4737-9A99-892FA228DD79}.Release|x64.ActiveCfg = Release|x64
-		{79EE24A3-AD36-4737-9A99-892FA228DD79}.Release|x64.Build.0 = Release|x64
-		{79EE24A3-AD36-4737-9A99-892FA228DD79}.Release|x86.ActiveCfg = Release|Win32
-		{79EE24A3-AD36-4737-9A99-892FA228DD79}.Release|x86.Build.0 = Release|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|x64.ActiveCfg = Debug|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|x64.Build.0 = Debug|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|x86.ActiveCfg = Debug|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Debug|x86.Build.0 = Debug|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|x64.ActiveCfg = Release|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|x64.Build.0 = Release|x64
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|x86.ActiveCfg = Release|Win32
-		{9F55377B-6C37-4700-9866-E070D64ADE0F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

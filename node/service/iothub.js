@@ -3,7 +3,7 @@
 
 'use strict';
 
-var common = require('_common');
+var common = require('azure-iot-common');
 
 module.exports = {
     Device: require('./lib/device.js'),

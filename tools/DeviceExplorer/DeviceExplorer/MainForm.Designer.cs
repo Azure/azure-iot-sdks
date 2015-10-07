@@ -92,6 +92,8 @@
             this.sendMessageToDeviceButton = new System.Windows.Forms.Button();
             this.textBoxMessage = new System.Windows.Forms.TextBox();
             this.ehStringToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.totalLabel = new System.Windows.Forms.Label();
+            this.deviceCountLabel = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -122,7 +124,7 @@
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1028, 630);
+            this.tabControl1.Size = new System.Drawing.Size(510, 630);
             this.tabControl1.TabIndex = 0;
             this.tabControl1.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControl1_Selected);
             // 
@@ -133,7 +135,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1020, 601);
+            this.tabPage2.Size = new System.Drawing.Size(502, 601);
             this.tabPage2.TabIndex = 3;
             this.tabPage2.Text = "Configuration";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -157,7 +159,7 @@
             this.groupBox5.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox5.Size = new System.Drawing.Size(1011, 288);
+            this.groupBox5.Size = new System.Drawing.Size(492, 288);
             this.groupBox5.TabIndex = 13;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Shared Access Signature";
@@ -170,7 +172,7 @@
             this.targetTextBox.Location = new System.Drawing.Point(95, 80);
             this.targetTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.targetTextBox.Name = "targetTextBox";
-            this.targetTextBox.Size = new System.Drawing.Size(911, 22);
+            this.targetTextBox.Size = new System.Drawing.Size(392, 22);
             this.targetTextBox.TabIndex = 16;
             // 
             // keyValueTextBox
@@ -181,7 +183,7 @@
             this.keyValueTextBox.Location = new System.Drawing.Point(95, 54);
             this.keyValueTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.keyValueTextBox.Name = "keyValueTextBox";
-            this.keyValueTextBox.Size = new System.Drawing.Size(911, 22);
+            this.keyValueTextBox.Size = new System.Drawing.Size(392, 22);
             this.keyValueTextBox.TabIndex = 15;
             // 
             // keyNameTextBox
@@ -192,7 +194,7 @@
             this.keyNameTextBox.Location = new System.Drawing.Point(95, 28);
             this.keyNameTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.keyNameTextBox.Name = "keyNameTextBox";
-            this.keyNameTextBox.Size = new System.Drawing.Size(911, 22);
+            this.keyNameTextBox.Size = new System.Drawing.Size(392, 22);
             this.keyNameTextBox.TabIndex = 14;
             // 
             // label9
@@ -247,7 +249,7 @@
             this.sasRichTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.sasRichTextBox.Name = "sasRichTextBox";
             this.sasRichTextBox.ReadOnly = true;
-            this.sasRichTextBox.Size = new System.Drawing.Size(1002, 137);
+            this.sasRichTextBox.Size = new System.Drawing.Size(483, 137);
             this.sasRichTextBox.TabIndex = 9;
             this.sasRichTextBox.Text = "";
             // 
@@ -255,7 +257,7 @@
             // 
             this.generateSASButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.generateSASButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.generateSASButton.Location = new System.Drawing.Point(810, 108);
+            this.generateSASButton.Location = new System.Drawing.Point(291, 108);
             this.generateSASButton.Margin = new System.Windows.Forms.Padding(2);
             this.generateSASButton.Name = "generateSASButton";
             this.generateSASButton.Size = new System.Drawing.Size(183, 28);
@@ -288,7 +290,7 @@
             this.groupBox6.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox6.Size = new System.Drawing.Size(1011, 268);
+            this.groupBox6.Size = new System.Drawing.Size(492, 268);
             this.groupBox6.TabIndex = 14;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Connection Information";
@@ -299,7 +301,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.protocolGatewayHost.Location = new System.Drawing.Point(5, 199);
             this.protocolGatewayHost.Name = "protocolGatewayHost";
-            this.protocolGatewayHost.Size = new System.Drawing.Size(1001, 22);
+            this.protocolGatewayHost.Size = new System.Drawing.Size(482, 22);
             this.protocolGatewayHost.TabIndex = 17;
             // 
             // label16
@@ -341,7 +343,7 @@
             this.dhConStringTextBox.Location = new System.Drawing.Point(5, 39);
             this.dhConStringTextBox.Multiline = true;
             this.dhConStringTextBox.Name = "dhConStringTextBox";
-            this.dhConStringTextBox.Size = new System.Drawing.Size(1001, 138);
+            this.dhConStringTextBox.Size = new System.Drawing.Size(482, 138);
             this.dhConStringTextBox.TabIndex = 4;
             this.dhConStringTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dhConStringTextBox_KeyDown);
             // 
@@ -352,7 +354,7 @@
             this.tabManagement.Location = new System.Drawing.Point(4, 25);
             this.tabManagement.Name = "tabManagement";
             this.tabManagement.Padding = new System.Windows.Forms.Padding(3);
-            this.tabManagement.Size = new System.Drawing.Size(1020, 601);
+            this.tabManagement.Size = new System.Drawing.Size(502, 601);
             this.tabManagement.TabIndex = 0;
             this.tabManagement.Text = "Management";
             this.tabManagement.UseVisualStyleBackColor = true;
@@ -367,7 +369,7 @@
             this.groupBox7.Controls.Add(this.deleteDeviceButton);
             this.groupBox7.Location = new System.Drawing.Point(6, 18);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(1008, 59);
+            this.groupBox7.Size = new System.Drawing.Size(531, 59);
             this.groupBox7.TabIndex = 8;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Actions";
@@ -417,10 +419,12 @@
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.deviceCountLabel);
+            this.groupBox2.Controls.Add(this.totalLabel);
             this.groupBox2.Controls.Add(this.devicesGridView);
             this.groupBox2.Location = new System.Drawing.Point(6, 83);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(1008, 512);
+            this.groupBox2.Size = new System.Drawing.Size(490, 512);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Devices";
@@ -434,12 +438,12 @@
             this.devicesGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.devicesGridView.ContextMenuStrip = this.devicesGridViewContextMenu;
             this.devicesGridView.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-            this.devicesGridView.Location = new System.Drawing.Point(5, 20);
+            this.devicesGridView.Location = new System.Drawing.Point(5, 49);
             this.devicesGridView.Margin = new System.Windows.Forms.Padding(2);
             this.devicesGridView.MultiSelect = false;
             this.devicesGridView.Name = "devicesGridView";
             this.devicesGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.devicesGridView.Size = new System.Drawing.Size(998, 486);
+            this.devicesGridView.Size = new System.Drawing.Size(480, 458);
             this.devicesGridView.TabIndex = 9;
             this.devicesGridView.DataBindingComplete += new System.Windows.Forms.DataGridViewBindingCompleteEventHandler(this.devicesGridView_DataBindingComplete);
             // 
@@ -493,8 +497,6 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox3.Controls.Add(this.consumerGroupCheckBox);
             this.groupBox3.Controls.Add(this.label6);
             this.groupBox3.Controls.Add(this.groupNameTextBox);
@@ -636,9 +638,8 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBox1.Controls.Add(this.eventHubTextBox);
             this.groupBox1.Location = new System.Drawing.Point(6, 292);
             this.groupBox1.Name = "groupBox1";
@@ -683,9 +684,8 @@
             // 
             // checkBoxMonitorFeedbackEndpoint
             // 
-            this.checkBoxMonitorFeedbackEndpoint.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxMonitorFeedbackEndpoint.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBoxMonitorFeedbackEndpoint.AutoSize = true;
             this.checkBoxMonitorFeedbackEndpoint.Location = new System.Drawing.Point(281, 148);
             this.checkBoxMonitorFeedbackEndpoint.Name = "checkBoxMonitorFeedbackEndpoint";
@@ -697,8 +697,7 @@
             // 
             // messageClearButton
             // 
-            this.messageClearButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.messageClearButton.Location = new System.Drawing.Point(264, 183);
+            this.messageClearButton.Location = new System.Drawing.Point(316, 189);
             this.messageClearButton.MaximumSize = new System.Drawing.Size(145, 30);
             this.messageClearButton.Name = "messageClearButton";
             this.messageClearButton.Size = new System.Drawing.Size(145, 30);
@@ -740,9 +739,8 @@
             // 
             // checkBox1
             // 
-            this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox1.AutoSize = true;
             this.checkBox1.Location = new System.Drawing.Point(104, 148);
             this.checkBox1.Name = "checkBox1";
@@ -753,9 +751,8 @@
             // 
             // groupBox4
             // 
-            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBox4.Controls.Add(this.messagesTextBox);
             this.groupBox4.Location = new System.Drawing.Point(6, 225);
             this.groupBox4.Name = "groupBox4";
@@ -805,8 +802,7 @@
             // 
             // sendMessageToDeviceButton
             // 
-            this.sendMessageToDeviceButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sendMessageToDeviceButton.Location = new System.Drawing.Point(71, 183);
+            this.sendMessageToDeviceButton.Location = new System.Drawing.Point(87, 189);
             this.sendMessageToDeviceButton.MaximumSize = new System.Drawing.Size(145, 30);
             this.sendMessageToDeviceButton.Name = "sendMessageToDeviceButton";
             this.sendMessageToDeviceButton.Size = new System.Drawing.Size(145, 30);
@@ -824,11 +820,29 @@
             this.textBoxMessage.Size = new System.Drawing.Size(386, 22);
             this.textBoxMessage.TabIndex = 4;
             // 
+            // totalLabel
+            // 
+            this.totalLabel.AutoSize = true;
+            this.totalLabel.Location = new System.Drawing.Point(7, 22);
+            this.totalLabel.Name = "totalLabel";
+            this.totalLabel.Size = new System.Drawing.Size(42, 16);
+            this.totalLabel.TabIndex = 10;
+            this.totalLabel.Text = "Total:";
+            // 
+            // deviceCountLabel
+            // 
+            this.deviceCountLabel.AutoSize = true;
+            this.deviceCountLabel.Location = new System.Drawing.Point(55, 22);
+            this.deviceCountLabel.Name = "deviceCountLabel";
+            this.deviceCountLabel.Size = new System.Drawing.Size(15, 16);
+            this.deviceCountLabel.TabIndex = 12;
+            this.deviceCountLabel.Text = "0";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1052, 646);
+            this.ClientSize = new System.Drawing.Size(534, 646);
             this.Controls.Add(this.tabControl1);
             this.MinimumSize = new System.Drawing.Size(550, 685);
             this.Name = "MainForm";
@@ -844,6 +858,7 @@
             this.tabManagement.ResumeLayout(false);
             this.groupBox7.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.devicesGridView)).EndInit();
             this.devicesGridViewContextMenu.ResumeLayout(false);
             this.tabData.ResumeLayout(false);
@@ -922,6 +937,8 @@
         private System.Windows.Forms.CheckBox checkBoxMonitorFeedbackEndpoint;
         private System.Windows.Forms.TextBox protocolGatewayHost;
         private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label deviceCountLabel;
+        private System.Windows.Forms.Label totalLabel;
     }
 }
 

@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.0.0-preview.1.0.0</span>
+   &#160;<span id="projectnumber">1.0.0-preview.3</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -113,9 +113,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a3e60e953d03a503c1ae30dd6af7f390f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a3e60e953d03a503c1ae30dd6af7f390f">IoTHubClient_SendEventAsync</a> (IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void *userContextCallback)</td></tr>
 <tr class="memdesc:a3e60e953d03a503c1ae30dd6af7f390f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronous call to send the message specified by <code>eventMessageHandle</code>.  <a href="#a3e60e953d03a503c1ae30dd6af7f390f">More...</a><br /></td></tr>
 <tr class="separator:a3e60e953d03a503c1ae30dd6af7f390f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a7263e65a99da2bb397977031d6e02a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a1a7263e65a99da2bb397977031d6e02a">IoTHubClient_GetSendStatus</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, <a class="el" href="iothub__client__ll_8h.html#a06bec2310f92a54329a1f39b0804ee88">IOTHUB_CLIENT_STATUS</a> *iotHubClientStatus)</td></tr>
-<tr class="memdesc:a1a7263e65a99da2bb397977031d6e02a"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns the current sending status for IoTHubClient.  <a href="#a1a7263e65a99da2bb397977031d6e02a">More...</a><br /></td></tr>
-<tr class="separator:a1a7263e65a99da2bb397977031d6e02a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a692ed29a02e5842a60db1b3c0ce1b186"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a692ed29a02e5842a60db1b3c0ce1b186">IoTHubClient_GetSendStatus</a> (IOTHUB_CLIENT_HANDLE iotHubClientHandle, <a class="el" href="iothub__client__ll_8h.html#a06bec2310f92a54329a1f39b0804ee88">IOTHUB_CLIENT_STATUS</a> *iotHubClientStatus)</td></tr>
+<tr class="memdesc:a692ed29a02e5842a60db1b3c0ce1b186"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns the current sending status for IoTHubClient.  <a href="#a692ed29a02e5842a60db1b3c0ce1b186">More...</a><br /></td></tr>
+<tr class="separator:a692ed29a02e5842a60db1b3c0ce1b186"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a86d2a2ad2209f6e33bf59ee586abc042"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client_8h.html#a86d2a2ad2209f6e33bf59ee586abc042">IoTHubClient_SetMessageCallback</a> (IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void *userContextCallback)</td></tr>
 <tr class="memdesc:a86d2a2ad2209f6e33bf59ee586abc042"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the message callback to be invoked when IoT Hub issues a message to the device. This is a blocking call.  <a href="#a86d2a2ad2209f6e33bf59ee586abc042">More...</a><br /></td></tr>
 <tr class="separator:a86d2a2ad2209f6e33bf59ee586abc042"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,7 +155,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <p>The API does not allow sharing of a connection across multiple devices. This is a blocking call.</p>
-<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_CLIENT_LL_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_CLIENT_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
 
 </div>
 </div>
@@ -192,8 +192,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <p>Sample connection string: </p><blockquote class="doxtable">
-<pre>HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];CredentialScope=Device;DeviceId=[Device ID goes here];SharedAccessKey=[Device key goes here];</pre> </blockquote>
-<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_CLIENT_LL_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
+<pre>HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessKey=[Device key goes here];</pre> </blockquote>
+<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_CLIENT_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
 
 </div>
 </div>
@@ -257,14 +257,14 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1a7263e65a99da2bb397977031d6e02a"></a>
+<a class="anchor" id="a692ed29a02e5842a60db1b3c0ce1b186"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">IOTHUB_CLIENT_RESULT</a> IoTHubClient_GetSendStatus </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype">IOTHUB_CLIENT_HANDLE&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
@@ -334,12 +334,12 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">iotHubClientHandle</td><td>The handle created by a call to the create function. </td></tr>
     <tr><td class="paramname">eventMessageHandle</td><td>The handle to an IoT Hub message. </td></tr>
-    <tr><td class="paramname">eventConfirmationCallback</td><td>The callback specified by the device for receiving confirmation of the delivery of the IoT Hub message. This callback can be expected to invoke the <a class="el" href="iothub__client__ll_8h.html#ab47deec96944dd3f1bf0e747ab565277" title="Asynchronous call to send the message specified by eventMessageHandle. ">IoTHubClient_LL_SendEventAsync</a> function for the same message in an attempt to retry sending a failing message. The user can specify a <code>NULL</code> value here to indicate that no callback is required. </td></tr>
+    <tr><td class="paramname">eventConfirmationCallback</td><td>The callback specified by the device for receiving confirmation of the delivery of the IoT Hub message. This callback can be expected to invoke the <a class="el" href="iothub__client_8h.html#a3e60e953d03a503c1ae30dd6af7f390f" title="Asynchronous call to send the message specified by eventMessageHandle. ">IoTHubClient_SendEventAsync</a> function for the same message in an attempt to retry sending a failing message. The user can specify a <code>NULL</code> value here to indicate that no callback is required. </td></tr>
     <tr><td class="paramname">userContextCallback</td><td>User specified context that will be provided to the callback. This can be <code>NULL</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__client__ll_8h.html#afc3049dc24e311713ab4735873989a4a" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call. ">IoTHubClient_LL_Destroy</a> function from within any callback.</p>
+<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__client_8h.html#a47fce212d1c5026e02ccd670242e1d83" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call. ">IoTHubClient_Destroy</a> function from within any callback.</p>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
@@ -383,7 +383,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__client__ll_8h.html#afc3049dc24e311713ab4735873989a4a" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call. ">IoTHubClient_LL_Destroy</a> function from within any callback.</p>
+<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__client_8h.html#a47fce212d1c5026e02ccd670242e1d83" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call. ">IoTHubClient_Destroy</a> function from within any callback.</p>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>

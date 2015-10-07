@@ -120,7 +120,7 @@ namespace DeviceExplorer
             {
                 if (!skipException)
                 {
-                    throw new ArgumentException("Invalid IoTHub connection string." + ex.Message);
+                    throw new ArgumentException("Invalid IoTHub connection string. " + ex.Message);
                 }
             }
         }
@@ -161,7 +161,7 @@ namespace DeviceExplorer
 
         #region ConfigurationsTab
 
-        private async void updateSettingsButton_Click(object sender, EventArgs e)
+        private void updateSettingsButton_Click(object sender, EventArgs e)
         {
             try
             {
@@ -181,7 +181,7 @@ namespace DeviceExplorer
                 // Referesh the device grid if devices were arleady listed:
                 if (devicesListed)
                 {
-                    await UpdateDevicesGridView();
+                    UpdateListOfDevices();
                 }
 
                 MessageBox.Show("Settings updated Successfully", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -240,6 +240,15 @@ namespace DeviceExplorer
             devicesGridView.DataSource = devicesList;
             devicesGridView.ReadOnly = true;
             devicesGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+
+            if (devicesList.Count() > MAX_COUNT_OF_DEVICES)
+            {
+                deviceCountLabel.Text = MAX_COUNT_OF_DEVICES.ToString() + "+";
+            }
+            else
+            {
+                deviceCountLabel.Text = devicesList.Count().ToString();
+            }
         }
 
         private void createButton_Click(object sender, EventArgs e)
@@ -248,7 +257,7 @@ namespace DeviceExplorer
             {
                 CreateDeviceForm createForm = new CreateDeviceForm(activeIoTHubConnectionString, MAX_COUNT_OF_DEVICES);
                 createForm.ShowDialog();    // Modal window
-                updateDevicesGridView();
+                UpdateListOfDevices();
             }
             catch (Exception ex)
             {
@@ -256,21 +265,18 @@ namespace DeviceExplorer
             }
         }
 
-        private async void listButton_Click(object sender, EventArgs e)
+        private void listButton_Click(object sender, EventArgs e)
         {
-            await UpdateDevicesGridView();
+            UpdateListOfDevices();
         }
 
-        private async Task UpdateDevicesGridView()
+        private void UpdateListOfDevices()
         {
             try
             {
                 listDevicesButton.Text = "Refresh";
                 devicesListed = true;
-                RegistryManager registryManager = RegistryManager.CreateFromConnectionString(activeIoTHubConnectionString);
-                var devices = await registryManager.GetDevicesAsync(1000);
                 updateDevicesGridView();
-                await registryManager.CloseAsync();
             }
             catch (Exception ex)
             {
@@ -646,15 +652,7 @@ namespace DeviceExplorer
         {
             if (checkBoxMonitorFeedbackEndpoint.CheckState == CheckState.Checked)
             {
-                if (!dhConStringTextBox.Text.Contains("df.azure-devices-int.net"))
-                {
-                    MessageBox.Show("can only read feedback endpoint from dogfood environment");
-                    checkBoxMonitorFeedbackEndpoint.CheckState = CheckState.Unchecked;
-                }
-                else
-                {
-                    await StartMonitoringFeedback();
-                }
+                await StartMonitoringFeedback();
             }
             else
             {

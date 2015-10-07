@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.Azure.IoTHub.MqttTransport</id>
+    <version>1.0.0-preview-003</version>
+    <title>Microsoft Azure IoTHub MQTT transport</title>
+    <authors>Microsoft Corp, Eclipse Foundation, The OpenSSL Project</authors>
+    <owners>Azure-IoT</owners>
+    <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/develop/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Azure/azure-iot-sdks</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>Microsoft Azure IoTHub MQTT transport</description>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
+    <summary>This nuget package can be used to connect to IoTHub over MQTT.</summary>
+    <releaseNotes>initial version</releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>MQTT Microsoft Azure IoT Native x86 native package</tags>
+    <dependencies>
+	  <dependency id ="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.0-preview-003"></dependency>
+	  <dependency id ="Microsoft.Azure.IoTHub.Common" version="1.0.0-preview-003"></dependency>
+	  
+    </dependencies>
+  </metadata>
+    <files>
+	
+	<file src="Microsoft.Azure.IoTHub.MqttTransport_thirdpartynotice.txt" target="thirdpartynotice.txt" />
+	
+    <!-- these are files for x86 plaform -->
+    <file src="..\..\..\iothub_client\build\windows\Win32\Debug\iothub_mqtt_transport.lib" target="build\native\Win32\Debug" />
+    <file src="..\..\..\iothub_client\build\windows\Win32\Debug\iothub_mqtt_transport.pdb" target="build\native\Win32\Debug" />
+	<file src="paho_outputs\Win32\Debug\paho-mqtt3cs.lib" target="build\native\Win32\Debug" />
+	<file src="paho_outputs\Win32\Debug\paho-mqtt3cs.dll" target="build\native\Win32\Debug" />
+	<file src="paho_outputs\Win32\Debug\paho-mqtt3cs.pdb" target="build\native\Win32\Debug" />
+	<file src="openssl_outputs\Win32\Debug\" target="build\native\Win32\Debug" />
+
+    <file src="Microsoft.Azure.IoTHub.MqttTransport.targets" target="build\native" />
+    <file src="..\..\..\iothub_client\inc\iothubtransportmqtt.h" target="build\native\include" />
+</files>
+</package>

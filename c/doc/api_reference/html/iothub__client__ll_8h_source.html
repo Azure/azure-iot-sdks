@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.0.0-preview.1.0.0</span>
+   &#160;<span id="projectnumber">1.0.0-preview.3</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -100,7 +100,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#include &quot;macro_utils.h&quot;</span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &quot;iothub_message.h&quot;</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="iothub__message_8h.html">iothub_message.h</a>&quot;</span></div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span></div>
@@ -199,6 +199,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="iothub__client__ll_8h_html_a988b1c83b28d268c642d72dcab8228a4"><div class="ttname"><a href="iothub__client__ll_8h.html#a988b1c83b28d268c642d72dcab8228a4">IOTHUBMESSAGE_DISPOSITION_RESULT</a></div><div class="ttdeci">enum IOTHUBMESSAGE_DISPOSITION_RESULT_TAG IOTHUBMESSAGE_DISPOSITION_RESULT</div><div class="ttdoc">Enumeration returned by the callback which is invoked whenever the IoT Hub sends a message to the dev...</div></div>
 <div class="ttc" id="iothub__client__ll_8h_html_af5e5e122bdc1f1228ae2116fc158b3d6"><div class="ttname"><a href="iothub__client__ll_8h.html#af5e5e122bdc1f1228ae2116fc158b3d6">IoTHubClient_LL_DoWork</a></div><div class="ttdeci">void IoTHubClient_LL_DoWork(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)</div><div class="ttdoc">This function is meant to be called by the user when work (sending/receiving) can be done by the IoTH...</div></div>
 <div class="ttc" id="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g___t_a_g_html_ad030712a97d1d08abb7d38841417fc2d"><div class="ttname"><a href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g___t_a_g.html#ad030712a97d1d08abb7d38841417fc2d">IOTHUB_CLIENT_CONFIG_TAG::deviceKey</a></div><div class="ttdeci">const char * deviceKey</div><div class="ttdoc">The device key used to authenticate the device. </div><div class="ttdef"><b>Definition:</b> iothub_client_ll.h:103</div></div>
+<div class="ttc" id="iothub__message_8h_html"><div class="ttname"><a href="iothub__message_8h.html">iothub_message.h</a></div><div class="ttdoc">The IoTHub_Message component encapsulates one message that can be transferred by an IoT hub client...</div></div>
 <div class="ttc" id="agenttime_8h_html"><div class="ttname"><a href="agenttime_8h.html">agenttime.h</a></div><div class="ttdoc">Function prototypes for time related functions. </div></div>
 <div class="ttc" id="iothub__client__ll_8h_html_aadecae0b07958725e83cae943250469d"><div class="ttname"><a href="iothub__client__ll_8h.html#aadecae0b07958725e83cae943250469d">IoTHubClient_LL_CreateFromConnectionString</a></div><div class="ttdeci">IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char *connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)</div><div class="ttdoc">Creates a IoT Hub client for communication with an existing IoT Hub using the specified connection st...</div></div>
 <div class="ttc" id="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g___t_a_g_html"><div class="ttname"><a href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g___t_a_g.html">IOTHUB_CLIENT_CONFIG_TAG</a></div><div class="ttdoc">This struct captures IoTHub client configuration. </div><div class="ttdef"><b>Definition:</b> iothub_client_ll.h:90</div></div>

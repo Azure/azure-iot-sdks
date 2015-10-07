@@ -1,21 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/**
- * Exports the {@link Message} object that provides a container for message
- * content and properties travelling to and from an IoT Hub.
- *
- * @example
- * var Message = require('./src/iothub').Message;
- *
- * var message = new Message('data to send');
- * message.properties.add('myProperty', 'my property value');
- * console.log('message content: ' + message.getData());
- *
- * @module common/message
- * @requires common/properties
- */
-
 'use strict';
 
 var Properties = require('./properties.js');

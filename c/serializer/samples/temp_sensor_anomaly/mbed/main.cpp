@@ -193,7 +193,7 @@ EXECUTE_COMMAND_RESULT AlarmThreshold(FrdmDevice* frdmDevice, ascii_char_ptr Sen
     return EXECUTE_COMMAND_SUCCESS;
 }
 
-/*this functiuon "links" IoTHub to the serialization library*/
+/*this function "links" IoTHub to the serialization library*/
 static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
     const unsigned char* buffer;

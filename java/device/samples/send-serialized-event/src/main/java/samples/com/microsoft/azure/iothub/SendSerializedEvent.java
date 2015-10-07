@@ -3,9 +3,9 @@
 
 package samples.com.microsoft.azure.iothub;
 
-import com.microsoft.azure.iothub.IotHubClient;
+import com.microsoft.azure.iothub.DeviceClient;
 import com.microsoft.azure.iothub.IotHubClientProtocol;
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
+import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.IotHubEventCallback;
 
@@ -18,15 +18,15 @@ import javax.naming.SizeLimitExceededException;
 public class SendSerializedEvent {
     private static class ParsedArguments {
         // Data
-        private static final int DEFAULT_TEMPERATURE = 65;
-        private static final int DEFAULT_HUMIDITY = 72;
+        private static final String DEFAULT_DEVICEID = "myFirstDevice";
+        private static final double DEFAULT_WINDSPEED = 10; // m/s
 
         public String[] rawArguments;
         public boolean parsedSuccessfully;
         public String connectionString;
         public IotHubClientProtocol protocol;
-        public int temperature;
-        public int humidity;
+        public String deviceId;
+        public double windSpeed;
 
         // Constructors
         public ParsedArguments(String[] args) {
@@ -55,15 +55,15 @@ public class SendSerializedEvent {
                     }
 
                     if(rawArguments.length >= 3) {
-                        temperature = Integer.parseInt(rawArguments[2]);
+                        deviceId = rawArguments[2];
                     } else {
-                        temperature = DEFAULT_TEMPERATURE;
+                        deviceId = DEFAULT_DEVICEID;
                     }
 
                     if(rawArguments.length >= 4) {
-                        humidity = Integer.parseInt(rawArguments[3]);
+                        windSpeed = Double.parseDouble(rawArguments[3]);
                     } else {
-                        humidity = DEFAULT_HUMIDITY;
+                        windSpeed = DEFAULT_WINDSPEED;
                     }
 
                     this.parsedSuccessfully = true;
@@ -92,7 +92,7 @@ public class SendSerializedEvent {
 
     private static void printUsage(){
         System.out.println("Expected arguments:");
-        System.out.println("[IoT Hub connection string] [https | amqps] [temperature] [humidity]");
+        System.out.println("[IoT Hub connection string] [https | amqps] [deviceId] [windSpeed]");
     }
 
     /**
@@ -118,7 +118,7 @@ public class SendSerializedEvent {
         System.out.format("Using communication protocol %s.\n", arguments.protocol.name());
 
         try {
-            IotHubClient client = new IotHubClient(arguments.connectionString, arguments.protocol);
+            DeviceClient client = new DeviceClient(arguments.connectionString, arguments.protocol);
 
             System.out.println("Successfully created an IoT Hub client.");
 
@@ -126,13 +126,13 @@ public class SendSerializedEvent {
 
             System.out.println("Opened connection to IoT Hub.");
 
-            ContosoThermostat505 data = new ContosoThermostat505();
-            data.temperature = arguments.temperature;
-            data.humidity = arguments.humidity;
+            ContosoAnemometer data = new ContosoAnemometer();
+            data.deviceId = arguments.deviceId;
+            data.windSpeed = arguments.windSpeed;
 
             String msgStr = data.serialize();
 
-            IotHubServiceboundMessage msg = new IotHubServiceboundMessage(msgStr);
+            Message msg = new Message(msgStr);
 
             Object lockobj = new Object();
             EventCallback callback = new EventCallback();

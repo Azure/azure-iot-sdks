@@ -32,8 +32,9 @@ _Bool, HubEnabledState
 
 DECLARE_MODEL(Thermostat,
 
-    /* Event data (proximity sensor value - can have the values 2 or 30) */
+    /* Event data (temperature, external temperature and humidity) */
 	WITH_DATA(double, Temperature),
+	WITH_DATA(double, ExternalTemperature),
 	WITH_DATA(double, Humidity),
 	WITH_DATA(ascii_char_ptr, DeviceId),
 
@@ -88,7 +89,7 @@ static void sendMessage(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned 
     free((void*)buffer);
 }
 
-/*this functiuon "links" IoTHub to the serialization library*/
+/*this function "links" IoTHub to the serialization library*/
 static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
     IOTHUBMESSAGE_DISPOSITION_RESULT result;
@@ -146,12 +147,6 @@ void remote_monitoring_run(void)
         }
         else
         {
-            unsigned int minimumPollingTime = 9; /*because it can poll "after 9 seconds" polls will happen effectively at ~10 seconds*/
-            if (IoTHubClient_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
-            {
-                printf("failure to set option \"MinimumPollingTime\"\r\n");
-            }
-
 #ifdef MBED_BUILD_TIMESTAMP
             // For mbed add the certificate information
             if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
@@ -218,6 +213,7 @@ void remote_monitoring_run(void)
                     }
 
 					thermostat->Temperature = 50.0;
+					thermostat->ExternalTemperature = 55.0;
 					thermostat->Humidity = 50.0;
 					thermostat->DeviceId = (char*)deviceId;
 
@@ -228,7 +224,7 @@ void remote_monitoring_run(void)
 
 						(void)printf("Sending sensor value Temperature = %02f, Humidity = %02f\r\n", thermostat->Temperature, thermostat->Humidity);
 
-                        if (SERIALIZE(&buffer, &bufferSize, thermostat->Temperature, thermostat->Humidity, thermostat->DeviceId) != IOT_AGENT_OK)
+                        if (SERIALIZE(&buffer, &bufferSize, thermostat->Temperature, thermostat->ExternalTemperature, thermostat->Humidity, thermostat->DeviceId) != IOT_AGENT_OK)
                         {
                             (void)printf("Failed sending sensor value\r\n");
                         }

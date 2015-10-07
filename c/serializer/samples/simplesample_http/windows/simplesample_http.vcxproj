@@ -19,27 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\iothub_client\build\windows\iothub_client.vcxproj">
-      <Project>{f17f4374-023d-455f-b254-5a87b6691395}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\iothub_client\build\windows\iothub_http_transport.vcxproj">
-      <Project>{6FF0978A-BED1-4BD2-A17D-AC3298D623CC}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\build\windows\serializer.vcxproj">
-      <Project>{0ba575e1-35f2-4631-9761-e55dcf8fe9d5}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\simplesample_http.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\simplesample_http.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{48CFEFC1-7F47-420C-B2BA-F32D331B0F52}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>SimpleSample</RootNamespace>
+    <RootNamespace>simplesample_http</RootNamespace>
     <ProjectName>simplesample_http</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -186,5 +178,18 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" />
+    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
+    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" />
+    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets'))" />
+    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
+    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets'))" />
+    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets'))" />
+  </Target>
 </Project>

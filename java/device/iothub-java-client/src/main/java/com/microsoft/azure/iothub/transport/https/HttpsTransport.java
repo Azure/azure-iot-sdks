@@ -3,19 +3,13 @@
 
 package com.microsoft.azure.iothub.transport.https;
 
-import com.microsoft.azure.iothub.IotHubMessage;
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
-import com.microsoft.azure.iothub.IotHubMessageResult;
-import com.microsoft.azure.iothub.IotHubMessageCallback;
-import com.microsoft.azure.iothub.IotHubEventCallback;
-import com.microsoft.azure.iothub.IotHubClientConfig;
-import com.microsoft.azure.iothub.IotHubStatusCode;
+import com.microsoft.azure.iothub.*;
+import com.microsoft.azure.iothub.MessageCallback;
 import com.microsoft.azure.iothub.transport.IotHubCallbackPacket;
 import com.microsoft.azure.iothub.transport.IotHubOutboundPacket;
 import com.microsoft.azure.iothub.transport.IotHubTransport;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -54,15 +48,15 @@ public final class HttpsTransport implements IotHubTransport
     /** Messages whose callbacks that are waiting to be invoked. */
     protected final Queue<IotHubCallbackPacket> callbackList;
 
-    protected final IotHubClientConfig config;
+    protected final DeviceClientConfig config;
 
     /**
-     * Constructs an instance from the given {@link IotHubClientConfig}
+     * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
      *
      * @param config configuration parameters for an IoT Hub connection.
      */
-    public HttpsTransport(IotHubClientConfig config)
+    public HttpsTransport(DeviceClientConfig config)
     {
         // Codes_SRS_HTTPSTRANSPORT_11_001: [The constructor shall initialize an empty transport queue for adding messages to be sent as a batch.]
         this.waitingList = new LinkedList<>();
@@ -90,6 +84,7 @@ public final class HttpsTransport implements IotHubTransport
         }
 
         // Codes_SRS_HTTPSTRANSPORT_11_023: [If the transport is already closed, the function shall throw an IllegalStateException.]
+        // Codes_SRS_HTTPSTRANSPORT_11_021: [The function shall establish an HTTPS connection with the IoT Hub given in the configuration.]
         this.connection = new HttpsIotHubConnection(this.config);
         this.state = HttpsTransportState.OPEN;
     }
@@ -112,7 +107,7 @@ public final class HttpsTransport implements IotHubTransport
     /**
      * Adds a message to the transport queue.
      *
-     * @param msg the message to be sent.
+     * @param message the message to be sent.
      * @param callback the callback to be invoked when a response for the
      * message is received.
      * @param callbackContext the context to be passed in when the callback is
@@ -121,21 +116,17 @@ public final class HttpsTransport implements IotHubTransport
      * @throws IllegalStateException if the transport has not been opened or is
      * already closed.
      */
-    public void addMessage(IotHubServiceboundMessage msg,
+    public void addMessage(Message message,
             IotHubEventCallback callback,
             Object callbackContext)
     {
         // Codes_SRS_HTTPSTRANSPORT_11_027: [If the transport is closed, the function shall throw an IllegalStateException.]
-        if (this.state == HttpsTransportState.CLOSED)
-        {
-            throw new IllegalStateException(
-                    "Cannot add a message to an HTTPS "
-                            + "transport that is closed.");
+        if (this.state == HttpsTransportState.CLOSED) {
+            throw new IllegalStateException("Cannot add a message to an HTTPS transport that is closed.");
         }
 
         // Codes_SRS_HTTPSTRANSPORT_11_003: [The function shall add a packet containing the message, callback, and callback context to the transport queue.]
-        IotHubOutboundPacket packet =
-                new IotHubOutboundPacket(msg, callback, callbackContext);
+        IotHubOutboundPacket packet = new IotHubOutboundPacket(message, callback, callbackContext);
         this.waitingList.add(packet);
     }
 
@@ -170,6 +161,7 @@ public final class HttpsTransport implements IotHubTransport
         HttpsMessage msg;
         try
         {
+            // Codes_SRS_HTTPSTRANSPORT_11_013: [If no messages fit using the batch format, the function shall send a single message without the batch format.] 
             msg = this.inProgressListToMessage();
         }
         catch (SizeLimitExceededException e)
@@ -244,7 +236,7 @@ public final class HttpsTransport implements IotHubTransport
                             + "an HTTPS transport that is already closed.");
         }
 
-        IotHubMessageCallback callback =
+        MessageCallback callback =
                 this.config.getMessageCallback();
         Object context = this.config.getMessageContext();
         if (callback == null)
@@ -253,14 +245,17 @@ public final class HttpsTransport implements IotHubTransport
         }
 
         // Codes_SRS_HTTPSTRANSPORT_11_009: [The function shall poll the IoT Hub for messages.]
+        // Codes_SRS_HTTPSTRANSPORT_11_010: [If a message is found and a message callback is registered, the function shall invoke the callback on the message.] 
         // Codes_SRS_HTTPSTRANSPORT_11_018: [If an invalid URI is generated from the configuration given in the constructor, the function shall throw a URISyntaxException.]
         // Codes_SRS_HTTPSTRANSPORT_11_019: [If the IoT Hub could not be reached, the function shall throw an IOException.]
-        IotHubMessage message = this.connection.receiveMessage();
+        Message message = this.connection.receiveMessage();
         if (message != null)
         {
             IotHubMessageResult result =
                     callback.execute(message, context);
 
+            // Codes_SRS_HTTPSTRANSPORT_11_011: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
+            // Codes_SRS_HTTPSTRANSPORT_11_020: [If the response from sending the IoT Hub message result does not have status code OK_EMPTY, the function shall throw an IOException.] 
             this.connection.sendMessageResult(result);
         }
     }

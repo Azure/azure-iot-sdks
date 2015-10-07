@@ -23,21 +23,3 @@ echo Copying Java API docs to %doc-target-dir%
 if exist %doc-target-dir% rd /s /q %doc-target-dir%
 mkdir %doc-target-dir%
 xcopy /q /e /y target\site\apidocs %doc-target-dir%
-
-rem -----------------------------------------------------------------------------
-rem -- Generate Java docs for Service SDK
-rem -----------------------------------------------------------------------------
-echo Generating Java Service SDK docs... 
-cd %build-root%\java\service\iothub-service-sdk
-call mvn -q javadoc:javadoc
-if not %errorlevel%==0 (
-    echo Generating java docs for iothub-java-client failed.
-    exit /b %errorlevel%
-)
-
-rem Move the generated docs to %build-root%\java\service\doc\api_reference
-set doc-target-dir=%build-root%\java\service\doc\api_reference
-echo Copying Java API docs to %doc-target-dir%
-if exist %doc-target-dir% rd /s /q %doc-target-dir%
-mkdir %doc-target-dir%
-xcopy /q /e /y target\site\apidocs %doc-target-dir%

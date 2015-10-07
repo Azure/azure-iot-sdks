@@ -1,36 +1,29 @@
 {
   "name": "azure-iothub",
-  "version": "1.0.0-preview.1",
-  "description": "Azure IoT Hub SDK for Node.js",
-  "main": "iothub.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Azure/azure-iot-sdks.git"
-  },
-  "keywords": [
-    "azure",
-    "iot",
-    "iothub"
-  ],
-  "author": "",
+  "version": "1.0.0-preview.3",
+  "description": "Azure IoT SDK - IoT Hub",
+  "author": "Microsoft Corporation",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Azure/azure-iot-sdks/issues"
+  "main": "iothub.js",
+  "dependencies": {
+    "azure-iot-common": "^1.0.0-preview.3"
   },
-  "homepage": "https://github.com/Azure/azure-iot-sdks#readme",
   "devDependencies": {
     "chai": "^3.3.0",
     "jake": "^8.0.12",
     "jshint": "^2.8.0",
+    "azure-iot-build": "^1.0.0-preview.3",
     "simplebuild-jshint": "^1.1.0"
   },
   "engines": {
     "node": "0.12.x"
   },
-  "dependencies": {
-    "null": "file:..\\common"
-  }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Azure/azure-iot-sdks.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Azure/azure-iot-sdks/issues"
+  },
+  "homepage": "https://github.com/Azure/azure-iot-sdks#readme"
 }

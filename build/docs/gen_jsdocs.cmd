@@ -8,12 +8,10 @@ set build-root=%~dp0..\..
 cd %build-root%\node
 
 rem -----------------------------------------------------------------------------
-rem -- Generate JS docs
+rem -- Generate device JS docs
 rem -----------------------------------------------------------------------------
-set jsdoc=node_modules\.bin\jsdoc.cmd
-if not exist %jsdoc% (
-	echo "jsdoc" was not found. Please make sure you've run "npm install" in %build-root%\node.
-	exit /b 1
-)
+set doc-target-dir=%build-root%\node\device\doc\api_reference
+if exist %doc-target-dir% rd /s /q %doc-target-dir%
+mkdir %doc-target-dir%
+jsdoc -c ..\build\docs\jsdoc-device.conf.json -d %doc-target-dir%
 
-%jsdoc% -c ..\build\docs\jsdoc.conf.json -d apidocs

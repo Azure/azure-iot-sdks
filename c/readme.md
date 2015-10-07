@@ -1,4 +1,4 @@
-# Microsoft Azure IoT Device SDK for C
+# Microsoft Azure IoT device SDK for C
 
 The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
 
@@ -14,40 +14,45 @@ To meet the wide range of device requirements in the Internet of Things space, t
  * Buffers data when the network connection is down.
  * Batches messages to improve communication efficiency.
  * Supports pluggable transport protocols. HTTPS, AMQP and MQTT are the protocols currently available now.
- * Supports pluggable serialization methods. JSON serialization is currently available now.
+ * Supports pluggable serialization methods. JSON serialization is available now.
 
 
 The library code:
 
-* Is written in ANSI C (C99) to maximize code portability.
+* Is written in ANSI C (C99) to maximize code portability and broad platform compatibility.
 * Avoids compiler extensions.
 * Exposes a platform abstraction layer to isolate OS dependencies (threading and mutual exclusion mechanisms, communications protocol e.g. HTTP). Refer to [porting guide](doc/porting_guide.md) for more information.
 
-Azure IoT device SDK for C can be used with a broad range of OS platforms and devices. For a list of tested configurations [click here](../doc/tested_configurations.md)
+Azure IoT device SDK for C can be used with a broad range of OS platforms and devices. For a list of tested configurations [click here](../doc/tested_configurations.md).
+
+## Application development guides
+For information on how to use this library refer to the documents below:
+
+- [Prepare your development environment to use the Azure IoT device SDK for C](doc/devbox_setup.md)
+- [Setup IoT Hub](../doc/setup_iothub.md)
+- [Provision devices](doc/provision_device.md)
+- [Using the DeviceExplorer application to tests IoT Hub device connectivity](../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
+- [Azure IoT device SDK for C  tutorial](https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/)
+- [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
+- [How to port the C libraries to other OS platforms](doc/porting_guide.md)
+- [C API reference](http://azure.github.io/azure-iot-sdks/c/api_reference/index.html)
+
+How to run the sample applications on:
+
+- [BeagleBone Black with Debian OS](doc/run_sample_on_beaglebone_black_debian.md)
+- [BeagleBone Black with Snappy OS](doc/run_sample_on_beaglebone_black_snappy.md)
+- [BeagleBone Green](doc/run_sample_on_beaglebone_green.md)
+- [Desktop Linux](doc/run_sample_on_desktop_linux.md)
+- [Freescale K64F](doc/run_sample_on_freescale_k64f_mbed.md)
+- [RasberryPi 2 with Raspbian OS](doc/run_sample_on_raspberrypi2_raspbian.md)
+- [Desktop Windows](doc/run_sample_on_desktop_windows.md)
+- [TI CC3200](doc/run_sample_on_ti_cc3200.md)
+
 
 ## SDK directory structure
 All C specific resources are located in the **azure-iot-sdks\c** folder. A description of the directories follows:
 ### /doc
-
-This directory contains application development guides, such as:
-- [Prepare your development environment to use the Azure IoT Device SDK for C](doc/devbox_setup.md)
-- [Introducing the Microsoft Azure IoT Device SDK for C (Whitepaper)](doc/whitepapers/guide_iot_introducing_c_sdk.md)
-- [Setup IoT Hub](../doc/setup_iot_hub.md)
-- [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
-- [How to use the DeviceExplorer application to tests IoT Hub device connectivity](../tools/DeviceExplorer/doc/tools_device_explorer.md)
-- [How to Port the C Libraries to other OS platforms](doc/porting_guide.md)
-
-Setup instructions for OS platforms:
-- [Windows](doc/run_sample_on_Windows.md)
-- [Linux](doc/run_sample_on_desktop_linux.md)
-
-Setup instructions for device configurations:
-- [Beaglebone Black](device_setup_beagleboneblack.md)
-- [Beaglebone Green](device_setup_beaglebonegreen.md)
-- [Freescale K64F](device_setup_freescale_k64f_mbed.md)
-- [RasberryPi 2 with Rasbian OS](device_setup_raspberrypi2_rasbian.md)
-- [RasberryPi 2 with Windows 10](device_setup_raspberrypi2_windows10.md)
-
+This directory contains application development guides and device setup instructions.
 
 ### /build_all
 

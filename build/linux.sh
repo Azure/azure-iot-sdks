@@ -3,12 +3,6 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 build_root=$(cd "$(dirname "$0")/.." && pwd)
-
-# -- Java --
-export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
-cd $build_root/java/device
-mvn verify
-[ $? -eq 0 ] || exit $?
 cd $build_root
 
 # -- C --
@@ -36,4 +30,9 @@ npm install
 cd ../service
 npm install
 ./build.sh lintAndAllTests
+[ $? -eq 0 ] || exit $?
+
+cd ../../tools/iothub-explorer
+npm install
+npm test
 [ $? -eq 0 ] || exit $?

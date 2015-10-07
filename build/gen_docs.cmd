@@ -10,7 +10,7 @@ cd %build-root%\build\docs
 rem -----------------------------------------------------------------------------
 rem -- Check for environment pre-requisites. This script requires
 rem -- that the following programs work:
-rem --     doxygen, git, node, javadoc, mvn
+rem --     doxygen, git, node, javadoc, mvn, jsdoc
 rem -----------------------------------------------------------------------------
 call :checkExists git
 if not %errorlevel%==0 exit /b %errorlevel%
@@ -23,6 +23,8 @@ if not %errorlevel%==0 exit /b %errorlevel%
 call :checkExists javadoc
 if not %errorlevel%==0 exit /b %errorlevel%
 call :checkExists mvn
+if not %errorlevel%==0 exit /b %errorlevel%
+call :checkExists jsdoc
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------

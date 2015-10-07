@@ -61,7 +61,7 @@ echo Pushing changes to repo '%project_name%'...
 hg addremove
 if %errorlevel% neq 0 goto :eof
 
-hg commit -u "%MBED_HG_USER%" -m "New release"
+hg commit -u "%MBED_HG_USER%" -m "v1.0.0-preview.3"
 
 hg push --insecure https://%MBED_USER%:%MBED_PWD%@developer.mbed.org/users/%MBED_USER%/code/%project_name%/
 

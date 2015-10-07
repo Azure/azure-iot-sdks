@@ -6,11 +6,10 @@ package tests.unit.com.microsoft.azure.iothub.transport.amqps;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
-import com.microsoft.azure.iothub.IotHubClientConfig;
-import com.microsoft.azure.iothub.IotHubMessage;
-import com.microsoft.azure.iothub.IotHubMessageProperty;
+import com.microsoft.azure.iothub.DeviceClientConfig;
+import com.microsoft.azure.iothub.Message;
+import com.microsoft.azure.iothub.MessageProperty;
 import com.microsoft.azure.iothub.IotHubMessageResult;
-import com.microsoft.azure.iothub.IotHubServiceboundMessage;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.net.IotHubMessageUri;
@@ -48,7 +47,7 @@ public class AmqpsIotHubSessionTest
     protected static final Charset UTF8 = StandardCharsets.UTF_8;
 
     @Mocked
-    protected IotHubClientConfig mockConfig;
+    protected DeviceClientConfig mockConfig;
     @Mocked
     protected JmsConnectionFactory mockConnFactory;
     @Mocked
@@ -243,7 +242,7 @@ public class AmqpsIotHubSessionTest
     @Test
     public void sendEventSendsEventToCorrectIotHub(
             @Mocked final IotHubEventUri mockEventUri,
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageProducer mockProducer)
             throws JMSException, IOException
@@ -287,7 +286,7 @@ public class AmqpsIotHubSessionTest
     @Test
     public void sendEventSendsMessageBody(
             @Mocked final IotHubEventUri mockEventUri,
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageProducer mockProducer,
             @Mocked final JmsBytesMessage mockBytesMsg)
@@ -301,7 +300,7 @@ public class AmqpsIotHubSessionTest
                 result = mockDest;
                 mockSess.createProducer(mockDest);
                 result = mockProducer;
-                mockMsg.getBody();
+                mockMsg.getBytes();
                 result = msgBody;
                 mockSess.createBytesMessage();
                 result = mockBytesMsg;
@@ -326,7 +325,7 @@ public class AmqpsIotHubSessionTest
     @Test
     public void sendEventSetsToProperty(
             @Mocked final IotHubEventUri mockEventUri,
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageProducer mockProducer,
             @Mocked final JmsBytesMessage mockBytesMsg)
@@ -375,14 +374,14 @@ public class AmqpsIotHubSessionTest
     @Test
     public void sendEventSetsAllMessageProperties(
             @Mocked final IotHubEventUri mockEventUri,
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageProducer mockProducer,
             @Mocked final JmsBytesMessage mockBytesMsg,
-            @Mocked final IotHubMessageProperty mockProperty)
+            @Mocked final MessageProperty mockProperty)
             throws JMSException, IOException
     {
-        final IotHubMessageProperty[] msgProperties = { mockProperty };
+        final MessageProperty[] msgProperties = { mockProperty };
         final String propertyName = "test-property-name";
         final String propertyValue = "test-property-value";
         new NonStrictExpectations()
@@ -424,7 +423,7 @@ public class AmqpsIotHubSessionTest
     @Test
     public void sendEventReturnsOkEmptyIfSuccessful(
             @Mocked final IotHubEventUri mockEventUri,
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageProducer mockProducer,
             @Mocked final JmsBytesMessage mockBytesMsg)
@@ -442,7 +441,7 @@ public class AmqpsIotHubSessionTest
     @Test
     public void sendEventReturnsErrorIfMessageNotReceived(
             @Mocked final IotHubEventUri mockEventUri,
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageProducer mockProducer,
             @Mocked final JmsBytesMessage mockBytesMsg)
@@ -472,7 +471,7 @@ public class AmqpsIotHubSessionTest
     @Test(expected = IOException.class)
     public void sendEventThrowsIOExceptionIfProducerCouldNotBeRegistered(
             @Mocked final IotHubEventUri mockEventUri,
-            @Mocked final IotHubServiceboundMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageProducer mockProducer)
             throws JMSException, IOException
@@ -496,7 +495,7 @@ public class AmqpsIotHubSessionTest
     // Tests_SRS_AMQPSIOTHUBSESSION_11_027: [If the AMQPS session is closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void sendEventFailsIfSessionNotYetOpened(
-            @Mocked final IotHubServiceboundMessage mockMsg) throws IOException
+            @Mocked final Message mockMsg) throws IOException
     {
         AmqpsIotHubSession sess = new AmqpsIotHubSession(mockConfig);
         sess.sendEvent(mockMsg);
@@ -505,7 +504,7 @@ public class AmqpsIotHubSessionTest
     // Tests_SRS_AMQPSIOTHUBSESSION_11_027: [If the AMQPS session is closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void sendEventFailsIfSessionAlreadyClosed(
-            @Mocked final IotHubServiceboundMessage mockMsg) throws IOException
+            @Mocked final Message mockMsg) throws IOException
     {
         AmqpsIotHubSession sess = new AmqpsIotHubSession(mockConfig);
         sess.open();
@@ -517,7 +516,7 @@ public class AmqpsIotHubSessionTest
     @Test
     public void receiveMessageSendsToCorrectIotHub(
             @Mocked final IotHubMessageUri mockMessageUri,
-            @Mocked final IotHubMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsBytesMessage mockAmqpsMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageConsumer mockConsumer)
@@ -564,7 +563,7 @@ public class AmqpsIotHubSessionTest
     @Test
     public void receiveMessageReturnsMessageBody(
             @Mocked final IotHubMessageUri mockMessageUri,
-            @Mocked final IotHubMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsBytesMessage mockAmqpsMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageConsumer mockConsumer)
@@ -590,7 +589,7 @@ public class AmqpsIotHubSessionTest
             {
                 mockAmqpsMsg.getBodyLength();
                 mockAmqpsMsg.readBytes((byte[]) any);
-                new IotHubMessage((byte[]) any);
+                new Message((byte[]) any);
             }
         };
     }
@@ -599,10 +598,10 @@ public class AmqpsIotHubSessionTest
     @Test
     public void receiveMessageReturnsMessageAppProperties(
             @Mocked final IotHubMessageUri mockMessageUri,
-            @Mocked final IotHubMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsBytesMessage mockAmqpsMsg,
             @Mocked final Enumeration mockPropertyNames,
-            @Mocked final IotHubMessageProperty mockProperty,
+            @Mocked final MessageProperty mockProperty,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageConsumer mockConsumer)
             throws JMSException, IOException
@@ -630,13 +629,13 @@ public class AmqpsIotHubSessionTest
                 result = propertyValue1;
                 mockAmqpsMsg.getStringProperty(propertyName2);
                 result = propertyValue2;
-                IotHubMessageProperty
+                MessageProperty
                         .isValidAppProperty(propertyName0, propertyValue0);
                 result = true;
-                IotHubMessageProperty
+                MessageProperty
                         .isValidAppProperty(propertyName1, propertyValue1);
                 result = false;
-                IotHubMessageProperty
+                MessageProperty
                         .isValidAppProperty(propertyName2, propertyValue2);
                 result = true;
             }
@@ -646,7 +645,7 @@ public class AmqpsIotHubSessionTest
         sess.open();
         sess.receiveMessage();
 
-        final IotHubMessage expectedMessage = mockMsg;
+        final Message expectedMessage = mockMsg;
         new VerificationsInOrder()
         {
             {
@@ -660,7 +659,7 @@ public class AmqpsIotHubSessionTest
     @Test(expected = IOException.class)
     public void receiveMessageThrowsIOExceptionIfReceiveFails(
             @Mocked final IotHubMessageUri mockMessageUri,
-            @Mocked final IotHubMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageConsumer mockConsumer)
             throws JMSException, IOException
@@ -702,7 +701,7 @@ public class AmqpsIotHubSessionTest
     @Test
     public void sendMessageResultSendsConsumedAckForComplete(
             @Mocked final IotHubMessageUri mockMessageUri,
-            @Mocked final IotHubMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsBytesMessage mockAmqpsMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageConsumer mockConsumer)
@@ -735,7 +734,7 @@ public class AmqpsIotHubSessionTest
     @Test
     public void sendMessageResultSendsReleasedAckForAbandon(
             @Mocked final IotHubMessageUri mockMessageUri,
-            @Mocked final IotHubMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsBytesMessage mockAmqpsMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageConsumer mockConsumer)
@@ -768,7 +767,7 @@ public class AmqpsIotHubSessionTest
     @Test
     public void sendMessageResultSendsPoisonedAckForReject(
             @Mocked final IotHubMessageUri mockMessageUri,
-            @Mocked final IotHubMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsBytesMessage mockAmqpsMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageConsumer mockConsumer)
@@ -801,7 +800,7 @@ public class AmqpsIotHubSessionTest
     @Test(expected = IllegalStateException.class)
     public void sendMessageResultFailsIfNoPreviousMessageReceived(
             @Mocked final IotHubMessageUri mockMessageUri,
-            @Mocked final IotHubMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageConsumer mockConsumer)
             throws JMSException, IOException
@@ -824,7 +823,7 @@ public class AmqpsIotHubSessionTest
     @Test(expected = IOException.class)
     public void sendMessageResultThrowsIOExceptionIfAckFails(
             @Mocked final IotHubMessageUri mockMessageUri,
-            @Mocked final IotHubMessage mockMsg,
+            @Mocked final Message mockMsg,
             @Mocked final JmsBytesMessage mockAmqpsMsg,
             @Mocked final JmsQueue mockDest,
             @Mocked final JmsMessageConsumer mockConsumer)

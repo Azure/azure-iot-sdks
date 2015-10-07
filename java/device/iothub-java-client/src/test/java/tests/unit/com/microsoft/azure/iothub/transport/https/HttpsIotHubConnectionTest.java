@@ -6,9 +6,9 @@ package tests.unit.com.microsoft.azure.iothub.transport.https;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
-import com.microsoft.azure.iothub.IotHubClientConfig;
-import com.microsoft.azure.iothub.IotHubMessage;
-import com.microsoft.azure.iothub.IotHubMessageProperty;
+import com.microsoft.azure.iothub.DeviceClientConfig;
+import com.microsoft.azure.iothub.Message;
+import com.microsoft.azure.iothub.MessageProperty;
 import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
@@ -37,7 +37,7 @@ import java.net.URLEncoder;
 public class HttpsIotHubConnectionTest
 {
     @Mocked
-    IotHubClientConfig mockConfig;
+    DeviceClientConfig mockConfig;
     @Mocked
     IotHubUri mockIotHubUri;
     @Mocked
@@ -54,6 +54,7 @@ public class HttpsIotHubConnectionTest
     IotHubStatusCode mockStatus;
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2015-08-15-preview'.] 
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_001: [The constructor shall save the client configuration.]
     @Test
     public void sendEventHasCorrectUrl(
             @Mocked final IotHubEventUri mockUri) throws IOException
@@ -134,9 +135,9 @@ public class HttpsIotHubConnectionTest
     @Test
     public void sendEventSendsMessageProperties(
             @Mocked final IotHubEventUri mockUri,
-            @Mocked final IotHubMessageProperty mockProperty) throws IOException
+            @Mocked final MessageProperty mockProperty) throws IOException
     {
-        final IotHubMessageProperty[] properties = { mockProperty };
+        final MessageProperty[] properties = { mockProperty };
         final String propertyName = "test-property-name";
         final String propertyValue = "test-property-value";
         new NonStrictExpectations()
@@ -516,7 +517,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                new IotHubMessage(expectedBody);
+                new Message(expectedBody);
             }
         };
     }
@@ -564,9 +565,9 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        IotHubMessage testMsg = conn.receiveMessage();
+        Message testMsg = conn.receiveMessage();
 
-        IotHubMessage expectedMsg = null;
+        Message expectedMsg = null;
         assertThat(testMsg, is(expectedMsg));
     }
 

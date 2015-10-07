@@ -6,8 +6,8 @@
 var assert = require('chai').assert;
 
 var Client = require('./client.js');
-var Message = require('_common').Message;
-var SimulatedHttps = require('_common').SimulatedHttps;
+var Message = require('azure-iot-common').Message;
+var SimulatedHttps = require('azure-iot-common').SimulatedHttps;
 
 function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
 
@@ -21,7 +21,7 @@ function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
       done();
     });
   }
-  
+
   /*Tests_SRS_NODE_IOTHUB_HTTPS_05_003: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
   /*Tests_SRS_NODE_IOTHUB_HTTPS_05_007: [If receive encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
   function expectNotFoundError(err) {
@@ -49,7 +49,7 @@ function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
     { name: 'device is not registered', expect: expect404Response },
     { name: 'password is wrong', expect: expect401Response }
   ];
-  
+
   badConnStrings.forEach(function (test, index, array) {
     it('fails to ' + opName + ' when the ' + tests[index].name, function (done) {
       makeRequestWith(test, tests[index].expect, done);
@@ -73,7 +73,7 @@ function runTests(transportFactory, goodConfig, badConfigs) {
       Authorization: <token generated from config>
       iothub-to: /devices/<config.keyName>/messages/events
       Host: <config.host>
-    
+
       <message>
       ]*/
       /*Tests_SRS_NODE_IOTHUB_HTTPS_05_005: [When sendEvent receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
