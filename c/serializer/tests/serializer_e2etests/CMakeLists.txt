@@ -29,12 +29,8 @@ add_library(
 serializer_e2etests SHARED ${serializer_e2etests_cpp_files} ${serializer_e2etests_h_files} ${serializer_e2etests_files}
 )
 linkProton(serializer_e2etests)
+linkPaho(serializer_e2etests)
 
 target_link_libraries(serializer_e2etests serializer micromock ctest iothub_client_http_transport iothub_client iothub_client_amqp_transport iothub_test common
-"$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.lib"
 winhttp.lib
 )
-
-file(COPY "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-file(COPY "$ENV{openssldir}/bin/libeay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-file(COPY "$ENV{openssldir}/bin/ssleay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)

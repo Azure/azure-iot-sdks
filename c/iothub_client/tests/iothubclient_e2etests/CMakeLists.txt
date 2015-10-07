@@ -29,11 +29,7 @@ iothubclient_e2etests SHARED ${iothubclient_e2etests_cpp_files} ${iothubclient_e
 )
 
 target_link_libraries(iothubclient_e2etests micromock ctest iothub_client_http_transport iothub_client iothub_client_amqp_transport iothub_test common
-"$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.lib"
 winhttp.lib
 )
 linkProton(iothubclient_e2etests)
-
-file(COPY "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-file(COPY "$ENV{openssldir}/bin/libeay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-file(COPY "$ENV{openssldir}/bin/ssleay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+linkPaho(iothubclient_e2etests)
