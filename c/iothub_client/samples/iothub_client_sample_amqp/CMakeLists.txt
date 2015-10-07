@@ -2,6 +2,9 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for iothub_client_sample_amqp
+
+compileAsC99()
+
 set(iothub_client_sample_amqp_c_files
 iothub_client_sample_amqp.c
 ./windows/main.c
@@ -14,6 +17,7 @@ iothub_client_sample_amqp.h
 IF(WIN32)
 	#windows needs this define
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
 include_directories(.)

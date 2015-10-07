@@ -4,6 +4,8 @@
 #this is CMakeLists.txt for multitree_unittests
 cmake_minimum_required(VERSION 3.0)
 
+compileAsC99()
+
 set(multitree_unittests_cpp_files
 multitree_unittests.cpp
 )

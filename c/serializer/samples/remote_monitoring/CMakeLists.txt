@@ -2,6 +2,9 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for remote_monitoring sample
+
+compileAsC99()
+
 set(remote_monitoring_c_files
 remote_monitoring.c
 ./windows/main.c

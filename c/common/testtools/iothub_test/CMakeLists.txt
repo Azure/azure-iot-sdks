@@ -2,6 +2,10 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists for iothub_test
+
+compileAsC99()
+
+
 set(iothub_test_c_files
 ./src/iothubtest.c
 ./src/iothub_account.c
@@ -22,6 +26,7 @@ includeProton()
 IF(WIN32)
 	#windows needs this define
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
 add_library(iothub_test ${iothub_test_c_files} ${iothub_test_h_files})

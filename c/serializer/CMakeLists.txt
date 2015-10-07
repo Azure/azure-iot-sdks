@@ -4,6 +4,8 @@
 cmake_minimum_required(VERSION 3.0)
 #this is CMakeLists for serializer
 
+compileAsC99()
+
 set(serializer_c_files
 ./src/agenttypesystem.c
 ./src/codefirst.c

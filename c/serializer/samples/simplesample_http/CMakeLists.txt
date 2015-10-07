@@ -2,6 +2,9 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for simplesample_http sample
+
+compileAsC99()
+
 set(simplesample_http_c_files
 simplesample_http.c
 ./windows/main.c

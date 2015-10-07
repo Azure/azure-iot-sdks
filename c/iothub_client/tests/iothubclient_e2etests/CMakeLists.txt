@@ -4,6 +4,8 @@
 #this is CMakeLists.txt for iothubclient_e2etests
 cmake_minimum_required(VERSION 3.0)
 
+compileAsC99()
+
 set(iothubclient_e2etests_cpp_files
 iothubclient_e2etests.cpp
 )
@@ -14,7 +16,7 @@ set(iothubclient_e2etests_c_files
 set(iothubclient_e2etests_h_files
 )
 
-include_directories(${IOTHUB_TEST_INC_FOLDER} ${MICROMOCK_INC_FOLDER} ${TESTRUNNERSWITCHER_INC_FOLDER} ${CTEST_INC_FOLDER} $ENV{VCInstallDir}UnitTest/include $ENV{proton_path}/qpid-proton/proton-c/include)
+include_directories(${IOTHUB_TEST_INC_FOLDER} ${MICROMOCK_INC_FOLDER} ${TESTRUNNERSWITCHER_INC_FOLDER} ${CTEST_INC_FOLDER} $ENV{VCInstallDir}UnitTest/include)
 link_directories($ENV{VCInstallDir}UnitTest/lib)
 
 IF(WIN32)

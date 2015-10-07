@@ -4,6 +4,8 @@
 cmake_minimum_required(VERSION 3.0)
 #this is CMakeLists for iothub_client
 
+compileAsC99()
+
 set(iothub_client_all_transport_c_files
 ./src/version.c
 ./src/iothub_message.c
@@ -81,6 +83,7 @@ include_directories(${IOTHUB_CLIENT_INC_FOLDER} ${COMMON_INC_FOLDER})
 IF(WIN32)
 	#windows needs this define
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
 add_library(

@@ -2,6 +2,9 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for simplesample_amqp sample
+
+compileAsC99()
+
 set(simplesample_amqp_c_files
 simplesample_amqp.c
 ./windows/main.c

@@ -4,6 +4,8 @@
 #this is CMakeLists.txt for serializer_e2etests
 cmake_minimum_required(VERSION 3.0)
 
+compileAsC99()
+
 set(serializer_e2etests_cpp_files
 serializer_e2etests.cpp
 )

@@ -4,6 +4,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(common)
 
+compileAsC99()
 #these are the C source files
 set(source_c_files
 ./src/base64.c
