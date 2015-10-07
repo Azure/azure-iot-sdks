@@ -55,6 +55,8 @@
             this.updateDeviceButton = new System.Windows.Forms.Button();
             this.deleteDeviceButton = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.deviceCountLabel = new System.Windows.Forms.Label();
+            this.totalLabel = new System.Windows.Forms.Label();
             this.devicesGridView = new System.Windows.Forms.DataGridView();
             this.devicesGridViewContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -92,8 +94,6 @@
             this.sendMessageToDeviceButton = new System.Windows.Forms.Button();
             this.textBoxMessage = new System.Windows.Forms.TextBox();
             this.ehStringToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.totalLabel = new System.Windows.Forms.Label();
-            this.deviceCountLabel = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -429,6 +429,24 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Devices";
             // 
+            // deviceCountLabel
+            // 
+            this.deviceCountLabel.AutoSize = true;
+            this.deviceCountLabel.Location = new System.Drawing.Point(55, 22);
+            this.deviceCountLabel.Name = "deviceCountLabel";
+            this.deviceCountLabel.Size = new System.Drawing.Size(15, 16);
+            this.deviceCountLabel.TabIndex = 12;
+            this.deviceCountLabel.Text = "0";
+            // 
+            // totalLabel
+            // 
+            this.totalLabel.AutoSize = true;
+            this.totalLabel.Location = new System.Drawing.Point(7, 22);
+            this.totalLabel.Name = "totalLabel";
+            this.totalLabel.Size = new System.Drawing.Size(42, 16);
+            this.totalLabel.TabIndex = 10;
+            this.totalLabel.Text = "Total:";
+            // 
             // devicesGridView
             // 
             this.devicesGridView.AllowUserToOrderColumns = true;
@@ -497,6 +515,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox3.Controls.Add(this.consumerGroupCheckBox);
             this.groupBox3.Controls.Add(this.label6);
             this.groupBox3.Controls.Add(this.groupNameTextBox);
@@ -638,8 +658,9 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.eventHubTextBox);
             this.groupBox1.Location = new System.Drawing.Point(6, 292);
             this.groupBox1.Name = "groupBox1";
@@ -819,24 +840,6 @@
             this.textBoxMessage.Name = "textBoxMessage";
             this.textBoxMessage.Size = new System.Drawing.Size(386, 22);
             this.textBoxMessage.TabIndex = 4;
-            // 
-            // totalLabel
-            // 
-            this.totalLabel.AutoSize = true;
-            this.totalLabel.Location = new System.Drawing.Point(7, 22);
-            this.totalLabel.Name = "totalLabel";
-            this.totalLabel.Size = new System.Drawing.Size(42, 16);
-            this.totalLabel.TabIndex = 10;
-            this.totalLabel.Text = "Total:";
-            // 
-            // deviceCountLabel
-            // 
-            this.deviceCountLabel.AutoSize = true;
-            this.deviceCountLabel.Location = new System.Drawing.Point(55, 22);
-            this.deviceCountLabel.Name = "deviceCountLabel";
-            this.deviceCountLabel.Size = new System.Drawing.Size(15, 16);
-            this.deviceCountLabel.TabIndex = 12;
-            this.deviceCountLabel.Text = "0";
             // 
             // MainForm
             // 
