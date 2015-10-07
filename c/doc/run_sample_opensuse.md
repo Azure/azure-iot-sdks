@@ -1,6 +1,6 @@
 # openSUSE Setup
 
-The following document describes the process of connecting openSUSE system to Azure IoT Hub.
+The following document describes the process of connecting an openSUSE system to Azure IoT Hub.
 
 ## Table of Contents
 
