@@ -12,7 +12,6 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
 
 /** Builds the authorization signature as a composition of functions. */
 public final class SignatureHelper
