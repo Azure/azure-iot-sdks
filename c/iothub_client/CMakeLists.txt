@@ -21,8 +21,8 @@ set(iothub_client_all_transport_h_files
 set(iothub_client_c_files
 ./src/iothub_client.c
 ./src/version.c
-../common/adapters/threadapi_c11.c
-../common/adapters/lock_c11.c
+${LOCK_C_FILE}
+${THREAD_C_FILE}
 )
 
 set(iothub_client_h_files
@@ -35,7 +35,7 @@ set(iothub_client_h_files
 set(iothub_client_http_transport_c_files
 ${iothub_client_all_transport_c_files}
 ./src/iothubtransporthttp.c
-../common/adapters/httpapi_winhttp.c
+${HTTP_C_FILE}
 )
 
 set(iothub_client_http_transport_h_files
@@ -86,6 +86,9 @@ IF(WIN32)
 	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
+
+add_definitions(-Dqpid_proton_EXPORTS)
+
 add_library(
 iothub_client_http_transport ${iothub_client_http_transport_c_files} ${iothub_client_http_transport_h_files}
 )
@@ -98,8 +101,8 @@ add_library(
 iothub_client_mqtt_transport ${iothub_client_mqtt_transport_c_files} ${iothub_client_mqtt_transport_h_files}
 )
 
-add_library(
-iothub_client ${iothub_client_c_files} ${iothub_client_h_files}
+add_library(iothub_client ${iothub_client_all_transport_c_files} ${iothub_client_all_transport_H_files}
+ ${iothub_client_c_files} ${iothub_client_h_files}
 )
 
 add_subdirectory(samples)

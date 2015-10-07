@@ -14,7 +14,7 @@ enable_testing()
 #2. link qpid-proton(d).lib
 #3. copying some shared libraries(.dll or .so) to the location of the output executable
 
-function(includeProton )
+function(includeProton)
 	if(WIN32)
 		include_directories($ENV{proton_path}/qpid-proton/proton-c/include)
 	elseif()
@@ -27,7 +27,7 @@ function(linkProton whatExecutableIsBuilding)
 	if(WIN32)
 		target_link_libraries(${whatExecutableIsBuilding} $ENV{proton_path}/qpid-proton/build/proton-c/Debug/qpid-protond.lib)
 		file(COPY $ENV{proton_path}/qpid-proton/build/proton-c/Debug/qpid-protond.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-	elseif()
+	else()
 		target_link_libraries(${whatExecutableIsBuilding} qpid-proton)
 	endif()
 endfunction(linkProton)
@@ -66,8 +66,7 @@ endmacro(compileAsC99)
 
 function(build_test_artifacts whatIsBuilding)
 
-	#message(STATUS "${whatIsBuilding} is having ARGC=${ARGC} ARGV0=${ARGV0} ARGV1=${ARGV1}")
-
+	#the first argument is whether the tests should be build with gballoc #defines or not
 	if(${ARGC} EQUAL 1)
 		set(uses_gb_alloc true)
 	else()
@@ -78,18 +77,20 @@ function(build_test_artifacts whatIsBuilding)
 		endif()
 	endif()
 	
-	#message(STATUS "${whatIsBuilding} is having uses_gb_alloc set to ${uses_gb_alloc}}")
-	
 	#setting #defines
 	if(WIN32)
 		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 		add_definitions(-DCPP_UNITTEST )
 		if(${uses_gb_alloc})
-			#message(STATUS "${whatIsBuilding} is getting -DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC")
 			add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+		else()	
 		endif(${uses_gb_alloc})			
 	else()
 		add_definitions(-DUSE_CTEST)
+		if(${uses_gb_alloc})
+			add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+		else()	
+		endif(${uses_gb_alloc})
 	endif()
 	
 	#setting includes
@@ -102,7 +103,6 @@ function(build_test_artifacts whatIsBuilding)
 	
 	#settings link directories
 	if(WIN32)
-		message(STATUS "setting link_directories for ${whatIsBuilding} to link_directories($ENV{VCInstallDir}UnitTest/lib)")
 		link_directories($ENV{VCInstallDir}UnitTest/lib)
 	else(WIN32)
 		#nothing
@@ -114,10 +114,29 @@ function(build_test_artifacts whatIsBuilding)
 			${whatIsBuilding} SHARED ${${whatIsBuilding}_cpp_files} ${${whatIsBuilding}_h_files} ${${whatIsBuilding}_c_files}
 		)
 	else(WIN32)
+		add_library(
+			${whatIsBuilding} SHARED ${${whatIsBuilding}_cpp_files} ${${whatIsBuilding}_h_files} ${${whatIsBuilding}_c_files}
+		)
 	endif(WIN32)
 	
 	target_link_libraries(${whatIsBuilding} micromock ctest)
 endfunction(build_test_artifacts)
+
+function(set_platform_files)
+if(WIN32)
+	#message(STATUS "XXXXXXXXXXXXXXXXXXX setting set(LOCK_C_FILE ./common/adapters/lock_c11.c)")
+	set(LOCK_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/lock_c11.c PARENT_SCOPE)
+	set(THREAD_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/threadapi_c11.c PARENT_SCOPE)
+	set(HTTP_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/httpapi_winhttp.c PARENT_SCOPE)
+else(WIN32)
+	#message(STATUS "XXXXXXXXXXXXXXXXXXX setting set(LOCK_C_FILE ./common/adapters/lock_pthreads.c)")
+	set(LOCK_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/lock_pthreads.c PARENT_SCOPE)
+	set(THREAD_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/threadapi_pthreads.c PARENT_SCOPE)
+	set(HTTP_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/httpapi_curl.c PARENT_SCOPE)
+endif(WIN32)
+endfunction(set_platform_files)
+
+set_platform_files()
 
 add_subdirectory(testtools)
 

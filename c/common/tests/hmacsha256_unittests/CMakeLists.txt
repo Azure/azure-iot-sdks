@@ -20,7 +20,7 @@ set(${theseTestsName}_c_files
 ../../src/sha384-512.c
 
 ../../src/gballoc.c
-../../adapters/lock_c11.c
+${LOCK_C_FILE}
 ../../src/buffer.c
 )
 

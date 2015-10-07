@@ -12,7 +12,7 @@ ${theseTestsName}.cpp
 )
 
 set(${theseTestsName}_c_files
-../../adapters/lock_c11.c
+	${LOCK_C_FILE}
 )
 
 set(${theseTestsName}_h_files

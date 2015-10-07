@@ -15,7 +15,7 @@ crtabstractions_unittests.cpp
 set(${theseTestsName}_c_files
 ../../src/crt_abstractions.c
 ../../src/gballoc.c
-../../adapters/lock_c11.c
+${LOCK_C_FILE}
 )
 
 set(${theseTestsName}_h_files
