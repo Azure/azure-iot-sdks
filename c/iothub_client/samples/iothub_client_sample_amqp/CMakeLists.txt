@@ -19,6 +19,6 @@ ENDIF(WIN32)
 include_directories(.)
 
 add_executable(iothub_client_sample_amqp ${iothub_client_sample_amqp_c_files} ${iothub_client_sample_amqp_h_files})
-#TODO: debug folder is hard coded and horrible. Should be something like configuration
-target_link_libraries(iothub_client_sample_amqp common iothub_client_amqp_transport iothub_client $ENV{proton_path}/qpid-proton/build/proton-c/Debug/qpid-protond.lib)
-file(COPY $ENV{proton_path}/qpid-proton/build/proton-c/Debug/qpid-protond.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+
+linkProton(iothub_client_sample_amqp)
+target_link_libraries(iothub_client_sample_amqp common iothub_client_amqp_transport iothub_client )

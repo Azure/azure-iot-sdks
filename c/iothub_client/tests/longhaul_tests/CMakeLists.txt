@@ -30,12 +30,12 @@ longhaul_e2etests SHARED ${longhaul_e2etests_cpp_files} ${longhaul_e2etests_h_fi
 )
 
 target_link_libraries(longhaul_e2etests micromock ctest iothub_client_mqtt_transport iothub_client_http_transport iothub_client iothub_client_amqp_transport iothub_test common
-$ENV{proton_path}/qpid-proton/build/proton-c/Debug/qpid-protond.lib
 "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.lib"
 winhttp.lib
 )
 
-file(COPY $ENV{proton_path}/qpid-proton/build/proton-c/Debug/qpid-protond.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+linkProton(longhaul_e2etests)
+
 file(COPY "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 file(COPY "$ENV{openssldir}/bin/libeay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 file(COPY "$ENV{openssldir}/bin/ssleay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)

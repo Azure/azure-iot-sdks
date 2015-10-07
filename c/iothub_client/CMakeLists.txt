@@ -73,7 +73,8 @@ set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this 
 
 
 include_directories(${IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER} ${COMMON_INC_FOLDER})
-include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER} ${COMMON_INC_FOLDER} $ENV{proton_path}/qpid-proton/proton-c/include)
+include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER} ${COMMON_INC_FOLDER})
+includeProton()
 include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${COMMON_INC_FOLDER} $ENV{paho_path}/org.eclipse.paho.mqtt.c/src)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER} ${COMMON_INC_FOLDER})
 
