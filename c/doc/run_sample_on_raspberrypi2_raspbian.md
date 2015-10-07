@@ -78,7 +78,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
 
   ```
   sudo apt-get update
-  sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git
+  sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
   ```
   If you get errors running sudo, make sure your root password is set as decribed above.
 
