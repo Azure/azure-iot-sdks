@@ -72,10 +72,16 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - On the board, run the following command to build and install Apache Proton library:
 
   ```
-  ~/azure-iot-sdks/c/build_all/linux/build_proton.sh --install
+  sudo ~/azure-iot-sdks/c/build_all/linux/build_proton.sh --install
   ```
 
-- Assuming everything went OK on the build_proton.sh, you can now build the SDK samples using the following command:
+- This SDK sample depends on the presences of a few libraries. Run the following command to build them:
+
+  ```
+  sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+  ```
+
+- You can now build the SDK code using the following command, assuming everything went OK on build\_proton.sh and build_paho.sh
 
   ```
   ~/azure-iot-sdks/c/build_all/linux/build.sh
