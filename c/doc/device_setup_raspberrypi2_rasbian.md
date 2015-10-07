@@ -69,7 +69,9 @@ https://www.raspberrypi.org/documentation/troubleshooting/hardware/networking/ip
   ![][1]
 
 <a name="provision"/>
-## Provision your device in IoT Hubs
+## Provision your device in an IoT Hub
+
+You need an IoT hub to which will communicate with your device. You can move on to the next step if you already have an IoT hub set up, otherwise you'll need to create one. Step by step instructions to do this can be fond in the **Create an IoT Hub** section of the [Getting started with IoT Hub](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-csharp-csharp-getstarted/) article. This article covers much more than just setting up an IoT hub, but you only need to follow the six steps in the **Create an IoT Hub** section for this sample.  
 
 You have two options for provisioning your Raspberry Pi device in IoT Hubs. Both options enable you to provision a new device and obtain the **Device ID** and **connection string** you need to connect your device to your IoT Hub.
 - (Recommended) Use the IoT Device Administration Portal you deployed when you followed the [Asset Monitoring Sample Solution Walkthrough](https://github.com/Azure/azure-iot-solution/blob/master/Docs/iot-asset-monitoring-sample-walkthrough.md).
@@ -93,13 +95,14 @@ To run this tool, you need connection and configuration information for your IoT
 
 - Open the solution in Visual Studio, then build and run it.
 
-- Paste in the two connection strings for your IoT Hub and Event Hub, and then click **Update**.
+- Paste the **connection string - primary key** for your IoT hub into the **IoT Hub Connection String** field in Device Explorer and then click the **Update** button (you wrote down the **connection string - primary key** in step 6 if you created your IoT hub using the directions in the **Create an IoT Hub** section of the [Getting started with IoT Hub](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-csharp-csharp-getstarted/) article).
 
-- Click the **Management** tab, then create a device ID for your device and register your device with your IoT Hub:
-	- Click **List** to call the device hub and retrieve a list of devices. If this is your first time, then you shouldn't retrieve anything!
-	- Click **Create** to create a device ID and key.
-	- Save this information in Notepad (or just keep the sample running). You will need this when you configure your device.
-
+- Create a device ID for your device and register it  with your IoT hub:
+	- Click the **Management** tab.
+	- Click **Create** to create and register a device ID and key with your IoT hub.
+	- Save the device's ID, primary key, and **connection string**  in Notepad (or just keep the sample running). You will need this later.
+		- Click the **Refresh** button in the **Managment** tab to make sure that Device Manager is showing the information for your newly registered device.
+		- Right click on the device and select **Copy data for selected device** OR copy the information by hand.
 
 <a name="buildrunapp"/>
 ## Build the sample application on the device
@@ -139,9 +142,15 @@ To run this tool, you need connection and configuration information for your IoT
     sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_proton.sh --install /usr
   ```
 
-- Assuming everything went OK on the build_proton.sh, you can now build the SDK samples using the following command:
+- This SDK sample depends on the presences of a few libraries. Run the following command to build them:
 
   ```
+  sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+  ```
+
+- You can now build the SDK code using the following command, assuming everything went OK on build\_proton.sh and build_paho.sh
+
+  ```  
   ~/azure-iot-suite-sdks/c/build_all/linux/build.sh
   ```
 
@@ -153,7 +162,7 @@ To run this tool, you need connection and configuration information for your IoT
 - Now run the **simplesample_amqp** sample by issuing the following commands:
 
   ```
-  ~/azure-iot-suite-sdks/serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ~/azure-iot-suite-sdks/c/serializer/samples/simplesample_amqp/linux/simplesample_amqp
   ```
 
 - This sample application sends simulated sensor data to your IoT Hub. See the [Asset Monitoring Sample Solution Walkthrough](https://github.com/Azure/azure-iot-solution/blob/master/Docs/iot-asset-monitoring-sample-walkthrough.md) for information about how you can verify that the sensor data is reaching your IoT Hub.
