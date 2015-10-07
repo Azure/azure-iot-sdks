@@ -14,8 +14,6 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 
-import javax.naming.SizeLimitExceededException;
-
 /**
  * <p>
  * An HTTPS transport. Contains functionality for adding messages and sending
