@@ -24,7 +24,7 @@ function SimulatedHttps() {
       done(new Error(), new Response(401));
     }
     else {
-      var msg = successMsg ? successMsg : new Message(''); 
+      var msg = successMsg ? successMsg : new Message('');
       done(null, new Response(204), msg);
     }
   };
@@ -52,23 +52,31 @@ SimulatedHttps.prototype.sendFeedback = function (feedbackAction, lockToken, con
 };
 
 SimulatedHttps.prototype.createDevice = function (path, deviceInfo, config, done) {
-  this.handleRequest(config, done, true, new Message('{ "deviceId": "testDevice" }'));
+  var device = { deviceId: deviceInfo.deviceId };
+  this.handleRequest(config, done, true, new Message(JSON.stringify(device)));
 };
 
 SimulatedHttps.prototype.updateDevice = function (path, deviceInfo, config, done) {
-  this.handleRequest(config, done, true, new Message('{ "deviceId": "testDevice" }'));
+  var device = { deviceId: deviceInfo.deviceId };
+  this.handleRequest(config, done, true, new Message(JSON.stringify(device)));
 };
 
 SimulatedHttps.prototype.getDevice = function (path, config, done) {
-  this.handleRequest(config, done, true, new Message('{ "deviceId": "testDevice" }'));
+  var device = { deviceId: 'testDevice' };
+  this.handleRequest(config, done, true, new Message(JSON.stringify(device)));
 };
 
 SimulatedHttps.prototype.listDevice = function (path, config, done) {
-  this.handleRequest(config, done, true, new Message("[{ \"deviceId\": \"testDevice1\" },{ \"deviceId\": \"testDevice2\" }]"));
+  var devices = [
+    { deviceId: 'testDevice1' },
+    { deviceId: 'testDevice2' }
+  ];
+  this.handleRequest(config, done, true, new Message(JSON.stringify(devices)));
 };
 
 SimulatedHttps.prototype.deleteDevice = function (path, config, done) {
-  this.handleRequest(config, done, true, new Message('{ "deviceId": "testDevice" }'));
+  var device = { deviceId: 'testDevice' };
+  this.handleRequest(config, done, true, new Message(JSON.stringify(device)));
 };
 
 module.exports = SimulatedHttps;
