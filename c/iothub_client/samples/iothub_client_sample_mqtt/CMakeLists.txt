@@ -2,10 +2,18 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for iothub_client_sample_mqtt
+
+compileAsC99()
+
 set(iothub_client_sample_mqtt_c_files
 iothub_client_sample_mqtt.c
-./windows/main.c
 )
+
+if(WIN32)
+	set(iothub_client_sample_mqtt_c_files ${iothub_client_sample_mqtt_c_files} ./windows/main.c)
+else()
+	set(iothub_client_sample_mqtt_c_files ${iothub_client_sample_mqtt_c_files} ./linux/main.c)
+endif()
 
 set(iothub_client_sample_mqtt_h_files
 iothub_client_sample_mqtt.h
@@ -14,14 +22,23 @@ iothub_client_sample_mqtt.h
 IF(WIN32)
 	#windows needs this define
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
 include_directories(.)
 
 add_executable(iothub_client_sample_mqtt ${iothub_client_sample_mqtt_c_files} ${iothub_client_sample_mqtt_h_files})
 
-#TODO: debug folder is hard coded and horrible. Should be something like configuration
-target_link_libraries(iothub_client_sample_mqtt common iothub_client_mqtt_transport iothub_client "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.lib")
-file(COPY "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-file(COPY "$ENV{openssldir}/bin/libeay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-file(COPY "$ENV{openssldir}/bin/ssleay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+target_link_libraries(iothub_client_sample_mqtt  
+	iothub_client_mqtt_transport 
+	iothub_client 
+	iothub_client_mqtt_transport 
+	common
+)
+
+if(WIN32)
+else()
+	target_link_libraries(iothub_client_sample_mqtt pthread)
+endif()
+
+linkPaho(iothub_client_sample_mqtt)

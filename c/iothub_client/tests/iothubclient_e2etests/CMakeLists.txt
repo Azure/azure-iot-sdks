@@ -4,37 +4,38 @@
 #this is CMakeLists.txt for iothubclient_e2etests
 cmake_minimum_required(VERSION 3.0)
 
-set(iothubclient_e2etests_cpp_files
-iothubclient_e2etests.cpp
+compileAsC99()
+set(theseTestsName iothubclient_e2etests)
+
+set(${theseTestsName}_cpp_files
+	${theseTestsName}.cpp
 )
 
-set(iothubclient_e2etests_c_files
+set(${theseTestsName}_c_files
 )
 
-set(iothubclient_e2etests_h_files
+set(${theseTestsName}_h_files
 )
 
-include_directories(${IOTHUB_TEST_INC_FOLDER} ${MICROMOCK_INC_FOLDER} ${TESTRUNNERSWITCHER_INC_FOLDER} ${CTEST_INC_FOLDER} $ENV{VCInstallDir}UnitTest/include $ENV{proton_path}/qpid-proton/proton-c/include)
-link_directories($ENV{VCInstallDir}UnitTest/lib)
+include_directories(${IOTHUB_TEST_INC_FOLDER})
 
-IF(WIN32)
-	#windows needs this define
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	add_definitions(-DCPP_UNITTEST -DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-ENDIF(WIN32)
+build_test_artifacts(${theseTestsName})
 
-
-add_library(
-iothubclient_e2etests SHARED ${iothubclient_e2etests_cpp_files} ${iothubclient_e2etests_h_files} ${iothubclient_e2etests_files}
+target_link_libraries(${theseTestsName}
+	iothub_test
+	iothub_client
+	iothub_client_amqp_transport
+	iothub_client_http_transport
+	iothub_client_mqtt_transport
+	common
+	iothub_client_http_transport
 )
 
-target_link_libraries(iothubclient_e2etests micromock ctest iothub_client_http_transport iothub_client iothub_client_amqp_transport iothub_test common
-$ENV{proton_path}/qpid-proton/build/proton-c/Debug/qpid-protond.lib
-"$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.lib"
-winhttp.lib
-)
+if(WIN32)
+else()
+	target_link_libraries(${theseTestsName} pthread)
+endif()
 
-file(COPY $ENV{proton_path}/qpid-proton/build/proton-c/Debug/qpid-protond.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-file(COPY "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-file(COPY "$ENV{openssldir}/bin/libeay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-file(COPY "$ENV{openssldir}/bin/ssleay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+linkHttp(${theseTestsName})
+linkProton(${theseTestsName})
+linkPaho(${theseTestsName})

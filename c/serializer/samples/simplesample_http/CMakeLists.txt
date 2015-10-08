@@ -2,13 +2,22 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for simplesample_http sample
+
+compileAsC99()
+
 set(simplesample_http_c_files
 simplesample_http.c
-./windows/main.c
 )
 
+if(WIN32)
+	set(simplesample_http_c_files ${simplesample_http_c_files} ./windows/main.c)
+else()
+	set(simplesample_http_c_files ${simplesample_http_c_files} ./linux/main.c)
+endif()
+
+
 set(simplesample_http_h_files
-simplesample_http.h
+	simplesample_http.h
 )
 
 IF(WIN32)
@@ -19,6 +28,17 @@ ENDIF(WIN32)
 include_directories(. ${COMMON_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
 
 add_executable(simplesample_http ${simplesample_http_c_files} ${simplesample_http_h_files})
-#TODO: debug folder is hard coded and horrible. Should be something like configuration
-#TODO: this should be a global function "install_proton" or something
-target_link_libraries(simplesample_http serializer iothub_client iothub_client_http_transport common Winhttp.lib)
+
+target_link_libraries(simplesample_http 
+	serializer 
+	iothub_client 
+	iothub_client_http_transport 
+	common
+	iothub_client_http_transport 
+)
+
+linkHttp(simplesample_http)
+if(WIN32)
+else()
+	target_link_libraries(simplesample_http pthread)
+endif()
