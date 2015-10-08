@@ -4,9 +4,11 @@
 'use strict';
 
 module.exports = {
-    ConnectionString: require('./lib/connection_string.js'),
+    createDictionary: require('./lib/dictionary.js'),
     endpoint: require('./lib/endpoint.js'),
+    errors: require('./lib/errors.js'),
     Https: require('./lib/https.js'),
     Message: require('./lib/message.js'),
+    SharedAccessSignature: require('./lib/shared_access_signature.js'),
     SimulatedHttps: require('./lib/https_simulated.js')
 };
