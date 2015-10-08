@@ -28,7 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{84052DC5
 		NuGet\Microsoft.Azure.Devices.Client.nuspec = NuGet\Microsoft.Azure.Devices.Client.nuspec
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Devices.Client.NetMF_43", "Microsoft.Azure.Devices.Client.NetMF\Microsoft.Azure.Devices.Client.NetMF_43.csproj", "{19F2FA91-FE92-4064-8865-F6719382CBD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Devices.Client.NetMF_43", "Microsoft.Azure.Devices.Client.NetMF\Microsoft.Azure.Devices.Client.Http.NetMF_43.csproj", "{19F2FA91-FE92-4064-8865-F6719382CBD4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MFDeviceClientHttpSample", "samples\MFDeviceClientHttpSample\MFDeviceClientHttpSample.csproj", "{7C9F3223-7B3D-4624-9406-4C76CDEBF6A3}"
 EndProject
