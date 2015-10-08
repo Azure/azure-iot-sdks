@@ -2,7 +2,6 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required(VERSION 3.0)
-project(common)
 
 compileAsC99()
 #these are the C source files

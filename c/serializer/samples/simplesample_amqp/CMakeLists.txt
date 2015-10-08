@@ -7,8 +7,13 @@ compileAsC99()
 
 set(simplesample_amqp_c_files
 simplesample_amqp.c
-./windows/main.c
 )
+
+if(WIN32)
+	set(simplesample_amqp_c_files ${simplesample_amqp_c_files} ./windows/main.c)
+else()
+	set(simplesample_amqp_c_files ${simplesample_amqp_c_files} ./linux/main.c)
+endif()
 
 set(simplesample_amqp_h_files
 simplesample_amqp.h
@@ -25,3 +30,8 @@ add_executable(simplesample_amqp ${simplesample_amqp_c_files} ${simplesample_amq
 
 target_link_libraries(simplesample_amqp serializer iothub_client iothub_client_amqp_transport common)
 linkProton(simplesample_amqp)
+
+if(WIN32)
+else()
+	target_link_libraries(simplesample_amqp pthread)
+endif()

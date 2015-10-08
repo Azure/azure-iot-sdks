@@ -15,7 +15,7 @@ set(${theseTestsName}_c_files
 ../../src/datamarshaller.c
 
 ../../../common/src/gballoc.c
-../../../common/adapters/lock_c11.c
+${LOCK_C_FILE}
 
 
 )

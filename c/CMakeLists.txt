@@ -17,7 +17,7 @@ enable_testing()
 function(includeProton)
 	if(WIN32)
 		include_directories($ENV{proton_path}/qpid-proton/proton-c/include)
-	elseif()
+	else()
 		#nothing to do here, it is assumed qpid-proton has been installed and headers and libraries are in the system
 	endif()
 endfunction(includeProton)
@@ -35,7 +35,7 @@ endfunction(linkProton)
 function(includePaho)
 if(WIN32)
 	#do something
-elseif()
+else()
 	#include something else
 endif()
 endfunction(includePaho)
@@ -47,10 +47,28 @@ function(linkPaho whatExecutableIsBuilding)
 		file(COPY "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 		file(COPY "$ENV{openssldir}/bin/libeay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 		file(COPY "$ENV{openssldir}/bin/ssleay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-	elseif()
+	else()
 		target_link_libraries(${whatExecutableIsBuilding} paho-mqtt3cs)
 	endif()
 endfunction(linkPaho)
+
+function(includeHttp)
+if(WIN32)
+	#do something
+else()
+	#include something else
+endif()
+endfunction(includeHttp)
+
+function(linkHttp whatExecutableIsBuilding)
+	includeHttp()
+	if(WIN32)
+		target_link_libraries(${whatExecutableIsBuilding} winhttp.lib)
+	else()
+		target_link_libraries(${whatExecutableIsBuilding} curl)
+	endif()
+endfunction(linkHttp)
+
 
 macro(compileAsC99)
   if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -110,14 +128,20 @@ function(build_test_artifacts whatIsBuilding)
 	
 	#setting output type
 	if(WIN32)
-		add_library(
-			${whatIsBuilding} SHARED ${${whatIsBuilding}_cpp_files} ${${whatIsBuilding}_h_files} ${${whatIsBuilding}_c_files}
+		add_library(${whatIsBuilding} SHARED 
+			${${whatIsBuilding}_cpp_files} 
+			${${whatIsBuilding}_h_files} 
+			${${whatIsBuilding}_c_files}
 		)
-	else(WIN32)
-		add_library(
-			${whatIsBuilding} SHARED ${${whatIsBuilding}_cpp_files} ${${whatIsBuilding}_h_files} ${${whatIsBuilding}_c_files}
+	else()
+		add_executable(${whatIsBuilding} 
+			${${whatIsBuilding}_cpp_files} 
+			${${whatIsBuilding}_h_files} 
+			${${whatIsBuilding}_c_files}
+			${CMAKE_CURRENT_LIST_DIR}/main.c
 		)
-	endif(WIN32)
+		add_test(NAME ${whatIsBuilding} COMMAND ${whatIsBuilding} )
+	endif()
 	
 	target_link_libraries(${whatIsBuilding} micromock ctest)
 endfunction(build_test_artifacts)

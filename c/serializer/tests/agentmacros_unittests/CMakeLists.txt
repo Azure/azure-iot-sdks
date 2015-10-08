@@ -6,14 +6,14 @@ cmake_minimum_required(VERSION 3.0)
 
 compileAsC99()
 set(theseTestsName agentmacros_unittests)
+
 set(${theseTestsName}_cpp_files
-${theseTestsName}.cpp
+	${theseTestsName}.cpp
 )
 
 set(${theseTestsName}_c_files
-
-../../../common/src/gballoc.c
-../../../common/adapters/lock_c11.c
+	../../../common/src/gballoc.c
+	${LOCK_C_FILE}
 )
 
 set(${theseTestsName}_h_files

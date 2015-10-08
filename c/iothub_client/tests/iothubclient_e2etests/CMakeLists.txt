@@ -5,33 +5,37 @@
 cmake_minimum_required(VERSION 3.0)
 
 compileAsC99()
+set(theseTestsName iothubclient_e2etests)
 
-set(iothubclient_e2etests_cpp_files
-iothubclient_e2etests.cpp
+set(${theseTestsName}_cpp_files
+	${theseTestsName}.cpp
 )
 
-set(iothubclient_e2etests_c_files
+set(${theseTestsName}_c_files
 )
 
-set(iothubclient_e2etests_h_files
+set(${theseTestsName}_h_files
 )
 
-include_directories(${IOTHUB_TEST_INC_FOLDER} ${MICROMOCK_INC_FOLDER} ${TESTRUNNERSWITCHER_INC_FOLDER} ${CTEST_INC_FOLDER} $ENV{VCInstallDir}UnitTest/include)
-link_directories($ENV{VCInstallDir}UnitTest/lib)
+include_directories(${IOTHUB_TEST_INC_FOLDER})
 
-IF(WIN32)
-	#windows needs this define
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	add_definitions(-DCPP_UNITTEST -DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-ENDIF(WIN32)
+build_test_artifacts(${theseTestsName})
 
-
-add_library(
-iothubclient_e2etests SHARED ${iothubclient_e2etests_cpp_files} ${iothubclient_e2etests_h_files} ${iothubclient_e2etests_files}
+target_link_libraries(${theseTestsName}
+	iothub_test
+	iothub_client
+	iothub_client_amqp_transport
+	iothub_client_http_transport
+	iothub_client_mqtt_transport
+	common
+	iothub_client_http_transport
 )
 
-target_link_libraries(iothubclient_e2etests micromock ctest iothub_client_http_transport iothub_client iothub_client_amqp_transport iothub_test common
-winhttp.lib
-)
-linkProton(iothubclient_e2etests)
-linkPaho(iothubclient_e2etests)
+if(WIN32)
+else()
+	target_link_libraries(${theseTestsName} pthread)
+endif()
+
+linkHttp(${theseTestsName})
+linkProton(${theseTestsName})
+linkPaho(${theseTestsName})

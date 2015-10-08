@@ -6,13 +6,13 @@ cmake_minimum_required(VERSION 3.0)
 
 compileAsC99()
 
-set(iothub_client_all_transport_c_files
+set(iothub_client_ll_transport_c_files
 ./src/version.c
 ./src/iothub_message.c
 ./src/iothub_client_ll.c
 )
 
-set(iothub_client_all_transport_h_files
+set(iothub_client_ll_transport_h_files
 ./inc/iothub_message.h
 ./inc/iothub_client_ll.h
 ./inc/version.h
@@ -33,35 +33,35 @@ set(iothub_client_h_files
 )
 
 set(iothub_client_http_transport_c_files
-${iothub_client_all_transport_c_files}
+${iothub_client_ll_transport_c_files}
 ./src/iothubtransporthttp.c
 ${HTTP_C_FILE}
 )
 
 set(iothub_client_http_transport_h_files
-${iothub_client_all_transport_h_files}
+${iothub_client_ll_transport_h_files}
 ./inc/iothubtransporthttp.h
 ../common/inc/httpapi.h
 )
 
 set(iothub_client_amqp_transport_c_files
-${iothub_client_all_transport_c_files}
+${iothub_client_ll_transport_c_files}
 ./src/iothubtransportamqp.c
 )
 
 set(iothub_client_amqp_transport_h_files
-${iothub_client_all_transport_h_files}
+${iothub_client_ll_transport_h_files}
 ./inc/iothubtransportamqp.h
 )
 
 set(iothub_client_mqtt_transport_c_files
-${iothub_client_all_transport_c_files}
+${iothub_client_ll_transport_c_files}
 ./src/iothubtransportmqtt.c
 ./adapters/mqttapi_paho.c
 )
 
 set(iothub_client_mqtt_transport_h_files
-${iothub_client_all_transport_h_files}
+${iothub_client_ll_transport_h_files}
 ./inc/iothubtransportmqtt.h
 ../common/inc/mqttapi.h
 )
@@ -89,20 +89,24 @@ ENDIF(WIN32)
 
 add_definitions(-Dqpid_proton_EXPORTS)
 
-add_library(
-iothub_client_http_transport ${iothub_client_http_transport_c_files} ${iothub_client_http_transport_h_files}
+add_library(iothub_client_http_transport 
+	${iothub_client_http_transport_c_files} 
+	${iothub_client_http_transport_h_files}
 )
 
-add_library(
-iothub_client_amqp_transport ${iothub_client_amqp_transport_c_files} ${iothub_client_amqp_transport_h_files}
+add_library(iothub_client_amqp_transport 
+	${iothub_client_amqp_transport_c_files} 
+	${iothub_client_amqp_transport_h_files}
 )
 
-add_library(
-iothub_client_mqtt_transport ${iothub_client_mqtt_transport_c_files} ${iothub_client_mqtt_transport_h_files}
+add_library(iothub_client_mqtt_transport 
+	${iothub_client_mqtt_transport_c_files} 
+	${iothub_client_mqtt_transport_h_files}
 )
 
-add_library(iothub_client ${iothub_client_all_transport_c_files} ${iothub_client_all_transport_H_files}
- ${iothub_client_c_files} ${iothub_client_h_files}
+add_library(iothub_client 
+	${iothub_client_c_files} 
+	${iothub_client_h_files}
 )
 
 add_subdirectory(samples)

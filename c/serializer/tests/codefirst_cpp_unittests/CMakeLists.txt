@@ -16,8 +16,9 @@ c_bool_size.c
 ../../src/codefirst.c
 
 ../../../common/src/gballoc.c
-../../../common/adapters/lock_c11.c
+${LOCK_C_FILE}
 
+../../../common/src/crt_abstractions.c
 ../../../common/src/strings.c
 )
 

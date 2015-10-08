@@ -21,4 +21,11 @@ include_directories(. ${COMMON_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
 
 add_executable(temp_sensor_anomaly ${temp_sensor_anomaly_c_files} ${temp_sensor_anomaly_h_files})
 
-target_link_libraries(temp_sensor_anomaly serializer iothub_client iothub_client_http_transport common Winhttp.lib)
+target_link_libraries(temp_sensor_anomaly 
+	serializer 
+	iothub_client 
+	iothub_client_http_transport 
+	common
+	iothub_client_http_transport)
+
+linkHttp(temp_sensor_anomaly)

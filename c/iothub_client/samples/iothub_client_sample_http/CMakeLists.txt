@@ -7,8 +7,14 @@ compileAsC99()
 
 set(iothub_client_sample_http_c_files
 iothub_client_sample_http.c
-./windows/main.c
 )
+
+if(WIN32)
+	set(iothub_client_sample_http_c_files ${iothub_client_sample_http_c_files} ./windows/main.c)
+else()
+	set(iothub_client_sample_http_c_files ${iothub_client_sample_http_c_files} ./linux/main.c)
+endif()
+
 
 set(iothub_client_sample_http_h_files
 iothub_client_sample_http.h
@@ -23,5 +29,18 @@ ENDIF(WIN32)
 include_directories(.)
 
 add_executable(iothub_client_sample_http ${iothub_client_sample_http_c_files} ${iothub_client_sample_http_h_files})
-#TODO: debug folder is hard coded and horrible. Should be something like configuration
-target_link_libraries(iothub_client_sample_http common iothub_client_http_transport iothub_client Winhttp.lib)
+
+target_link_libraries(iothub_client_sample_http 
+#iothubclient is here only because locking... in gballoc no less.
+	iothub_client
+	iothub_client_http_transport
+	common
+	iothub_client_http_transport
+)
+
+if(WIN32)
+else()
+target_link_libraries(iothub_client_sample_http curl)
+endif()
+	
+linkHttp(iothub_client_sample_http)
