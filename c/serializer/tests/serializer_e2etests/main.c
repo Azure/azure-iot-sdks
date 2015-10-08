@@ -6,6 +6,6 @@
 int main(void)
 {
     size_t failedTestCount = 0;
-    RUN_TEST_SUITE(serializer_e2e_tests, failedTestCount);
+    RUN_TEST_SUITE(serializer_e2etests, failedTestCount);
     return failedTestCount;
 }
