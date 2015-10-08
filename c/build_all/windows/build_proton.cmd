@@ -88,7 +88,7 @@ rem ----------------------------------------------------------------------------
 rem -- Create the nuget package
 rem -----------------------------------------------------------------------------
 
-copy %package-root%\%package-id%.* %proton-root%
+copy %package-root%\%package-id%* %proton-root%
 if not %errorlevel%==0 exit /b %errorlevel%
 
 pushd %proton-root%
