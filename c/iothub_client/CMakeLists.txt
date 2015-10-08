@@ -4,13 +4,15 @@
 cmake_minimum_required(VERSION 3.0)
 #this is CMakeLists for iothub_client
 
-set(iothub_client_all_transport_c_files
+compileAsC99()
+
+set(iothub_client_ll_transport_c_files
 ./src/version.c
 ./src/iothub_message.c
 ./src/iothub_client_ll.c
 )
 
-set(iothub_client_all_transport_h_files
+set(iothub_client_ll_transport_h_files
 ./inc/iothub_message.h
 ./inc/iothub_client_ll.h
 ./inc/version.h
@@ -19,8 +21,8 @@ set(iothub_client_all_transport_h_files
 set(iothub_client_c_files
 ./src/iothub_client.c
 ./src/version.c
-../common/adapters/threadapi_c11.c
-../common/adapters/lock_c11.c
+${LOCK_C_FILE}
+${THREAD_C_FILE}
 )
 
 set(iothub_client_h_files
@@ -31,35 +33,35 @@ set(iothub_client_h_files
 )
 
 set(iothub_client_http_transport_c_files
-${iothub_client_all_transport_c_files}
+${iothub_client_ll_transport_c_files}
 ./src/iothubtransporthttp.c
-../common/adapters/httpapi_winhttp.c
+${HTTP_C_FILE}
 )
 
 set(iothub_client_http_transport_h_files
-${iothub_client_all_transport_h_files}
+${iothub_client_ll_transport_h_files}
 ./inc/iothubtransporthttp.h
 ../common/inc/httpapi.h
 )
 
 set(iothub_client_amqp_transport_c_files
-${iothub_client_all_transport_c_files}
+${iothub_client_ll_transport_c_files}
 ./src/iothubtransportamqp.c
 )
 
 set(iothub_client_amqp_transport_h_files
-${iothub_client_all_transport_h_files}
+${iothub_client_ll_transport_h_files}
 ./inc/iothubtransportamqp.h
 )
 
 set(iothub_client_mqtt_transport_c_files
-${iothub_client_all_transport_c_files}
+${iothub_client_ll_transport_c_files}
 ./src/iothubtransportmqtt.c
 ./adapters/mqttapi_paho.c
 )
 
 set(iothub_client_mqtt_transport_h_files
-${iothub_client_all_transport_h_files}
+${iothub_client_ll_transport_h_files}
 ./inc/iothubtransportmqtt.h
 ../common/inc/mqttapi.h
 )
@@ -73,29 +75,38 @@ set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this 
 
 
 include_directories(${IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER} ${COMMON_INC_FOLDER})
-include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER} ${COMMON_INC_FOLDER} $ENV{proton_path}/qpid-proton/proton-c/include)
+include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER} ${COMMON_INC_FOLDER})
+includeProton()
 include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${COMMON_INC_FOLDER} $ENV{paho_path}/org.eclipse.paho.mqtt.c/src)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER} ${COMMON_INC_FOLDER})
 
 IF(WIN32)
 	#windows needs this define
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-add_library(
-iothub_client_http_transport ${iothub_client_http_transport_c_files} ${iothub_client_http_transport_h_files}
+
+add_definitions(-Dqpid_proton_EXPORTS)
+
+add_library(iothub_client_http_transport 
+	${iothub_client_http_transport_c_files} 
+	${iothub_client_http_transport_h_files}
 )
 
-add_library(
-iothub_client_amqp_transport ${iothub_client_amqp_transport_c_files} ${iothub_client_amqp_transport_h_files}
+add_library(iothub_client_amqp_transport 
+	${iothub_client_amqp_transport_c_files} 
+	${iothub_client_amqp_transport_h_files}
 )
 
-add_library(
-iothub_client_mqtt_transport ${iothub_client_mqtt_transport_c_files} ${iothub_client_mqtt_transport_h_files}
+add_library(iothub_client_mqtt_transport 
+	${iothub_client_mqtt_transport_c_files} 
+	${iothub_client_mqtt_transport_h_files}
 )
 
-add_library(
-iothub_client ${iothub_client_c_files} ${iothub_client_h_files}
+add_library(iothub_client 
+	${iothub_client_c_files} 
+	${iothub_client_h_files}
 )
 
 add_subdirectory(samples)

@@ -4,6 +4,8 @@
 cmake_minimum_required(VERSION 3.0)
 #this is unittests for ctest
 
+compileAsC99()
+
 set(ctest_unittests_c_files
 assertfailurestests.c
 assertsuccesstests.c
