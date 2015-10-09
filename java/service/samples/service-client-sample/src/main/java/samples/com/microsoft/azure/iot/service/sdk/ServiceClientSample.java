@@ -5,8 +5,10 @@
 
 package samples.com.microsoft.azure.iot.service.sdk;
 
-import com.microsoft.azure.iot.service.sdk.*;
-import org.apache.commons.codec.binary.Base64;
+import com.microsoft.azure.iot.service.sdk.FeedbackBatch;
+import com.microsoft.azure.iot.service.sdk.FeedbackReceiver;
+import com.microsoft.azure.iot.service.sdk.Message;
+import com.microsoft.azure.iot.service.sdk.ServiceClient;
 
 import javax.jms.JMSException;
 import java.io.IOException;
@@ -42,7 +44,7 @@ public class ServiceClientSample
         openServiceClient();
         openFeedbackReceiver();
 
-        Message commandMessage = new Message(Base64.decodeBase64("Cloud to device message.".getBytes(StandardCharsets.UTF_8)));
+        Message commandMessage = new Message("Cloud to device message...".getBytes(StandardCharsets.UTF_8));
 
         System.out.printf("\n********* Sending message to device...\n");
 
