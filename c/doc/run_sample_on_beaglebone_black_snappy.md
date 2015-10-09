@@ -148,7 +148,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - Plug the USB cable into your computer, so you can access the board (your PC will install drivers, etc., the first time). You can use the same USB cable to power the board; it's not necessary to use the separate power block.
 - Use one of the following two options to install the Windows drivers:
 	-  Download the [x64](http://beagleboard.org/static/Drivers/Windows/BONE_D64.exe) or [x86 (32-bit)](http://beagleboard.org/static/Drivers/Windows/BONE_DRV.exe) drivers. On x64, you only need the x64 drivers.
-	-  The drivers (Linux and Windows) are already on the board. When you connect it via USB, the board appears as another drive letter called **BeagleBone Getting Started**. You can find the drivers under **[DRIVE LETTER]:\Drivers\Windows\[BONE\_D64.exe, and BONE\_DRV.exe]**.
+	-  The drivers (Linux and Windows) are already on the board. When you connect it via USB, the board appears as another drive letter called **BeagleBone Getting Started**. You can find the x64 driver under **[DRIVE LETTER]:\Drivers\Windows\BONE\_D64.exe** and the x86 driver under **[DRIVE LETTER]:\Drivers\Windows\BONE\_DRV.exe**.
 
 <a name="Verify-that-you-can-connect-to-the-device"/>
 ## Verify that you can connect to the device
@@ -223,17 +223,19 @@ To run this tool, you need connection and configuration information for your IoT
 <a name="Build-the-Azure-client"/>
 ## Build the sample
 
-The Azure IoT Hub SDK depends on Apache Qpid Proton (AMQP) to integrate with the device hub and Event Hubs.
-
-- On the board, run the following command to build/install Apache Proton:
+- The Azure IoT Hub SDK depends on Apache Qpid Proton (AMQP) to integrate with the device hub and Event Hubs. On the board, run the following command to build/install Apache Proton:
 
 		sudo ~/azure-iot-sdks/c/build_all/linux/build_proton.sh --install /usr
 
-- Assuming everything went OK on the build\_proton.sh, you can now build the SDK code using the following command:
+- This SDK sample depends on the presences of a few libraries. Run the following command to build them:
+
+		sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+
+- You can now build the SDK code using the following command, assuming everything went OK on build\_proton.sh and build\_paho.sh
 
 		~/azure-iot-sdks/c/build_all/linux/build.sh
 
-	**Note:** If you receive the following error, ignore it: **"crtabstractions\_unittests/crtabstractions\_unittests.cpp:119:5"**.
+	**Note:** Ignore the following error if you receive it: **"crtabstractions\_unittests/crtabstractions\_unittests.cpp:119:5"**.
 
 <a name="Run-the-samples"/>
 ## Run the samples
