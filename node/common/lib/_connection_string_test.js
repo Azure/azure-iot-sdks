@@ -8,17 +8,15 @@ var assert = require('chai').assert;
 function ConnectionString(value, segments) {
   var valueStr = String(value);
 
-  if (segments) {
-    if (Object.prototype.toString.call(segments) !== '[object Array]') {
-      segments = [segments];
-    }
-
-    segments.forEach(function (name) {
-      var exp = '(?:^|;)' + name + '=([^;]+)';
-      var match = valueStr.match(new RegExp(exp));
-      if (!!match) this[name] = match[1];
-    }.bind(this));
+  if (Object.prototype.toString.call(segments) !== '[object Array]') {
+    segments = [segments];
   }
+
+  segments.forEach(function (name) {
+    var exp = '(?:^|;)' + name + '=([^;]+)';
+    var match = valueStr.match(new RegExp(exp));
+    if (!!match) this[name] = match[1];
+  }.bind(this));
 }
 
 describe('ConnectionString', function () {
@@ -72,6 +70,16 @@ describe('ConnectionString', function () {
 
     it('creates no properties when value argument is falsy', function () {
       var cn = new ConnectionString('', 'name');
+      assert.deepEqual(cn, {});
+    });
+
+    it('creates no properties when segments argument is an empty array', function () {
+      var cn = new ConnectionString('name=value', []);
+      assert.deepEqual(cn, {});
+    });
+
+    it('creates no properties when segments argument is falsy', function () {
+      var cn = new ConnectionString('name=value', null);
       assert.deepEqual(cn, {});
     });
   });
