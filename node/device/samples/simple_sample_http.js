@@ -31,7 +31,7 @@ setInterval(function(){
       printResultFor('receive')(err, res);
     }
   });
-}, 1000);
+}, 1500000);
 
 // Helper function to print results in the console
 function printResultFor(op) {
