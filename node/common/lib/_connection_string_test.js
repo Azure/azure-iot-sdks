@@ -56,7 +56,18 @@ describe('ConnectionString', function () {
       assert.propertyVal(cn, 'name', 'value');
     });
 
-    // it('does something reasonable when the segments argument is not a string or array', function () {
-    // });
+    it('accepts any segments argument that is convertible to string', function () {
+      var arg = { value: 'name', toString: function () { return this.value; } };
+      var cn = new ConnectionString('name=value', arg);
+      assert.propertyVal(cn, 'name', 'value');
+    });
+
+    it('accepts any segments argument that is convertible array of strings', function () {
+      var arg = [
+        { value: 'name', toString: function () { return this.value; } }
+      ];
+      var cn = new ConnectionString('name=value', arg);
+      assert.propertyVal(cn, 'name', 'value');
+    });
   });
 });
