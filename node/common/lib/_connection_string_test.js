@@ -4,20 +4,7 @@
 'use strict';
 
 var assert = require('chai').assert;
-
-function ConnectionString(value, segments) {
-  var valueStr = String(value);
-
-  if (Object.prototype.toString.call(segments) !== '[object Array]') {
-    segments = [segments];
-  }
-
-  segments.forEach(function (name) {
-    var exp = '(?:^|;)' + name + '=([^;]+)';
-    var match = valueStr.match(new RegExp(exp));
-    if (!!match) this[name] = match[1];
-  }.bind(this));
-}
+var ConnectionString = require('./connection_string.js');
 
 describe('ConnectionString', function () {
   describe('#constructor', function () {
