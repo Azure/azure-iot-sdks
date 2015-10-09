@@ -5,8 +5,20 @@
 
 var assert = require('chai').assert;
 
-function ConnectionString() {
-    this.name = 'value';
+function ConnectionString(value, segments) {
+  this._value = value;
+
+  if (segments) {
+    if (Object.prototype.toString.call(segments) !== '[object Array]') {
+      segments = [segments];
+    }
+
+    segments.forEach(function (name) {
+      var exp = name + '=([^;]+)';
+      var match = value.match(new RegExp(exp));
+      if (!!match) this[name] = match[1];
+    }.bind(this));
+  }
 }
 
 describe('ConnectionString', function () {
@@ -20,5 +32,16 @@ describe('ConnectionString', function () {
       var cn = new ConnectionString('name=value', 'othername');
       assert.notProperty('othername');
     });
+
+    it('finds more than one segment in the connection string', function () {
+      var cn = new ConnectionString('name1=value1;name2=value2', ['name1', 'name2']);
+      assert.propertyVal(cn, 'name1', 'value1');
+      assert.propertyVal(cn, 'name2', 'value2');
+    });
+
+    // it('does something reasonable when the value argument is not a string', function () {
+    // });
+    // it('does something reasonable when the segments argument is not a string or array', function () {
+    // });
   });
 });
