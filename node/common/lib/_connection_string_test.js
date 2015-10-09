@@ -6,7 +6,7 @@
 var assert = require('chai').assert;
 
 function ConnectionString(value, segments) {
-  this._value = value;
+  this._value = String(value);
 
   if (segments) {
     if (Object.prototype.toString.call(segments) !== '[object Array]') {
@@ -15,7 +15,7 @@ function ConnectionString(value, segments) {
 
     segments.forEach(function (name) {
       var exp = '(?:^|;)' + name + '=([^;]+)';
-      var match = value.match(new RegExp(exp));
+      var match = this._value.match(new RegExp(exp));
       if (!!match) this[name] = match[1];
     }.bind(this));
   }
@@ -50,8 +50,12 @@ describe('ConnectionString', function () {
       assert.propertyVal(cn, 'name2', 'value2');
     });
 
-    // it('does something reasonable when the value argument is not a string', function () {
-    // });
+    it('accepts any value argument that is convertible to string', function () {
+      var arg = { value: 'name=value', toString: function () { return this.value; } };
+      var cn = new ConnectionString(arg, 'name');
+      assert.propertyVal(cn, 'name', 'value');
+    });
+
     // it('does something reasonable when the segments argument is not a string or array', function () {
     // });
   });
