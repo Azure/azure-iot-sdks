@@ -44,6 +44,12 @@ describe('ConnectionString', function () {
       assert.notProperty(cn, 'name');
     });
 
+    it('only matches the segments you care about', function () {
+      var cn = new ConnectionString('name1=value1;name2=value2', 'name2');
+      assert.notProperty(cn, 'name1');
+      assert.propertyVal(cn, 'name2', 'value2');
+    });
+
     // it('does something reasonable when the value argument is not a string', function () {
     // });
     // it('does something reasonable when the segments argument is not a string or array', function () {
