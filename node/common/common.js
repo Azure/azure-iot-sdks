@@ -4,6 +4,7 @@
 'use strict';
 
 module.exports = {
+    ConnectionString: require('./lib/connection_string.js'),
     endpoint: require('./lib/endpoint.js'),
     Https: require('./lib/https.js'),
     Message: require('./lib/message.js'),
