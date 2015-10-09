@@ -104,7 +104,12 @@ You can verify that the environment variables necessary to run **_Maven 3_** hav
 git clone https://github.com/avranju/qpid-jms.git
 cd qpid-jms
 mvn install
-cd ..
+```
+
+We have noticed that certain unit tests can fail when running `mvn install` as given above with the latest version of JDK 8 (1.8.0_60 at the time this document was written). It works fine with older versions however. If this occurs please skip running unit tests like so:
+
+```
+mvn install -DskipTests
 ```
 
 <a name="installiot"/>
