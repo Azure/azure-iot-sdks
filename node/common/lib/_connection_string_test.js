@@ -14,7 +14,7 @@ function ConnectionString(value, segments) {
     }
 
     segments.forEach(function (name) {
-      var exp = name + '=([^;]+)';
+      var exp = '(?:^|;)' + name + '=([^;]+)';
       var match = value.match(new RegExp(exp));
       if (!!match) this[name] = match[1];
     }.bind(this));
@@ -37,6 +37,11 @@ describe('ConnectionString', function () {
       var cn = new ConnectionString('name1=value1;name2=value2', ['name1', 'name2']);
       assert.propertyVal(cn, 'name1', 'value1');
       assert.propertyVal(cn, 'name2', 'value2');
+    });
+
+    it('exactly matches segment names', function () {
+      var cn = new ConnectionString('not-my-name=value', 'name');
+      assert.notProperty(cn, 'name');
     });
 
     // it('does something reasonable when the value argument is not a string', function () {
