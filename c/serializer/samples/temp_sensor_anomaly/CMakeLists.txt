@@ -2,6 +2,9 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for temp_sensor_anomaly sample
+if(NOT ${use_http})
+	message(FATAL_ERROR "temp_sensor_anomaly being generated without HTTP support")
+endif()
 
 compileAsC99()
 

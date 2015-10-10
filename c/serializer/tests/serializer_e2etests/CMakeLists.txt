@@ -4,6 +4,10 @@
 #this is CMakeLists.txt for serializer_e2etests
 cmake_minimum_required(VERSION 3.0)
 
+if(NOT (${use_amqp} AND  ${use_http}) )
+	message(FATAL_ERROR "serializer_e2etests being generated without amqp or http support")
+endif()
+
 compileAsC99()
 set(theseTestsName serializer_e2etests)
 
@@ -20,7 +24,7 @@ set(${theseTestsName}_h_files
 
 include_directories(${IOTHUB_TEST_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER} ${SERIALIZER_INC_FOLDER})
 
-build_test_artifacts(${theseTestsName})
+build_test_artifacts(${theseTestsName} ON)
 
 target_link_libraries(${theseTestsName}
 	serializer

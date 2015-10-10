@@ -4,6 +4,10 @@
 #this is CMakeLists.txt for httpapiex_unittests
 cmake_minimum_required(VERSION 3.0)
 
+if(NOT ${use_http})
+	message(FATAL_ERROR "httpapiex_unittests being generated without HTTP support")
+endif()
+
 compileAsC99()
 set(theseTestsName httpapiex_unittests )
 
@@ -19,4 +23,4 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
-build_test_artifacts(${theseTestsName})
+build_test_artifacts(${theseTestsName} ON)

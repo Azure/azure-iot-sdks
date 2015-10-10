@@ -4,6 +4,10 @@
 #this is CMakeLists.txt for httpapiexsas_unittests
 cmake_minimum_required(VERSION 3.0)
 
+if(NOT ${use_http})
+	message(FATAL_ERROR "httpapiexsas_unittests being generated without HTTP support")
+endif()
+
 compileAsC99()
 set(theseTestsName httpapiexsas_unittests)
 
@@ -19,6 +23,6 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
-build_test_artifacts(${theseTestsName})
+build_test_artifacts(${theseTestsName} ON)
 
 

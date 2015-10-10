@@ -3,6 +3,10 @@
 
 #this is CMakeLists.txt for simplesample_http sample
 
+if(NOT ${use_http})
+	message(FATAL_ERROR "simplesample_http being generated without HTTP support")
+endif()
+
 compileAsC99()
 
 set(simplesample_http_c_files

@@ -5,6 +5,10 @@
 
 compileAsC99()
 
+if(NOT ${use_amqp})
+	message(FATAL_ERROR "simplesample_amqp being generated without amqp support")
+endif()
+
 set(simplesample_amqp_c_files
 simplesample_amqp.c
 )

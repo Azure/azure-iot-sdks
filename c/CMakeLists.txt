@@ -2,9 +2,30 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required(VERSION 3.0)
-project(everything)
+project(azure_iot_sdks)
+
+#the following variables are project-wide and can be used with cmake-gui
+option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
+option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
+option(use_mqtt "set use_mqtt to ON if mqtt is to be used, set to OFF to not use mqtt" ON)
+option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF) [if possible, they are always build]" OFF)
+option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (default is OFF)[if possible, they are always build]" OFF)
+option(skip_unittests "set skip_unittests to ON to skip unittests (default is OFF)[if possible, they are always build]" OFF)
+option(compileOption_C "passes a string to the command line of the C compiler" OFF)
+option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
+
 
 enable_testing()
+
+#if any compiler has a command line switch called "OFF" then it will need special care
+if(NOT "${compileOption_C}" STREQUAL "OFF")
+	set(CMAKE_C_FLAGS "${compileOption_C} ${CMAKE_C_FLAGS}")
+endif()
+
+if(NOT "${compileOption_CXX}" STREQUAL "OFF")
+	set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
+endif()
+
 
 #this project uses several other projects that are build not by these CMakeFiles
 #this project also targets several OSes
@@ -13,7 +34,6 @@ enable_testing()
 #1. add the includes of proton
 #2. link qpid-proton(d).lib
 #3. copying some shared libraries(.dll or .so) to the location of the output executable
-
 function(includeProton)
 	if(WIN32)
 		include_directories($ENV{proton_path}/qpid-proton/proton-c/include)
@@ -74,33 +94,22 @@ macro(compileAsC99)
   endif()
 endmacro(compileAsC99)
 
-function(build_test_artifacts whatIsBuilding)
-
-	#the first argument is whether the tests should be build with gballoc #defines or not
-	if(${ARGC} EQUAL 1)
-		set(uses_gb_alloc true)
-	else()
-		if(${ARGV1} EQUAL 0)
-			set(uses_gb_alloc false)
-		else()
-			set(uses_gb_alloc true)
-		endif()
+function(build_test_artifacts whatIsBuilding use_gballoc)
+	
+	#the first argument is what is building
+	#the second argument is whether the tests should be build with gballoc #defines or not
+	
+	if(${use_gballoc})
+		add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+	else()	
 	endif()
 	
 	#setting #defines
 	if(WIN32)
 		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 		add_definitions(-DCPP_UNITTEST )
-		if(${uses_gb_alloc})
-			add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-		else()	
-		endif(${uses_gb_alloc})			
 	else()
-		add_definitions(-DUSE_CTEST)
-		if(${uses_gb_alloc})
-			add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-		else()	
-		endif(${uses_gb_alloc})
+		add_definitions(-DUSE_CTEST)		
 	endif()
 	
 	#setting includes
@@ -114,17 +123,30 @@ function(build_test_artifacts whatIsBuilding)
 	#settings link directories
 	if(WIN32)
 		link_directories($ENV{VCInstallDir}UnitTest/lib)
-	else(WIN32)
+	else()
 		#nothing
-	endif(WIN32)
+	endif()
 	
 	#setting output type
 	if(WIN32)
-		add_library(${whatIsBuilding} SHARED 
-			${${whatIsBuilding}_cpp_files} 
-			${${whatIsBuilding}_h_files} 
-			${${whatIsBuilding}_c_files}
+		#to disable running e2e or longhaul or unittests tests for windows, we build the the same thing as "static library" so it is not picked up by visual studio
+		if(
+			(("${whatIsBuilding}" MATCHES ".*e2e.*") AND NOT ${run_e2e_tests}) OR
+			(("${whatIsBuilding}" MATCHES ".*longhaul.*") AND NOT ${run_longhaul_tests}) OR
+			(("${whatIsBuilding}" MATCHES ".*unittests.*") AND ${skip_unittests})
 		)
+			add_library(${whatIsBuilding} STATIC
+				${${whatIsBuilding}_cpp_files} 
+				${${whatIsBuilding}_h_files} 
+				${${whatIsBuilding}_c_files}
+			)
+		else()
+			add_library(${whatIsBuilding} SHARED 
+				${${whatIsBuilding}_cpp_files} 
+				${${whatIsBuilding}_h_files} 
+				${${whatIsBuilding}_c_files}
+			)
+		endif()
 	else()
 		add_executable(${whatIsBuilding} 
 			${${whatIsBuilding}_cpp_files} 
@@ -132,7 +154,15 @@ function(build_test_artifacts whatIsBuilding)
 			${${whatIsBuilding}_c_files}
 			${CMAKE_CURRENT_LIST_DIR}/main.c
 		)
-		add_test(NAME ${whatIsBuilding} COMMAND ${whatIsBuilding} )
+		
+		if(
+			(("${whatIsBuilding}" MATCHES ".*e2e.*") AND NOT ${run_e2e_tests}) OR
+			(("${whatIsBuilding}" MATCHES ".*longhaul.*") AND NOT ${run_longhaul_tests}) OR
+			(("${whatIsBuilding}" MATCHES ".*unittests.*") AND ${skip_unittests})
+		) 					
+		else()
+			add_test(NAME ${whatIsBuilding} COMMAND ${whatIsBuilding} )
+		endif()
 	endif()
 	
 	target_link_libraries(${whatIsBuilding} micromock ctest)

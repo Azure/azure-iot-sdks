@@ -5,6 +5,10 @@
 
 compileAsC99()
 
+if(NOT ${use_http})
+	message(FATAL_ERROR "iothub_client_sample_http being generated without HTTP support")
+endif()
+
 set(iothub_client_sample_http_c_files
 iothub_client_sample_http.c
 )
