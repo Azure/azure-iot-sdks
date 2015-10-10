@@ -3,27 +3,26 @@
 
 'use strict';
 
-/*Codes_SRS_NODE_COMMON_CONNSTR_05_001: [The ConnectionString constructor shall accept two arguments:
-value - the connection string to parse
-segments - the name of the property to expect when parsing value, or an array of such names]*/
-function ConnectionString(value, segments) {
+/*Codes_SRS_NODE_COMMON_CONNSTR_05_001: [The ConnectionString constructor shall accept as an argument the connection string to parse.]*/
+function ConnectionString(value) {
+  /*Codes_SRS_NODE_COMMON_CONNSTR_05_006: [If the value argument is falsy the constructor shall not add any properties to itself.]*/
+  if (!value) return;
+
   /*Codes_SRS_NODE_COMMON_CONNSTR_05_002: [The constructor shall convert the value argument to type String before using it.]*/
-  var valueStr = String(value);
-
-  /*Codes_SRS_NODE_COMMON_CONNSTR_05_003: [If the segments argument is not of type Array, the constructor shall convert it to type Array before using it.]*/
-  if (Object.prototype.toString.call(segments) !== '[object Array]') {
-    segments = [segments];
-  }
-
-  /*Codes_SRS_NODE_COMMON_CONNSTR_05_008: [If either value or segments arguments are falsy, or if the segments array is empty, the constructor shall not add any properties to itself.]*/
-  segments.forEach(function (name) {
-    /*Codes_SRS_NODE_COMMON_CONNSTR_05_004: [The constructor shall convert all elements in the segments argument to type String before using them.]*/
-    var exp = '(?:^|;)' + name + '=([^;]+)';
-    /*Codes_SRS_NODE_COMMON_CONNSTR_05_005: [For each element in the segments array, the constructor shall search value for a match of the form: 'element=somevalue', where this match is found either at the beginning of value, or immediately following a semicolon (';').]*/
-    /*Codes_SRS_NODE_COMMON_CONNSTR_05_006: [If there are multiple matches for a given element, only the first shall be used.]*/
-    var match = valueStr.match(new RegExp(exp));
-    /*Codes_SRS_NODE_COMMON_CONNSTR_05_007: [For each element that has a match, the constructor shall create a property on the ConnectionString object instance with the same name as the element value.  The property’s value shall be the sequence of characters in the connection string following the equal sign ('=') up to but not including the next semicolon (';'), or to the end of the string if no semicolon exists.]*/
-    if (!!match) this[name] = match[1];
+  var segments = String(value).split(';');
+  
+  segments.forEach(function (nameValue) {
+    /*Codes_SRS_NODE_COMMON_CONNSTR_05_003: [The constructor shall search value for name/value pairs of the form: 'element=somevalue', where the pair is found either at the beginning of value, or immediately following a semicolon (';').]*/
+    var pair = nameValue.split('=');
+    if (pair.length === 2) {
+      /*Codes_SRS_NODE_COMMON_CONNSTR_05_004: [If there are multiple pairs with the same name, the last value shall be used.]*/
+      /*Codes_SRS_NODE_COMMON_CONNSTR_05_005: [For each pair, the constructor shall create a property on the ConnectionString object instance with the same name as the pair.  The property’s value shall be the pair value.]*/
+      this[pair[0]] = pair[1];
+    }
+    else if (pair.length === 3 && !pair[2]) {
+      // base64-encoded values can have a trailing equal sign ('='), which we need to preserve
+      this[pair[0]] = pair[1] + '=';
+    }
   }.bind(this));
 }
 
