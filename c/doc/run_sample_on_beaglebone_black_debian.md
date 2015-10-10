@@ -86,6 +86,12 @@ you obtained in the "Connecting your device to an IoT hub" step above.
     sudo ./c/build_all/linux/build_proton.sh --install /usr
   ```
 
+- Build a few libraries upon which the samples depend:
+
+  ```
+    sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+  ```
+
 - Finally, build the sample applications:
 
   ```
@@ -98,7 +104,7 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 - Run the **simplesample_amqp** sample:
 
   ```
-  ./serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ./c/serializer/samples/simplesample_amqp/linux/simplesample_amqp
   ```
 
 This sample application sends simulated sensor data to your IoT Hub.
