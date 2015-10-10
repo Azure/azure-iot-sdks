@@ -35,6 +35,11 @@ describe('ConnectionString', function () {
       assert.propertyVal(cn, 'name2', 'value2');
     });
 
+    it('finds the first match when duplicate segment names exist in the connection string', function () {
+      var cn = new ConnectionString('name=value1;name=value2', 'name');
+      assert.propertyVal(cn, 'name', 'value1');
+    });
+
     it('accepts any value argument that is convertible to string', function () {
       var arg = { value: 'name=value', toString: function () { return this.value; } };
       var cn = new ConnectionString(arg, 'name');
