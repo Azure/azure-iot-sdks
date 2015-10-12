@@ -42,11 +42,14 @@ The AMQP samples require the Qpid Proton-C library.  There are two ways to obtai
 
 4. Install  [Python ver. 2.7.9](https://www.python.org/downloads/) (make sure it is installed in your path, type "python -V" to verify).
 
-5. Open a Visual Studio 2015 x86 Native Tools command prompt.
+5. Ensure that the git.exe application is in your system path.
 
-6. Run the script **build_proton.cmd** in the **\build_all\windows** directory to build the proton libraries. You need to complete this step before continuing to the next section.
+6. Open a Visual Studio 2015 x86 Native Tools command prompt.
+
+7. Run the script **build_proton.cmd** in the **\build_all\windows** directory to build the proton libraries. You need to complete this step before continuing to the next section.
 
 ### Building the Apache MQTT library in Windows
+
 To build the MQTT-based samples you must install the Paho open source library.
 
 1. Create the environment variables **OpenSSLDir=c:\OpenSSL** and **PAHO_PATH=c:\Paho**.
