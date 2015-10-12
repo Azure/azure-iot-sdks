@@ -15,24 +15,23 @@ Be sure to include Visual C++ and NuGet Package Manager.
 
 - Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest release version.
 
-
 ### Preparing Qpid Proton libraries in Windows
 
 The AMQP samples require the Qpid Proton-C library.  There are two ways to obtain the library-- via NuGet or by downloading the source from GitHub and building it yourself.
 
-#### Getting Qpid Proton via NuGet
+#### Option 1: Getting Qpid Proton via NuGet
 
  1. In Visual Studio 2015 right click on the iothub_client solution and select "Manage NuGet Package for Solutions".
 
- 1. Click the "Include prerelease" check box.
+ 2. Click the "Include prerelease" check box.
 
- 2. Enter Apache.Qpid.Proton.AzureIot in the Search box (Ctrl+E) to find the Proton NuGet Package.
+ 3. Enter Apache.Qpid.Proton.AzureIot in the Search box (Ctrl+E) to find the Proton NuGet Package.
 
- 3. Select the Apache.Qpid.Proton.AzureIot package and on the right pane click the Install button.
+ 4. Select the Apache.Qpid.Proton.AzureIot package and on the right pane click the Install button.
 
- 4. Enter OK at the dialog and Accept the license terms to continue.
+ 5. Enter OK at the dialog and Accept the license terms to continue.
 
-#### Building the Qpid Proton library
+#### Option 2: Building the Qpid Proton library
 
 1. Create a folder on your development machine in which to download the proton libraries. This example uses the location **C:\Proton**.
 
@@ -58,7 +57,7 @@ To build the MQTT-based samples you must install the Paho open source library.
 
 3. Open a Visual Studio 2015 x86 Native Tools command prompt.
 
-4. Run the script **build_paho.cmd** in the **\build_all\windows** directory.
+4. Run the script **build_paho.cmd** in the **c\build_all\windows** directory.
 
 5. In order to test MQTT End2End you must also deploy an [Azure IoT Protocol Gateway](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md).
 
