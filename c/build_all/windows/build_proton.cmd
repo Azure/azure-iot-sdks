@@ -55,7 +55,7 @@ if not exist %build-root%\build (
 )
 pushd %build-root%\build
 
-cmake -G "Visual Studio 14 2015" .. 
+cmake -G "Visual Studio 14" .. 
 if not %errorlevel%==0 exit /b %errorlevel%
 
 msbuild /m proton.sln /property:Configuration=Debug
@@ -72,7 +72,7 @@ if not exist %build-root%\build_x64 (
 )
 pushd %build-root%\build_x64
 
-cmake -G "Visual Studio 14 2015 Win64" .. 
+cmake -G "Visual Studio 14 Win64" .. 
 if not %errorlevel%==0 exit /b %errorlevel%
 
 msbuild /m proton.sln /property:Configuration=Debug
