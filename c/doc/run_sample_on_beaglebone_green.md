@@ -93,17 +93,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - Now run the **simplesample_amqp** sample by issuing the following commands:
 
   ```
-  ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/linux/simplesample_amqp
-  ```
-
-<a name="tips"/>
-## Tips
-
-- If you just want to build the serializer samples, run the following commands:
-
-  ```
-  cd ~/azure-iot-sdks/c/serializer/build/linux
-  make -f makefile.linux all
+  ~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp
   ```
 
 - You can use the DeviceExplorer tool on your desktop machine to see the data your device is sending and receiving.

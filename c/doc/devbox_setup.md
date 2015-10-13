@@ -22,7 +22,7 @@ The AMQP samples require the Qpid Proton-C library.  There are two ways to obtai
 
 #### Getting Qpid Proton via NuGet
 
- 1. In Visual Studio 2015 right click on the iothub_client solution and select "Manage NuGet Package for Solutions".
+ 1. In Visual Studio 2015 right click on your solution and select "Manage NuGet Package for Solutions".
 
  1. Click the "Include prerelease" check box.
 
@@ -69,15 +69,15 @@ You can build the Windows samples to verify that your environment is set up corr
 
 3. Run the `build.cmd` script.
 
-This script builds the **iothub_client** and **serializer** libraries and their associated samples. It also runs the test suite.
+This script uses cmake to make a folder called "cmake" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the solution and run tests.
 
   > Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [Run sample on Windows](run_sample_on_Windows.md).
 
-To view the projects and examine the source code, open the **c\\iothubclient\\build\\windows\\iothub_client.sln** or **c\\serializer\\build\\windows\\serializer.sln** solution files in Visual Studio.
+To view the projects and examine the source code, open the **azure_iot_sdks.sln** solution files in Visual Studio.
 
 You can use one of the sample applications as a template to get started when you are creating your own client applications.
 
-  > Note: some of the projects in these solutions use the **Apache.Qpid.Proton.AzureIot** NuGet package to reference the Qpid Proton libraries, some use the Qpid Proton libraries referenced by the **PROTON_PATH** environment variable.
+  > Note: the projects in this solution always use the Qpid Proton libraries referenced by the **PROTON_PATH** environment variable.
 
 <a name="linux"/>
 ## Set up a Linux development environment
@@ -91,7 +91,7 @@ This section shows you how to set up a development environment for the Azure IoT
 
 4. Run the `build.sh` script.
 
-This script builds the **iothub_client** and **serializer** libraries and their associated samples.
+This script uses cmake to make a folder called "cmake" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the solution and run tests.
 
  > Note: you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
 

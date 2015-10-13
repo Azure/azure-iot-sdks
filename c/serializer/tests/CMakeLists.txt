@@ -21,4 +21,7 @@ add_subdirectory(schema_unittests)
 add_subdirectory(schemalib_unittests)
 add_subdirectory(schemalib_without_init_unittests)
 add_subdirectory(schemaserializer_unittests)
-add_subdirectory(serializer_e2etests)
+
+if(${use_amqp} AND ${use_http})
+	add_subdirectory(serializer_e2etests)
+endif()

@@ -20,4 +20,4 @@ ${LOCK_C_FILE}
 ../../../common/src/crt_abstractions.c
 )
 
-build_test_artifacts(${theseTestsName})
+build_test_artifacts(${theseTestsName} ON)

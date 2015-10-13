@@ -200,6 +200,7 @@ Azure IoT SDK.
 
     ***Note:*** *LogFile.txt in above command should be replaced with a file
     name where build output will be written.*
+    **Note:** build.sh creates a folder called "cmake" in your home folder. Inside "cmake" are all the results of the compilation of the complete software.
 
 <a name="Step_3_3:_Run_E2E"/>
 
@@ -242,7 +243,7 @@ In this section you will run the end to end test cases for Azure IoT client SDK 
 
 -   Run end to end test cases by executing following command on your device:
 
-        ./azure-iot-sdks/c/iothub_client/build/linux/iothubclient_e2etests | tee E2ELogFile.txt
+        ~/cmake/iothub_client/build/linux/iothubclient_e2etests | tee E2ELogFile.txt
 
     ***Note:*** *E2ELogFile.txt in above command should be replaced with a file name where ene to end test results will be written.*
 
@@ -271,11 +272,11 @@ section. These will be needed in [Step 4](#Step_4_2:_Share)
 
     **If using AMQP protocol:** Run sample *iothub\_client\_sample\_amqp*
 
-        ./azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
+        ~/cmake/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
 
     **If using HTTP protocol:** Run sample *iothub\_client\_sample\_http*
 
-        ./azure-iot-sdks/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
+        ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
 
 4.  Verify that the confirmation messages show an OK. If not, then you may have
     incorrectly copied the device hub connection information.

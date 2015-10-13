@@ -20,7 +20,7 @@ if errorlevel 1 goto :eof
 cd %build-root%
 
 REM -- C --
-call c\build_all\windows\build.cmd
+call %build-root%\c\build_all\windows\build.cmd
 if errorlevel 1 goto :eof
 
 REM -- Node.js --

@@ -32,4 +32,4 @@ stdafx.h
 )
 
 
-build_test_artifacts(${theseTestsName})
+build_test_artifacts(${theseTestsName} ON)
