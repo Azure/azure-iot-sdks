@@ -10,7 +10,7 @@ You can use the [Azure Preview Portal][azure-portal] to create an IoT hub to use
 
 1. Log on to the [Azure Preview Portal][azure-portal].
 
-2. In the jumpbar, click **New**, then click **Internet of Things**, and then click **IoT Hub**.
+2. In the jumpbar, click **New**, then click **Internet of Things**, and then click **Azure IoT Hub**.
 
    ![][1]
 
