@@ -21,9 +21,9 @@ The AMQP samples require the Qpid Proton-C library.  There are two ways to obtai
 
 #### Option 1: Getting Qpid Proton via NuGet
 
- 1. In Visual Studio 2015 right click on the iothub_client solution and select "Manage NuGet Package for Solutions".
+ 1. Using Visual Studio 2015 open the iothub_client.sln solution located in **c\\iothub_client\\build\\windows** directory and right click on the iothub_client solution and select "Manage NuGet Package for Solutions".
 
- 2. Click the "Include prerelease" check box.
+ 2. Click the "Include prerelease" check box (Click Restore packages if Visual Studio Prompts for this).
 
  3. Enter Apache.Qpid.Proton.AzureIot in the Search box (Ctrl+E) to find the Proton NuGet Package.
 
@@ -45,19 +45,19 @@ The AMQP samples require the Qpid Proton-C library.  There are two ways to obtai
 
 6. Open a Visual Studio 2015 x86 Native Tools command prompt.
 
-7. Run the script **build_proton.cmd** in the **\build_all\windows** directory to build the proton libraries. You need to complete this step before continuing to the next section.
+7. Run the script **build_proton.cmd** in the **c\\build_all\\windows** directory to build the proton libraries. You need to complete this step before continuing to the next section.
 
 ### Building the Apache MQTT library in Windows
 
 To build the MQTT-based samples you must install the Paho open source library.
 
-1. Create the environment variables **OpenSSLDir=c:\OpenSSL** and **PAHO_PATH=c:\Paho**.
+1. Create the user environment variables **OpenSSLDir=c:\OpenSSL** and **PAHO_PATH=c:\Paho** (Open Control Panel -> Select System -> Select Advanced System Settins -> Click Advanced tab -> Choose the Environment Variables buttons).
 
 2. Install [Perl ver. 5.20.2 or higher](https://www.perl.org/get.html) (make sure it is installed in your path, type "perl -v" to verify).
 
 3. Open a Visual Studio 2015 x86 Native Tools command prompt.
 
-4. Run the script **build_paho.cmd** in the **c\build_all\windows** directory.
+4. Run the script **build_paho.cmd** in the **c\\build_all\\windows** directory.
 
 5. In order to test MQTT End2End you must also deploy an [Azure IoT Protocol Gateway](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md).
 
