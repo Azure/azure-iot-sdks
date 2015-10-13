@@ -74,6 +74,8 @@ Before building the application, complete the following steps:
 
 3. Open the file `tirtos/cc3200/wificonfig.h`. Search for "USER STEP" and update the WIFI SSID and SECURITY_KEY macros.
 
+4. Download the [elf2cc32 executable for Windows](https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32.exe?raw=true) or [elf2cc32 executable for Linux](https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32?raw=true) to the folder <AZURE_INSTALL_DIR>\azure-iot-sdks\c\serializer\samples\simplesample_http\tirtos\cc3200\tools. This tool is needed for converting the simplesample_http.out to simplesample_http.bin file.
+
 In the Windows command prompt, enter the following commands to build the application:
 
   ```
