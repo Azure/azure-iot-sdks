@@ -21,9 +21,9 @@ The AMQP samples require the Qpid Proton-C library.  There are two ways to obtai
 
 #### Option 1: Getting Qpid Proton via NuGet
 
- 1. Using Visual Studio 2015 open the iothub_client.sln solution located in **c\\iothub_client\\build\\windows** directory and right click on the iothub_client solution and select "Manage NuGet Package for Solutions".
+ 1. Using Visual Studio 2015 open the iothub_client.sln solution located in **c\\iothub_client\\build\\windows** directory, right click on the iothub_client solution and select "Manage NuGet Package for Solutions".
 
- 2. Click the "Include prerelease" check box (Click Restore packages if Visual Studio Prompts for this).
+ 2. Click the "Include prerelease" check box (click "Restore packages" if Visual Studio Prompts for this).
 
  3. Enter Apache.Qpid.Proton.AzureIot in the Search box (Ctrl+E) to find the Proton NuGet Package.
 
