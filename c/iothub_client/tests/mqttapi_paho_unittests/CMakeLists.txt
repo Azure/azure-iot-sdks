@@ -2,7 +2,7 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for mqttapi_paho_unittests
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 if(NOT ${use_mqtt})
 	message(FATAL_ERROR "mqttapi_paho_unittests being generated without mqtt support")
