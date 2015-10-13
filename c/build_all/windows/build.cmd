@@ -49,7 +49,7 @@ rem // default build options
 set build-clean=0
 set build-config=Debug
 set build-platform=Win32
-set CMAKE_run_e2e_tests=ON
+set CMAKE_run_e2e_tests=OFF
 set CMAKE_run_longhaul_tests=OFF
 
 :args-loop
@@ -58,7 +58,7 @@ if "%1" equ "-c" goto arg-build-clean
 if "%1" equ "--clean" goto arg-build-clean
 if "%1" equ "--config" goto arg-build-config
 if "%1" equ "--platform" goto arg-build-platform
-if "%1" equ "--skip-e2e-tests" goto arg-skip-e2e-tests
+if "%1" equ "--run-e2e-tests" goto arg-run-e2e-tests
 if "%1" equ "--run-longhaul-tests" goto arg-longhaul-tests
 call :usage && exit /b 1
 
@@ -78,8 +78,8 @@ if "%1" equ "" call :usage && exit /b 1
 set build-platform=%1
 goto args-continue
 
-:arg-skip-e2e-tests
-set CMAKE_run_e2e_tests=OFF
+:arg-run-e2e-tests
+set CMAKE_run_e2e_tests=ON
 goto args-continue
 
 :arg-longhaul-tests
@@ -212,7 +212,7 @@ if not %errorlevel%==0 exit /b %errorlevel%
 msbuild /m azure_iot_sdks.sln
 if not %errorlevel%==0 exit /b %errorlevel%
 
-ctest -C "debug"
+ctest -C "debug" -V
 if not %errorlevel%==0 exit /b %errorlevel%
 
 popd
@@ -252,7 +252,7 @@ echo options:
 echo  -c, --clean           delete artifacts from previous build before building
 echo  --config ^<value^>      [Debug] build configuration (e.g. Debug, Release)
 echo  --platform ^<value^>    [Win32] build platform (e.g. Win32, x64, ...)
-echo  --skip-e2e-tests      do not run end-to-end tests
+echo  --run-e2e-tests       run end-to-end tests
 echo  --run-longhaul-tests  run long-haul tests
 goto :eof
 
