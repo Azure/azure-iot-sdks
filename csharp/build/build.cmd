@@ -30,7 +30,7 @@ rem ----------------------------------------------------------------------------
 
 rem // default build options
 set build-clean=0
-set build-config=Debug
+set build-config=Release
 set build-platform="Any CPU"
 
 :args-loop

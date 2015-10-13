@@ -26,6 +26,11 @@ rem -- Clear directories before starting process
 del /F /Q %client-build-root%\build\tosign
 del /F /Q %client-build-root%\build\signed
 
+rem -- Build the DeviceExplorerWithInstaller.sln to ensure both projects are built
+devenv %client-build-root%\tools\DeviceExplorer\DeviceExplorerWithInstaller.sln /Build "Release"
+echo ErrorLevel after devenv is %errorlevel%
+if not %errorlevel%==0 exit /b %errorlevel%
+
 rem -- Copy the DeviceExplorer.exe file to the "tosign" folder
 xcopy /q /y /R %client-build-root%\tools\DeviceExplorer\DeviceExplorer\bin\Release\DeviceExplorer.exe %client-build-root%\build\tosign\
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -45,7 +50,7 @@ rem -- Clear directories
 del /F /Q %client-build-root%\build\tosign
 del /F /Q %client-build-root%\build\signed
 
-rem -- Build the SetupDeviceExplorer project
+rem -- Build the DeviceExplorerWithInstaller.sln. Only the SetupDeviceExplorer project will build since both were built before
 devenv %client-build-root%\tools\DeviceExplorer\DeviceExplorerWithInstaller.sln /Build "Release"
 echo ErrorLevel after devenv is %errorlevel%
 if not %errorlevel%==0 exit /b %errorlevel%
