@@ -48,6 +48,10 @@ rem ******************************************************************
 rem * Sign the Managed DLLs with both "Authenticode" & "Strong Name" *
 rem ******************************************************************
 
+rem -- Build Delay-Signed version of the csharp client
+call %client-build-root%\build\release\delay_sign_csharp.cmd
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 rem -- Copy the managed dlls to the "tosign" Folder for signing
 xcopy /q /y /R %client-build-root%\csharp\Microsoft.Azure.Devices.Client\bin\Release\Microsoft.Azure.Devices.Client.dll %client-build-root%\build\tosign\
 if %errorlevel% neq 0 exit /b %errorlevel%

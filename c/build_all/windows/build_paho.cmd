@@ -1,11 +1,26 @@
 @setlocal EnableExtensions EnableDelayedExpansion
 @echo off
 
+if not defined PAHO_PATH goto :errorPAHOPATHnotDefined
+if not defined OpenSSLDir goto :errorOPenSSLDirnotDefined
+
+goto :continueWithInstallation
+
+
+:errorPAHOPATHnotDefined
+@Echo PAHO_PATH not defined. Please, Define PAHO_PATH on Environment Variables, restart command prompt and the script.
+goto :eof
+
+:errorOPenSSLDirnotDefined
+@Echo OpenSSLDir not defined. Please, Define OpenSSLDir on Environment Variables and restart the script.
+goto :eof
+
+:continueWithInstallation
+
 rem -----------------------------------------------------------------------------
 rem -- use OpenSSLDir
 rem -----------------------------------------------------------------------------
-set openSSL-root=%~d0\openssldir
-if defined OpenSSLDir set openSSL-root=%OpenSSLDir%
+set openSSL-root=%OpenSSLDir%
 set openSSL-repo=https://github.com/openssl/openssl.git
 set openSSL-build-root=%openSSL-root%
 set openSSL-branch=OpenSSL_1_0_1-stable
@@ -13,8 +28,7 @@ set openSSL-branch=OpenSSL_1_0_1-stable
 rem -----------------------------------------------------------------------------
 rem -- use PAHO_PATH
 rem -----------------------------------------------------------------------------
-set paho-root=%~d0\paho
-if defined PAHO_PATH set paho-root=%PAHO_PATH%
+set paho-root=%PAHO_PATH%
 set paho-repo=https://git.eclipse.org/r/paho/org.eclipse.paho.mqtt.c.git
 set package-root=%~dp0\..\packaging\windows
 set paho-build-root=%paho-root%\org.eclipse.paho.mqtt.c
