@@ -4,17 +4,17 @@
 #this makefile has the purpose of building the Send sample from its source file and iothub_client
 
 #this sets the output file name
-SENDTELEMETRYASYNCOVERHTTP_EXE=./iothub_client_sample_http
+SENDEVENTASYNCOVERHTTP_EXE=./iothub_client_sample_http
 
 #this sets the INCLUDE paths
 HEADERS_FILES_LOCATION=../ ../../../inc ../../../../common/inc
 
 #setting SEND_FILES_LOCATION to the folder where send has its source code
-SENDTELEMETRYASYNCOVERHTTP_FILES_LOCATION=../
+SENDEVENTASYNCOVERHTTP_FILES_LOCATION=../
 
-#setting the sources to be all the .c files in the SENDTELEMETRYASYNCOVERHTTP_FILES_LOCATION 
+#setting the sources to be all the .c files in the SENDEVENTASYNCOVERHTTP_FILES_LOCATION 
 SOURCES=\
-	$(wildcard $(SENDTELEMETRYASYNCOVERHTTP_FILES_LOCATION)/*.c) main.c \
+	$(wildcard $(SENDEVENTASYNCOVERHTTP_FILES_LOCATION)/*.c) main.c \
 
 #this is iothub_client lib
 IOTHUBCLIENTLIB=../../../build/linux/libiothub_client.a ../../../build/linux/libiothub_http_transport.a
@@ -57,7 +57,7 @@ CC_OTHER_LIBRARIES = $(patsubst %, -l%, $(OTHER_LIBRARIES))
 all: $(OBJECTS)
 	$(MAKE) -C $(IOTHUB_CLIENT_MAKEFILE_LOCATION) -f makefile.linux all
 	$(MAKE) -C $(IOTHUB_CLIENT_MAKEFILE_LOCATION) -f makefile_http_transport.linux all
-	$(CC) $(OBJECTS) $(IOTHUBCLIENTLIB) $(CC_OTHER_LIBRARIES) -L $(HOME)/lib -o $(SENDTELEMETRYASYNCOVERHTTP_EXE)
+	$(CC) $(OBJECTS) $(IOTHUBCLIENTLIB) $(CC_OTHER_LIBRARIES) -L $(HOME)/lib -o $(SENDEVENTASYNCOVERHTTP_EXE)
 
 #next we describe how to build the said object files from the source files
 
@@ -74,4 +74,4 @@ COMMON_COMMAND_LINE=$(CC) $(CC_INCLUDES) $(CFLAGS) $< -o $@
 #this is the clean target.
 clean:
 	$(MAKE) -C $(IOTHUB_CLIENT_MAKEFILE_LOCATION) -f makefile.linux clean
-	$(RM) $(OBJECTS) $(SENDTELEMETRYASYNCOVERHTTP_EXE)
+	$(RM) $(OBJECTS) $(SENDEVENTASYNCOVERHTTP_EXE)

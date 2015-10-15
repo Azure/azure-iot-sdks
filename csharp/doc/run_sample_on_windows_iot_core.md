@@ -157,11 +157,11 @@ This function can be invoked from `MainPage` similarly to how we did in the prev
         ReceiveDataFromAzure();
     }
 
-Now, before you run the app, switch to the Device Explorer and open the Notification tab:
+Now, before you run the app, switch to the Device Explorer and open the Message To Device tab:
 
-![](./pngs/device_explorer_notif.png)
+![](./pngs/device_explorer_msg.png)
 
-Select your device in the Device ID list, and type "hello, device!" in the Notification box. Hit Send.
+Select your device in the Device ID list, and type "hello, device!" in the Message box. Hit Send.
 
 Now set the breakpoint at the `await` statement and start the application. When the control reaches the breakpoint, you should see the value of `messageData` as "hello, device!":
 

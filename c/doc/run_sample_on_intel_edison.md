@@ -121,12 +121,12 @@ The result should be the following:
 # ./iothub_client_sample_amqp
 hub_client/samples/iothub_client_sample_amqp/linux#
 Starting the IoTHub client sample AMQP...
-IoTHubClient_SetNotificationCallback...successful.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SetMessageCallback...successful.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
 Press any key to exit the application.
 Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[1] received for message tracking id = 1 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[2] received for message tracking id = 2 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[3] received for message tracking id = 3 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[4] received for message tracking id = 4 with result = IOTHUB_CLIENT_CONFIRMATION_OK
 ```

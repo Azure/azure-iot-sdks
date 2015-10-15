@@ -86,7 +86,7 @@ Client.prototype.sendEventBatch = function(messages, done) {
 
 /**
  * The receive method queries the IoT Hub (as the device indicated in the
- * constructor argument) for the next notification in the queue.
+ * constructor argument) for the next message in the queue.
  * @param {Function}  done      The callback to be invoked when `receive`
  *                              completes execution.
  */
@@ -97,7 +97,7 @@ Client.prototype.receive = function(done) {
 };
 
 /**
- * The `abandon` method directs the IoT Hub to re-enqueue a notification
+ * The `abandon` method directs the IoT Hub to re-enqueue a message
  * message so it may be received again later.
  * @param {Message}   message   The [message]{@linkcode module:common/message.Message}
  *                              to be re-enqueued.
@@ -110,7 +110,7 @@ Client.prototype.abandon = function(message, done) {
 };
 
 /**
- * The `reject` method directs the IoT Hub to delete a notification message
+ * The `reject` method directs the IoT Hub to delete a message
  * from the queue and record that it was rejected.
  * @param {Message}   message   The [message]{@linkcode module:common/message.Message}
  *                              to be deleted.
@@ -123,7 +123,7 @@ Client.prototype.reject = function(message, done) {
 };
 
 /**
- * The `complete` method directs the IoT Hub to delete a notification message
+ * The `complete` method directs the IoT Hub to delete a message
  * from the queue and record that it was accepted.
  * @param {Message}   message   The [message]{@linkcode module:common/message.Message}
  *                              to be accepted.

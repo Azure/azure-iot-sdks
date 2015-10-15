@@ -256,7 +256,7 @@ Https.prototype.sendEventBatch = function (messages, config, done) {
 
 /**
  * The receive method queries the IoT Hub (as the device indicated in the
- * `config` parameter) for the next notification in the queue.
+ * `config` parameter) for the next message in the queue.
  * @param {Object}  config            This is a dictionary containing the
  *                                    following keys and values:
  *
@@ -295,9 +295,9 @@ Https.prototype.receive = function (config, done) {
  *
  * | Value    | Action                                                                                               |
  * |----------|------------------------------------------------------------------------------------------------------|
- * | abandon  | Directs the IoT Hub to re-enqueue a notification message so it may be received again later.          |
- * | reject   | Directs the IoT Hub to delete a notification message from the queue and record that it was rejected. |
- * | complete | Directs the IoT Hub to delete a notification message from the queue and record that it was accepted. |
+ * | abandon  | Directs the IoT Hub to re-enqueue a message so it may be received again later.          |
+ * | reject   | Directs the IoT Hub to delete a message from the queue and record that it was rejected. |
+ * | complete | Directs the IoT Hub to delete a message from the queue and record that it was accepted. |
  *
  * @param {String}  lockToken An HTTP E-Tag used to manage concurrent updates
  *                            to the device

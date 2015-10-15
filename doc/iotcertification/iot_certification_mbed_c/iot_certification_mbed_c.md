@@ -145,7 +145,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 7.  From Workspace Management menu, select **New &minus;&gt; New Program**.
 
-    ![Import\_Library](images/image2_1.PNG)
+    ![Import\_Library](images/3_2_01_a.PNG)
 
 8.  The **Create new program** dialog is displayed. The platform field
     should be pre-populated with the hardware platform you selected.
@@ -153,12 +153,12 @@ This section walks you through building, deploying and validating the IoT Client
 9.  Set the **Template** field to **Empty Program**. Use any program
     name you want in the **Program Name** field, then click OK.
 
-       ![](images/image1.PNG)
+       ![](images/3_2_02.PNG)
 
 10.  Click **Import** on the main menu. This will bring up **Import
     Wizard**.
 
-        ![](images/image2.PNG)
+        ![](images/3_2_03.PNG)
 
 11.  Go to the **Upload** tab on Import Wizard and click the **Browse...**
     button at the bottom of the page.
@@ -186,7 +186,7 @@ This section walks you through building, deploying and validating the IoT Client
 17.  At the top of the window, click the **Click Here** link to import
     from a URL. The **Import Library** dialog appears.
 
-        ![Import\_Library](images/image2_2.PNG)
+        ![Import\_Library](images/3_2_04.PNG)
 
 18.  Enter the following URL into the Source URL field.
 
@@ -194,7 +194,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 19.  Once done click **Import**.
 
-        ![Import\_Library](images/image2_3.PNG)
+        ![Import\_Library](images/3_2_05.PNG)
 
 20.  Repeat Steps 16 and 17 and enter the following URL into the Source
     URL field. Once done click **Import**:
@@ -209,7 +209,7 @@ This section walks you through building, deploying and validating the IoT Client
          http://developer.mbed.org/users/AzureIoTClient/code/proton-c-mbed/
 
 22.  Click **Compile** from main menu to build the program. If the build is successful, a .bin file with the name of your project will get generated. Save this file on your machine. It will be used in next step.
-    ![Import\_Library](images/image2_4.PNG)
+    ![Import\_Library](images/3_2_06.PNG)
 
   ***Note:*** *You can safely ignore any warnings, but if the build
   generates errors, fix them before proceeding.*
@@ -227,7 +227,7 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
 
 1.  Launch the Device Explorer as explained in [Step 2](#Step_2:_Register) and navigate to **Data** tab. Select the device name you created from the drop-down list of device IDs and click **Monitor** button.
 
-     ![DeviceExplorer\_Monitor](images/image3.png)
+     ![DeviceExplorer\_Monitor](images/3_3_1_01.png)
 
 2.  Device Explorer is now monitoring data sent from the selected device to the IoT Hub.
 
@@ -237,17 +237,17 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
 
 4.  Connect to the device using an SSH client application, such as PuTTY. You can determine which serial port your device uses by checking the Windows Device Manager.
 
-    ![Windows\_SerialPort](images/image4.png)
+    ![Windows\_SerialPort](images/3_3_1_02.png)
 
 5.  In PuTTY, click the **Serial** connection type. The device most
     likely connects at 115200, so enter that value in the Speed box.
     Then click Open.
 
-    ![PuTTY](images/image5.png)
+    ![PuTTY](images/3_3_1_03.png)
 
 6.  The iothub\_client\_sample\_amqp program starts executing.
 
-    ![Event\_Data](images/image6.png)
+    ![Event\_Data](images/3_3_1_04.png)
 
     Verify that the confirmation messages show an OK. If not, then you may have incorrectly copied the device hub connection information.
     
@@ -255,22 +255,22 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
      
 7. You should be able to see the events received in the Device Explorer's data tab.
 
-     ![Monitor\_Data](images/image9.png)
+     ![Monitor\_Data](images/3_3_1_05.png)
     
 ### 3.3.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your device,
-    go to the **Notification** tab in Device Explorer.
+    go to the **Message To Device** tab in Device Explorer.
 
 2.  Select the device you created using Device ID drop down.
 
-3.  Add some text to the Notification field, then click Send.
+3.  Add some text to the Message field, then click Send.
 
-    ![DeviceExplorer\_Notification](images/image7.png)
+    ![DeviceExplorer\_Message](images/3_3_2_01.png)
 
 4.  You should be able to see the message received in the terminal window.
 
-    ![Terminal\_NotificationReceive](images/image8.png)
+    ![Terminal\_MessageReceive](images/3_3_2_02.png)
 
 <a name="Step_4:_Package_Share"/>
 # Step 4: Package and Share

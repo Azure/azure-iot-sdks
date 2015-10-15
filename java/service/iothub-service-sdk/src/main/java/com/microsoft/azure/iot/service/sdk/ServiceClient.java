@@ -41,9 +41,9 @@ public abstract class ServiceClient
     public abstract CompletableFuture<Void> closeAsync();
     
     /**
-     * Send a one-way notification to the specified device
+     * Send a one-way message to the specified device
      * @param deviceId - The device identifier for the target device
-     * @param message - The message containing the notification
+     * @param message - The message for the device
      * @return 
      */
     public abstract CompletableFuture<Void> sendAsync(String deviceId, Message message);
