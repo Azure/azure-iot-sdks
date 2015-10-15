@@ -4,14 +4,8 @@
 @setlocal EnableExtensions EnableDelayedExpansion
 @echo off
 
-set build-root=%~dp0..
+set build-root=%~dp0..\..
 
-rem -----------------------------------------------------------------------------
-rem -- Update link to DeviceExplorer MSI in tools\DeviceExplorer\doc\how_to_use_device_explorer.md
-rem -----------------------------------------------------------------------------
-rem node update_de_link.js %SDK_VERSION%
-
-rem -----------------------------------------------------------------------------
-rem -- Update version string in build\docs\Doxyfile
-rem -----------------------------------------------------------------------------
-rem node update_doxyfile.js %SDK_VERSION%
+cd %build-root%\build\release\bump_version
+call npm install
+node app.js
