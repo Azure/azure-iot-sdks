@@ -123,5 +123,12 @@ Run your sample application. Device Explorer should now show that the IoT hub ha
 
   ![](media/device_explorer/iotgetstart9.png)
 
+>Note: You must be sure to use the correct format when you send a message to your device. For example, the **simplesample_amqp** sample for the C serializer library accepts the following JSON commands:
+
+```
+{"Name":"SetAirResistance","Parameters":{"Position":55}}
+{"Name":"TurnFanOn","Parameters":{}}
+```
+
 
 [setup-iothub]: ../../../doc/setup_iothub.md
