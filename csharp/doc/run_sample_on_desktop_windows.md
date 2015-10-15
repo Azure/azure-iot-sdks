@@ -14,12 +14,12 @@ Before you get started, you should:
 
 1.  Start a new instance of Visual Studio 2015. Open the **iothub_csharp_client.sln** solution in the **csharp** folder in your local copy of the repository.
 
-2.  In Visual Studio, in **Solution Explorer**, navigate to the samples folder. In the **DeviceClientAmqpSample** project, open the **ConnectionStrings.cs** file.
+2.  In Visual Studio, in **Solution Explorer**, navigate to the samples folder. In the **DeviceClientAmqpSample** project, open the **Program.cs** file.
 
 3.  Locate the following code in the file:
 
     ```
-    public const string DeviceConnectionString = "<replace>";
+    private const string DeviceConnectionString = "<replace>";
     ```
 
 4.  Replace `<replace>` with the connection string for your device. The section "Get device connection string or data" in the document [How to use Device Explorer][device-explorer] explains how to retrieve the connection string for your device. Save the changes.
