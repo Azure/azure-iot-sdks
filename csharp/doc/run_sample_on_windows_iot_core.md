@@ -23,6 +23,8 @@ First of all, you need to set up your device.
 - If you’re using MinnowBoard Max set up your device according to instructions [here](http://ms-iot.github.io/content/en-US/win10/SetupMBM.htm).
 - If you’re using Dragonboard setup instructions should come soon [here](http://ms-iot.github.io/content/en-US/GetStarted.htm).
 
+> Note: We recommend using the RTM version of Windows 10 IoT Core unless there is a specific feature in a Windows 10 Insider Preview version that you want to use.
+
 
 ## Install Visual Studio 2015 and Tools
 
