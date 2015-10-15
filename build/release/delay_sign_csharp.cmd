@@ -27,8 +27,9 @@ echo [assembly: AssemblyDelaySignAttribute(true)] >> %build-root%\csharp\Microso
 echo [assembly: AssemblyKeyFileAttribute("35MSSharedLib1024.snk")] >> %build-root%\csharp\Microsoft.Azure.Devices.Client.WinRT\Properties\AssemblyInfo.cs
 
 rem -- Build csharp client with updated AssemblyInfo.cs
+set build_error=0
 call %build-root%\csharp\build\build.cmd
-if %errorlevel% neq 0 exit /b %errorlevel%
+if %errorlevel% neq 0 set build_error=1
 
 rem -- Restore the original AssemblyInfo.cs
 xcopy /q /y /R %build-root%\csharp\Microsoft.Azure.Devices.Client\Properties\Original_AssemblyInfo.cs %build-root%\csharp\Microsoft.Azure.Devices.Client\Properties\AssemblyInfo.cs
@@ -40,3 +41,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 rem -- Delete unwanted files
 del /F /Q %build-root%\csharp\Microsoft.Azure.Devices.Client\Properties\Original_AssemblyInfo.cs
 del /F /Q %build-root%\csharp\Microsoft.Azure.Devices.Client.WinRT\Properties\Original_AssemblyInfo.cs
+
+echo Charp Build Error: %build_error%
+
+if %build_error% neq 0 exit /b 1

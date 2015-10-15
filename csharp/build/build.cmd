@@ -14,7 +14,7 @@ where /q nuget.exe
 if not !errorlevel! == 0 (
 @Echo Azure IoT SDK needs to download nuget.exe from https://www.nuget.org/nuget.exe 
 @Echo https://www.nuget.org 
-choice /C yn /M "Do you want to download and run nuget.exe?" 
+choice /C yn /M "Do you want to download and run nuget.exe"
 if not !errorlevel!==1 goto :eof
 rem if nuget.exe is not found, then ask user
 Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
