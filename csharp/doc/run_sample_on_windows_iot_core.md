@@ -116,7 +116,9 @@ Type in the name of your device. Make sure the **Use authentication** box is unc
 
 Now, you're ready to build and deploy the app. Choose **Build** and then **Deploy** from the top menu.
 
-Hit F5 to run the app. It might take a few second for the app to start.  
+Hit F5 to run the app. It might take a few second for the app to start.
+
+> Note: For more information about deploying and debugging your code on a device, see the ["Hello, World!" Sample][hello-sample] for IoT on the [Windows Dev Center][iot-dev-center].
 
 ## Validate Your Solution
 
@@ -173,3 +175,5 @@ Congratulations! You have successfully received your string from Azure IoT Hub.
 
 [device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [setup-iothub]: ../../doc/setup_iothub.md
+[hello-sample]: http://ms-iot.github.io/content/win10/samples/HelloWorld.htm
+[iot-dev-center]: https://dev.windows.com/iot
