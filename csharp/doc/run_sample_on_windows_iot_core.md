@@ -50,7 +50,7 @@ In the New Project dialog that comes up, select "Blank App (Universal Windows) V
 
 Once the project has been created, we need to include a reference to the Microsoft.Azure.Devices.Client library -- this is the component that contains the functionality necessary to connect to Azure IoT Hub.
 
-In the Solution Explorer window, right-click on the solution and select "Managed NuGet Packages":
+In the Solution Explorer window, right-click on the solution and select "Manage NuGet Packages":
 
 ![Manage NuGet Packages...](./pngs/manage_NuGet.png)
 
