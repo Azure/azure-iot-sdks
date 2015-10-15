@@ -34,10 +34,14 @@ To build Device Explorer yourself, open the **tools\\DeviceExplorer\\DeviceExplo
 
 
 -  In the **Configuration** tab, add the connection string for your IoT Hub. For information about how to find this connection string, see the document [Setup your IoT Hub][setup-iothub]. Then click **Update**.
--  If you are using a Protocol Gateway (For example, MQTT Protocol Gateway), make sure you fill the **Protocol Gateway HostName** field with the address of your protocol gateway (for example **localhost** if it is deployed locally to your developmemt box) before getting a device connection string.
 
   ![](media/device_explorer/iotgetstart1.png)
 
+### Configure a Protocol Gateway
+
+You only need to complete this step if you are using a Protocol Gateway (such as the [Microsoft Azure IoT Protocol Gateway][protocol-gateway]).
+
+Add the address of your protocol gateway to the **Protocol Gateway HostName** field with the address of your protocol gateway before you try to get a device connection string on the **Management** tab. If you are running the protocol gateway locally on the same machine as Device Explorer, you can use **localhost** as the address, otherwise you will need the network address of the machine where you deployed the protocol gateway.
 
 <a name="managedevices"/>
 ## Manage devices
@@ -125,3 +129,4 @@ Run your sample application. Device Explorer should now show that the IoT hub ha
 
 
 [setup-iothub]: ../../../doc/setup_iothub.md
+[protocol-gateway]: https://github.com/Azure/azure-iot-protocol-gateway
