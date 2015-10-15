@@ -18,21 +18,27 @@ Be sure to include Visual C++ and NuGet Package Manager.
 
 ### Preparing Qpid Proton libraries in Windows
 
-The AMQP samples require the Qpid Proton-C library.  There are two ways to obtain the library-- via NuGet or by downloading the source from GitHub and building it yourself.
+The AMQP samples require the Qpid Proton-C library.  There are two alternative ways to obtain the library-- via NuGet (recommended) or by downloading the source from GitHub and building it yourself.
 
 #### Getting Qpid Proton via NuGet
 
- 1. In Visual Studio 2015 right click on the iothub_client solution and select "Manage NuGet Package for Solutions".
+You can use the NuGet package manager to add the Qpid Proton libraries to your Visual Studio solution:
+
+ 1. In Visual Studio 2015, open the solution you want to build (such as c\\iothub_client\\build\\windows\\iothub_client_dev.sln or c\\serializer\\build\\windows\\serializer_dev.sln) from your local copy of the repository. Then in **Solution Explorer**, right click on the solution and click **Manage NuGet Package for Solutions**.
 
  1. Click the "Include prerelease" check box.
 
- 2. Enter Apache.Qpid.Proton.AzureIot in the Search box (Ctrl+E) to find the Proton NuGet Package.
+ 2. Enter **Apache.Qpid.Proton.AzureIot** in the Search box (Ctrl+E) to find the Proton NuGet Package.
 
- 3. Select the Apache.Qpid.Proton.AzureIot package and on the right pane click the Install button.
+ 3. Select the **Apache.Qpid.Proton.AzureIo** package and in the right pane click **Install**.
 
- 4. Enter OK at the dialog and Accept the license terms to continue.
+ 4. Click **OK** in the **Review Changes** dialog and then accept the license terms to continue.
+
+The Qpid Proton libraries are now installed in this solution. You will need to complete these steps for each solution you build.
 
 #### Building the Qpid Proton library
+
+If you prefer to build the Qpid libraries yourself, follow these steps:
 
 1. Create a folder on your development machine in which to download the proton libraries. This example uses the location **C:\Proton**.
 
@@ -61,15 +67,21 @@ To build the MQTT-based samples you must install the Paho open source library.
 
 ### Verify your environment
 
+> Note: If you want to complete this verification task, the **PROTON_PATH** environment variable must be set, even if you are installing the Qpid Proton libraries using NuGet. 
+
 You can build the Windows samples to verify that your environment is set up correctly.
 
 1. Open a Visual Studio 2015 x86 Native Tools command prompt.
 
 2. Navigate to the **c\\build_all\\windows** folder in your local copy of the repository.
 
-3. Run the `build.cmd` script.
+3. Run the following command:
 
-This script builds the **iothub_client** and **serializer** libraries and their associated samples. It also runs the test suite.
+  ```
+  build.cmd --skip-e2e-tests
+  ```
+
+This script builds the **iothub_client** and **serializer** libraries and their associated samples. It also runs part of the test suite. If you want to run the end-to-end tests, you must configure the tests in the iothubclient_e2etests project with a valid IoT Hub connection string.
 
   > Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [Run sample on Windows](run_sample_on_Windows.md).
 
