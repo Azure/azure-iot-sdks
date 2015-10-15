@@ -30,7 +30,7 @@ First of all, you need to set up your device.
 
 To create Windows IoT Core solutions, you will need to install [Visual Studio 2015](https://www.visualstudio.com/en-us/products/vs-2015-product-editions.aspx). You can install any edition of Visual Studio, including the free Community edition.
 
-Make sure to select the "Universal Windows App Development Tools", the component required for writing apps Windows 10:
+Make sure to select the **Universal Windows App Development Tools**, the component required for writing apps Windows 10:
 
 ![Universal Windows App Development Tools](./pngs/install_tools_for_windows10.png)
 
@@ -38,11 +38,11 @@ Make sure to select the "Universal Windows App Development Tools", the component
 
 UWP (Universal Windows Platform) is an evolution of Windows application model introduced in Windows 8. UWP provides a common app platform available on every device that runs Windows 10, including the IoT Core.
 
-To create a UWP solution in Visual Studio, select File -> New -> Project:
+To create a UWP solution in Visual Studio, on the **File** menu, click **New** then **Project**:
 
 ![New Project Creation](./pngs/new_project_menu.png)
 
-In the New Project dialog that comes up, select "Blank App (Universal Windows) Visual C#. Give your project a name, for example "MyFirstIoTCoreApp":
+In the New Project dialog that comes up, select **Blank App (Universal Windows) Visual C#**. Give your project a name, for example **MyFirstIoTCoreApp**:
 
 ![New Solution Dialog](./pngs/new_solution.PNG)
 
@@ -50,15 +50,15 @@ In the New Project dialog that comes up, select "Blank App (Universal Windows) V
 
 Once the project has been created, we need to include a reference to the Microsoft.Azure.Devices.Client library -- this is the component that contains the functionality necessary to connect to Azure IoT Hub.
 
-In the Solution Explorer window, right-click on the solution and select "Manage NuGet Packages":
+In **Solution Explorer**, right-click on the solution and select **Manage NuGet Packages**:
 
 ![Manage NuGet Packages...](./pngs/manage_NuGet.png)
 
-The NuGet Package Manager will open. Find the package named "Microsoft.Azure.Devices.Client" and click Install:  
+The NuGet Package Manager will open. Make sure to select **Include prerelease**. Find the package named **Microsoft.Azure.Devices.Client** and click **Install**:  
 
 ![Installing Microsoft.Azure.Devices.Client package](./pngs/find_madc.png)
 
-The package will be downloaded and added to your project.
+On the **Review Changes** dialog, click **OK**, then accept the license terms. The package is downloaded and added to your project.
 
 ## Build and run the Device Explorer tool
 
@@ -70,7 +70,7 @@ You can use the Device Explorer sample application on your Windows desktop machi
 
 ## Sample 1: Sending Data to Azure IoT Hub
 
-At last, you can start writing code! Open the file named `MainPage.xampl.cs` and add a few `using` directives:
+At last, you can start writing code! Open the file named **MainPage.xaml.cs** and add a few `using` directives:
 
     using System.Text;
     using System.Threading.Tasks;
@@ -92,7 +92,7 @@ Add the following function to class `MainPage`:
 
 ### Using The Real Connection String
 
-Important: remember to replace the `"<replace>"` string in the above snippet with the actual connection string. To get the connection string for your device, return the Device Explorer's **Management** tab, find your device in the list, right-click on it and select "Copy connection string for selected device". Now paste this string into your code, replacing the string `"<replace>"`.
+Important: remember to replace the `"<replace>"` string in the above snippet with the actual connection string. To get the connection string for your device, return the Device Explorer **Management** tab, find your device in the list, right-click on it and select **Copy connection string for selected device**. Now paste this string into your code, replacing the string `"<replace>"`.
 
 This string gives you access to the service, so remember to keep it secret -- in particular, you don't want to check it into your source control system, especially if you project is open source.
 
@@ -102,19 +102,19 @@ Finally, it's time to run the app! Add the call to the function `SendDataToAzure
 
 ![](./pngs/invoke_function.png)
 
-Now choose the right architecture (x86 or ARM, depending on your device) and set the debugging method to "Remote Machine":
+Now choose the right architecture (x86 or ARM, depending on your device) and set the debugging method to **Remote Machine**:
 
 ![](./pngs/select_arch.png)
 
 If you're using a Raspberry Pi device, select ARM. For other supported devices, consult [windowsondevices.com](http://www.windowsondevices.com).
 
-You will need to deploy your app to an IoT device so that you can run and debug it remotely. Right-click on the solution in the Solution Explorer, select Properties and navigate to the Debug tab:
+You will need to deploy your app to an IoT device so that you can run and debug it remotely. Right-click on the solution in Solution Explorer, select **Properties** and navigate to the **Debug** tab:
 
 ![](./pngs/select_device.png)
 
-Type in the name of your device. Make sure the "Use authentication" box is unchecked.
+Type in the name of your device. Make sure the **Use authentication** box is unchecked.
 
-Now, you're ready to build and deploy the app. Choose "Build" and then "Deploy" from the top menu.
+Now, you're ready to build and deploy the app. Choose **Build** and then **Deploy** from the top menu.
 
 Hit F5 to run the app. It might take a few second for the app to start.  
 
@@ -122,7 +122,7 @@ Hit F5 to run the app. It might take a few second for the app to start.
 
 Use the Device Explorer to inspect data coming to Azure IoT Hub and manage devices.
 
-Navigate to the Data tab in the Device Explorer and make sure you see "Hello, Windows 10" string there:
+Navigate to the **Data** tab in the Device Explorer and make sure you see "Hello, Windows 10" string there:
 
 ![](./pngs/device_explorer_data.png)
 
@@ -159,11 +159,11 @@ This function can be invoked from `MainPage` similarly to how we did in the prev
         ReceiveDataFromAzure();
     }
 
-Now, before you run the app, switch to the Device Explorer and open the Notification tab:
+Now, before you run the app, switch to the Device Explorer and open the **Notification** tab:
 
 ![](./pngs/device_explorer_notif.png)
 
-Select your device in the Device ID list, and type "hello, device!" in the Notification box. Hit Send.
+Select your device in the **Device ID** list, and type "hello, device!" in the **Notification** box. Hit Send.
 
 Now set the breakpoint at the `await` statement and start the application. When the control reaches the breakpoint, you should see the value of `messageData` as "hello, device!":
 
