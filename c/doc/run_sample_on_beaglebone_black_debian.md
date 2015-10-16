@@ -104,21 +104,11 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 - Run the **simplesample_amqp** sample:
 
   ```
-  ./c/serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp
   ```
 
 This sample application sends simulated sensor data to your IoT Hub.
 
-
-<a name="tips"/>
-## Tips
-
-- If you just want to build the serializer samples, run the following commands:
-
-  ```
-  cd ./c/serializer/build/linux
-  make -f makefile.linux all
-  ```
 
 - On Windows, you can use the Device Explorer tool to see the data your device is sending and receiving.
 

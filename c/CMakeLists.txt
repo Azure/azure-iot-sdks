@@ -94,10 +94,53 @@ macro(compileAsC99)
   endif()
 endmacro(compileAsC99)
 
+
+function(windows_unittests_add_dll whatIsBuilding)	
+	link_directories(${whatIsBuilding}_dll $ENV{VCInstallDir}UnitTest/lib)
+	
+	add_library(${whatIsBuilding}_dll SHARED 
+		${${whatIsBuilding}_cpp_files} 
+		${${whatIsBuilding}_h_files} 
+		${${whatIsBuilding}_c_files}
+	)
+	
+	target_include_directories(${whatIsBuilding}_dll PUBLIC ${common_include_directories} $ENV{VCInstallDir}UnitTest/include)
+	target_compile_definitions(${whatIsBuilding}_dll PUBLIC -DCPP_UNITTEST)
+	target_link_libraries(${whatIsBuilding}_dll micromock_cpp_unittest ctest ${ARGN})
+endfunction()
+
+function(windows_unittests_add_lib whatIsBuilding)	
+	link_directories(${whatIsBuilding}_lib $ENV{VCInstallDir}UnitTest/lib)
+	
+	add_library(${whatIsBuilding}_lib STATIC 
+		${${whatIsBuilding}_cpp_files} 
+		${${whatIsBuilding}_h_files} 
+		${${whatIsBuilding}_c_files}
+	)
+	
+	target_include_directories(${whatIsBuilding}_lib PUBLIC ${common_include_directories})
+	target_compile_definitions(${whatIsBuilding}_lib PUBLIC -DUSE_CTEST)
+	target_link_libraries(${whatIsBuilding}_lib micromock_ctest ctest ${ARGN})
+endfunction()
+
+function(windows_unittests_add_exe whatIsBuilding)
+	add_executable(${whatIsBuilding}_exe
+		${${whatIsBuilding}_cpp_files} 
+		${${whatIsBuilding}_h_files} 
+		${${whatIsBuilding}_c_files}
+		${CMAKE_CURRENT_LIST_DIR}/main.c
+	)
+	target_compile_definitions(${whatIsBuilding}_exe PUBLIC -DUSE_CTEST)
+	target_include_directories(${whatIsBuilding}_exe PUBLIC ${common_include_directories})
+	target_link_libraries(${whatIsBuilding}_exe micromock_ctest ctest ${ARGN})
+	add_test(NAME ${whatIsBuilding} COMMAND ${whatIsBuilding}_exe)
+endfunction()
+
 function(build_test_artifacts whatIsBuilding use_gballoc)
 	
 	#the first argument is what is building
 	#the second argument is whether the tests should be build with gballoc #defines or not
+	#the following arguments are a list of libraries to link with
 	
 	if(${use_gballoc})
 		add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
@@ -106,26 +149,17 @@ function(build_test_artifacts whatIsBuilding use_gballoc)
 	
 	#setting #defines
 	if(WIN32)
-		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-		add_definitions(-DCPP_UNITTEST )
+		add_definitions(-D_CRT_SECURE_NO_WARNINGS)		
 	else()
-		add_definitions(-DUSE_CTEST)		
 	endif()
 	
 	#setting includes
 	set(common_include_directories ${MICROMOCK_INC_FOLDER} ${TESTRUNNERSWITCHER_INC_FOLDER} ${CTEST_INC_FOLDER} ${SAL_INC_FOLDER} ${COMMON_INC_FOLDER} ${COMMON_SRC_FOLDER})
-	if(WIN32)
-		include_directories(${common_include_directories} $ENV{VCInstallDir}UnitTest/include)		
+	if(WIN32)				
 	else()
 		include_directories(${common_include_directories})
 	endif()
-	
-	#settings link directories
-	if(WIN32)
-		link_directories($ENV{VCInstallDir}UnitTest/lib)
-	else()
-		#nothing
-	endif()
+
 	
 	#setting output type
 	if(WIN32)
@@ -135,37 +169,24 @@ function(build_test_artifacts whatIsBuilding use_gballoc)
 			(("${whatIsBuilding}" MATCHES ".*longhaul.*") AND NOT ${run_longhaul_tests}) OR
 			(("${whatIsBuilding}" MATCHES ".*unittests.*") AND ${skip_unittests})
 		)
-			add_library(${whatIsBuilding} STATIC
-				${${whatIsBuilding}_cpp_files} 
-				${${whatIsBuilding}_h_files} 
-				${${whatIsBuilding}_c_files}
-			)
+			windows_unittests_add_lib(${whatIsBuilding} ${ARGN})
 		else()
-			add_library(${whatIsBuilding} SHARED 
-				${${whatIsBuilding}_cpp_files} 
-				${${whatIsBuilding}_h_files} 
-				${${whatIsBuilding}_c_files}
-			)
+			windows_unittests_add_exe(${whatIsBuilding} ${ARGN})
+			windows_unittests_add_dll(${whatIsBuilding} ${ARGN})
 		endif()
 	else()
-		add_executable(${whatIsBuilding} 
-			${${whatIsBuilding}_cpp_files} 
-			${${whatIsBuilding}_h_files} 
-			${${whatIsBuilding}_c_files}
-			${CMAKE_CURRENT_LIST_DIR}/main.c
-		)
-		
 		if(
 			(("${whatIsBuilding}" MATCHES ".*e2e.*") AND NOT ${run_e2e_tests}) OR
 			(("${whatIsBuilding}" MATCHES ".*longhaul.*") AND NOT ${run_longhaul_tests}) OR
 			(("${whatIsBuilding}" MATCHES ".*unittests.*") AND ${skip_unittests})
-		) 					
+		)
+			windows_unittests_add_lib(${whatIsBuilding} ${ARGN})
 		else()
-			add_test(NAME ${whatIsBuilding} COMMAND ${whatIsBuilding} )
+			windows_unittests_add_exe(${whatIsBuilding} ${ARGN})
 		endif()
 	endif()
 	
-	target_link_libraries(${whatIsBuilding} micromock ctest)
+	
 endfunction(build_test_artifacts)
 
 function(set_platform_files)

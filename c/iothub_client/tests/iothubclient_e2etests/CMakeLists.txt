@@ -25,19 +25,48 @@ include_directories(${IOTHUB_TEST_INC_FOLDER})
 
 build_test_artifacts(${theseTestsName} ON)
 
-target_link_libraries(${theseTestsName}
-	iothub_test
-	iothub_client
-	iothub_client_amqp_transport
-	iothub_client_http_transport
-	common
-	iothub_client_http_transport
-)
+
+
 
 if(WIN32)
+	if(TARGET ${theseTestsName}_dll)
+		target_link_libraries(${theseTestsName}_dll
+			iothub_test
+			iothub_client
+			iothub_client_amqp_transport
+			iothub_client_http_transport
+			common
+			iothub_client_http_transport
+		)
+		linkHttp(${theseTestsName}_dll)
+		linkProton(${theseTestsName}_dll)
+	endif()
+	
+	if(TARGET ${theseTestsName}_exe)
+		target_link_libraries(${theseTestsName}_exe
+			iothub_test
+			iothub_client
+			iothub_client_amqp_transport
+			iothub_client_http_transport
+			common
+			iothub_client_http_transport
+		)
+		linkHttp(${theseTestsName}_exe)
+		linkProton(${theseTestsName}_exe)	
+	endif()
 else()
-	target_link_libraries(${theseTestsName} pthread)
+	if(TARGET ${theseTestsName}_exe)
+		target_link_libraries(${theseTestsName}_exe
+			iothub_test
+			iothub_client
+			iothub_client_amqp_transport
+			iothub_client_http_transport
+			common
+			iothub_client_http_transport
+		)
+		target_link_libraries(${theseTestsName}_exe pthread)
+		linkHttp(${theseTestsName}_exe)
+		linkProton(${theseTestsName}_exe)
+	endif()
 endif()
 
-linkHttp(${theseTestsName})
-linkProton(${theseTestsName})

@@ -1,0 +1,21 @@
+{
+    "c": {
+        "device": "1.0.0-preview.3"
+    },
+    "csharp": {
+        "device": "1.0.0-preview-003-1"
+    },
+    "java": {
+        "device": "1.0.0-preview.3",
+        "service": "1.0.0-preview.3"
+    },
+    "node": {
+ 	  "build": "1.0.0-preview.3",
+	  "common": "1.0.0-preview.3",
+      "device": "1.0.0-preview.3",
+      "service": "1.0.0-preview.3"
+    },
+    "iothub-explorer": "1.0.0-preview.3.a",
+    "device-explorer": "1.0.0-preview.3",
+    "github-release": "v1.0.0-preview.3"
+}

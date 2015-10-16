@@ -4,13 +4,13 @@
 @setlocal EnableExtensions EnableDelayedExpansion
 @echo off
 
-set build-root=%~dp0..
+set build-root=%~dp0..\..
 cd %build-root%\build\release
 
 rem -----------------------------------------------------------------------------
 rem -- Bump version numbers across the repo
 rem -----------------------------------------------------------------------------
-rem call bump_version.cmd
+call bump_version.cmd
 
 rem -----------------------------------------------------------------------------
 rem -- Release mbed code

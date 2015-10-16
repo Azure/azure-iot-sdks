@@ -18,9 +18,9 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
 ## Build and run the sample
 
-1. Start a new instance of Visual Studio 2015. Open the **serializer.sln** solution in the **c\\serializer\\build\\windows** folder in your local copy of the repository.
+1. Start a new instance of Visual Studio 2015. Open the **azure_iot_sdks.sln** solution in the **cmake** folder in your home directory.
 
-2. In Visual Studio, in **Solution Explorer**, navigate to the samples folder. In the **simplesample_amqp** project, open the **simplesample_amqp.c** file.
+2. In Visual Studio, in **Solution Explorer**, navigate to **simplesample_amqp** project, open the **simplesample_amqp.c** file.
 
 3. Locate the following code in the file:
     ```
