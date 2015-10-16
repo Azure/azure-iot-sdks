@@ -2,6 +2,9 @@
     "c": {
         "device": "1.0.0-preview.3"
     },
+    "c_nuget": {
+        "device": "1.0.0-preview.3"
+    },
     "csharp": {
         "device": "1.0.0-preview-003-1"
     },
