@@ -99,6 +99,8 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 <a name="tips"/>
 ## Tips
 
+- You can find additional samples to explore and run in the **c\\serializer\\samples** and **c\\iothub_client\\samples** folders in this repository.
+
 - If you just want to build the serializer samples, run the following commands:
 
   ```

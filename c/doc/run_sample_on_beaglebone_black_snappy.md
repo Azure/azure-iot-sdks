@@ -249,6 +249,8 @@ To run this tool, you need connection and configuration information for your IoT
 <a name="Tips"/>
 ## Tips
 
+- You can find additional samples to explore and run in the **c\\serializer\\samples** and **c\\iothub_client\\samples** folders in this repository.
+
 - If you just want to build iothub\_client, run the following commands:
 
 		cd ~/azure-iot-sdks/c/iothub_client/build/linux
