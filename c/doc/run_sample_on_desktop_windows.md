@@ -23,10 +23,16 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 2. In Visual Studio, in **Solution Explorer**, navigate to the samples folder. In the **simplesample_amqp** project, open the **simplesample_amqp.c** file.
 
 3. Locate the following code in the file:
+
     ```
    static const char* connectionString = "[device connection string]";
     ```
-4. Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
+
+4. Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin) and save the changes:
+
+  ```
+  static const char* connectionString = "HostName=..."
+  ```
 
 5. The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
 
