@@ -30,7 +30,7 @@ Transport.prototype.connect = function connect(done) {
 
   this._amqp.on('client:errorReceived', function (err) {
     this.disconnect(function () {
-      done(translateError(err));
+      if (done) done(translateError(err));
     });
   }.bind(this));
 
@@ -40,10 +40,10 @@ Transport.prototype.connect = function connect(done) {
 
   this._connectPromise
     .then(function () {
-      done();
+      if (done) done();
     })
     .catch(function (err) {
-      done(translateError(err));
+      if (done) done(translateError(err));
     });
 };
 
@@ -51,10 +51,10 @@ Transport.prototype.disconnect = function disconnect(done) {
   this._connectPromise = null;
   this._amqp.disconnect()
     .then(function () {
-      done();
+      if (done) done();
     })
     .catch(function (err) {
-      done(err);
+      if (done) done(err);
     });
 };
 
@@ -68,7 +68,9 @@ Transport.prototype.send = function send(deviceId, message, done) {
   };
 
   this.connect(function (err) {
-    if (!!err) done(err);
+    if (err) {
+      if (done) done(err);
+    }
     else {
       if (!this._senderPromise) {
         this._senderPromise = this._amqp.createSender(endpoint);
@@ -77,15 +79,15 @@ Transport.prototype.send = function send(deviceId, message, done) {
       this._senderPromise
         .then(function (sender) {
           sender.on('errorReceived', function (err) {
-            done(translateError(err));
+            if (done) done(translateError(err));
           });
           return sender.send(message.getData(), messageOptions);
         })
         .then(function (state) {
-          done(null, state);
+          if (done) done(null, state);
         })
         .catch(function (err) {
-          done(translateError(err));
+          if (done) done(translateError(err));
         });
     }
   }.bind(this));

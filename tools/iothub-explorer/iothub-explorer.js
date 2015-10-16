@@ -8,6 +8,7 @@
 var nopt = require("nopt");
 var colorsTmpl = require('colors-tmpl');
 var prettyjson = require('prettyjson');
+var Client = require('azure-iothub').Client;
 var Registry = require('azure-iothub').Registry;
 var Https = require('azure-iothub').Https;
 
@@ -26,16 +27,16 @@ if (!parsed.argv.remain.length) {
   process.exit(1);
 }
 
-var connString, command, arg;
+var connString, command, arg1, arg2;
 
 if ('HostName=' !== parsed.argv.remain[0].substr(0, 'HostName='.length)) {
   command = parsed.argv.remain[0];
-  arg = parsed.argv.remain[1];
 }
 else {
   connString = parsed.argv.remain[0];
   command = parsed.argv.remain[1];
-  arg = parsed.argv.remain[2];
+  arg1 = parsed.argv.remain[2];
+  arg2 = parsed.argv.remain[3];
 }
 
 if (command === 'help') {
@@ -65,11 +66,11 @@ if (command === 'list') {
   });
 }
 else if (command === 'create') {
-  if (!arg) inputError('No device information given');
+  if (!arg1) inputError('No device information given');
   var info;
   try {
     // 'create' command expects either deviceId or JSON device description
-    info = (arg.charAt(0) !== '{') ? { "deviceId": arg } : JSON.parse(arg);
+    info = (arg1.charAt(0) !== '{') ? { "deviceId": arg1 } : JSON.parse(arg1);
   }
   catch(e) {
     if (e instanceof SyntaxError) inputError('Device information isn\'t valid JSON');
@@ -80,25 +81,37 @@ else if (command === 'create') {
     if (err) serviceError(err);
     else {
       if (!parsed.raw) {
-        console.log(colorsTmpl('\n{green}Created device ' + arg + '{/green}'));
+        console.log(colorsTmpl('\n{green}Created device ' + arg1 + '{/green}'));
       }
       printDevice(device);
     }
   });
 }
 else if (command === 'get') {
-  if (!arg) inputError('No device ID given');
-  registry.get(arg, function (err, res, device) {
+  if (!arg1) inputError('No device ID given');
+  registry.get(arg1, function (err, res, device) {
     if (err) serviceError(err);
     else printDevice(device);
   });
 }
 else if (command === 'delete') {
-  if (!arg) inputError('No device ID given');
-  registry.delete(arg, function (err, res) {
+  if (!arg1) inputError('No device ID given');
+  registry.delete(arg1, function (err, res) {
     if (err) serviceError(err);
     else if (!parsed.raw) {
-      console.log(colorsTmpl('\n{green}Deleted device ' + arg + '{/green}'));
+      console.log(colorsTmpl('\n{green}Deleted device ' + arg1 + '{/green}'));
+    }
+  });
+}
+else if (command === 'send') {
+  if (!arg1) inputError('No device ID given');
+  if (!arg2) inputError('No message given');
+  var client = Client.fromConnectionString(connString);
+  client.send(arg1, arg2, function (err, res) {
+    if (err) serviceError(err);
+    else {
+      if (!parsed.raw) console.log(colorsTmpl('\n{green}Message sent{/green}'));
+      client.close();
     }
   });
 }
@@ -184,6 +197,8 @@ function usage() {
     '    Can optionally display just the selected properties and/or the connection string.{/grey}',
     '  {green}iothub-explorer{/green} {white}<connection-string> delete <device-id>{/white}',
     '    {grey}Deletes the given device from the IoT Hub.{/grey}',
+    '  {green}iothub-explorer{/green} {white}<connection-string> send <device-id> <msg>{/white}',
+    '    {grey}Sends a cloud-to-device message to the given device{/grey}',
     '  {green}iothub-explorer{/green} {white}help{/white}',
     '    {grey}Displays this help message.{/grey}',
     '',
