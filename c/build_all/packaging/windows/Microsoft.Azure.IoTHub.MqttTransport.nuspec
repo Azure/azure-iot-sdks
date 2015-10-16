@@ -26,8 +26,8 @@
 	<file src="Microsoft.Azure.IoTHub.MqttTransport_thirdpartynotice.txt" target="thirdpartynotice.txt" />
 	
     <!-- these are files for x86 plaform -->
-    <file src="..\..\..\iothub_client\build\windows\Win32\Debug\iothub_mqtt_transport.lib" target="build\native\Win32\Debug" />
-    <file src="..\..\..\iothub_client\build\windows\Win32\Debug\iothub_mqtt_transport.pdb" target="build\native\Win32\Debug" />
+    <file src="..\..\..\..\build_output\c\win32\debug\iothub_client_mqtt_transport.lib" target="build\native\Win32\Debug" />
+    <file src="..\..\..\..\build_output\c\win32\debug\iothub_client_mqtt_transport.pdb" target="build\native\Win32\Debug" />
 	<file src="paho_outputs\Win32\Debug\paho-mqtt3cs.lib" target="build\native\Win32\Debug" />
 	<file src="paho_outputs\Win32\Debug\paho-mqtt3cs.dll" target="build\native\Win32\Debug" />
 	<file src="paho_outputs\Win32\Debug\paho-mqtt3cs.pdb" target="build\native\Win32\Debug" />

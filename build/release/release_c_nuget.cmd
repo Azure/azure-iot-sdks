@@ -16,32 +16,24 @@ if not defined nuget_feed (
 )
 
 rem -----------------------------------------------------------------------------
-rem -- Delay Sign csharp client
-rem -----------------------------------------------------------------------------
-call %build-root%\build\release\delay_sign_csharp.cmd
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-rem -----------------------------------------------------------------------------
 rem -- Auto Sign csharp client with Strong Name & Authenticode
 rem -----------------------------------------------------------------------------
-call %build-root%\build\release\auto_sign_csharp_client.cmd
+call %build-root%\build\release\auto_sign_c_client.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
 rem -- Create NuGet Package
 rem -----------------------------------------------------------------------------
-pushd %build-root%\csharp\nuget\
-powershell.exe %build-root%\csharp\nuget\make_nuget_package.ps1
+echo Y | call %build-root%\c\build_all\packaging\windows\rebuild_nugets.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
-popd
 
 rem -----------------------------------------------------------------------------
 rem -- Publish csharp NuGet Package
 rem -----------------------------------------------------------------------------
 if not defined nuget_feed (
-	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\nuget\
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\build_all\packaging\windows
 	if %errorlevel% neq 0 exit /b %errorlevel%
 ) else (
-	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\nuget\ --feed %nuget_feed%
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\build_all\packaging\windows --feed %nuget_feed%
 	if %errorlevel% neq 0 exit /b %errorlevel%
 )
