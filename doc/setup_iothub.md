@@ -10,7 +10,7 @@ You can use the [Azure Preview Portal][azure-portal] to create an IoT hub to use
 
 1. Log on to the [Azure Preview Portal][azure-portal].
 
-2. In the jumpbar, click **New**, then click **Internet of Things**, and then click **IoT Hub**.
+2. In the jumpbar, click **New**, then click **Internet of Things**, and then click **Azure IoT Hub**.
 
    ![][1]
 
@@ -20,7 +20,7 @@ You can use the [Azure Preview Portal][azure-portal] to create an IoT hub to use
 
     * In the **Name** box, enter a name to identify your IoT hub. When the **Name** is validated, a green check mark appears in the **Name** box.
     * Change the **Pricing and scale tier** as desired. This tutorial does not require a specific tier.
-    * In the **Resource group** box, create a new resource group, or select and existing one. For more information, see [Using resource groups to manage your Azure resources](resource-group-portal.md).
+    * In the **Resource group** box, create a new resource group, or select and existing one. For more information, see [Using resource groups to manage your Azure resources][resource-group-portal].
     * Use **Location** to specify the geographic location in which to host your IoT hub.  
 
 
@@ -52,6 +52,7 @@ To add a device to your IoT hub, you can use the [iothub-explorer][use-iothub-ex
 [manage-iothub-portal]: http://azure.microsoft.com/en-us/documentation/articles/iot-hub-manage-portal/
 [use-device-explorer]: ../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [use-iothub-explorer]: ../c/doc/provision_device.md
+[resource-group-portal]: https://github.com/Azure/azure-content/blob/master/articles/azure-portal/resource-group-portal.md
 
 [1]: media/create-iot-hub1.png
 [2]: media/create-iot-hub2.png
