@@ -299,22 +299,22 @@ section. These will be needed in [Step 4](#Step_4_2:_Share)
 ### 3.4.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your device,
-    go to the **Notification** tab in Device Explorer.
+    go to the **Message To Device** tab in Device Explorer.
 
 2.  Select the device you created using Device ID drop down.
 
-3.  Add some text to the Notification field, then click Send.
+3.  Add some text to the Message field, then click Send.
 
-    ![NotificationSend\_DeviceExplorer](images/3_3_1_06.png)
+    ![MessageSend\_DeviceExplorer](images/3_3_1_06.png)
 
 4.  You should be able to see the command received in the console window for the
     client sample.
 
     **If using AMQP protocol:**
-    ![NotificationSend\_terminal](images/3_3_1_07.png)
+    ![MessageSend\_terminal](images/3_3_1_07.png)
 
     **If using HTTP protocol:**
-    ![NotificationSend\_terminal](images/3_3_1_08.png)
+    ![MessageSend\_terminal](images/3_3_1_08.png)
 
 <a name="Step_4:_Package_Share"/>
 

@@ -34,7 +34,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
 7. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_amqp** application.
 
-8. See "Monitor device-to-cloud events" in the document [How to use Device Explorer][device-explorer] to learn how to use the **DeviceExplorer** utility to send cloud-to-device notification messages to the **simplesample_amqp** application.
+8. See "Monitor device-to-cloud events" in the document [How to use Device Explorer][device-explorer] to learn how to use the **DeviceExplorer** utility to send cloud-to-device messages to the **simplesample_amqp** application.
 
 
 [devbox-setup]: devbox_setup.md

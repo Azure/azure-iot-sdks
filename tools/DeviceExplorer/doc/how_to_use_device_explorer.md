@@ -75,7 +75,7 @@ Creating a device adds device details to the device identity registry. IoT Hub u
 <a name="getdatadevice"/>
 ### Get device connection string or configuration data
 
-- Use the mouse right click for context menu for the selected device. The menu has the following option
+- Use the mouse right click for context menu for the selected device. The menu has the following options
 
   ![](media/device_explorer/connstr.png)
 

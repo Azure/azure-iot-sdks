@@ -30,7 +30,7 @@ Before you get started, you should:
 
 7. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **Device Client AMQP Sample** application.
 
-8. See the section "Receive notifications" in the document [How to use Device Explorer][device-explorer] to learn how to use the **DeviceExplorer** utility to send cloud-to-device notification messages to the **Device Client AMQP Sample** application.
+8. See the section "Send cloud-to-device messages" in the document [How to use Device Explorer][device-explorer] to learn how to use the **DeviceExplorer** utility to send cloud-to-device messages to the **Device Client AMQP Sample** application.
 
 
 [setup-devbox-windows]: devbox_setup.md
