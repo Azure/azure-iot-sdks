@@ -30,7 +30,7 @@ You can use the NuGet package manager to add the Qpid Proton libraries to your V
 
  2. Enter **Apache.Qpid.Proton.AzureIot** in the Search box (Ctrl+E) to find the Proton NuGet Package.
 
- 3. Select the **Apache.Qpid.Proton.AzureIo** package and in the right pane click **Install**.
+ 3. Select the **Apache.Qpid.Proton.AzureIot** package and in the right pane click **Install**.
 
  4. Click **OK** in the **Review Changes** dialog and then accept the license terms to continue.
 
