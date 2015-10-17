@@ -17,7 +17,7 @@ Be sure to include Visual C++ and NuGet Package Manager.
 
 ### Preparing Qpid Proton libraries in Windows
 
-The AMQP samples require the Qpid Proton-C library.  There are two ways to obtain the library-- via NuGet or by downloading the source from GitHub and building it yourself.
+The AMQP samples require the Qpid Proton-C library.  There are two alternative ways to obtain the library-- via NuGet (recommended) or by downloading the source from GitHub and building it yourself.
 
 #### Option 1: Getting Qpid Proton via NuGet
 
@@ -32,6 +32,8 @@ The AMQP samples require the Qpid Proton-C library.  There are two ways to obtai
  5. Enter OK at the dialog and Accept the license terms to continue.
 
 #### Option 2: Building the Qpid Proton library
+
+If you prefer to build the Qpid libraries yourself, follow these steps:
 
 1. Create a folder on your development machine in which to download the proton libraries. This example uses the location **C:\Proton**.
 
@@ -63,13 +65,19 @@ To build the MQTT-based samples you must install the Paho open source library.
 
 ### Verify your environment
 
+> Note: If you want to complete this verification task, the **PROTON_PATH** environment variable must be set, even if you are installing the Qpid Proton libraries using NuGet. 
+
 You can build the Windows samples to verify that your environment is set up correctly.
 
 1. Open a Visual Studio 2015 x86 Native Tools command prompt.
 
 2. Navigate to the **c\\build_all\\windows** folder in your local copy of the repository.
 
-3. Run the `build.cmd` script.
+3. Run the following command:
+
+  ```
+  build.cmd --skip-e2e-tests
+  ```
 
 This script uses cmake to make a folder called "cmake" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the solution and run tests.
 

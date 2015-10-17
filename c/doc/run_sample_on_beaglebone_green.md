@@ -63,7 +63,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - Verify that you now have a copy of the SDK under the directory ~/azure-iot-sdks.
 
 
-- Edit the file ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace the placeholder in the following lines of code with your IoT Hub device connection string (see requirements section for how to set up your IoT Hub instance and provision your device info). You can use the console-based text editor **nano** to edit the file:
+- Edit the file ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace the placeholder in the following line of code with your IoT Hub device connection string (see requirements section for how to set up your IoT Hub instance and provision your device info). You can use the console-based text editor **nano** to edit the file:
 
   ```
   static const char* connectionString = "[device connection string]";

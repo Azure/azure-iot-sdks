@@ -110,6 +110,15 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 This sample application sends simulated sensor data to your IoT Hub.
 
 
+<a name="tips"/>
+## Tips
+
+- If you just want to build the serializer samples, go to the cmake output folder and navigate to serializer/samples then run the following command:
+
+  ```
+  make -f Makefile all
+  ```
+
 - On Windows, you can use the Device Explorer tool to see the data your device is sending and receiving.
 
 [setup-iothub]: ../../doc/setup_iothub.md

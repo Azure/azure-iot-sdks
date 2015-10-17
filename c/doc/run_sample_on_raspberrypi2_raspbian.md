@@ -138,6 +138,15 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 
 This sample application sends simulated sensor data to your IoT Hub.
 
+
+<a name="tips"/>
+## Tips
+
+- If you just want to build the serializer samples, go to the cmake output folder and navigate to the seriliazer/samples folder, then run the following command:
+
+  ```
+  make -f Makefile all
+  ```
 - On Windows, you can use the [Device Explorer][device-explorer] to see the data your device is sending and receiving.
 
 [1]: ./media/service-bus-iot-raspberrypi-raspbian-setup/raspbian01.png

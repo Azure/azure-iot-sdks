@@ -247,5 +247,12 @@ To run this tool, you need connection and configuration information for your IoT
 
 - Verify that the **Confirmation** messages show an **OK**. If not, then you may have incorrectly pasted the device hub connection information.
 
+<a name="Tips"/>
+## Tips
+
+- If you just want to build iothub\_client, go to the cmake output directory and navigate to the iothub_client/samples folder then run the following command:
+
+		make -f Makefile all
+
 [setup-iothub]: ../../doc/setup_iothub.md
 [provision-device]: ./provision_device.md
