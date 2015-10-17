@@ -22,6 +22,12 @@ call %build-root%\build\release\auto_sign_c_client.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
+rem -- Build all native client configurations & platforms
+rem -----------------------------------------------------------------------------
+call %build-root%\c\build_all\windows\build_client.cmd --platform Win32
+call %build-root%\c\build_all\windows\build_client.cmd --platform x64
+
+rem -----------------------------------------------------------------------------
 rem -- Create NuGet Package
 rem -----------------------------------------------------------------------------
 echo Y | call %build-root%\c\build_all\packaging\windows\rebuild_nugets.cmd

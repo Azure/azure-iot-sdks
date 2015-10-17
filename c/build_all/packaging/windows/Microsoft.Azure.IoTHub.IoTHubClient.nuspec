@@ -27,9 +27,9 @@
     <!-- <file src="..\..\..\..\build_output\c\win32\release\iothub_client.lib" target="build\native\Win32\Release" />  -->
       
     <!-- these are files for x64 plaform -->
-    <!-- <file src="..\..\..\..\build_output\c\x64\debug\iothub_client.lib" target="build\native\x64\Debug" />  -->
-    <!-- <file src="..\..\..\..\build_output\c\x64\debug\iothub_client.pdb" target="build\native\x64\Debug" />  -->
-    <!-- <file src="..\..\..\..\build_output\c\x64\release\iothub_client.lib" target="build\native\x64\Release" />  -->
+    <file src="..\..\..\..\build_output\c\x64\debug\iothub_client.lib" target="build\native\x64\Debug" />
+    <file src="..\..\..\..\build_output\c\x64\debug\iothub_client.pdb" target="build\native\x64\Debug" />
+    <file src="..\..\..\..\build_output\c\x64\release\iothub_client.lib" target="build\native\x64\Release" />
 
     <file src="Microsoft.Azure.IoTHub.IoTHubClient.targets" target="build\native" />
 	

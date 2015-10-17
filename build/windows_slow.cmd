@@ -9,7 +9,7 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- C# --
 cd %build-root%\csharp\build
-call build.cmd
+echo Y | call build.cmd
 if errorlevel 1 goto :eof
 cd %build-root%
 

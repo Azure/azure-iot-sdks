@@ -27,9 +27,9 @@
     <!-- <file src="..\..\..\..\build_output\c\win32\release\common.lib" target="build\native\Win32\Release" />  -->
       
     <!-- these are files for x64 plaform -->
-    <!-- <file src="..\..\..\..\build_output\c\x64\debug\common.lib" target="build\native\x64\Debug" />  -->
-    <!-- <file src="..\..\..\..\build_output\c\x64\debug\common.pdb" target="build\native\x64\Debug" />  -->
-    <!-- <file src="..\..\..\..\build_output\c\x64\relase\common.lib" target="build\native\x64\Release" />  -->
+    <file src="..\..\..\..\build_output\c\x64\debug\common.lib" target="build\native\x64\Debug" />
+    <file src="..\..\..\..\build_output\c\x64\debug\common.pdb" target="build\native\x64\Debug" />
+    <file src="..\..\..\..\build_output\c\x64\release\common.lib" target="build\native\x64\Release" />
 
     <file src="Microsoft.Azure.IoTHub.Common.targets" target="build\native" />
     <file src="..\..\..\common\inc\*.h" target="build\native\include" />

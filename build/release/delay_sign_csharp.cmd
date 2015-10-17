@@ -28,7 +28,7 @@ echo [assembly: AssemblyKeyFileAttribute("35MSSharedLib1024.snk")] >> %build-roo
 
 rem -- Build csharp client with updated AssemblyInfo.cs
 set build_error=0
-call %build-root%\csharp\build\build.cmd
+echo Y | call %build-root%\csharp\build\build.cmd
 if %errorlevel% neq 0 set build_error=1
 
 rem -- Restore the original AssemblyInfo.cs

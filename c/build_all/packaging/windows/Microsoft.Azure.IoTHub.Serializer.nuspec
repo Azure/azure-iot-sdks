@@ -24,12 +24,12 @@
     <file src="..\..\..\..\build_output\c\win32\debug\serializer.lib" target="build\native\Win32\Debug" />
     <file src="..\..\..\..\build_output\c\win32\debug\serializer.pdb" target="build\native\Win32\Debug" />
       
-    <!-- <file src="..\..\..\..\build_output\c\win32\release\serializer.lib" target="build\native\Win32\Release" />  -->
+    <file src="..\..\..\..\build_output\c\win32\release\serializer.lib" target="build\native\Win32\Release" />
       
     <!-- these are files for x64 plaform -->
-    <!-- <file src="..\..\..\..\build_output\c\x64\debug\serializer.lib" target="build\native\x64\Debug" />  -->
-    <!-- <file src="..\..\..\..\build_output\c\x64\debug\serializer.pdb" target="build\native\x64\Debug" />  -->
-    <!-- <file src="..\..\..\..\build_output\c\x64\release\serializer.lib" target="build\native\x64\Release" />  -->
+    <file src="..\..\..\..\build_output\c\x64\debug\serializer.lib" target="build\native\x64\Debug" />
+    <file src="..\..\..\..\build_output\c\x64\debug\serializer.pdb" target="build\native\x64\Debug" />
+    <file src="..\..\..\..\build_output\c\x64\release\serializer.lib" target="build\native\x64\Release" />
 
     <file src="Microsoft.Azure.IoTHub.Serializer.targets" target="build\native" />
     <file src="..\..\..\serializer\inc\*.h" target="build\native\include" />
