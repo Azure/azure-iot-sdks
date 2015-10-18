@@ -20,7 +20,7 @@ if errorlevel 1 goto :eof
 cd %build-root%
 
 REM -- C --
-call %build-root%\c\build_all\windows\build.cmd --run-e2e-tests
+echo Y | call %build-root%\c\build_all\windows\build.cmd --run-e2e-tests
 if errorlevel 1 goto :eof
 cd %build-root%
 

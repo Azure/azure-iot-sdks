@@ -56,6 +56,7 @@ if not defined NUGET_API_KEY (
 	if not defined nuget_feed_path (
 		choice /C yn /M "No NuGet feed specified. Do you want to publish to Nuget.org"
 		if not !errorlevel!==1 goto :eof
+		echo Publishing to Nuget.org with ApiKey: %NUGET_API_KEY%
 		nuget push %nuget_packages_path%\*.nupkg -ApiKey %NUGET_API_KEY% -NonInteractive
 		if not %errorlevel%==0 exit /b %errorlevel%
 	) else (

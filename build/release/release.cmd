@@ -11,7 +11,7 @@ set nuget_feed=%1
 
 if not defined nuget_feed (
 	choice /C yn /M "No feed specified. Are you sure you want to publish to Nuget.org?"
-	if not %errorlevel%==1 goto :eof
+	if not !errorlevel!==1 goto :eof
 )
 
 rem -----------------------------------------------------------------------------
@@ -64,8 +64,3 @@ rem ----------------------------------------------------------------------------
 rem -- Publish node npm packages
 rem -----------------------------------------------------------------------------
 rem call release_npm.cmd
-
-rem -----------------------------------------------------------------------------
-rem -- Generate API docs
-rem -----------------------------------------------------------------------------
-call ..\gen_docs.cmd
