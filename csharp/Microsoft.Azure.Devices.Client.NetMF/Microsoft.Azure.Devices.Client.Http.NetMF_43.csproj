@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
+    <DefineConstants>DEBUG;HTTP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -28,8 +28,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>HTTP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -48,6 +47,7 @@
     <Compile Include="Common\IETagHolder.cs" />
     <Compile Include="Common\Security\SharedAccessSignatureBuilder.cs" />
     <Compile Include="Common\Security\SharedAccessSignatureConstants.cs" />
+    <Compile Include="Common\SHA.cs" />
     <Compile Include="Common\WebApi\CustomHeaderConstants.cs" />
     <Compile Include="DeliveryAcknowledgement.cs" />
     <Compile Include="DeviceAuthenticationWithRegistrySymmetricKey.cs" />
@@ -69,12 +69,9 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SPOT.IO" />
-    <Reference Include="Microsoft.SPOT.Native" />
-    <Reference Include="Microsoft.SPOT.Security.PKCS11" />
     <Reference Include="System" />
     <Reference Include="System.Http" />
     <Reference Include="System.IO" />
-    <Reference Include="System.Security" />
   </ItemGroup>
   <PropertyGroup>
   </PropertyGroup>
