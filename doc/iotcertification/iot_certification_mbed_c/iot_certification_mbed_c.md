@@ -1,4 +1,4 @@
-How to Certify IoT devices running Mbed OS with Azure IoT SDK 
+How to Certify IoT devices running Mbed OS with Azure IoT SDK
 ===
 ---
 
@@ -24,7 +24,7 @@ How to Certify IoT devices running Mbed OS with Azure IoT SDK
 **About this document**
 
 This document provides step-by-step guidance to IoT hardware publishers on how to certify an IoT enabled hardware with Azure IoT SDK. This multi-step process includes:
--   Configuring Azure IoT Hub 
+-   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
 -   Packaging and sharing the logs  
@@ -80,24 +80,24 @@ To run Device Explorer tool, use following configuration string as described in 
 3.  Create and register the device with your IoT Hub using instructions as below.
 
     a. Click the **Management** tab.    
-    
-    b. Click **List** button to call the device hub and retrieve a list of devices. 
+
+    b. Click **List** button to call the device hub and retrieve a list of devices.
        If this is your first time, then you shouldn't retrieve anything.
-       
-    c. Click **Create** button to create a device ID and key. 
-    
-    d. Once created successfully, device will be listed in Device Explorer. 
-    
+
+    c. Click **Create** button to create a device ID and key.
+
+    d. Once created successfully, device will be listed in Device Explorer.
+
     e. Right click the device and from context menu select "**Copy connection string for selected device**".
-    
+
     f. Save this information in Notepad. You will need this information in later steps.
 
-**Not running Windows on your PC?** - Please send us an email on 
+**Not running Windows on your PC?** - Please send us an email on
 <azureiotcertified@microsoft.com> and we will follow up with you with
 instructions.
 
 <a name="Step_3:_Build"/>
-# Step 3: Build and Validate the sample using C client libraries 
+# Step 3: Build and Validate the sample using C client libraries
 
 This section walks you through building, deploying and validating the IoT Client SDK on your device running a mbed operating system. You will install necessary prerequisites on your device.  Once done,  you will build and deploy the IoT Client SDK and validate the sample tests required for IoT certification with the Azure IoT SDK.
 
@@ -198,7 +198,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 20.  Repeat Steps 16 and 17 and enter the following URL into the Source
     URL field. Once done click **Import**:
-    
+
          https://developer.mbed.org/users/wolfSSL/code/wolfSSL/
          http://developer.mbed.org/users/mbed_official/code/EthernetInterface/
          http://developer.mbed.org/users/mbed_official/code/mbed-rtos/
@@ -216,7 +216,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 <a name="Step_3_3:_Run"/>
 ## 3.3 Run and Validate the samples
-    
+
 In this section you will run the Azure IoT client SDK samples to validate
 communication between your device and Azure IoT Hub. You will send messages to the Azure IoT Hub service and validate that IoT Hub has successfully receive the data. You will also monitor any messages send from the Azure IoT Hub to client.
 
@@ -235,7 +235,7 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
 
     ***Note:*** *Saving the .bin file to the device causes the current terminal session to the device to reset. When it reconnects, reset the terminal again manually, or start a new terminal. This enables the mbed device to reset and start executing the program.*
 
-4.  Connect to the device using an SSH client application, such as PuTTY. You can determine which serial port your device uses by checking the Windows Device Manager.
+4.  Connect to the device using an SSH terminal program, such as PuTTY. You can determine which serial port your device uses by checking the Windows Device Manager.
 
     ![Windows\_SerialPort](images/3_3_1_02.png)
 
@@ -250,13 +250,13 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
     ![Event\_Data](images/3_3_1_04.png)
 
     Verify that the confirmation messages show an OK. If not, then you may have incorrectly copied the device hub connection information.
-    
+
       ***NOTE:*** *If the program does not starts, reset the board manually.*
-     
+
 7. You should be able to see the events received in the Device Explorer's data tab.
 
      ![Monitor\_Data](images/3_3_1_05.png)
-    
+
 ### 3.3.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your device,
@@ -277,7 +277,7 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
 
 <a name="Step_4_1:_Package"/>
 ## 4.1 Package build logs and sample test results
-  
+
 Package following artifacts from your device:
 
 1.  Screenshot for the build results generated while compiling on the [mbed
