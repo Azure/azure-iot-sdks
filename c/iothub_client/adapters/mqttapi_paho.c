@@ -616,7 +616,7 @@ MQTTAPI_RESULT MQTTAPI_SetDeliveryCompletedCallback(MQTTAPI_HANDLE instance, MQT
 
 void MQTTAPI_Destroy(MQTTAPI_HANDLE instance)
 {
-	PMQTTTAPI_HANDLE_DATA mqttHandleData = instance;
+	PMQTTTAPI_HANDLE_DATA mqttHandleData = (PMQTTTAPI_HANDLE_DATA)instance;
 
 	/* Codes_SRS_MQTTAPI_04_021: [If parameter instance is NULL then MQTTAPI_Destroy shall take no action.] */
 	if (mqttHandleData != NULL)
@@ -636,7 +636,7 @@ void MQTTAPI_Destroy(MQTTAPI_HANDLE instance)
 			MQTTClient_disconnect(mqttHandleData->client, 0);
 		}
 
-		/* Codes_SRS_MQTTAPI_04_053: [If there are messages to be sent MQTTAPI_Destroy shall signalize the user that the message couldn’t be sent by reason of MQTTAPI_CONFIRMATION_BECAUSE_DESTROY]  */
+		/* Codes_SRS_MQTTAPI_04_053: [If there are messages to be sent MQTTAPI_Destroy shall signal the user that the message couldn’t be sent by reason of MQTTAPI_CONFIRMATION_BECAUSE_DESTROY]  */
 		{
 			PDLIST_ENTRY received;
 			while ((received = DList_RemoveHeadList(&(mqttHandleData->messagesReceived))) != &(mqttHandleData->messagesReceived))
@@ -690,7 +690,7 @@ void MQTTAPI_Destroy(MQTTAPI_HANDLE instance)
 			}
 		}
 
-		MQTTClient_destroy(mqttHandleData->client);
+		MQTTClient_destroy(&mqttHandleData->client);
 		Lock_Deinit(mqttHandleData->LockHandle);
 		free(mqttHandleData);
 	}

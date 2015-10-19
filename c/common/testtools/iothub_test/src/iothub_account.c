@@ -91,6 +91,19 @@ const char* IoTHubAccount_GetDeviceKey(void)
 #endif
 }
 
+const char* IoTHubAccount_GetProtocolGatewayHostName(void)
+{
+#ifdef MBED_BUILD_TIMESTAMP
+	static char* value[MBED_PARAM_MAX_LENGTH];
+	(void)mbed_log("ProtocolGatewayHostName?\r\n");
+	(void)scanf("%s", &value);
+	(void)mbed_log("Received '%s'\r\n", value);
+	return value;
+#else
+	return getenv("IOTHUB_PROTOCOL_GATEWAY_HOSTNAME");
+#endif
+}
+
 const char* IoTHubAccount_GetIoTHubConnString(void)
 {
 #ifdef MBED_BUILD_TIMESTAMP
