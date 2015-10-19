@@ -220,40 +220,48 @@ module.exports = [
         "replaceString": "node.build"
     },
     {
-        "taskType": "jsonReplaceTask",
+        "taskType": "multiTask",
         "filePath": "node/common/package.json",
-        "search": "version",
-        "replaceString": "node.common"
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "filePath": "node/common/package.json",
+                "search": "devDependencies.azure-iot-build",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.common;
+                }
+            }
+        ]
     },
     {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/common/package.json",
-        "search": "devDependencies.azure-iot-build",
-        "replaceString": function(versions) {
-            return '^' + versions.node.common;
-        }
-    },
-    {
-        "taskType": "jsonReplaceTask",
+        "taskType": "multiTask",
         "filePath": "node/device/package.json",
-        "search": "version",
-        "replaceString": "node.device"
-    },
-    {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/device/package.json",
-        "search": "dependencies.azure-iot-common",
-        "replaceString": function(versions) {
-            return '^' + versions.node.device;
-        }
-    },
-    {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/device/package.json",
-        "search": "devDependencies.azure-iot-build",
-        "replaceString": function(versions) {
-            return '^' + versions.node.device;
-        }
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.device;
+                }
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "devDependencies.azure-iot-build",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.device;
+                }
+            }
+        ]
     },
     {
         "taskType": "jsonReplaceTask",
@@ -264,26 +272,29 @@ module.exports = [
         }
     },
     {
-        "taskType": "jsonReplaceTask",
+        "taskType": "multiTask",
         "filePath": "node/service/package.json",
-        "search": "version",
-        "replaceString": "node.service"
-    },
-    {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/service/package.json",
-        "search": "dependencies.azure-iot-common",
-        "replaceString": function(versions) {
-            return '^' + versions.node.service;
-        }
-    },
-    {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/service/package.json",
-        "search": "devDependencies.azure-iot-build",
-        "replaceString": function(versions) {
-            return '^' + versions.node.service;
-        }
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.service"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.service;
+                }
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "devDependencies.azure-iot-build",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.service;
+                }
+            }
+        ]
     },
     {
         "taskType": "jsonReplaceTask",
