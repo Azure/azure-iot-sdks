@@ -304,11 +304,11 @@ section. These will be needed in [Step 4](#Step_4_2).*
 <a name="Step_3_2_2"/>
 ### 3.2.2 Receive messages from IoT Hub
 
-1.  To verify that you can send messages from the IoT Hub to your device, go to the **Notification** tab in Device Explorer.
+1.  To verify that you can send messages from the IoT Hub to your device, go to the **Messages To Device** tab in Device Explorer.
 
 2.  Select the device you created using Device ID drop down.
 
-3.  Add some text to the Notification field, then click Send.
+3.  Add some text to the Message field, then click Send.
 
     ![DeviceExplorer\_message\_send](images/device_explorer_message_send.png)
 
