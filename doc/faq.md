@@ -23,7 +23,7 @@ The Visual Studio native C projects included in this repository ([azure-iot-sdks
 
 Note: You can download the free Community edition of Visual Studio 2015 [here](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx).
 
-1. Open the native C solution in Visual Studio 2013 (for example, c\\serializer\\build\\windows\\serializer.sln).
+1. Open the native C solution in Visual Studio 2013 (for example, azure_iot_sdks.sln in your home folder).
 2. In **Solution Explorer** select all the projects in the solution. The right-click in **Solution Explorer** and click **Properties**.
 3. Expand **Configuration Properties**, and then select **General**.
 4. Change the **Platform Toolset** to **Visual Studio 2013 (v120)**, then click **OK**.

@@ -27,8 +27,8 @@ public:
     {
         if (NULL != InterlockedCompareExchangePointer((void**)&m_GlobalMockInstance, this, NULL))
         {
-            TCHAR errorString[1024];
-            _stprintf_s(errorString, COUNT_OF(errorString), _T("Attempting to use mock %S in a multithreading environment"), typeid(C).name());
+            char errorString[1024];
+            sprintf(errorString, "Attempting to use mock %s in a multithreading environment", typeid(C).name());
             MOCK_THROW(CMicroMockException(MICROMOCK_EXCEPTION_INTERNAL_ERROR,
                 errorString));
         }
@@ -38,10 +38,8 @@ public:
     {
         if (this != InterlockedCompareExchangePointer((void**)&m_GlobalMockInstance, NULL, this))
         {
-            TCHAR errorString[1024];
-            _stprintf_s(errorString, COUNT_OF(errorString), _T("Mock global instance for mock %S has been changed while the mock was used"), typeid(C).name());
-            MOCK_THROW(CMicroMockException(MICROMOCK_EXCEPTION_INTERNAL_ERROR,
-                errorString));
+            char errorString[1024];
+            sprintf(errorString, "Mock global instance for mock %s has been changed while the mock was used", typeid(C).name());
         }
     }
 
@@ -51,8 +49,8 @@ public:
     {
         if (NULL == m_GlobalMockInstance)
         {
-            TCHAR errorString[1024];
-            _stprintf_s(errorString, COUNT_OF(errorString), _T("Error retrieving singleton for mock %S"), typeid(C).name());
+            char errorString[1024];
+            sprintf(errorString, "Error retrieving singleton for mock %s", typeid(C).name());
             MOCK_THROW(CMicroMockException(MICROMOCK_EXCEPTION_INTERNAL_ERROR,
                 errorString));
         }

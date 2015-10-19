@@ -11,7 +11,6 @@
 
 #include "iothub_client_ll.h"
 #include "iothub_message.h"
-#include "threadapi.h"
 #include "crt_abstractions.h"
 #include "iothubtransporthttp.h"
 
@@ -168,7 +167,6 @@ void iothub_client_sample_http_run(void)
         while (1)
         {
             IoTHubClient_LL_DoWork(iotHubClientHandle);
-            ThreadAPI_Sleep(1);
         }
 
         IoTHubClient_LL_Destroy(iotHubClientHandle);

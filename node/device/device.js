@@ -3,7 +3,7 @@
 
 /**
  * The `azure-iot-device` module provides a means for devices to send events to and
- * receive notifications from an Azure IoT Hub.  The client handles
+ * receive messages from an Azure IoT Hub.  The client handles
  * communication with the IoT Hub through a transport supplied by the caller
  * (e.g., [Https]{@linkcode module:adapters/https.Https}).
  *
@@ -30,7 +30,7 @@
  *
  * client.receive (function (err, res, msg) {
  *   print(err, res);
- *   if (msg) console.log('Notification: ' + msg);
+ *   if (msg) console.log('Message: ' + msg);
  *   if (!err && res.statusCode !== 204) {
  *     client.complete(msg, print);
  *   }

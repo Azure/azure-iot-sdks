@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Microsoft.Azure.IoTHub.Common</id>
-    <version>1.0.0-preview-003</version>
+    <version>1.0.0-preview-004</version>
     <title>Microsoft Azure IoTHub Common</title>
     <authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
@@ -21,17 +21,17 @@
   </metadata>
     <files>
     <!-- these are files for x86 plaform -->
-    <file src="..\..\..\common\build\windows\Win32\Debug\common.lib" target="build\native\Win32\Debug" />
-    <file src="..\..\..\common\build\windows\Win32\Debug\common.pdb" target="build\native\Win32\Debug" />
+    <file src="..\..\..\..\build_output\c\win32\debug\common.lib" target="build\native\Win32\Debug"/>
+    <file src="..\..\..\..\build_output\c\win32\debug\common.pdb" target="build\native\Win32\Debug"/>
       
-    <file src="..\..\..\common\build\windows\Win32\Release\common.lib" target="build\native\Win32\Release" /> 
+    <!-- <file src="..\..\..\..\build_output\c\win32\release\common.lib" target="build\native\Win32\Release" />  -->
       
     <!-- these are files for x64 plaform -->
-    <file src="..\..\..\common\build\windows\x64\Debug\common.lib" target="build\native\x64\Debug" /> 
-    <file src="..\..\..\common\build\windows\x64\Debug\common.pdb" target="build\native\x64\Debug" /> 
-    <file src="..\..\..\common\build\windows\x64\Release\common.lib" target="build\native\x64\Release" /> 
+    <file src="..\..\..\..\build_output\c\x64\debug\common.lib" target="build\native\x64\Debug"/>
+    <file src="..\..\..\..\build_output\c\x64\debug\common.pdb" target="build\native\x64\Debug"/>
+    <file src="..\..\..\..\build_output\c\x64\release\common.lib" target="build\native\x64\Release"/>
 
-    <file src="Microsoft.Azure.IoTHub.Common.targets" target="build\native" />
-    <file src="..\..\..\common\inc\*.h" target="build\native\include" />
+    <file src="Microsoft.Azure.IoTHub.Common.targets" target="build\native"/>
+    <file src="..\..\..\common\inc\*.h" target="build\native\include"/>
 </files>
 </package>

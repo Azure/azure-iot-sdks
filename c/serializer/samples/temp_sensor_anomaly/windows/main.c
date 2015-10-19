@@ -39,16 +39,16 @@ WITH_ACTION(AlarmThreshold, ascii_char_ptr, SensorId)
 
 END_NAMESPACE(Contoso);
 
-IOTHUBMESSAGE_DISPOSITION_RESULT AlarmAnomaly(FrdmDevice* frdmDevice, ascii_char_ptr SensorId)
+EXECUTE_COMMAND_RESULT AlarmAnomaly(FrdmDevice* frdmDevice, ascii_char_ptr SensorId)
 {
     (void)printf("Anomaly ALARM from: %s\r\n", SensorId);
-    return IOTHUBMESSAGE_ACCEPTED;
+    return EXECUTE_COMMAND_SUCCESS;
 }
 
-IOTHUBMESSAGE_DISPOSITION_RESULT AlarmThreshold(FrdmDevice* frdmDevice, ascii_char_ptr SensorId)
+EXECUTE_COMMAND_RESULT AlarmThreshold(FrdmDevice* frdmDevice, ascii_char_ptr SensorId)
 {
     (void)printf("Threshold ALARM from: %s\r\n", SensorId);
-    return IOTHUBMESSAGE_ACCEPTED;
+    return EXECUTE_COMMAND_SUCCESS;
 }
 
 static void sendMessage(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* buffer, size_t size)

@@ -154,10 +154,6 @@ This section walks you through building, deploying and validating the IoT Client
 
         git clone https://github.com/Azure/azure-iot-sdks.git
 
--   You will be prompted for your GitHub user name and password.
-
-    ***Note:*** *If you have two-factor authentication enabled for your account, you'll need to generate/use a personal access token in place of your password. To generate token, navigate to <https://github.com/settings/tokens/new> and follow the on screen instructions.*
-
 -   Verify that you now have a copy of the source code under the directory ~/azure-iot-suite-sdks.
 
 <a name="Step_3_2:_Build"/>
@@ -167,11 +163,13 @@ This section walks you through building, deploying and validating the IoT Client
 
     **For simple_sample_http.js:**
     
-        nano azure-iot-sdks/node/samples/simple_sample_http.js
+        cd ~/azure-iot-sdks/node/device/samples
+        nano simple_sample_http.js
 
     **For send_batch_http.js:**
     
-        nano azure-iot-sdks/node/samples/send_batch_http.js        
+        cd ~/azure-iot-sdks/node/device/samples
+        nano send_batch_http.js        
     
 -   This launches a console-based text editor. Scroll down to the
     connection information.
@@ -186,9 +184,14 @@ This section walks you through building, deploying and validating the IoT Client
 
 -   Press Ctrl+X to exit nano.
 
+-   Run the following command before leaving the **~/azure-iot-sdks/node/device/samples** directory
+    
+        npm install
+
     **For registry_sample.js:**
     
-        nano azure-iot-sdks/node/samples/registry_sample.js
+        cd ~/azure-iot-sdks/node/service/samples
+        nano registry_sample.js
 
 -   This launches a console-based text editor. Scroll down to the
     connection information.
@@ -203,9 +206,15 @@ This section walks you through building, deploying and validating the IoT Client
 
 -   Press Ctrl+X to exit nano.
 
+-   Run the following command before leaving the **~/azure-iot-sdks/node/service/samples** directory
+    
+        npm install
+
 -   Build the SDK code using the following command.
 
-     	   ~/azure-iot-sdks/node/build.sh | tee LogFile.txt 
+        cd ~/azure-iot-sdks/node/build
+        npm install
+        ./build.sh | tee LogFile.txt 
 
    ***Note:*** *LogFile.txt in above command should be replaced with a file name where build output will be written.*
 
@@ -228,9 +237,7 @@ In this section you will run the Azure IoT client SDK samples to validate commun
 
         node ~/azure-iot-sdks/node/samples/simple_sample_http.js
 
-4. Verify that the receive and send status messages show no error. If any, then you may have incorrectly copied the device hub connection information.
-
-    **Note**: **204 No Content** is not an error.
+4. Verify that data has been successfully sent and received. If any, then you may have incorrectly copied the device hub connection information.
  
    ![Simple_Sample_result_terminal](images/3_3_1_02.png)
 
@@ -251,25 +258,29 @@ In this section you will run the Azure IoT client SDK samples to validate commun
 
 8.  Verify that you receive information for new device created in the messages.    
     
+    ![Registry_Sample_result_DeviceExplorer](images/3_3_1_06.png)
+    
 9.  In Device Explorer, go to Management tab and click List button. Your new device should show up in the list.
 
     ![Registry_Sample_result_DeviceExplorer](images/3_3_1_07.png)
 
+**Note:** The registry_sample.js sample will create and delete a device. In order to see it in the Device Explorer tool you will need to refresh your devices before the sample finishes running.
+
 ### 3.3.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your
-    device, go to the **Notification** tab in Device Explorer.
+    device, go to the **Message To Device** tab in Device Explorer.
 
 2.  Select the device you created using Device ID drop down.
 
-3.  Add some text to the Notification field, then click Send button.
+3.  Add some text to the Message field, then click Send button.
     
-    ![NotificationSend_DeviceExplorer](images/3_3_2_01.png)
+    ![MessageSend_DeviceExplorer](images/3_3_2_01.png)
     
 4.  You should be able to see the command received in the console window
     of the client sample.
 
-    ![NotificationSend_terminal](images/3_3_1_02.png)
+    ![MessageSend_terminal](images/3_3_2_02.png)
 
 <a name="Step_4:_Package_Share"/>
 # Step 4: Package and Share
