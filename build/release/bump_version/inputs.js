@@ -38,10 +38,18 @@ module.exports = [
         }
     },
     {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/iothub_client/tests/version_unittests/version_unittests.cpp",
+        "search": "(\\\".*\\\")([ \t]*\\,[ \t]*IOTHUB\\_SDK\\_VERSION)",
+        "replaceString": function(versions) {
+            return '"' + versions.c.device + '"$2';
+        }
+    },
+    {
         "taskType": "xmlReplaceTask",
         "filePath": "c/build_all/packaging/windows/Apache.QPID.Proton.AzureIot.nuspec",
         "search": "//*[local-name(.)='package' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']/*[local-name(.)='metadata' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']/*[local-name(.)='version' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']",
-        "replaceString": "c_nuget.device"
+        "replaceString": "qpid_proton_nuget"
     },
     {
         "taskType": "xmlReplaceTask",
