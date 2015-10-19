@@ -198,6 +198,7 @@ else
 
 	$MBEDMessageList = New-List;
 	$MBEDMessageBuffer = "";
+	$EventsPendingVerification = New-List;
 
 	# There are 2 distinct timeout mechanisms implemented below.
 	# A. One for the overall test execution;
@@ -211,6 +212,7 @@ else
 	$TimeoutInSeconds = 120; # Default value. It will be updated once the script receives the duration from the test running on MBED.
 	$InitialTime = Get-Date;
 	$SleepTime = 2;
+	$MaxEventReceivedWaitTime = 180; # seconds
 
 	$KeepAliveTimeoutInSeconds = 120;
 	$LastKeepAliveTime = Get-Date;
@@ -250,34 +252,22 @@ else
 					continue;
 				}
 				
-				if ($Message -IMATCH "VerifyMessageReceived\[(.*)\]")
+				if ($Message -IMATCH "VerifyMessageReceived\[(.*)\] sent on \[(.*)\]")
 				{
 					$ScriptState = $ScriptStates.WaitingForTestCompletion;
 					$TrackKeepAlives = $true;
 					$LastKeepAliveTime = Get-Date;
 					
 					$VerificationResult = "0";
+					
 					$MessageToVerify = $MATCHES[1];
+					$TimeSent = [DateTime]::Parse($MATCHES[2]);
 					
-					$EventData = Get-IoTEventHubNextEvent -EventHubListener $EventHubListener -TimeoutInSeconds $EventHubListenTimeoutInSeconds;
+					$EventsPendingVerification.Add(@($MessageToVerify, $TimeSent));
 					
-					if ($EventData -EQ $null)
+					if (Verify-EventsReceivedByHub -EventHubListener $EventHubListener -EventHubListenTimeoutInSeconds $EventHubListenTimeoutInSeconds -VerificationList $EventsPendingVerification -MaxEventReceivedWaitTime $MaxEventReceivedWaitTime)
 					{
-						Write-Message -Error "Could not find message [$MessageToVerify] on Event Hub within $EventHubListenTimeoutInSeconds seconds.";
-					}
-					else
-					{
-						$MessageRetrievedFromEventHub = [System.Text.Encoding]::UTF8.GetString($EventData.GetBytes());
-						
-						if ($MessageRetrievedFromEventHub -IEQ $MessageToVerify)
-						{
-							Write-Message "Event Hub received correct message [$MessageRetrievedFromEventHub]";
-							$VerificationResult = "1";
-						}
-						else
-						{
-							Write-Message -Error "Event Hub received incorrect message [$MessageRetrievedFromEventHub]";
-						}
+						$VerificationResult = "1";
 					}
 					
 					$SerialPort.WriteLine($VerificationResult);
