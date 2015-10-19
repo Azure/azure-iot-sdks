@@ -206,6 +206,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.5"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.5 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.5"
+                    }
+                }
             }
         }
         "Release"
@@ -542,6 +550,17 @@
             "Property" = "8:ProgramMenuFolder"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_BD6EE032240045A4ABA0131D454B3BCF"
+                    {
+                    "Name" = "8:Azure IoT Hub"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_29207758D4D242CA9A2502F6E8A952A6"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_3961CBFC9F214298B8B6E62DC355EC88"
@@ -573,7 +592,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:DeviceExplorer"
         "ProductCode" = "8:{103649C6-130F-4513-A146-210617635462}"
-        "PackageCode" = "8:{534CFD24-6F0B-4FB8-A934-6AFA72C6A8A2}"
+        "PackageCode" = "8:{D95147E5-F66E-4F78-9C88-A89F1144B3A3}"
         "UpgradeCode" = "8:{E4C37F6C-415B-456E-9726-C39D607B3248}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -693,6 +712,20 @@
         }
         "Shortcut"
         {
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_65DFBBFF468349C4B8598BE0DB93C3A4"
+            {
+            "Name" = "8:Device Explorer"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_3C8CFDB0C50D4A2F9D0AA09969673389"
+            "Folder" = "8:_BD6EE032240045A4ABA0131D454B3BCF"
+            "WorkingFolder" = "8:_3961CBFC9F214298B8B6E62DC355EC88"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
         }
         "UserInterface"
         {
