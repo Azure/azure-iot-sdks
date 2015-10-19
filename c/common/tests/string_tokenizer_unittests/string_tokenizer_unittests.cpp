@@ -51,6 +51,7 @@ namespace BASEIMPLEMENTATION
 #endif
 
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
+static MICROMOCK_MUTEX_HANDLE g_testByTest;
 
 #define TEST_STRING_HANDLE (STRING_HANDLE)0x42
 #define FAKE_LOCK_HANDLE (LOCK_HANDLE)0x4f
@@ -114,25 +115,32 @@ BEGIN_TEST_SUITE(string_tokenizer_unittests)
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
         DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
-#ifdef _CRTDBG_MAP_ALLOC
-        if (_CrtDumpMemoryLeaks())
-        {
-#ifdef CPP_UNITTEST
-            Logger::WriteMessage("Memory Leak found!!! Run test in debug mode & review Debug output for details.");
-#endif
-        }
-#endif
     }
 
     TEST_SUITE_INITIALIZE(setsBufferTempSize)
     {
         INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        g_testByTest = MicroMockCreateMutex();
+        ASSERT_IS_NOT_NULL(g_testByTest);
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     {
+        if (!MicroMockAcquireMutex(g_testByTest))
+        {
+            ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
+        }
+
         currentmalloc_call = 0;
         whenShallmalloc_fail = 0;
+    }
+
+    TEST_FUNCTION_CLEANUP(TestMethodCleanup)
+    {
+        if (!MicroMockReleaseMutex(g_testByTest))
+        {
+            ASSERT_FAIL("failure in test framework at ReleaseMutex");
+        }
     }
 
     /* STRING_TOKENIZER_Tests BEGIN */

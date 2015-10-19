@@ -921,11 +921,9 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_HANDLE_DATA* handleData, ST
 static void reversePutListBackIn(PDLIST_ENTRY source, PDLIST_ENTRY destination)
 {
     /*this function takes a list, and inserts it in another list. When done in the context of this file, it reverses the effects of a not-able-to-send situation*/
-    PDLIST_ENTRY afterHead;
-    while ((afterHead = DList_RemoveHeadList(source)) != source)
-    {
-        DList_InsertHeadList(destination, afterHead);
-    }
+    DList_AppendTailList(destination->Flink, source);
+    DList_RemoveEntryList(source);
+    DList_InitializeListHead(source);
 }
 
 static void DoEvent(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)

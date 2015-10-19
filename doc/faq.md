@@ -9,6 +9,7 @@ This document contains both general FAQs about the Microsoft Azure IoT device SD
 **Microsoft Azure IoT device SDK for .NET FAQs**
 
 - [UWP support for Microsoft.Azure.Devices.Client](#uwpsupport)
+- [NotImplementedException thrown when using UWP](#notimpluwp)
 
 **Microsoft Azure IoT device SDK for Java FAQs**
 
@@ -22,7 +23,7 @@ The Visual Studio native C projects included in this repository ([azure-iot-sdks
 
 Note: You can download the free Community edition of Visual Studio 2015 [here](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx).
 
-1. Open the native C solution in Visual Studio 2013 (for example, c\\serializer\\build\\windows\\serializer.sln).
+1. Open the native C solution in Visual Studio 2013 (for example, azure_iot_sdks.sln in your home folder).
 2. In **Solution Explorer** select all the projects in the solution. The right-click in **Solution Explorer** and click **Properties**.
 3. Expand **Configuration Properties**, and then select **General**.
 4. Change the **Platform Toolset** to **Visual Studio 2013 (v120)**, then click **OK**.
@@ -78,6 +79,17 @@ Desktop apps use either text files or XML (.resx) files to create resources. The
 UWP uses the Windows Store resource model that replaces the hub-and-spoke model common to .NET Framework desktop apps. In UWP apps, .resw files are used to create resources. The format of the file is the same as .resx, but the packaging mechanism is different. At compile time, all the .resw files for an app are packed into a single PRI file by the MakePRI utility and included with the app's deployment package. At run time, the **Windows.ApplicationModel.Resources.ResourceLoader** class and the types in the **Windows.ApplicationModel.Resources.Core** namespace provide access to app resources.
 
 To support resources in Microsoft.Azure.Devices.Client library, the existing Resource.resx file has been copied to Resource.resw. The two files will now need to be kept in sync. Unlike in the .NET version of the library, the UWP version does not contain generated C# files. Instead, a new file, WinRTResources.cs is introduced. Whenever a new string is added to the .resx/.resw file, a corresponding entry must be copied from Resources.Designer.cs to WinRTResources.cs (follow the existing entries as an example)
+
+<a name="notimpluwp"/>
+## NotImplementedException thrown when using UWP
+
+The UWP version of the .NET device libraries does not support the AMQP protocol. If you see a **NotImplementedException** thrown in a UWP application that uses the Azure IoT device SDK for .NET, then check that you are using the HTTPS protocol and not the AMQP protocol.
+
+For example:
+
+```
+var deviceClient = DeviceClient.Create(iotHubUri, new DeviceAuthenticationWithRegistrySymmetricKey("myFirstDevice", deviceKey), TransportType.Http1);
+```
 
 <a name="javapi2error"/>
 ## Error when using AMQP on Raspberry Pi2

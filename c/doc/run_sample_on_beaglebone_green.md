@@ -47,7 +47,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
   ```
   sudo apt-get update
-  sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git
+  sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
   ```
 
   **Note:** You can paste into a PuTTY terminal window in Windows by using mouse right-click.
@@ -63,7 +63,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - Verify that you now have a copy of the SDK under the directory ~/azure-iot-sdks.
 
 
-- Edit the file ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace the placeholder in the following lines of code with your IoT Hub device connection string (see requirements section for how to set up your IoT Hub instance and provision your device info). You can use the console-based text editor **nano** to edit the file:
+- Edit the file ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace the placeholder in the following line of code with your IoT Hub device connection string (see requirements section for how to set up your IoT Hub instance and provision your device info). You can use the console-based text editor **nano** to edit the file:
 
   ```
   static const char* connectionString = "[device connection string]";
@@ -72,10 +72,16 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - On the board, run the following command to build and install Apache Proton library:
 
   ```
-  ~/azure-iot-sdks/c/build_all/linux/build_proton.sh --install
+  sudo ~/azure-iot-sdks/c/build_all/linux/build_proton.sh --install
   ```
 
-- Assuming everything went OK on the build_proton.sh, you can now build the SDK samples using the following command:
+- This SDK sample depends on the presences of a few libraries. Run the following command to build them:
+
+  ```
+  sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+  ```
+
+- You can now build the SDK code using the following command, assuming everything went OK on build\_proton.sh and build\_paho.sh
 
   ```
   ~/azure-iot-sdks/c/build_all/linux/build.sh
@@ -87,17 +93,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - Now run the **simplesample_amqp** sample by issuing the following commands:
 
   ```
-  ~/azure-iot-sdks/c/serializer/samples/simplesample_amqp/linux/simplesample_amqp
-  ```
-
-<a name="tips"/>
-## Tips
-
-- If you just want to build the serializer samples, run the following commands:
-
-  ```
-  cd ~/azure-iot-sdks/c/serializer/build/linux
-  make -f makefile.linux all
+  ~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp
   ```
 
 - You can use the DeviceExplorer tool on your desktop machine to see the data your device is sending and receiving.

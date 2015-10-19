@@ -14,7 +14,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Win32Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'Win32' ) )">
     <Link>
-      <AdditionalDependencies>$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/paho-mqtt3cs.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/iothub_mqtt_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/paho-mqtt3cs.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/iothub_client_mqtt_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <UsingTask TaskName="Microsoft_Azure_Mqtt_Transport_Contains" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">

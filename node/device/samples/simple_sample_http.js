@@ -19,7 +19,7 @@ setInterval(function(){
   client.sendEvent(message, printResultFor('send'));
 }, 1000);
 
-// Monitor notifications from IoT Hub and print them in the console.
+// Monitor messages from IoT Hub and print them in the console.
 setInterval(function(){
   client.receive(function (err, res, msg) {
     if (!err && res.statusCode !== 204) {

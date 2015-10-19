@@ -49,7 +49,7 @@ namespace Microsoft.Azure.Devices.Client
         /// [Optional] Used to specify the role of the message in the communication pattern. 
         /// Possible values: 
         ///     “d2c”: event message (device to cloud) 
-        ///     “c2d”: notification 
+        ///     “c2d”: message 
         ///     “d2creq”: inquiry request 
         ///     “d2cres”: inquiry response 
         ///     “c2dreq”: command request 

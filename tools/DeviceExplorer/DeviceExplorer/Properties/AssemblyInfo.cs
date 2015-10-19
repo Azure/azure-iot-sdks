@@ -33,3 +33,7 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+
+// Version information for an assembly follows semantic versioning 1.0.0. See
+// semver.org for details.
+[assembly: AssemblyInformationalVersion("1.0.0-preview.4")]

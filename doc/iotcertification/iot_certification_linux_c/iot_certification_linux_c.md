@@ -29,8 +29,8 @@ How to certify IoT devices running Linux with Azure IoT SDK
 
 This document provides step-by-step guidance to IoT hardware publishers on how
 to certify an IoT enabled hardware with Azure IoT SDK. This multi-step process
-includes: 
--   Configuring Azure IoT Hub 
+includes:
+-   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
 -   Packaging and sharing the logs
@@ -50,12 +50,12 @@ You should have the following items ready before beginning the process:
 -   Required hardware to certify.
 
 ***Note:*** *If you haven’t contacted Microsoft about being an Azure Certified for IoT partner, please submit this [form](<https://iotcert.cloudapp.net/>) first to request it and then follow these instructions.*
-    
+
 <a name="Step_1:_Configure"/>
 
 # Step 1: Sign Up To Azure IoT Hub
 
-Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service. As part of the sign up process, you will receive the connection string. 
+Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service. As part of the sign up process, you will receive the connection string.
 
 -   **IoT Hub Connection String**: An example of IoT Hub Connection String is as below:
 
@@ -81,7 +81,7 @@ To run Device Explorer tool, use following configuration string as described in
 [Step1](#Step_1:_Configure):
 
 -   IoT Hub Connection String
-    
+
 
 **Steps:**
 1.  Click [here](<https://github.com/Azure/azure-iot-sdks/blob/develop/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) to download and install Device Explorer.
@@ -131,17 +131,15 @@ Azure IoT SDK.
 
     **Debian or Ubuntu**
 
-        sudo apt-get update 
+        sudo apt-get update
 
-        sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git 
-
-        sudo apt-get install -y uuid-dev uuid 
+        sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
 
     **Fedora**
 
-        sudo dnf check-update -y 
+        sudo dnf check-update -y
 
-        sudo dnf install libcurl-devel openssl-devel libuuid-devel uuid-devel gcc-c++ make cmake git      
+        sudo dnf install libcurl-devel openssl-devel libuuid-devel uuid-devel gcc-c++ make cmake git unzip java-1.7.0-openjdk
 
     **Any Other Linux OS**
 
@@ -202,6 +200,7 @@ Azure IoT SDK.
 
     ***Note:*** *LogFile.txt in above command should be replaced with a file
     name where build output will be written.*
+    **Note:** build.sh creates a folder called "cmake" in your home folder. Inside "cmake" are all the results of the compilation of the complete software.
 
 <a name="Step_3_3:_Run_E2E"/>
 
@@ -226,25 +225,25 @@ In this section you will run the end to end test cases for Azure IoT client SDK 
     -   **IOTHUB_EVENTHUB_LISTEN_NAME:** Name of your Event Hub
     -   **IOTHUB_NAME:** Name of your IoT Hub
     -   **IOTHUB_SHARED_ACCESS_SIGNATURE:** this value can be generated from Device Explorer
-    
+
         Go to **Configuration** tab &minus;&gt; Click **Generate SAS** button
     -   **IOTHUB_SUFFIX:** Suffix of your IoT Hub hostname in connection string
     -   **IOTHUB_PARTITION_COUNT:** Set value as **16**
     -   **IOTHUB_POLICY_NAME:** Keep it blank
     -   **IOTHUB_POLICY_KEY:** Keep it blank
-    
+
 
 -   Set environment variables by running following command on your device:
 
         cd ./azure-iot-sdks/tools/iot_hub_e2e_tests_params/
         chmod +x setiotdeviceparametersfore2etests.sh
-        sudo ./setiotdeviceparametersfore2etests.sh 
+        sudo ./setiotdeviceparametersfore2etests.sh
 
 ### 3.3.2 Run End to End test cases
 
 -   Run end to end test cases by executing following command on your device:
 
-        ./azure-iot-sdks/c/iothub_client/build/linux/iothubclient_e2etests | tee E2ELogFile.txt
+        ~/cmake/iothub_client/build/linux/iothubclient_e2etests | tee E2ELogFile.txt
 
     ***Note:*** *E2ELogFile.txt in above command should be replaced with a file name where ene to end test results will be written.*
 
@@ -273,49 +272,49 @@ section. These will be needed in [Step 4](#Step_4_2:_Share)
 
     **If using AMQP protocol:** Run sample *iothub\_client\_sample\_amqp*
 
-        ./azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
+        ~/cmake/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
 
     **If using HTTP protocol:** Run sample *iothub\_client\_sample\_http*
 
-        ./azure-iot-sdks/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
+        ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
 
 4.  Verify that the confirmation messages show an OK. If not, then you may have
     incorrectly copied the device hub connection information.
 
-    **If using AMQP protocol:**  
+    **If using AMQP protocol:**
     ![SampleAMQP\_result\_terminal](images/3_3_1_02.png)
 
-    **If using HTTP protocol:**  
+    **If using HTTP protocol:**
     ![SampleHTTP\_result\_terminal](images/3_3_1_03.png)
 
 5.  Device Explorer should show that IoT Hub has successfully received data sent
     by sample test.
 
-    **If using AMQP protocol:**  
+    **If using AMQP protocol:**
     ![SampleAMQP\_result\_DeviceExplorer](images/3_3_1_04.png)
 
-    **If using HTTP protocol:**  
+    **If using HTTP protocol:**
     ![SampleHTTP\_result\_DeviceExplorer](images/3_3_1_05.png)
 
 ### 3.4.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your device,
-    go to the **Notification** tab in Device Explorer.
+    go to the **Message To Device** tab in Device Explorer.
 
 2.  Select the device you created using Device ID drop down.
 
-3.  Add some text to the Notification field, then click Send.
+3.  Add some text to the Message field, then click Send.
 
-    ![NotificationSend\_DeviceExplorer](images/3_3_1_06.png)
+    ![MessageSend\_DeviceExplorer](images/3_3_1_06.png)
 
 4.  You should be able to see the command received in the console window for the
     client sample.
 
-    **If using AMQP protocol:**  
-    ![NotificationSend\_terminal](images/3_3_1_07.png)
+    **If using AMQP protocol:**
+    ![MessageSend\_terminal](images/3_3_1_07.png)
 
-    **If using HTTP protocol:**  
-    ![NotificationSend\_terminal](images/3_3_1_08.png)
+    **If using HTTP protocol:**
+    ![MessageSend\_terminal](images/3_3_1_08.png)
 
 <a name="Step_4:_Package_Share"/>
 

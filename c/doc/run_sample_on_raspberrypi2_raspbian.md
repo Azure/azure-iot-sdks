@@ -78,7 +78,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
 
   ```
   sudo apt-get update
-  sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git
+  sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
   ```
   If you get errors running sudo, make sure your root password is set as decribed above.
 
@@ -115,6 +115,12 @@ you obtained in the "Connecting your device to an IoT hub" step above.
     sudo ./c/build_all/linux/build_proton.sh --install /usr
   ```
 
+- Build a few libraries upon which the samples depend:
+
+  ```
+  sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+  ```
+
 - Finally, build the sample applications:
 
   ```
@@ -127,7 +133,7 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 - Run the **simplesample_amqp** sample:
 
   ```
-  ./c/serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp
   ```
 
 This sample application sends simulated sensor data to your IoT Hub.
@@ -136,11 +142,10 @@ This sample application sends simulated sensor data to your IoT Hub.
 <a name="tips"/>
 ## Tips
 
-- If you just want to build the serializer samples, run the following commands:
+- If you just want to build the serializer samples, go to the cmake output folder and navigate to the seriliazer/samples folder, then run the following command:
 
   ```
-  cd ./c/serializer/build/linux
-  make -f makefile.linux all
+  make -f Makefile all
   ```
 - On Windows, you can use the [Device Explorer][device-explorer] to see the data your device is sending and receiving.
 

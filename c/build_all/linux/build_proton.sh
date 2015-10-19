@@ -2,7 +2,7 @@
 
 set -e
 
-proton_repo="https://github.com/dcristoloveanu/qpid-proton.git"
+proton_repo="https://github.com/dcristoloveanu/qpid-proton"
 proton_branch="0.9-IoTClient"
 build_root=
 
@@ -40,7 +40,7 @@ process_args ()
             build_root="$2"
         elif [ "$1" == "-i" ] || [ "$1" == "--install" ]
         then
-            install_root="$2" 
+            install_root="$2"
         else
             usage
         fi
@@ -69,8 +69,13 @@ sync_proton ()
     fi
 
     rm $build_root -r -f
-    mkdir $build_root
-    git clone -b $proton_branch $proton_repo $build_root
+    cd /tmp
+    curl -L $proton_repo/archive/$proton_branch.zip -o proton.zip
+    mkdir proton
+    unzip proton.zip -d proton
+    mv ./proton/qpid-proton-$proton_branch/ $build_root/
+    rm proton.zip
+    rm -rf proton
 }
 
 build ()

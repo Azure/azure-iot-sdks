@@ -67,9 +67,9 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
 The program starts executing. You may have to reset the board (press CTRL+Break or press on the board's reset button) if the program does not start automatically when you connect.
 
-## Monitor device data and send notifications using Device Explorer
+## Monitor device data and send messages using Device Explorer
 
-- Now  your device is sending telemetry data to Azure IoT Hub and you can monitor this data and send notifications to your device using the [device explorer tool](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
+- Now  your device is sending event data to Azure IoT Hub and you can monitor this data and send messages to your device using the [device explorer tool](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
 
 
 [setup-iothub]: ../../doc/setup_iothub.md
