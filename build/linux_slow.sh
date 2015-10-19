@@ -10,35 +10,12 @@ export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
 cd $build_root/java/device
 mvn verify
 [ $? -eq 0 ] || exit $?
+cd $build_root
 
 # -- C --
-./c/build_all/linux/build.sh --run-e2e-tests #-x
+c/build_all/linux/build.sh --run-e2e-tests #-x
 [ $? -eq 0 ] || exit $?
 
 # -- Node.js --
-cd $build_root/node
-
-cd build
-npm install
-./build.sh
-[ $? -eq 0 ] || exit $?
-
-cd ../common
-npm install
-./build.sh lintAndAllTests
-[ $? -eq 0 ] || exit $?
-
-cd ../device
-npm install
-./build.sh lintAndAllTests
-[ $? -eq 0 ] || exit $?
-
-cd ../service
-npm install
-./build.sh lintAndAllTests
-[ $? -eq 0 ] || exit $?
-
-cd ../../tools/iothub-explorer
-npm install
-npm test
+build/linux_node.sh
 [ $? -eq 0 ] || exit $?

@@ -4,7 +4,6 @@
 'use strict';
 
 var transportSpecificTests = require('./_client_test.js');
-var RealTransport = require('./transport.js');
 
 describe('Over real AMQP', function () {
   this.timeout(10000);
