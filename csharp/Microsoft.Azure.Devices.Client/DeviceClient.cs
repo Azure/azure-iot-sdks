@@ -85,7 +85,12 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString)
         {
+#if WINDOWS_UWP
+            return CreateFromConnectionString(connectionString, TransportType.Http1);
+#else
             return CreateFromConnectionString(connectionString, TransportType.Amqp);
+#endif
+
         }
 
         /// <summary>
