@@ -227,6 +227,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="NuGet\make_nuget_package.ps1" />
+    <None Include="NuGet\Microsoft.Azure.Devices.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

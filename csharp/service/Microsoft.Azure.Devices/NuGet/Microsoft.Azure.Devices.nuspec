@@ -24,8 +24,8 @@
     </frameworkAssemblies>
   </metadata>
   <files>
-    <file src="..\Microsoft.Azure.Devices\bin\debug\Microsoft.Azure.Devices.dll" target="lib\net451\Microsoft.Azure.Devices.dll" />
-    <file src="..\Microsoft.Azure.Devices\bin\debug\Microsoft.Azure.Devices.pdb" target="lib\net451\Microsoft.Azure.Devices.pdb" />
-    <file src="..\Microsoft.Azure.Devices\bin\debug\Microsoft.Azure.Devices.XML" target="lib\net451\Microsoft.Azure.Devices.XML" />
+    <file src="..\Microsoft.Azure.Devices\bin\release\Microsoft.Azure.Devices.dll" target="lib\net451\Microsoft.Azure.Devices.dll" />
+    <file src="..\Microsoft.Azure.Devices\bin\release\Microsoft.Azure.Devices.pdb" target="lib\net451\Microsoft.Azure.Devices.pdb" />
+    <file src="..\Microsoft.Azure.Devices\bin\release\Microsoft.Azure.Devices.XML" target="lib\net451\Microsoft.Azure.Devices.XML" />
   </files>
 </package>
