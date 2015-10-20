@@ -24,7 +24,7 @@ This file contains the following information:
 ## Requirements
 
 - Computer with GitHub installed and access to the [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub private repository.
-- SSH client, such as [PuTTY](http://www.putty.org/), so you can access the command line.
+- SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the BeagleBone Black.
 - Either the Chrome or Firefox web browser, so you can browse to the embedded webserver on your your board.
 - The boards come with all the required software; however, to update the board and run the current sample you must use FTP or a USB driver to copy your files. You can also use [WinSCP](http://winscp.net/eng/index.php).
 - Required hardware: [Beagleboard-BeagleBone](http://www.amazon.com/Beagleboard-BeagleBone-Starter-Case--Power-Supply--Micro/dp/B00P6TV9V4/ref=sr_1_3?ie=UTF8&qid=1426002583&sr=8-3&keywords=beaglebone).
