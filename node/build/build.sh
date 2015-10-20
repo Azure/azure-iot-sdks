@@ -1,16 +1,74 @@
 #!/bin/sh
+
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-scriptdir="`dirname "$0"`"
-jakepath="`pwd`/node_modules/.bin/jake"
+min_output=
+integration_tests=
+npm_command=
 
-cd $scriptdir
-if [ ! -f $jakepath ]
+node_root=$(cd "$(dirname "$0")/.." && pwd)
+cd $node_root
+
+usage ()
+{
+    echo "Lint code and run tests."
+    echo "build.sh [options]"
+    echo "options"
+    echo " --min                 minimize display output"
+    echo " --integration-tests   run integration tests too (unit tests always run)"
+    exit 1
+}
+
+process_args ()
+{
+    min_output=0
+    integration_tests=0
+
+    for arg in $*
+    do
+        case "$arg" in
+            "--min" ) min_output=1;;
+            "--integration-tests" ) integration_tests=1;;
+            * ) usage;;
+        esac
+    done
+    
+    case "$min_output$integration_tests" in
+        "00" ) npm_command="npm -s test";;
+        "01" ) npm_command="npm -s run lint && npm -s run alltest";;
+        "10" ) npm_command="npm -s run lint && npm -s run unittest-min";;
+        "11" ) npm_command="npm -s run ci";;
+    esac
+}
+
+lint_and_test ()
+{
+    cd "$1"
+    pwd
+    eval $npm_command
+}
+
+process_args $*
+
+echo ""
+if [ $integration_tests -eq 0 ]
 then
-    echo "This script depends on packages it cannot find. Please run 'npm install' from $scriptdir, then try again."
-    echo ""
-    exit 1 
+    echo "-- Linting and running unit tests --"
+else
+    echo "-- Linting and running unit + integration tests --"
 fi
+echo ""
 
-$jakepath $*
+lint_and_test $node_root/common
+[ $? -eq 0 ] || exit $?
+
+lint_and_test $node_root/device
+[ $? -eq 0 ] || exit $?
+
+lint_and_test $node_root/service
+[ $? -eq 0 ] || exit $?
+
+cd $node_root/../tools/iothub-explorer
+npm -s test
+[ $? -eq 0 ] || exit $?

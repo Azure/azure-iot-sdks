@@ -10,28 +10,20 @@ for %%i in ("%node-root%") do set node-root=%%~fi
 
 cd %node-root%
 
-cd build
+cd common
 echo.
 echo -- Creating links for %cd% --
-call npm link
-
-cd ..\common
-echo.
-echo -- Creating links for %cd% --
-call npm link azure-iot-build
 call npm link
 
 cd ..\device
 echo.
 echo -- Creating links for %cd% --
-call npm link azure-iot-build
 call npm link azure-iot-common
 call npm link
 
 cd ..\service
 echo.
 echo -- Creating links for %cd% --
-call npm link azure-iot-build
 call npm link azure-iot-common
 call npm link
 

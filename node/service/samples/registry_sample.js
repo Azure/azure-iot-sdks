@@ -3,7 +3,7 @@
 
 'use strict';
 
-var iothub = require('../iothub.js'); // require('azure-iothub');
+var iothub = require('azure-iothub');
 
 var connectionString = '[IoT Connection String]';
 
