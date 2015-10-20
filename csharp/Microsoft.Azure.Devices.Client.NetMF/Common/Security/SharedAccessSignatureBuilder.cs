@@ -4,11 +4,9 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using Microsoft.Azure.Devices.Client.Extensions;
-    using Microsoft.SPOT.Cryptoki;
     using System;
-    using System.Security.Cryptography;
     using System.Text;
-    
+
     sealed class SharedAccessSignatureBuilder
     {
         string key;
@@ -74,30 +72,48 @@ namespace Microsoft.Azure.Devices.Client
         {
             const long ticksPerSecond = 1000000000 / 100; // NetMF: 1 tick = 100 nano seconds
 
+            // .NETMF < v4.4 had a know bug with DateTime.Kind: values were always created with DateTimeKind.Local 
+            // this requires us to perform an extra step to make a DateTime to be in UTC, otherwise the expiry date will be calculated wrongly
+
+#if MF_FRAMEWORK_VERSION_V4_2 || MF_FRAMEWORK_VERSION_V4_3
+            // the 'absolute' value is correct but DateTimeKind is Local (WRONG!)
+            DateTime expiresOn = TimeZone.CurrentTimeZone.ToUniversalTime(DateTime.UtcNow.Add(timeToLive));
+            TimeSpan secondsFromBaseTime = expiresOn.Subtract(TimeZone.CurrentTimeZone.ToUniversalTime(SharedAccessSignatureConstants.EpochTime));
+            return (secondsFromBaseTime.Ticks / ticksPerSecond).ToString();
+#else
             DateTime expiresOn = DateTime.UtcNow.Add(timeToLive);
             TimeSpan secondsFromBaseTime = expiresOn.Subtract(SharedAccessSignatureConstants.EpochTime);
             return((uint)(secondsFromBaseTime.Ticks / ticksPerSecond)).ToString(); 
+            return (secondsFromBaseTime.Ticks / ticksPerSecond).ToString();
+#endif
         }
 
         static string Sign(string requestString, string key)
         {
-            using (Session openSession = new Session("", MechanismType.SHA256_HMAC))
-            {
-                CryptokiAttribute[] secretKey = new CryptokiAttribute[] 
-                { 
-                    new CryptokiAttribute(CryptokiAttribute.CryptokiType.Class, Utility.ConvertToBytes((int)CryptokiClass.SECRET_KEY)),
-                    new CryptokiAttribute(CryptokiAttribute.CryptokiType.KeyType, Utility.ConvertToBytes((int)CryptoKey.KeyType.GENERIC_SECRET)),
-                    new CryptokiAttribute(CryptokiAttribute.CryptokiType.Value, Convert.FromBase64String(key)) 
-                }; 
+            // computing SHA256 signature using a managed code library
+            var hmac = ElzeKool.SHA.computeHMAC_SHA256(Convert.FromBase64String(key), Encoding.UTF8.GetBytes(requestString));
+            return Convert.ToBase64String(hmac);
 
-                CryptoKey binKey = CryptoKey.LoadKey(openSession, secretKey);
+            // computing SHA256 signature using the .NET Micro Framework classes
+            // this requires that the appropriate assemblies are compiled and available in the .NETMF build it's being used
+            // required assemblies are: Microsoft.SPOT.Cryptoki and System.Security.Cryptography
+            //using (Microsoft.SPOT.Cryptoki.Session openSession = new Microsoft.SPOT.Cryptoki.Session("", Microsoft.SPOT.Cryptoki.MechanismType.SHA256_HMAC))
+            //{
+            //    Microsoft.SPOT.Cryptoki.CryptokiAttribute[] secretKey = new Microsoft.SPOT.Cryptoki.CryptokiAttribute[] 
+            //    { 
+            //        new Microsoft.SPOT.Cryptoki.CryptokiAttribute(Microsoft.SPOT.Cryptoki.CryptokiAttribute.CryptokiType.Class, Microsoft.SPOT.Cryptoki.Utility.ConvertToBytes((int)Microsoft.SPOT.Cryptoki.CryptokiClass.SECRET_KEY)),
+            //        new Microsoft.SPOT.Cryptoki.CryptokiAttribute(Microsoft.SPOT.Cryptoki.CryptokiAttribute.CryptokiType.KeyType, Microsoft.SPOT.Cryptoki.Utility.ConvertToBytes((int)System.Security.Cryptography.CryptoKey.KeyType.GENERIC_SECRET)),
+            //        new Microsoft.SPOT.Cryptoki.CryptokiAttribute(Microsoft.SPOT.Cryptoki.CryptokiAttribute.CryptokiType.Value, Convert.FromBase64String(key)) 
+            //    }; 
 
-                using (KeyedHashAlgorithm hmacOpenSSL = new KeyedHashAlgorithm(KeyedHashAlgorithmType.HMACSHA256, binKey))
-                {
-                    byte[] hmac1 = hmacOpenSSL.ComputeHash(Encoding.UTF8.GetBytes(requestString));
-                    return Convert.ToBase64String(hmac1);
-                }
-            }
+            //    System.Security.Cryptography.CryptoKey binKey = System.Security.Cryptography.CryptoKey.LoadKey(openSession, secretKey);
+
+            //    using (System.Security.Cryptography.KeyedHashAlgorithm hmacOpenSSL = new System.Security.Cryptography.KeyedHashAlgorithm(System.Security.Cryptography.KeyedHashAlgorithmType.HMACSHA256, binKey))
+            //    {
+            //        byte[] hmac1 = hmacOpenSSL.ComputeHash(Encoding.UTF8.GetBytes(requestString));
+            //        return Convert.ToBase64String(hmac1);
+            //    }
+            //}
         }
     }
 }
