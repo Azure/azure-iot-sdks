@@ -10,6 +10,7 @@ This document contains both general FAQs about the Microsoft Azure IoT device SD
 
 - [UWP support for Microsoft.Azure.Devices.Client](#uwpsupport)
 - [NotImplementedException thrown when using UWP](#notimpluwp)
+- [IotHubCommunicationException or FileNotFoundException thrown when using HTTP protocol](#httpexception)
 
 **Microsoft Azure IoT device SDK for Java FAQs**
 
@@ -90,6 +91,23 @@ For example:
 ```
 var deviceClient = DeviceClient.Create(iotHubUri, new DeviceAuthenticationWithRegistrySymmetricKey("myFirstDevice", deviceKey), TransportType.Http1);
 ```
+
+<a name="httpexception"/>
+## IotHubCommunicationException or FileNotFoundException thrown when using HTTP protocol
+
+The **DeviceClient** class in the Microsoft.Azure.Devices.Client package requires the **System.Net.Http.Formatting** class to communicate with IoT Hub over HTTP.
+
+You see an **IotHubCommunicationException** or **FileNotFoundException** exception when you try to use the HTTP protocol to send a device-to-cloud message:
+
+```
+DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Http1);
+
+...
+
+await deviceClient.SendEventAsync(eventMessage);
+```
+
+To prevent these exceptions from happening, you should add **Microsoft.AspNet.WebApi.Client** NuGet package to your project.
 
 <a name="javapi2error"/>
 ## Error when using AMQP on Raspberry Pi2
