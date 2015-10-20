@@ -97,18 +97,6 @@ namespace Microsoft.Azure.Devices.Client
             private set;
         }
 
-        public string GetUser()
-        {
-            var stringBuilder = new StringBuilder();
-            stringBuilder.Append(this.SharedAccessKeyName ?? WebUtility.UrlEncode(this.DeviceId));
-            stringBuilder.Append(UserSeparator);
-            stringBuilder.Append("sas.");
-            stringBuilder.Append(this.SharedAccessKeyName == null ? "" : "root.");
-            stringBuilder.Append(this.IotHubName);
-
-            return stringBuilder.ToString();
-        }
-
         public string GetPassword()
         {
             string password;
