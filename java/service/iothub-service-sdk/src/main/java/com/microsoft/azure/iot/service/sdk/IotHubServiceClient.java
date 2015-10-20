@@ -6,9 +6,8 @@
 package com.microsoft.azure.iot.service.sdk;
 
 import com.microsoft.azure.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.iot.service.transport.amqps.AmqpMessageSender;
+import com.microsoft.azure.iot.service.transport.amqps.AmqpSend;
 
-import javax.jms.JMSException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
@@ -22,10 +21,10 @@ public class IotHubServiceClient extends ServiceClient
 {
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    private AmqpMessageSender amqpMessageSender;
-    String hostName;
-    String userName;
-    String sasToken;
+    private AmqpSend amqpMessageSender;
+    private final String hostName;
+    private final String userName;
+    private final String sasToken;
 
     protected IotHubServiceClient(IotHubConnectionString iotHubConnectionString) throws URISyntaxException, IOException
     {
@@ -41,10 +40,10 @@ public class IotHubServiceClient extends ServiceClient
         IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionString);
         this.sasToken = iotHubServiceSasToken.toString();
 
-        this.amqpMessageSender = new AmqpMessageSender(hostName, userName, sasToken);
+        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken);
     }
 
-    public void open() throws JMSException
+    public void open() throws IOException
     {
         if (this.amqpMessageSender != null)
         {
@@ -52,7 +51,7 @@ public class IotHubServiceClient extends ServiceClient
         }
     }
 
-    private void close() throws JMSException
+    public void close()
     {
         if (this.amqpMessageSender != null)
         {
@@ -60,7 +59,7 @@ public class IotHubServiceClient extends ServiceClient
         }
     }
 
-    private void send(String deviceId, Message message) throws JMSException
+    public void send(String deviceId, String message) throws IOException
     {
         if (this.amqpMessageSender != null)
         {
@@ -77,7 +76,7 @@ public class IotHubServiceClient extends ServiceClient
             {
                 open();
                 future.complete(null);
-            } catch (JMSException e)
+            } catch (IOException e)
             {
                 future.completeExceptionally(e);
             }
@@ -90,31 +89,25 @@ public class IotHubServiceClient extends ServiceClient
     {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
-            try
-            {
-                close();
-                future.complete(null);
-            } catch (JMSException e)
-            {
-                future.completeExceptionally(e);
-            }
+            close();
+            future.complete(null);
         });
         return future;
     }
 
     @Override
-    public CompletableFuture<Void> sendAsync(String deviceId, Message message)
+    public CompletableFuture<Void> sendAsync(String deviceId, String message)
     {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
-            try
-            {
-                send(deviceId, message);
-                future.complete(null);
-            } catch (JMSException e)
-            {
-                future.completeExceptionally(e);
-            }
+        try
+        {
+            send(deviceId, message);
+            future.complete(null);
+        } catch (IOException e)
+        {
+            future.completeExceptionally(e);
+        }
         });
         return future;
     }

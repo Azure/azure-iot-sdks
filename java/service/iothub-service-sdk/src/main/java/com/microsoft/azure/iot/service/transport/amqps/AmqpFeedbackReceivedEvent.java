@@ -3,13 +3,10 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.iot.service.sdk;
+package com.microsoft.azure.iot.service.transport.amqps;
 
-public enum FeedbackStatusCodeEnum
+public interface AmqpFeedbackReceivedEvent
 {
-    success,
-    expired,
-    deliveryCountExceeded,
-    rejected,
-    unknown
+    public void onFeedbackReceived(String feedbackJson);
 }
+
