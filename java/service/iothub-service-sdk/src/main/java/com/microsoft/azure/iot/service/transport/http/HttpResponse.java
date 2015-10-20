@@ -3,7 +3,7 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.iot.service.transport.https;
+package com.microsoft.azure.iot.service.transport.http;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import java.util.Map;
  * An HTTPS response. Contains the status code, body, header fields, and error
  * reason (if any).
  */
-public class HttpsResponse
+public class HttpResponse
 {
     protected final int status;
     protected final byte[] body;
@@ -30,11 +30,11 @@ public class HttpsResponse
      * with the field name.
      * @param errorReason the error reason.
      */
-    public HttpsResponse(int status, byte[] body,
-            Map<String, List<String>> headerFields,
-            byte[] errorReason)
+    public HttpResponse(int status, byte[] body,
+                        Map<String, List<String>> headerFields,
+                        byte[] errorReason)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSRESPONSE_12_001: [The constructor shall store the input arguments so that the getters can return them later.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_001: [The constructor shall store the input arguments so that the getters can return them later.]
         this.status = status;
         this.body = Arrays.copyOf(body, body.length);
         this.errorReason = errorReason;
@@ -60,7 +60,7 @@ public class HttpsResponse
      */
     public int getStatus()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSRESPONSE_12_002: [The function shall return the status code given in the constructor.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_002: [The function shall return the status code given in the constructor.]
         return this.status;
     }
 
@@ -71,7 +71,7 @@ public class HttpsResponse
      */
     public byte[] getBody()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSRESPONSE_12_003: [The function shall return a copy of the body given in the constructor.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_003: [The function shall return a copy of the body given in the constructor.]
         return Arrays.copyOf(this.body, this.body.length);
     }
 
@@ -88,10 +88,10 @@ public class HttpsResponse
      */
     public String getHeaderField(String field)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSRESPONSE_12_008: [The function shall match the header field name in a case-insensitive manner.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_008: [The function shall match the header field name in a case-insensitive manner.]
         String canonicalizedField = canonicalizeFieldName(field);
         String values = this.headerFields.get(canonicalizedField);
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSRESPONSE_12_006: [If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_006: [If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.]
         if (values == null)
         {
             String errMsg = String.format("Could not find a value "
@@ -100,7 +100,7 @@ public class HttpsResponse
             throw new IllegalArgumentException(errMsg);
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSRESPONSE_12_004: [The function shall return a comma-separated list of the values associated with the header field name.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_004: [The function shall return a comma-separated list of the values associated with the header field name.]
         return values;
     }
 
@@ -127,7 +127,7 @@ public class HttpsResponse
      */
     public byte[] getErrorReason()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSRESPONSE_12_007: [The function shall return the error reason given in the constructor.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_007: [The function shall return the error reason given in the constructor.]
         return this.errorReason;
     }
 
@@ -156,7 +156,7 @@ public class HttpsResponse
         return valuesStr;
     }
 
-    protected HttpsResponse()
+    protected HttpResponse()
     {
         this.status = 0;
         this.body = null;

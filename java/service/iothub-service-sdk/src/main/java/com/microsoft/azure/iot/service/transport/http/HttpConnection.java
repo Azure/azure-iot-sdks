@@ -3,7 +3,7 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.iot.service.transport.https;
+package com.microsoft.azure.iot.service.transport.http;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
@@ -26,7 +26,7 @@ import java.util.Map;
  * read. Otherwise, the data remains in the stream and the connection will not
  * be reusable.
  */
-public class HttpsConnection
+public class HttpConnection
 {
     /** The underlying HTTPS connection. */
     protected final HttpsURLConnection connection;
@@ -46,9 +46,9 @@ public class HttpsConnection
      *
      * @throws IOException if the connection was unable to be opened.
      */
-    public HttpsConnection(URL url, HttpsMethod method) throws IOException
+    public HttpConnection(URL url, HttpMethod method) throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_004: [If the URI given does not use the HTTPS protocol, the constructor shall throw an IllegalArgumentException.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_004: [If the URI given does not use the HTTPS protocol, the constructor shall throw an IllegalArgumentException.]
         String protocol = url.getProtocol();
         if (!protocol.equalsIgnoreCase("HTTPS"))
         {
@@ -60,10 +60,10 @@ public class HttpsConnection
         }
         System.out.println("PROTOCOL: " + protocol.toString());
 
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_001: [The constructor shall open a connection to the given URL.]
-        // Coses_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_002: [The constructor shall throw an IOException if the connection was unable to be opened.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_001: [The constructor shall open a connection to the given URL.]
+        // Coses_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_002: [The constructor shall throw an IOException if the connection was unable to be opened.]
         this.connection = (HttpsURLConnection) url.openConnection();
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_003: [The constructor shall set the HTTPS method to the given method.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_003: [The constructor shall set the HTTPS method to the given method.]
         this.connection.setRequestMethod(method.name());
         this.body = new byte[0];
     }
@@ -76,14 +76,14 @@ public class HttpsConnection
      */
     public void connect() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_006: [The function shall stream the request body, if present, through the connection.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_006: [The function shall stream the request body, if present, through the connection.]
         if (this.body.length > 0)
         {
             this.connection.setDoOutput(true);
             this.connection.getOutputStream().write(this.body);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_005: [The function shall send a request to the URL given in the constructor.]
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_007: [The function shall throw an IOException if the connection could not be established, or the server responded with a bad status code.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_005: [The function shall send a request to the URL given in the constructor.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_007: [The function shall throw an IOException if the connection could not be established, or the server responded with a bad status code.]
         this.connection.connect();
     }
 
@@ -97,10 +97,10 @@ public class HttpsConnection
      * HttpsURLConnection silently converts the HTTPS method to POST or PUT if a
      * body is written to the request.
      */
-    public void setRequestMethod(HttpsMethod method)
+    public void setRequestMethod(HttpMethod method)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_009: [The function shall throw an IllegalArgumentException if the request currently has a non-empty body and the new method is not a POST or a PUT.]
-        if (method != HttpsMethod.POST && method != HttpsMethod.PUT)
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_009: [The function shall throw an IllegalArgumentException if the request currently has a non-empty body and the new method is not a POST or a PUT.]
+        if (method != HttpMethod.POST && method != HttpMethod.PUT)
         {
             if (this.body.length > 0)
             {
@@ -110,7 +110,7 @@ public class HttpsConnection
             }
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_008: [The function shall set the request method.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_008: [The function shall set the request method.]
         try
         {
             this.connection.setRequestMethod(method.name());
@@ -129,7 +129,7 @@ public class HttpsConnection
      */
     public void setRequestHeader(String field, String value)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_010: [The function shall set the given request header field.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_010: [The function shall set the given request header field.]
         this.connection.setRequestProperty(field, value);
     }
 
@@ -142,7 +142,7 @@ public class HttpsConnection
      */
     public void setReadTimeoutMillis(int timeout)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_011: [The function shall set the read timeout to the given value.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_011: [The function shall set the read timeout to the given value.]
         this.connection.setReadTimeout(timeout);
     }
 
@@ -158,10 +158,10 @@ public class HttpsConnection
      */
     public void writeOutput(byte[] body)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_013: [The function shall throw an IllegalArgumentException if the request does not currently use method POST or PUT and the body is non-empty.]
-        HttpsMethod method = HttpsMethod.valueOf(
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_013: [The function shall throw an IllegalArgumentException if the request does not currently use method POST or PUT and the body is non-empty.]
+        HttpMethod method = HttpMethod.valueOf(
                 this.connection.getRequestMethod());
-        if (method != HttpsMethod.POST && method != HttpsMethod.PUT)
+        if (method != HttpMethod.POST && method != HttpMethod.PUT)
         {
             if (body.length > 0)
             {
@@ -172,7 +172,7 @@ public class HttpsConnection
         }
         else
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_012: [The function shall save the body to be sent with the request.]
+            // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_012: [The function shall save the body to be sent with the request.]
             this.body = Arrays.copyOf(body, body.length);
         }
     }
@@ -187,11 +187,11 @@ public class HttpsConnection
      */
     public byte[] readInput() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_014: [The function shall read from the input stream (response stream) and return the response.]
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_015: [The function shall throw an IOException if the input stream could not be accessed.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_014: [The function shall read from the input stream (response stream) and return the response.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_015: [The function shall throw an IOException if the input stream could not be accessed.]
         InputStream inputStream = this.connection.getInputStream();
         byte[] input = readInputStream(inputStream);
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_016: [The function shall close the input stream after it has been completely read.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_016: [The function shall close the input stream after it has been completely read.]
         inputStream.close();
 
         return input;
@@ -207,8 +207,8 @@ public class HttpsConnection
      */
     public byte[] readError() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_017: [The function shall read from the error stream and return the response.]
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_018: [The function shall throw an IOException if the error stream could not be accessed.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_017: [The function shall read from the error stream and return the response.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_018: [The function shall throw an IOException if the error stream could not be accessed.]
         InputStream errorStream = this.connection.getErrorStream();
 
         byte[] error = new byte[0];
@@ -216,7 +216,7 @@ public class HttpsConnection
         if (errorStream != null)
         {
             error = readInputStream(errorStream);
-            // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_019: [The function shall close the error stream after it has been completely read.]
+            // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_019: [The function shall close the error stream after it has been completely read.]
             errorStream.close();
         }
 
@@ -232,8 +232,8 @@ public class HttpsConnection
      */
     public int getResponseStatus() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_020: [The function shall return the response status code.]
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_021: [The function shall throw an IOException if no response was received.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_020: [The function shall return the response status code.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_021: [The function shall throw an IOException if no response was received.]
         return this.connection.getResponseCode();
     }
 
@@ -248,8 +248,8 @@ public class HttpsConnection
      */
     public Map<String, List<String>> getResponseHeaders() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_022: [The function shall return a mapping of header field names to the values associated with the header field name.]
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_023: [The function shall throw an IOException if no response was received.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_022: [The function shall return a mapping of header field names to the values associated with the header field name.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_023: [The function shall throw an IOException if no response was received.]
         return this.connection.getHeaderFields();
     }
 
@@ -284,7 +284,7 @@ public class HttpsConnection
         return byteArray;
     }
 
-    protected HttpsConnection()
+    protected HttpConnection()
     {
         this.connection = null;
     }

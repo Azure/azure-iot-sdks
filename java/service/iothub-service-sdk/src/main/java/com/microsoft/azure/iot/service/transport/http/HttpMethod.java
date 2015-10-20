@@ -3,10 +3,10 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.iot.service.transport.https;
+package com.microsoft.azure.iot.service.transport.http;
 
 /** The HTTPS request method (i.e. GET). */
-public enum HttpsMethod
+public enum HttpMethod
 {
     GET, POST, PUT, DELETE
 }

@@ -3,17 +3,17 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.iot.service.transport.https;
+package com.microsoft.azure.iot.service.transport.http;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-public class HttpsRequest
+public class HttpRequest
 {
     /** The underlying HTTPS connection stream. */
-    protected final HttpsConnection connection;
+    protected final HttpConnection connection;
 
     /**
      * Constructor. Takes a URL as an argument and returns an HTTPS request that
@@ -29,13 +29,13 @@ public class HttpsRequest
      * @throws IllegalArgumentException if the endpoint given does not use the
      * HTTPS protocol.
      */
-    public HttpsRequest(URL url, HttpsMethod method, byte[] body) throws IOException
+    public HttpRequest(URL url, HttpMethod method, byte[] body) throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_001: [The function shall open a connection with the given URL as the endpoint.]
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_003: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_004: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
-        this.connection = new HttpsConnection(url, method);
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_002: [The function shall write the body to the connection.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_001: [The function shall open a connection with the given URL as the endpoint.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_003: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_004: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
+        this.connection = new HttpConnection(url, method);
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_002: [The function shall write the body to the connection.]
         this.connection.writeOutput(body);
     }
 
@@ -47,7 +47,7 @@ public class HttpsRequest
      * @throws IOException if the connection could not be established, or the
      * input/output streams could not be accessed.
      */
-    public HttpsResponse send() throws IOException
+    public HttpResponse send() throws IOException
     {
         int responseStatus = -1;
         byte[] responseBody = new byte[0];
@@ -55,7 +55,7 @@ public class HttpsRequest
         Map<String, List<String>> headerFields;
         try
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_005: [The function shall send an HTTPS request as formatted in the constructor.]
+            // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_005: [The function shall send an HTTPS request as formatted in the constructor.]
             this.connection.connect();
 
             responseStatus = this.connection.getResponseStatus();
@@ -70,18 +70,18 @@ public class HttpsRequest
             // response, then getResponseStatus() returns a valid status code.
             // Otherwise, a connection could not be established and
             // getResponseStatus() throws an IOException.
-            // Codes_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_007: [If the client cannot connect to the server, the function shall throw an IOException.]
+            // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_007: [If the client cannot connect to the server, the function shall throw an IOException.]
             responseStatus = this.connection.getResponseStatus();
             headerFields = this.connection.getResponseHeaders();
-            // Codes_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_008: [If an I/O exception occurs because of a bad response status code, the function shall attempt to flush or read the error stream so that the underlying HTTPS connection can be reused.]
+            // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_008: [If an I/O exception occurs because of a bad response status code, the function shall attempt to flush or read the error stream so that the underlying HTTPS connection can be reused.]
             // Connections are transparently managed by Java.
             // The error stream must be cleared so that the connection
             // can be reused later.
             errorReason = this.connection.readError();
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
-        return new HttpsResponse(responseStatus, responseBody, headerFields,
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
+        return new HttpResponse(responseStatus, responseBody, headerFields,
                 errorReason);
     }
 
@@ -93,9 +93,9 @@ public class HttpsRequest
      *
      * @return itself, for fluent setting.
      */
-    public HttpsRequest setHeaderField(String field, String value)
+    public HttpRequest setHeaderField(String field, String value)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_009: [The function shall set the header field with the given name to the given value.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_009: [The function shall set the header field with the given name to the given value.]
         this.connection.setRequestHeader(field, value);
         return this;
     }
@@ -109,14 +109,14 @@ public class HttpsRequest
      *
      * @return itself, for fluent setting.
      */
-    public HttpsRequest setReadTimeoutMillis(int timeout)
+    public HttpRequest setReadTimeoutMillis(int timeout)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_010: [The function shall set the read timeout for the request to the given value.]
+        // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_010: [The function shall set the read timeout for the request to the given value.]
         this.connection.setReadTimeoutMillis(timeout);
         return this;
     }
 
-    protected HttpsRequest()
+    protected HttpRequest()
     {
         this.connection = null;
     }

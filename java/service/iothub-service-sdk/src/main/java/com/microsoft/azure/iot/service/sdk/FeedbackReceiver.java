@@ -5,9 +5,9 @@
 
 package com.microsoft.azure.iot.service.sdk;
 
-import com.microsoft.azure.iot.service.transport.amqps.AmqpFeedbackReceiver;
+import com.microsoft.azure.iot.service.transport.amqps.AmqpReceive;
 
-import javax.jms.JMSException;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,41 +17,41 @@ public class FeedbackReceiver extends Receiver
     private final long DEFAULT_TIMEOUT_MS = 60000;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    private AmqpFeedbackReceiver amqpFeedbacReceiver;
+    private AmqpReceive amqpReceiver;
     private String deviceId;
 
     public FeedbackReceiver(String hostName, String userName, String sasToken, String deviceId)
     {
         this.deviceId = deviceId;
-        this.amqpFeedbacReceiver = new AmqpFeedbackReceiver(hostName, userName, sasToken);
+        this.amqpReceiver = new AmqpReceive(hostName, userName, sasToken);
     }
 
-    private void open() throws JMSException
+    private void open()
     {
-        if (this.amqpFeedbacReceiver != null)
+        if (this.amqpReceiver != null)
         {
-            this.amqpFeedbacReceiver.open();
+            this.amqpReceiver.open();
         }
     }
 
-    private void close() throws JMSException
+    private void close()
     {
-        if (this.amqpFeedbacReceiver != null)
+        if (this.amqpReceiver != null)
         {
-            this.amqpFeedbacReceiver.close();
+            this.amqpReceiver.close();
         }
     }
 
-    private FeedbackBatch receive() throws JMSException
+    private FeedbackBatch receive() throws IOException, InterruptedException
     {
         return receive(DEFAULT_TIMEOUT_MS);
     }
 
-    private FeedbackBatch receive(long timeoutMs) throws JMSException
+    private FeedbackBatch receive(long timeoutMs) throws IOException, InterruptedException
     {
-        if (this.amqpFeedbacReceiver != null)
+        if (this.amqpReceiver != null)
         {
-            return this.amqpFeedbacReceiver.receive(this.deviceId, timeoutMs);
+            return this.amqpReceiver.receive(this.deviceId, timeoutMs);
         }
         return null;
     }
@@ -61,14 +61,8 @@ public class FeedbackReceiver extends Receiver
     {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
-            try
-            {
-                open();
-                future.complete(null);
-            } catch (JMSException e)
-            {
-                future.completeExceptionally(e);
-            }
+            open();
+            future.complete(null);
         });
         return future;
     }
@@ -78,14 +72,8 @@ public class FeedbackReceiver extends Receiver
     {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
-            try
-            {
-                close();
-                future.complete(null);
-            } catch (JMSException e)
-            {
-                future.completeExceptionally(e);
-            }
+            close();
+            future.complete(null);
         });
         return future;
     }
@@ -101,14 +89,17 @@ public class FeedbackReceiver extends Receiver
     {
         final CompletableFuture<FeedbackBatch> future = new CompletableFuture<>();
         executor.submit(() -> {
-            try
-            {
-                FeedbackBatch responseFeedbackBatch = receive(timeoutSeconds);
-                future.complete(responseFeedbackBatch);
-            } catch (JMSException e)
-            {
-                future.completeExceptionally(e);
-            }
+        try
+        {
+            FeedbackBatch responseFeedbackBatch = receive(timeoutSeconds);
+            future.complete(responseFeedbackBatch);
+        } catch (IOException e)
+        {
+            future.completeExceptionally(e);
+        } catch (InterruptedException e)
+        {
+            future.completeExceptionally(e);
+        }
         });
         return future;
     }

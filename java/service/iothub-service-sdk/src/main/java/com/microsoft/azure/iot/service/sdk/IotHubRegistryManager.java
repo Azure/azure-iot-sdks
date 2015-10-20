@@ -8,9 +8,9 @@ package com.microsoft.azure.iot.service.sdk;
 import com.microsoft.azure.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.iot.service.exceptions.IotHubExceptionManager;
-import com.microsoft.azure.iot.service.transport.https.HttpsMethod;
-import com.microsoft.azure.iot.service.transport.https.HttpsRequest;
-import com.microsoft.azure.iot.service.transport.https.HttpsResponse;
+import com.microsoft.azure.iot.service.transport.http.HttpResponse;
+import com.microsoft.azure.iot.service.transport.http.HttpMethod;
+import com.microsoft.azure.iot.service.transport.http.HttpRequest;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -64,8 +64,8 @@ public class IotHubRegistryManager extends RegistryManager
         URL url = iotHubConnectionString.getUrlDevice(device.getId());
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        HttpsRequest request =
-                new HttpsRequest(url, HttpsMethod.PUT, deviceJson.getBytes()).
+        HttpRequest request =
+                new HttpRequest(url, HttpMethod.PUT, deviceJson.getBytes()).
                         setReadTimeoutMillis(timeoutSec).
                         setHeaderField("authorization", sasTokenString).
                         setHeaderField("Request-Id", "1001").
@@ -73,7 +73,7 @@ public class IotHubRegistryManager extends RegistryManager
                         setHeaderField("Content-Type", "application/json").
                         setHeaderField("charset", "utf-8");
 
-        HttpsResponse response = request.send();
+        HttpResponse response = request.send();
         
         IotHubExceptionManager.HttpResponseVerification(IotHubExceptionManager.RegistryManagerAction.AddDevice, response);
 
@@ -109,8 +109,8 @@ public class IotHubRegistryManager extends RegistryManager
         URL url = iotHubConnectionString.getUrlDevice(deviceId);
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        HttpsRequest request =
-                new HttpsRequest(url, HttpsMethod.GET, new byte[0]).
+        HttpRequest request =
+                new HttpRequest(url, HttpMethod.GET, new byte[0]).
                         setReadTimeoutMillis(timeoutSec).
                         setHeaderField("authorization", sasTokenString).
                         setHeaderField("Request-Id", "1001").
@@ -118,7 +118,7 @@ public class IotHubRegistryManager extends RegistryManager
                         setHeaderField("Content-Type", "application/json").
                         setHeaderField("charset", "utf-8");
 
-        HttpsResponse response = request.send();
+        HttpResponse response = request.send();
 
         IotHubExceptionManager.HttpResponseVerification(IotHubExceptionManager.RegistryManagerAction.AddDevice, response);
         
@@ -154,8 +154,8 @@ public class IotHubRegistryManager extends RegistryManager
         URL url = iotHubConnectionString.getUrlDeviceList(maxCount);
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        HttpsRequest request =
-                new HttpsRequest(url, HttpsMethod.GET, new byte[0]).
+        HttpRequest request =
+                new HttpRequest(url, HttpMethod.GET, new byte[0]).
                         setReadTimeoutMillis(timeoutSec).
                         setHeaderField("authorization", sasTokenString).
                         setHeaderField("Request-Id", "1001").
@@ -163,7 +163,7 @@ public class IotHubRegistryManager extends RegistryManager
                         setHeaderField("Content-Type", "application/json").
                         setHeaderField("charset", "utf-8");
 
-        HttpsResponse response = request.send();
+        HttpResponse response = request.send();
         
         IotHubExceptionManager.HttpResponseVerification(IotHubExceptionManager.RegistryManagerAction.AddDevice, response);
 
@@ -217,8 +217,8 @@ public class IotHubRegistryManager extends RegistryManager
         URL url = iotHubConnectionString.getUrlDevice(device.getId());
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        HttpsRequest request =
-                new HttpsRequest(url, HttpsMethod.PUT, device.serializeToJson().getBytes()).
+        HttpRequest request =
+                new HttpRequest(url, HttpMethod.PUT, device.serializeToJson().getBytes()).
                         setReadTimeoutMillis(timeoutSec).
                         setHeaderField("authorization", sasTokenString.toString()).
                         setHeaderField("Request-Id", "1001").
@@ -227,7 +227,7 @@ public class IotHubRegistryManager extends RegistryManager
                         setHeaderField("Content-Type", "application/json").
                         setHeaderField("charset", "utf-8");
 
-        HttpsResponse response = request.send();
+        HttpResponse response = request.send();
         
         IotHubExceptionManager.HttpResponseVerification(IotHubExceptionManager.RegistryManagerAction.AddDevice, response);
 
@@ -279,13 +279,13 @@ public class IotHubRegistryManager extends RegistryManager
         URL url = iotHubConnectionString.getUrlDevice(deviceId);
         String sasToken = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        HttpsRequest request =
-                new HttpsRequest(url, HttpsMethod.DELETE, new byte[0]).
+        HttpRequest request =
+                new HttpRequest(url, HttpMethod.DELETE, new byte[0]).
                         setReadTimeoutMillis(timeoutSec).
                         setHeaderField("authorization", sasToken).
                         setHeaderField("If-Match", "*");
 
-        HttpsResponse response = request.send();
+        HttpResponse response = request.send();
         
         IotHubExceptionManager.HttpResponseVerification(IotHubExceptionManager.RegistryManagerAction.AddDevice, response);
     }
@@ -316,8 +316,8 @@ public class IotHubRegistryManager extends RegistryManager
         URL url = iotHubConnectionString.getUrlDeviceStatistics();
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        HttpsRequest request =
-                new HttpsRequest(url, HttpsMethod.GET, new byte[0]).
+        HttpRequest request =
+                new HttpRequest(url, HttpMethod.GET, new byte[0]).
                         setReadTimeoutMillis(timeoutSec).
                         setHeaderField("authorization", sasTokenString).
                         setHeaderField("Request-Id", "1001").
@@ -325,7 +325,7 @@ public class IotHubRegistryManager extends RegistryManager
                         setHeaderField("Content-Type", "application/json").
                         setHeaderField("charset", "utf-8");
 
-        HttpsResponse response = request.send();
+        HttpResponse response = request.send();
         
         IotHubExceptionManager.HttpResponseVerification(IotHubExceptionManager.RegistryManagerAction.AddDevice, response);
 

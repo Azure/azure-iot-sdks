@@ -3,10 +3,7 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.iot.service.transport.https;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+package com.microsoft.azure.iot.service.transport.http;
 
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -15,6 +12,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -23,11 +21,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
-/** Unit tests for HttpsConnection. */
+/** Unit tests for HttpConnection. */
 @RunWith(JMockit.class)
-public class HttpsConnectionTest
+public class HttpConnectionTest
 {
     @Mocked
     URL mockUrl;
@@ -38,7 +37,7 @@ public class HttpsConnectionTest
     @Test
     public void constructorOpensConnection() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        final HttpMethod httpMethod = HttpMethod.PUT;
         new NonStrictExpectations()
         {
             {
@@ -49,7 +48,7 @@ public class HttpsConnectionTest
             }
         };
 
-        new HttpsConnection(mockUrl, httpsMethod);
+        new HttpConnection(mockUrl, httpMethod);
 
         new Verifications()
         {
@@ -64,7 +63,7 @@ public class HttpsConnectionTest
     public void constructorThrowsIoExceptionIfCannotOpenConnection()
             throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        final HttpMethod httpsMethod = HttpMethod.PUT;
         new NonStrictExpectations()
         {
             {
@@ -75,14 +74,14 @@ public class HttpsConnectionTest
             }
         };
 
-        new HttpsConnection(mockUrl, httpsMethod);
+        new HttpConnection(mockUrl, httpsMethod);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_003: [The constructor shall set the HTTPS method to the given method.]
     @Test
     public void constructorSetsRequestMethod() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        final HttpMethod httpsMethod = HttpMethod.PUT;
         new NonStrictExpectations()
         {
             {
@@ -95,7 +94,7 @@ public class HttpsConnectionTest
             }
         };
 
-        new HttpsConnection(mockUrl, httpsMethod);
+        new HttpConnection(mockUrl, httpsMethod);
 
         new Verifications()
         {
@@ -109,7 +108,7 @@ public class HttpsConnectionTest
     @Test(expected = IllegalArgumentException.class)
     public void constructorRejectsNonHttpsUrl() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        final HttpMethod httpsMethod = HttpMethod.PUT;
         new NonStrictExpectations()
         {
             {
@@ -122,14 +121,14 @@ public class HttpsConnectionTest
             }
         };
 
-        new HttpsConnection(mockUrl, httpsMethod);
+        new HttpConnection(mockUrl, httpsMethod);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_005: [The function shall send a request to the URL given in the constructor.]
     @Test
     public void connectUsesCorrectUrl() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        final HttpMethod httpsMethod = HttpMethod.PUT;
         new NonStrictExpectations()
         {
             {
@@ -141,7 +140,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
 
         conn.connect();
 
@@ -157,7 +156,7 @@ public class HttpsConnectionTest
     @Test
     public void connectStreamsRequestBody() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        final HttpMethod httpsMethod = HttpMethod.PUT;
         byte[] body = { 1, 2, 3 };
         new NonStrictExpectations()
         {
@@ -170,7 +169,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
 
         conn.writeOutput(body);
         body[0] = 5;
@@ -189,7 +188,7 @@ public class HttpsConnectionTest
     @Test(expected = IOException.class)
     public void connectThrowsIoExceptionIfCannotConnect() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        final HttpMethod httpsMethod = HttpMethod.PUT;
         new NonStrictExpectations()
         {
             {
@@ -203,7 +202,7 @@ public class HttpsConnectionTest
                 result = new IOException();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
 
         conn.connect();
     }
@@ -212,7 +211,7 @@ public class HttpsConnectionTest
     @Test
     public void setRequestMethodSetsRequestMethod() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        final HttpMethod httpsMethod = HttpMethod.PUT;
         new NonStrictExpectations()
         {
             {
@@ -224,7 +223,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
 
         conn.setRequestMethod(httpsMethod);
 
@@ -241,8 +240,8 @@ public class HttpsConnectionTest
     @Test(expected = IllegalArgumentException.class)
     public void setRequestMethodRejectsNonPostOrPutIfHasBody() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.POST;
-        final HttpsMethod illegalHttpsMethod = HttpsMethod.DELETE;
+        final HttpMethod httpsMethod = HttpMethod.POST;
+        final HttpMethod illegalHttpsMethod = HttpMethod.DELETE;
         final byte[] body = { 1, 2, 3 };
         new NonStrictExpectations()
         {
@@ -255,7 +254,7 @@ public class HttpsConnectionTest
                 returns(httpsMethod.name(), illegalHttpsMethod.name());
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
 
         conn.writeOutput(body);
         conn.setRequestMethod(illegalHttpsMethod);
@@ -265,7 +264,7 @@ public class HttpsConnectionTest
     @Test
     public void setRequestHeaderSetsRequestHeader() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final HttpMethod httpsMethod = HttpMethod.POST;
         final String field = "test-field";
         final String value = "test-value";
         new NonStrictExpectations()
@@ -279,7 +278,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
 
         conn.setRequestHeader(field, value);
 
@@ -295,7 +294,7 @@ public class HttpsConnectionTest
     @Test
     public void setReadTimeoutSetsRequestTimeout() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final HttpMethod httpsMethod = HttpMethod.POST;
         final String field = "test-field";
         final String value = "test-value";
         final int timeout = 1;
@@ -310,7 +309,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
 
         conn.setReadTimeoutMillis(timeout);
 
@@ -327,7 +326,7 @@ public class HttpsConnectionTest
     @Test(expected = IllegalArgumentException.class)
     public void writeOutputFailsWhenMethodIsNotPostOrPut() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = { 1, 2 };
         new NonStrictExpectations()
         {
@@ -340,7 +339,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
 
         conn.writeOutput(body);
     }
@@ -349,7 +348,7 @@ public class HttpsConnectionTest
     @Test
     public void writeOutputDoesNotFailWhenBodyIsEmpty() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = new byte[0];
         new NonStrictExpectations()
         {
@@ -362,7 +361,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
 
         conn.writeOutput(body);
     }
@@ -371,7 +370,7 @@ public class HttpsConnectionTest
     @Test
     public void readInputCompletelyReadsInputStream(@Mocked final InputStream mockIs) throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         new NonStrictExpectations()
         {
             {
@@ -387,7 +386,7 @@ public class HttpsConnectionTest
                 returns(1, 2, 3, -1);
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         byte[] testResponse = conn.readInput();
@@ -400,7 +399,7 @@ public class HttpsConnectionTest
     @Test(expected = IOException.class)
     public void readInputFailsIfCannotAccessInputStream() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         new NonStrictExpectations()
         {
             {
@@ -414,7 +413,7 @@ public class HttpsConnectionTest
                 result = new IOException();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         conn.readInput();
@@ -425,7 +424,7 @@ public class HttpsConnectionTest
     public void readInputClosesInputStream(@Mocked final InputStream mockIs)
             throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         new NonStrictExpectations()
         {
             {
@@ -441,7 +440,7 @@ public class HttpsConnectionTest
                 result = -1;
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         conn.readInput();
@@ -458,7 +457,7 @@ public class HttpsConnectionTest
     @Test
     public void readErrorCompletelyReadsErrorStream(@Mocked final InputStream mockIs) throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         new NonStrictExpectations()
         {
             {
@@ -474,7 +473,7 @@ public class HttpsConnectionTest
                 returns(1, 2, 3, -1);
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         byte[] testError = conn.readError();
@@ -487,7 +486,7 @@ public class HttpsConnectionTest
     @Test
     public void readErrorReturnsEmptyErrorReasonIfNoErrorReason() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         new NonStrictExpectations()
         {
             {
@@ -501,7 +500,7 @@ public class HttpsConnectionTest
                 result = null;
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         byte[] testError = conn.readError();
@@ -515,7 +514,7 @@ public class HttpsConnectionTest
     public void readErrorFailsIfCannotAccessErrorStream()
             throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         new NonStrictExpectations()
         {
             {
@@ -529,7 +528,7 @@ public class HttpsConnectionTest
                 result = new IOException();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         conn.readError();
@@ -539,7 +538,7 @@ public class HttpsConnectionTest
     @Test
     public void readErrorClosesErrorStream(@Mocked final InputStream mockIs) throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         new NonStrictExpectations()
         {
             {
@@ -555,7 +554,7 @@ public class HttpsConnectionTest
                 result = -1;
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         conn.readError();
@@ -574,7 +573,7 @@ public class HttpsConnectionTest
             @Mocked final InputStream mockIs)
             throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         final int status = 204;
         new NonStrictExpectations()
         {
@@ -589,7 +588,7 @@ public class HttpsConnectionTest
                 result = status;
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         int testStatus = conn.getResponseStatus();
@@ -602,7 +601,7 @@ public class HttpsConnectionTest
     @Test(expected = IOException.class)
     public void getResponseStatusFailsIfDidNotReceiveResponse(@Mocked final InputStream mockIs) throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         new NonStrictExpectations()
         {
             {
@@ -616,7 +615,7 @@ public class HttpsConnectionTest
                 result = new IOException();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         conn.getResponseStatus();
@@ -626,7 +625,7 @@ public class HttpsConnectionTest
     @Test
     public void getResponseHeadersReturnsResponseHeaders() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         final String field0 = "test-field0";
         final String value0 = "test-value0";
         final String field1 = "test-field1";
@@ -651,7 +650,7 @@ public class HttpsConnectionTest
                 result = responseHeaders;
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         Map<String, List<String>> testResponseHeaders =
@@ -673,7 +672,7 @@ public class HttpsConnectionTest
     @Test(expected = IOException.class)
     public void getResponseHeadersFailsIfDidNotReceiveResponse() throws IOException
     {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final HttpMethod httpsMethod = HttpMethod.GET;
         new NonStrictExpectations()
         {
             {
@@ -687,7 +686,7 @@ public class HttpsConnectionTest
                 result = new IOException();
             }
         };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
 
         conn.getResponseHeaders();

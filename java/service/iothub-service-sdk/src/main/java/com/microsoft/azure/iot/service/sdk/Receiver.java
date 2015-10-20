@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.iot.service.sdk;
 
-import javax.jms.JMSException;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -15,8 +14,8 @@ import java.util.concurrent.CompletableFuture;
 */
 public abstract class Receiver
 {
-    protected abstract CompletableFuture<Void> openAsync() throws JMSException;
-    protected abstract CompletableFuture<Void> closeAsync() throws JMSException;
+    protected abstract CompletableFuture<Void> openAsync();
+    protected abstract CompletableFuture<Void> closeAsync();
 
     protected abstract CompletableFuture<FeedbackBatch> receiveAsync();
     protected abstract CompletableFuture<FeedbackBatch> receiveAsync(long timeoutSeconds);
