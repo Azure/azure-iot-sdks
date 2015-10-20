@@ -1,0 +1,247 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7FC2A03F-36FE-44C5-A1EF-5B1F11458350}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.Azure.Devices</RootNamespace>
+    <AssemblyName>Microsoft.Azure.Devices</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Debug\Microsoft.Azure.Devices.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\Microsoft.Azure.Devices.xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Azure.Amqp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Azure.Amqp.1.0.0-preview-003\lib\net451\Microsoft.Azure.Amqp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AmqpClientHelper.cs" />
+    <Compile Include="AmqpFeedbackReceiver.cs" />
+    <Compile Include="AmqpServiceClient.cs" />
+    <Compile Include="ApiResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ApiResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Common\PerfectHash.cs" />
+    <Compile Include="Properties\AssemblyVersion.cs" />
+    <Compile Include="AuthenticationMechanism.cs" />
+    <Compile Include="AuthenticationMethodFactory.cs" />
+    <Compile Include="ClientApiVersionHelper.cs" />
+    <Compile Include="Common\ActionItem.cs" />
+    <Compile Include="Common\AmqpTrace.cs" />
+    <Compile Include="Common\AsyncResult.cs" />
+    <Compile Include="Common\BufferedInputStream.cs" />
+    <Compile Include="Common\Client\IotHubAmqpProperty.cs" />
+    <Compile Include="Common\CommonConstants.cs" />
+    <Compile Include="Common\CommonResources.cs" />
+    <Compile Include="Common\CompletedAsyncResult.cs" />
+    <Compile Include="Common\Data\AccessRights.cs" />
+    <Compile Include="Common\Data\AmqpErrorMapper.cs" />
+    <Compile Include="Common\Data\SharedAccessSignatureAuthorizationRule.cs" />
+    <Compile Include="Common\EventHubPartitionKeyResolver.cs" />
+    <Compile Include="Common\ExceptionDispatcher.cs" />
+    <Compile Include="Common\Exceptions\AssertionFailedException.cs" />
+    <Compile Include="Common\Exceptions\CallbackException.cs" />
+    <Compile Include="Common\Exceptions\DeviceAlreadyExistsException.cs" />
+    <Compile Include="Common\Exceptions\DeviceInvalidResultCountException.cs" />
+    <Compile Include="Common\Exceptions\DeviceMaximumQueueDepthExceededException.cs" />
+    <Compile Include="Common\Exceptions\DeviceMessageLockLostException.cs" />
+    <Compile Include="Common\Exceptions\DeviceNotFoundException.cs" />
+    <Compile Include="Common\Exceptions\FatalException.cs" />
+    <Compile Include="Common\Exceptions\InvalidProtocolVersionException.cs" />
+    <Compile Include="Common\Exceptions\IotHubAmqpErrorCode.cs" />
+    <Compile Include="Common\Exceptions\IotHubCommunicationException.cs" />
+    <Compile Include="Common\Exceptions\IotHubException.cs" />
+    <Compile Include="Common\Exceptions\IotHubNotFoundException.cs" />
+    <Compile Include="Common\Exceptions\IotHubSerializationException.cs" />
+    <Compile Include="Common\Exceptions\IotHubSerializationVersionException.cs" />
+    <Compile Include="Common\Exceptions\IotHubSuspendedException.cs" />
+    <Compile Include="Common\Exceptions\IotHubThrottledException.cs" />
+    <Compile Include="Common\Exceptions\JobCancelledException.cs" />
+    <Compile Include="Common\Exceptions\JobNotFoundException.cs" />
+    <Compile Include="Common\Exceptions\JobQuotaExceededException.cs" />
+    <Compile Include="Common\Exceptions\MessageTooLargeException.cs" />
+    <Compile Include="Common\Exceptions\PreconditionFailedException.cs" />
+    <Compile Include="Common\Exceptions\QuotaExceededException.cs" />
+    <Compile Include="Common\Exceptions\ServerBusyException.cs" />
+    <Compile Include="Common\Exceptions\ServerErrorException.cs" />
+    <Compile Include="Common\Exceptions\ThrottlingException.cs" />
+    <Compile Include="Common\Exceptions\UnauthorizedException.cs" />
+    <Compile Include="Common\ExceptionTrace.cs" />
+    <Compile Include="Common\Extensions\CommonExtensions.cs" />
+    <Compile Include="Common\Extensions\DictionaryExtensions.cs" />
+    <Compile Include="Common\Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Common\Extensions\ExceptionExtensions.cs" />
+    <Compile Include="Common\Extensions\MemberInfoExtensions.cs" />
+    <Compile Include="Common\Extensions\OtherExtensions.cs" />
+    <Compile Include="Common\Extensions\StringFormattingExtensions.cs" />
+    <Compile Include="Common\Fx.cs" />
+    <Compile Include="Common\FxCop.cs" />
+    <Compile Include="Common\FxTrace.cs" />
+    <Compile Include="Common\HashCode.cs" />
+    <Compile Include="Common\IAmqpTrace.cs" />
+    <Compile Include="Common\IETagHolder.cs" />
+    <Compile Include="Common\InternalBufferManager.cs" />
+    <Compile Include="Common\Interop\SafeEventLogWriteHandle.cs" />
+    <Compile Include="Common\Interop\UnsafeNativeMethods.cs" />
+    <Compile Include="Common\IOThreadScheduler.cs" />
+    <Compile Include="Common\IOThreadTimer.cs" />
+    <Compile Include="Common\PartialTrustHelpers.cs" />
+    <Compile Include="Common\ReadOnlyDictionary45.cs" />
+    <Compile Include="Common\Resources.Designer.cs" />
+    <Compile Include="Common\Security\CryptoKeyGenerator.cs" />
+    <Compile Include="Common\Security\ISharedAccessSignatureCredential.cs" />
+    <Compile Include="Common\Security\SecurityConstants.cs" />
+    <Compile Include="Common\Security\SecurityHelper.cs" />
+    <Compile Include="Common\Security\SharedAccessSignature.cs" />
+    <Compile Include="Common\Security\SharedAccessSignatureBuilder.cs" />
+    <Compile Include="Common\Security\SharedAccessSignatureConstants.cs" />
+    <Compile Include="Common\SerializationUtilities.cs" />
+    <Compile Include="Common\SignalGate.cs" />
+    <Compile Include="Common\SingletonDictionary.cs" />
+    <Compile Include="Common\StringValidationHelper.cs" />
+    <Compile Include="Common\SynchronizedPool.cs" />
+    <Compile Include="Common\TaskHelpers.cs" />
+    <Compile Include="Common\Ticks.cs" />
+    <Compile Include="Common\TimeoutHelper.cs" />
+    <Compile Include="Common\Timestamp.cs" />
+    <Compile Include="Common\TraceOperation.cs" />
+    <Compile Include="Common\Tracing\EventTraceActivity.cs" />
+    <Compile Include="Common\TrackingHelper.cs" />
+    <Compile Include="Common\Utils.cs" />
+    <Compile Include="Common\WaitCallbackActionItem.cs" />
+    <Compile Include="Common\WebApi\CustomHeaderConstants.cs" />
+    <Compile Include="Common\WebApi\ErrorMapper.cs" />
+    <Compile Include="Common\WebApi\ResourceRequest.cs" />
+    <Compile Include="DeliveryAcknowledgement.cs" />
+    <Compile Include="DeliveryException.cs" />
+    <Compile Include="DeliveryFailureReason.cs" />
+    <Compile Include="Device.cs" />
+    <Compile Include="DeviceConnectionState.cs" />
+    <Compile Include="DeviceStatus.cs" />
+    <Compile Include="EndpointKind.cs" />
+    <Compile Include="ETagHolder.cs" />
+    <Compile Include="ExceptionHandlingHelper.cs" />
+    <Compile Include="ExportDevicesRequest.cs" />
+    <Compile Include="ExportImportRequest.cs" />
+    <Compile Include="FeedbackBatch.cs" />
+    <Compile Include="FeedbackReceiver.cs" />
+    <Compile Include="FeedbackRecord.cs" />
+    <Compile Include="FeedbackStatusCode.cs" />
+    <Compile Include="HttpClientHelper.cs" />
+    <Compile Include="HttpRegistryManager.cs" />
+    <Compile Include="IAuthenticationMethod.cs" />
+    <Compile Include="IAuthorizationHeaderProvider.cs" />
+    <Compile Include="IHttpClientHelper.cs" />
+    <Compile Include="ImportDevicesRequest.cs" />
+    <Compile Include="IotHubApiResources.cs" />
+    <Compile Include="IotHubConnection.cs" />
+    <Compile Include="IotHubConnectionString.cs" />
+    <Compile Include="IotHubConnectionStringBuilder.cs" />
+    <Compile Include="JobProperties.cs" />
+    <Compile Include="JobStatus.cs" />
+    <Compile Include="JobType.cs" />
+    <Compile Include="MappingType.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="MessageConverter.cs" />
+    <Compile Include="MessageSystemPropertyNames.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PutOperationType.cs" />
+    <Compile Include="Receiver.cs" />
+    <Compile Include="RegistryManager.cs" />
+    <Compile Include="RegistryStatistics.cs" />
+    <Compile Include="ServiceAuthenticationWithSharedAccessPolicyKey.cs" />
+    <Compile Include="ServiceAuthenticationWithSharedAccessPolicyToken.cs" />
+    <Compile Include="ServiceClient.cs" />
+    <Compile Include="ServiceStatistics.cs" />
+    <Compile Include="SymmetricKey.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ApiResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ApiResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\Resources.resx" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
