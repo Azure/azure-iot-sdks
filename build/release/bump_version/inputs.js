@@ -222,29 +222,10 @@ module.exports = [
     // Node SDK package.json files
     ///////////////////////////////////////////////////
     {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/build/package.json",
-        "search": "version",
-        "replaceString": "node.build"
-    },
-    {
         "taskType": "multiTask",
         "filePath": "node/common/package.json",
-        "search": [
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "version",
-                "replaceString": "node.common"
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "filePath": "node/common/package.json",
-                "search": "devDependencies.azure-iot-build",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.common;
-                }
-            }
-        ]
+        "search": "version",
+        "replaceString": "node.common"
     },
     {
         "taskType": "multiTask",
@@ -259,14 +240,7 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
                 "replaceString": function(versions) {
-                    return '^' + versions.node.device;
-                }
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "devDependencies.azure-iot-build",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.device;
+                    return '^' + versions.node.common;
                 }
             }
         ]
@@ -292,14 +266,7 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
                 "replaceString": function(versions) {
-                    return '^' + versions.node.service;
-                }
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "devDependencies.azure-iot-build",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.service;
+                    return '^' + versions.node.common;
                 }
             }
         ]

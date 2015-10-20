@@ -191,7 +191,7 @@ Registry.prototype.list = function (done) {
 Registry.prototype.delete = function (deviceId, done) {
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_007: [The delete method shall throw a ReferenceError if the supplied deviceId is not valid. When the delete method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback]*/
   var path = endpoint.devicePath(deviceId);
-  this.transport.deleteDevice(path, this.config, function (err, res, msg) {
+  this.transport.deleteDevice(path, this.config, function (err, res) {
     done(err, res);
   });
 };

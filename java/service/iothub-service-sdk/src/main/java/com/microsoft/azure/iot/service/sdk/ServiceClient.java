@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.iot.service.sdk;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class ServiceClient
@@ -27,7 +28,13 @@ public abstract class ServiceClient
         IotHubServiceClient iotServiceClient = new IotHubServiceClient(iotHubConnectionString);
         return iotServiceClient;
     }
-    
+
+    public abstract void open() throws IOException;
+
+    public abstract void close();
+
+    public abstract void send(String deviceId, String message) throws IOException;
+
     /**
      * Open the ServiceClient instance
      * @return 
@@ -46,7 +53,7 @@ public abstract class ServiceClient
      * @param message - The message for the device
      * @return 
      */
-    public abstract CompletableFuture<Void> sendAsync(String deviceId, Message message);
+    public abstract CompletableFuture<Void> sendAsync(String deviceId, String message);
     
     /**
      * Get the FeedbackReceiver

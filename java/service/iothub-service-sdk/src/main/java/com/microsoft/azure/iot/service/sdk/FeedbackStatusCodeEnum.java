@@ -10,5 +10,6 @@ public enum FeedbackStatusCodeEnum
     success,
     expired,
     deliveryCountExceeded,
-    rejected
+    rejected,
+    unknown
 }
