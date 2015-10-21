@@ -1,7 +1,15 @@
 # How to use Device Explorer for IoT Hub devices
 This topic describes how to download, build and use the Device Explorer tool. You can use this tool to manage devices connecting to your IoT hub. For example, you can register a device with your IoT hub, monitor messages from your devices, and send messages to your devices.
 
+Device Explorer runs on your local machine and connects to your IoT hub in Azure. It communicates with the following [IoT Hub endpoints][lnk-devguide]:
+
+- *Device identity management* to provision and manage devices registtered with your IoT hub.
+- *Receive device-to-cloud* to enable you to monitor messages sent from your device to your IoT hub.
+- *Send cloud-to-device* to enable you to send messages to your devices from your IoT hub.
+
 > **Note:** The Device Explorer utility only runs on Windows.
+
+To learn more about IoT Hub, see [What is Azure IoT Hub?][what-is-iot-hub].
 
 ## Table of Contents
 - [Getting Device Explorer](#download)
@@ -137,3 +145,5 @@ Run your sample application. Device Explorer should now show that the IoT hub ha
 
 [setup-iothub]: ../../../doc/setup_iothub.md
 [protocol-gateway]: https://github.com/Azure/azure-iot-protocol-gateway
+[lnk-devguide]: https://azure.microsoft.com/documentation/articles/iot-hub-devguide/
+[what-is-iot-hub]: https://azure.microsoft.com/documentation/articles/iot-hub-what-is-iot-hub/
