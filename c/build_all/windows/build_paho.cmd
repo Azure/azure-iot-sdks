@@ -91,6 +91,10 @@ if not %errorlevel%==0 exit /b %errorlevel%
 call nmake -f ms\ntdll.mak install
 if not %errorlevel%==0 exit /b %errorlevel%
 
+mkdir out32dllForNuget
+xcopy /q /y /R .\out32dll\*.* .\out32dllForNuget\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 rem -----------------------------------------------------------------------------
 rem -- sync the paho source code
 rem -----------------------------------------------------------------------------
