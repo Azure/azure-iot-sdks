@@ -86,11 +86,11 @@ Then cd to the directory:
   cd azure-iot-sdks
   ```
 
-- Prepare your environment by running 
+- Prepare your environment by running
   ```
   sudo ~/azure-iot-sdks/c/build_all/linux/setup.sh
   ```
-  
+
 - Edit the file ./c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace connection string placeholder with the connection string
 you obtained in the "Connecting your device to an IoT hub" step above.
 (You can use the console-based text editor **nano** to edit the file):
@@ -99,6 +99,18 @@ you obtained in the "Connecting your device to an IoT hub" step above.
   static const char* connectionString = "[device connection string]";
   ```
   > Note: You can skip this step if you only want to build the samples without running them.
+
+- Build and install the Apache Proton library:
+
+  ```
+    sudo ./c/build_all/linux/build_proton.sh --install /usr
+  ```
+
+- Build a few libraries upon which the samples depend:
+
+  ```
+  sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+  ```
 
 - Finally, build the sample applications:
 
