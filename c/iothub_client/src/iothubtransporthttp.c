@@ -23,6 +23,7 @@
 #include "agenttime.h"
 
 #define IOTHUB_APP_PREFIX "iothub-app-"
+#define IOTHUB_MESSAGE_ID "iothub-messageid"
 
 #define CONTENT_TYPE "Content-Type"
 #define APPLICATION_OCTET_STREAM "application/octet-stream"
@@ -1461,6 +1462,7 @@ responseContent: a new instance of buffer]
                                 else
                                 {
                                     /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.]*/
+                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_07_008: [The HTTP header of iothub-messageid shall be set in the MessageId.]*/
                                     size_t nHeaders;
                                     if (HTTPHeaders_GetHeaderCount(responseHTTPHeaders, &nHeaders) != HTTP_HEADERS_OK)
                                     {
@@ -1487,6 +1489,16 @@ responseContent: a new instance of buffer]
                                                     char* whereIsColon = strchr(completeHeader, ':');
                                                     *whereIsColon = '\0'; /*cut it down*/
                                                     if (Map_AddOrUpdate(properties, completeHeader + strlen(IOTHUB_APP_PREFIX), whereIsColon + 2) != MAP_OK) /*whereIsColon+1 is a space because HTTPEHADERS outputs a ": " between name and value*/
+                                                    {
+                                                        free(completeHeader);
+                                                        break;
+                                                    }
+                                                }
+                                                else if (strncmp(IOTHUB_MESSAGE_ID, completeHeader, strlen(IOTHUB_MESSAGE_ID)) == 0)
+                                                {
+                                                    char* whereIsColon = strchr(completeHeader, ':');
+                                                    *whereIsColon = '\0'; /*cut it down*/
+                                                    if (IoTHubMessage_SetMessageId(receivedMessage, whereIsColon + 2) != IOTHUB_MESSAGE_OK)
                                                     {
                                                         free(completeHeader);
                                                         break;
