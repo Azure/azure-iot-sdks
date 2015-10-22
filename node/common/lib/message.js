@@ -23,7 +23,7 @@ var Properties = require('./properties.js');
  *                                      following special symbols:
  *                                      <br/>`- : . + % _ # * ? ! ( ) , = @ ; $ '`
  * @property {String}   to              Destination of the message
- * @property {Date}     expiryTime      Expiry time in UTC interpreted by hub on
+ * @property {Date}     expiryTimeUtc   Expiry time in UTC interpreted by hub on
  *                                      C2D messages. Ignored in other cases.
  * @property {String}   lockToken       Used by receiver to Abandon, Reject or
  *                                      Complete the message
@@ -37,12 +37,12 @@ function Message(data) {
   this.data = data;
 
   this.properties = new Properties();
-  this.messageId = "";
-  this.to = "";
-  this.expiryTime = null;
-  this.lockToken = "";
-  this.correlationId = "";
-  this.userId = "";
+  this.messageId = '';
+  this.to = '';
+  this.expiryTimeUtc = null;
+  this.lockToken = '';
+  this.correlationId = '';
+  this.userId = '';
 }
 
 /**

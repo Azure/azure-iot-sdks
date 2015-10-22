@@ -6,7 +6,7 @@
   "license": "MIT",
   "main": "iothub.js",
   "dependencies": {
-    "amqp10": "^2.0.0",
+    "amqp10": "noodlefrenzy/node-amqp10",
     "azure-iot-common": "^1.0.0-preview.4"
   },
   "devDependencies": {
