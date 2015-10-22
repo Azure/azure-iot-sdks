@@ -262,7 +262,7 @@ namespace Microsoft.Azure.Devices.Client
             var eTag = new ETagHolder { ETag = lockToken };
 
             return this.httpClientHelper.DeleteAsync(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceBoundPathTemplate + "/{0}".FormatInvariant(lockToken), new Dictionary<string, string> { { "reject", null } }),
+                GetRequestUri(this.deviceId, CommonConstants.DeviceBoundPathTemplate + "/{0}".FormatInvariant(lockToken), null),
                 eTag,
                 ExceptionHandlingHelper.GetDefaultErrorMapping(),
                 customHeaders,

@@ -16,7 +16,7 @@ function constructBatchBody(messages)
 {
   var body = '[';
   
-  messages.forEach(function(message, index, array) {
+  messages.forEach(function(message, index) {
     var buffMsg = new Buffer(message.getData() );
 
     if (index > 0) body += ',';

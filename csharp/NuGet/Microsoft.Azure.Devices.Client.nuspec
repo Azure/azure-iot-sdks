@@ -7,7 +7,7 @@
         <authors>Microsoft Corp</authors>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/master/LICENSE</licenseUrl>
-        <description>Package for Microsoft Azure Device Client</description>
+        <description>Device SDK for Azure IoT Devices</description>
         <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
         <releaseNotes>initial version</releaseNotes>
         <copyright>Copyright 2015</copyright>
@@ -18,7 +18,7 @@
                 <dependency id="Newtonsoft.Json" version="6.0.8" />
             </group>
             <group targetFramework="net45" >
-                <dependency id="Microsoft.Azure.Amqp" version="1.0.0-preview-002" />
+                <dependency id="Microsoft.Azure.Amqp" version="1.0.0-preview-003" />
             </group>
         </dependencies>
     </metadata>

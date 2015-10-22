@@ -6,7 +6,7 @@
 package com.microsoft.azure.iot.service.exceptions;
 
 import com.microsoft.azure.iot.service.sdk.Tools;
-import com.microsoft.azure.iot.service.transport.https.HttpsResponse;
+import com.microsoft.azure.iot.service.transport.http.HttpResponse;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -26,7 +26,7 @@ public class IotHubExceptionManager
         GetStatistics
     }
     
-    public static void HttpResponseVerification(RegistryManagerAction registryManagerAction, HttpsResponse httpsResponse)
+    public static void HttpResponseVerification(RegistryManagerAction registryManagerAction, HttpResponse httpsResponse)
             throws 
             IotHubBadFormatException, 
             IotHubUnathorizedException, 
