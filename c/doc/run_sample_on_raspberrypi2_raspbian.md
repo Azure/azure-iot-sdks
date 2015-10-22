@@ -109,7 +109,7 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 - Build a few libraries upon which the samples depend:
 
   ```
-  sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+  sudo ~/azure-iot-sdks/c/build_all/linux/build_paho.sh
   ```
 
 - Finally, build the sample applications:

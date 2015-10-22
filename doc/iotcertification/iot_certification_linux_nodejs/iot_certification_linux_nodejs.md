@@ -27,7 +27,7 @@ This document provides step-by-step guidance to IoT hardware publishers on how t
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
--   Packaging and sharing the logs   
+-   Packaging and sharing the logs
 
 
 **Prepare**
@@ -113,7 +113,7 @@ This section walks you through building, deploying and validating the IoT Client
 
         sudo apt-get remove nodejs
 
-    **Fedora**            
+    **Fedora**
 
         sudo dnf remove nodejs
 
@@ -129,7 +129,7 @@ This section walks you through building, deploying and validating the IoT Client
 
         sudo apt-get install -y nodejs
 
-    **Fedora**            
+    **Fedora**
 
         wget http://nodejs.org/dist/v0.12.7/node-v0.12.7-linux-x64.tar.gz
 
@@ -154,7 +154,7 @@ This section walks you through building, deploying and validating the IoT Client
 
         git clone https://github.com/Azure/azure-iot-sdks.git
 
--   Verify that you now have a copy of the source code under the directory ~/azure-iot-suite-sdks.
+-   Verify that you now have a copy of the source code under the directory ~/azure-iot-sdks.
 
 <a name="Step-3-2:-Build"/>
 ## 3.2 Build the samples
@@ -169,7 +169,7 @@ This section walks you through building, deploying and validating the IoT Client
     **For send_batch_http.js:**
 
         cd ~/azure-iot-sdks/node/device/samples
-        nano send_batch_http.js        
+        nano send_batch_http.js
 
 -   This launches a console-based text editor. Scroll down to the
     connection information.
@@ -256,7 +256,7 @@ In this section you will run the Azure IoT client SDK samples to validate commun
 
         node ~/azure-iot-sdks/node/samples/registry_sample.js
 
-8.  Verify that you receive information for new device created in the messages.    
+8.  Verify that you receive information for new device created in the messages.
 
     ![Registry_Sample_result_DeviceExplorer](images/3_3_1_06.png)
 

@@ -27,7 +27,7 @@ This document provides step-by-step guidance to IoT hardware publishers on how t
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
--   Packaging and sharing the logs  
+-   Packaging and sharing the logs
 
 **Prepare**
 
@@ -37,7 +37,7 @@ by step to ensure end to end understanding.
 You should have the following items ready before beginning the process:
 
 -   Computer with GitHub installed and access to the
-    [azure-iot-suite-sdks](https://github.com/Azure/azure-iot-sdks)
+    [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)
     GitHub private repository
 -   SSH client, such as [PuTTY](http://www.putty.org/), so you can
     access the command line
@@ -79,7 +79,7 @@ To run Device Explorer tool, use following configuration string as described in 
 
 3.  Create and register the device with your IoT Hub using instructions as below.
 
-    a. Click the **Management** tab.    
+    a. Click the **Management** tab.
 
     b. Click **List** button to call the device hub and retrieve a list of devices.
        If this is your first time, then you shouldn't retrieve anything.
