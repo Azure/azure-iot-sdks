@@ -26,6 +26,7 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
         STRING_HANDLE string;
     } value;
     MAP_HANDLE properties;
+    char* messageId;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
 static bool ContainsOnlyUsAscii(const char* asciiValue)
@@ -118,6 +119,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char* byt
                 /*Codes_SRS_IOTHUBMESSAGE_02_025: [Otherwise, IoTHubMessage_CreateFromByteArray shall return a non-NULL handle.] */
                 /*Codes_SRS_IOTHUBMESSAGE_02_026: [The type of the new message shall be IOTHUBMESSAGE_BYTEARRAY.] */
                 result->contentType = IOTHUBMESSAGE_BYTEARRAY;
+                result->messageId = NULL;
                 /*all is fine, return result*/
             }
         }
@@ -158,6 +160,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromString(const char* source)
             /*Codes_SRS_IOTHUBMESSAGE_02_031: [Otherwise, IoTHubMessage_CreateFromString shall return a non-NULL handle.] */
             /*Codes_SRS_IOTHUBMESSAGE_02_032: [The type of the new message shall be IOTHUBMESSAGE_STRING.] */
             result->contentType = IOTHUBMESSAGE_STRING;
+            result->messageId = NULL;
         }
     }
     return result;
@@ -186,13 +189,25 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
         }
         else
         {
-            if (source->contentType == IOTHUBMESSAGE_BYTEARRAY)
+            result->messageId = NULL;
+            if (source->messageId != NULL && mallocAndStrcpy_s(&result->messageId, source->messageId) != 0)
+            {
+                LogError("unable to Copy messageId\r\n");
+                free(result);
+                result = NULL;
+            }
+            else if (source->contentType == IOTHUBMESSAGE_BYTEARRAY)
             {
                 /*Codes_SRS_IOTHUBMESSAGE_02_006: [IoTHubMessage_Clone shall clone to content by a call to BUFFER_clone] */
                 if ((result->value.byteArray = BUFFER_clone(source->value.byteArray)) == NULL)
                 {
                     /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
                     LogError("unable to BUFFER_clone\r\n");
+                    if (result->messageId)
+                    {
+                        free(result->messageId);
+                        result->messageId = NULL;
+                    }
                     free(result);
                     result = NULL;
                 }
@@ -202,6 +217,11 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                     /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
                     LogError("unable to Map_Clone\r\n");
                     BUFFER_delete(result->value.byteArray);
+                    if (result->messageId)
+                    {
+                        free(result->messageId);
+                        result->messageId = NULL;
+                    }
                     free(result);
                     result = NULL;
                 }
@@ -218,6 +238,11 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                 if ((result->value.string = STRING_clone(source->value.string)) == NULL)
                 {
                     /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
+                    if (result->messageId)
+                    {
+                        free(result->messageId);
+                        result->messageId = NULL;
+                    }
                     free(result);
                     result = NULL;
                     LogError("failed to STRING_clone\r\n");
@@ -228,6 +253,11 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                     /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
                     LogError("unable to Map_Clone\r\n");
                     STRING_delete(result->value.string);
+                    if (result->messageId)
+                    {
+                        free(result->messageId);
+                        result->messageId = NULL;
+                    }
                     free(result);
                     result = NULL;
                 }
@@ -324,14 +354,63 @@ MAP_HANDLE IoTHubMessage_Properties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     /*Codes_SRS_IOTHUBMESSAGE_02_001: [If iotHubMessageHandle is NULL then IoTHubMessage_Properties shall return NULL.]*/
     if (iotHubMessageHandle == NULL)
     {
-        LogError("invalid arg (NULL) passed to IoTHubMessage_Properties\r\n")
-            result = NULL;
+        LogError("invalid arg (NULL) passed to IoTHubMessage_Properties\r\n");
+        result = NULL;
     }
     else
     {
         /*Codes_SRS_IOTHUBMESSAGE_02_002: [Otherwise, for any non-NULL iotHubMessageHandle it shall return a non-NULL MAP_HANDLE.]*/
         IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
         result = handleData->properties;
+    }
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* messageId)
+{
+    IOTHUB_MESSAGE_RESULT result;
+    /* Codes_SRS_IOTHUBMESSAGE_07_012: [if any of the parameters are NULL then IoTHubMessage_SetMessageId shall return a IOTHUB_MESSAGE_INVALID_ARG value.] */
+    if (iotHubMessageHandle == NULL || messageId == NULL)
+    {
+        LogError("invalid arg (NULL) passed to IoTHubMessage_SetMessageId\r\n");
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+        /* Codes_SRS_IOTHUBMESSAGE_07_013: [If the IOTHUB_MESSAGE_HANDLE messageId is not NULL, then the IOTHUB_MESSAGE_HANDLE messageId will be freed] */
+        if (handleData->messageId != NULL)
+        {
+            free(handleData->messageId);
+        }
+
+        /* Codes_SRS_IOTHUBMESSAGE_07_014: [If the allocation or the copying of the messageId fails, then IoTHubMessage_SetMessageId shall return IOTHUB_MESSAGE_ERROR.] */
+        if (mallocAndStrcpy_s(&handleData->messageId, messageId) != 0)
+        {
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+    return result;
+}
+
+const char* IoTHubMessage_GetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+    /* Codes_SRS_IOTHUBMESSAGE_07_010: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_MessageId shall return a NULL value.] */
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("invalid arg (NULL) passed to IoTHubMessage_GetMessageId\r\n");
+        result = NULL;
+    }
+    else
+    {
+        /* Codes_SRS_IOTHUBMESSAGE_07_011: [IoTHubMessage_MessageId shall return the messageId as a const char*.] */
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+        result = handleData->messageId;
     }
     return result;
 }
@@ -353,6 +432,8 @@ void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
             STRING_delete(handleData->value.string);
         }
         Map_Destroy(handleData->properties);
+        free(handleData->messageId);
+        handleData->messageId = NULL;
         free(handleData);
     }
 }
