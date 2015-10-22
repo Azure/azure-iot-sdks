@@ -222,7 +222,7 @@ module.exports = [
     // Node SDK package.json files
     ///////////////////////////////////////////////////
     {
-        "taskType": "multiTask",
+        "taskType": "jsonReplaceTask",
         "filePath": "node/common/package.json",
         "search": "version",
         "replaceString": "node.common"
