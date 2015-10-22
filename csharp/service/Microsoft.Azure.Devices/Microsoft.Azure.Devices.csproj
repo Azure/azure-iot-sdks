@@ -92,7 +92,6 @@
       <DependentUpon>ApiResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Common\PerfectHash.cs" />
-    <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="AuthenticationMechanism.cs" />
     <Compile Include="AuthenticationMethodFactory.cs" />
     <Compile Include="ClientApiVersionHelper.cs" />

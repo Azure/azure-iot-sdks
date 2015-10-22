@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Microsoft.Azure.Devices</id>
-    <version>1.0.0-preview-005</version>
-    <title>Microsoft Azure Devices Service SDK</title>
+    <version>$Version$</version>
+    <title>Microsoft Azure IoT Service SDK</title>
     <authors>Microsoft</authors>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/master/LICENSE</licenseUrl>
@@ -24,8 +24,8 @@
     </frameworkAssemblies>
   </metadata>
   <files>
-    <file src="..\Microsoft.Azure.Devices\bin\release\Microsoft.Azure.Devices.dll" target="lib\net451\Microsoft.Azure.Devices.dll" />
-    <file src="..\Microsoft.Azure.Devices\bin\release\Microsoft.Azure.Devices.pdb" target="lib\net451\Microsoft.Azure.Devices.pdb" />
-    <file src="..\Microsoft.Azure.Devices\bin\release\Microsoft.Azure.Devices.XML" target="lib\net451\Microsoft.Azure.Devices.XML" />
+    <file src="..\..\..\thirdpartynotice.txt" target="thirdpartynotice.txt" />
+    <file src="..\bin\release\Microsoft.Azure.Devices.dll" target="lib\net451\Microsoft.Azure.Devices.dll" />
+    <file src="..\bin\release\Microsoft.Azure.Devices.XML" target="lib\net451\Microsoft.Azure.Devices.XML" />
   </files>
 </package>

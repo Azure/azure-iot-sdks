@@ -15,7 +15,7 @@ if (-Not (Test-Path 'NuGet.exe')) {
     Invoke-WebRequest 'https://nuget.org/nuget.exe' -OutFile 'NuGet.exe'
 }
 
-$dotNetFile = "..\Microsoft.Azure.Devices\Properties\AssemblyInfo.cs"
+$dotNetFile = "..\Properties\AssemblyInfo.cs"
 
 # Delete existing packages to force rebuild
 ls Microsoft.Azure.Devices.*.nupkg | % { del $_ }
