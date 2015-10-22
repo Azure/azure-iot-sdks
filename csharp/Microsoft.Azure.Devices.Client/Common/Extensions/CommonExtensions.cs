@@ -58,15 +58,17 @@ namespace Microsoft.Azure.Devices.Client.Extensions
                 throw new ArgumentException("Malformed Token");
             }
 
-            IEnumerable<string[]> parts = valuePairString.Split(kvpDelimiter).
-                Select((part) => part.Split(new char[] { kvpSeparator }, 2));
+            IEnumerable<string[]> parts = valuePairString
+                .Split(kvpDelimiter)
+                .Where(p => p.Trim().Length > 0)
+                .Select(p => p.Split(new char[] { kvpSeparator }, 2));
 
-            if (parts.Any((part) => part.Length != 2))
+            if (parts.Any(p => p.Length != 2))
             {
                 throw new FormatException("Malformed Token");
             }
 
-            IDictionary<string, string> map = parts.ToDictionary((kvp) => kvp[0], (kvp) => kvp[1], StringComparer.OrdinalIgnoreCase);
+            IDictionary<string, string> map = parts.ToDictionary(kvp => kvp[0], (kvp) => kvp[1], StringComparer.OrdinalIgnoreCase);
 
             return map;
         }
