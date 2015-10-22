@@ -189,6 +189,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
         }
         else
         {
+            result->messageId = NULL;
             if (source->messageId != NULL && mallocAndStrcpy_s(&result->messageId, source->messageId) != 0)
             {
                 LogError("unable to Copy messageId\r\n");
@@ -205,6 +206,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                     if (result->messageId)
                     {
                         free(result->messageId);
+                        result->messageId = NULL;
                     }
                     free(result);
                     result = NULL;
@@ -218,6 +220,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                     if (result->messageId)
                     {
                         free(result->messageId);
+                        result->messageId = NULL;
                     }
                     free(result);
                     result = NULL;
@@ -235,11 +238,12 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                 if ((result->value.string = STRING_clone(source->value.string)) == NULL)
                 {
                     /*Codes_SRS_IOTHUBMESSAGE_03_004: [IoTHubMessage_Clone shall return NULL if it fails for any reason.]*/
-                    free(result);
                     if (result->messageId)
                     {
                         free(result->messageId);
+                        result->messageId = NULL;
                     }
+                    free(result);
                     result = NULL;
                     LogError("failed to STRING_clone\r\n");
                 }
@@ -252,6 +256,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                     if (result->messageId)
                     {
                         free(result->messageId);
+                        result->messageId = NULL;
                     }
                     free(result);
                     result = NULL;
@@ -428,6 +433,7 @@ void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
         }
         Map_Destroy(handleData->properties);
         free(handleData->messageId);
+        handleData->messageId = NULL;
         free(handleData);
     }
 }

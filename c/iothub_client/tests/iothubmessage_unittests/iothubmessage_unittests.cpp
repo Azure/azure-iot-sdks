@@ -766,6 +766,7 @@ BEGIN_TEST_SUITE(iothubmessage_unittests)
         STRICT_EXPECTED_CALL(mocks, BUFFER_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(h));
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)).IgnoreArgument(1);
 
         ///act
         IoTHubMessage_Destroy(h);
@@ -789,6 +790,7 @@ BEGIN_TEST_SUITE(iothubmessage_unittests)
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(h));
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)).IgnoreArgument(1);
 
         ///act
         IoTHubMessage_Destroy(h);
