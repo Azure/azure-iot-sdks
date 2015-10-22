@@ -12,3 +12,9 @@ cd %build-root%\csharp\build
 call build.cmd
 if errorlevel 1 goto :eof
 cd %build-root%
+
+REM -- C# Service SDK --
+cd %build-root%\csharp\service\build
+call build.cmd
+if errorlevel 1 goto :eof
+cd %build-root%
