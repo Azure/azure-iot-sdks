@@ -23,8 +23,7 @@ usage ()
     echo " -c,  --clean                  remove artifacts from previous build before building"
     echo " -cl, --compileoption <value>  specify a compile option to be passed to gcc"
     echo "   Example: -cl -O1 -cl ..."
-    echo " --skip-unit-tests             do not run the unit tests (unit tests are run by default)"
-    echo " --run-e2e-tests               run end-to-end tests (e2e tests are not run by default)"
+    echo " --skip-e2e-tests              skip the running of end-to-end tests (e2e tests are run by default)"
     echo " --run-longhaul-tests          run long haul tests (long haul tests are not run by default)"
     echo ""
     echo " --no-amqp                     do no build AMQP transport and samples"
@@ -63,6 +62,7 @@ process_args ()
 }
 
 process_args $*
+
 rm -r -f ~/cmake
 mkdir ~/cmake
 pushd ~/cmake
