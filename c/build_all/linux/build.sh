@@ -62,6 +62,7 @@ process_args ()
     done
 }
 
+process_args $*
 rm -r -f ~/cmake
 mkdir ~/cmake
 pushd ~/cmake
