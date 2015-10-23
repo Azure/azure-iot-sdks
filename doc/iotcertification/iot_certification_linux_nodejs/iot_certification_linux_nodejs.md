@@ -154,7 +154,7 @@ This section walks you through building, deploying and validating the IoT Client
 
         git clone https://github.com/Azure/azure-iot-sdks.git
 
--   Verify that you now have a copy of the source code under the directory ~/azure-iot-suite-sdks.
+-   Verify that you now have a copy of the source code under the directory ~/azure-iot-sdks.
 
 <a name="Step-3-2:-Build"/>
 ## 3.2 Build the samples

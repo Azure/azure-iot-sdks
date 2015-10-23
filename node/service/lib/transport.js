@@ -5,6 +5,7 @@
 
 var amqp10 = require('amqp10');
 var errors = require('azure-iot-common').errors;
+var AmqpMessage = require('./amqp_message.js');
 
 function Transport(config) {
   this._config = config;
@@ -60,12 +61,10 @@ Transport.prototype.disconnect = function disconnect(done) {
 
 Transport.prototype.send = function send(deviceId, message, done) {
   var endpoint = '/messages/devicebound';
+  var to = '/devices/' + encodeURIComponent(deviceId) + '/messages/devicebound';
 
-  var messageOptions = {
-    properties: {
-      to: '/devices/' + encodeURIComponent(deviceId) + '/messages/devicebound'
-    }
-  };
+  var amqpMessage = AmqpMessage.fromMessage(message);
+  amqpMessage.properties.to = to;
 
   this.connect(function (err) {
     if (err) {
@@ -81,7 +80,7 @@ Transport.prototype.send = function send(deviceId, message, done) {
           sender.on('errorReceived', function (err) {
             if (done) done(translateError(err));
           });
-          return sender.send(message.getData(), messageOptions);
+          return sender.send(amqpMessage);
         })
         .then(function (state) {
           if (done) done(null, state);

@@ -4,8 +4,8 @@
 #this is CMakeLists.txt for iothubclient_e2etests
 cmake_minimum_required(VERSION 3.0)
 
-if(NOT (${use_http} AND ${use_amqp}))
-	message(FATAL_ERROR "iothubclient_e2etests being generated without HTTP and AMQP support")
+if(NOT (${use_http} AND ${use_amqp} AND ${use_mqtt}))
+	message(FATAL_ERROR "iothubclient_e2etests being generated without HTTP, AMQP and MQTT support")
 endif()
 
 compileAsC99()
@@ -37,9 +37,11 @@ if(WIN32)
 			iothub_client_http_transport
 			common
 			iothub_client_http_transport
+			iothub_client_mqtt_transport
 		)
 		linkHttp(${theseTestsName}_dll)
 		linkProton(${theseTestsName}_dll)
+		linkPaho(${theseTestsName}_dll)
 	endif()
 	
 	if(TARGET ${theseTestsName}_exe)
@@ -50,9 +52,11 @@ if(WIN32)
 			iothub_client_http_transport
 			common
 			iothub_client_http_transport
+			iothub_client_mqtt_transport
 		)
 		linkHttp(${theseTestsName}_exe)
 		linkProton(${theseTestsName}_exe)	
+		linkPaho(${theseTestsName}_exe)
 	endif()
 else()
 	if(TARGET ${theseTestsName}_exe)
@@ -63,10 +67,12 @@ else()
 			iothub_client_http_transport
 			common
 			iothub_client_http_transport
+			iothub_client_mqtt_transport
 		)
 		target_link_libraries(${theseTestsName}_exe pthread)
 		linkHttp(${theseTestsName}_exe)
 		linkProton(${theseTestsName}_exe)
+		linkPaho(${theseTestsName}_exe)
 	endif()
 endif()
 
