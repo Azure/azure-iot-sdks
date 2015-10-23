@@ -439,6 +439,7 @@ static bool HTTPHeaders_GetHeaderCount_writes_to_its_outputs = true;
 #define TEST_HEADER_1 "iothub-app-NAME1: VALUE1"
 #define TEST_HEADER_1_5 "not-iothub-app-NAME1: VALUE1"
 #define TEST_HEADER_2 "iothub-app-NAME2: VALUE2"
+#define TEST_HEADER_3 "iothub-messageid: VALUE3"
 /*value returned by time() function*/
 /*for the purpose of this implementation, time_t represents the number of seconds since 1970, 1st jan, 0:0:0*/
 #define TEST_GET_TIME_VALUE 384739233
@@ -454,165 +455,164 @@ public:
         BASEIMPLEMENTATION::DList_InitializeListHead(listHead);
     MOCK_VOID_METHOD_END()
 
-        MOCK_STATIC_METHOD_1(, int, DList_IsListEmpty, PDLIST_ENTRY, listHead)
+    MOCK_STATIC_METHOD_1(, int, DList_IsListEmpty, PDLIST_ENTRY, listHead)
         int result2 = BASEIMPLEMENTATION::DList_IsListEmpty(listHead);
     MOCK_METHOD_END(int, result2)
 
-        MOCK_STATIC_METHOD_2(, void, DList_InsertTailList, PDLIST_ENTRY, listHead, PDLIST_ENTRY, listEntry)
+    MOCK_STATIC_METHOD_2(, void, DList_InsertTailList, PDLIST_ENTRY, listHead, PDLIST_ENTRY, listEntry)
         BASEIMPLEMENTATION::DList_InsertTailList(listHead, listEntry);
     MOCK_VOID_METHOD_END()
 
-        MOCK_STATIC_METHOD_2(, void, DList_InsertHeadList, PDLIST_ENTRY, listHead, PDLIST_ENTRY, listEntry)
+    MOCK_STATIC_METHOD_2(, void, DList_InsertHeadList, PDLIST_ENTRY, listHead, PDLIST_ENTRY, listEntry)
         BASEIMPLEMENTATION::DList_InsertHeadList(listHead, listEntry);
     MOCK_VOID_METHOD_END()
 
 
-        MOCK_STATIC_METHOD_2(, void, DList_AppendTailList, PDLIST_ENTRY, listHead, PDLIST_ENTRY, ListToAppend)
+    MOCK_STATIC_METHOD_2(, void, DList_AppendTailList, PDLIST_ENTRY, listHead, PDLIST_ENTRY, ListToAppend)
         BASEIMPLEMENTATION::DList_AppendTailList(listHead, ListToAppend);
     MOCK_VOID_METHOD_END()
 
-        MOCK_STATIC_METHOD_1(, int, DList_RemoveEntryList, PDLIST_ENTRY, listEntry)
+    MOCK_STATIC_METHOD_1(, int, DList_RemoveEntryList, PDLIST_ENTRY, listEntry)
         int result2 = BASEIMPLEMENTATION::DList_RemoveEntryList(listEntry);
     MOCK_METHOD_END(int, result2)
 
-        MOCK_STATIC_METHOD_1(, PDLIST_ENTRY, DList_RemoveHeadList, PDLIST_ENTRY, listHead)
+    MOCK_STATIC_METHOD_1(, PDLIST_ENTRY, DList_RemoveHeadList, PDLIST_ENTRY, listHead)
         PDLIST_ENTRY entry = BASEIMPLEMENTATION::DList_RemoveHeadList(listHead);
     MOCK_METHOD_END(PDLIST_ENTRY, entry)
 
-
-        MOCK_STATIC_METHOD_1(, void*, gballoc_malloc, size_t, size)
+    MOCK_STATIC_METHOD_1(, void*, gballoc_malloc, size_t, size)
         void* result2;
-    currentmalloc_call++;
-    if (whenShallmalloc_fail>0)
-    {
-        if (currentmalloc_call == whenShallmalloc_fail)
+        currentmalloc_call++;
+        if (whenShallmalloc_fail>0)
         {
-            result2 = (void*)NULL;
+            if (currentmalloc_call == whenShallmalloc_fail)
+            {
+                result2 = (void*)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
-    }
     MOCK_METHOD_END(void*, result2);
 
     MOCK_STATIC_METHOD_2(, void*, gballoc_realloc, void*, ptr, size_t, size)
-        MOCK_METHOD_END(void*, BASEIMPLEMENTATION::gballoc_realloc(ptr, size));
+    MOCK_METHOD_END(void*, BASEIMPLEMENTATION::gballoc_realloc(ptr, size));
 
     MOCK_STATIC_METHOD_1(, void, gballoc_free, void*, ptr)
         BASEIMPLEMENTATION::gballoc_free(ptr);
     MOCK_VOID_METHOD_END()
 
-        MOCK_STATIC_METHOD_3(, void, eventConfirmationCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback)
-        MOCK_VOID_METHOD_END()
+    MOCK_STATIC_METHOD_3(, void, eventConfirmationCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback)
+    MOCK_VOID_METHOD_END()
 
-        MOCK_STATIC_METHOD_3(, int, messageCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback)
-        MOCK_METHOD_END(int, 0);
+    MOCK_STATIC_METHOD_3(, int, messageCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback)
+    MOCK_METHOD_END(int, 0);
 
 
     /*Strings*/
     MOCK_STATIC_METHOD_0(, STRING_HANDLE, STRING_new)
         STRING_HANDLE result2;
-    currentSTRING_new_call++;
-    if (whenShallSTRING_new_fail > 0)
-    {
-        if (currentSTRING_new_call == whenShallSTRING_new_fail)
+        currentSTRING_new_call++;
+        if (whenShallSTRING_new_fail > 0)
         {
-            result2 = (STRING_HANDLE)NULL;
+            if (currentSTRING_new_call == whenShallSTRING_new_fail)
+            {
+                result2 = (STRING_HANDLE)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::STRING_new();
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::STRING_new();
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::STRING_new();
-    }
     MOCK_METHOD_END(STRING_HANDLE, result2)
 
     MOCK_STATIC_METHOD_1(, STRING_HANDLE, STRING_new_JSON, const char*, source)
         STRING_HANDLE result2;
-    currentSTRING_new_JSON_call++;
-    if (whenShallSTRING_new_JSON_fail > 0)
-    {
-        if (currentSTRING_new_JSON_call == whenShallSTRING_new_JSON_fail)
+        currentSTRING_new_JSON_call++;
+        if (whenShallSTRING_new_JSON_fail > 0)
         {
-            result2 = (STRING_HANDLE)NULL;
+            if (currentSTRING_new_JSON_call == whenShallSTRING_new_JSON_fail)
+            {
+                result2 = (STRING_HANDLE)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::STRING_new_JSON(source);
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::STRING_new_JSON(source);
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::STRING_new_JSON(source);
-    }
     MOCK_METHOD_END(STRING_HANDLE, result2)
 
     MOCK_STATIC_METHOD_1(, STRING_HANDLE, STRING_clone, STRING_HANDLE, handle)
         STRING_HANDLE result2;
-    currentSTRING_clone_call++;
-    if (whenShallSTRING_clone_fail > 0)
-    {
-        if (currentSTRING_clone_call == whenShallSTRING_clone_fail)
+        currentSTRING_clone_call++;
+        if (whenShallSTRING_clone_fail > 0)
         {
-            result2 = (STRING_HANDLE)NULL;
+            if (currentSTRING_clone_call == whenShallSTRING_clone_fail)
+            {
+                result2 = (STRING_HANDLE)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::STRING_clone(handle);
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::STRING_clone(handle);
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::STRING_clone(handle);
-    }
     MOCK_METHOD_END(STRING_HANDLE, result2)
 
     MOCK_STATIC_METHOD_1(, STRING_HANDLE, STRING_construct, const char*, source)
         STRING_HANDLE result2;
-    currentSTRING_construct_call++;
-    if (whenShallSTRING_construct_fail > 0)
-    {
-        if (currentSTRING_construct_call == whenShallSTRING_construct_fail)
+        currentSTRING_construct_call++;
+        if (whenShallSTRING_construct_fail > 0)
         {
-            result2 = (STRING_HANDLE)NULL;
+            if (currentSTRING_construct_call == whenShallSTRING_construct_fail)
+            {
+                result2 = (STRING_HANDLE)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::STRING_construct(source);
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::STRING_construct(source);
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::STRING_construct(source);
-    }
     MOCK_METHOD_END(STRING_HANDLE, result2)
 
     MOCK_STATIC_METHOD_2(, STRING_HANDLE, STRING_construct_n, const char*, source, size_t, size)
         STRING_HANDLE result2;
-    currentSTRING_construct_n_call++;
-    if (whenShallSTRING_construct_n_fail > 0)
-    {
-        if (currentSTRING_construct_n_call == whenShallSTRING_construct_n_fail)
+        currentSTRING_construct_n_call++;
+        if (whenShallSTRING_construct_n_fail > 0)
         {
-            result2 = (STRING_HANDLE)NULL;
+            if (currentSTRING_construct_n_call == whenShallSTRING_construct_n_fail)
+            {
+                result2 = (STRING_HANDLE)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::STRING_construct_n(source, size);
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::STRING_construct_n(source, size);
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::STRING_construct_n(source, size);
-    }
     MOCK_METHOD_END(STRING_HANDLE, result2)
 
     MOCK_STATIC_METHOD_1(, void, STRING_delete, STRING_HANDLE, s)
@@ -643,28 +643,28 @@ public:
         /* HTTPHeaders mocks */
     MOCK_STATIC_METHOD_0(, HTTP_HEADERS_HANDLE, HTTPHeaders_Alloc)
         HTTP_HEADERS_HANDLE result2;
-    currentHTTPHeaders_Alloc_call++;
-    if ((whenShallHTTPHeaders_Alloc_fail > 0) && (whenShallHTTPHeaders_Alloc_fail == currentHTTPHeaders_Alloc_call))
-    {
-        result2 = NULL;
-    }
-    else
-    {
-        result2 = malloc(1);
-    }
+        currentHTTPHeaders_Alloc_call++;
+        if ((whenShallHTTPHeaders_Alloc_fail > 0) && (whenShallHTTPHeaders_Alloc_fail == currentHTTPHeaders_Alloc_call))
+        {
+            result2 = NULL;
+        }
+        else
+        {
+            result2 = malloc(1);
+        }
     MOCK_METHOD_END(HTTP_HEADERS_HANDLE, result2)
 
     MOCK_STATIC_METHOD_1(, HTTP_HEADERS_HANDLE, HTTPHeaders_Clone, HTTP_HEADERS_HANDLE, handle)
         HTTP_HEADERS_HANDLE result2;
-    currentHTTPHeaders_Clone_call++;
-    if ((whenShallHTTPHeaders_Clone_fail > 0) && (whenShallHTTPHeaders_Clone_fail == currentHTTPHeaders_Clone_call))
-    {
-        result2 = NULL;
-    }
-    else
-    {
-        result2 = malloc(1);
-    }
+        currentHTTPHeaders_Clone_call++;
+        if ((whenShallHTTPHeaders_Clone_fail > 0) && (whenShallHTTPHeaders_Clone_fail == currentHTTPHeaders_Clone_call))
+        {
+            result2 = NULL;
+        }
+        else
+        {
+            result2 = malloc(1);
+        }
     MOCK_METHOD_END(HTTP_HEADERS_HANDLE, result2)
 
     MOCK_STATIC_METHOD_1(, void, HTTPHeaders_Free, HTTP_HEADERS_HANDLE, httpHeadersHandle)
@@ -764,11 +764,10 @@ public:
             *size = 3;
         }
         }
-
     }
     MOCK_METHOD_END(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK)
 
-     MOCK_STATIC_METHOD_1(, const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, handle)
+    MOCK_STATIC_METHOD_1(, const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, handle)
 
         const char* result2;
         switch ((uintptr_t)handle)
@@ -799,81 +798,82 @@ public:
             result = NULL;
         }
         }
-
     MOCK_METHOD_END(const char*, result2)
 
     MOCK_STATIC_METHOD_1(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
-    
-    MAP_HANDLE result2;
-    switch ((uintptr_t)iotHubMessageHandle)
-    {
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_1) :
-    {
-        result2 = TEST_MAP_EMPTY;
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_2) :
-    {
-        result2 = TEST_MAP_EMPTY;
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_3) :
-    {
-        result2 = TEST_MAP_EMPTY;            
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_4) : /*this is out of bounds message (>256K)*/
-    {
-        result2 = TEST_MAP_EMPTY;            
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_5) : /*this is a message that just fits*/
-    {
-        result2 = TEST_MAP_EMPTY;            
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_6) : 
-    {
-        result2 = TEST_MAP_1_PROPERTY;
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_7) :
-    {
-        result2 = TEST_MAP_2_PROPERTY;
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_8) :
-    {
-        result2 = TEST_MAP_3_PROPERTY;
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_9) :
-    {
-        result2 = TEST_MAP_EMPTY;
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_10) :
-    {
-        result2 = TEST_MAP_EMPTY;
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_11) :
-    {
-        result2 = TEST_MAP_1_PROPERTY_A_B;
-        break;
-    }
-    case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_12) :
-    {
-        result2 = TEST_MAP_1_PROPERTY_AA_B;
-        break;
-    }
-    default:
-    {
-        /*not expected really*/
-        ASSERT_FAIL("not expected");
-    }
-    }
+        MAP_HANDLE result2;
+        switch ((uintptr_t)iotHubMessageHandle)
+        {
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_1) :
+        {
+            result2 = TEST_MAP_EMPTY;
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_2) :
+        {
+            result2 = TEST_MAP_EMPTY;
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_3) :
+        {
+            result2 = TEST_MAP_EMPTY;            
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_4) : /*this is out of bounds message (>256K)*/
+        {
+            result2 = TEST_MAP_EMPTY;            
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_5) : /*this is a message that just fits*/
+        {
+            result2 = TEST_MAP_EMPTY;            
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_6) : 
+        {
+            result2 = TEST_MAP_1_PROPERTY;
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_7) :
+        {
+            result2 = TEST_MAP_2_PROPERTY;
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_8) :
+        {
+            result2 = TEST_MAP_3_PROPERTY;
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_9) :
+        {
+            result2 = TEST_MAP_EMPTY;
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_10) :
+        {
+            result2 = TEST_MAP_EMPTY;
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_11) :
+        {
+            result2 = TEST_MAP_1_PROPERTY_A_B;
+            break;
+        }
+        case ((uintptr_t)TEST_IOTHUB_MESSAGE_HANDLE_12) :
+        {
+            result2 = TEST_MAP_1_PROPERTY_AA_B;
+            break;
+        }
+        default:
+        {
+            /*not expected really*/
+            ASSERT_FAIL("not expected");
+        }
+        }
     MOCK_METHOD_END(MAP_HANDLE, result2)
+
+    MOCK_STATIC_METHOD_2(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetMessageId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, messageId)
+    MOCK_METHOD_END(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK)
 
     MOCK_STATIC_METHOD_1(, IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
         IOTHUBMESSAGE_CONTENT_TYPE result2;
@@ -914,45 +914,45 @@ public:
     /*buffer*/
     /* BUFFER Mocks */
     MOCK_STATIC_METHOD_0(, BUFFER_HANDLE, BUFFER_new)
-    BUFFER_HANDLE result2;
-    currentBUFFER_new_call++;
-    if (whenShallBUFFER_new_fail > 0)
-    {
-        if (currentBUFFER_new_call == whenShallBUFFER_new_fail)
+        BUFFER_HANDLE result2;
+        currentBUFFER_new_call++;
+        if (whenShallBUFFER_new_fail > 0)
         {
-            result2 = (BUFFER_HANDLE)NULL;
+            if (currentBUFFER_new_call == whenShallBUFFER_new_fail)
+            {
+                result2 = (BUFFER_HANDLE)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::BUFFER_new();
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::BUFFER_new();
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::BUFFER_new();
-    }
     MOCK_METHOD_END(BUFFER_HANDLE, result2)
 
-        MOCK_STATIC_METHOD_1(, void, BUFFER_delete, BUFFER_HANDLE, s)
+    MOCK_STATIC_METHOD_1(, void, BUFFER_delete, BUFFER_HANDLE, s)
         BASEIMPLEMENTATION::BUFFER_delete(s);
     MOCK_VOID_METHOD_END()
 
 
-        MOCK_STATIC_METHOD_3(, int, BUFFER_build, BUFFER_HANDLE, handle, const unsigned char*, source, size_t, size)
-        MOCK_METHOD_END(int, BASEIMPLEMENTATION::BUFFER_build(handle, source, size))
+    MOCK_STATIC_METHOD_3(, int, BUFFER_build, BUFFER_HANDLE, handle, const unsigned char*, source, size_t, size)
+    MOCK_METHOD_END(int, BASEIMPLEMENTATION::BUFFER_build(handle, source, size))
 
-        MOCK_STATIC_METHOD_1(, unsigned char*, BUFFER_u_char, BUFFER_HANDLE, handle);
-    unsigned char* result2;
-    result2 = BASEIMPLEMENTATION::BUFFER_u_char(handle);
+    MOCK_STATIC_METHOD_1(, unsigned char*, BUFFER_u_char, BUFFER_HANDLE, handle);
+        unsigned char* result2;
+        result2 = BASEIMPLEMENTATION::BUFFER_u_char(handle);
     MOCK_METHOD_END(unsigned char*, result2)
 
-        MOCK_STATIC_METHOD_1(, size_t, BUFFER_length, BUFFER_HANDLE, handle);
-    size_t result2;
-    result2 = BASEIMPLEMENTATION::BUFFER_length(handle);
+    MOCK_STATIC_METHOD_1(, size_t, BUFFER_length, BUFFER_HANDLE, handle);
+        size_t result2;
+        result2 = BASEIMPLEMENTATION::BUFFER_length(handle);
     MOCK_METHOD_END(size_t, result2)
 
-        MOCK_STATIC_METHOD_2(, STRING_HANDLE, Base64_Encode_Bytes, const unsigned char*, source, size_t, size);
-    currentBase64_Encode_Bytes_call++;
+    MOCK_STATIC_METHOD_2(, STRING_HANDLE, Base64_Encode_Bytes, const unsigned char*, source, size_t, size);
+        currentBase64_Encode_Bytes_call++;
     MOCK_METHOD_END(STRING_HANDLE, (((currentBase64_Encode_Bytes_call > 0) && (currentBase64_Encode_Bytes_call == whenShallBase64_Encode_Bytes_fail)) ? ((STRING_HANDLE)NULL) : BASEIMPLEMENTATION::Base64_Encode_Bytes(source, size)));
 
     MOCK_STATIC_METHOD_4(, MAP_RESULT, Map_GetInternals, MAP_HANDLE, handle, const char*const**, keys, const char*const**, values, size_t*, count)
@@ -1001,7 +1001,7 @@ public:
     MOCK_METHOD_END(MAP_RESULT, MAP_OK);
 
     MOCK_STATIC_METHOD_3(, MAP_RESULT, Map_AddOrUpdate, MAP_HANDLE, handle, const char*, key, const char*, value)
-        MOCK_METHOD_END(MAP_RESULT, MAP_OK)
+    MOCK_METHOD_END(MAP_RESULT, MAP_OK)
 
     MOCK_STATIC_METHOD_2(, HTTP_HEADERS_RESULT, HTTPHeaders_GetHeaderCount, HTTP_HEADERS_HANDLE, httpHeadersHandle, size_t*, headersCount);
     if (HTTPHeaders_GetHeaderCount_writes_to_its_outputs)
@@ -1013,35 +1013,41 @@ public:
     MOCK_STATIC_METHOD_3(, HTTP_HEADERS_RESULT, HTTPHeaders_GetHeader, HTTP_HEADERS_HANDLE, handle, size_t, index, char**, destination)
         HTTP_HEADERS_RESULT result2;
         currentHTTPHeaders_GetHeader_call++;
-    if (whenShallHTTPHeaders_GetHeader_fail != currentHTTPHeaders_GetHeader_call)
-    {
-        if (index == 0)
+        if (whenShallHTTPHeaders_GetHeader_fail != currentHTTPHeaders_GetHeader_call)
         {
-            *destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(TEST_HEADER_1) + 1);
-            strcpy(*destination, TEST_HEADER_1);
-        }
-        else if (index == 1)
-        {
-            *destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(TEST_HEADER_1_5) + 1);
-            strcpy(*destination, TEST_HEADER_1_5);
+            if (index == 0)
+            {
+                *destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(TEST_HEADER_1) + 1);
+                strcpy(*destination, TEST_HEADER_1);
+            }
+            else if (index == 1)
+            {
+                *destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(TEST_HEADER_1_5) + 1);
+                strcpy(*destination, TEST_HEADER_1_5);
 
-        }
-        else if (index == 2)
-        {
-            *destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(TEST_HEADER_2) + 1);
-            strcpy(*destination, TEST_HEADER_2);
+            }
+            else if (index == 2)
+            {
+                *destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(TEST_HEADER_2) + 1);
+                strcpy(*destination, TEST_HEADER_2);
 
+            }
+            else if (index == 3)
+            {
+                *destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(TEST_HEADER_3) + 1);
+                strcpy(*destination, TEST_HEADER_3);
+
+            }
+            else
+            {
+                *destination = NULL; /*never to be reached*/
+            }
+            result2 = HTTP_HEADERS_OK;
         }
         else
         {
-            *destination = NULL; /*never to be reached*/
+            result2 = HTTP_HEADERS_ERROR;
         }
-        result2 = HTTP_HEADERS_OK;
-    }
-    else
-    {
-        result2 = HTTP_HEADERS_ERROR;
-    }
     MOCK_METHOD_END(HTTP_HEADERS_RESULT, result2)
 
     MOCK_STATIC_METHOD_1(, STRING_HANDLE, URL_EncodeString, const char*, textEncode)
@@ -1070,8 +1076,6 @@ public:
     MOCK_METHOD_END(double, stopTime-startTime)
 };
 
-
-
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, DList_InitializeListHead, PDLIST_ENTRY, listHead);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , int, DList_IsListEmpty, PDLIST_ENTRY, listHead);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , void, DList_InsertTailList, PDLIST_ENTRY, listHead, PDLIST_ENTRY, listEntry);
@@ -1086,7 +1090,6 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, gballoc_free, vo
 
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , void, eventConfirmationCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , int, messageCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback);
-
 
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportHttpMocks, , STRING_HANDLE, STRING_new);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , STRING_HANDLE, STRING_new_JSON, const char*, source);
@@ -1122,7 +1125,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , const char*, IoTHubMes
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, IoTHubMessage_Destroy, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
-
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetMessageId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, messageId);
 
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , MAP_RESULT, Map_AddOrUpdate, MAP_HANDLE, handle, const char*, key, const char*, value);
 DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubTransportHttpMocks, , MAP_RESULT, Map_GetInternals, MAP_HANDLE, handle, const char*const**, keys, const char*const**, values, size_t*, count);
@@ -8928,8 +8931,6 @@ responseContent: a new instance of buffer]
             STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
                 .IgnoreArgument(1);
             STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
-
-            
         }
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -11182,7 +11183,307 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
+    /* Tests_SRS_IOTHUBTRANSPORTTHTTP_07_008: [The HTTP header of iothub-messageid shall be set in the MessageId.] */
+    TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
+    {
+        ///arrange
+        CIoTHubTransportHttpMocks mocks;
+        unsigned int statusCode200 = 200;
+        unsigned int statusCode204 = 204;
+        auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+        (void)IoTHubTransportHttp_Subscribe(handle);
+        mocks.ResetAllCalls();
+        STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
+        STRICT_EXPECTED_CALL(mocks, get_time(NULL));
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, BUFFER_new());
+        STRICT_EXPECTED_CALL(mocks, BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+            .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+            IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
+            IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+            HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
+            "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
+            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+            NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+            IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+            IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+            ))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .IgnoreArgument(5)
+            .IgnoreArgument(7)
+            .IgnoreArgument(8)
+            .IgnoreArgument(9)
+            .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
+
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+            .IgnoreArgument(1)
+            .SetReturn(TEST_ETAG_VALUE);
+
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, BUFFER_length(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        {
+            /*this scope is for is properties code*/
+
+            int nHeaders = 4;
+            HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
+
+            STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
+
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .IgnoreArgument(3);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
+
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .IgnoreArgument(3);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .IgnoreArgument(3);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
+
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 3, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .IgnoreArgument(3);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(IGNORED_PTR_ARG, "VALUE3"))
+                .IgnoreArgument(1);
+        }
+
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2);
+
+        /*this returns "0" so the message needs to be "accepted"*/
+        /*this is "accepting"*/
+        STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
+            .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+            .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+            IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
+            IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+            HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
+            "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
+            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+            NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+            IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+            NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+            NULL                                                /*BUFFER_HANDLE responseContent))                              */
+            ))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .IgnoreArgument(5)
+            .IgnoreArgument(7)
+            .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
+
+        ///act
+        IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubTransportHttp_Destroy(handle);
+    }
+
+    /* Tests_SRS_IOTHUBTRANSPORTTHTTP_07_008: [The HTTP header of iothub-messageid shall be set in the MessageId.] */
+    TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
+    {
+        ///arrange
+        CIoTHubTransportHttpMocks mocks;
+        unsigned int statusCode200 = 200;
+        unsigned int statusCode204 = 204;
+        auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+        (void)IoTHubTransportHttp_Subscribe(handle);
+        mocks.ResetAllCalls();
+        STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
+
+        STRICT_EXPECTED_CALL(mocks, get_time(NULL));
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, BUFFER_new());
+        STRICT_EXPECTED_CALL(mocks, BUFFER_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+            .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+            IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
+            IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+            HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
+            "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
+            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+            NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+            IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+            IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+            ))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .IgnoreArgument(5)
+            .IgnoreArgument(7)
+            .IgnoreArgument(8)
+            .IgnoreArgument(9)
+            .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
+
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+            .IgnoreArgument(1)
+            .SetReturn(TEST_ETAG_VALUE);
+
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, BUFFER_u_char(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, BUFFER_length(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        {
+            /*this scope is for is properties code*/
+
+            int nHeaders = 4;
+            HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
+
+            STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
+
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .IgnoreArgument(3);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
+
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .IgnoreArgument(3);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .IgnoreArgument(3);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
+
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 3, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .IgnoreArgument(3);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(IGNORED_PTR_ARG, "VALUE3"))
+                .IgnoreArgument(1)
+                .SetReturn(IOTHUB_MESSAGE_ERROR);
+        }
+
+        /*this is "abandon"*/
+        STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
+            .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+            .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+            IGNORED_PTR_ARG,
+            IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+            HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
+            "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
+            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+            NULL,                                               /*BUFFER_HANDLE requestContent,                                */
+            IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+            NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+            NULL                                                /*BUFFER_HANDLE responseContent))                              */
+            ))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .IgnoreArgument(5)
+            .IgnoreArgument(7)
+            .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
+
+        ///act
+        IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubTransportHttp_Destroy(handle);
+    }
 
 END_TEST_SUITE(iothubtransporthttp)
 
