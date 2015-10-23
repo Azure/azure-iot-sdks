@@ -11239,9 +11239,6 @@ responseContent: a new instance of buffer]
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, BUFFER_length(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-//        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-//            .IgnoreArgument(1)
-//            .IgnoreArgument(2);
         {
             /*this scope is for is properties code*/
 

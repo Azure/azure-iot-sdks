@@ -105,7 +105,7 @@ static bool checkForErrorsThenWork(PAMQP_TRANSPORT_STATE transportState)
     return result;
 }
 
-static int setIotMessageId(IOTHUB_MESSAGE_HANDLE ioTMessage, pn_message_t* msg)
+static int setMessageId(IOTHUB_MESSAGE_HANDLE ioTMessage, pn_message_t* msg)
 {
     int result;
 
@@ -1243,8 +1243,8 @@ static void processMessage(PAMQP_TRANSPORT_STATE transportState, pn_tracker_t tr
                     pn_messenger_release(transportState->messenger, tracker, 0);
                     pn_messenger_settle(transportState->messenger, tracker, 0);
                 }
-                /* Codes_SRS_IOTHUBTRANSPORTTAMQP_07_003: [If the protocol id is set it will be set as in the MessageId.] */
-                else if (setIotMessageId(ioTMessage, transportState->message) != 0)
+                /* Codes_SRS_IOTHUBTRANSPORTTAMQP_07_003: [If the pn_message_get_id value is not NULL then the value will be set by calling IotHubMessage_SetMessageId.] */
+                else if (setMessageId(ioTMessage, transportState->message) != 0)
                 {
                     LogError("Failed to set MessageId for IoT hub message\r\n");
                     pn_messenger_release(transportState->messenger, tracker, 0);
