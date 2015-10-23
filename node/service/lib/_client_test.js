@@ -139,6 +139,12 @@ function transportSpecificTests(opts) {
     });
 
     describe('#send', function () {
+      function createTestMessage() {
+        var msg = new Message('msg');
+        msg.expiryTimeUtc = Date.now() + 5000; // Expire 5s from now, to reduce the chance of us hitting the 50-message limit on the IoT Hub
+        return msg;
+      }
+
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_016: [When the send method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - standard JavaScript Error object (or subclass)
       response - an implementation-specific response object returned by the underlying protocol, useful for logging and troubleshooting]*/
@@ -147,7 +153,7 @@ function transportSpecificTests(opts) {
         testSubject.open(function (err) {
           if (err) done(err);
           else {
-            testSubject.send(deviceId, new Message('msg'), function (err, state) {
+            testSubject.send(deviceId, createTestMessage(), function (err, state) {
               if (!err) {
                 assert.equal(state.descriptor.toString(), 0x24); // 0x24 == AMQP's 'accepted' disposition frame
               }
@@ -159,7 +165,7 @@ function transportSpecificTests(opts) {
 
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_015: [If the connection has not already been opened (e.g., by a call to open), the send method shall open the connection before attempting to send the message.]*/
       it('opens if necessary', function (done) {
-        testSubject.send(deviceId, new Message('msg'), function (err, state) {
+        testSubject.send(deviceId, createTestMessage(), function (err, state) {
           if (!err) {
             assert.equal(state.descriptor.toString(), 0x24); // 0x24 == AMQP's 'accepted' disposition frame
           }
@@ -175,7 +181,7 @@ function transportSpecificTests(opts) {
             testSubject.close(function (err) {
               if (err) done(err);
               else {
-                testSubject.send(deviceId, new Message('msg'), function (err, state) {
+                testSubject.send(deviceId, createTestMessage(), function (err, state) {
                   if (!err) {
                     assert.equal(state.descriptor.toString(), 0x24); // 0x24 == AMQP's 'accepted' disposition frame
                   }
