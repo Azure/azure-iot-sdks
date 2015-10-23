@@ -6,16 +6,19 @@
 'use strict';
 
 var nopt = require("nopt");
+var uuid = require('uuid');
 var colorsTmpl = require('colors-tmpl');
 var prettyjson = require('prettyjson');
+var Message = require('azure-iot-common').Message;
 var Client = require('azure-iothub').Client;
 var Registry = require('azure-iothub').Registry;
 var Https = require('azure-iothub').Https;
 
 var expected = {
-  "connection-string": Boolean,
-  "display": String,
-  "raw": Boolean
+  'connection-string': Boolean,
+  'display': String,
+  'raw': Boolean,
+  'ack': ['none', 'negative', 'positive', 'full']
 };
 
 var parsed = nopt(expected, null, process.argv, 2);
@@ -106,11 +109,25 @@ else if (command === 'delete') {
 else if (command === 'send') {
   if (!arg1) inputError('No device ID given');
   if (!arg2) inputError('No message given');
+
+  var message = new Message(arg2);
+
+  if (parsed.ack) {
+    message.messageId = uuid.v4();
+    message.ack = parsed.ack;
+  }
+
   var client = Client.fromConnectionString(connString);
-  client.send(arg1, arg2, function (err, res) {
+  client.send(arg1, message, function (err, res) {
     if (err) serviceError(err);
     else {
-      if (!parsed.raw) console.log(colorsTmpl('\n{green}Message sent{/green}'));
+      if (!parsed.raw) {
+        var id = '';
+        if (parsed.ack && parsed.ack !== 'none') {
+          id = ' (id: ' + message.messageId + ')';
+        }
+        console.log(colorsTmpl('\n{green}Message sent{/green}' + id));
+      }
       client.close();
     }
   });
@@ -197,8 +214,8 @@ function usage() {
     '    Can optionally display just the selected properties and/or the connection string.{/grey}',
     '  {green}iothub-explorer{/green} {white}<connection-string> delete <device-id>{/white}',
     '    {grey}Deletes the given device from the IoT Hub.{/grey}',
-    '  {green}iothub-explorer{/green} {white}<connection-string> send <device-id> <msg>{/white}',
-    '    {grey}Sends a cloud-to-device message to the given device{/grey}',
+    '  {green}iothub-explorer{/green} {white}<connection-string> send <device-id> <msg> [--ack="none|positive|negative|full"]{/white}',
+    '    {grey}Sends a cloud-to-device message to the given device, optionally with acknowledgment of receipt{/grey}',
     '  {green}iothub-explorer{/green} {white}help{/white}',
     '    {grey}Displays this help message.{/grey}',
     '',

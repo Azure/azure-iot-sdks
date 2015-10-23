@@ -22,6 +22,24 @@ AmqpMessage.fromMessage = function fromMessage(message) {
     amqpMessage.properties.absoluteExpiryTime = message.expiryTimeUtc;
   }
 
+  /*Codes_SRS_NODE_IOTHUB_AMQPMSG_05_007: [If the message argument has a messageId property, the properties property of the AmqpMessage object shall have a property named messageId with the same value.]*/
+  if (message.messageId) {
+    amqpMessage.properties.messageId = message.messageId;
+  }
+
+  /*Codes_SRS_NODE_IOTHUB_AMQPMSG_05_008: [If needed, the created AmqpMessage object shall have a property of type Object named applicationProperties.]*/
+  function ensureApplicationPropertiesCreated() {
+    if (!amqpMessage.applicationProperties) {
+      amqpMessage.applicationProperties = {};
+    }
+  }
+
+  /*Codes_SRS_NODE_IOTHUB_AMQPMSG_05_009: [If the message argument has an ack property, the applicationProperties property of the AmqpMessage object shall have a property named iothub-ack with the same value.]*/
+  if (message.ack) {
+    ensureApplicationPropertiesCreated();
+    amqpMessage.applicationProperties['iothub-ack'] = message.ack;
+  }
+
   /*Codes_SRS_NODE_IOTHUB_AMQPMSG_05_005: [If message.getData() is truthy, the AmqpMessage object shall have a property named body with the value returned from message.getData().]*/
   var body = message.getData();
   if (body) {

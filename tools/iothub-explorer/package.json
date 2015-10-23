@@ -7,10 +7,12 @@
   "main": "iothub-explorer.js",
   "bin": "iothub-explorer.js",
   "dependencies": {
+    "azure-iot-common": "1.0.0-preview.4",
     "azure-iothub": "1.0.0-preview.4",
     "colors-tmpl": "^1.0.0",
     "nopt": "^3.0.4",
-    "prettyjson": "^1.1.3"
+    "prettyjson": "^1.1.3",
+    "uuid": "^2.0.1"
   },
   "devDependencies": {
     "jshint": "^2.8.0"

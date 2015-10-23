@@ -23,6 +23,11 @@ describe('AmqpMessage', function () {
     });
 
     /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_002: [The created AmqpMessage object shall have a property of type Object named properties.]*/
+    it('always creates a properties object on the AmqpMessage object', function () {
+      var amqpMessage = AmqpMessage.fromMessage(new Message());
+      assert.property(amqpMessage, 'properties');
+    });
+
     /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_003: [If the message argument has a to property, the properties property of the AmqpMessage object shall have a property named to with the same value.]*/
     it('maps message.to to amqpMessage.properties.to', function () {
       var to = 'destination';
@@ -34,8 +39,7 @@ describe('AmqpMessage', function () {
 
     /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_003: [If the message argument has a to property, the properties property of the AmqpMessage object shall have a property named to with the same value.]*/
     it('does not set amqpMessage.properties.to if message.to isn\'t set', function () {
-      var message = new Message();
-      var amqpMessage = AmqpMessage.fromMessage(message);
+      var amqpMessage = AmqpMessage.fromMessage(new Message());
       assert.notDeepProperty(amqpMessage, 'properties.to');
     });
 
@@ -50,9 +54,45 @@ describe('AmqpMessage', function () {
 
     /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_004: [If the message argument has an expiryTimeUtc property, the properties property of the AmqpMessage object shall have a property named absoluteExpiryTime with the same value.]*/
     it('does not set amqpMessage.properties.absoluteExpiryTime if message.expiryTimeUtc isn\'t set', function () {
-      var message = new Message();
-      var amqpMessage = AmqpMessage.fromMessage(message);
+      var amqpMessage = AmqpMessage.fromMessage(new Message());
       assert.notDeepProperty(amqpMessage, 'properties.absoluteExpiryTime');
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_007: [If the message argument has a messageId property, the properties property of the AmqpMessage object shall have a property named messageId with the same value.]*/
+    it('maps message.messageId to amqpMessage.properties.messageId', function () {
+      var messageId = '123';
+      var message = new Message();
+      message.messageId = messageId;
+      var amqpMessage = AmqpMessage.fromMessage(message);
+      assert.equal(amqpMessage.properties.messageId, messageId);
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_007: [If the message argument has a messageId property, the properties property of the AmqpMessage object shall have a property named messageId with the same value.]*/
+    it('does not set amqpMessage.properties.messageId if message.messageId isn\'t set', function () {
+      var amqpMessage = AmqpMessage.fromMessage(new Message());
+      assert.notDeepProperty(amqpMessage, 'properties.messageId');
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_008: [If needed, the created AmqpMessage object shall have a property of type Object named applicationProperties.]*/
+    it('does not create amqpMessage.applicationProperties object if the are no application properties', function () {
+      var amqpMessage = AmqpMessage.fromMessage(new Message());
+      assert.notProperty(amqpMessage, 'applicationProperties');
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_008: [If needed, the created AmqpMessage object shall have a property of type Object named applicationProperties.]*/
+    /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_009: [If the message argument has an ack property, the applicationProperties property of the AmqpMessage object shall have a property named iothub-ack with the same value.]*/
+    it('maps message.ack to amqpMessage.applicationProperties[\'iothub-ack\']', function () {
+      var ack = 'full';
+      var message = new Message();
+      message.ack = ack;
+      var amqpMessage = AmqpMessage.fromMessage(message);
+      assert.equal(amqpMessage.applicationProperties['iothub-ack'], ack);
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_009: [If the message argument has an ack property, the applicationProperties property of the AmqpMessage object shall have a property named iothub-ack with the same value.]*/
+    it('does not set amqpMessage.applicationProperties[\'iothub-ack\'] if message.ack isn\'t set', function () {
+      var amqpMessage = AmqpMessage.fromMessage(new Message());
+      assert.notDeepProperty(amqpMessage, 'applicationProperties.iothub-ack');
     });
 
     /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_005: [If message.getData() is truthy, the AmqpMessage object shall have a property named body with the value returned from message.getData().]*/
@@ -65,8 +105,7 @@ describe('AmqpMessage', function () {
 
     /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_005: [If message.getData() is truthy, the AmqpMessage object shall have a property named body with the value returned from message.getData().]*/
     it('does not set amqpMessage.body if message does not have a body', function () {
-      var message = new Message();
-      var amqpMessage = AmqpMessage.fromMessage(message);
+      var amqpMessage = AmqpMessage.fromMessage(new Message());
       assert.notProperty(amqpMessage, 'body');
     });
   });

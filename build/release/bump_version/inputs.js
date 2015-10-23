@@ -272,9 +272,28 @@ module.exports = [
         ]
     },
     {
-        "taskType": "jsonReplaceTask",
+        "taskType": "multiTask",
         "filePath": "tools/iothub-explorer/package.json",
-        "search": "version",
-        "replaceString": "iothub-explorer"
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "iothub-explorer"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.common;
+                }
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iothub",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.service;
+                }
+            }
+        ]
     }
 ];
