@@ -29,7 +29,7 @@ Other useful documents include:
 
 ## Folder structure of repository
 
-All the .NET specific resources are located in the **csharp** folder.
+All the .NET device specific resources are located in the **csharp** folder.
 
 ### /build
 

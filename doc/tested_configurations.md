@@ -71,7 +71,7 @@ The [Microsoft Azure IoT service SDK for Java](java/service/readme.md) has been 
 
 
 ## CSharp
-The [Microsoft Azure IoT device SDK for .NET](csharp/readme.md) has been tested on the following configurations:
+The [Microsoft Azure IoT device SDK for .NET](csharp/device/readme.md) has been tested on the following configurations:
 
 |OS Platform| Version|Protocols|
 |:---------|:----------:|:----------:|

@@ -92,7 +92,7 @@ module.exports = [
     ///////////////////////////////////////////////////
     {
         "taskType": "regexReplaceTask",
-        "filePath": "csharp/Microsoft.Azure.Devices.Client/Properties/AssemblyInfo.cs",
+        "filePath": "csharp/device/Microsoft.Azure.Devices.Client/Properties/AssemblyInfo.cs",
         "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
         "replaceString": function(versions) {
             return '$1' + versions.csharp.device + '$2';
@@ -100,7 +100,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "csharp/Microsoft.Azure.Devices.Client.WinRT/Properties/AssemblyInfo.cs",
+        "filePath": "csharp/device/Microsoft.Azure.Devices.Client.WinRT/Properties/AssemblyInfo.cs",
         "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
         "replaceString": function(versions) {
             return '$1' + versions.csharp.device + '$2';

@@ -12,7 +12,7 @@ Before you get started, you should:
 
 ## Build and run the sample
 
-1.  Start a new instance of Visual Studio 2015. Open the **iothub_csharp_client.sln** solution in the **csharp** folder in your local copy of the repository.
+1.  Start a new instance of Visual Studio 2015. Open the **iothub_csharp_client.sln** solution in the **csharp\device** folder in your local copy of the repository.
 
 2.  In Visual Studio, in **Solution Explorer**, navigate to the samples folder. In the **DeviceClientAmqpSample** project, open the **Program.cs** file.
 
