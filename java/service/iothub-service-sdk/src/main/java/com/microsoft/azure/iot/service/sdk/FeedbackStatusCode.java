@@ -5,8 +5,14 @@
 
 package com.microsoft.azure.iot.service.sdk;
 
-public enum IotHubDeviceConnectionState
+/**
+ * Enum for feedback status codes
+ */
+public enum FeedbackStatusCode
 {
-    connected,
-    disconnected
+    success,
+    expired,
+    deliveryCountExceeded,
+    rejected,
+    unknown
 }

@@ -10,12 +10,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 @RunWith(JMockit.class)
-public class IotHubRegistryManagerTest
+public class RegistryManagerE2ETest
 {
     private static String connectionString = "";
     private static String deviceId = "xxx-test-device";
@@ -25,8 +23,10 @@ public class IotHubRegistryManagerTest
     {
         if (!Tools.isNullOrEmpty(connectionString))
         {
+            // Arrange
             RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
             Device device = Device.createFromId(deviceId);
+            // Act
             regmen.addDevice(device);
         }
     }
@@ -36,7 +36,9 @@ public class IotHubRegistryManagerTest
     {
         if (!Tools.isNullOrEmpty(connectionString))
         {
+            // Arrange
             RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
+            // Act
             Device device = regmen.getDevice(deviceId);
         }
     }
@@ -46,7 +48,9 @@ public class IotHubRegistryManagerTest
     {
         if (!Tools.isNullOrEmpty(connectionString))
         {
+            // Arrange
             RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
+            // Act
             ArrayList<Device> devices = regmen.getDevices(1000);
         }
     }
@@ -56,8 +60,10 @@ public class IotHubRegistryManagerTest
     {
         if (!Tools.isNullOrEmpty(connectionString))
         {
+            // Arrange
             RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
             Device device = Device.createFromId(deviceId);
+            // Act
             regmen.updateDevice(device);
         }
     }
@@ -67,7 +73,9 @@ public class IotHubRegistryManagerTest
     {
         if (!Tools.isNullOrEmpty(connectionString))
         {
+            // Arrange
             RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
+            // Act
             regmen.removeDevice(deviceId);
         }
     }
@@ -77,7 +85,9 @@ public class IotHubRegistryManagerTest
     {
         if (!Tools.isNullOrEmpty(connectionString))
         {
+            // Arrange
             RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
+            // Act
             regmen.getStatistics();
         }
     }
@@ -87,11 +97,11 @@ public class IotHubRegistryManagerTest
     {
         if (!Tools.isNullOrEmpty(connectionString))
         {
+            // Arrange
             RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
             Device device = Device.createFromId(deviceId);
+            // Act
             CompletableFuture<Device> future = regmen.addDeviceAsync(device);
-
-
             while (!future.isDone())
             {
                 System.out.println("Task is not completed yet...");

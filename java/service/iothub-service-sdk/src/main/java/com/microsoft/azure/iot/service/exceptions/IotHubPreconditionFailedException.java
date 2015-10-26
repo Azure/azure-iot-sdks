@@ -5,7 +5,10 @@
 
 package com.microsoft.azure.iot.service.exceptions;
 
-public class IotHubPreconditionFailedException extends IotHubException 
+/**
+ * Create precondition failed exception
+ */
+public class IotHubPreconditionFailedException extends IotHubException
 {
     public IotHubPreconditionFailedException()
     {

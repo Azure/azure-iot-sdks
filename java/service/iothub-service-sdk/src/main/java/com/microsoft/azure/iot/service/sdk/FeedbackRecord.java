@@ -7,6 +7,10 @@ package com.microsoft.azure.iot.service.sdk;
 
 import java.time.Instant;
 
+/**
+ * Data structure for feedback record received
+ * Provide getters and setters for feedback record batch properties
+ */
 public class FeedbackRecord
 {
     private Instant enqueuedTimeUtc;
@@ -33,14 +37,14 @@ public class FeedbackRecord
         this.correlationId = correlationId;
     }
 
-    private FeedbackStatusCodeEnum statusCode;
+    private FeedbackStatusCode statusCode;
 
-    public FeedbackStatusCodeEnum getStatusCode()
+    public FeedbackStatusCode getStatusCode()
     {
         return statusCode;
     }
 
-    public void setStatusCode(FeedbackStatusCodeEnum statusCode)
+    public void setStatusCode(FeedbackStatusCode statusCode)
     {
         this.statusCode = statusCode;
     }

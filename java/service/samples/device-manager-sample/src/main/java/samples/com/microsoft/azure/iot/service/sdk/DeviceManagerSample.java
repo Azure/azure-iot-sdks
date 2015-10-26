@@ -8,6 +8,7 @@ package samples.com.microsoft.azure.iot.service.sdk;
 import com.microsoft.azure.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.iot.service.sdk.Device;
 import com.microsoft.azure.iot.service.sdk.RegistryManager;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -16,8 +17,6 @@ public class DeviceManagerSample
 {
     private static final String connectionString = "[Connection string goes here]";
     private static final String deviceId = "[Device name goes here]";
-    private static final String primaryKey = "[New primary key goes here]";
-    private static final String secondaryKey = "[New secondary key goes here]";
 
     /**
      * @param args
@@ -56,7 +55,7 @@ public class DeviceManagerSample
         {
             device = registryManager.addDevice(device);
 
-            System.out.println("Device created: " + device.getId());
+            System.out.println("Device created: " + device.getDeviceId());
             System.out.println("Device key: " + device.getPrimaryKey());
         } catch (IotHubException iote)
         {
@@ -76,7 +75,7 @@ public class DeviceManagerSample
         {
             returnDevice = registryManager.getDevice(deviceId);
 
-            System.out.println("Device: " + returnDevice.getId());
+            System.out.println("Device: " + returnDevice.getDeviceId());
             System.out.println("Device primary key: " + returnDevice.getPrimaryKey());
             System.out.println("Device secondary key: " + returnDevice.getSecondaryKey());
             System.out.println("Device eTag: " + returnDevice.geteTag());
@@ -91,6 +90,9 @@ public class DeviceManagerSample
     
     private static void UpdateDevice() throws Exception
     {
+        String primaryKey = "[New primary key goes here]";
+        String secondaryKey = "[New secondary key goes here]";
+
         RegistryManager registryManager = RegistryManager.createFromConnectionString(DeviceManagerSample.connectionString);
         
         Device device = Device.createFromId(deviceId);
@@ -100,7 +102,7 @@ public class DeviceManagerSample
         {
             device = registryManager.updateDevice(device);
 
-            System.out.println("Device updated: " + device.getId());
+            System.out.println("Device updated: " + device.getDeviceId());
             System.out.println("Device primary key: " + device.getPrimaryKey());
             System.out.println("Device secondary key: " + device.getSecondaryKey());
         } catch (IotHubException iote)

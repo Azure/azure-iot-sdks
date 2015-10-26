@@ -5,7 +5,10 @@
 
 package com.microsoft.azure.iot.service.exceptions;
 
-public class IotHubInternalServerErrorException extends IotHubException 
+/**
+ * Create internal server error exception
+ */
+public class IotHubInternalServerErrorException extends IotHubException
 {
     public IotHubInternalServerErrorException()
     {

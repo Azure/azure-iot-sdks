@@ -48,7 +48,7 @@ class AmqpSendHandler extends BaseHandler
      */
     AmqpSendHandler(String hostName, String userName, String sasToken) 
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
+        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
@@ -86,8 +86,8 @@ class AmqpSendHandler extends BaseHandler
 
     /**
      * Create Proton message from deviceId and content string
-     * @param deviceId device name string 
-     * @param content content string of the message 
+     * @param deviceId device name string
+     * @param content content string of the message
      */
     public void createBinaryMessage(String deviceId, String content)
     {

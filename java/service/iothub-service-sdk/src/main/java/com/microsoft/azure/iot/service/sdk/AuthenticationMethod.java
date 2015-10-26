@@ -12,11 +12,6 @@ package com.microsoft.azure.iot.service.sdk;
  */
 public abstract class AuthenticationMethod
 {
-    /**    
-     * IotHub device name
-     */
-    protected String deviceId;
-
     /**
      * Authentication policy name
      */
@@ -42,5 +37,5 @@ public abstract class AuthenticationMethod
      * @return An instance of {@link IotHubConnectionString} populated with the
      * the authentication properties.
      */
-    abstract IotHubConnectionString populate(IotHubConnectionString iotHubConnectionStringBuilder);
+    protected abstract IotHubConnectionString populate(IotHubConnectionString iotHubConnectionStringBuilder);
 }

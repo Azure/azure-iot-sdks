@@ -5,7 +5,10 @@
 
 package com.microsoft.azure.iot.service.exceptions;
 
-public class IotHubTooManyDevicesException extends IotHubException 
+/**
+ * Create too many devices exception
+ */
+public class IotHubTooManyDevicesException extends IotHubException
 {
     public IotHubTooManyDevicesException()
     {

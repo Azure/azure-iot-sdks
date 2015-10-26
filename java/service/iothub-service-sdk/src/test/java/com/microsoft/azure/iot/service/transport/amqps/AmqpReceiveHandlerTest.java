@@ -44,10 +44,10 @@ public class AmqpReceiveHandlerTest
     @Mocked Event event;
     @Mocked Receiver receiver;
     @Mocked Delivery delivery;
-    @Mocked org.apache.qpid.proton.engine.Sender sender;
-    @Mocked org.apache.qpid.proton.amqp.messaging.Target target;
-    @Mocked org.apache.qpid.proton.engine.Link link;
-    @Mocked org.apache.qpid.proton.amqp.messaging.Source source;
+    @Mocked Sender sender;
+    @Mocked Target target;
+    @Mocked Link link;
+    @Mocked Source source;
 
     AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent = feedbackJson -> {};
 
@@ -55,12 +55,13 @@ public class AmqpReceiveHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_002: [The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_003: [The constructor shall initialize a new FlowController (Proton) object to handle communication handshake]
     @Test
-    public void testAmqpReceiveHandler()
+    public void amqpReceiveHandler_call_flow_and_init_ok()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-
+        // Assert
         new Expectations()
         {
             {
@@ -68,13 +69,13 @@ public class AmqpReceiveHandlerTest
                 flowcontroller = new FlowController();
             }
         };
+        // Act
         AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, amqpFeedbackReceivedEvent);
-
         String _hostName = Deencapsulation.getField(amqpReceiveHandler, "hostName");
         String _userName = Deencapsulation.getField(amqpReceiveHandler, "userName");
         String _sasToken = Deencapsulation.getField(amqpReceiveHandler, "sasToken");
         AmqpFeedbackReceivedEvent _amqpFeedbackReceivedEvent = Deencapsulation.getField(amqpReceiveHandler, "amqpFeedbackReceivedEvent");
-
+        // Assert
         assertEquals(hostName + ":5671", _hostName);
         assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
@@ -87,15 +88,16 @@ public class AmqpReceiveHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_007: [The event handler shall close the Session and Connection (Proton)]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_008: [The event handler shall call the FeedbackReceived callback if it has been initialized]
     @Test
-    public void testOnDelivery()
+    public void onDelivery_call_flow_and_init_ok()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
         String hostAddr = hostName + ":5671";
-
         createProtonObjects();
-
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, amqpFeedbackReceivedEvent);
+        // Assert
         new Expectations()
         {
             {
@@ -113,21 +115,22 @@ public class AmqpReceiveHandlerTest
                 connection.close();
             }
         };
-
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, amqpFeedbackReceivedEvent);
+        // Act
         amqpReceiveHandler.onDelivery(event);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
     @Test
-    public void testOnConnectionBound()
+    public void onConnectionBound_call_flow_and_init_ok()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
         String hostAddr = hostName + ":5671";
-
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, null);
+        // Assert
         new Expectations()
         {
             {
@@ -141,8 +144,7 @@ public class AmqpReceiveHandlerTest
                 transport.ssl(sslDomain);
             }
         };
-
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, null);
+        // Act
         amqpReceiveHandler.onConnectionBound(event);
     }
 
@@ -152,14 +154,16 @@ public class AmqpReceiveHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_013: [The event handler shall create a Receiver (Proton) object and set the protocol tag on it to a predefined constant]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_014: [The event handler shall open the Connection, the Session and the Receiver object]
     @Test
-    public void testOnConnectionInit()
+    public void onConnectionInit_call_flow_and_init_ok()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
         String hostAddr = hostName + ":5671";
         String receiver_tag = "receiver";
-
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, null);
+        // Assert
         new Expectations()
         {
             {
@@ -172,22 +176,23 @@ public class AmqpReceiveHandlerTest
                 receiver.open();
             }
         };
-
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, null);
+        // Act
         amqpReceiveHandler.onConnectionInit(event);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_015: [The event handler shall create a new Target (Proton) object using the given endpoint address]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_016: [The event handler shall get the Link (Proton) object and set its target to the created Target (Proton) object]
     @Test
-    public void testOnLinkInit()
+    public void onLinkInit_call_flow_and_init_ok()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
         String hostAddr = hostName + ":5671";
         String endpoint = "/messages/servicebound/feedback";
-
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, null);
+        // Assert
         new Expectations()
         {
             {
@@ -200,8 +205,7 @@ public class AmqpReceiveHandlerTest
                 link.setSource(source);
             }
         };
-
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, null);
+        // Act
         amqpReceiveHandler.onLinkInit(event);
     }
 
