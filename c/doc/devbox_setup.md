@@ -94,6 +94,8 @@ You can use one of the sample applications as a template to get started when you
 
 This section shows you how to set up a development environment for the Azure IoT device SDK for C on Ubuntu.
 
+**Note:** this setup process requires **cmake** version 3.0 or higher. You can verify the current version installed in your environment using the `cmake --version` command. For information about how to upgrade your version of cmake to 3.2 on Ubuntu 14.04, see http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04.
+
 1. Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the Ubuntu machine you are using.
 
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
