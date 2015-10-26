@@ -65,7 +65,7 @@ To build the MQTT-based samples you must install the Paho open source library.
 
 ### Verify your environment
 
-> Note: If you want to complete this verification task, the **PROTON_PATH** environment variable must be set, even if you are installing the Qpid Proton libraries using NuGet. 
+> Note: If you want to complete this verification task, the **PROTON_PATH** environment variable must be set, even if you are installing the Qpid Proton libraries using NuGet.
 
 You can build the Windows samples to verify that your environment is set up correctly.
 
@@ -95,13 +95,14 @@ You can use one of the sample applications as a template to get started when you
 This section shows you how to set up a development environment for the Azure IoT device SDK for C on Ubuntu.
 
 1. Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the Ubuntu machine you are using.
+
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
 3. Run the `setup.sh` script to install the prerequisite packages and the dependent libraries.
 
 4. Run the `build.sh` script.
 
-This script uses cmake to make a folder called "cmake" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the solution and run tests.
+This script uses **cmake** to make a folder called "cmake" in your home directory and generates a makefile. The script then builds the solution and runs the tests.
 
  > Note: you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
 
