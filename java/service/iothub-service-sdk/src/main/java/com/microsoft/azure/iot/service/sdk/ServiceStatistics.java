@@ -5,6 +5,10 @@
 
 package com.microsoft.azure.iot.service.sdk;
 
+/**
+ * Data structure for service statistics received in Json array
+ * Provide getters and setters for statistics properties
+ */
 public class ServiceStatistics
 {
     private long ConnectedDeviceCount;

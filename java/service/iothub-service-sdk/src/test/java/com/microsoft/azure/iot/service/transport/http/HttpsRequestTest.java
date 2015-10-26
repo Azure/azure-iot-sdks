@@ -30,6 +30,7 @@ public class HttpsRequestTest
     @Test
     public void constructorOpensConnection(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = new byte[0];
         new NonStrictExpectations()
@@ -39,9 +40,9 @@ public class HttpsRequestTest
                 result = "http";
             }
         };
-
+        // Act
         new HttpRequest(mockUrl, httpsMethod, body);
-
+        // Assert
         new Verifications()
         {
             {
@@ -54,8 +55,10 @@ public class HttpsRequestTest
     @Test
     public void constructorWritesBodyToConnection(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = { 1, 2, 3 };
+        final byte[] expectedBody = body;
         new NonStrictExpectations()
         {
             {
@@ -63,10 +66,9 @@ public class HttpsRequestTest
                 result = "http";
             }
         };
-
+        // Act
         new HttpRequest(mockUrl, httpsMethod, body);
-
-        final byte[] expectedBody = body;
+        // Assert
         new Verifications()
         {
             {
@@ -80,6 +82,7 @@ public class HttpsRequestTest
     @Test
     public void constructorSetsHttpsMethodCorrectly(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = new byte[0];
         new NonStrictExpectations()
@@ -89,9 +92,9 @@ public class HttpsRequestTest
                 result = "http";
             }
         };
-
+        // Act
         new HttpRequest(mockUrl, httpsMethod, body);
-
+        // Assert
         new Verifications()
         {
             {
@@ -101,9 +104,11 @@ public class HttpsRequestTest
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_004: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
+    // Assert
     @Test(expected = IOException.class)
     public void constructorThrowsIoExceptionIfCannotSetupConnection(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = new byte[0];
         new NonStrictExpectations()
@@ -115,7 +120,7 @@ public class HttpsRequestTest
                 result = new IOException();
             }
         };
-
+        // Act
         new HttpRequest(mockUrl, httpsMethod, body);
     }
 
@@ -123,6 +128,7 @@ public class HttpsRequestTest
     @Test
     public void sendHasCorrectHttpsMethod() throws IOException
     {
+        // Arrange
         final HttpMethod expectedMethod = HttpMethod.GET;
         final byte[] body = new byte[0];
         new MockUp<HttpConnection>()
@@ -185,6 +191,7 @@ public class HttpsRequestTest
                 return new HashMap<>();
             }
         };
+        // Assert
         new NonStrictExpectations()
         {
             {
@@ -192,9 +199,8 @@ public class HttpsRequestTest
                 result = "http";
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, expectedMethod, body);
+        HttpRequest request = new HttpRequest(mockUrl, expectedMethod, body);
+        // Act
         request.send();
     }
 
@@ -202,6 +208,7 @@ public class HttpsRequestTest
     @Test
     public void sendSetsHeaderFieldsCorrectly() throws IOException
     {
+        // Arrange
         final HttpMethod expectedMethod = HttpMethod.GET;
         final byte[] body = new byte[0];
         final String field0 = "test-field0";
@@ -269,6 +276,7 @@ public class HttpsRequestTest
                 return new HashMap<>();
             }
         };
+        // Assert
         new NonStrictExpectations()
         {
             {
@@ -276,9 +284,8 @@ public class HttpsRequestTest
                 result = "http";
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, expectedMethod, body);
+        // Act
+        HttpRequest request = new HttpRequest(mockUrl, expectedMethod, body);
         request.setHeaderField(field0, value0);
         request.setHeaderField(field1, value1);
         request.send();
@@ -288,6 +295,7 @@ public class HttpsRequestTest
     @Test
     public void sendWritesBodyToOutputStream() throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.POST;
         final byte[] expectedBody = { 1, 2, 3 };
         new MockUp<HttpConnection>()
@@ -349,6 +357,7 @@ public class HttpsRequestTest
                 return new HashMap<>();
             }
         };
+        // Assert
         new NonStrictExpectations()
         {
             {
@@ -356,9 +365,8 @@ public class HttpsRequestTest
                 result = "http";
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, httpsMethod, expectedBody);
+        // Act
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, expectedBody);
         request.send();
     }
 
@@ -366,9 +374,11 @@ public class HttpsRequestTest
     @Test
     public void sendReadsStatusCode(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = new byte[0];
         final int status = 204;
+        final int expectedStatus = status;
         new NonStrictExpectations()
         {
             {
@@ -378,13 +388,11 @@ public class HttpsRequestTest
                 result = status;
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, httpsMethod, body);
+        // Act
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body);
         HttpResponse response = request.send();
         int testStatus = response.getStatus();
-
-        final int expectedStatus = status;
+        // Assert
         assertThat(testStatus, is(expectedStatus));
     }
 
@@ -392,9 +400,11 @@ public class HttpsRequestTest
     @Test
     public void sendReturnsBody(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] requestBody = new byte[0];
         final byte[] responseBody = { 1, 2, 3, 0, 4 };
+        final byte[] expectedBody = responseBody;
         new NonStrictExpectations()
         {
             {
@@ -404,13 +414,11 @@ public class HttpsRequestTest
                 result = responseBody;
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, httpsMethod, requestBody);
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, requestBody);
+        // Act
         HttpResponse response = request.send();
         byte[] testBody = response.getBody();
-
-        final byte[] expectedBody = responseBody;
+        // Assert
         assertThat(testBody, is(expectedBody));
     }
 
@@ -419,9 +427,11 @@ public class HttpsRequestTest
     @Test
     public void sendReturnsError(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = new byte[0];
         final byte[] error = { 5, 6, 7, 0, 1 };
+        final byte[] expectedError = error;
         new NonStrictExpectations()
         {
             {
@@ -433,13 +443,11 @@ public class HttpsRequestTest
                 result = error;
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, httpsMethod, body);
+        // Act
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body);
         HttpResponse response = request.send();
         byte[] testError = response.getErrorReason();
-
-        final byte[] expectedError = error;
+        // Assert
         assertThat(testError, is(expectedError));
     }
 
@@ -447,6 +455,7 @@ public class HttpsRequestTest
     @Test
     public void sendReturnsHeaderFields(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final Map<String, List<String>> headerFields = new HashMap<>();
         final String field = "test-field";
         final List<String> values = new LinkedList<>();
@@ -455,6 +464,7 @@ public class HttpsRequestTest
         values.add(value0);
         values.add(value1);
         headerFields.put(field, values);
+        final String expectedValues = value0 + "," + value1;
         final HttpMethod httpsMethod = HttpMethod.POST;
         final byte[] body = new byte[0];
         new NonStrictExpectations()
@@ -466,13 +476,11 @@ public class HttpsRequestTest
                 result = headerFields;
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, httpsMethod, body);
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body);
+        // Act
         HttpResponse response = request.send();
         String testValues = response.getHeaderField(field);
-
-        final String expectedValues = value0 + "," + value1;
+        // Assert
         assertThat(testValues, is(expectedValues));
     }
 
@@ -480,9 +488,11 @@ public class HttpsRequestTest
     @Test
     public void sendReturnsStatusCodeOnBadStatusException(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.POST;
         final byte[] body = new byte[0];
         final int badStatus = 404;
+        final int expectedStatus = badStatus;
         new NonStrictExpectations()
         {
             {
@@ -494,20 +504,20 @@ public class HttpsRequestTest
                 result = badStatus;
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, httpsMethod, body);
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body);
+        // Act
         HttpResponse response = request.send();
         int testStatus = response.getStatus();
-
-        final int expectedStatus = badStatus;
+        // Assert
         assertThat(testStatus, is(expectedStatus));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSREQUEST_12_007: [If the client cannot connect to the server, the function shall throw an IOException.]
+    // Assert
     @Test(expected = IOException.class)
     public void sendThrowsIoExceptionIfCannotConnect(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.POST;
         final byte[] body = new byte[0];
         new NonStrictExpectations()
@@ -527,9 +537,8 @@ public class HttpsRequestTest
                 result = new IOException();
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, httpsMethod, body);
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body);
+        // Act
         request.send();
     }
 
@@ -537,6 +546,7 @@ public class HttpsRequestTest
     @Test
     public void sendReturnsHeaderFieldsOnBadStatusException(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final Map<String, List<String>> headerFields = new HashMap<>();
         final String field = "test-field";
         final List<String> values = new LinkedList<>();
@@ -545,6 +555,7 @@ public class HttpsRequestTest
         headerFields.put(field, values);
         final HttpMethod httpsMethod = HttpMethod.POST;
         final byte[] body = new byte[0];
+        final String expectedValues = value;
         new NonStrictExpectations()
         {
             {
@@ -556,13 +567,11 @@ public class HttpsRequestTest
                 result = headerFields;
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, httpsMethod, body);
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body);
+        // Act
         HttpResponse response = request.send();
         String testValues = response.getHeaderField(field);
-
-        final String expectedValues = value;
+        // Assert
         assertThat(testValues, is(expectedValues));
     }
 
@@ -570,6 +579,7 @@ public class HttpsRequestTest
     @Test
     public void setHeaderFieldSetsHeaderField(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.POST;
         final byte[] body = new byte[0];
         final String field = "test-field";
@@ -581,11 +591,10 @@ public class HttpsRequestTest
                 result = "http";
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, httpsMethod, body);
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body);
+        // Act
         request.setHeaderField(field, value);
-
+        // Assert
         new Verifications()
         {
             {
@@ -598,9 +607,11 @@ public class HttpsRequestTest
     @Test
     public void setReadTimeoutSetsReadTimeout(@Mocked final HttpConnection mockConn) throws IOException
     {
+        // Arrange
         final HttpMethod httpsMethod = HttpMethod.POST;
         final byte[] body = new byte[0];
         final int readTimeout = 1;
+        final int expectedReadTimeout = readTimeout;
         new NonStrictExpectations()
         {
             {
@@ -608,12 +619,10 @@ public class HttpsRequestTest
                 result = "http";
             }
         };
-
-        HttpRequest request =
-                new HttpRequest(mockUrl, httpsMethod, body);
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body);
+        // Act
         request.setReadTimeoutMillis(readTimeout);
-
-        final int expectedReadTimeout = readTimeout;
+        // Assert
         new Verifications()
         {
             {

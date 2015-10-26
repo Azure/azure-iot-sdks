@@ -13,67 +13,76 @@ import java.io.StringReader;
 import java.time.Instant;
 import java.util.ArrayList;
 
+/**
+ * Provide static function to parse Json string to FeedbackBatch object.
+ */
 public class FeedbackBatchMessage
 {
-    public static FeedbackBatch parseFeedbackBatch(String feedbackJson)
+    /**
+     * Parse received Json and create FeedbackBAtch object
+     *
+     * @param jsonString json string to parse
+     * @return created FeedbackBatch
+     */
+    public static FeedbackBatch parse(String jsonString)
     {
         FeedbackBatch returnFeedbackBatch = new FeedbackBatch();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPMESSAGE_12_001: [The function shall return an empty FeedbackBatch object if the input is empty or null]
-        if (!Tools.isNullOrEmpty(feedbackJson))
+        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKBATCHMESSAGE_12_001: [The function shall return an empty FeedbackBatch object if the input is empty or null]
+        if (!Tools.isNullOrEmpty(jsonString))
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPMESSAGE_12_003: [The function shall remove data batch brackets if they exist]
-            if (feedbackJson.startsWith("Data{"))
+            // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKBATCHMESSAGE_12_003: [The function shall remove data batch brackets if they exist]
+            if (jsonString.startsWith("Data{"))
             {
-                feedbackJson = feedbackJson.substring(5, feedbackJson.length() - 1);
+                jsonString = jsonString.substring(5, jsonString.length() - 1);
             }
 
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPMESSAGE_12_002: [The function shall return an empty FeedbackBatch object if the content of the Data input is empty]
-            if (!feedbackJson.equals(""))
+            // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKBATCHMESSAGE_12_002: [The function shall return an empty FeedbackBatch object if the content of the Data input is empty]
+            if (!jsonString.equals(""))
             {
-                try (JsonReader jsonReader = Json.createReader(new StringReader(feedbackJson)))
+                try (JsonReader jsonReader = Json.createReader(new StringReader(jsonString)))
                 {
                     JsonArray jsonArray = jsonReader.readArray();
                     ArrayList<FeedbackRecord> records = new ArrayList<>();
 
-                    // Codes_SRS_SERVICE_SDK_JAVA_AMQPMESSAGE_12_005: [The function shall parse all the Json record to the FeedbackBatch]
+                    // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKBATCHMESSAGE_12_005: [The function shall parse all the Json record to the FeedbackBatch]
                     for (int i = 0; i < jsonArray.size(); i++)
                     {
-                        // Codes_SRS_SERVICE_SDK_JAVA_AMQPMESSAGE_12_004: [The function shall throw a JsonParsingException if the parsing failed]
+                        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKBATCHMESSAGE_12_004: [The function shall throw a JsonParsingException if the parsing failed]
                         JsonObject jsonObject = (JsonObject) jsonArray.get(i);
 
                         FeedbackRecord feedbackRecord = new FeedbackRecord();
 
-                        feedbackRecord.setEnqueuedTimeUtc(Instant.parse(Tools.getStringValueFromJsonObject(jsonObject, "enqueuedTimeUtc")));
+                        feedbackRecord.setEnqueuedTimeUtc(Instant.parse(Tools.getValueFromJsonObject(jsonObject, "enqueuedTimeUtc")));
                         feedbackRecord.setCorrelationId("");
-                        String description = Tools.getStringValueFromJsonObject(jsonObject, "description");
+                        String description = Tools.getValueFromJsonObject(jsonObject, "description");
                         feedbackRecord.setDescription(description);
                         if (description.toLowerCase().equals("success"))
                         {
-                            feedbackRecord.setStatusCode(FeedbackStatusCodeEnum.success);
+                            feedbackRecord.setStatusCode(FeedbackStatusCode.success);
                         } else if (description.toLowerCase().equals("expired"))
                         {
-                            feedbackRecord.setStatusCode(FeedbackStatusCodeEnum.expired);
+                            feedbackRecord.setStatusCode(FeedbackStatusCode.expired);
                         } else if (description.toLowerCase().equals("deliverycountexceeded"))
                         {
-                            feedbackRecord.setStatusCode(FeedbackStatusCodeEnum.deliveryCountExceeded);
+                            feedbackRecord.setStatusCode(FeedbackStatusCode.deliveryCountExceeded);
                         } else if (description.toLowerCase().equals("rejected"))
                         {
-                            feedbackRecord.setStatusCode(FeedbackStatusCodeEnum.rejected);
+                            feedbackRecord.setStatusCode(FeedbackStatusCode.rejected);
                         }
                         else
                         {
-                            feedbackRecord.setStatusCode(FeedbackStatusCodeEnum.unknown);
+                            feedbackRecord.setStatusCode(FeedbackStatusCode.unknown);
                         }
-                        feedbackRecord.setDeviceId(Tools.getStringValueFromJsonObject(jsonObject, "deviceId"));
-                        feedbackRecord.setDeviceGenerationId(Tools.getStringValueFromJsonObject(jsonObject, "deviceGenerationId"));
+                        feedbackRecord.setDeviceId(Tools.getValueFromJsonObject(jsonObject, "deviceId"));
+                        feedbackRecord.setDeviceGenerationId(Tools.getValueFromJsonObject(jsonObject, "deviceGenerationId"));
 
                         records.add(feedbackRecord);
                     }
 
                     if (records.size() > 0)
                     {
-                        // Codes_SRS_SERVICE_SDK_JAVA_AMQPMESSAGE_12_006: [The function shall copy the last record’s UTC time for batch UTC time]
+                        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKBATCHMESSAGE_12_006: [The function shall copy the last record’s UTC time for batch UTC time]
                         returnFeedbackBatch.setEnqueuedTimeUtc(records.get(records.size() - 1).getEnqueuedTimeUtc());
                         returnFeedbackBatch.setUserId("");
                         returnFeedbackBatch.setLockToken("");

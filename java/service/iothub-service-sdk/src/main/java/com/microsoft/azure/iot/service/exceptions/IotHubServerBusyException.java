@@ -5,7 +5,10 @@
 
 package com.microsoft.azure.iot.service.exceptions;
 
-public class IotHubServerBusyException extends IotHubException 
+/**
+ * Create server busy exception
+ */
+public class IotHubServerBusyException extends IotHubException
 {
     public IotHubServerBusyException()
     {

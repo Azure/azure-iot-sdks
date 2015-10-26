@@ -53,9 +53,9 @@ public class AmqpSendHandlerTest
     @Mocked Sasl sasl;
     @Mocked SslDomain sslDomain;
     @Mocked Session session;
-    @Mocked org.apache.qpid.proton.engine.Sender sender;
-    @Mocked org.apache.qpid.proton.engine.Link link;
-    @Mocked org.apache.qpid.proton.amqp.messaging.Target target;
+    @Mocked Sender sender;
+    @Mocked Link link;
+    @Mocked Target target;
     @Mocked Delivery delivery;
 
     // Test_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
@@ -64,91 +64,103 @@ public class AmqpSendHandlerTest
     @Test
     public void constructor_copies_params_to_members()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-
         new Expectations()
         {
             {
                 handshaker = new Handshaker();
             }
         };
+        // Act
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
-
         String _hostName = amqpSendHandler.hostName;
         String _userName = amqpSendHandler.userName;
         String _sasToken = amqpSendHandler.sasToken;
-
+        // Assert
         assertEquals(hostName + ":5671", _hostName);
         assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
+    // Assert
     @Test (expected = IllegalArgumentException.class)
     public void constructor_checks_if_hostName_null()
     {
+        // Arrange
         String hostName = null;
         String userName = "bbb";
         String sasToken = "ccc";
-
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken);
+        // Act
+        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
+    // Assert
     @Test (expected = IllegalArgumentException.class)
     public void constructor_checks_if_hostName_empty()
     {
+        // Arrange
         String hostName = "";
         String userName = "bbb";
         String sasToken = "ccc";
-
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken);
+        // Act
+        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
+    // Assert
     @Test (expected = IllegalArgumentException.class)
     public void constructor_checks_if_userName_null()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = null;
         String sasToken = "ccc";
-
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken);
+        // Act
+        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
+    // Assert
     @Test (expected = IllegalArgumentException.class)
     public void constructor_checks_if_userName_empty()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "";
         String sasToken = "ccc";
-
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken);
+        // Act
+        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
+    // Assert
     @Test (expected = IllegalArgumentException.class)
     public void constructor_checks_if_sasToken_null()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = null;
-
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken);
+        // Act
+        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
+    // Assert
     @Test (expected = IllegalArgumentException.class)
     public void constructor_checks_if_sasToken_empty()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "";
-
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken);
+        // Act
+        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_004: [The function shall create a new Message (Proton) object]
@@ -159,13 +171,15 @@ public class AmqpSendHandlerTest
     @Test
     public void createBinaryMessage_creates_Message_and_sets_To()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
         String toProperty = "/devices/deviceId/messages/devicebound";
-
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        // Assert
         new Expectations()
         {
             {
@@ -178,7 +192,7 @@ public class AmqpSendHandlerTest
                 message.setBody(section);
             }
         };
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        // Act
         amqpSendHandler.createBinaryMessage(deviceId, content);
     }
 
@@ -187,11 +201,13 @@ public class AmqpSendHandlerTest
     @Test
     public void onConnectionBound_sets_Sasl_Plain()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
         String hostAddr = hostName + ":5671";
-
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        // Assert
         new Expectations()
         {
             {
@@ -205,8 +221,7 @@ public class AmqpSendHandlerTest
                 transport.ssl(sslDomain);
             }
         };
-
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        // Act
         amqpSendHandler.onConnectionBound(event);
     }
 
@@ -217,11 +232,13 @@ public class AmqpSendHandlerTest
     @Test
     public void onConnectionInit_creates_Session_and_open_Connection()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
         String hostAddr = hostName + ":5671";
-
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        // Assert
         new Expectations()
         {
             {
@@ -234,22 +251,23 @@ public class AmqpSendHandlerTest
                 sender.open();
             }
         };
-
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        // Act
         amqpSendHandler.onConnectionInit(event);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_015: [The event handler shall create a new Target (Proton) object using the given endpoint address]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_016: [The event handler shall get the Link (Proton) object and set its target to the created Target (Proton) object]
     @Test
-    public void testOnLinkInit()
+    public void onLinkInit_call_flow_ok()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
         String hostAddr = hostName + ":5671";
         String endpoint = "/messages/devicebound";
-
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        // Assert
         new Expectations()
         {
             {
@@ -258,8 +276,7 @@ public class AmqpSendHandlerTest
                 target.setAddress(endpoint);
             }
         };
-
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        // Act
         amqpSendHandler.onLinkInit(event);
     }
 
@@ -269,8 +286,9 @@ public class AmqpSendHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_020: [The event handler shall send the encoded bytes]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [The event handler shall close the Sender, Session and Connection]
     @Test
-    public void testOnLinkFlow()
+    public void onLinkFlow_call_flow_ok()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
@@ -278,9 +296,10 @@ public class AmqpSendHandlerTest
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
         String endpoint = "/messages/devicebound";
-
         createProtonObjects();
-
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        amqpSendHandler.createBinaryMessage(deviceId, content);
+        // Assert
         new Expectations()
         {
             {
@@ -294,9 +313,7 @@ public class AmqpSendHandlerTest
                 connection.close();
             }
         };
-
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
-        amqpSendHandler.createBinaryMessage(deviceId, content);
+        // Act
         amqpSendHandler.onLinkFlow(event);
     }
 
@@ -306,8 +323,9 @@ public class AmqpSendHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_020: [The event handler shall send the encoded bytes]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [The event handler shall close the Sender, Session and Connection]
     @Test
-    public void testOnLinkFlowBufferOverflow()
+    public void onLinkFlowBufferOverflow_call_flow_ok()
     {
+        // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
@@ -315,11 +333,10 @@ public class AmqpSendHandlerTest
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
         String endpoint = "/messages/devicebound";
-
         exceptionCount = 0;
         createProtonObjects();
-
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        // Assert
         new Expectations()
         {
             {
@@ -328,6 +345,7 @@ public class AmqpSendHandlerTest
                 link.getCredit();
             }
         };
+        // Act
         amqpSendHandler.onLinkFlow(event);
     }
 

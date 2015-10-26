@@ -5,6 +5,9 @@
 
 package com.microsoft.azure.iot.service.exceptions;
 
+/**
+ * Create bad message format exception
+ */
 public class IotHubBadFormatException extends IotHubException 
 {
     public IotHubBadFormatException()

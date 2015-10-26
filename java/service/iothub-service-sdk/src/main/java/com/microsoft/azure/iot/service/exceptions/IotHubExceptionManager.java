@@ -14,19 +14,26 @@ import javax.json.JsonReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Provide static function to verify results and throw appropriate exception.
+ */
 public class IotHubExceptionManager
 {
-    public static enum RegistryManagerAction
-    {
-        AddDevice,
-        GetDevice,
-        GetDevices,
-        UpdateDevice,
-        RemoveDevice,
-        GetStatistics
-    }
-    
-    public static void HttpResponseVerification(RegistryManagerAction registryManagerAction, HttpResponse httpsResponse)
+    /**
+     * Verify Http response using response status
+     *
+     * @param httpResponse
+     * @throws IotHubBadFormatException
+     * @throws IotHubUnathorizedException
+     * @throws IotHubTooManyDevicesException
+     * @throws IotHubPreconditionFailedException
+     * @throws IotHubTooManyRequestsException
+     * @throws IotHubInternalServerErrorException
+     * @throws IotHubServerBusyException
+     * @throws IotHubNotFoundException
+     * @throws IotHubException
+     */
+    public static void httpResponseVerification(HttpResponse httpResponse)
             throws 
             IotHubBadFormatException, 
             IotHubUnathorizedException, 
@@ -35,55 +42,72 @@ public class IotHubExceptionManager
             IotHubTooManyRequestsException,
             IotHubInternalServerErrorException,
             IotHubServerBusyException,
-            IotHubHubNotFoundException,
+            IotHubNotFoundException,
             IotHubException
     {
-        int responseStatus = httpsResponse.getStatus();
+        int responseStatus = httpResponse.getStatus();
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_001: [The function shall throw IotHubBadFormatException if the Http response status equal 400]
         if (400 == responseStatus)
         {
             throw new IotHubBadFormatException();
         }
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubUnathorizedException if the Http response status equal 401]
         else if (401 == responseStatus)
         {
             throw new IotHubUnathorizedException();
         }
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubTooManyDevicesException if the Http response status equal 403]
         else if (403 == responseStatus)
         {
             throw new IotHubTooManyDevicesException();
         }
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubNotFoundException if the Http response status equal 404]
         else if (404 == responseStatus)
         {
-            throw new IotHubHubNotFoundException();
+            throw new IotHubNotFoundException();
         }
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubPreconditionFailedException if the Http response status equal 412]
         else if (412 == responseStatus)
         {
             throw new IotHubPreconditionFailedException();
         }
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubTooManyRequestsException if the Http response status equal 429]
         else if (429 == responseStatus)
         {
             throw new IotHubTooManyRequestsException();
         }
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubInternalServerErrorException if the Http response status equal 500]
         else if (500 == responseStatus)
         {
             throw new IotHubInternalServerErrorException();
         }
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubServerBusyException if the Http response status equal 503]
         else if (503 == responseStatus)
         {
             throw new IotHubServerBusyException();
         }
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
         else if (responseStatus > 300)
         {
-            String errorMessage = "";
-            String jsonString = new String(httpsResponse.getErrorReason(), StandardCharsets.UTF_8);
-            try (JsonReader jsonReader = Json.createReader(new StringReader(jsonString)))
+            try
             {
-                JsonObject jsonObject = jsonReader.readObject();
-                if ((jsonObject != JsonObject.NULL) && (jsonObject != null))
+                String errorMessage = "";
+                String jsonString = new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8);
+                try (JsonReader jsonReader = Json.createReader(new StringReader(jsonString)))
                 {
-                    errorMessage = Tools.getStringValueFromJsonObject(jsonObject, "ExceptionMessage");
+                    JsonObject jsonObject = jsonReader.readObject();
+                    if ((jsonObject != JsonObject.NULL) && (jsonObject != null))
+                    {
+                        errorMessage = Tools.getValueFromJsonObject(jsonObject, "ExceptionMessage");
+                    }
                 }
+                throw new IotHubException(errorMessage);
             }
-            throw new IotHubException(errorMessage);
+            catch (Exception e)
+            {
+                throw new IotHubException("Unknown error reason");
+            }
         }
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_010: [The function shall return without exception if the response status equal or less than 300]
     }
 }

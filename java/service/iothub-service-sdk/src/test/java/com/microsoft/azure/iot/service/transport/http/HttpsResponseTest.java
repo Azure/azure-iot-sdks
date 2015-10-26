@@ -27,16 +27,16 @@ public class HttpsResponseTest
     @Test
     public void getStatusReturnsStatus()
     {
+        // Arrange
         final int status = 200;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
         final byte[] errorReason = {};
-
-        HttpResponse response =
-                new HttpResponse(status, body, headerFields, errorReason);
-        int testStatus = response.getStatus();
-
         final int expectedStatus = status;
+        // Act
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        int testStatus = response.getStatus();
+        // Assert
         assertThat(testStatus, is(expectedStatus));
     }
 
@@ -45,18 +45,17 @@ public class HttpsResponseTest
     @Test
     public void getBodyReturnsCopyOfBody()
     {
+        // Arrange
         final int status = 200;
         final byte[] body = { 1, 2, 3, 4 };
         final Map<String, List<String>> headerFields = new HashMap<>();
         byte[] errorReason = {};
-
-        HttpResponse response =
-                new HttpResponse(status, body, headerFields, errorReason);
-        byte[] testBody = response.getBody();
-
         final byte[] expectedBody = body;
+        // Act
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        byte[] testBody = response.getBody();
+        // Assert
         assertThat(testBody, is(expectedBody));
-
         testBody[0] = 3;
         assertThat(testBody, is(not(expectedBody)));
     }
@@ -66,6 +65,7 @@ public class HttpsResponseTest
     @Test
     public void getHeaderFieldReturnsHeaderField()
     {
+        // Arrange
         final int status = 200;
         final byte[] body = { 1 };
         final byte[] errorReason = {};
@@ -74,15 +74,14 @@ public class HttpsResponseTest
         final List<String> values = new LinkedList<>();
         final String value0 = "test-field-value0";
         final String value1 = "test-field-value1";
+        final String expectedValues = value0 + "," + value1;
         values.add(value0);
         values.add(value1);
         headerFields.put(field, values);
-
-        HttpResponse response =
-                new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         String testValues = response.getHeaderField(field);
-
-        final String expectedValues = value0 + "," + value1;
+        // Assert
         assertThat(testValues, is(expectedValues));
     }
 
@@ -90,6 +89,7 @@ public class HttpsResponseTest
     @Test
     public void getHeaderFieldMatchesCaseInsensitive()
     {
+        // Arrange
         final int status = 200;
         final byte[] body = { 1 };
         final byte[] errorReason = {};
@@ -98,32 +98,31 @@ public class HttpsResponseTest
         final List<String> values = new LinkedList<>();
         final String value0 = "test-field-value0";
         final String value1 = "test-field-value1";
+        final String expectedValues = value0 + "," + value1;
         values.add(value0);
         values.add(value1);
         headerFields.put(field, values);
-
-        HttpResponse response =
-                new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         String differentCaseField = "Test-Field";
         String testValues = response.getHeaderField(differentCaseField);
-
-        final String expectedValues = value0 + "," + value1;
+        // Assert
         assertThat(testValues, is(expectedValues));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSRESPONSE_12_006: [If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.]
+    // Assert
     @Test(expected = IllegalArgumentException.class)
-    public void getHeaderFieldRejectsInvalidFieldName()
-            throws IllegalArgumentException
+    public void getHeaderFieldRejectsInvalidFieldName() throws IllegalArgumentException
     {
+        // Arrange
         final int status = 200;
         final byte[] body = { 1 };
         final byte[] errorReason = {};
         final Map<String, List<String>> headerFields = new HashMap<>();
         final String field = "test-field";
-
-        HttpResponse response =
-                new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         response.getHeaderField(field);
     }
 
@@ -132,16 +131,16 @@ public class HttpsResponseTest
     @Test
     public void getErrorReasonReturnsErrorReason()
     {
+        // Arrange
         final int status = 200;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
         final byte[] errorReason = { 2, 3, 4, 5 };
-
-        HttpResponse response =
-                new HttpResponse(status, body, headerFields, errorReason);
-        byte[] testErrorReason = response.getErrorReason();
-
         final byte[] expectedErrorReason = errorReason;
+        // Act
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        byte[] testErrorReason = response.getErrorReason();
+        // Assert
         assertThat(testErrorReason, is(expectedErrorReason));
     }
 }

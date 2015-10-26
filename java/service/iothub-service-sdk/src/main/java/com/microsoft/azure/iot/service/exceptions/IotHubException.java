@@ -5,10 +5,11 @@
 
 package com.microsoft.azure.iot.service.exceptions;
 
+/**
+ * Super class for IotHub exceptions
+ */
 public class IotHubException extends Exception
 {
-  public IotHubException() { super(); }
-  public IotHubException(String message) { super(message); }
-  public IotHubException(String message, Throwable cause) { super(message, cause); }
-  public IotHubException(Throwable cause) { super(cause); }
-}    
+    public IotHubException() { super(); }
+    public IotHubException(String message) { super(message); }
+}

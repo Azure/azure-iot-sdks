@@ -122,7 +122,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
     public void onFeedbackReceived(String feedbackJson)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_010: [The function shall parse the received Json string to FeedbackBath object]
-        feedbackBatch = FeedbackBatchMessage.parseFeedbackBatch(feedbackJson);
+        feedbackBatch = FeedbackBatchMessage.parse(feedbackJson);
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_011: [The function shall release the event handling semaphore]
         semaphore.release();
     }

@@ -8,6 +8,10 @@ package com.microsoft.azure.iot.service.sdk;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * Expose all connections string properties and methods
+ * for user, device and connection string serialization.
+ */
 public class IotHubConnectionString extends IotHubConnectionStringBuilder
 {
     protected static final String VALUE_PAIR_DELIMITER = ";";
@@ -42,8 +46,14 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
     protected IotHubConnectionString() {}
 
+    /**
+     * Serialize user string
+     *
+     * @return Output format: "SharedAccessKeyName@sas.root.IotHubName"
+     */
     public String getUserString()
     {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_001: [The function shall serialize the object properties to a string using the following format: SharedAccessKeyName@sas.root.IotHubName]
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(this.sharedAccessKeyName);
         stringBuilder.append(USER_SEPARATOR);
@@ -53,29 +63,50 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         return stringBuilder.toString();
     }
 
+    /**
+     * Create url for requesting device data
+     *
+     * @param deviceId name of the device
+     * @return Output format: "https:hostname/devices/deviceId?api-version=201X-XX-XX"
+     * @throws MalformedURLException
+     */
     public URL getUrlDevice(String deviceId) throws MalformedURLException
     {
-        if (!Tools.isNullOrEmpty(deviceId))
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_002: [The function shall throw IllegalArgumentException if the input string is empty or null]
+        if (Tools.isNullOrEmpty(deviceId))
         {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(URL_HTTPS);
-            stringBuilder.append(hostName);
-            stringBuilder.append(URL_SEPARATOR_0);
-            stringBuilder.append(URL_PATH_DEVICES);
-            stringBuilder.append(URL_SEPARATOR_0);
-            stringBuilder.append(deviceId);
-            stringBuilder.append(URL_SEPARATOR_1);
-            stringBuilder.append(URL_API_VERSION);
-            return new URL(stringBuilder.toString());
+            throw new IllegalArgumentException("device name cannot be empty or null");
         }
-        else
-        {
-            return null;
-        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_003: [The function shall create a URL object from the given deviceId using the following format: https:hostname/devices/deviceId?api-version=201X-XX-XX]
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_DEVICES);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(deviceId);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
     }
 
+    /**
+     * Create url for requesting device list
+     *
+     * @param maxCount number of requested devices
+     * @return Output format: "https:hostname/devices/?maxCount=XX&api-version=201X-XX-XX"
+     * @throws MalformedURLException
+     */
     public URL getUrlDeviceList(Integer maxCount) throws MalformedURLException
     {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_004: [The constructor shall throw NullPointerException if the input integer is null]
+        if ((maxCount == null) || (maxCount < 1))
+        {
+            throw new IllegalArgumentException("maxCount cannot be null or less then 1");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_005: [The function shall create a URL object from the given integer using the following format: https:hostname/devices/?maxCount=XX&api-version=201X-XX-XX]
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(URL_HTTPS);
         stringBuilder.append(hostName);
@@ -90,8 +121,15 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         return new URL(stringBuilder.toString());
     }
 
+    /**
+     * Create url for requesting device statistics
+     *
+     * @return Output format: "https:hostname/statistics/devices?api-version=201X-XX-XX"
+     * @throws MalformedURLException
+     */
     public URL getUrlDeviceStatistics() throws MalformedURLException
     {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_006: [The function shall create a URL object from the object properties using the following format: https:hostname/statistics/devices?api-version=201X-XX-XX]
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(URL_HTTPS);
         stringBuilder.append(hostName);
@@ -104,54 +142,15 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         return new URL(stringBuilder.toString());
     }
 
-    public String getIotHubName()
-    {
-        return this.iotHubName;
-    }
-
-    public AuthenticationMethod getAuthenticationMethod()
-    {
-        return this.authenticationMethod;
-    }
-
-    public String getSharedAccessKeyName()
-    {
-        return this.sharedAccessKeyName;
-    }
-
-    public String getSharedAccessKey()
-    {
-        return this.sharedAccessKey;
-    }
-
-    public String getSharedAccessSignature()
-    {
-        return this.sharedAccessSignature;
-    }
-
-    public String getHostName()
-    {
-        return this.hostName;
-    }
-
-    protected void setSharedAccessKeyName(String sharedAccessKeyName)
-    {
-        this.sharedAccessKeyName = sharedAccessKeyName;
-    }
-
-    protected void setSharedAccessKey(String sharedAccessKey)
-    {
-        this.sharedAccessKey = sharedAccessKey;
-    }
-
-    protected void setSharedAccessSignature(String sharedAccessSignature)
-    {
-        this.sharedAccessSignature = sharedAccessSignature;
-    }
-
+    /**
+     * Serialize connection string
+     *
+     * @return Iot Hub connection string
+     */
     @Override
     public String toString()
     {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_007: [The function shall serialize the object to a string using the following format: HostName=HOSTNAME.b.c.d;SharedAccessKeyName=ACCESSKEYNAME;SharedAccessKey=1234567890abcdefghijklmnopqrstvwxyz=;SharedAccessSignature=]
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(HOST_NAME_PROPERTY_NAME);
         stringBuilder.append(VALUE_PAIR_SEPARATOR);
@@ -173,5 +172,89 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(this.sharedAccessSignature);
 
         return stringBuilder.toString();
+    }
+
+    /**
+     * Getter for iotHubName
+     *
+     * @return iothub name string
+     */
+    public String getIotHubName()
+    {
+        return this.iotHubName;
+    }
+
+    /**
+     * Getter for authenticationMethod
+     *
+     * @return AuthenticationMethod object
+     */
+    public AuthenticationMethod getAuthenticationMethod()
+    {
+        return this.authenticationMethod;
+    }
+
+    /**
+     * Getter for sharedAccessKeyName
+     *
+     * @return shared access key name string
+     */
+    public String getSharedAccessKeyName()
+    {
+        return this.sharedAccessKeyName;
+    }
+
+    /**
+     * Getter for sharedAccessKey
+     *
+     * @return shared access key string
+     */
+    public String getSharedAccessKey()
+    {
+        return this.sharedAccessKey;
+    }
+
+    /**
+     * Getter for sharedAccessSignature
+     *
+     * @return shared access signature string
+     */
+    public String getSharedAccessSignature()
+    {
+        return this.sharedAccessSignature;
+    }
+
+    /**
+     * Getter for hostName
+     *
+     * @return hostname string
+     */
+    public String getHostName()
+    {
+        return this.hostName;
+    }
+
+    /**
+     * Setter for sharedAccessKeyName
+     */
+    protected void setSharedAccessKeyName(String sharedAccessKeyName)
+    {
+        this.sharedAccessKeyName = sharedAccessKeyName;
+    }
+
+    /**
+     * Setter for sharedAccessKey
+     */
+    protected void setSharedAccessKey(String sharedAccessKey)
+    {
+        this.sharedAccessKey = sharedAccessKey;
+    }
+
+    /**
+     * Setter for sharedAccessSignature
+     */
+    protected void setSharedAccessSignature(String sharedAccessSignature)
+    {
+        this.sharedAccessSignature = sharedAccessSignature;
     }
 }

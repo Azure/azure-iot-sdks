@@ -19,10 +19,4 @@ public abstract class Receiver
 
     protected abstract CompletableFuture<FeedbackBatch> receiveAsync();
     protected abstract CompletableFuture<FeedbackBatch> receiveAsync(long timeoutSeconds);
-
-    protected abstract CompletableFuture<Boolean> abandonAsync(String lockToken);
-    protected abstract CompletableFuture<Boolean> completeAsync(String lockToken);
-    
-    protected abstract CompletableFuture<Boolean> abandonAsync(Message message);
-    protected abstract CompletableFuture<Boolean> completeAsync(Message message);
 }

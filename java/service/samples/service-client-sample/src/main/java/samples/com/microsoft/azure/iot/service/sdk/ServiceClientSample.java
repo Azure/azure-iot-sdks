@@ -70,7 +70,7 @@ public class ServiceClientSample
         System.out.println("********* Successfully created an ServiceClient.");
     }
 
-    protected static void closeServiceClient() throws ExecutionException, InterruptedException
+    protected static void closeServiceClient() throws ExecutionException, InterruptedException, IOException
     {
         serviceClient.close();
 
