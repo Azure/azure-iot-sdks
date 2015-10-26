@@ -8,7 +8,7 @@ set current-path=%~dp0
 rem // remove trailing slash
 set current-path=%current-path:~0,-1%
 
-set build-root=%current-path%\..\..\..
+set build-root=%current-path%\..\..
 rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
@@ -67,23 +67,26 @@ goto args-loop
 :args-done
 
 rem -----------------------------------------------------------------------------
-rem -- build csharp iot client
+rem -- build device explorer
 rem -----------------------------------------------------------------------------
-
-call nuget restore "%build-root%\csharp\device\iothub_csharp_client.sln"
+call nuget restore "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln"
 if %build-clean%==1 (
-    call :clean-a-solution "%build-root%\csharp\device\iothub_csharp_client.sln" %build-config% %build-platform%
+    call :clean-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln" %build-config% %build-platform%
     if not !errorlevel!==0 exit /b !errorlevel!
 )
-call :build-a-solution "%build-root%\csharp\device\iothub_csharp_client.sln" %build-config% %build-platform%
-if not !errorlevel!==0 exit /b !errorlevel!
+call :build-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln" %build-config% %build-platform%
+if not %errorlevel%==0 exit /b %errorlevel%
+
+rem -----------------------------------------------------------------------------
+rem -- build device explorer with installer
+rem -----------------------------------------------------------------------------
+devenv %build-root%\..\tools\DeviceExplorer\DeviceExplorerWithInstaller.sln /Build %build-config%
+if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
 rem -- done
 rem -----------------------------------------------------------------------------
-
 goto :eof
-
 
 rem -----------------------------------------------------------------------------
 rem -- subroutines
