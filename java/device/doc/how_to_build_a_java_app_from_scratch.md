@@ -42,7 +42,7 @@ or
 IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
 IotHubClient client = new IotHubClient(connString, protocol);
-```	
+```
 
 - Create and set up message callback if you want to handle IoT Hub messages
 
@@ -111,7 +111,7 @@ Navigate to the directory with the messages sample. Run the sample using the fol
 java -jar ./handle-messages-{version}-with-deps.jar "{connection string}" "{https or amqps}"
 ```
 
-Note that the double quotes around each argument are required.
+Note that the double quotes around each argument are required, but the braces '{' and '}' should be removed.
 
 <a name="logging"/>
 ### Change logging granularity
@@ -122,7 +122,7 @@ Include the following line in your `config.properties` file:
 .level = {LOGGING_LEVEL}
 ```
 
-An explanation of the different logging levels can be found 
+An explanation of the different logging levels can be found
 [here](http://docs.oracle.com/javase/7/docs/api/java/util/logging/Level.html).
 
 Then, set the JVM property `java.util.logging.config.file={Path to your config.properties file}`.
