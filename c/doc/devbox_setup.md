@@ -98,9 +98,9 @@ This section shows you how to set up a development environment for the Azure IoT
 
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
-3. Run the `setup.sh` script to install the prerequisite packages and the dependent libraries.
+3. Run the `/setup.sh` script to install the prerequisite packages and the dependent libraries.
 
-4. Run the `build.sh` script.
+4. Run the `./build.sh` script.
 
 This script uses **cmake** to make a folder called "cmake" in your home directory and generates a makefile. The script then builds the solution and runs the tests.
 
