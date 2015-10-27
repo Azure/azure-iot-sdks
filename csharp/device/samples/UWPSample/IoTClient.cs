@@ -13,12 +13,13 @@ namespace Microsoft.Azure.Devices.Client.Samples
     class IoTClient
     {
         private static int MESSAGE_COUNT = 5;
+        private const string DeviceConnectionString = "<replace>";
 
         public async static Task Start()
         {
             try
             {
-                DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(ConnectionStrings.DeviceConnectionString, TransportType.Http1);
+                DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Http1);
 
                 await SendEvent(deviceClient);
                 await ReceiveCommands(deviceClient);
