@@ -144,11 +144,6 @@ void simplesample_mqtt_run(void)
         }
         else
         {
-            unsigned int minimumPollingTime = 9; /*because it can poll "after 9 seconds" polls will happen effectively at ~10 seconds*/
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
-            {
-                printf("failure to set option \"MinimumPollingTime\"\r\n");
-            }
 
 #ifdef MBED_BUILD_TIMESTAMP
             // For mbed add the certificate information
