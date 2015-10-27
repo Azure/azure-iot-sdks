@@ -182,5 +182,7 @@ namespace Microsoft.Azure.Devices.Common.WebApi
         /// All the resource providers *must* return this value in the response headers to facilitate debugging.
         /// </summary>
         public const string RequestId = "x-ms-request-id";
+
+        public const string HttpErrorCodeName = "iothub-errorcode";
     }
 }

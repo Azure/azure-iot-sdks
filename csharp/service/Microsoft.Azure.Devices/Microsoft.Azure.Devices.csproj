@@ -91,6 +91,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ApiResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Common\Exceptions\ErrorCode.cs" />
     <Compile Include="Common\PerfectHash.cs" />
     <Compile Include="AuthenticationMechanism.cs" />
     <Compile Include="AuthenticationMethodFactory.cs" />
@@ -179,7 +180,6 @@
     <Compile Include="Common\Utils.cs" />
     <Compile Include="Common\WaitCallbackActionItem.cs" />
     <Compile Include="Common\WebApi\CustomHeaderConstants.cs" />
-    <Compile Include="Common\WebApi\ErrorMapper.cs" />
     <Compile Include="Common\WebApi\ResourceRequest.cs" />
     <Compile Include="DeliveryAcknowledgement.cs" />
     <Compile Include="DeliveryException.cs" />

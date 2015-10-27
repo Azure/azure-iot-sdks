@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 namespace Microsoft.Azure.Devices.Common.Exceptions
 {
     using System;
@@ -100,7 +101,7 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
 
             if (exception is AmqpException)
             {
-                AmqpException amqpException = (AmqpException) exception;
+                AmqpException amqpException = (AmqpException)exception;
                 error.Condition = amqpException.Error.Condition;
                 error.Info = amqpException.Error.Info;
             }
@@ -193,7 +194,7 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
 
             string trackingId;
             error.Info.TryGetValue(IotHubAmqpProperty.TrackingId, out trackingId);
-            trackingId = TrackingHelper.CheckAndAddGatewayIdToTrackingId(trackingId);                
+            trackingId = TrackingHelper.CheckAndAddGatewayIdToTrackingId(trackingId);
             error.Info[IotHubAmqpProperty.TrackingId] = trackingId;
 
             return error;
@@ -230,8 +231,8 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
             Exception retException;
             if (error == null)
             {
-               retException = new IotHubException("Unknown error.");
-               return retException;
+                retException = new IotHubException("Unknown error.");
+                return retException;
             }
 
             string message = error.Description;
@@ -284,7 +285,7 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
             }
             else if (error.Condition.Equals(IotHubAmqpErrorCode.DeviceAlreadyExists))
             {
-                retException = new DeviceAlreadyExistsException(message, (Exception)null) ;
+                retException = new DeviceAlreadyExistsException(message, (Exception)null);
             }
             else if (error.Condition.Equals(IotHubAmqpErrorCode.DeviceContainerThrottled))
             {
@@ -309,7 +310,7 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
 
             if (trackingId != null && retException is IotHubException)
             {
-                IotHubException iotHubException = (IotHubException) retException;                
+                IotHubException iotHubException = (IotHubException)retException;
                 iotHubException.TrackingId = trackingId;
             }
             return retException;

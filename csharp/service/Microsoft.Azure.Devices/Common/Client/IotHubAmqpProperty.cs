@@ -11,5 +11,6 @@ namespace Microsoft.Azure.Devices.Common.Client
         public static readonly AmqpSymbol TimeoutName = AmqpConstants.Vendor + ":timeout";
         public static readonly AmqpSymbol StackTraceName = AmqpConstants.Vendor + ":stack-trace";
         public static readonly AmqpSymbol TrackingId = AmqpConstants.Vendor + ":tracking-id";
+        public static readonly AmqpSymbol ErrorCode = AmqpConstants.Vendor + ":error-code";
     }
 }

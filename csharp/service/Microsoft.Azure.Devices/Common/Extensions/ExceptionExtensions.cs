@@ -9,6 +9,8 @@ namespace Microsoft.Azure.Devices.Common
     using System.Linq;
     using System.Reflection;
 
+    using Microsoft.Azure.Devices.Common.Exceptions;
+
     public static class ExceptionExtensions
     {
         const string ExceptionIdentifierName = "ExceptionId";
@@ -125,6 +127,19 @@ namespace Microsoft.Azure.Devices.Common
             }
 
             return true;
+        }
+
+        public static bool CheckIotHubErrorCode(this Exception ex, params ErrorCode[] errorCodeList)
+        {
+            foreach(var errorCode in errorCodeList)
+            { 
+                if(ex is IotHubException && ((IotHubException) ex).Code == errorCode)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
