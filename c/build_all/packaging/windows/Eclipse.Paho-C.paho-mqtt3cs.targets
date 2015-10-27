@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="Eclipse_Paho_mqtt3cs_init">
+ <PropertyGroup Label="Default initializers for properties">
+    <Linkage-Eclipse_Paho_mqtt3cs Condition="'$(Linkage-Eclipse_Paho_mqtt3cs)' == ''">static</Linkage-Eclipse_Paho_mqtt3cs>
+    <CallingConvention-Eclipse_Paho_mqtt3cs Condition="'$(CallingConvention-Eclipse_Paho_mqtt3cs)' == ''">cdecl</CallingConvention-Eclipse_Paho_mqtt3cs>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)../../build/native/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+	  <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)../../build/native/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Win32Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'Win32' ) )">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../../lib/native/Win32/Debug/paho-mqtt3cs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Win32Release" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'Win32' ) )">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../../lib/native/Win32/Release/paho-mqtt3cs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Win64Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'x64' ) )">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../../lib/native/x64/Debug/paho-mqtt3cs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Win64Release" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'x64' ) )">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../../lib/native/x64/Release/paho-mqtt3cs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <UsingTask TaskName="Eclipse_Paho_mqtt3cs_Contains" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">
+    <ParameterGroup>
+      <Text Output="false" ParameterType="System.String" />
+      <Library Output="false" Required="true" ParameterType="System.String" />
+      <Value Output="false" Required="true" ParameterType="System.String" />
+      <Result Output="true" ParameterType="System.String" />
+    </ParameterGroup>
+    <Task>
+      <Code>Result = ((Text ?? "").Split(';').Contains(Library) ) ? Value : String.Empty;</Code>
+    </Task>
+  </UsingTask>
+  <Target Name="Eclipse_Paho_mqtt3cs_init">
+    <Eclipse_Paho_mqtt3cs_Contains Text="Linkage-dynamic" Library="Eclipse_Paho_mqtt3cs" Value="dynamic" Condition="'$(Linkage-Eclipse_Paho_mqtt3cs)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-Eclipse_Paho_mqtt3cs" />
+    </Eclipse_Paho_mqtt3cs_Contains>
+    <Eclipse_Paho_mqtt3cs_Contains Text="Linkage-static" Library="Eclipse_Paho_mqtt3cs" Value="static" Condition="'$(Linkage-Eclipse_Paho_mqtt3cs)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-Eclipse_Paho_mqtt3cs" />
+    </Eclipse_Paho_mqtt3cs_Contains>
+    <Eclipse_Paho_mqtt3cs_Contains Text="Linkage-ltcg" Library="Eclipse_Paho_mqtt3cs" Value="ltcg" Condition="'$(Linkage-Eclipse_Paho_mqtt3cs)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-Eclipse_Paho_mqtt3cs" />
+    </Eclipse_Paho_mqtt3cs_Contains>
+    <Eclipse_Paho_mqtt3cs_Contains Text="Linkage-sxs" Library="Eclipse_Paho_mqtt3cs" Value="sxs" Condition="'$(Linkage-Eclipse_Paho_mqtt3cs)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-Eclipse_Paho_mqtt3cs" />
+    </Eclipse_Paho_mqtt3cs_Contains>
+    <Eclipse_Paho_mqtt3cs_Contains Text="CallingConvention-cdecl" Library="Eclipse_Paho_mqtt3cs" Value="cdecl" Condition="'$(CallingConvention-Eclipse_Paho_mqtt3cs)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-Eclipse_Paho_mqtt3cs" />
+    </Eclipse_Paho_mqtt3cs_Contains>
+    <Eclipse_Paho_mqtt3cs_Contains Text="CallingConvention-stdcall" Library="Eclipse_Paho_mqtt3cs" Value="stdcall" Condition="'$(CallingConvention-Eclipse_Paho_mqtt3cs)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-Eclipse_Paho_mqtt3cs" />
+    </Eclipse_Paho_mqtt3cs_Contains>
+    <Eclipse_Paho_mqtt3cs_Contains Text="CallingConvention-fastcall" Library="Eclipse_Paho_mqtt3cs" Value="fastcall" Condition="'$(CallingConvention-Eclipse_Paho_mqtt3cs)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-Eclipse_Paho_mqtt3cs" />
+    </Eclipse_Paho_mqtt3cs_Contains>
+    <Eclipse_Paho_mqtt3cs_Contains Text="CallingConvention-thiscall" Library="Eclipse_Paho_mqtt3cs" Value="thiscall" Condition="'$(CallingConvention-Eclipse_Paho_mqtt3cs)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-Eclipse_Paho_mqtt3cs" />
+    </Eclipse_Paho_mqtt3cs_Contains>
+    <Eclipse_Paho_mqtt3cs_Contains Text="CallingConvention-clrcall" Library="Eclipse_Paho_mqtt3cs" Value="clrcall" Condition="'$(CallingConvention-Eclipse_Paho_mqtt3cs)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-Eclipse_Paho_mqtt3cs" />
+    </Eclipse_Paho_mqtt3cs_Contains>
+  </Target>
+    <Target Name="Eclipse_Paho_mqtt3cs_redist_AfterBuild" AfterTargets="AfterBuild" />
+  <Target Name="Eclipse_Paho_mqtt3cs_redist_AfterBuild_Win32_and_Debug" Label="Win32 and Debug" Condition="'$(Platform.ToLower())' == 'win32' And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="Eclipse_Paho_mqtt3cs_redist_AfterBuild">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../../lib/native/Win32/Debug/paho-mqtt3cs.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="Eclipse_Paho_mqtt3cs_redist_AfterBuild_Win32_and_Release" Label="Win32 and Release" Condition="'$(Platform.ToLower())' == 'win32' And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" AfterTargets="Eclipse_Paho_mqtt3cs_redist_AfterBuild">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../../lib/native/Win32/Release/paho-mqtt3cs.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="Eclipse_Paho_mqtt3cs_redist_AfterBuild_Win64_and_Debug" Label="Win64 and Debug" Condition="'$(Platform.ToLower())' == 'x64' And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="Eclipse_Paho_mqtt3cs_redist_AfterBuild">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../../lib/native/x64/Debug/paho-mqtt3cs.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="Eclipse_Paho_mqtt3cs_redist_AfterBuild_Win64_and_Release" Label="Win64 and Release" Condition="'$(Platform.ToLower())' == 'x64' And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" AfterTargets="Eclipse_Paho_mqtt3cs_redist_AfterBuild">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../../lib/native/x64/Release/paho-mqtt3cs.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
+  
+</Project>
