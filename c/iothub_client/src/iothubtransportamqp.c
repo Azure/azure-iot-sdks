@@ -105,7 +105,7 @@ static bool checkForErrorsThenWork(PAMQP_TRANSPORT_STATE transportState)
     return result;
 }
 
-static int setMessageId(IOTHUB_MESSAGE_HANDLE ioTMessage, pn_message_t* msg)
+static int setRecvMessageIds(IOTHUB_MESSAGE_HANDLE ioTMessage, pn_message_t* msg)
 {
     int result;
 
@@ -136,6 +136,88 @@ static int setMessageId(IOTHUB_MESSAGE_HANDLE ioTMessage, pn_message_t* msg)
         result = 0;
     }
 
+    if (result == 0)
+    {
+        pn_atom_t corrIdInfo = pn_message_get_correlation_id(msg);
+        if (corrIdInfo.type != PN_NULL)
+        {
+            if (corrIdInfo.type != PN_STRING)
+            {
+                LogError("Message Id Failure: Invalid correlation id Type %d\r\n", corrIdInfo.type);
+                result = __LINE__;
+            }
+            else
+            {
+                if (IoTHubMessage_SetCorrelationId(ioTMessage, corrIdInfo.u.as_bytes.start) != IOTHUB_MESSAGE_OK)
+                {
+                    result = __LINE__;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+        }
+        else
+        {
+            // NULL values mean it's not set
+            result = 0;
+        }
+    }
+    return result;
+}
+
+static int setSendMessageIds(PDLIST_ENTRY messagesEntry, pn_message_t* msg)
+{
+    int result;
+
+    IOTHUB_MESSAGE_LIST* currentMessage = containingRecord(messagesEntry->Flink, IOTHUB_MESSAGE_LIST, entry);
+    const char* messageId = IoTHubMessage_GetMessageId(currentMessage->messageHandle);
+    if (messageId != NULL)
+    {
+        pn_bytes_t dataBytes = pn_bytes(strlen(messageId), messageId);
+        pn_atom_t pnMsgId;
+        pnMsgId.type = PN_STRING;
+        pnMsgId.u.as_bytes = dataBytes;
+        if (pn_message_set_id(msg, pnMsgId) == 0)
+        {
+            result = 0;
+        }
+        else
+        {
+            LogError("Failure setting pn_message_set_id.\r\n");
+            result = __LINE__;
+        }
+    }
+    else
+    {
+        result = 0;
+    }
+
+    if (result == 0)
+    {
+        const char* correlationId = IoTHubMessage_GetCorrelationId(currentMessage->messageHandle);
+        if (correlationId != NULL)
+        {
+            pn_bytes_t dataBytes = pn_bytes(strlen(correlationId), correlationId);
+            pn_atom_t pnCorrelationId;
+            pnCorrelationId.type = PN_STRING;
+            pnCorrelationId.u.as_bytes = dataBytes;
+            if (pn_message_set_correlation_id(msg, pnCorrelationId) == 0)
+            {
+                result = 0;
+            }
+            else
+            {
+                LogError("Failure setting pn_message_set_correlation_id.\r\n");
+                result = __LINE__;
+            }
+        }
+        else
+        {
+            result = 0;
+        }
+    }
     return result;
 }
 
@@ -1023,6 +1105,13 @@ static void sendEvent(PAMQP_TRANSPORT_STATE transportState)
                 /*Codes_SRS_IOTHUBTRANSPORTTAMQP_06_082: [sendEvent will then break out of the send loop.]*/
                 break;
             }
+            else if (setSendMessageIds(&headOfAvailable->eventMessages, transportState->message))
+            {
+                /*Codes_SRS_IOTHUBTRANSPORTTAMQP_06_081: [sendEvent will take the item that had been the head of the waitingToSend and put it back at the head of the waitingToSend list.]*/
+                putSecondListAfterHeadOfFirst(transportState->waitingToSend, &headOfAvailable->eventMessages);
+                /*Codes_SRS_IOTHUBTRANSPORTTAMQP_06_082: [sendEvent will then break out of the send loop.]*/
+                break;
+            }
             else
             {
                 /*Codes_SRS_IOTHUBTRANSPORTTAMQP_06_083: [If the proton API is successful then invoke pn_messenger_put.]*/
@@ -1244,7 +1333,7 @@ static void processMessage(PAMQP_TRANSPORT_STATE transportState, pn_tracker_t tr
                     pn_messenger_settle(transportState->messenger, tracker, 0);
                 }
                 /* Codes_SRS_IOTHUBTRANSPORTTAMQP_07_003: [If the pn_message_get_id value is not NULL then the value will be set by calling IotHubMessage_SetMessageId.] */
-                else if (setMessageId(ioTMessage, transportState->message) != 0)
+                else if (setRecvMessageIds(ioTMessage, transportState->message) != 0)
                 {
                     LogError("Failed to set MessageId for IoT hub message\r\n");
                     pn_messenger_release(transportState->messenger, tracker, 0);
