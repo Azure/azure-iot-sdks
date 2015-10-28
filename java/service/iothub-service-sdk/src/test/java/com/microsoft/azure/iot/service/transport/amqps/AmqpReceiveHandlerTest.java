@@ -137,7 +137,6 @@ public class AmqpReceiveHandlerTest
                 connection = event.getConnection();
                 transport = connection.getTransport();
                 sasl.plain(anyString, anyString);
-                address = new Address(hostAddr);
                 sslDomain = Proton.sslDomain();
                 sslDomain.init(SslDomain.Mode.CLIENT);
                 sslDomain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);

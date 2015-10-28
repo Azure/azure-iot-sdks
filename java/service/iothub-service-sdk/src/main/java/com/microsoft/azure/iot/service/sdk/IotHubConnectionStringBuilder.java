@@ -25,9 +25,9 @@ public class IotHubConnectionStringBuilder
     /**
      * Static constructor to create IotHubConnectionString deserialize the given string
      *
-     * @param connectionString serialized connection string
-     * @return IotHubConnectionString object
-     * @throws Exception
+     * @param connectionString The serialized connection string
+     * @return The IotHubConnectionString object
+     * @throws Exception This exception is thrown if the object creation failed
      */
     public static IotHubConnectionString createConnectionString(String connectionString) throws Exception
     {
@@ -45,10 +45,10 @@ public class IotHubConnectionStringBuilder
     /**
      * Static constructor to create IotHubConnectionString from host name and authentication method
      *
-     * @param hostName hos tname string
-     * @param authenticationMethod AuthenticationMethod object
-     * @return IotHubConnectionString object
-     * @throws Exception
+     * @param hostName The hostName string
+     * @param authenticationMethod The AuthenticationMethod object
+     * @return The IotHubConnectionString object
+     * @throws Exception This exception is thrown if the object creation failed
      */
     public static IotHubConnectionString createConnectionString(String hostName, AuthenticationMethod authenticationMethod) throws Exception
     {
@@ -73,9 +73,9 @@ public class IotHubConnectionStringBuilder
     /**
      * Deserialize connection string
      *
-     * @param connectionString connection string to deserialize
-     * @param iotHubConnectionString target object for deserialization
-     * @throws Exception
+     * @param connectionString The connection string to deserialize
+     * @param iotHubConnectionString The target object for deserialization
+     * @throws Exception This exception is thrown if the parsing failed
      */
     protected static void parse(String connectionString, IotHubConnectionString iotHubConnectionString) throws Exception
     {
@@ -132,8 +132,8 @@ public class IotHubConnectionStringBuilder
     /**
      * Parse the iot hub name part from the host name
      *
-     * @param iotHubConnectionString source iotHubConnectionString contains the host name
-     * @return substring of the host name until the first "." character
+     * @param iotHubConnectionString The source iotHubConnectionString containing the hostName
+     * @return The substring of the host name until the first "." character
      */
     protected static String parseIotHubName(IotHubConnectionString iotHubConnectionString)
     {
@@ -153,10 +153,10 @@ public class IotHubConnectionStringBuilder
     /**
      * Validate IotHubConnectionString format
      *
-     * @param iotHubConnectionString object to validate
-     * @throws IllegalArgumentException
+     * @param iotHubConnectionString The object to validate
+     * @throws IllegalArgumentException This exception is thrown if the input object is null
      */
-    protected static void validate(IotHubConnectionString iotHubConnectionString) throws Exception
+    protected static void validate(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_015: [The function shall throw IllegalArgumentException if the sharedAccessKeyName of the input itoHubConnectionString is empty]
         if (Tools.isNullOrWhiteSpace(iotHubConnectionString.sharedAccessKeyName))
@@ -179,9 +179,9 @@ public class IotHubConnectionStringBuilder
     /**
      * Validate string property using given regex
      *
-     * @param value string value to validate
-     * @param propertyName property name
-     * @param regex regex used for validation
+     * @param value The string value to validate
+     * @param propertyName The property name
+     * @param regex The regex used for validation
      */
     protected static void validateFormat(String value, String propertyName, String regex)
     {

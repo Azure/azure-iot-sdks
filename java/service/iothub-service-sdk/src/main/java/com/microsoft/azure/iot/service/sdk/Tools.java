@@ -17,11 +17,10 @@ import java.util.Map;
 public class Tools
 {
     /**
-     * Helper function to check if the
-     * input string is null or empty
+     * Helper function to check if the input string is null or empty
      *
-     * @param value string to check
-     * @return true if the input string is empty or null
+     * @param value The string to check
+     * @return The value true if the input string is empty or null
      */
     public static Boolean isNullOrEmpty(String value)
     {
@@ -39,11 +38,10 @@ public class Tools
     }
 
     /**
-     * Helper function to check if the
-     * input string is null or contains only whitespace(s)
+     * Helper function to check if the input string is null or contains only whitespace(s)
      *
-     * @param value string to check
-     * @return true if the input string is empty or contains only whitespace(s)
+     * @param value The string to check
+     * @return The value true if the input string is empty or contains only whitespace(s)
      */
     public static Boolean isNullOrWhiteSpace(String value)
     {
@@ -63,12 +61,11 @@ public class Tools
     }
 
     /**
-     * Helper function to get a value from the given Map
-     * if the key name exists
+     * Helper function to get a value from the given Map if the key name exists
      *
-     * @param map Map object to get the value from
-     * @param keyName name of the key
-     * @return the value of the given key if exists otherwise empty string
+     * @param map The Map object to get the value from
+     * @param keyName The name of the key
+     * @return The value of the given key if exists otherwise empty string
      */
     public static String getValueStringByKey(Map map, String keyName)
     {
@@ -95,12 +92,11 @@ public class Tools
     }
 
     /**
-     * Helper function to get a value from the given JsonObject
-     * if the key name exists
-     *JsonObject object to get the value from
-     * @param jsonObject JsonObject object to get the value from
-     * @param key name of the key
-     * @return the value of the given key if exists otherwise empty string
+     * Helper function to get a value from the given JsonObject if the key name exists
+     *
+     * @param jsonObject The JsonObject object to get the value from
+     * @param key The name of the key
+     * @return The value of the given key if exists otherwise empty string
      */
     public static String getValueFromJsonObject(JsonObject jsonObject, String key)
     {
@@ -130,11 +126,10 @@ public class Tools
     }
 
     /**
-     * Helper function to get trim the leading and trailing
-     * parenthesis from a Json string if they exists
+     * Helper function to get trim the leading and trailing parenthesis from a Json string if they exists
      *
-     * @param jsonString JsonString to trim
-     * @return trimmed string
+     * @param jsonString The JsonString to trim
+     * @return The trimmed string
      */
     public static String getValueFromJsonString(JsonString jsonString)
     {
@@ -162,12 +157,11 @@ public class Tools
     }
 
     /**
-     * Helper function to get numeric value
-     * from a JsonObject
+     * Helper function to get numeric value from a JsonObject
      *
-     * @param jsonObject JsonObject object to get the value from
-     * @param key name of the key
-     * @return numeric value
+     * @param jsonObject The JsonObject object to get the value from
+     * @param key The name of the key
+     * @return The numeric value
      */
     public static long getNumberValueFromJsonObject(JsonObject jsonObject, String key)
     {
@@ -205,14 +199,13 @@ public class Tools
     }
 
     /**
-     * Helper function to properly craft Json string
-     * of key-value pair
+     * Helper function to properly craft Json string of key-value pair
      *
-     * @param strBuilder StringBuilder to work on
-     * @param name name of the key
-     * @param value value
-     * @param isQuoted if true leading and trailing quotes will be added
-     * @param isLast if false trailing comma will added
+     * @param strBuilder The StringBuilder to work on
+     * @param name The name of the key
+     * @param value The value of the key
+     * @param isQuoted If true leading and trailing quotes will be added
+     * @param isLast If false trailing comma will added
      */
     public static void appendJsonAttribute(StringBuilder strBuilder, String name, String value, Boolean isQuoted, Boolean isLast)
     {
@@ -256,5 +249,4 @@ public class Tools
             }
         }
     }
-
 }

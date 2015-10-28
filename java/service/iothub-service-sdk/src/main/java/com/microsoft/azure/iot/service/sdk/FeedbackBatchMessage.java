@@ -19,10 +19,10 @@ import java.util.ArrayList;
 public class FeedbackBatchMessage
 {
     /**
-     * Parse received Json and create FeedbackBAtch object
+     * Parse received Json and create FeedbackBatch object
      *
-     * @param jsonString json string to parse
-     * @return created FeedbackBatch
+     * @param jsonString Json string to parse
+     * @return The created FeedbackBatch
      */
     public static FeedbackBatch parse(String jsonString)
     {

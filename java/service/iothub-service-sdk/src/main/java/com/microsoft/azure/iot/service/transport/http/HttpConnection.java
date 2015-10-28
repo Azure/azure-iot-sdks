@@ -41,10 +41,10 @@ public class HttpConnection
     /**
      * Constructor. Opens a connection to the given URL.
      *
-     * @param url the URL for the HTTPS connection.
-     * @param method the HTTPS method (i.e. GET).
+     * @param url The URL for the HTTPS connection.
+     * @param method The HTTPS method (i.e. GET).
      *
-     * @throws IOException if the connection was unable to be opened.
+     * @throws IOException  This exception is thrown if the connection was unable to be opened.
      */
     public HttpConnection(URL url, HttpMethod method) throws IOException
     {
@@ -71,8 +71,8 @@ public class HttpConnection
     /**
      * Sends the request to the URL given in the constructor.
      *
-     * @throws IOException if the connection could not be established, or the
-     * server responded with a bad status code.
+     * @throws IOException This exception thrown if the connection could not be established,
+     * or the server responded with a bad status code.
      */
     public void connect() throws IOException
     {
@@ -90,10 +90,10 @@ public class HttpConnection
     /**
      * Sets the request method (i.e. POST).
      *
-     * @param method the request method.
+     * @param method The request method.
      *
-     * @throws IllegalArgumentException if the request currently has a non-empty
-     * body and the new method is not a POST or a PUT. This is because Java's
+     * @throws IllegalArgumentException This exception thrown if the request currently
+     * has a non-empty body and the new method is not a POST or a PUT. This is because Java's
      * HttpsURLConnection silently converts the HTTPS method to POST or PUT if a
      * body is written to the request.
      */
@@ -124,8 +124,8 @@ public class HttpConnection
     /**
      * Sets the request header field to the given value.
      *
-     * @param field the header field name.
-     * @param value the header field value.
+     * @param field The header field name.
+     * @param value The header field value.
      */
     public void setRequestHeader(String field, String value)
     {
@@ -138,7 +138,7 @@ public class HttpConnection
      * milliseconds after the server receives a request and before the server
      * sends data back.
      *
-     * @param timeout the read timeout.
+     * @param timeout The read timeout.
      */
     public void setReadTimeoutMillis(int timeout)
     {
@@ -149,7 +149,7 @@ public class HttpConnection
     /**
      * Saves the body to be sent with the request.
      *
-     * @param body the request body.
+     * @param body The request body.
      *
      * @throws IllegalArgumentException if the request does not currently use
      * method POST or PUT and the body is non-empty. This is because Java's
@@ -180,10 +180,10 @@ public class HttpConnection
     /**
      * Reads from the input stream (response stream) and returns the response.
      *
-     * @return the response body.
+     * @return The response body.
      *
-     * @throws IOException if the input stream could not be accessed, for
-     * example if the server could not be reached.
+     * @throws IOException This exception thrown if the input stream could not be
+     * accessed, for example if the server could not be reached.
      */
     public byte[] readInput() throws IOException
     {
@@ -200,10 +200,10 @@ public class HttpConnection
     /**
      * Reads from the error stream and returns the error reason.
      *
-     * @return the error reason.
+     * @return The error reason.
      *
-     * @throws IOException if the input stream could not be accessed, for
-     * example if the server could not be reached.
+     * @throws IOException This exception thrown if the input stream could not be
+     * accessed, for example if the server could not be reached.
      */
     public byte[] readError() throws IOException
     {
@@ -226,9 +226,9 @@ public class HttpConnection
     /**
      * Returns the response status code.
      *
-     * @return the response status code.
+     * @return The response status code.
      *
-     * @throws IOException if no response was received.
+     * @throws IOException This exception thrown if no response was received.
      */
     public int getResponseStatus() throws IOException
     {
@@ -244,7 +244,7 @@ public class HttpConnection
      *
      * @return the response headers.
      *
-     * @throws IOException if no response was received.
+     * @throws IOException This exception thrown if no response was received.
      */
     public Map<String, List<String>> getResponseHeaders() throws IOException
     {
@@ -256,11 +256,11 @@ public class HttpConnection
     /**
      * Reads the input stream until the stream is empty.
      *
-     * @param stream the input stream.
+     * @param stream The input stream.
      *
-     * @return the content of the input stream.
+     * @return The content of the input stream.
      *
-     * @throws IOException if the input stream could not be read from.
+     * @throws IOException This exception thrown if the input stream could not be read from.
      */
     protected static byte[] readInputStream(InputStream stream)
             throws IOException
