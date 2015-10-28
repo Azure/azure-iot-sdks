@@ -29,7 +29,7 @@ public class SymmetricKey
 
     /**
      * Getter for primary key
-     * @return primary key
+     * @return Primary key part of the symmetric key
      */
     public String getPrimaryKey()
     {
@@ -40,7 +40,7 @@ public class SymmetricKey
      * Setter for primary key
      * Validates the length of the key
      *
-     * @param primaryKey
+     * @param primaryKey Primary key part of the symmetric key
      */
     public void setPrimaryKey(String primaryKey)
     {
@@ -52,7 +52,7 @@ public class SymmetricKey
 
     /**
      * Getter for secondary key
-     * @return secondary key
+     * @return Secondary key part of the symmetric key
      */
     public String getSecondaryKey()
     {
@@ -63,7 +63,7 @@ public class SymmetricKey
      * Setter for secondary key
      * Validates the length of the key
      *
-     * @param secondaryKey
+     * @param secondaryKey Secondary key part of the symmetric key
      */
     public void setSecondaryKey(String secondaryKey)
     {
@@ -75,7 +75,7 @@ public class SymmetricKey
 
     /**
      * Validate the length of the key
-     * @param key
+     * @param key The key to validate
      */
     private void validateDeviceAuthenticationKey(String key)
     {

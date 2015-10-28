@@ -14,6 +14,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * IotHub specific message container
+ */
 public class Message
 {
     /**
@@ -165,7 +168,7 @@ public class Message
 
     /**
     * stream: a stream containing the body of the message
-     * @param stream
+     * @param stream The stream containing the message body
     **/
     public Message(ByteArrayInputStream stream)
     {
@@ -177,7 +180,7 @@ public class Message
 
     /**
     * byteArray: a byte array containing the body of the message
-     * @param byteArray
+     * @param byteArray The byte array containing the message body
     **/
     public Message(byte[] byteArray)
     {
@@ -185,10 +188,14 @@ public class Message
     }
 
     /**
+     */
+    /**
+     *
      * @param string - a string containing the body of the message.
      * Important: If a string is passed, the HttpBatch.SerializeAsString is set to true,
      * and the internal byte representation is serialized as UTF-8,
      * with HttpBatch.Encoding set to UTF-8.
+     * @throws UnsupportedEncodingException This exception is thrown if unsupported encoding used
      */
     public Message(String string) throws UnsupportedEncodingException
     {
@@ -197,7 +204,7 @@ public class Message
 
     /**
     * The stream content of the body.
-     * @return 
+     * @return The ByteArrayOutputStream object containing the message body
     **/
     public ByteArrayOutputStream getBodyStream()
     {
@@ -208,7 +215,7 @@ public class Message
 
     /**
     * The byte content of the body.
-     * @return 
+     * @return The byte array of the message body
     **/
     public byte[] getBytes()
     {

@@ -4,13 +4,8 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
-
-#if WINDOWS_UWP
-    internal
-#else
-    public
-#endif
-    sealed class DeviceAuthenticationWithSharedAccessPolicyKey : IAuthenticationMethod
+    
+    public sealed class DeviceAuthenticationWithSharedAccessPolicyKey : IAuthenticationMethod
     {
         string deviceId;
         string policyName;

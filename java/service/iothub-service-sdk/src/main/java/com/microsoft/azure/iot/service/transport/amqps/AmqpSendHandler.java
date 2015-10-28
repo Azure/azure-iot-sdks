@@ -40,11 +40,11 @@ class AmqpSendHandler extends BaseHandler
     private int nextTag = 0;
 
     /**
-     * Constructor to set up connection parameters and initialize
-     * handshaker for transport 
-     * @param hostName address string of the service (example: AAA.BBB.CCC)
-     * @param userName username string to use SASL authentication (example: user@sas.service)
-     * @param sasToken SAS token string
+     * Constructor to set up connection parameters and initialize handshaker for transport
+     *
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
      */
     AmqpSendHandler(String hostName, String userName, String sasToken) 
     {
@@ -68,8 +68,7 @@ class AmqpSendHandler extends BaseHandler
         this.userName = userName;
         this.sasToken = sasToken;
 
-        // Add a child handler that performs some default handshaking
-        // behaviour.
+        // Add a child handler that performs some default handshaking behaviour.
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_004: [The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake]
         add(new Handshaker());
     }
@@ -86,8 +85,8 @@ class AmqpSendHandler extends BaseHandler
 
     /**
      * Create Proton message from deviceId and content string
-     * @param deviceId device name string
-     * @param content content string of the message
+     * @param deviceId The device name string
+     * @param content The content string of the message
      */
     public void createBinaryMessage(String deviceId, String content)
     {
@@ -109,9 +108,9 @@ class AmqpSendHandler extends BaseHandler
 
     /**
      * Create Proton SslDomain object from Address using the given Ssl mode
-     * @param address Proton Address object
-     * @param mode Proton enum value of requested Ssl mode
-     * @return the created Ssl domain
+     * @param address The proton address object
+     * @param mode The proton enum value of requested Ssl mode
+     * @return The created Ssl domain
      */
     private SslDomain makeDomain(Address address, SslDomain.Mode mode)
     {
@@ -123,7 +122,7 @@ class AmqpSendHandler extends BaseHandler
 
     /**
      * Event handler for the connection bound event
-     * @param event Proton Event object
+     * @param event The proton event object
      */
     @Override
     public void onConnectionBound(Event event)
@@ -146,7 +145,7 @@ class AmqpSendHandler extends BaseHandler
 
     /**
      * Event handler for the connection init event
-     * @param event Proton Event object
+     * @param event The proton event object
      */
     @Override
     public void onConnectionInit(Event event)
@@ -178,7 +177,7 @@ class AmqpSendHandler extends BaseHandler
 
     /**
      * Event handler for the link init event
-     * @param event Proton Event object
+     * @param event The proton event object
      */
     @Override
     public void onLinkInit(Event event)
@@ -193,7 +192,7 @@ class AmqpSendHandler extends BaseHandler
 
     /**
      * Event handler for the link flow event
-     * @param event Proton Event object
+     * @param event The proton event object
      */
     @Override
     public void onLinkFlow(Event event)

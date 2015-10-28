@@ -11,6 +11,7 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
     {
         const string IsTransientValueSerializationStoreName = "IotHubException-IsTransient";
         const string TrackingIdSerializationStoreName = "IoTHubException-TrackingId";
+        const string ErrorCodeName = "ErrorCode";
 
         public bool IsTransient { get; private set; }
 
@@ -73,6 +74,12 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
             base.GetObjectData(info, context);
             info.AddValue(IsTransientValueSerializationStoreName, this.IsTransient);
             info.AddValue(TrackingIdSerializationStoreName, this.TrackingId);
+        }
+
+        public ErrorCode Code
+        {
+            get;
+            private set;
         }
     }
 }

@@ -37,9 +37,9 @@ public class RegistryManager
     /**
      * Static constructor to create instance from connection string
      *
-     * @param connectionString iot hub connection string
-     * @return instance of RegistryManager
-     * @throws Exception
+     * @param connectionString The iot hub connection string
+     * @return The instance of RegistryManager
+     * @throws Exception This exception is thrown if the object creation failed
      */
     public static RegistryManager createFromConnectionString(String connectionString) throws Exception
     {
@@ -71,10 +71,10 @@ public class RegistryManager
      * Add device using the given Device object
      * Return with the response device object from IotHub
      *
-     * @param device device object to add
-     * @return IotHub response with the created device
-     * @throws IOException
-     * @throws IotHubException
+     * @param device The device object to add
+     * @return The future object for the requested operation
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public Device addDevice(Device device) throws IOException, IotHubException
     {
@@ -115,9 +115,10 @@ public class RegistryManager
     /**
      * Async wrapper for add() operation
      *
-     * @return future containing the created device
-     * @throws IOException
-     * @throws IotHubException
+     * @param device The device object to add
+     * @return The future object for the requested operation
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<Device> addDeviceAsync(Device device) throws IOException, IotHubException
     {
@@ -145,10 +146,10 @@ public class RegistryManager
     /**
      * Get device data by device Id from IotHub
      *
-     * @param deviceId id of requested device
-     * @return device object of requested device
-     * @throws IOException
-     * @throws IotHubException
+     * @param deviceId The id of requested device
+     * @return The device object of requested device
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public Device getDevice(String deviceId) throws IOException, IotHubException
     {
@@ -187,10 +188,10 @@ public class RegistryManager
     /**
      * Async wrapper for getDevice() operation
      *
-     * @param deviceId
-     * @return future containing the device
-     * @throws IOException
-     * @throws IotHubException
+     * @param deviceId The id of requested device
+     * @return The future object for the requested operation
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<Device> getDeviceAsync(String deviceId) throws IOException, IotHubException
     {
@@ -218,10 +219,10 @@ public class RegistryManager
     /**
      * Get list of devices
      *
-     * @param maxCount requested count of devices
-     * @return array of requested device objects
-     * @throws IOException
-     * @throws IotHubException
+     * @param maxCount The requested count of devices
+     * @return The array of requested device objects
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public ArrayList<Device> getDevices(Integer maxCount) throws IOException, IotHubException
     {
@@ -272,10 +273,10 @@ public class RegistryManager
     /**
      * Async wrapper for getDevices() operation
      *
-     * @param maxCount
-     * @return future containing the list of devices
-     * @throws IOException
-     * @throws IotHubException
+     * @param maxCount The requested count of devices
+     * @return The future object for the requested operation
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<ArrayList<Device>> getDevicesAsync(Integer maxCount) throws IOException, IotHubException
     {
@@ -303,10 +304,10 @@ public class RegistryManager
     /**
      * Update device not forced
      *
-     * @param device
-     * @return
-     * @throws IOException
-     * @throws IotHubException
+     * @param device The device object containing updated data
+     * @return The updated device object
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public Device updateDevice(Device device) throws IOException, IotHubException
     {
@@ -322,10 +323,11 @@ public class RegistryManager
     /**
      * Update device with forceUpdate input parameter
      *
-     * @param device device object containing updated data
-     * @return updated device object
-     * @throws IOException
-     * @throws IotHubException
+     * @param device The device object containing updated data
+     * @param forceUpdate True is the update has to be forced regardless if the device state
+     * @return The updated device object
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public Device updateDevice(Device device, Boolean forceUpdate) throws IOException, IotHubException
     {
@@ -368,10 +370,10 @@ public class RegistryManager
     /**
      * Async wrapper for updateDevice() operation
      *
-     * @param device
-     * @return future containing the updated device object
-     * @throws IOException
-     * @throws IotHubException
+     * @param device The device object containing updated data
+     * @return The future object for the requested operation
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<Device> updateDeviceAsync(Device device) throws IOException, IotHubException
     {
@@ -398,10 +400,11 @@ public class RegistryManager
     /**
      * Async wrapper for forced updateDevice() operation
      *
-     * @param device
-     * @return
-     * @throws IOException
-     * @throws IotHubException
+     * @param device The device object containing updated data
+     * @param forceUpdate True is the update has to be forced regardless if the device state
+     * @return The future object for the requested operation
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<Device> updateDeviceAsync(Device device, Boolean forceUpdate) throws IOException, IotHubException
     {
@@ -428,9 +431,9 @@ public class RegistryManager
     /**
      * Remove device
      *
-     * @param deviceId device name to remove
-     * @throws IOException
-     * @throws IotHubException
+     * @param deviceId The device name to remove
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public void removeDevice(String deviceId) throws IOException, IotHubException
     {
@@ -461,10 +464,10 @@ public class RegistryManager
     /**
      * Async wrapper for removeDevice() operation
      *
-     * @param deviceId
-     * @return
-     * @throws IOException
-     * @throws IotHubException
+     * @param deviceId The device object to remove
+     * @return The future object for the requested operation
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<Boolean> removeDeviceAsync(String deviceId) throws IOException, IotHubException
     {
@@ -493,8 +496,8 @@ public class RegistryManager
      * Get device statistics
      *
      * @return RegistryStatistics object containing the requested data
-     * @throws IOException
-     * @throws IotHubException
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public RegistryStatistics getStatistics() throws IOException, IotHubException
     {
@@ -527,9 +530,9 @@ public class RegistryManager
     /**
      * Async wrapper for getStatistics() operation
      *
-     * @return
-     * @throws IOException
-     * @throws IotHubException
+     * @return The future object for the requested operation
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<RegistryStatistics> getStatisticsAsync() throws IOException, IotHubException
     {

@@ -4,13 +4,8 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
-
-#if WINDOWS_UWP
-    internal
-#else
-    public
-#endif
-    sealed class DeviceAuthenticationWithToken : IAuthenticationMethod
+    
+    public sealed class DeviceAuthenticationWithToken : IAuthenticationMethod
     {
         string deviceId;
         string token;

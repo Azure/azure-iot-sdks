@@ -33,9 +33,9 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
 
     /**
      * Constructor to set up connection parameters
-     * @param hostName address string of the service (example: AAA.BBB.CCC)
-     * @param userName username string to use SASL authentication (example: user@sas.service)
-     * @param sasToken SAS token string
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
      */
     public AmqpReceive(String hostName, String userName, String sasToken)
     {
@@ -47,7 +47,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
 
     /**
      * Event handler for the reactor init event
-     * @param event Proton Event object
+     * @param event The proton event object
      */
     @Override
     public void onReactorInit(Event event) {
@@ -83,11 +83,11 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
     /**
      * Syncronized call to receive feedback batch
      * Hide the event based receiving mechanism from the user API
-     * @param deviceId device name string
-     * @param timeoutMs timeout in milliseconds to wait for feedback
-     * @return received feedback batch
-     * @throws IOException
-     * @throws InterruptedException
+     * @param deviceId The device name string
+     * @param timeoutMs The timeout in milliseconds to wait for feedback
+     * @return The received feedback batch
+     * @throws IOException This exception is thrown if the input AmqpReceive object is null
+     * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
     public synchronized FeedbackBatch receive(String deviceId, long timeoutMs) throws IOException, InterruptedException
     {
@@ -117,7 +117,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
      * Handle on feedback received Proton event
      * Parse received json and save result to a member variable
      * Release semaphore for wait function
-     * @param feedbackJson
+     * @param feedbackJson Received Json string to process
      */
     public void onFeedbackReceived(String feedbackJson)
     {

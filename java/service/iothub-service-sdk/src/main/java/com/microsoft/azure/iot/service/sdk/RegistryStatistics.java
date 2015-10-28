@@ -30,10 +30,9 @@ public class RegistryStatistics
      * Static constructor
      * De-serializes a Device object from JSON string
      *
-     * @param jsonString - String containing the JSON serialization of a Device object
+     * @param jsonString The string containing the JSON serialization of a Device object
      * @return RegistryStatistics object
-     * @exception IllegalArgumentException This exception is thrown if
-     * {@code jsonString} is {@code null}.
+     * @exception IllegalArgumentException This exception is thrown if {@code jsonString} is {@code null}.
      */
     public static RegistryStatistics parse(String jsonString)
     {
