@@ -1,6 +1,6 @@
 {
     "name": "azure-iot-common",
-    "version": "1.0.0-preview.3",
+    "version": "1.0.0-preview.4",
     "description": "Azure IoT SDK - Common",
     "author": "Microsoft Corporation",
     "license": "MIT",

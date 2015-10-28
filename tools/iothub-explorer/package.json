@@ -1,13 +1,13 @@
 {
   "name": "iothub-explorer",
-  "version": "1.0.0-preview.4",
+  "version": "1.0.0-preview.4.a",
   "description": "Azure IoT Hub Explorer",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "main": "iothub-explorer.js",
   "bin": "iothub-explorer.js",
   "dependencies": {
-    "azure-iothub": "1.0.0-preview.3",
+    "azure-iothub": "1.0.0-preview.4",
     "colors-tmpl": "^1.0.0",
     "nopt": "^3.0.4",
     "prettyjson": "^1.1.3"
@@ -20,7 +20,7 @@
     "test": "npm -s run-script jshint"
   },
   "engines": {
-    "node": "0.12.x"
+    "node": "^0.12 || ^4"
   },
   "repository": {
     "type": "git",
