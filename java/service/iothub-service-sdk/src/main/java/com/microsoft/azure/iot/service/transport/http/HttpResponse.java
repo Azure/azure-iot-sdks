@@ -24,11 +24,10 @@ public class HttpResponse
     /**
      * Constructor.
      *
-     * @param status the HTTPS status code.
-     * @param body the response body.
-     * @param headerFields a map of header field names and the values associated
-     * with the field name.
-     * @param errorReason the error reason.
+     * @param status The HTTPS status code.
+     * @param body The response body.
+     * @param headerFields The map of header field names and the values associated with the field name.
+     * @param errorReason The error reason.
      */
     public HttpResponse(int status, byte[] body,
                         Map<String, List<String>> headerFields,
@@ -56,7 +55,7 @@ public class HttpResponse
     /**
      * Getter for the HTTPS status code.
      *
-     * @return the HTTPS status code.
+     * @return The HTTPS status code.
      */
     public int getStatus()
     {
@@ -67,7 +66,7 @@ public class HttpResponse
     /**
      * Getter for the response body.
      *
-     * @return the response body.
+     * @return The response body.
      */
     public byte[] getBody()
     {
@@ -107,7 +106,7 @@ public class HttpResponse
     /**
      * Getter for the header fields.
      *
-     * @return a copy of the header fields for this response.
+     * @return The copy of the header fields for this response.
      */
     public Map<String, String> getHeaderFields()
     {
@@ -123,7 +122,7 @@ public class HttpResponse
     /**
      * Getter for the error reason.
      *
-     * @return the error reason.
+     * @return The error reason.
      */
     public byte[] getErrorReason()
     {

@@ -17,8 +17,8 @@ public class ServiceAuthenticationWithSharedAccessPolicyToken extends Authentica
      * Populate given IotHubConnectionString with proper
      * policy token authentication data
      *
-     * @param iotHubConnectionString
-     * @return populated IotHubConnectionString object
+     * @param iotHubConnectionString The iotHubConnectionString object to populate
+     * @return The populated IotHubConnectionString object
      */
     @Override
     protected IotHubConnectionString populate(IotHubConnectionString iotHubConnectionString)
@@ -44,8 +44,8 @@ public class ServiceAuthenticationWithSharedAccessPolicyToken extends Authentica
     /**
      * Constructor to create instance from policy name and policy key
      *
-     * @param policyName policy name string
-     * @param token token string
+     * @param policyName The policy name string
+     * @param token The token string
      */
     public ServiceAuthenticationWithSharedAccessPolicyToken(String policyName, String token)
     {
@@ -55,7 +55,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyToken extends Authentica
 
     /**
      * Getter for policy name
-     * @return policy name string
+     * @return The policy name string
      */
     public String getPolicyName()
     {
@@ -64,7 +64,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyToken extends Authentica
 
     /**
      * Setter for policy name
-     * @param policyName string value to set
+     * @param policyName The string value to set
      */
     protected void setPolicyName(String policyName)
     {
@@ -73,7 +73,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyToken extends Authentica
 
     /**
      * Getter for policy token
-     * @return policy token string
+     * @return The policy token string
      */
     public String getToken()
     {
@@ -82,7 +82,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyToken extends Authentica
 
     /**
      * Setter for policy token
-     * @param token string value to set
+     * @param token The string value to set
      */
     protected void setToken(String token)
     {

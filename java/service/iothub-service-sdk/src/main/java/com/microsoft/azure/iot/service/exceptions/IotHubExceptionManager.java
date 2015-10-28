@@ -22,16 +22,16 @@ public class IotHubExceptionManager
     /**
      * Verify Http response using response status
      *
-     * @param httpResponse
-     * @throws IotHubBadFormatException
-     * @throws IotHubUnathorizedException
-     * @throws IotHubTooManyDevicesException
-     * @throws IotHubPreconditionFailedException
-     * @throws IotHubTooManyRequestsException
-     * @throws IotHubInternalServerErrorException
-     * @throws IotHubServerBusyException
-     * @throws IotHubNotFoundException
-     * @throws IotHubException
+     * @param httpResponse Http response object to verify
+     * @throws IotHubBadFormatException This exception is thrown if the response status equal 400
+     * @throws IotHubUnathorizedException This exception is thrown if the response status equal 401
+     * @throws IotHubTooManyDevicesException This exception is thrown if the response status equal 403
+     * @throws IotHubNotFoundException This exception is thrown if the response status equal 404
+     * @throws IotHubPreconditionFailedException This exception is thrown if the response status equal 412
+     * @throws IotHubTooManyRequestsException This exception is thrown if the response status equal 429
+     * @throws IotHubInternalServerErrorException This exception is thrown if the response status equal 500
+     * @throws IotHubServerBusyException This exception is thrown if the response status equal 503
+     * @throws IotHubException This exception is thrown if the response status none of them above and greater then 300
      */
     public static void httpResponseVerification(HttpResponse httpResponse)
             throws 

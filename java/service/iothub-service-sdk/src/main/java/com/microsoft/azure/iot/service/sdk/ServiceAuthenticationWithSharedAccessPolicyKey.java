@@ -16,8 +16,8 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
     /**
      * Constructor to create instance from policy name and policy key
      *
-     * @param policyName policy name string
-     * @param key policy key string
+     * @param policyName The policy name string
+     * @param key The policy key string
      */
     public ServiceAuthenticationWithSharedAccessPolicyKey(String policyName, String key)
     {
@@ -29,8 +29,8 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
      * Populate given IotHubConnectionString with proper
      * policy key authentication data
      *
-     * @param iotHubConnectionString
-     * @return populated IotHubConnectionString object
+     * @param iotHubConnectionString The iotHubConnectionString object to populate
+     * @return The populated IotHubConnectionString object
      */
     @Override
     protected IotHubConnectionString populate(IotHubConnectionString iotHubConnectionString)
@@ -55,7 +55,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
 
     /**
      * Getter for policy name
-     * @return policy name string
+     * @return The policy name string
      */
     public String getPolicyName()
     {
@@ -64,7 +64,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
 
     /**
      * Setter for policy name
-     * @param policyName string value to set
+     * @param policyName The string value to set
      */
     protected void setPolicyName(String policyName)
     {
@@ -73,7 +73,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
 
     /**
      * Getter for policy key
-     * @return policy key string
+     * @return The policy key string
      */
     public String getKey()
     {
@@ -82,7 +82,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
 
     /**
      * Setter for policy key
-     * @param key string value to set
+     * @param key The string value to set
      */
     protected void setKey(String key)
     {

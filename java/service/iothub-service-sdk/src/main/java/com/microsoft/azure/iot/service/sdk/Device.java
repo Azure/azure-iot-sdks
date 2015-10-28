@@ -32,8 +32,8 @@ public class Device
      *
      * @param deviceId - String containing the device name
      * @return Device object
-     * @throws IllegalArgumentException This exception is thrown if
-     *                                  {@code deviceId} is {@code null} or empty.
+     * @throws IllegalArgumentException This exception is thrown if {@code deviceId} is {@code null} or empty.
+     * @throws NoSuchAlgorithmException This exception is thrown if the encryption method is not supported by the keyGenerator
      */
     public static Device createFromId(String deviceId) throws NoSuchAlgorithmException
     {
@@ -53,8 +53,7 @@ public class Device
      *
      * @param jsonString - String containing the JSON serialization of a Device object
      * @return Device object
-     * @throws IllegalArgumentException This exception is thrown if
-     *                                  {@code jsonString} is {@code null}.
+     * @throws IllegalArgumentException This exception is thrown if {@code jsonString} is {@code null}.
      */
     public static Device createFromJson(String jsonString)
     {
@@ -77,8 +76,8 @@ public class Device
     /**
      * Create an Device instance using the given device name
      *
-     * @param deviceId name of the device (used as device id)
-     * @throws NoSuchAlgorithmException
+     * @param deviceId Name of the device (used as device id)
+     * @throws NoSuchAlgorithmException This exception is thrown if the encryption method is not supported by the keyGenerator
      */
     protected Device(String deviceId) throws NoSuchAlgorithmException
     {
@@ -112,10 +111,10 @@ public class Device
 
     /**
      * Create an Device instance using the given JsonObject
-     * @param jsonObject object created by parsing device Json string
+     * @param jsonObject Json object created by parsing device Json string
      *
-     * @throws JsonParsingException
-     * @throws IllegalArgumentException
+     * @throws JsonParsingException This exception is thrown if the Json parsing failed
+     * @throws IllegalArgumentException This exception is thrown if the input JsonObject is null
      */
     protected Device(JsonObject jsonObject) throws JsonParsingException, IllegalArgumentException
     {
@@ -168,7 +167,7 @@ public class Device
     /**
      * Serialize the object to Json format
      *
-     * @return
+     * @return Json string containing this Device object
      */
     protected String serializeToJson()
     {
@@ -257,7 +256,7 @@ public class Device
     /**
      * Getter for device name
      *
-     * @return deviceId string
+     * @return The deviceId string
      */
     public String getDeviceId()
     {
@@ -272,7 +271,7 @@ public class Device
     /**
      * Getter for GenerationId
      *
-     * @return generation deviceId string
+     * @return The generationId string
      */
     public String getGenerationId()
     {
@@ -289,7 +288,7 @@ public class Device
     /**
      * Getter for SymmetricKey object
      *
-     * @return SymmetricKey object
+     * @return The symmetricKey object
      */
     public SymmetricKey getSymmetricKey()
     {
@@ -299,7 +298,7 @@ public class Device
     /**
      * Getter for PrimaryKey part of the SymmetricKey
      *
-     * @return PrimaryKey string
+     * @return The primaryKey string
      */
     public String getPrimaryKey()
     {
@@ -309,7 +308,7 @@ public class Device
     /**
      * Getter for SecondaryKey part of the SymmetricKey
      *
-     * @return SecondaryKey string
+     * @return The secondaryKey string
      */
     public String getSecondaryKey()
     {
@@ -325,7 +324,7 @@ public class Device
     /**
      * Getter for eTag
      *
-     * @return eTag string
+     * @return The eTag string
      */
     public String geteTag()
     {
@@ -341,7 +340,7 @@ public class Device
 
     /**
      * Getter for DeviceStatus object
-     * @return DeviceStatus object
+     * @return The deviceStatus object
      */
     public DeviceStatus getStatus()
     {
@@ -357,7 +356,7 @@ public class Device
     /**
      * Getter for status reason
      *
-     * @return status reason string
+     * @return The statusReason string
      */
     public String getStatusReason()
     {
@@ -372,7 +371,7 @@ public class Device
     /**
      * Getter for status updated time string
      *
-     * @return status updated time string
+     * @return The string containing the time when the statusUpdated parameter was updated
      */
     public String getStatusUpdatedTime()
     {
@@ -388,7 +387,7 @@ public class Device
     /**
      * Getter for connection state
      *
-     * @return connection state string
+     * @return The connectionState string
      */
     public DeviceConnectionState getConnectionState()
     {
@@ -403,7 +402,7 @@ public class Device
     /**
      * Getter for connection state updated time
      *
-     * @return connection state updated string
+     * @return The string containing the time when the connectionState parameter was updated
      */
     public String getConnectionStateUpdatedTime()
     {
@@ -418,7 +417,7 @@ public class Device
     /**
      * Getter for last activity time
      *
-     * @return last activity time string
+     * @return The string containing the time when the lastActivity parameter was updated
      */
     public String getLastActivityTime()
     {
@@ -433,7 +432,7 @@ public class Device
     /**
      * Getter for cloud to device message count
      *
-     * @return cloud to device message count
+     * @return The string containing the time when the cloudToDeviceMessageCount parameter was updated
      */
     public long getCloudToDeviceMessageCount()
     {

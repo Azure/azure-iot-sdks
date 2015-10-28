@@ -17,13 +17,13 @@ public interface HttpMessage
 
     /**
      * Gets the message body.
-     * @return Returns the message body.
+     * @return The message body.
      */
     byte[] getBody();
 
     /**
      * Gets the content type string.
-     * @return Returns the message content-type.
+     * @return The message content-type.
      */
     String getContentType();
 }
