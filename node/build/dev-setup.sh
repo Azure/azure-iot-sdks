@@ -25,6 +25,7 @@ npm link
 
 cd ../../tools/iothub-explorer
 echo "\n-- Creating links for `pwd` --"
+npm link azure-iot-common
 npm link azure-iothub
 npm install
 [ $? -eq 0 ] || exit $?

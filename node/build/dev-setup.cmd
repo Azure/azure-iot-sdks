@@ -30,5 +30,6 @@ call npm link
 cd ..\..\tools\iothub-explorer
 echo.
 echo -- Creating links for %cd% --
+call npm link azure-iot-common
 call npm link azure-iothub
 call npm install
