@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{84052DC5
 		NuGet\Microsoft.Azure.Devices.Client.nuspec = NuGet\Microsoft.Azure.Devices.Client.nuspec
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Devices.Client.Test", "Microsoft.Azure.Devices.Client\test\Microsoft.Azure.Devices.Api.Test\Microsoft.Azure.Devices.Client.Test.csproj", "{74A0E4B7-4A50-4665-A7A3-A217D06649D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -148,6 +150,22 @@ Global
 		{C44B182E-2AC8-4E96-A461-06F40403D617}.Release|x86.ActiveCfg = Release|x86
 		{C44B182E-2AC8-4E96-A461-06F40403D617}.Release|x86.Build.0 = Release|x86
 		{C44B182E-2AC8-4E96-A461-06F40403D617}.Release|x86.Deploy.0 = Release|x86
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Debug|ARM.Build.0 = Debug|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Debug|x64.Build.0 = Debug|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Debug|x86.Build.0 = Debug|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Release|ARM.ActiveCfg = Release|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Release|ARM.Build.0 = Release|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Release|x64.ActiveCfg = Release|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Release|x64.Build.0 = Release|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Release|x86.ActiveCfg = Release|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
