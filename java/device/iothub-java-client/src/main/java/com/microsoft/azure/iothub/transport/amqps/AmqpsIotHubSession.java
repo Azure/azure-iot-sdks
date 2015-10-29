@@ -167,9 +167,7 @@ public final class AmqpsIotHubSession
                         "Cannot send event using "
                                 + "an AMQPS session that is closed.");
             }
-
-            //TODO: // Codes_SRS_AMQPSIOTHUBSESSION_11_007: [The function shall send all message properties.]
-
+            
             // Codes_SRS_AMQPSIOTHUBSESSION_11_004: [The function shall send an event message to the IoT Hub given in the configuration.]
             // Codes_SRS_AMQPSIOTHUBSESSION_11_005: [The function shall send the message body.]
             // Codes_SRS_AMQPSIOTHUBSESSION_11_008: [If the message was successfully received by the service, the function shall return status code OK_EMPTY.]
@@ -179,7 +177,6 @@ public final class AmqpsIotHubSession
                 this.sender.send(message.getBytes(), message.messageId);
 
             }
-            //TODO: Will take more investigating to see how much info is provided in a handler exception. It would be nice to be specific about setting the status code to ERROR ONLY if the message wasn't received but not for any other HandlerException.
             catch (HandlerException e)
             {
                 System.out.println(e.getMessage());
