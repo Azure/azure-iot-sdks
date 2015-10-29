@@ -11232,6 +11232,7 @@ responseContent: a new instance of buffer]
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+        int nHeaders = 4;
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
@@ -11286,7 +11287,6 @@ responseContent: a new instance of buffer]
         {
             /*this scope is for is properties code*/
 
-            int nHeaders = 4;
             HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
             STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
                 .IgnoreArgument(1)
@@ -11385,6 +11385,7 @@ responseContent: a new instance of buffer]
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+        int nHeaders = 4;
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
@@ -11439,7 +11440,6 @@ responseContent: a new instance of buffer]
         {
             /*this scope is for is properties code*/
 
-            int nHeaders = 4;
             HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
             STRICT_EXPECTED_CALL(mocks, HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
                 .IgnoreArgument(1)
