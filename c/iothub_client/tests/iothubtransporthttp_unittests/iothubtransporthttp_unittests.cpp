@@ -11232,7 +11232,7 @@ responseContent: a new instance of buffer]
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
-        int nHeaders = 4;
+        size_t nHeaders = 4;
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
@@ -11385,7 +11385,7 @@ responseContent: a new instance of buffer]
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
-        int nHeaders = 4;
+        size_t nHeaders = 4;
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
