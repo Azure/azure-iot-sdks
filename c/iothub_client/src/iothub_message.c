@@ -27,6 +27,7 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     } value;
     MAP_HANDLE properties;
     char* messageId;
+    char* correlationId;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
 static bool ContainsOnlyUsAscii(const char* asciiValue)
@@ -120,6 +121,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char* byt
                 /*Codes_SRS_IOTHUBMESSAGE_02_026: [The type of the new message shall be IOTHUBMESSAGE_BYTEARRAY.] */
                 result->contentType = IOTHUBMESSAGE_BYTEARRAY;
                 result->messageId = NULL;
+                result->correlationId = NULL;
                 /*all is fine, return result*/
             }
         }
@@ -161,6 +163,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromString(const char* source)
             /*Codes_SRS_IOTHUBMESSAGE_02_032: [The type of the new message shall be IOTHUBMESSAGE_STRING.] */
             result->contentType = IOTHUBMESSAGE_STRING;
             result->messageId = NULL;
+            result->correlationId = NULL;
         }
     }
     return result;
@@ -190,9 +193,21 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
         else
         {
             result->messageId = NULL;
+            result->correlationId = NULL;
             if (source->messageId != NULL && mallocAndStrcpy_s(&result->messageId, source->messageId) != 0)
             {
                 LogError("unable to Copy messageId\r\n");
+                free(result);
+                result = NULL;
+            }
+            else if (source->correlationId != NULL && mallocAndStrcpy_s(&result->correlationId, source->correlationId) != 0)
+            {
+                LogError("unable to Copy correlationId\r\n");
+                if (result->messageId != NULL)
+                {
+                    free(result->messageId);
+                    result->messageId = NULL;
+                }
                 free(result);
                 result = NULL;
             }
@@ -208,6 +223,11 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                         free(result->messageId);
                         result->messageId = NULL;
                     }
+                    if (result->correlationId != NULL)
+                    {
+                        free(result->correlationId);
+                        result->correlationId = NULL;
+                    }
                     free(result);
                     result = NULL;
                 }
@@ -221,6 +241,11 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                     {
                         free(result->messageId);
                         result->messageId = NULL;
+                    }
+                    if (result->correlationId != NULL)
+                    {
+                        free(result->correlationId);
+                        result->correlationId = NULL;
                     }
                     free(result);
                     result = NULL;
@@ -243,6 +268,11 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                         free(result->messageId);
                         result->messageId = NULL;
                     }
+                    if (result->correlationId != NULL)
+                    {
+                        free(result->correlationId);
+                        result->correlationId = NULL;
+                    }
                     free(result);
                     result = NULL;
                     LogError("failed to STRING_clone\r\n");
@@ -257,6 +287,11 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                     {
                         free(result->messageId);
                         result->messageId = NULL;
+                    }
+                    if (result->correlationId != NULL)
+                    {
+                        free(result->correlationId);
+                        result->correlationId = NULL;
                     }
                     free(result);
                     result = NULL;
@@ -366,6 +401,56 @@ MAP_HANDLE IoTHubMessage_Properties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     return result;
 }
 
+const char* IoTHubMessage_GetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+    /* Codes_SRS_IOTHUBMESSAGE_07_016: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetCorrelationId shall return a NULL value.] */
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("invalid arg (NULL) passed to IoTHubMessage_GetCorrelationId\r\n");
+        result = NULL;
+    }
+    else
+    {
+        /* Codes_SRS_IOTHUBMESSAGE_07_017: [IoTHubMessage_GetCorrelationId shall return the correlationId as a const char*.] */
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+        result = handleData->correlationId;
+    }
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* correlationId)
+{
+    IOTHUB_MESSAGE_RESULT result;
+    /* Codes_SRS_IOTHUBMESSAGE_07_018: [if any of the parameters are NULL then IoTHubMessage_SetCorrelationId shall return a IOTHUB_MESSAGE_INVALID_ARG value.]*/
+    if (iotHubMessageHandle == NULL || correlationId == NULL)
+    {
+        LogError("invalid arg (NULL) passed to IoTHubMessage_SetCorrelationId\r\n");
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+        /* Codes_SRS_IOTHUBMESSAGE_07_019: [If the IOTHUB_MESSAGE_HANDLE correlationId is not NULL, then the IOTHUB_MESSAGE_HANDLE correlationId will be deallocated.] */
+        if (handleData->correlationId != NULL)
+        {
+            free(handleData->correlationId);
+        }
+
+        if (mallocAndStrcpy_s(&handleData->correlationId, correlationId) != 0)
+        {
+            /* Codes_SRS_IOTHUBMESSAGE_07_020: [If the allocation or the copying of the correlationId fails, then IoTHubMessage_SetCorrelationId shall return IOTHUB_MESSAGE_ERROR.] */
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUBMESSAGE_07_021: [IoTHubMessage_SetCorrelationId finishes successfully it shall return IOTHUB_MESSAGE_OK.] */
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+    return result;
+}
+
 IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* messageId)
 {
     IOTHUB_MESSAGE_RESULT result;
@@ -434,6 +519,8 @@ void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
         Map_Destroy(handleData->properties);
         free(handleData->messageId);
         handleData->messageId = NULL;
+        free(handleData->correlationId);
+        handleData->correlationId = NULL;
         free(handleData);
     }
 }
