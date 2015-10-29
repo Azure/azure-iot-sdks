@@ -28,10 +28,10 @@ public class FeedbackReceiver extends Receiver
      * Constructor to verify initialization parameters
      * Create instance of AmqpReceive
      *
-     * @param hostName iot hub host name
-     * @param userName iot hub user name
-     * @param sasToken iot hub SAS token for the given device
-     * @param deviceId device id
+     * @param hostName The iot hub host name
+     * @param userName The iot hub user name
+     * @param sasToken The iot hub SAS token for the given device
+     * @param deviceId The device id
      */
     public FeedbackReceiver(String hostName, String userName, String sasToken, String deviceId)
     {
@@ -61,7 +61,7 @@ public class FeedbackReceiver extends Receiver
     /**
      * Open AmqpReceive object
      *
-     * @throws IOException
+     * @throws IOException This exception is thrown if the input AmqpReceive object is null
      */
     public void open() throws IOException
     {
@@ -77,7 +77,7 @@ public class FeedbackReceiver extends Receiver
     /**
      * Close AmqpReceive object
      *
-     * @throws IOException
+     * @throws IOException This exception is thrown if the input AmqpReceive object is null
      */
     public void close() throws IOException
     {
@@ -93,9 +93,9 @@ public class FeedbackReceiver extends Receiver
     /**
      * Receive FeedbackBatch with default timeout
      *
-     * @return received FeedbackBatch object
-     * @throws IOException
-     * @throws InterruptedException
+     * @return The received FeedbackBatch object
+     * @throws IOException This exception is thrown if the input AmqpReceive object is null
+     * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
     public FeedbackBatch receive() throws IOException, InterruptedException
     {
@@ -105,10 +105,10 @@ public class FeedbackReceiver extends Receiver
 
     /**
      * Receive FeedbackBatch with specific timeout
-     * @param timeoutMs timeout in milliseconds
-     * @return received FeedbackBatch object
-     * @throws IOException
-     * @throws InterruptedException
+     * @param timeoutMs The timeout in milliseconds
+     * @return The received FeedbackBatch object
+     * @throws IOException This exception is thrown if the input AmqpReceive object is null
+     * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
     public FeedbackBatch receive(long timeoutMs) throws IOException, InterruptedException
     {
@@ -124,7 +124,7 @@ public class FeedbackReceiver extends Receiver
     /**
      * Async wrapper for open() operation
      *
-     * @return
+     * @return The future object for the requested operation
      */
     @Override
     public CompletableFuture<Void> openAsync()
@@ -147,7 +147,7 @@ public class FeedbackReceiver extends Receiver
     /**
      * Async wrapper for close() operation
      *
-     * @return
+     * @return The future object for the requested operation
      */
     @Override
     public CompletableFuture<Void> closeAsync()
@@ -170,7 +170,7 @@ public class FeedbackReceiver extends Receiver
     /**
      * Async wrapper for receive() operation with default timeout
      *
-     * @return
+     * @return The future object for the requested operation
      */
     @Override
     public CompletableFuture<FeedbackBatch> receiveAsync()
@@ -182,7 +182,7 @@ public class FeedbackReceiver extends Receiver
     /**
      * Async wrapper for receive() operation with specific timeout
      *
-     * @return
+     * @return The future object for the requested operation
      */
     @Override
     public CompletableFuture<FeedbackBatch> receiveAsync(long timeoutMs)

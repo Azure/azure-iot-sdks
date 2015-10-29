@@ -9,7 +9,6 @@ import com.microsoft.azure.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.iot.service.transport.amqps.AmqpSend;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,8 +29,9 @@ public class ServiceClient
     /**
      * Create ServiceClient from the specified connection string
      *
-     * @param connectionString - Connection string for the IotHub
-     * @return
+     * @param connectionString The connection string for the IotHub
+     * @return The created ServiceClient object
+     * @throws Exception This exception is thrown if the object creation failed
      */
     public static ServiceClient createFromConnectionString(String connectionString) throws Exception
     {
@@ -51,11 +51,9 @@ public class ServiceClient
     /**
      * Initialize AMQP sender using given connection string
      *
-     * @param iotHubConnectionString
-     * @throws URISyntaxException
-     * @throws IOException
+     * @param iotHubConnectionString The ConnectionString object for the IotHub
      */
-    protected ServiceClient(IotHubConnectionString iotHubConnectionString) throws URISyntaxException, IOException
+    protected ServiceClient(IotHubConnectionString iotHubConnectionString)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_004: [The constructor shall throw IllegalArgumentException if the input object is null]
         if (iotHubConnectionString == null)
@@ -78,7 +76,7 @@ public class ServiceClient
 
     /**
      * Open AMQP sender
-     * @throws IOException
+     * @throws IOException This exception is thrown if the AmqpSender object is not initialized
      */
     public void open() throws IOException
     {
@@ -93,6 +91,7 @@ public class ServiceClient
 
     /**
      * Close AMQP sender
+     * @throws IOException This exception is thrown if the AmqpSender object is not initialized
      */
     public void close() throws IOException
     {
@@ -110,7 +109,7 @@ public class ServiceClient
      *
      * @param deviceId The device identifier for the target device
      * @param message The message for the device
-     * @throws IOException
+     * @throws IOException This exception is thrown if the AmqpSender object is not initialized
      */
     public void send(String deviceId, String message) throws IOException, IOException
     {
@@ -126,7 +125,7 @@ public class ServiceClient
     /**
      * Provide asynchronous access to open()
      *
-     * @return future object
+     * @return The future object for the requested operation
      */
     public CompletableFuture<Void> openAsync()
     {
@@ -148,7 +147,7 @@ public class ServiceClient
     /**
      * Provide asynchronous access to close()
      *
-     * @return future object
+     * @return The future object for the requested operation
      */
     public CompletableFuture<Void> closeAsync()
     {
@@ -172,7 +171,7 @@ public class ServiceClient
      *
      * @param deviceId The device identifier for the target device
      * @param message The message for the device
-     * @return
+     * @return The future object for the requested operation
      */
     public CompletableFuture<Void> sendAsync(String deviceId, String message)
     {
@@ -195,7 +194,7 @@ public class ServiceClient
      * Get FeedbackReceiver object
      *
      * @param deviceId The device identifier for the target device
-     * @return - An instance of the FeedbackReceiver
+     * @return The instance of the FeedbackReceiver
      */
     public FeedbackReceiver getFeedbackReceiver(String deviceId)
     {

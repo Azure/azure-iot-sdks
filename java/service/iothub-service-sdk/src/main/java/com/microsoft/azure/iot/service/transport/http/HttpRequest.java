@@ -19,15 +19,14 @@ public class HttpRequest
      * Constructor. Takes a URL as an argument and returns an HTTPS request that
      * is ready to be sent.
      *
-     * @param url the URL for the request.
-     * @param method the HTTPS request method (i.e. GET).
-     * @param body the request body. Must be an array of size 0 if the request
-     * method is GET or DELETE.
+     * @param url The URL for the request.
+     * @param method The HTTPS request method (i.e. GET).
+     * @param body The request body. Must be an array of size 0 if the request method is GET or DELETE.
      *
-     * @throws IOException if an IOException occurs in setting up the HTTPS
-     * connection.
-     * @throws IllegalArgumentException if the endpoint given does not use the
-     * HTTPS protocol.
+     * @throws IOException This exception thrown if an IOException occurs
+     * in setting up the HTTPS connection.
+     * @throws IllegalArgumentException This exception thrown if the endpoint
+     * given does not use the HTTPS protocol.
      */
     public HttpRequest(URL url, HttpMethod method, byte[] body) throws IOException
     {
@@ -42,10 +41,10 @@ public class HttpRequest
     /**
      * Executes the HTTPS request.
      *
-     * @return an HTTPS response.
+     * @return The HTTPS response.
      *
-     * @throws IOException if the connection could not be established, or the
-     * input/output streams could not be accessed.
+     * @throws IOException This exception thrown if the connection could not be
+     * established, or the input/output streams could not be accessed.
      */
     public HttpResponse send() throws IOException
     {
@@ -88,10 +87,10 @@ public class HttpRequest
     /**
      * Sets the header field to the given value.
      *
-     * @param field the header field name.
-     * @param value the header field value.
+     * @param field The header field name.
+     * @param value The header field value.
      *
-     * @return itself, for fluent setting.
+     * @return The object itself, for fluent setting.
      */
     public HttpRequest setHeaderField(String field, String value)
     {
@@ -105,9 +104,9 @@ public class HttpRequest
      * is the number of milliseconds after the server receives a request and
      * before the server sends data back.
      *
-     * @param timeout the read timeout.
+     * @param timeout The read timeout.
      *
-     * @return itself, for fluent setting.
+     * @return The object itself, for fluent setting.
      */
     public HttpRequest setReadTimeoutMillis(int timeout)
     {

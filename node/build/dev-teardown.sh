@@ -8,6 +8,7 @@ node_root=$(cd "$(dirname "$0")/.." && pwd)
 cd $node_root/../tools/iothub-explorer
 echo "-- Removing links for `pwd` --"
 npm rm azure-iothub
+npm rm azure-iot-common
 
 cd $node_root/service
 echo "-- Removing links for `pwd` --"

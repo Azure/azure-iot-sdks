@@ -4,8 +4,49 @@
 'use strict';
 
 var amqp10 = require('amqp10');
-var errors = require('azure-iot-common').errors;
 var AmqpMessage = require('./amqp_message.js');
+var errors = require('azure-iot-common').errors;
+var EventEmitter = require('events');
+var util = require('util');
+
+function FeedbackReceiver(amqpReceiver) {
+  EventEmitter.call(this);
+  this._amqpReceiver = amqpReceiver;
+
+  this.on('newListener', function (event) {
+    // lazy-init AMQP event listeners
+    if (event === 'message' && this.listenerCount('message') === 0) {
+      this._setupAmqpReceiverListeners();
+    }
+  }.bind(this));
+
+  this.on('removeListener', function (event) {
+    // stop listening for AMQP events if our consumers stop listening for our events
+    if (event === 'message' && this.listenerCount('message') === 0) {
+      this._removeAmqpReceiverListeners();
+    }
+  }.bind(this));
+}
+
+util.inherits(FeedbackReceiver, EventEmitter);
+
+FeedbackReceiver.prototype._onAmqpErrorReceived = function (err) {
+  this.emit('errorReceived', translateError(err));
+};
+  
+FeedbackReceiver.prototype._onAmqpMessage = function (feedbackRecords) {
+  this.emit('message', feedbackRecords);
+};
+  
+FeedbackReceiver.prototype._setupAmqpReceiverListeners = function () {
+  this._amqpReceiver.on('errorReceived', this._onAmqpErrorReceived.bind(this));
+  this._amqpReceiver.on('message', this._onAmqpMessage.bind(this));
+};
+
+FeedbackReceiver.prototype._removeAmqpReceiverListeners = function () {
+  this._amqpReceiver.removeListener('errorReceived', this._onAmqpErrorReceived.bind(this));
+  this._amqpReceiver.on('message', this._onAmqpMessage.bind(this));
+};
 
 function Transport(config) {
   this._config = config;
@@ -19,6 +60,10 @@ function Transport(config) {
   }, amqp10.Policy.EventHub));
   this._connectPromise = null;
   this._senderPromise = null;
+  this._receiverPromise = null;
+  this._feedbackReceiver = null;
+
+  this.FeedbackReceiver = FeedbackReceiver;
 }
 
 Transport.prototype.connect = function connect(done) {
@@ -85,6 +130,39 @@ Transport.prototype.send = function send(deviceId, message, done) {
         .then(function (state) {
           if (done) done(null, state);
         })
+        .catch(function (err) {
+          if (done) done(translateError(err));
+        });
+    }
+  }.bind(this));
+};
+
+Transport.prototype.getFeedbackReceiver = function getFeedbackReceiver(done) {
+  if (!this._feedbackReceiver) {
+    this._setupReceiverLink(done);
+  }
+  else {
+    done(null, this._feedbackReceiver);
+  }
+};
+
+Transport.prototype._setupReceiverLink = function setupReceiverLink(done) {
+  var endpoint = '/messages/serviceBound/feedback';
+
+  this.connect(function (err) {
+    if (err) {
+      if (done) done(err);
+    }
+    else {
+      if (!this._receiverPromise) {
+        this._receiverPromise = this._amqp.createReceiver(endpoint);
+      }
+
+      this._receiverPromise
+        .then(function (receiver) {
+          this._feedbackReceiver = new FeedbackReceiver(receiver);
+          done(null, this._feedbackReceiver);
+        }.bind(this))
         .catch(function (err) {
           if (done) done(translateError(err));
         });

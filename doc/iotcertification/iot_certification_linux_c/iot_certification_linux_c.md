@@ -218,15 +218,12 @@ In this section you will run the end to end test cases for Azure IoT client SDK 
     -   **IOTHUB_CONNECTION_STRING:** Connection string to your IoT Hub
     -   **IOTHUB_DEVICE_ID:** Id of the device you have registered in [Step 2](#Step-2:-Register)
     -   **IOTHUB_DEVICE_KEY:** Primary key of the device registered in [Step 2](#Step-2:-Register)
-    -   **IOTHUB_EVENTHUB_ACCESS_KEY:** Shared access key of your IoT Hub
     -   **IOTHUB_EVENTHUB_CONNECTION_STRING:** Connection string to your Event Hub
     -   **IOTHUB_EVENTHUB_CONSUMER_GROUP:** Set value as **$Default**
     -   **IOTHUB_EVENTHUB_LISTEN_NAME:** Name of your Event Hub
-    -   **IOTHUB_NAME:** Name of your IoT Hub
     -   **IOTHUB_SHARED_ACCESS_SIGNATURE:** this value can be generated from Device Explorer
 
         Go to **Configuration** tab &minus;&gt; Click **Generate SAS** button
-    -   **IOTHUB_SUFFIX:** Suffix of your IoT Hub hostname in connection string
     -   **IOTHUB_PARTITION_COUNT:** Set value as **16**
     -   **IOTHUB_POLICY_NAME:** Keep it blank
     -   **IOTHUB_POLICY_KEY:** Keep it blank

@@ -45,8 +45,7 @@ public final class IotHubServiceSasToken
      * Constructor. Generates a SAS token that grants access to an IoT Hub for
      * the specified amount of time. (1 year specified in TOKEN_VALID_SECS)
      *
-     * @param iotHubConnectionString connection string object
-     * will become invalid.
+     * @param iotHubConnectionString Connection string object containing the connection parameters
      */
     public IotHubServiceSasToken(IotHubConnectionString iotHubConnectionString)
     {
@@ -124,7 +123,7 @@ public final class IotHubServiceSasToken
     /**
      * Returns the string representation of the SAS token.
      *
-     * @return the string representation of the SAS token.
+     * @return The string representation of the SAS token.
      */
     @Override
     public String toString()

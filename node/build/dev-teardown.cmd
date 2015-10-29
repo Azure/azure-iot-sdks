@@ -11,6 +11,7 @@ for %%i in ("%node-root%") do set node-root=%%~fi
 cd %node-root%\..\tools\iothub-explorer
 echo -- Removing links for %cd% --
 call npm rm azure-iothub
+call npm rm azure-iot-common
 
 cd %node-root%\service
 echo -- Removing links for %cd% --

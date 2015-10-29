@@ -36,12 +36,9 @@ $IoTHubClientParams = @{
     "IoTHubConnString?"               = $env:IOTHUB_CONNECTION_STRING;
     "DeviceId?"                       = $env:IOTHUB_DEVICE_ID;
     "DeviceKey?"                      = $env:IOTHUB_DEVICE_KEY;
-    "EventhubAccessKey?"              = $env:IOTHUB_EVENTHUB_ACCESS_KEY;
     "EventhubConsumerGroup?"          = $env:IOTHUB_EVENTHUB_CONSUMER_GROUP;
     "EventhubListenName?"             = $env:IOTHUB_EVENTHUB_LISTEN_NAME;
-    "IoTHubName?"                     = $env:IOTHUB_NAME;
     "SharedAccessSignature?"          = $($env:IOTHUB_SHARED_ACCESS_SIGNATURE -REPLACE "SharedAccessSignature ", "");
-    "IoTHubSuffix?"                   = $env:IOTHUB_SUFFIX;
     
     "IoTHubEventHubConnectionString?" = $env:IOTHUB_EVENTHUB_CONNECTION_STRING;
     "IoTPartitionCount?"              = $env:IOTHUB_PARTITION_COUNT;

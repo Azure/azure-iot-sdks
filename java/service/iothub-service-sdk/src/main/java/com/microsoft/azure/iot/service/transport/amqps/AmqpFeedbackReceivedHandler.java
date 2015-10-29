@@ -9,7 +9,6 @@ import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.messenger.impl.Address;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 
@@ -35,9 +34,9 @@ class AmqpFeedbackReceivedHandler extends BaseHandler
     /**
      * Constructor to set up connection parameters and initialize
      * handshaker and flow controller for transport
-     * @param hostName address string of the service (example: AAA.BBB.CCC)
-     * @param userName username string to use SASL authentication (example: user@sas.service)
-     * @param sasToken SAS token string
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
      * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
      */
     AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
@@ -59,11 +58,10 @@ class AmqpFeedbackReceivedHandler extends BaseHandler
 
     /**
      * Create Proton SslDomain object from Address using the given Ssl mode
-     * @param address Proton Address object
      * @param mode Proton enum value of requested Ssl mode
-     * @return the created Ssl domain
+     * @return The created Ssl domain
      */
-    private SslDomain makeDomain(Address address, SslDomain.Mode mode)
+    private SslDomain makeDomain(SslDomain.Mode mode)
     {
         SslDomain domain = Proton.sslDomain();
         domain.init(mode);
@@ -73,7 +71,7 @@ class AmqpFeedbackReceivedHandler extends BaseHandler
 
     /**
      * Event handler for the on delivery event
-     * @param event Proton Event object
+     * @param event The proton event object
      */
     @Override
     public void onDelivery(Event event)
@@ -116,9 +114,7 @@ class AmqpFeedbackReceivedHandler extends BaseHandler
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);
 
-            Address address = new Address(this.hostName);
-
-            SslDomain domain = makeDomain(address, SslDomain.Mode.CLIENT);
+            SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
             domain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
             Ssl ssl = transport.ssl(domain);
         }

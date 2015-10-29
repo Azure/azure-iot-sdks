@@ -49,7 +49,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Serialize user string
      *
-     * @return Output format: "SharedAccessKeyName@sas.root.IotHubName"
+     * @return The user string in the following format: "SharedAccessKeyName@sas.root.IotHubName"
      */
     public String getUserString()
     {
@@ -66,9 +66,9 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Create url for requesting device data
      *
-     * @param deviceId name of the device
-     * @return Output format: "https:hostname/devices/deviceId?api-version=201X-XX-XX"
-     * @throws MalformedURLException
+     * @param deviceId The name of the device
+     * @return The device Url in the following format: "https:hostname/devices/deviceId?api-version=201X-XX-XX"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
      */
     public URL getUrlDevice(String deviceId) throws MalformedURLException
     {
@@ -94,9 +94,9 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Create url for requesting device list
      *
-     * @param maxCount number of requested devices
-     * @return Output format: "https:hostname/devices/?maxCount=XX&api-version=201X-XX-XX"
-     * @throws MalformedURLException
+     * @param maxCount The number of requested devices
+     * @return URL string to get the device list from IotHub
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
      */
     public URL getUrlDeviceList(Integer maxCount) throws MalformedURLException
     {
@@ -124,8 +124,8 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Create url for requesting device statistics
      *
-     * @return Output format: "https:hostname/statistics/devices?api-version=201X-XX-XX"
-     * @throws MalformedURLException
+     * @return The device statistics Url in the following format: "https:hostname/statistics/devices?api-version=201X-XX-XX"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
      */
     public URL getUrlDeviceStatistics() throws MalformedURLException
     {
@@ -177,7 +177,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Getter for iotHubName
      *
-     * @return iothub name string
+     * @return The iot hub name string
      */
     public String getIotHubName()
     {
@@ -187,7 +187,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Getter for authenticationMethod
      *
-     * @return AuthenticationMethod object
+     * @return The authenticationMethod object
      */
     public AuthenticationMethod getAuthenticationMethod()
     {
@@ -197,7 +197,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Getter for sharedAccessKeyName
      *
-     * @return shared access key name string
+     * @return The sharedAccessKeyName string
      */
     public String getSharedAccessKeyName()
     {
@@ -207,7 +207,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Getter for sharedAccessKey
      *
-     * @return shared access key string
+     * @return The sharedAccessKey string
      */
     public String getSharedAccessKey()
     {
@@ -217,7 +217,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Getter for sharedAccessSignature
      *
-     * @return shared access signature string
+     * @return The sharedAccessSignature string
      */
     public String getSharedAccessSignature()
     {
@@ -227,7 +227,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Getter for hostName
      *
-     * @return hostname string
+     * @return The hostName string
      */
     public String getHostName()
     {
@@ -236,6 +236,8 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
     /**
      * Setter for sharedAccessKeyName
+     *
+     * @param sharedAccessKeyName The value of the signature to set
      */
     protected void setSharedAccessKeyName(String sharedAccessKeyName)
     {
@@ -244,6 +246,8 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
     /**
      * Setter for sharedAccessKey
+     *
+     * @param sharedAccessKey The value of the signature to set
      */
     protected void setSharedAccessKey(String sharedAccessKey)
     {
@@ -252,6 +256,8 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
     /**
      * Setter for sharedAccessSignature
+     *
+     * @param sharedAccessSignature The value of the signature to set
      */
     protected void setSharedAccessSignature(String sharedAccessSignature)
     {

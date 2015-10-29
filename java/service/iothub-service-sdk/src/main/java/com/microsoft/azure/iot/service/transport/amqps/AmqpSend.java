@@ -29,9 +29,9 @@ public class AmqpSend extends BaseHandler
 
     /**
      * Constructor to set up connection parameters
-     * @param hostName address string of the service (example: AAA.BBB.CCC)
-     * @param userName username string to use SASL authentication (example: user@sas.service)
-     * @param sasToken SAS token string
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
      */
     public AmqpSend(String hostName, String userName, String sasToken)
     {
@@ -57,7 +57,7 @@ public class AmqpSend extends BaseHandler
 
     /**
      * Event handler for the reactor init event
-     * @param event Proton Event object
+     * @param event The proton event object
      */
     @Override
     public void onReactorInit(Event event) {
@@ -74,9 +74,8 @@ public class AmqpSend extends BaseHandler
 
     /**
      * Create AmqpsSendHandler and store it in a member variable
-     * @throws IOException
      */
-    public void open() throws IOException
+    public void open()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_004: [The function shall create an AmqpsSendHandler object to handle reactor events]
         amqpSendHandler = new AmqpSendHandler(this.hostName, this.userName, this.sasToken);
@@ -95,9 +94,9 @@ public class AmqpSend extends BaseHandler
      * Create binary message
      * Initialize and start Proton reactor
      * Send the created message
-     * @param deviceId device name string
-     * @param content content string of the message
-     * @throws IOException
+     * @param deviceId The device name string
+     * @param content The content string of the message
+     * @throws IOException This exception is thrown if the AmqpSend object is not initialized
      */
     public void send(String deviceId, String content) throws IOException
     {
