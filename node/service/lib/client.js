@@ -9,6 +9,23 @@ var Message = require('azure-iot-common').Message;
 var ServiceToken = require('../node_modules/azure-iot-common/lib/authorization.js').ServiceToken;
 var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
 
+/**
+ * @class FeedbackReceiver
+ * @emits FeedbackReceiver#errorReceived
+ * @emits FeedbackReceiver#message
+ */
+
+/**
+ * @class           module:azure-iothub.Client
+ * @classdesc       Creates an IoT Hub service client. Normally, consumers will
+ *                  call one of the factory methods, {@link fromConnectionString}
+ *                  or {@link fromSharedAccessSignature}, rather than calling
+ *                  this constructor directly.
+ * @param {Object}  transport   An object that implements the interface
+ *                              expected of a transport object, e.g.,
+ *                              {@link module:azure-iothub~Transport}.
+  * @prop {FeedbackReceiver} FeedbackReceiver
+ */
 function Client(transport) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_001: [The Client constructor shall throw ReferenceError if the transport argument is falsy.]*/
   if (!transport) throw new ReferenceError('transport is \'' + transport + '\'');
@@ -22,6 +39,12 @@ function Client(transport) {
   Object.defineProperty(this, 'FeedbackReceiver', { value: transport.FeedbackReceiver });
 }
 
+/**
+ * @method            module:azure-iothub.Client.fromConnectionString
+ * @description       Creates an IoT Hub service client.
+ * @param {String}    value   A connection string which encapsulates "service
+ *                            connect" permissions on an IoT hub.
+ */
 Client.fromConnectionString = function fromConnectionString(value) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_002: [The fromConnectionString method shall throw ReferenceError if the value argument is falsy.]*/
   if (!value) throw new ReferenceError('value is \'' + value + '\'');
@@ -41,6 +64,12 @@ Client.fromConnectionString = function fromConnectionString(value) {
   return new Client(new DefaultTransport(config));
 };
 
+/**
+ * @method            module:azure-iothub.Client.fromSharedAccessSignature
+ * @description       Creates an IoT Hub service client.
+ * @param {String}    value   A shared access signature which encapsulates
+ *                            "service connect" permissions on an IoT hub.
+ */
 Client.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_005: [The fromSharedAccessSignature method shall throw ReferenceError if the value argument is falsy.]*/
   if (!value) throw new ReferenceError('value is \'' + value + '\'');
@@ -59,6 +88,14 @@ Client.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
   return new Client(new DefaultTransport(config));
 };
 
+/**
+ * @method            module:azure-iothub.Client#open
+ * @description       Opens the connection to an IoT hub.
+ * @param {Function}  done    The function to call when the operation is
+ *                            complete. `done` will be passed an Error object
+ *                            argument, which will be null if the operation
+ *                            completed successfully.
+ */
 Client.prototype.open = function open(done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_008: [The open method shall open a connection to the IoT Hub that was identified when the Client object was created (e.g., in Client.fromConnectionString).]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_009: [When the open method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
@@ -69,6 +106,14 @@ Client.prototype.open = function open(done) {
   this._transport.connect(done);
 };
 
+/**
+ * @method            module:azure-iothub.Client#close
+ * @description       Closes the connection to an IoT hub.
+ * @param {Function}  done    The function to call when the operation is
+ *                            complete. `done` will be passed an Error object
+ *                            argument, which will be null if the operation
+ *                            completed successfully.
+ */
 Client.prototype.close = function close(done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_021: [The close method shall close the connection.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_022: [When the close method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
@@ -79,6 +124,20 @@ Client.prototype.close = function close(done) {
   this._transport.disconnect(done);
 };
 
+/**
+ * @method            module:azure-iothub.Client#send
+ * @description       Sends a message to a device.
+ * @param {String}    deviceId  The identifier of an existing device identity.
+ * @param {}          message   The body of the message to send to the device.
+ *                              If `message` is not of type
+ *                              {@link module:azure-iot-common.Message}, it
+ *                              will be converted.
+ * @param {Function}  done      The function to call when the operation is
+ *                              complete. `done` will be called with two
+ *                              arguments: an Error object (can be null) and a
+ *                              transport-specific response object useful for
+ *                              logging or debugging.
+ */
 Client.prototype.send = function send(deviceId, message, done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_013: [The send method shall throw ReferenceError if the deviceId or message arguments are falsy.]*/
   if (!deviceId) {
@@ -103,6 +162,14 @@ Client.prototype.send = function send(deviceId, message, done) {
   this._transport.send(deviceId, message, done);
 };
 
+/**
+ * @method            module:azure-iothub.Client#getFeedbackReceiver
+ * @description       Returns a FeedbackReceiver object which emits events when new feedback messages are received by the client.
+ * @param {Function}  done      The function to call when the operation is
+ *                              complete. `done` will be called with two
+ *                              arguments: an Error object (can be null) and a
+ *                              FeedbackReceiver object.
+ */
 Client.prototype.getFeedbackReceiver = function getFeedbackReceiver(done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_026: [If the connection has not already been opened (e.g., by a call to open), the getFeedbackReceiver method shall open the connection.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_027: [When the getFeedbackReceiver method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
