@@ -82,7 +82,7 @@ describe('authorization', function () {
           return new authorization.Token(args.resourceUri, args.keyName, args.key, args.expiry);
         }
       
-        function throws(element, index, array) {
+        function throws(element) {
           args[argName] = element;
           var messageMatch = new RegExp('^Argument \'' + argName + '\' is ' + element);
           assert.throws(createAuthToken, ReferenceError, messageMatch);

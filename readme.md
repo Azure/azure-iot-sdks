@@ -14,7 +14,7 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 This repository contains the following IoT device SDKs:
 
 - [Azure IoT device SDK for C](c/readme.md)
-- [Azure IoT device SDK for .NET](csharp/readme.md)
+- [Azure IoT device SDK for .NET](csharp/device/readme.md)
 - [Azure IoT device SDK for Java](java/device/readme.md)
 - [Azure IoT device SDK for Node.js](node/device/readme.md)
 

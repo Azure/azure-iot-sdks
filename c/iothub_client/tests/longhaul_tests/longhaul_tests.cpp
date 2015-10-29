@@ -34,12 +34,27 @@ const char* TEST_MESSAGE_DATA_FMT = "{\"notifyData\":\"%.24s\",\"id\":\"%d\"}";
 #define IOTHUB_COUNTER_MAX           10
 #define IOTHUB_TIMEOUT_SEC           1000
 #define MAX_CLOUD_TRAVEL_TIME           60.0
+#define MAX_EVENT_RECEIVED_WAIT_TIME 180.0
+#define MAX_EVENT_RECEIVED_QUERY_TIME 10
+#define INDEFINITE_TIME ((time_t)-1)
+
 
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
 #define IOTHUBCLIENT_TEST_CATEGORY_LONGHAUL "IOTHUBCLIENT_TESTS_LONGHAUL"
 
-int keepVerifyingEventReceived = 0;
+#ifndef MBED_BUILD_TIMESTAMP
+DLIST_ENTRY eventsPendingVerification;
+LOCK_HANDLE eventsPendingVerificationLockHandle;
+IOTHUB_TEST_HANDLE devhubTestHandle;
+
+time_t receiveTimeQueryRangeStart = time(NULL);
+double minEventTravelTime = MAX_EVENT_RECEIVED_WAIT_TIME;
+double maxEventTravelTime = 0;
+double avgEventTravelTime = 0;
+double numberOfEventsSent = 0;
+double numberOfEventsReceived = 0;
+#endif
 
 typedef struct EVENT_DATA_TAG
 {
@@ -47,6 +62,9 @@ typedef struct EVENT_DATA_TAG
     const char* message;
     bool sent;
     bool received;
+	time_t time_sent;
+	time_t time_received;
+	DLIST_ENTRY link;
 } EVENT_DATA;
 
 typedef struct MESSAGE_DATA_TAG
@@ -62,18 +80,38 @@ BEGIN_TEST_SUITE(longhaul_tests)
 
     static int IoTHubCallback(void* context, const char* data, size_t size)
     {
-        int result = 0; // 0 means "keep processing"
-        (void)data, size;
-        EVENT_DATA* expectedData = (EVENT_DATA*)context;
-        if (expectedData != NULL)
-        {
-            if (strcmp(expectedData->message, data) == 0)
-            {
-                expectedData->received = true;
-                result = 1;
-            }
-        }
-        return result;
+		int result = 1; // 0 means "keep processing"
+		
+#ifndef MBED_BUILD_TIMESTAMP
+		if (Lock(eventsPendingVerificationLockHandle) == LOCK_OK)
+		{
+			PDLIST_ENTRY currentListEntry = eventsPendingVerification.Flink;
+
+			while (currentListEntry != &eventsPendingVerification)
+			{
+				result = 0;
+
+				EVENT_DATA* sentEvent = containingRecord(currentListEntry, EVENT_DATA, link);
+
+				if (strcmp(data, sentEvent->message) == 0)
+				{
+					sentEvent->time_received = time(NULL);
+					sentEvent->received = true;
+
+					numberOfEventsReceived++;
+					break;
+				}
+				else
+				{
+					currentListEntry = currentListEntry->Flink;
+				}
+			}
+
+			Unlock(eventsPendingVerificationLockHandle);
+		}
+#endif
+
+		return result;
     }
 
     static void SendEventCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
@@ -82,7 +120,19 @@ BEGIN_TEST_SUITE(longhaul_tests)
         (void)result;
         if (data != NULL)
         {
+			data->time_sent = time(NULL);
             data->sent = true;
+
+#ifndef MBED_BUILD_TIMESTAMP
+			if (Lock(eventsPendingVerificationLockHandle) == LOCK_OK)
+			{
+				DList_AppendTailList(&eventsPendingVerification, &data->link);
+
+				numberOfEventsSent++;
+
+				Unlock(eventsPendingVerificationLockHandle);
+			}
+#endif
         }
     }
 
@@ -208,6 +258,9 @@ BEGIN_TEST_SUITE(longhaul_tests)
                 result->message = tempString;
                 result->sent = false;
                 result->received = false;
+				result->time_sent = INDEFINITE_TIME;
+				result->time_received = INDEFINITE_TIME;
+				DList_InitializeListHead(&result->link);
             }
         }
 
@@ -275,14 +328,135 @@ BEGIN_TEST_SUITE(longhaul_tests)
         return testDuration;
     }
 
+	static void InitializeEventReceivedVerification()
+	{
+#ifndef MBED_BUILD_TIMESTAMP
+
+		eventsPendingVerificationLockHandle = Lock_Init();
+		if (eventsPendingVerificationLockHandle == NULL)
+		{
+			LogError("Lock_Init failed for list of events pending verification.\r\n");
+		}
+
+		DList_InitializeListHead(&eventsPendingVerification);
+
+		devhubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(), IoTHubAccount_GetIoTHubConnString(), IoTHubAccount_GetDeviceId(), IoTHubAccount_GetDeviceKey(), IoTHubAccount_GetEventhubListenName(), IoTHubAccount_GetEventhubAccessKey(), IoTHubAccount_GetSharedAccessSignature(), IoTHubAccount_GetEventhubConsumerGroup());
+		ASSERT_IS_NOT_NULL(devhubTestHandle);
+#endif
+	}
+
+	static void VerifyEventsReceivedByHub(EVENT_DATA* sendData)
+	{
+#ifdef MBED_BUILD_TIMESTAMP
+		time_t time_sent = sendData->time_sent;
+		(void)LogInfo("VerifyMessageReceived[%s] sent on [%s]\r\n", sendData->message, ctime(&time_sent));
+
+		int response = -1;
+		scanf("%d", &response);
+
+		if (response == 0 || response == 1)
+		{
+			sendData->received = response;
+			
+			if (response == 0)
+			{
+				ASSERT_FAIL("Event not received by IoT hub within expected time.\r\n");
+			}
+		}
+		else
+		{
+			LogError("Failed getting result of verification of Events received by hub.");
+		}
+#else
+		IOTHUB_TEST_CLIENT_RESULT clientResult = IoTHubTest_ListenForEvent(devhubTestHandle, IoTHubCallback, 16, NULL, receiveTimeQueryRangeStart, MAX_EVENT_RECEIVED_QUERY_TIME);
+		ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, clientResult);
+
+
+		if (Lock(eventsPendingVerificationLockHandle) == LOCK_OK)
+		{
+			PDLIST_ENTRY currentListEntry = eventsPendingVerification.Flink;
+
+			receiveTimeQueryRangeStart = time(NULL);
+
+			while (currentListEntry != &eventsPendingVerification)
+			{
+				EVENT_DATA* sentEvent = containingRecord(currentListEntry, EVENT_DATA, link);
+
+				currentListEntry = currentListEntry->Flink;
+
+				if (sentEvent->received)
+				{
+					double eventTravelTime = difftime(sentEvent->time_received, sentEvent->time_sent);
+
+					if (eventTravelTime > maxEventTravelTime)
+					{
+						maxEventTravelTime = eventTravelTime;
+					}
+
+					if (eventTravelTime < minEventTravelTime)
+					{
+						minEventTravelTime = eventTravelTime;
+					}
+
+					if (numberOfEventsReceived > 0)
+					{
+						avgEventTravelTime = (avgEventTravelTime * (numberOfEventsReceived - 1) + eventTravelTime) / numberOfEventsReceived;
+					}
+
+					DList_RemoveEntryList(&sentEvent->link);
+					EventData_Destroy(sentEvent);
+				}
+				else
+				{
+					if (difftime(time(NULL), sentEvent->time_sent) > MAX_EVENT_RECEIVED_WAIT_TIME)
+					{
+						LogError("Event '%s' not received by IoT hub within %f seconds.\r\n", sentEvent->message, MAX_EVENT_RECEIVED_WAIT_TIME);
+
+						ASSERT_FAIL("Event not received by IoT hub within expected time.\r\n");
+					}
+					
+					if (difftime(receiveTimeQueryRangeStart, sentEvent->time_sent) > 0)
+					{
+						receiveTimeQueryRangeStart = sentEvent->time_sent + 325;
+					}
+				}
+			}
+
+			Unlock(eventsPendingVerificationLockHandle);
+		}
+#endif
+	}
+
+	static void CompleteEventReceivedVerification()
+	{
+#ifndef MBED_BUILD_TIMESTAMP
+		if (Lock(eventsPendingVerificationLockHandle) == LOCK_OK)
+		{
+			while (!DList_IsListEmpty(&eventsPendingVerification))
+			{
+				// The loop will terminate either if
+				// - all events were received by the hub (VerifyEventsReceivedByHub() will then empty eventsPendingVerification out), or
+				// - if VerifyEventsReceivedByHub triggers an assert for timing out the verification.
+				VerifyEventsReceivedByHub(NULL);
+			}
+
+			IoTHubTest_Deinit(devhubTestHandle);
+
+			LogInfo("Number of Events: Sent=%f, Received=%f; Travel Time (secs): Min=%f, Max=%f, Average=%f\r\n", 
+				numberOfEventsSent, numberOfEventsReceived, minEventTravelTime, maxEventTravelTime, avgEventTravelTime);
+
+			Unlock(eventsPendingVerificationLockHandle);
+		}
+
+		Lock_Deinit(eventsPendingVerificationLockHandle);
+#endif
+	}
+
     void RunLongHaulTest(int totalRunTimeInSeconds, int eventFrequencyInHz)
     {
         LogInfo("Starting Long Haul tests (totalRunTimeInSeconds=%d, eventFrequencyInHz=%d)\r\n", totalRunTimeInSeconds, eventFrequencyInHz);
 
         // arrange
-#ifndef MBED_BUILD_TIMESTAMP
-        IOTHUB_TEST_HANDLE devhubTestHandle;
-#endif
         IOTHUB_CLIENT_CONFIG iotHubConfig;
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         IOTHUB_TEST_CLIENT_RESULT clientResult;
@@ -293,10 +467,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = AMQP_Protocol;
 
-#ifndef MBED_BUILD_TIMESTAMP
-        devhubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(), IoTHubAccount_GetIoTHubConnString(), IoTHubAccount_GetDeviceId(), IoTHubAccount_GetDeviceKey(), IoTHubAccount_GetEventhubListenName(), IoTHubAccount_GetEventhubAccessKey(), IoTHubAccount_GetSharedAccessSignature(), IoTHubAccount_GetEventhubConsumerGroup());
-        ASSERT_IS_NOT_NULL(devhubTestHandle);
-#endif
+		InitializeEventReceivedVerification();
 
         iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
         ASSERT_IS_NOT_NULL(iotHubClientHandle);
@@ -343,29 +514,9 @@ BEGIN_TEST_SUITE(longhaul_tests)
             // assert
             ASSERT_IS_TRUE(sendData->sent); // Callback was invoked (event was sent by IoTHubClient).
 
-#ifdef MBED_BUILD_TIMESTAMP
-            (void)LogInfo("VerifyMessageReceived[%s]\r\n", sendData->message);
-
-            int response = -1;
-            scanf("%d", &response);
-
-            if (response == 0 || response == 1)
-            {
-                sendData->received = response;
-            }
-            else
-            {
-                LogError("Could not verify if event hub received the message (response=%d).", response);
-            }
-#else
-            clientResult = IoTHubTest_ListenForEventForMaxDrainTime(devhubTestHandle, IoTHubCallback, 16, sendData);
-            ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, clientResult);
-#endif
-
-            ASSERT_IS_TRUE(sendData->received); // Callback was invoked (event was received by IoTHub).
+			VerifyEventsReceivedByHub(sendData);
 
             IoTHubMessage_Destroy(msgHandle);
-            EventData_Destroy(sendData);
 
             WaitForFrequencyMatch(eventFrequencyInHz, loopInitialTimeInMilliseconds);
         }
@@ -375,9 +526,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
         // cleanup
         IoTHubClient_Destroy(iotHubClientHandle);
 
-#ifndef MBED_BUILD_TIMESTAMP
-        IoTHubTest_Deinit(devhubTestHandle);
-#endif
+		CompleteEventReceivedVerification();
 
         LogInfo("Long Haul tests completed\r\n");
     }

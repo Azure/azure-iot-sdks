@@ -5,6 +5,7 @@
     "c_nuget": {
         "device": "1.0.0-preview-004"
     },
+    "qpid_proton_nuget": "0.9.0.1-preview-003",
     "csharp": {
         "device": "1.0.0-preview-004"
     },
@@ -18,7 +19,7 @@
       "device": "1.0.0-preview.4",
       "service": "1.0.0-preview.4"
     },
-    "iothub-explorer": "1.0.0-preview.4",
+    "iothub-explorer": "1.0.0-preview.4.a",
     "device-explorer": "1.0.0-preview.4",
     "github-release": "v1.0.0-preview.4"
 }

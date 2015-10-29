@@ -5,17 +5,38 @@
 
 'use strict';
 
-var nopt = require("nopt");
+var nopt = require('nopt');
+var uuid = require('uuid');
 var colorsTmpl = require('colors-tmpl');
 var prettyjson = require('prettyjson');
+var Message = require('azure-iot-common').Message;
 var Client = require('azure-iothub').Client;
 var Registry = require('azure-iothub').Registry;
 var Https = require('azure-iothub').Https;
 
+function Count(val) {
+  this.val = +val;
+}
+Count.prototype = {
+  toString: function () { return '' + this.val; },
+  valueOf: function () { return this.val; }
+};
+
+nopt.typeDefs.Count = {
+  type: Count,
+  validate: function validateCount(data, key, val) {
+    val = new Count(val);
+    if (isNaN(val) || !val.valueOf() || val < 0 || val % 1 !== 0) return false;
+    data[key] = val;
+  }
+};
+
 var expected = {
-  "connection-string": Boolean,
-  "display": String,
-  "raw": Boolean
+  'connection-string': Boolean,
+  'display': String,
+  'raw': Boolean,
+  'ack': ['none', 'negative', 'positive', 'full'],
+  'messages': Count
 };
 
 var parsed = nopt(expected, null, process.argv, 2);
@@ -106,13 +127,56 @@ else if (command === 'delete') {
 else if (command === 'send') {
   if (!arg1) inputError('No device ID given');
   if (!arg2) inputError('No message given');
+
+  var deviceId = arg1;
+  var message = new Message(arg2);
+
+  if (parsed.ack) {
+    message.messageId = uuid.v4();
+    message.ack = parsed.ack;
+  }
+
   var client = Client.fromConnectionString(connString);
-  client.send(arg1, arg2, function (err, res) {
+  client.send(deviceId, message, function (err) {
     if (err) serviceError(err);
     else {
-      if (!parsed.raw) console.log(colorsTmpl('\n{green}Message sent{/green}'));
+      if (!parsed.raw) {
+        var id = '';
+        if (parsed.ack && parsed.ack !== 'none') {
+          id = ' (id: ' + message.messageId + ')';
+        }
+        console.log(colorsTmpl('\n{green}Message sent{/green}' + id));
+      }
       client.close();
     }
+  });
+}
+else if (command === 'receive') {
+  var client = Client.fromConnectionString(connString);
+  client.getFeedbackReceiver(function (err, receiver) {
+    var messageCount = parsed.messages || 0;
+    var forever = !parsed.messages;
+
+    if (err) serviceError(err);
+    if (!parsed.raw) {
+      console.log(colorsTmpl('\n{yellow}Waiting for feedback...{/yellow} (Ctrl-C to quit)'));
+    }
+
+    receiver.on('errorReceived', function (err) { serviceError(err); });
+    receiver.on('message', function (feedbackRecords) {
+      var output = {
+        'iothub-enqueuedtime': feedbackRecords.annotations.value['iothub-enqueuedtime'],
+        body: feedbackRecords.body
+      };
+
+      var rendered = parsed.raw ?
+        JSON.stringify(output) :
+        '\nFeedback message\n' + prettyjson.render(output);
+
+      console.log(rendered);
+
+      if (!forever && --messageCount === 0) process.exit(0);
+    });
   });
 }
 else {
@@ -178,7 +242,9 @@ function printDevice(device) {
     result.push({connectionString: connectionString(device)});
   }
 
-  var output = parsed.raw ? JSON.stringify(result) : '\n' + prettyjson.render(result);
+  var output = parsed.raw ?
+    JSON.stringify(result) :
+    '\n' + prettyjson.render(result);
   console.log(output);
 }
 
@@ -197,8 +263,10 @@ function usage() {
     '    Can optionally display just the selected properties and/or the connection string.{/grey}',
     '  {green}iothub-explorer{/green} {white}<connection-string> delete <device-id>{/white}',
     '    {grey}Deletes the given device from the IoT Hub.{/grey}',
-    '  {green}iothub-explorer{/green} {white}<connection-string> send <device-id> <msg>{/white}',
-    '    {grey}Sends a cloud-to-device message to the given device{/grey}',
+    '  {green}iothub-explorer{/green} {white}<connection-string> send <device-id> <msg> [--ack="none|positive|negative|full"]{/white}',
+    '    {grey}Sends a cloud-to-device message to the given device, with the option to request feedback about delivery{/grey}',
+    '  {green}iothub-explorer{/green} {white}<connection-string> receive [--messages=n]{/white}',
+    '    {grey}Receives feedback about the delivery of cloud-to-device messages; optionally exits after receiving {white}n{/white} messages.{/grey}',
     '  {green}iothub-explorer{/green} {white}help{/white}',
     '    {grey}Displays this help message.{/grey}',
     '',

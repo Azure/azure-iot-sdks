@@ -38,10 +38,10 @@ call %client-build-root%\build\release\delay_sign_csharp.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -- Copy the managed dlls to the "tosign" Folder for signing
-xcopy /q /y /R %client-build-root%\csharp\Microsoft.Azure.Devices.Client\bin\Release\Microsoft.Azure.Devices.Client.dll %client-build-root%\build\tosign\
+xcopy /q /y /R %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client\bin\Release\Microsoft.Azure.Devices.Client.dll %client-build-root%\build\tosign\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-xcopy /q /y /R %client-build-root%\csharp\Microsoft.Azure.Devices.Client.WinRT\bin\Release\Microsoft.Azure.Devices.Client.winmd %client-build-root%\build\tosign\
+xcopy /q /y /R %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.WinRT\bin\Release\Microsoft.Azure.Devices.Client.winmd %client-build-root%\build\tosign\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -- Auto-sign the managed dlls placed in the "tosign" Folder
@@ -49,16 +49,16 @@ csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-roo
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -- Copy the signed managed dlls back to their respective build output directories
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.dll %client-build-root%\csharp\Microsoft.Azure.Devices.Client\bin\Release\
+xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client\bin\Release\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.winmd %client-build-root%\csharp\Microsoft.Azure.Devices.Client.WinRT\bin\Release\
+xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.winmd %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.WinRT\bin\Release\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.dll %client-build-root%\csharp\Microsoft.Azure.Devices.Client\obj\Release\
+xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client\obj\Release\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.winmd %client-build-root%\csharp\Microsoft.Azure.Devices.Client.WinRT\obj\Release\
+xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.winmd %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.WinRT\obj\Release\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -- Clean directories

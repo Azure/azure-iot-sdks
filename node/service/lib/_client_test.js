@@ -5,8 +5,8 @@
 
 var assert = require('chai').assert;
 var Client = require('./client.js');
-var Message = require('azure-iot-common').Message;
 var errors = require('azure-iot-common').errors;
+var Message = require('azure-iot-common').Message;
 
 describe('Client', function () {
   describe('#constructor', function () {
@@ -100,7 +100,7 @@ function transportSpecificTests(opts) {
 
     beforeEach('prepare test subject', function () {
       if (opts.transport && opts.connectionString) assert.fail('test setup error');
-      if (opts.transport) testSubject = new Client(opts.transport);
+      if (opts.transport) testSubject = new Client(opts.transport());
       else testSubject = Client.fromConnectionString(opts.connectionString);
       deviceId = opts.id;
     });
@@ -139,6 +139,12 @@ function transportSpecificTests(opts) {
     });
 
     describe('#send', function () {
+      function createTestMessage() {
+        var msg = new Message('msg');
+        msg.expiryTimeUtc = Date.now() + 5000; // Expire 5s from now, to reduce the chance of us hitting the 50-message limit on the IoT Hub
+        return msg;
+      }
+
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_016: [When the send method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - standard JavaScript Error object (or subclass)
       response - an implementation-specific response object returned by the underlying protocol, useful for logging and troubleshooting]*/
@@ -147,7 +153,7 @@ function transportSpecificTests(opts) {
         testSubject.open(function (err) {
           if (err) done(err);
           else {
-            testSubject.send(deviceId, new Message('msg'), function (err, state) {
+            testSubject.send(deviceId, createTestMessage(), function (err, state) {
               if (!err) {
                 assert.equal(state.descriptor.toString(), 0x24); // 0x24 == AMQP's 'accepted' disposition frame
               }
@@ -159,7 +165,7 @@ function transportSpecificTests(opts) {
 
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_015: [If the connection has not already been opened (e.g., by a call to open), the send method shall open the connection before attempting to send the message.]*/
       it('opens if necessary', function (done) {
-        testSubject.send(deviceId, new Message('msg'), function (err, state) {
+        testSubject.send(deviceId, createTestMessage(), function (err, state) {
           if (!err) {
             assert.equal(state.descriptor.toString(), 0x24); // 0x24 == AMQP's 'accepted' disposition frame
           }
@@ -175,7 +181,7 @@ function transportSpecificTests(opts) {
             testSubject.close(function (err) {
               if (err) done(err);
               else {
-                testSubject.send(deviceId, new Message('msg'), function (err, state) {
+                testSubject.send(deviceId, createTestMessage(), function (err, state) {
                   if (!err) {
                     assert.equal(state.descriptor.toString(), 0x24); // 0x24 == AMQP's 'accepted' disposition frame
                   }
@@ -207,6 +213,109 @@ function transportSpecificTests(opts) {
         });
       });
     });
+
+    describe('#getFeedbackReceiver', function () {
+      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_027: [When the getFeedbackReceiver method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
+      err - standard JavaScript Error object (or subclass)
+      receiver - an instance of Client.FeedbackReceiver]*/
+      it('returns an Error object', function (done) {
+        testSubject._transport._config.sharedAccessSignature = 'fail'; // TODO: don't reach into internals to force failure
+        testSubject.getFeedbackReceiver(function (err) {
+          assert.instanceOf(err, Error);
+          done();
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_027: [When the getFeedbackReceiver method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
+      err - standard JavaScript Error object (or subclass)
+      receiver - an instance of Client.FeedbackReceiver]*/
+      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_028: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
+      it('returns a FeedbackReceiver object', function (done) {
+        testSubject.getFeedbackReceiver(function (err, receiver) {
+          if (err) done(err);
+          else {
+            assert.instanceOf(receiver, testSubject.FeedbackReceiver);
+            done();
+          }
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_033: [getFeedbackReceiver shall return the same instance of Client.FeedbackReceiver every time it is called with a given instance of Client.]*/
+      it('always returns the same FeedbackReceiver', function (done) {
+        testSubject.getFeedbackReceiver(function (err, receiver1) {
+          if (err) done(err);
+          testSubject.getFeedbackReceiver(function (err, receiver2) {
+            if (err) done(err);
+            assert.equal(receiver1, receiver2);
+            done();
+          });
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_030: [The FeedbackReceiver class shall inherit EventEmitter to provide consumers the ability to listen for (and stop listening for) events.]*/
+      it('FeedbackReceiver inherits EventEmitter', function (done) {
+        testSubject.getFeedbackReceiver(function (err, receiver) {
+          if (err) done(err);
+          var EventEmitter = require('events');
+          assert.instanceOf(receiver, EventEmitter);
+          done();
+        });
+      });
+
+      function sendShortLivedC2dMessage(deviceId, messageId, done) {
+        var msg = new Message('msg');
+        msg.messageId = messageId;
+        msg.ack = 'full';
+
+        // Set up the c2d message to expire immediately, so that this test
+        // doesn't have to receive the message (acting as the device)--the
+        // feedback message will be generated due to message expiration.
+        msg.expiryTimeUtc = Date.now() + 100; // 100ms from now
+
+        testSubject.send(deviceId, msg, function (err) {
+          if (err) done(err);
+        });
+      }
+
+      function findFeedbackRecord(deviceId, messageId, records) {
+        return records.body.some(function (record) {
+          return (record.originalMessageId === messageId && record.deviceId === deviceId);
+        });
+      }
+
+      // There is one "global" feedback message queue per IoT Hub, and it is
+      // designed to be read by only one entity. Multiple readers can swallow
+      // each others' messages (i.e., one reader will receive+complete messages
+      // which the other reader is looking for). So to run #getFeedbackReceiver
+      // tests, we'd need to spin up a new IoT Hub just for those tests, which
+      // adds time and adds new potential points of failure. Another option is to
+      // create a service that is the *only* reader for our test Hub, then query
+      // it from the tests, but that also introduces new potential points of
+      // failure. We'll skip this test for now...
+      //
+      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_026: [If the connection has not already been opened (e.g., by a call to open), the getFeedbackReceiver method shall open the connection.]*/
+      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_031: [FeedbackReceiver shall expose the 'errorReceived' event, whose handler shall be called with the following arguments:
+      err – standard JavaScript Error object (or subclass)]*/
+      /*SRS_NODE_IOTHUB_CLIENT_05_032: [FeedbackReceiver shall expose the 'message' event, whose handler shall be called with the following arguments when a new feedback message is received from the IoT Hub:
+      message – a JavaScript object containing a batch of one or more feedback records]*/
+      it.skip('returns a receiver that emits feedback messages', function (done) {
+        this.timeout(30000);
+        testSubject.getFeedbackReceiver(function (err, receiver) {
+          if (err) done(err);
+          else {
+            var messageId = 'mid-' + Math.random();
+            receiver.on('errorReceived', function (err) { done(err); });
+            receiver.on('message', function (feedbackRecords) {
+              if (findFeedbackRecord(deviceId, messageId, feedbackRecords)) {
+                done();
+              }
+            });
+
+            sendShortLivedC2dMessage(deviceId, messageId, done);
+          }
+        });
+      });
+    });
   });
 }
 
@@ -215,7 +324,7 @@ module.exports = transportSpecificTests;
 describe('Over simulated AMQP', function () {
   var SimulatedTransport = require('./transport_simulated.js');
   var opts = {
-    transport: new SimulatedTransport(),
+    transport: function () { return new SimulatedTransport(); },
     connectionString: null,
     id: 'id'
   };

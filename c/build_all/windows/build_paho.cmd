@@ -72,7 +72,7 @@ git clone -b %openSSL-branch% %openSSL-repo% %openSSL-build-root%
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
-rem -- build OpenSSL
+rem -- build OpenSSL 32 bits
 rem -----------------------------------------------------------------------------
 
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86 
@@ -91,6 +91,10 @@ if not %errorlevel%==0 exit /b %errorlevel%
 call nmake -f ms\ntdll.mak install
 if not %errorlevel%==0 exit /b %errorlevel%
 
+mkdir out32dllForNuget
+xcopy /q /y /R .\out32dll\*.* .\out32dllForNuget\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 rem -----------------------------------------------------------------------------
 rem -- sync the paho source code
 rem -----------------------------------------------------------------------------
@@ -100,7 +104,7 @@ git clone %paho-repo% %paho-build-root%
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
-rem -- build paho
+rem -- build paho 32 bits.
 rem -----------------------------------------------------------------------------
 
 pushd %paho-build-root%
@@ -119,3 +123,27 @@ goto paho_build_done
 exit /b 1
 :paho_build_done
 if not %errorlevel%==0 exit /b %errorlevel%
+
+rem -----------------------------------------------------------------------------
+rem -- build OpenSSL 64 bits
+rem -----------------------------------------------------------------------------
+
+call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64 
+if not %errorlevel%==0 exit /b %errorlevel%
+
+pushd %openSSL-build-root%
+perl Configure VC-WIN64A
+if not %errorlevel%==0 exit /b %errorlevel%
+
+call ms\do_win64a
+if not %errorlevel%==0 exit /b %errorlevel%
+
+call nmake -f ms\ntdll.mak clean
+if not %errorlevel%==0 exit /b %errorlevel%
+
+call nmake -f ms\ntdll.mak
+if not %errorlevel%==0 exit /b %errorlevel%
+
+mkdir out64dll
+xcopy /q /y /R .\out32dll\*.* .\out64dll\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%

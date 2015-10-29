@@ -171,3 +171,40 @@ function Get-IoTEventHubNextEvent
 	$EventData = $EventHubListener.Receive($EventReceiveTimeout);
 	return $EventData;
 }
+
+function Verify-EventsReceivedByHub
+{
+	PARAM ($EventHubListener, $EventHubListenTimeoutInSeconds, $VerificationList, $MaxEventReceivedWaitTime);
+	
+	$Result = $true;
+	
+	while (($EventData = Get-IoTEventHubNextEvent -EventHubListener $EventHubListener -TimeoutInSeconds $EventHubListenTimeoutInSeconds) -NE $null)
+	{
+		$MessageRetrievedFromEventHub = [System.Text.Encoding]::UTF8.GetString($EventData.GetBytes());
+	
+		for ($i = 0; $i -LT $VerificationList.Count; $i++)
+		{
+			$EventToVerify = $VerificationList.GetElementAt($i);
+			
+			if ($MessageRetrievedFromEventHub -IEQ $EventToVerify[0])
+			{
+				$VerificationList.RemoveAt($i);
+				break;
+			}
+		}
+	}
+	
+	for ($i = 0; $i -LT $VerificationList.Count; $i++)
+	{
+		$EventToVerify = $VerificationList.GetElementAt($i);
+		
+		if (($(Get-Date) - $EventToVerify[1]).TotalSeconds -GT $MaxEventReceivedWaitTime)
+		{
+			Write-Message -Error -Message "Event $($EventToVerify[0]) not received by IoT hub within $MaxEventReceivedWaitTime seconds.";
+			$Result = $false;
+			break;
+		}
+	}
+	
+	return $Result;
+}
