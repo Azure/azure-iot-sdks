@@ -99,4 +99,4 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - You can use the DeviceExplorer tool on your desktop machine to see the data your device is sending and receiving.
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md

@@ -7,7 +7,7 @@ Device Explorer runs on your local machine and connects to your IoT hub in Azure
 - *Receive device-to-cloud* to enable you to monitor messages sent from your device to your IoT hub.
 - *Send cloud-to-device* to enable you to send messages to your devices from your IoT hub.
 
-> **Note:** The Device Explorer utility only runs on Windows.
+> **Note:** The Device Explorer utility only runs on Windows. On other platforms use the [iothub explorer][iothub-explorer] tool.
 
 To learn more about IoT Hub, see [What is Azure IoT Hub?][what-is-iot-hub].
 
@@ -147,3 +147,4 @@ Run your sample application. Device Explorer should now show that the IoT hub ha
 [protocol-gateway]: https://github.com/Azure/azure-iot-protocol-gateway
 [lnk-devguide]: https://azure.microsoft.com/documentation/articles/iot-hub-devguide/
 [what-is-iot-hub]: https://azure.microsoft.com/documentation/articles/iot-hub-what-is-iot-hub/
+[iothub-explorer]: ../../iothub-explorer/doc/provision_device.md
