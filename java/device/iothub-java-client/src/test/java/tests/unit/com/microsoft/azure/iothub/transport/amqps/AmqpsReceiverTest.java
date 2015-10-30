@@ -16,12 +16,9 @@ import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.*;
 import org.apache.qpid.proton.reactor.impl.IO;
-import org.apache.qpid.proton.reactor.impl.ReactorImpl;
 import org.junit.Test;
-import sun.text.resources.FormatData_es_EC;
 
 import java.io.IOException;
-import java.lang.management.ThreadInfo;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
