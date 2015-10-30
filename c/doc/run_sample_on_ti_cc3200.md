@@ -125,4 +125,4 @@ The Device Explorer can be used to monitor the data sent by the application. Und
 ```
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md
