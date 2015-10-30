@@ -34,7 +34,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
   ./build.sh --skip-unit-tests
   ```
 
-6. Run the **c/serializer/samples/simplesample_amqp/linux/simplesample_amqp** sample application.
+6. Run the **~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp** sample application.
 
 7. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_amqp** application.
 

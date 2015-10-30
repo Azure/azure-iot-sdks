@@ -90,8 +90,8 @@ COPY %tests_path%\*.h %outdir%
 COPY %tests_path%\..\*.cpp %outdir%
 
 @REM  Copy E2E test extras
-COPY %root_path%\testtools\iothub_test\inc\*.h %outdir%
-COPY %root_path%\testtools\iothub_test\src\*.c %outdir%
+COPY %root_path%\common\testtools\iothub_test\inc\*.h %outdir%
+COPY %root_path%\common\testtools\iothub_test\src\*.c %outdir%
 
 @REM  Copy mbed-specific common code
 COPY /Y %root_path%\common\adapters\*mbed.c %outdir%

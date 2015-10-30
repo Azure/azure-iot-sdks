@@ -13,14 +13,14 @@ function createTransport() {
 var host = process.env.IOTHUB_NAME + '.' + process.env.IOTHUB_SUFFIX;
 var keyName = process.env.IOTHUB_DEVICE_ID;
 var key = process.env.IOTHUB_DEVICE_KEY;
-var connectionString = 'HostName='+host+';CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId='+keyName+';SharedAccessKey='+key;
+var connectionString = 'HostName='+host+';DeviceId='+keyName+';SharedAccessKey='+key;
 var badConnStrings = [
-  'HostName=bad;CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId='+keyName+';SharedAccessKey='+key,
-  'HostName='+host+';CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId=bad;SharedAccessKey='+key,
-  'HostName='+host+';CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId='+keyName+';SharedAccessKey=bad;'
+  'HostName=bad;DeviceId='+keyName+';SharedAccessKey='+key,
+  'HostName='+host+';DeviceId=bad;SharedAccessKey='+key,
+  'HostName='+host+';DeviceId='+keyName+';SharedAccessKey=bad;'
 ];
 
 describe('Over real HTTPS', function () {
-  this.timeout(5000); // default timeout is 2s, but 'hostname is malformed' tests are taking 2.2s on some machines...
+  this.timeout(10000); // default timeout is 2s, but 'hostname is malformed' tests are taking 2.2s on some machines...
   runTests(createTransport, connectionString, badConnStrings);
 });

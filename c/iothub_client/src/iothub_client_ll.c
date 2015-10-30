@@ -81,6 +81,8 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
             config->iotHubSuffix = NULL;
             config->deviceId = NULL;
             config->deviceKey = NULL;
+			/* Codes_SRS_IOTHUBCLIENT_LL_04_002: [If it does not, it shall pass the protocolGatewayHostName NULL.] */
+			config->protocolGatewayHostName = NULL;
 
             if ((connString = STRING_construct(connectionString)) == NULL)
             {
@@ -174,6 +176,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                     config->deviceKey = STRING_c_str(deviceKeyString);
                                 }
                             }
+							/* Codes_SRS_IOTHUBCLIENT_LL_04_001: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of key/value pair GatewayHostName. If it does exist it shall pass the value to IoTHubClient_LL_Create API.] */
                             else if (strcmp(s_token, PROTOCOL_GATEWAY_HOST) == 0)
                             {
                                 protocolGateway = STRING_clone(valueString);

@@ -1,3 +1,3 @@
 # To build the simplesample_amqp sample
 
-Follow the instructions [here](https://github.com/Azure/azure-iot-sdks/blob/master/doc/mbed_setup.md).
+Follow the instructions [here](https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/run_sample_on_freescale_k64f_mbed.md).

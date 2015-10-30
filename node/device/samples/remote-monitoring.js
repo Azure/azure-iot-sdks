@@ -34,19 +34,19 @@ function generateRandomIncrement()
   return ((Math.random() * 2)-1);
 }
 
-// function to send telemetry data
-function sendTelemetryData(){
+// function to send event data
+function sendEventData(){
   temperature += generateRandomIncrement();
   externalTemperature += generateRandomIncrement();
   humidity += generateRandomIncrement();
   var data = JSON.stringify({ "DeviceID":deviceID, "Temperature":temperature, "Humidity":humidity, "ExternalTemperature":externalTemperature });
-  console.log("Sending device telemetry data:\n"+data);
+  console.log("Sending device event data:\n"+data);
   client.sendEvent(new device.Message(data), printResultFor('send'));
 }
 
-// function to wait on notifications
+// function to wait on messages
 var isWaiting = false;
-function waitForNotifications(){
+function waitForMessages(){
   isWaiting = true;
   client.receive(function (err, res, msg) {
     printResultFor('receive')(err, res);
@@ -92,8 +92,8 @@ var deviceMetaData = {
 console.log("Sending device metadata:\n"+JSON.stringify(deviceMetaData));
 client.sendEvent(new device.Message(JSON.stringify(deviceMetaData)), printResultFor('send'));
 
-// start telemetry data send routing
-setInterval(sendTelemetryData, 1000);
+// start event data send routing
+setInterval(sendEventData, 1000);
 
-// Start notifications listener
-setInterval(function(){ if (!isWaiting) waitForNotifications();}, 200);
+// Start messages listener
+setInterval(function(){ if (!isWaiting) waitForMessages();}, 200);

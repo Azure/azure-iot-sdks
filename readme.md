@@ -44,7 +44,7 @@ This folder contains the following documents that are relevant to all the langua
 
 - [Set up IoT Hub](doc/setup_iothub.md) describes how to configure your Azure IoT Hub service.
 - [FAQ](doc/faq.md) contains frequently asked questions about the SDKs and libraries.
-- [OS Platforms and hardware compatibility](doc\tested_configurations.md) describes the SDK compatibility with different OS platforms as well as specific device configurations.
+- [OS Platforms and hardware compatibility](doc/tested_configurations.md) describes the SDK compatibility with different OS platforms as well as specific device configurations.
 
 ### /tools
 

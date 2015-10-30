@@ -23,22 +23,22 @@
     <files>
     <!-- these are files for x86 plaform -->
 	
-	<file src="Apache.QPID.Proton.AzureIot_thirdpartynotice.txt" target="thirdpartynotice.txt" />
+	<file src="Apache.QPID.Proton.AzureIot_thirdpartynotice.txt" target="thirdpartynotice.txt"/>
 	
-    <file src="qpid-proton\build\proton-c\Debug\qpid-protond.lib" target="build\native\Win32\Debug" /> 
-    <file src="qpid-proton\build\proton-c\Debug\qpid-protond.dll" target="build\native\Win32\Debug" /> 
-    <file src="qpid-proton\build\proton-c\Debug\qpid-protond.pdb" target="build\native\Win32\Debug" /> 
-    <file src="qpid-proton\build\proton-c\Release\qpid-proton.lib" target="build\native\Win32\Release" /> 
-    <file src="qpid-proton\build\proton-c\Release\qpid-proton.dll" target="build\native\Win32\Release" /> 
+    <file src="qpid-proton\build\proton-c\Debug\qpid-protond.lib" target="build\native\Win32\Debug"/> 
+    <file src="qpid-proton\build\proton-c\Debug\qpid-protond.dll" target="build\native\Win32\Debug"/> 
+    <file src="qpid-proton\build\proton-c\Debug\qpid-protond.pdb" target="build\native\Win32\Debug"/> 
+    <file src="qpid-proton\build\proton-c\Release\qpid-proton.lib" target="build\native\Win32\Release"/> 
+    <file src="qpid-proton\build\proton-c\Release\qpid-proton.dll" target="build\native\Win32\Release"/> 
       
     <!-- these are files for x64 plaform -->
-    <file src="qpid-proton\build_x64\proton-c\Debug\qpid-protond.lib" target="build\native\x64\Debug" /> 
-    <file src="qpid-proton\build_x64\proton-c\Debug\qpid-protond.dll" target="build\native\x64\Debug" /> 
-    <file src="qpid-proton\build_x64\proton-c\Debug\qpid-protond.pdb" target="build\native\x64\Debug" /> 
-    <file src="qpid-proton\build_x64\proton-c\Release\qpid-proton.lib" target="build\native\x64\Release" /> 
-    <file src="qpid-proton\build_x64\proton-c\Release\qpid-proton.dll" target="build\native\x64\Release" /> 
+    <file src="qpid-proton\build_x64\proton-c\Debug\qpid-protond.lib" target="build\native\x64\Debug"/> 
+    <file src="qpid-proton\build_x64\proton-c\Debug\qpid-protond.dll" target="build\native\x64\Debug"/> 
+    <file src="qpid-proton\build_x64\proton-c\Debug\qpid-protond.pdb" target="build\native\x64\Debug"/> 
+    <file src="qpid-proton\build_x64\proton-c\Release\qpid-proton.lib" target="build\native\x64\Release"/> 
+    <file src="qpid-proton\build_x64\proton-c\Release\qpid-proton.dll" target="build\native\x64\Release"/> 
 
-    <file src="Apache.QPID.Proton.AzureIot.targets" target="build\native" />
-    <file src="qpid-proton\proton-c\include\proton\*.h" target="build\native\include\proton" />
+    <file src="Apache.QPID.Proton.AzureIot.targets" target="build\native"/>
+    <file src="qpid-proton\proton-c\include\proton\*.h" target="build\native\include\proton"/>
 </files>
 </package>

@@ -36,7 +36,7 @@ This section shows you how to set up a development environment for the Azure IoT
 
 4. Run the `build.sh` script.
 
-This script builds the **iothub_client** and **serializer** libraries and their associated samples.
+This script builds the **iothub_client** and **serializer** libraries and their associated samples in a folder called "cmake" inside you home folder.
 
  > Note: you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
 
@@ -59,7 +59,7 @@ This script builds the **iothub_client** and **serializer** libraries and their 
   ./build.sh --skip-unit-tests
   ```
 
-6. Run the **c/serializer/samples/simplesample_amqp/linux/simplesample_amqp** sample application.
+6. Run the **~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp** sample application.
 
 7. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_amqp** application.
 

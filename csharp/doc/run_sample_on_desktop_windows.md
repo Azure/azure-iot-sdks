@@ -14,12 +14,12 @@ Before you get started, you should:
 
 1.  Start a new instance of Visual Studio 2015. Open the **iothub_csharp_client.sln** solution in the **csharp** folder in your local copy of the repository.
 
-2.  In Visual Studio, in **Solution Explorer**, navigate to the samples folder. In the **DeviceClientAmqpSample** project, open the **ConnectionStrings.cs** file.
+2.  In Visual Studio, in **Solution Explorer**, navigate to the samples folder. In the **DeviceClientAmqpSample** project, open the **Program.cs** file.
 
 3.  Locate the following code in the file:
 
     ```
-    public const string DeviceConnectionString = "<replace>";
+    private const string DeviceConnectionString = "<replace>";
     ```
 
 4.  Replace `<replace>` with the connection string for your device. The section "Get device connection string or data" in the document [How to use Device Explorer][device-explorer] explains how to retrieve the connection string for your device. Save the changes.
@@ -30,7 +30,7 @@ Before you get started, you should:
 
 7. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **Device Client AMQP Sample** application.
 
-8. See the section "Receive notifications" in the document [How to use Device Explorer][device-explorer] to learn how to use the **DeviceExplorer** utility to send cloud-to-device notification messages to the **Device Client AMQP Sample** application.
+8. See the section "Send cloud-to-device messages" in the document [How to use Device Explorer][device-explorer] to learn how to use the **DeviceExplorer** utility to send cloud-to-device messages to the **Device Client AMQP Sample** application.
 
 
 [setup-devbox-windows]: devbox_setup.md
