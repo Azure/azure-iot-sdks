@@ -54,7 +54,7 @@ You should see the following:
 
   ```
   $ opkg install git
-  $ git clone github.com/Azure/azure-iot-suite-sdks.git
+  $ git clone github.com/Azure/azure-iot-sdks.git
   ```
 
 - You may be prompted to add an RSA key to your device, respond with “yes.”
@@ -84,6 +84,7 @@ We first need to update the credentials in the sample AMPQ app to match those of
   $ ./build_proton.sh
   $ ./build.sh
   ```
+  **Note:** build.sh creates a folder called "cmake" in your home folder. Inside "cmake" are all the results of the compilation of the complete software.
 
 - Update the ldconfig cache
   While building the Azure IoT SDK, we needed to first build a dependency called [Qpid Proton][qpidproton].
@@ -109,9 +110,8 @@ We first need to update the credentials in the sample AMPQ app to match those of
 If you completed the operation correctly, you will see "libqpid-proton.so.2” listed
 Now that we have added Qpid Proton to our ldcache, we are able to build the sample C project which relies on Proton:
 
-- Navigate back to: /c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp/linux and run the following commands
+- Navigate to: ~/cmake/iothub_client/samples/iothub_client_sample_amqp
   ```
-  make -f makefile.linux
   ./iothub_client_sample_amqp
   ```
 
@@ -121,12 +121,12 @@ The result should be the following:
 # ./iothub_client_sample_amqp
 hub_client/samples/iothub_client_sample_amqp/linux#
 Starting the IoTHub client sample AMQP...
-IoTHubClient_SetNotificationCallback...successful.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SetMessageCallback...successful.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
 Press any key to exit the application.
 Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[1] received for message tracking id = 1 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[2] received for message tracking id = 2 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[3] received for message tracking id = 3 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[4] received for message tracking id = 4 with result = IOTHUB_CLIENT_CONFIRMATION_OK
 ```

@@ -15,14 +15,14 @@ var policy = process.env.IOTHUB_POLICY_NAME;
 var key = process.env.IOTHUB_POLICY_KEY;
 var deviceId = process.env.IOTHUB_DEVICE_ID;
 
-var connectionString = 'HostName='+host+';CredentialType=type;CredentialScope=scope;SharedAccessKeyName='+policy+';SharedAccessKey='+key;
+var connectionString = 'HostName='+host+';SharedAccessKeyName='+policy+';SharedAccessKey='+key;
 var badConnStrings = [
-  'HostName=bad;CredentialType=type;CredentialScope=scope;SharedAccessKeyName='+policy+';SharedAccessKey='+key,
-  'HostName='+host+';CredentialType=type;CredentialScope=scope;SharedAccessKeyName=bad;SharedAccessKey='+key,
-  'HostName='+host+';CredentialType=type;CredentialScope=scope;SharedAccessKeyName='+policy+';SharedAccessKey=bad'
+  'HostName=bad;SharedAccessKeyName='+policy+';SharedAccessKey='+key,
+  'HostName='+host+';SharedAccessKeyName=bad;SharedAccessKey='+key,
+  'HostName='+host+';SharedAccessKeyName='+policy+';SharedAccessKey=bad'
 ];
 
 describe('Over real HTTPS', function () {
-  this.timeout(5000);
+  this.timeout(10000);
   runTests(createTransport, connectionString, badConnStrings, deviceId);
 });

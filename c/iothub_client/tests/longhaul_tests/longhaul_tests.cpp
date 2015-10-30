@@ -21,6 +21,10 @@
 #include "buffer_.h"
 #include "threadapi.h"
 
+#ifdef MBED_BUILD_TIMESTAMP
+#include "certs.h"
+#endif
+
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 static bool g_callbackRecv = false;
 
@@ -296,6 +300,14 @@ BEGIN_TEST_SUITE(longhaul_tests)
 
         iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
         ASSERT_IS_NOT_NULL(iotHubClientHandle);
+		
+#ifdef MBED_BUILD_TIMESTAMP
+        // For mbed add the certificate information
+        if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+        {
+            LogError("failure to set option \"TrustedCerts\"\r\n");
+        }
+#endif
 
         time_t testInitialTime = time(NULL);
 

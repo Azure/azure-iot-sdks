@@ -4,6 +4,15 @@
 @setlocal EnableExtensions EnableDelayedExpansion
 @echo off
 
+rem - Specify the Azure SDK client build root
+set current-path=%~dp0
+set current-path=%current-path:~0,-1%
+set client-root=%current-path%\..\..\..\..
+for %%i in ("%client-root%") do set client-root=%%~fi
+echo Client root is %client-root%
+
+pushd %client-root%\c\build_all\packaging\windows\
+
 where /q nuget.exe
 if not !errorlevel! == 0 (
 @Echo Azure IoT SDK needs to download nuget.exe from https://www.nuget.org/nuget.exe 
@@ -19,6 +28,46 @@ Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
 )
 
 del *.nupkg
+
+rem -- Copy all Win32 files from cmake build directory to the repo directory
+xcopy /q /y /R %USERPROFILE%\cmake_Win32\iothub_client\Debug\*.* %client-root%\build_output\c\win32\debug\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %USERPROFILE%\cmake_Win32\common\Debug\*.* %client-root%\build_output\c\win32\debug\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %USERPROFILE%\cmake_Win32\serializer\Debug\*.* %client-root%\build_output\c\win32\debug\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %USERPROFILE%\cmake_Win32\iothub_client\Release\*.* %client-root%\build_output\c\win32\release\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %USERPROFILE%\cmake_Win32\common\Release\*.* %client-root%\build_output\c\win32\release\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %USERPROFILE%\cmake_Win32\serializer\Release\*.* %client-root%\build_output\c\win32\release\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+rem -- Copy all x64 files from cmake build directory to the repo directory
+xcopy /q /y /R %USERPROFILE%\cmake_x64\iothub_client\Debug\*.* %client-root%\build_output\c\x64\debug\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %USERPROFILE%\cmake_x64\common\Debug\*.* %client-root%\build_output\c\x64\debug\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %USERPROFILE%\cmake_x64\serializer\Debug\*.* %client-root%\build_output\c\x64\debug\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %USERPROFILE%\cmake_x64\iothub_client\Release\*.* %client-root%\build_output\c\x64\release\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %USERPROFILE%\cmake_x64\common\Release\*.* %client-root%\build_output\c\x64\release\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %USERPROFILE%\cmake_x64\serializer\Release\*.* %client-root%\build_output\c\x64\release\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+rem -- Package Nuget
 nuget pack Microsoft.Azure.IoTHub.HttpTransport.nuspec
 nuget pack Microsoft.Azure.IoTHub.AmqpTransport.nuspec
 nuget pack Microsoft.Azure.IoTHub.IoTHubClient.nuspec
@@ -40,6 +89,7 @@ rem mkdir Release
 rem mkdir Debug
 rem cd ..
 cd ..
+
 copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.lib" paho_outputs\Win32\Debug
 copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.pdb" paho_outputs\Win32\Debug
 copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.dll" paho_outputs\Win32\Debug
@@ -66,3 +116,7 @@ rmdir paho_outputs /S /Q
 rmdir openssl_outputs /S /Q
 
 nuget pack Microsoft.Azure.IoTHub.Serializer.nuspec
+
+rmdir %client-root%\build_output /S /Q
+
+popd

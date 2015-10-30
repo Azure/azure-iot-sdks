@@ -14,22 +14,22 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Win32Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'Win32' ) )">
     <Link>
-      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/iothub_http_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/iothub_client_http_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Win32Release" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'Win32' ) )">
     <Link>
-      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Release/iothub_http_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Release/iothub_client_http_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Win64Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'x64' ) )">
     <Link>
-      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/x64/Debug/iothub_http_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/x64/Debug/iothub_client_http_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Win64Release" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'x64' ) )">
     <Link>
-      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/x64/Release/iothub_http_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/x64/Release/iothub_client_http_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <UsingTask TaskName="Microsoft_Azure_Http_Transport_Contains" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">

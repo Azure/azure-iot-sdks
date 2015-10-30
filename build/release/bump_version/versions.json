@@ -1,0 +1,24 @@
+{
+    "c": {
+        "device": "1.0.0-preview.4"
+    },
+    "c_nuget": {
+        "device": "1.0.0-preview-004"
+    },
+    "csharp": {
+        "device": "1.0.0-preview-004"
+    },
+    "java": {
+        "device": "1.0.0-preview.4",
+        "service": "1.0.0-preview.4"
+    },
+    "node": {
+ 	  "build": "1.0.0-preview.4",
+	  "common": "1.0.0-preview.4",
+      "device": "1.0.0-preview.4",
+      "service": "1.0.0-preview.4"
+    },
+    "iothub-explorer": "1.0.0-preview.4",
+    "device-explorer": "1.0.0-preview.4",
+    "github-release": "v1.0.0-preview.4"
+}
