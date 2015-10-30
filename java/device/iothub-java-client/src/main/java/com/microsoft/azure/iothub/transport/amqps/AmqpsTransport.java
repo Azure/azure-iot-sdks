@@ -40,6 +40,8 @@ public final class AmqpsTransport implements IotHubTransport
     /** The AMQPS session with an IoT Hub. */
     protected AmqpsIotHubSession session;
 
+    protected AmqpsComm amqpsComm;
+
     /** Messages waiting to be sent to an IoT Hub. */
     protected final Queue<IotHubOutboundPacket> waitingList;
     /** Messages whose callbacks that are waiting to be invoked. */

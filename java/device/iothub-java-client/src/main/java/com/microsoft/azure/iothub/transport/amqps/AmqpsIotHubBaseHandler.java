@@ -265,7 +265,7 @@ public class AmqpsIotHubBaseHandler extends BaseHandler {
      * Create Proton message using given content byte array
      * @param content
      */
-    public void createBinaryMessage(byte[] content){
+    public synchronized void createBinaryMessage(byte[] content){
         this.createBinaryMessage(content, null);
     }
 
@@ -274,7 +274,7 @@ public class AmqpsIotHubBaseHandler extends BaseHandler {
      * @param content
      * @param messageId
      */
-    public void createBinaryMessage(byte[] content, Object messageId){
+    public synchronized void createBinaryMessage(byte[] content, Object messageId){
         this.parentComm.lockSending();
 
         // Codes_SRS_AMQPSSENDERHANDLER_14_006: [The function shall create a new Message (Proton) object.]
