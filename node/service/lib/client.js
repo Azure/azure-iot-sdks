@@ -6,7 +6,7 @@
 var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./transport.js');
 var Message = require('azure-iot-common').Message;
-var ServiceToken = require('../node_modules/azure-iot-common/lib/authorization.js').ServiceToken;
+var ServiceToken = require('azure-iot-common').authorization.ServiceToken;
 var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
 
 /**
