@@ -4,14 +4,14 @@
 #this is CMakeLists.txt for samples. There's noithig here, except redirections to 
 #individual protocol samples
 
-if(${use_amqp})
+if(${use_amqp} STREQUAL "ON")
 	add_subdirectory(iothub_client_sample_amqp)
 endif()
 
-if(${use_http})
+if(${use_http} STREQUAL "ON")
 	add_subdirectory(iothub_client_sample_http)
 endif()
 
-if(${use_mqtt})
+if(${use_mqtt} STREQUAL "ON")
 	add_subdirectory(iothub_client_sample_mqtt)
 endif()

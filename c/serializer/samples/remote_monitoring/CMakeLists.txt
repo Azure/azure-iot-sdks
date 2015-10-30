@@ -5,7 +5,7 @@
 
 compileAsC99()
 
-if(NOT ${use_amqp})
+if(NOT ${use_amqp} STREQUAL "ON")
 	message(FATAL_ERROR "remote_monitoring being generated without amqp support")
 endif()
 

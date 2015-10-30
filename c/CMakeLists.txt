@@ -1,13 +1,13 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 3.0)
+#cmake_minimum_required(VERSION 3.0)
 project(azure_iot_sdks)
 
 #the following variables are project-wide and can be used with cmake-gui
-option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
+option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" OFF)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
-option(use_mqtt "set use_mqtt to ON if mqtt is to be used, set to OFF to not use mqtt" ON)
+option(use_mqtt "set use_mqtt to ON if mqtt is to be used, set to OFF to not use mqtt" OFF)
 option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF) [if possible, they are always build]" OFF)
 option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (default is OFF)[if possible, they are always build]" OFF)
 option(skip_unittests "set skip_unittests to ON to skip unittests (default is OFF)[if possible, they are always build]" OFF)
@@ -16,6 +16,15 @@ option(compileOption_CXX "passes a string to the command line of the C++ compile
 
 
 enable_testing()
+
+SET(IN_OPENWRT $ENV{IN_OPENWRT})
+
+#IF (IN_OPENWRT)
+        ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
+#        INCLUDE_DIRECTORIES("$ENV{TOOLCHAIN_DIR}/usr/include" "$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
+#        INCLUDE_DIRECTORIES("$ENV{TOOLCHAIN_DIR}/usr/include/openssl")
+#        INCLUDE_DIRECTORIES("$ENV{TOOLCHAIN_DIR}/usr/include/uuid")
+#ENDIF(IN_OPENWRT)
 
 #if any compiler has a command line switch called "OFF" then it will need special care
 if(NOT "${compileOption_C}" STREQUAL "OFF")
@@ -91,7 +100,7 @@ macro(compileAsC99)
   if (CMAKE_VERSION VERSION_LESS "3.1")
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
       set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
-	  set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
+	  #set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
     endif()
   else()
     set (CMAKE_C_STANDARD 99)
@@ -208,7 +217,7 @@ endfunction(set_platform_files)
 
 set_platform_files()
 
-add_subdirectory(testtools)
+#add_subdirectory(testtools)
 
 add_subdirectory(common)
 

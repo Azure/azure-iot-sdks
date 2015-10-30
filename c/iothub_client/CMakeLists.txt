@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 3.0)
+#cmake_minimum_required(VERSION 3.0)
 #this is CMakeLists for iothub_client
 
 compileAsC99()
@@ -32,7 +32,7 @@ set(iothub_client_h_files
 ./inc/version.h
 )
 
-if(${use_http})
+if(${use_http} STREQUAL "ON")
 	set(iothub_client_http_transport_c_files
 		${iothub_client_ll_transport_c_files}
 		./src/iothubtransporthttp.c
@@ -46,7 +46,7 @@ if(${use_http})
 	)
 endif()
 
-if(${use_amqp})
+if(${use_amqp} STREQUAL "ON")
 	set(iothub_client_amqp_transport_c_files
 		${iothub_client_ll_transport_c_files}
 		./src/iothubtransportamqp.c
@@ -58,7 +58,7 @@ if(${use_amqp})
 	)
 endif()
 
-if(${use_mqtt})
+if(${use_mqtt} STREQUAL "ON")
 	set(iothub_client_mqtt_transport_c_files
 		${iothub_client_ll_transport_c_files}
 		./src/iothubtransportmqtt.c
@@ -76,15 +76,15 @@ endif()
 #these are the include folders
 #the following "set" statetement exports across the project a global variable called COMMON_INC_FOLDER that expands to whatever needs to included when using COMMON library
 
-if(${use_http})
+if(${use_http} STREQUAL "ON")
 	set(IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_http_transport lib" FORCE)
 endif()
 
-if(${use_amqp})
+if(${use_amqp} STREQUAL "ON")
 	set(IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_amqp_transport lib" FORCE)
 endif()
 
-if(${use_mqtt})
+if(${use_mqtt} STREQUAL "ON")
 	set(IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_mqtt_transport lib" FORCE)
 endif()
 
@@ -92,16 +92,16 @@ set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this 
 
 include_directories(${COMMON_INC_FOLDER})
 
-if(${use_http})
+if(${use_http} STREQUAL "ON")
 	include_directories(${IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER})
 endif()
 
-if(${use_amqp})
+if(${use_amqp} STREQUAL "ON")
 	include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER})
 	includeProton()
 endif()
 
-if(${use_mqtt})
+if(${use_mqtt} STREQUAL "ON")
 	include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} $ENV{paho_path}/org.eclipse.paho.mqtt.c/src)
 endif()
 
@@ -113,25 +113,25 @@ IF(WIN32)
 	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-if(${use_amqp})
+if(${use_amqp} STREQUAL "ON")
 	add_definitions(-Dqpid_proton_EXPORTS)
 endif()
 
-if(${use_http})
+if(${use_http} STREQUAL "ON")
 	add_library(iothub_client_http_transport 
 		${iothub_client_http_transport_c_files} 
 		${iothub_client_http_transport_h_files}
 	)
 endif()
 
-if(${use_amqp})
+if(${use_amqp} STREQUAL "ON")
 	add_library(iothub_client_amqp_transport 
 		${iothub_client_amqp_transport_c_files} 
 		${iothub_client_amqp_transport_h_files}
 	)
 endif()
 
-if(${use_mqtt})
+if(${use_mqtt} STREQUAL "ON")
 	add_library(iothub_client_mqtt_transport 
 		${iothub_client_mqtt_transport_c_files} 
 		${iothub_client_mqtt_transport_h_files}
@@ -143,5 +143,5 @@ add_library(iothub_client
 	${iothub_client_h_files}
 )
 
-add_subdirectory(samples)
-add_subdirectory(tests)
+#add_subdirectory(samples)
+#add_subdirectory(tests)

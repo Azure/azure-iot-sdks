@@ -3,7 +3,7 @@
 
 #this is CMakeLists.txt for iothub_client_sample_mqtt
 
-if(NOT ${use_mqtt})
+if(NOT ${use_mqtt} STREQUAL "ON")
 	message(FATAL_ERROR "iothub_client_sample_mqtt being generated without mqtt support")
 endif()
 

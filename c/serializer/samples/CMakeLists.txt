@@ -4,17 +4,17 @@
 #this is CMakeLists.txt for serializer samples. There's nothing here, except redirections to 
 #individual samples
 
-if(${use_amqp})
+if(${use_amqp} STREQUAL "ON")
 	add_subdirectory(remote_monitoring)
 	add_subdirectory(simplesample_amqp)
 endif()
 
-if(${use_http})
+if(${use_http} STREQUAL "ON")
 	add_subdirectory(simplesample_http)
 	add_subdirectory(temp_sensor_anomaly)
 endif()
 
-if(${use_mqtt})
+if(${use_mqtt} STREQUAL "ON")
 	add_subdirectory(simplesample_mqtt)
 endif()
 

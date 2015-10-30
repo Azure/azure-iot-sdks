@@ -6,28 +6,28 @@
 #
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=openwrt-qpid-proton
-PKG_VERSION:=0.8
+PKG_NAME:=azure-iot-sdks
+PKG_VERSION:=1
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/openwrt-qpid-proton
+define Package/azure-iot-sdks
   SECTION:=libs
   CATEGORY:=Libraries
   DEPENDS:=+libopenssl +libuuid
-  TITLE:=qpid-proton v0.8 c migration to OpenWRT
+  TITLE:=Azure IoT SDK
 endef
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./src/* $(PKG_BUILD_DIR)/
-	rm -f $(PKG_BUILD_DIR)/CMakeCache.txt
-	rm -fR $(PKG_BUILD_DIR)/CMakeFiles
-	rm -f $(PKG_BUILD_DIR)/Makefile ]
-	rm -f $(PKG_BUILD_DIR)/cmake_install.cmake
+	$(CP) ./src/c/* $(PKG_BUILD_DIR)/
+#	rm -f $(PKG_BUILD_DIR)/CMakeCache.txt
+#	rm -fR $(PKG_BUILD_DIR)/CMakeFiles
+#	rm -f $(PKG_BUILD_DIR)/Makefile ]
+#	rm -f $(PKG_BUILD_DIR)/cmake_install.cmake
 endef
 
 define Build/Configure
@@ -50,10 +50,10 @@ define Build/Configure
 endef
 
 define Build/InstallDev
-	$(INSTALL_DIR) $(STAGING_DIR)/usr/include/proton
-	$(CP) $(PKG_BUILD_DIR)/proton-c/include/* $(STAGING_DIR)/usr/include/
-	$(INSTALL_DIR) $(STAGING_DIR)/usr/lib
-	$(CP) $(PKG_BUILD_DIR)/proton-c/libqpid-proton.so.2 $(STAGING_DIR)/usr/lib/
+	$(INSTALL_DIR) $(STAGING_DIR)/usr/include/azure-iot-sdks
+#	$(CP) $(PKG_BUILD_DIR)/proton-c/include/* $(STAGING_DIR)/usr/include/
+#	$(INSTALL_DIR) $(STAGING_DIR)/usr/lib
+#	$(CP) $(PKG_BUILD_DIR)/proton-c/libqpid-proton.so.2 $(STAGING_DIR)/usr/lib/
 endef
 
 define Build/UninstallDev
@@ -63,17 +63,18 @@ define Build/UninstallDev
 endef
 
 define Build/Compile
+#	cmake -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt=$build_mqtt $build_root
 	$(MAKE) -C $(PKG_BUILD_DIR)
-	$(STRIP) $(PKG_BUILD_DIR)/proton-c/libqpid-proton.so*
+#	$(STRIP) $(PKG_BUILD_DIR)/proton-c/libqpid-proton.so*
 endef
 
-define Package/openwrt-qpid-proton/install
+define Package/azure-iot-sdks/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_DIR) $(1)/usr/share/proton/examples
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/proton-c/libqpid-proton.so.2 $(1)/usr/lib/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/examples/messenger/c/recv* $(1)/usr/share/proton/examples/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/examples/messenger/c/send* $(1)/usr/share/proton/examples/
+#	$(INSTALL_DIR) $(1)/usr/share/proton/examples
+#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/proton-c/libqpid-proton* $(1)/usr/lib/
+#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/examples/messenger/c/recv* $(1)/usr/share/proton/examples/
+#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/examples/messenger/c/send* $(1)/usr/share/proton/examples/
 endef
 
-$(eval $(call BuildPackage,openwrt-qpid-proton))
+$(eval $(call BuildPackage,azure-iot-sdks))
 

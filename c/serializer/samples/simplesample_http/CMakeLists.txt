@@ -3,7 +3,7 @@
 
 #this is CMakeLists.txt for simplesample_http sample
 
-if(NOT ${use_http})
+if(NOT ${use_http} STREQUAL "ON")
 	message(FATAL_ERROR "simplesample_http being generated without HTTP support")
 endif()
 
@@ -12,6 +12,8 @@ compileAsC99()
 set(simplesample_http_c_files
 simplesample_http.c
 )
+
+set(TARGET_LDFLAGS "-lm")
 
 if(WIN32)
 	set(simplesample_http_c_files ${simplesample_http_c_files} ./windows/main.c)

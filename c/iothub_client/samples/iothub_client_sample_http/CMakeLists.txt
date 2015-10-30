@@ -5,7 +5,7 @@
 
 compileAsC99()
 
-if(NOT ${use_http})
+if(NOT ${use_http} STREQUAL "ON")
 	message(FATAL_ERROR "iothub_client_sample_http being generated without HTTP support")
 endif()
 

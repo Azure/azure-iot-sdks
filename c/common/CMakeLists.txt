@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 3.0)
+#cmake_minimum_required(VERSION 3.0)
 
 compileAsC99()
 #these are the C source files
@@ -26,7 +26,7 @@ set(source_c_files
 ./adapters/agenttime.c
 )
 
-if(${use_http})
+if(${use_http} STREQUAL "ON")
 	set(source_c_files ${source_c_files}
 		./src/httpapiex.c
 		./src/httpapiexsas.c
@@ -57,7 +57,7 @@ set(source_h_files
 ./inc/vector.h
 )
 
-if(${use_http})
+if(${use_http} STREQUAL "ON")
 	set(source_h_files ${source_h_files}
 		./inc/httpapi.h
 		./inc/httpapiex.h
@@ -80,5 +80,5 @@ ENDIF(WIN32)
 #this is the product (a library)
 add_library(common ${source_c_files} ${source_h_files})
 
-add_subdirectory(tests)
+#add_subdirectory(tests)
 add_subdirectory(testtools)

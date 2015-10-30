@@ -3,7 +3,7 @@
 
 #this is CMakeLists.txt for simplesample_mqtt sample
 
-if(NOT ${use_mqtt})
+if(NOT ${use_mqtt} STREQUAL "ON")
 	message(FATAL_ERROR "simplesample_mqtt being generated without mqtt support")
 endif()
 
