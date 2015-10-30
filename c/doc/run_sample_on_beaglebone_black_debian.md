@@ -104,7 +104,7 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 - Run the **simplesample_amqp** sample:
 
   ```
-  ~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp
   ```
 
 This sample application sends simulated sensor data to your IoT Hub.

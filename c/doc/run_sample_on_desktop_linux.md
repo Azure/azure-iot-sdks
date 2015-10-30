@@ -28,13 +28,9 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
 4. The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
 
-5. Save your changes and build the samples.  To build your sample you can run the the build.sh script in the **c/build_all/linux** directory. To skip running the unit tests, use:
+5. Save your changes and build the samples. To build your sample you can run the the build.sh script in the **c/build_all/linux** directory.
 
-  ```
-  ./build.sh --skip-unit-tests
-  ```
-
-6. Run the **~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp** sample application.
+6. Run the **~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp** sample application.
 
 7. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_amqp** application.
 
