@@ -5,7 +5,7 @@
 build_root=$(cd "$(dirname "$0")/.." && pwd)
 
 # -- Java --
-export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/java/device
 mvn verify
 [ $? -eq 0 ] || exit $?
