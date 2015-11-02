@@ -6,20 +6,19 @@ How to certify IoT devices running Linux with Azure IoT SDK
 # Table of Contents
 
 -   [Introduction](#Introduction)
--   [Step 1: Configure Azure IoT Hub](#Step_1:_Configure)
--   [Step 2: Register Device](#Step_2:_Register)
+-   [Step 1: Configure Azure IoT Hub](#Step-1:-Configure)
+-   [Step 2: Register Device](#Step-2:-Register)
 -   [Step 3: Build and Validate the sample using C client
-    libraries](#Step_3:_Build)
-    -   [3.1 Load the Azure IoT bits and prerequisites on
-        device](#Step_3_1:_Load)
-    -   [3.2 Build the samples](#Step_3_2:_Build)
-    -   [3.3 Execute End to End Test Cases](#Step_3_3:_Run_E2E)
-    -   [3.4 Run and Validate the Samples](#Step_3_4:_Run)
--   [Step 4: Package and Share](#Step_4:_Package_Share)
-    -   [4.1 Package build logs and sample test results](#Step_4_1:_Package)
-    -   [4.2 Share package with Engineering Support](#Step_4_2:_Share)
-    -   [4.3 Next steps](#Step_4_3:_Next)
--   [Step 5: Troubleshooting](#Step_5:_Troubleshooting)
+    libraries](#Step-3:-Build)
+    -   [3.1 Load the Azure IoT bits and prerequisites on device](#Step-3-1:-Load)
+    -   [3.2 Build the samples](#Step-3-2:-Build)
+    -   [3.3 Execute End to End Test Cases](#Step-3-3:-Run_E2E)
+    -   [3.4 Run and Validate the Samples](#Step-3-4:-Run)
+-   [Step 4: Package and Share](#Step-4:-Package_Share)
+    -   [4.1 Package build logs and sample test results](#Step-4-1:-Package)
+    -   [4.2 Share package with Engineering Support](#Step-4-2:-Share)
+    -   [4.3 Next steps](#Step-4-3:-Next)
+-   [Step 5: Troubleshooting](#Step-5:-Troubleshooting)
 
 <a name="Introduction"/>
 
@@ -51,7 +50,7 @@ You should have the following items ready before beginning the process:
 
 ***Note:*** *If you haven’t contacted Microsoft about being an Azure Certified for IoT partner, please submit this [form](<https://iotcert.cloudapp.net/>) first to request it and then follow these instructions.*
 
-<a name="Step_1:_Configure"/>
+<a name="Step-1:-Configure"/>
 
 # Step 1: Sign Up To Azure IoT Hub
 
@@ -61,7 +60,7 @@ Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-
 
          HostName=[YourIoTHubName];SharedAccessKeyName=[YourAccessKeyName];SharedAccessKey=[YourAccessKey]
 
-<a name="Step_2:_Register"/>
+<a name="Step-2:-Register"/>
 
 # Step 2: Register Device
 
@@ -78,7 +77,7 @@ perform the following operations:
 -   Sending messages to your device
 
 To run Device Explorer tool, use following configuration string as described in
-[Step1](#Step_1:_Configure):
+[Step1](#Step-1:-Configure):
 
 -   IoT Hub Connection String
 
@@ -109,7 +108,7 @@ To run Device Explorer tool, use following configuration string as described in
 ***Not running Windows on your PC?*** - Please send us an email on
 <azureiotcertified@microsoft.com> and we will follow up with you with instructions.
 
-<a name="Step_3:_Build"/>
+<a name="Step-3:-Build"/>
 
 # Step 3: Build and Validate the sample using C client libraries
 
@@ -119,7 +118,7 @@ prerequisites on your device. Once done, you will build and deploy the IoT
 Client SDK and validate the sample tests required for IoT certification with the
 Azure IoT SDK.
 
-<a name="Step_3_1:_Load"/>
+<a name="Step-3-1:-Load"/>
 
 ## 3.1 Load the Azure IoT bits and prerequisites on device
 
@@ -152,7 +151,7 @@ Azure IoT SDK.
 -   Verify that you now have a copy of the source code under the
     directory ~/azure-iot-sdks.
 
-<a name="Step_3_2:_Build"/>
+<a name="Step-3-2:-Build"/>
 
 ## 3.2 Build the samples
 
@@ -177,7 +176,7 @@ Azure IoT SDK.
         static const char* connectionString = "[device connection string]";
 
 -   Replace the above placeholder with device connection string. You can get
-    this from device explorer as explained in [Step 2](#Step_2:_Register), that
+    this from device explorer as explained in [Step 2](#Step-2:-Register), that
     you copied into Notepad.
 
 -   Save your changes by pressing Ctrl+O and when nano prompts you to save it as
@@ -192,7 +191,7 @@ Azure IoT SDK.
 
 -   Assuming everything went OK with the build\_proton.sh, you can now build the
     SDK code using the following command. If you are facing any issues during
-    build, follow troubleshooting [Step 5](#Step_5:_Troubleshooting).
+    build, follow troubleshooting [Step 5](#Step-5:-Troubleshooting).
 
         chmod +x ./azure-iot-sdks/c/build_all/linux/build_paho.sh
         ./azure-iot-sdks/c/build_all/linux/build_paho.sh
@@ -200,8 +199,9 @@ Azure IoT SDK.
 
     ***Note:*** *LogFile.txt in above command should be replaced with a file
     name where build output will be written.*
+    **Note:** build.sh creates a folder called "cmake" in your home folder. Inside "cmake" are all the results of the compilation of the complete software.
 
-<a name="Step_3_3:_Run_E2E"/>
+<a name="Step-3-3:-Run_E2E"/>
 
 ## 3.3 Execute End to End Test Cases
 
@@ -216,8 +216,8 @@ In this section you will run the end to end test cases for Azure IoT client SDK 
 -   Set the values for all the variables listed in the file as explained below.
 
     -   **IOTHUB_CONNECTION_STRING:** Connection string to your IoT Hub
-    -   **IOTHUB_DEVICE_ID:** Id of the device you have registered in [Step 2](#Step_2:_Register)
-    -   **IOTHUB_DEVICE_KEY:** Primary key of the device registered in [Step 2](#Step_2:_Register)
+    -   **IOTHUB_DEVICE_ID:** Id of the device you have registered in [Step 2](#Step-2:-Register)
+    -   **IOTHUB_DEVICE_KEY:** Primary key of the device registered in [Step 2](#Step-2:-Register)
     -   **IOTHUB_EVENTHUB_ACCESS_KEY:** Shared access key of your IoT Hub
     -   **IOTHUB_EVENTHUB_CONNECTION_STRING:** Connection string to your Event Hub
     -   **IOTHUB_EVENTHUB_CONSUMER_GROUP:** Set value as **$Default**
@@ -242,23 +242,23 @@ In this section you will run the end to end test cases for Azure IoT client SDK 
 
 -   Run end to end test cases by executing following command on your device:
 
-        ./azure-iot-sdks/c/iothub_client/build/linux/iothubclient_e2etests | tee E2ELogFile.txt
+        ~/cmake/iothub_client/build/linux/iothubclient_e2etests | tee E2ELogFile.txt
 
     ***Note:*** *E2ELogFile.txt in above command should be replaced with a file name where ene to end test results will be written.*
 
 
-<a name="Step_3_4:_Run"/>
+<a name="Step-3-4:-Run"/>
 ## 3.4 Run and Validate the Samples
 
 In this section you will run the Azure IoT client SDK samples to validate
 communication between your device and Azure IoT Hub. You will send messages to the Azure IoT Hub service and validate that IoT Hub has successfully receive the data. You will also monitor any messages send from the Azure IoT Hub to client.
 
 **Note:** Take screenshots of all the operations you will perform in this
-section. These will be needed in [Step 4](#Step_4_2:_Share)
+section. These will be needed in [Step 4](#Step-4-2:-Share)
 
 ### 3.4.1 Send Device Events to IOT Hub:
 
-1.  Launch the Device Explorer as explained in [Step 2](#Step_2:_Register) and
+1.  Launch the Device Explorer as explained in [Step 2](#Step-2:-Register) and
     navigate to **Data** tab. Select the device name you created from the
     drop-down list of device IDs and click **Monitor** button.
 
@@ -271,11 +271,11 @@ section. These will be needed in [Step 4](#Step_4_2:_Share)
 
     **If using AMQP protocol:** Run sample *iothub\_client\_sample\_amqp*
 
-        ./azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
+        ~/cmake/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
 
     **If using HTTP protocol:** Run sample *iothub\_client\_sample\_http*
 
-        ./azure-iot-sdks/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
+        ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
 
 4.  Verify that the confirmation messages show an OK. If not, then you may have
     incorrectly copied the device hub connection information.
@@ -298,28 +298,28 @@ section. These will be needed in [Step 4](#Step_4_2:_Share)
 ### 3.4.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your device,
-    go to the **Notification** tab in Device Explorer.
+    go to the **Message To Device** tab in Device Explorer.
 
 2.  Select the device you created using Device ID drop down.
 
-3.  Add some text to the Notification field, then click Send.
+3.  Add some text to the Message field, then click Send.
 
-    ![NotificationSend\_DeviceExplorer](images/3_3_1_06.png)
+    ![MessageSend\_DeviceExplorer](images/3_3_1_06.png)
 
 4.  You should be able to see the command received in the console window for the
     client sample.
 
     **If using AMQP protocol:**
-    ![NotificationSend\_terminal](images/3_3_1_07.png)
+    ![MessageSend\_terminal](images/3_3_1_07.png)
 
     **If using HTTP protocol:**
-    ![NotificationSend\_terminal](images/3_3_1_08.png)
+    ![MessageSend\_terminal](images/3_3_1_08.png)
 
-<a name="Step_4:_Package_Share"/>
+<a name="Step-4:-Package_Share"/>
 
 # Step 4: Package and Share
 
-<a name="Step_4_1:_Package"/>
+<a name="Step-4-1:-Package"/>
 
 ## 4.1 Package build logs and sample test results
 
@@ -337,20 +337,20 @@ Package following artifacts from your device:
     the instructions should look please refer the examples published on
     GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/c/doc>)
 
-<a name="Step_4_2:_Share"/>
+<a name="Step-4-2:-Share"/>
 
 ## 4.2 Share package with Microsoft Azure IoT team
 
 Share the package in email to  <azureiotcertified@microsoft.com>.
 
-<a name="Step_4_3:_Next"/>
+<a name="Step-4-3:-Next"/>
 
 ## 4.3 Next steps
 
 Once you shared the documents with us, we will contact you in the following 48
 to 72 business hours with next steps.
 
-<a name="Step_5:_Troubleshooting"/>
+<a name="Step-5:-Troubleshooting"/>
 
 # Step 5: Troubleshooting
 

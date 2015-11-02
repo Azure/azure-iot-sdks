@@ -55,7 +55,7 @@ typedef struct EXPECTED_RECEIVE_DATA_TAG
 
 static size_t IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_nCalls;
 
-static void IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_Notification(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
+static void IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_Message(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     (void)(result, userContextCallback);
     IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_nCalls++;
@@ -63,7 +63,7 @@ static void IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_Notification(I
 
 static size_t IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_with_properties_nCalls;
 
-static void IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_with_properties_Notification(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
+static void IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_with_properties_Message(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     (void)(result, userContextCallback);
     IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_with_properties_nCalls++;
@@ -504,7 +504,7 @@ BEGIN_TEST_SUITE(iothubclient_e2etests)
         {
             IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromString("a");
             ASSERT_IS_NOT_NULL(messageHandle);
-            auto res2 = IoTHubClient_LL_SendEventAsync(iotHubClientLLHandle, messageHandle, IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_Notification, NULL);
+            auto res2 = IoTHubClient_LL_SendEventAsync(iotHubClientLLHandle, messageHandle, IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_Message, NULL);
             ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, res2);
             IoTHubMessage_Destroy(messageHandle);
         }
@@ -555,7 +555,7 @@ BEGIN_TEST_SUITE(iothubclient_e2etests)
             auto res4 = Map_AddOrUpdate(IoTHubMessage_Properties(messageHandle), "b", "c");
             ASSERT_ARE_EQUAL(MAP_RESULT, MAP_OK, res4);
             
-            auto res2 = IoTHubClient_LL_SendEventAsync(iotHubClientLLHandle, messageHandle, IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_with_properties_Notification, NULL);
+            auto res2 = IoTHubClient_LL_SendEventAsync(iotHubClientLLHandle, messageHandle, IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_with_properties_Message, NULL);
             ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, res2);
             IoTHubMessage_Destroy(messageHandle);
         }

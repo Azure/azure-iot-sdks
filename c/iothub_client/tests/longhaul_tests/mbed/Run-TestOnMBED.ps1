@@ -204,7 +204,7 @@ else
 	#    To prevent the script from waiting forever for the test to end;
 	#    This timeout is applicable to the script, the test might continue running forever on the device.
 	# B. One for each iteration between MBED<->SCRIPT (keep-alive mechanism).
-	#    Tracked for each cycle of MBED sending the telemetry, and requesting to this SCRIPT to verify it on the server.
+	#    Tracked for each cycle of MBED sending the event, and requesting to this SCRIPT to verify it on the server.
 	#    This is to cause this SCRIPT to fail fast if it is heading to a failure.
 	
 	$ExtraTimeoutInSeconds = 300;

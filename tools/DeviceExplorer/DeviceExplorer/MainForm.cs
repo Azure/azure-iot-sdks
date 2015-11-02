@@ -243,7 +243,7 @@ namespace DeviceExplorer
         #endregion
 
         #region ManagementTab
-        private async void updateDevicesGridView()
+        private async Task updateDevicesGridView()
         {
             var devicesProcessor = new DevicesProcessor(activeIoTHubConnectionString, MAX_COUNT_OF_DEVICES, protocolGatewayHost.Text);
             var devicesList = await devicesProcessor.GetDevices();
@@ -281,23 +281,23 @@ namespace DeviceExplorer
             UpdateListOfDevices();
         }
 
-        private void UpdateListOfDevices()
+        private async void UpdateListOfDevices()
         {
             try
             {
                 listDevicesButton.Text = "Refresh";
                 devicesListed = true;
-                updateDevicesGridView();
+                await updateDevicesGridView();
             }
             catch (Exception ex)
             {
                 listDevicesButton.Text = "List";
                 devicesListed = false;
-                MessageBox.Show(String.Format("Unable to retrieve list of devices.\n{0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(String.Format("Unable to retrieve list of devices. Please verify your connection strings.\n{0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void updateDeviceButton_Click(object sender, EventArgs e)
+        private async void updateDeviceButton_Click(object sender, EventArgs e)
         {
             try
             {
@@ -306,8 +306,8 @@ namespace DeviceExplorer
                 DeviceUpdateForm updateForm = new DeviceUpdateForm(registryManager, MAX_COUNT_OF_DEVICES, selectedDeviceId);
                 updateForm.ShowDialog(this);
                 updateForm.Dispose();
-                updateDevicesGridView();
-                registryManager.CloseAsync();
+                await updateDevicesGridView();
+                await registryManager.CloseAsync();
             }
             catch (Exception ex)
             {
@@ -326,7 +326,7 @@ namespace DeviceExplorer
                 {
                     await registryManager.RemoveDeviceAsync(selectedDeviceId);
                     MessageBox.Show("Device deleted successfully!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    updateDevicesGridView();
+                    await updateDevicesGridView();
                     await registryManager.CloseAsync();
                 }
             }
@@ -346,10 +346,11 @@ namespace DeviceExplorer
 
             try
             {
+                string selectedDevice = deviceIDsComboBoxForEvent.SelectedItem.ToString();
                 eventHubClient = EventHubClient.CreateFromConnectionString(activeIoTHubConnectionString, "messages/events");
                 eventHubTextBox.Text = String.Format("Receiving events...\r\n");
                 eventHubPartitionsCount = eventHubClient.GetRuntimeInformation().PartitionCount;
-                string partition = EventHubPartitionKeyResolver.ResolveToPartition(deviceIDsComboBoxForEvent.SelectedItem.ToString(), eventHubPartitionsCount);
+                string partition = EventHubPartitionKeyResolver.ResolveToPartition(selectedDevice, eventHubPartitionsCount);
                 eventHubReceiver = eventHubClient.GetConsumerGroup(consumerGroupName).CreateReceiver(partition, startTime);
 
                 while (true)
@@ -362,16 +363,25 @@ namespace DeviceExplorer
                     {
                         string data = Encoding.UTF8.GetString(eventData.GetBytes());
                         DateTime enqueuedTime = eventData.EnqueuedTimeUtc.ToLocalTime();
-                        eventHubTextBox.Text += String.Format("{0}> Data:[{1}]", enqueuedTime, data);
-                        if (eventData.Properties.Count > 0)
+
+                        // Display only data from the selected device; otherwise, skip.
+                        string connectionDeviceId = eventData.SystemProperties["iothub-connection-device-id"].ToString();
+
+                        if (string.CompareOrdinal(selectedDevice, connectionDeviceId) == 0)
                         {
-                            eventHubTextBox.Text += "Properties:\r\n";
-                            foreach (var property in eventData.Properties)
+                            eventHubTextBox.Text += String.Format("{0}> Device: [{1}], Data:[{2}]", enqueuedTime, connectionDeviceId, data);
+
+                            if (eventData.Properties.Count > 0)
                             {
-                                eventHubTextBox.Text += String.Format("'{0}': '{1}'\r\n", property.Key, property.Value);
+                                eventHubTextBox.Text += "Properties:\r\n";
+                                foreach (var property in eventData.Properties)
+                                {
+                                    eventHubTextBox.Text += String.Format("'{0}': '{1}'\r\n", property.Key, property.Value);
+                                }
                             }
+                            eventHubTextBox.Text += "\r\n";
                         }
-                        eventHubTextBox.Text += "\r\n";
+
                     }
                 }
             }

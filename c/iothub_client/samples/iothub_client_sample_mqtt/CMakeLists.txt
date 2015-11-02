@@ -3,6 +3,10 @@
 
 #this is CMakeLists.txt for iothub_client_sample_mqtt
 
+if(NOT ${use_mqtt})
+	message(FATAL_ERROR "iothub_client_sample_mqtt being generated without mqtt support")
+endif()
+
 compileAsC99()
 
 set(iothub_client_sample_mqtt_c_files

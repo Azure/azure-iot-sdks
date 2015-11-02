@@ -6,6 +6,7 @@
 var common = require('azure-iot-common');
 
 module.exports = {
+    Client: require('./lib/client.js'),
     Device: require('./lib/device.js'),
     Https: common.Https,
     Registry: require('./lib/registry.js')

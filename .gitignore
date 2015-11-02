@@ -192,6 +192,10 @@ java/**/*dependency-reduced-pom.xml
 **/node_modules/
 **/.idea/
 
+# VS Code stuff
+typings/**
+.vscode/**
+
 csharp/NuGet/*.exe
 csharp/NuGet/*.nupkg
 csharp/.vs/*

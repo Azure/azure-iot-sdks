@@ -86,6 +86,12 @@ you obtained in the "Connecting your device to an IoT hub" step above.
     sudo ./c/build_all/linux/build_proton.sh --install /usr
   ```
 
+- Build a few libraries upon which the samples depend:
+
+  ```
+    sudo ~/azure-iot-sdks/c/build_all/linux/build_paho.sh
+  ```
+
 - Finally, build the sample applications:
 
   ```
@@ -98,7 +104,7 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 - Run the **simplesample_amqp** sample:
 
   ```
-  ./serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp
   ```
 
 This sample application sends simulated sensor data to your IoT Hub.
@@ -107,14 +113,13 @@ This sample application sends simulated sensor data to your IoT Hub.
 <a name="tips"/>
 ## Tips
 
-- If you just want to build the serializer samples, run the following commands:
+- If you just want to build the serializer samples, go to the cmake output folder and navigate to serializer/samples then run the following command:
 
   ```
-  cd ./c/serializer/build/linux
-  make -f makefile.linux all
+  make -f Makefile all
   ```
 
 - On Windows, you can use the Device Explorer tool to see the data your device is sending and receiving.
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md

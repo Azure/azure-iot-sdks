@@ -20,4 +20,4 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
-build_test_artifacts(${theseTestsName} 0)
+build_test_artifacts(${theseTestsName} OFF)

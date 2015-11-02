@@ -16,6 +16,7 @@ goto :eof
 goto :eof
 
 :continueWithInstallation
+
 rem -----------------------------------------------------------------------------
 rem -- use OpenSSLDir
 rem -----------------------------------------------------------------------------
@@ -27,7 +28,6 @@ set openSSL-branch=OpenSSL_1_0_1-stable
 rem -----------------------------------------------------------------------------
 rem -- use PAHO_PATH
 rem -----------------------------------------------------------------------------
-
 set paho-root=%PAHO_PATH%
 set paho-repo=https://git.eclipse.org/r/paho/org.eclipse.paho.mqtt.c.git
 set package-root=%~dp0\..\packaging\windows

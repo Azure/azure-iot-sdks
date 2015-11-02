@@ -5,6 +5,10 @@
 
 compileAsC99()
 
+if(NOT ${use_amqp})
+	message(FATAL_ERROR "remote_monitoring being generated without amqp support")
+endif()
+
 set(remote_monitoring_c_files
 remote_monitoring.c
 )

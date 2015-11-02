@@ -13,9 +13,6 @@ set(source_c_files
 ./src/gballoc.c
 ./src/hmac.c
 ./src/hmacsha256.c
-./src/httpapiex.c
-./src/httpapiexsas.c
-./src/httpheaders.c
 ./src/map.c
 ./src/sastoken.c
 ./src/sha1.c
@@ -29,6 +26,14 @@ set(source_c_files
 ./adapters/agenttime.c
 )
 
+if(${use_http})
+	set(source_c_files ${source_c_files}
+		./src/httpapiex.c
+		./src/httpapiexsas.c
+		./src/httpheaders.c
+	)
+endif()
+
 #these are the C headers
 set(source_h_files
 ./inc/agenttime.h
@@ -39,10 +44,6 @@ set(source_h_files
 ./inc/gballoc.h
 ./inc/hmac.h
 ./inc/hmacsha256.h
-./inc/httpapi.h
-./inc/httpapiex.h
-./inc/httpapiexsas.h
-./inc/httpheaders.h
 ./inc/iot_logging.h
 ./inc/macro_utils.h
 ./inc/map.h
@@ -55,6 +56,15 @@ set(source_h_files
 ./inc/urlencode.h
 ./inc/vector.h
 )
+
+if(${use_http})
+	set(source_h_files ${source_h_files}
+		./inc/httpapi.h
+		./inc/httpapiex.h
+		./inc/httpapiexsas.h
+		./inc/httpheaders.h
+	)
+endif()
 
 #these are the include folders
 #the following "set" statetement exports across the project a global variable called COMMON_INC_FOLDER that expands to whatever needs to included when using COMMON library

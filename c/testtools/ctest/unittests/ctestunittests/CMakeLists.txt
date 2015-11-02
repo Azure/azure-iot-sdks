@@ -37,4 +37,6 @@ ctest_unittests ${ctest_unittests_c_files} ${ctest_unittests_cpp_files} ${ctest_
 
 target_link_libraries(ctest_unittests ctest)
 
-add_test(NAME ctest_unittests COMMAND ctest_unittests)
+if(NOT ${skip_unittests})
+	add_test(NAME ctest_unittests COMMAND ctest_unittests)
+endif()

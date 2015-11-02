@@ -3,6 +3,10 @@
 
 #this is CMakeLists.txt for simplesample_mqtt sample
 
+if(NOT ${use_mqtt})
+	message(FATAL_ERROR "simplesample_mqtt being generated without mqtt support")
+endif()
+
 compileAsC99()
 
 set(simplesample_mqtt_c_files

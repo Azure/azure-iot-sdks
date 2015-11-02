@@ -11,8 +11,8 @@ var SimulatedHttps = require('azure-iot-common').SimulatedHttps;
 
 function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
 
-  /*Tests_SRS_NODE_IOTHUB_CLIENT_05_003: [When the sendEvent method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
-  /*Tests_SRS_NODE_IOTHUB_CLIENT_05_005: [When the receive method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
+  /*Tests_SRS_NODE_DEVICE_CLIENT_05_003: [When the sendEvent method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
+  /*Tests_SRS_NODE_DEVICE_CLIENT_05_005: [When the receive method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
   function makeRequestWith(connString, test, done) {
     var transport = transportFactory();
     var client = new Client(connString, transport);
@@ -61,13 +61,13 @@ function runTests(transportFactory, goodConfig, badConfigs) {
 
   describe('Client', function () {
     describe('#sendEvent', function () {
-      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_001: [The Client constructor shall accept a transport object]*/
-      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_002: [The sendEvent method shall send the event (indicated by the message argument) via the transport associated with the Client instance.]*/
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_001: [The Client constructor shall accept a transport object]*/
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_002: [The sendEvent method shall send the event (indicated by the message argument) via the transport associated with the Client instance.]*/
       /*Tests_SRS_NODE_IOTHUB_HTTPS_05_001: [The Https constructor shall accept a config object with three properties:
       host – (string) the fully-qualified DNS hostname of an IoT Hub
       keyName – (string) the identifier of a device registered with the IoT Hub, or the name of an authorization policy
       key – (string) the key associated with the device registration or authorization policy.]*/
-      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_003: [When the sendEvent method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_003: [When the sendEvent method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
       /*Tests_SRS_NODE_IOTHUB_HTTPS_05_002: [The sendEvent method shall construct an HTTP request using information supplied by the caller, as follows:
       POST <config.host>/devices/<config.keyName>/messages/events?api-version=<version> HTTP/1.1
       Authorization: <token generated from config>
@@ -133,13 +133,13 @@ function runTests(transportFactory, goodConfig, badConfigs) {
     });
 
     describe('#receive', function () {
-      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_001: [The Client constructor shall accept a transport object]*/
-      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_004: [The receive method shall query the IoT Hub for the next message via the transport associated with the Client instance.]*/
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_001: [The Client constructor shall accept a transport object]*/
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_004: [The receive method shall query the IoT Hub for the next message via the transport associated with the Client instance.]*/
       /*Tests_SRS_NODE_IOTHUB_HTTPS_05_001: [The Https constructor shall accept a config object with three properties:
       host – (string) the fully-qualified DNS hostname of an IoT Hub
       keyName – (string) the identifier of a device registered with the IoT Hub, or the name of an authorization policy
       key – (string) the key associated with the device registration or authorization policy.]*/
-      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_005: [When the receive method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_005: [When the receive method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
       /*Tests_SRS_NODE_IOTHUB_HTTPS_05_006: [The receive method shall construct an HTTP request using information supplied by the caller, as follows:
       GET <config.host>/devices/<config.keyName>/messages/devicebound?api-version=<version> HTTP/1.1
       Authorization: <token generated from config>
@@ -166,7 +166,7 @@ function runTests(transportFactory, goodConfig, badConfigs) {
     });
 
     describe('#abandon', function () {
-      /* Tests_SRS_NODE_IOTHUB_CLIENT_07_001: [The abandon method shall call into the transport’s sendFeedback with the ‘abandon’ keyword and the lockToken.] */
+      /* Tests_SRS_NODE_DEVICE_CLIENT_07_001: [The abandon method shall call into the transport’s sendFeedback with the ‘abandon’ keyword and the lockToken.] */
       it('message.lockToken is not entered', function (done) {
         var client = new Client(goodConfig, transportFactory());
         var message = new Message('hello');
@@ -184,7 +184,7 @@ function runTests(transportFactory, goodConfig, badConfigs) {
     });
 
     describe('#reject', function () {
-      /* SRS_NODE_IOTHUB_CLIENT_07_002: [The reject method shall call into the transport’s sendFeedback with the ‘reject’ keyword and the lockToken.] */
+      /* SRS_NODE_DEVICE_CLIENT_07_002: [The reject method shall call into the transport’s sendFeedback with the ‘reject’ keyword and the lockToken.] */
       it('message.lockToken is not entered', function (done) {
         var client = new Client(goodConfig, transportFactory());
         var message = new Message('hello');
@@ -202,7 +202,7 @@ function runTests(transportFactory, goodConfig, badConfigs) {
     });
 
     describe('#complete', function () {
-      /* SRS_NODE_IOTHUB_CLIENT_07_003: [The complete method shall call into the transport’s sendFeedback with the ‘complete’ keyword and the lockToken.] */
+      /* SRS_NODE_DEVICE_CLIENT_07_003: [The complete method shall call into the transport’s sendFeedback with the ‘complete’ keyword and the lockToken.] */
       it('message.lockToken is not entered', function (done) {
         var client = new Client(goodConfig, transportFactory());
         var message = new Message('hello');

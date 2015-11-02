@@ -5,6 +5,10 @@
 
 compileAsC99()
 
+if(NOT ${use_amqp})
+	message(FATAL_ERROR "iothub_client_sample_amqp being generated without amqp support")
+endif()
+
 set(iothub_client_sample_amqp_c_files
 	iothub_client_sample_amqp.c
 )

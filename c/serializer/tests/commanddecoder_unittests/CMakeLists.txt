@@ -18,4 +18,4 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
-build_test_artifacts(${theseTestsName})
+build_test_artifacts(${theseTestsName} ON)
