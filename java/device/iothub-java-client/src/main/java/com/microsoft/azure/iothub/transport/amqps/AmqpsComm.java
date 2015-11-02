@@ -196,7 +196,7 @@ public class AmqpsComm extends BaseHandler {
     /**
      *
      */
-    private void send(){
+    private synchronized void send(){
         if(canSend) {
             try {
                 Tuple message = this.toSendMessageQueue.remove();
