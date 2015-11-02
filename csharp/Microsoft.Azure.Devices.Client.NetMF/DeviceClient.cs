@@ -190,7 +190,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Puts a received message back onto the device queue
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
-        public void AbandonAsync(Message message)
+        public void Abandon(Message message)
         {
             impl.Abandon(message);
         }

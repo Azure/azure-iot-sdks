@@ -79,21 +79,6 @@ namespace Microsoft.Azure.Devices.Client
             return this.OnReceive(timeout);
         }
 
-        ///// <summary>
-        ///// Deletes a received message from the device queue
-        ///// </summary>
-        ///// <returns>The lock identifier for the previously received message</returns>
-        //public async Task CompleteAsync(string lockToken)
-        //{
-        //    if (string.IsNullOrEmpty(lockToken))
-        //    {
-        //        throw Fx.Exception.ArgumentNull("lockToken");
-        //    }
-
-        //    await this.EnsureOpenedAsync(false);
-        //    await this.OnCompleteAsync(lockToken);
-        //}
-
         /// <summary>
         /// Deletes a received message from the device queue
         /// </summary>
@@ -102,11 +87,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (message == null)
             {
-                //throw Fx.Exception.ArgumentNull("message");
+                throw new ArgumentNullException();
             }
 
             this.EnsureOpened(false);
-            this.OnCompleteAsync(message);
+            this.OnComplete(message);
         }
 
         /// <summary>
@@ -270,11 +255,9 @@ namespace Microsoft.Azure.Devices.Client
 
         protected abstract void OnOpen(bool explicitOpen);
 
-        //protected abstract Task OnCloseAsync();
-
         protected abstract Message OnReceive(TimeSpan timeout);
 
-        protected virtual void OnCompleteAsync(Message message)
+        protected virtual void OnComplete(Message message)
         {
             this.OnComplete(message.LockToken);
         }
@@ -297,6 +280,5 @@ namespace Microsoft.Azure.Devices.Client
 
         protected abstract void OnSendEvent(Message message);
 
-        //protected abstract Task OnSendEventAsync(IEnumerable<Message> messages);
     }
 }
