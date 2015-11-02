@@ -104,7 +104,7 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 - Run the **simplesample_amqp** sample:
 
   ```
-  ~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp
   ```
 
 This sample application sends simulated sensor data to your IoT Hub.
@@ -122,4 +122,4 @@ This sample application sends simulated sensor data to your IoT Hub.
 - On Windows, you can use the Device Explorer tool to see the data your device is sending and receiving.
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md
