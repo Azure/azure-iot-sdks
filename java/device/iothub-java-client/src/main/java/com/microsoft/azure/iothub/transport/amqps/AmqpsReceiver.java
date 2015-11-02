@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.iothub.transport.amqps;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Event;
@@ -15,6 +16,7 @@ import org.apache.qpid.proton.reactor.Reactor;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
@@ -74,11 +76,11 @@ public class AmqpsReceiver extends BaseHandler{
      * @throws IOException
      * @throws InterruptedException
      */
-    public void open() throws IOException, InterruptedException {
+    public CompletableFuture<Boolean> open() throws IOException, InterruptedException {
         // Codes_SRS_AMQPSRECEIVER_14_004: [The function shall initialize it’s AmqpsReceiverHandler using the saved host name, user name, device ID and sas token.]
         // Codes_SRS_AMQPSRECEIVER_14_005: [The function shall open the Amqps connection and trigger the Reactor (Proton) to begin receiving.]
         this.amqpsReceiverHandler = new AmqpsReceiverHandler(this.hostName, this.userName, this.deviceID, this.sasToken, this);
-        this.beginReceive();
+        return this.beginReceive();
     }
 
     /**
@@ -96,11 +98,11 @@ public class AmqpsReceiver extends BaseHandler{
      * @throws IOException
      * @throws InterruptedException
      */
-    public synchronized void beginReceive() throws IOException, InterruptedException {
+    public synchronized CompletableFuture<Boolean> beginReceive() throws IOException, InterruptedException {
         //Acquire permit to continue execution of this method and spawn a new thread.
         // Codes_SRS_AMQPSRECEIVER_14_008: [The function shall attempt to acquire a permit from the semaphore.]
         reactorSemaphore.acquire();
-
+        final CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
         if(this.amqpsReceiverHandler != null) {
             // Codes_SRS_AMQPSRECEIVER_14_009: [The function shall initialize its Reactor object using itself as the handler.]
             this.reactor = Proton.reactor(this);
@@ -121,10 +123,12 @@ public class AmqpsReceiver extends BaseHandler{
 
                         //Release the semaphore and make permit available allowing for the next reactor thread to spawn.
                         reactorSemaphore.release();
+                        future.complete(Boolean.TRUE);
                     } catch(HandlerException e){
                         // Codes_SRS_AMQPSRECEIVER_14_013: [If the Reactor throws a HandlerException while running, the thread shall release the semaphore and close the Receiver.]
                         close();
                         reactorSemaphore.release();
+                        future.complete(Boolean.FALSE);
                     }
                 }
             }).start();
@@ -132,6 +136,7 @@ public class AmqpsReceiver extends BaseHandler{
             // Codes_SRS_AMQPSRECEIVER_14_007: [If the AmqpsReceiverHandler has not been initialized, the function shall throw a new IOException.]
             throw new IOException("The Receiver Handler has not been initialized. Call open before receiving.");
         }
+        return future;
     }
 
     /**
