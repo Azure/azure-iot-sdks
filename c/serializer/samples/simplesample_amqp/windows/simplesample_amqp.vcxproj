@@ -27,9 +27,7 @@
     <ClInclude Include="..\simplesample_amqp.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CFA7DCBE-66A2-47DB-8E8A-D4F67E79E547}</ProjectGuid>
@@ -65,13 +63,6 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-    <Import Project="..\..\..\build\windows\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets" Condition="Exists('..\..\..\build\windows\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets')" />
-    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" />
-    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
-    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets')" />
-    <Import Project="..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets" Condition="Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets')" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -187,14 +178,19 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\..\build\windows\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets'))" />
-    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets'))" />
-    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
-    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets'))" />
-    <Error Condition="!Exists('..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\build\windows\packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets'))" />
+    <Error Condition="!Exists('packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets'))" />
   </Target>
+  <Import Project="packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets" Condition="Exists('packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets')" />
+  <Import Project="packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
+  <Import Project="packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets')" />
+  <Import Project="packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.Serializer.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Serializer.targets')" />
 </Project>

@@ -30,7 +30,7 @@ For information on how to use this library refer to the documents below:
 
 - [Prepare your development environment to use the Azure IoT device SDK for C](doc/devbox_setup.md)
 - [Setup IoT Hub](../doc/setup_iothub.md)
-- [Provision devices](doc/provision_device.md)
+- [Provision devices](../tools/iothub-explorer/doc/provision_device.md)
 - [Using the DeviceExplorer application to tests IoT Hub device connectivity](../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
 - [Azure IoT device SDK for C  tutorial](https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/)
 - [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
@@ -47,6 +47,7 @@ How to run the sample applications on:
 - [RasberryPi 2 with Raspbian OS](doc/run_sample_on_raspberrypi2_raspbian.md)
 - [Desktop Windows](doc/run_sample_on_desktop_windows.md)
 - [TI CC3200](doc/run_sample_on_ti_cc3200.md)
+- [openSUSE](doc/run_sample_opensuse.md)
 
 
 ## SDK directory structure

@@ -1,6 +1,0 @@
-com.microsoft.azure.iothub
-com.microsoft.azure.iothub.auth
-com.microsoft.azure.iothub.net
-com.microsoft.azure.iothub.transport
-com.microsoft.azure.iothub.transport.amqps
-com.microsoft.azure.iothub.transport.https

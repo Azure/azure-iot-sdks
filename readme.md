@@ -44,10 +44,10 @@ This folder contains the following documents that are relevant to all the langua
 
 - [Set up IoT Hub](doc/setup_iothub.md) describes how to configure your Azure IoT Hub service.
 - [FAQ](doc/faq.md) contains frequently asked questions about the SDKs and libraries.
-- [OS Platforms and hardware compatibility](doc\tested_configurations.md) describes the SDK compatibility with different OS platforms as well as specific device configurations.
+- [OS Platforms and hardware compatibility](doc/tested_configurations.md) describes the SDK compatibility with different OS platforms as well as specific device configurations.
 
 ### /tools
 
 This folder contains tools you will find useful when you are working with IoT Hub and the device SDKs.
-- [iothub-explorer](c/doc/provision_device.md): describes how to use the iothub-explorer node.js tool to provision a device for use in IoT Hub.
+- [iothub-explorer](tools/iothub-explorer/doc/provision_device.md): describes how to use the iothub-explorer node.js tool to provision a device for use in IoT Hub.
 - [Device Explorer](tools/DeviceExplorer/doc/how_to_use_device_explorer.md): this tool enables you to perform operations such as manage the devices registered to an IoT hub, view device-to-cloud messages sent to an IoT hub, and send cloud-to-device messages from an IoT hub. Note this tool only runs on Windows.
