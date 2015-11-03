@@ -4,36 +4,58 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
-    
+
+    /// <summary>
+    /// Authentication method that uses the symmetric key associated with the device in the device registry. 
+    /// </summary>
     public sealed class DeviceAuthenticationWithRegistrySymmetricKey : IAuthenticationMethod
     {
         string deviceId;
         byte[] key;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeviceAuthenticationWithRegistrySymmetricKey"/> class.
+        /// </summary>
+        /// <param name="deviceId">Device identifier.</param>
+        /// <param name="key">Symmetric key associated with the device.</param>
         public DeviceAuthenticationWithRegistrySymmetricKey(string deviceId, string key)
         {
             this.SetDeviceId(deviceId);
             this.SetKeyFromBase64String(key);
         }
 
+        /// <summary>
+        /// Gets or sets the device identifier.
+        /// </summary>
         public string DeviceId
         {
             get { return this.deviceId; }
             set { this.SetDeviceId(value); }
         }
 
+        /// <summary>
+        /// Gets or sets the key associated with the device.
+        /// </summary>
         public byte[] Key 
         { 
             get { return this.key; }
             set { this.SetKey(value); } 
         }
 
+        /// <summary>
+        /// Gets or sets the Base64 formatted key associated with the device.
+        /// </summary>
         public string KeyAsBase64String
         {
             get { return Convert.ToBase64String(this.Key); }
             set { this.SetKeyFromBase64String(value);}
         }
 
+        /// <summary>
+        /// Populates an <see cref="IotHubConnectionStringBuilder"/> instance based on the properties of the current instance.
+        /// </summary>
+        /// <param name="iotHubConnectionStringBuilder">Instance to populate.</param>
+        /// <returns>The populated <see cref="IotHubConnectionStringBuilder"/> instance.</returns>
         public IotHubConnectionStringBuilder Populate(IotHubConnectionStringBuilder iotHubConnectionStringBuilder)
         {
             if (iotHubConnectionStringBuilder == null)

@@ -21,6 +21,6 @@ var badConnStrings = [
 ];
 
 describe('Over real HTTPS', function () {
-  this.timeout(10000); // default timeout is 2s, but 'hostname is malformed' tests are taking 2.2s on some machines...
+  this.timeout(15000);
   runTests(createTransport, connectionString, badConnStrings);
 });
