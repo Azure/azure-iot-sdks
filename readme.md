@@ -49,5 +49,5 @@ This folder contains the following documents that are relevant to all the langua
 ### /tools
 
 This folder contains tools you will find useful when you are working with IoT Hub and the device SDKs.
-- [iothub-explorer](c/doc/provision_device.md): describes how to use the iothub-explorer node.js tool to provision a device for use in IoT Hub.
+- [iothub-explorer](tools/iothub-explorer/doc/provision_device.md): describes how to use the iothub-explorer node.js tool to provision a device for use in IoT Hub.
 - [Device Explorer](tools/DeviceExplorer/doc/how_to_use_device_explorer.md): this tool enables you to perform operations such as manage the devices registered to an IoT hub, view device-to-cloud messages sent to an IoT hub, and send cloud-to-device messages from an IoT hub. Note this tool only runs on Windows.

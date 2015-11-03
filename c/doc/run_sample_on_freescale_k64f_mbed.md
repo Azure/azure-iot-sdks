@@ -73,7 +73,7 @@ The program starts executing. You may have to reset the board (press CTRL+Break 
 
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md
 [1]: ./media/mbed1.png
 [2]: ./media/mbed2.png
 [3]: ./media/mbed3.png

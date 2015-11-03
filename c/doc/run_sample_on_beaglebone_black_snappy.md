@@ -255,4 +255,4 @@ To run this tool, you need connection and configuration information for your IoT
 		make -f Makefile all
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md
