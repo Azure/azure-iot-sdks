@@ -1,5 +1,5 @@
 using System;
-namespace Microsoft.Azure.Devices.Client
+namespace Microsoft.Azure.Devices.Client.Extensions
 {
     static class StringExtensions
     {

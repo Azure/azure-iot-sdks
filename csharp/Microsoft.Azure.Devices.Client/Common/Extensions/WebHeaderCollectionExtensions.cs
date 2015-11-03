@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Microsoft.Azure.Devices.Client
+namespace Microsoft.Azure.Devices.Client.Extensions
 {
     static class WebHeaderCollectionExtensions
     {

@@ -5,6 +5,7 @@ namespace Microsoft.Azure.Devices.Client
 {
     using System;
     using System.Net;
+    using Microsoft.Azure.Devices.Client.Extensions;
 #if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
     using System.Collections.Generic;
 #endif
@@ -126,7 +127,7 @@ namespace Microsoft.Azure.Devices.Client
             // the 'absolute' value is correct but DateTimeKind is Local (WRONG!)
             DateTime expiresOn = TimeZone.CurrentTimeZone.ToUniversalTime(DateTime.UtcNow.Add(timeToLive));
             TimeSpan secondsFromBaseTime = expiresOn.Subtract(TimeZone.CurrentTimeZone.ToUniversalTime(SharedAccessSignatureConstants.EpochTime));
-            return (secondsFromBaseTime.Ticks / ticksPerSecond).ToString();
+            return (secondsFromBaseTime.Ticks / TimeSpan.TicksPerSecond).ToString();
 #elif MF_FRAMEWORK_VERSION_V4_4
             DateTime expiresOn = DateTime.UtcNow.Add(timeToLive);
             TimeSpan secondsFromBaseTime = expiresOn.Subtract(SharedAccessSignatureConstants.EpochTime);
