@@ -5,6 +5,9 @@
 
 package com.microsoft.azure.iot.service.sdk;
 
+/**
+ * Enum for device connection state
+ */
 public enum DeviceConnectionState
 {
     Disconnected,

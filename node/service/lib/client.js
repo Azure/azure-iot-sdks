@@ -4,16 +4,22 @@
 'use strict';
 
 var ConnectionString = require('./connection_string.js');
+var DefaultTransport = require('./transport.js');
 var Message = require('azure-iot-common').Message;
 var ServiceToken = require('../node_modules/azure-iot-common/lib/authorization.js').ServiceToken;
 var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
-
-var DefaultTransport = require('./transport.js');
 
 function Client(transport) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_001: [The Client constructor shall throw ReferenceError if the transport argument is falsy.]*/
   if (!transport) throw new ReferenceError('transport is \'' + transport + '\'');
   this._transport = transport;
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_030: [The FeedbackReceiver class shall inherit EventEmitter to provide consumers the ability to listen for (and stop listening for) events.]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_031: [FeedbackReceiver shall expose the 'errorReceived' event, whose handler shall be called with the following arguments:
+  err – standard JavaScript Error object (or subclass)]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_032: [FeedbackReceiver shall expose the 'message' event, whose handler shall be called with the following arguments when a new feedback message is received from the IoT Hub:
+  message – a JavaScript object containing a batch of one or more feedback records]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_033: [getFeedbackReceiver shall return the same instance of Client.FeedbackReceiver every time it is called with a given instance of Client.]*/
+  Object.defineProperty(this, 'FeedbackReceiver', { value: transport.FeedbackReceiver });
 }
 
 Client.fromConnectionString = function fromConnectionString(value) {
@@ -93,8 +99,18 @@ Client.prototype.send = function send(deviceId, message, done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_017: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_018: [Otherwise the argument err shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_019: [If the deviceId has not been registered with the IoT Hub, send shall return an instance of DeviceNotFoundError.]*/
-  /*SRS_NODE_IOTHUB_CLIENT_05_020: [If the queue which receives messages on behalf of the device is full, send shall return and instance of DeviceMaximumQueueDepthExceededError.]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_020: [If the queue which receives messages on behalf of the device is full, send shall return and instance of DeviceMaximumQueueDepthExceededError.]*/
   this._transport.send(deviceId, message, done);
+};
+
+Client.prototype.getFeedbackReceiver = function getFeedbackReceiver(done) {
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_026: [If the connection has not already been opened (e.g., by a call to open), the getFeedbackReceiver method shall open the connection.]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_027: [When the getFeedbackReceiver method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
+  err - standard JavaScript Error object (or subclass)
+  receiver - an instance of Client.FeedbackReceiver]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_028: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_029: [Otherwise the argument err shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.]*/
+  this._transport.getFeedbackReceiver(done);
 };
 
 module.exports = Client;

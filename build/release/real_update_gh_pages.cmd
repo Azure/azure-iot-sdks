@@ -19,9 +19,12 @@ if "%current_git_branch%" neq "develop" (
 )
 
 rem -----------------------------------------------------------------------------
-rem -- We assume that the API docs in the repo are the absolute latest and just
-rem -- and just check that in to gh-pages. First, copy all the docs out to a
-rem -- temp folder.
+rem -- Call gen_docs.cmd to generate API docs afresh
+rem -----------------------------------------------------------------------------
+call %build-root%\build\gen_docs.cmd
+
+rem -----------------------------------------------------------------------------
+rem -- First, copy all the docs out to a temp folder.
 rem -----------------------------------------------------------------------------
 set temp_doc_dir=%temp%\azure-iot-sdks
 if exist %temp_doc_dir% rd /s /q %temp_doc_dir%

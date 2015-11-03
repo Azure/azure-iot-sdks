@@ -166,8 +166,8 @@ public final class AmqpsTransport implements IotHubTransport
         {
             // an AMQPS session must be manually managed,
             // so we reopen a new session to avoid encountering corrupted state.
-            this.session = new AmqpsIotHubSession(this.config);
-            this.session.open();
+            this.close();
+            this.open();
         }
 
         // Codes_SRS_AMQPSTRANSPORT_11_004: [The function shall attempt to send every message on its waiting list, one at a time.]
@@ -262,8 +262,8 @@ public final class AmqpsTransport implements IotHubTransport
         {
             // an AMQPS session must be manually managed,
             // so we reopen a new session to avoid encountering corrupted state.
-            this.session = new AmqpsIotHubSession(this.config);
-            this.session.open();
+            this.close();
+            this.open();
         }
 
         try

@@ -4,6 +4,7 @@
 'use strict';
 
 module.exports = {
+    authorization: require('./lib/authorization.js'),
     createDictionary: require('./lib/dictionary.js'),
     endpoint: require('./lib/endpoint.js'),
     errors: require('./lib/errors.js'),

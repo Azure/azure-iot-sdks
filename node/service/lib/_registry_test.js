@@ -45,7 +45,7 @@ function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
     { name: 'key is wrong', expect: expect401Response }
   ];
 
-  badConnStrings.forEach(function (test, index, array) {
+  badConnStrings.forEach(function (test, index) {
     it('fails to ' + opName + ' when the ' + tests[index].name, function (done) {
       makeRequestWith(test, tests[index].expect, done);
     });
@@ -67,8 +67,7 @@ function runTests(transportFactory, goodConfig, badConfigs, deviceId) {
         var registry = new Registry(goodConfig, transportFactory());
         var deviceInfo = new Device(null);
         assert.throws(function() {
-          registry.create(deviceInfo, function(err, response) {
-          });
+          registry.create(deviceInfo, function () {});
         }, ReferenceError, 'Invalid argument \'deviceId\'');
         done();
       });
@@ -153,8 +152,7 @@ function runTests(transportFactory, goodConfig, badConfigs, deviceId) {
         var registry = new Registry(goodConfig, transportFactory());
         var deviceInfo = new Device(null);
         assert.throws(function() {
-          registry.update(deviceInfo, function(err, response) {
-          });
+          registry.update(deviceInfo, function () {});
         }, ReferenceError, 'Invalid argument \'deviceId\'');
         done();
       });
@@ -189,7 +187,7 @@ function runTests(transportFactory, goodConfig, badConfigs, deviceId) {
       it('deletes the given device', function(done) {
         var registry = new Registry(goodConfig, transportFactory());
         var deviceInfo = new Device(deviceJson);
-        registry.delete(deviceInfo.deviceId, function(err, response) {
+        registry.delete(deviceInfo.deviceId, function(err) {
           assert.isNull(err);
           done();
         });

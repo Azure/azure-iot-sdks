@@ -13,7 +13,7 @@ if(${use_amqp})
 	add_subdirectory(longhaul_tests)
 endif()
 
-if(${use_amqp} AND ${use_http})
+if(${use_amqp} AND ${use_http} AND ${use_mqtt})
 	add_subdirectory(iothubclient_e2etests)
 endif()
 

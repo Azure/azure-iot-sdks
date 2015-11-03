@@ -93,30 +93,6 @@ goto args-loop
 :args-done
 
 rem -----------------------------------------------------------------------------
-rem -- build device explorer
-rem -----------------------------------------------------------------------------
-
-call nuget restore "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln"
-if %build-clean%==1 (
-    call :clean-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln" "Release" "Any CPU"
-    if not !errorlevel!==0 exit /b !errorlevel!
-)
-call :build-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln" "Release" "Any CPU"
-if not %errorlevel%==0 exit /b %errorlevel%
-
-rem -----------------------------------------------------------------------------
-rem -- build device explorer with installer
-rem -----------------------------------------------------------------------------
-
-call nuget restore "%build-root%\..\tools\deviceexplorer\deviceexplorerwithinstaller.sln"
-if %build-clean%==1 (
-    call :clean-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorerwithinstaller.sln" "Release" "Any CPU"
-    if not !errorlevel!==0 exit /b !errorlevel!
-)
-call :build-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorerwithinstaller.sln" "Release" "Any CPU"
-if not %errorlevel%==0 exit /b %errorlevel%
-
-rem -----------------------------------------------------------------------------
 rem -- restore packages for solutions
 rem -----------------------------------------------------------------------------
 
