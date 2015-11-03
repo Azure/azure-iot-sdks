@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.0.0-preview.4</span>
+   &#160;<span id="projectnumber">1.0.0-preview.5</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -146,6 +146,18 @@ Functions</h2></td></tr>
 <tr class="memitem:a2ab46db5ad9db0b497b5171e21b64ea2"><td class="memItemLeft" align="right" valign="top">MAP_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a2ab46db5ad9db0b497b5171e21b64ea2">IoTHubMessage_Properties</a> (IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)</td></tr>
 <tr class="memdesc:a2ab46db5ad9db0b497b5171e21b64ea2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a handle to the message's properties map.  <a href="#a2ab46db5ad9db0b497b5171e21b64ea2">More...</a><br /></td></tr>
 <tr class="separator:a2ab46db5ad9db0b497b5171e21b64ea2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada4fa36e8ab3af2759a6e5703d55dc29"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ada4fa36e8ab3af2759a6e5703d55dc29">IoTHubMessage_GetMessageId</a> (IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)</td></tr>
+<tr class="memdesc:ada4fa36e8ab3af2759a6e5703d55dc29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the MessageId from the IOTHUB_MESSAGE_HANDLE.  <a href="#ada4fa36e8ab3af2759a6e5703d55dc29">More...</a><br /></td></tr>
+<tr class="separator:ada4fa36e8ab3af2759a6e5703d55dc29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d5f3d8a6da59b259f170de613c61cc0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a3d5f3d8a6da59b259f170de613c61cc0">IoTHubMessage_SetMessageId</a> (IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char *messageId)</td></tr>
+<tr class="memdesc:a3d5f3d8a6da59b259f170de613c61cc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the MessageId for the IOTHUB_MESSAGE_HANDLE.  <a href="#a3d5f3d8a6da59b259f170de613c61cc0">More...</a><br /></td></tr>
+<tr class="separator:a3d5f3d8a6da59b259f170de613c61cc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac9f6f33fc89f91ffa7853692a1555b6"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#aac9f6f33fc89f91ffa7853692a1555b6">IoTHubMessage_GetCorrelationId</a> (IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)</td></tr>
+<tr class="memdesc:aac9f6f33fc89f91ffa7853692a1555b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the CorrelationId from the IOTHUB_MESSAGE_HANDLE.  <a href="#aac9f6f33fc89f91ffa7853692a1555b6">More...</a><br /></td></tr>
+<tr class="separator:aac9f6f33fc89f91ffa7853692a1555b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afcc4a3e4e8ac287b0a9a3850c5a72248"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#afcc4a3e4e8ac287b0a9a3850c5a72248">IoTHubMessage_SetCorrelationId</a> (IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char *correlationId)</td></tr>
+<tr class="memdesc:afcc4a3e4e8ac287b0a9a3850c5a72248"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the CorrelationId for the IOTHUB_MESSAGE_HANDLE.  <a href="#afcc4a3e4e8ac287b0a9a3850c5a72248">More...</a><br /></td></tr>
+<tr class="separator:afcc4a3e4e8ac287b0a9a3850c5a72248"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8303de9790f32c3b0aebac6cfb0e80bf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a8303de9790f32c3b0aebac6cfb0e80bf">IoTHubMessage_Destroy</a> (IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)</td></tr>
 <tr class="memdesc:a8303de9790f32c3b0aebac6cfb0e80bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees all resources associated with the given message handle.  <a href="#a8303de9790f32c3b0aebac6cfb0e80bf">More...</a><br /></td></tr>
 <tr class="separator:a8303de9790f32c3b0aebac6cfb0e80bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -331,6 +343,56 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aac9f6f33fc89f91ffa7853692a1555b6"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* IoTHubMessage_GetCorrelationId </td>
+          <td>(</td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname"><em>iotHubMessageHandle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the CorrelationId from the IOTHUB_MESSAGE_HANDLE. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A const char* pointing to the Correlation Id. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ada4fa36e8ab3af2759a6e5703d55dc29"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* IoTHubMessage_GetMessageId </td>
+          <td>(</td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname"><em>iotHubMessageHandle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the MessageId from the IOTHUB_MESSAGE_HANDLE. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A const char* pointing to the Message Id. </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="aaf63b9aecdde6f8c90d9fbd0755d0c41"></a>
 <div class="memitem">
 <div class="memproto">
@@ -378,6 +440,78 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <code>MAP_HANDLE</code> pointing to the properties map for this message. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="afcc4a3e4e8ac287b0a9a3850c5a72248"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a> IoTHubMessage_SetCorrelationId </td>
+          <td>(</td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname"><em>iotHubMessageHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>correlationId</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the CorrelationId for the IOTHUB_MESSAGE_HANDLE. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message. </td></tr>
+    <tr><td class="paramname">correlationId</td><td>Pointer to the memory location of the messageId</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns IOTHUB_MESSAGE_OK if the messageId was set successfully or an error code otherwise. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a3d5f3d8a6da59b259f170de613c61cc0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">IOTHUB_MESSAGE_RESULT</a> IoTHubMessage_SetMessageId </td>
+          <td>(</td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname"><em>iotHubMessageHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>messageId</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the MessageId for the IOTHUB_MESSAGE_HANDLE. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message. </td></tr>
+    <tr><td class="paramname">messageId</td><td>Pointer to the memory location of the messageId</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns IOTHUB_MESSAGE_OK if the messageId was set successfully or an error code otherwise. </dd></dl>
 
 </div>
 </div>

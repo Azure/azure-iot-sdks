@@ -41,8 +41,12 @@ var searchData=
   ['iothubmessage_5fdisposition_5fresult_5ftag',['IOTHUBMESSAGE_DISPOSITION_RESULT_TAG',['../iothub__client__ll_8h.html#ad6c1da5dbe6e1dd6746ab930b377d531',1,'iothub_client_ll.h']]],
   ['iothubmessage_5fgetbytearray',['IoTHubMessage_GetByteArray',['../iothub__message_8h.html#afac0461ed8c3d522bbf2a4cfa9f3f957',1,'iothub_message.h']]],
   ['iothubmessage_5fgetcontenttype',['IoTHubMessage_GetContentType',['../iothub__message_8h.html#ae7fd8e5a5844a4346933a86feb577d3c',1,'iothub_message.h']]],
+  ['iothubmessage_5fgetcorrelationid',['IoTHubMessage_GetCorrelationId',['../iothub__message_8h.html#aac9f6f33fc89f91ffa7853692a1555b6',1,'iothub_message.h']]],
+  ['iothubmessage_5fgetmessageid',['IoTHubMessage_GetMessageId',['../iothub__message_8h.html#ada4fa36e8ab3af2759a6e5703d55dc29',1,'iothub_message.h']]],
   ['iothubmessage_5fgetstring',['IoTHubMessage_GetString',['../iothub__message_8h.html#aaf63b9aecdde6f8c90d9fbd0755d0c41',1,'iothub_message.h']]],
   ['iothubmessage_5fproperties',['IoTHubMessage_Properties',['../iothub__message_8h.html#a2ab46db5ad9db0b497b5171e21b64ea2',1,'iothub_message.h']]],
+  ['iothubmessage_5fsetcorrelationid',['IoTHubMessage_SetCorrelationId',['../iothub__message_8h.html#afcc4a3e4e8ac287b0a9a3850c5a72248',1,'iothub_message.h']]],
+  ['iothubmessage_5fsetmessageid',['IoTHubMessage_SetMessageId',['../iothub__message_8h.html#a3d5f3d8a6da59b259f170de613c61cc0',1,'iothub_message.h']]],
   ['iothubname',['iotHubName',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g___t_a_g.html#a6b559edc71ff3b0e8d9f9840cb36b27c',1,'IOTHUB_CLIENT_CONFIG_TAG']]],
   ['iothubsuffix',['iotHubSuffix',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g___t_a_g.html#ae54e74d8db92b20f796df76f01d5dd68',1,'IOTHUB_CLIENT_CONFIG_TAG']]]
 ];
