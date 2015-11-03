@@ -74,6 +74,9 @@
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\DeviceAuthenticationWithRegistrySymmetricKey.cs">
       <Link>DeviceAuthenticationWithRegistrySymmetricKey.cs</Link>
     </Compile>
+    <Compile Include="..\..\Microsoft.Azure.Devices.Client\DeviceAuthenticationWithSharedAccessPolicyKey.cs">
+      <Link>DeviceAuthenticationWithSharedAccessPolicyKey.cs</Link>
+    </Compile>
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\DeviceAuthenticationWithToken.cs">
       <Link>DeviceAuthenticationWithToken.cs</Link>
     </Compile>

@@ -12,8 +12,8 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (iotHubConnectionStringBuilder.SharedAccessKeyName != null)
             {
-                //return new DeviceAuthenticationWithSharedAccessPolicyKey(
-                //    iotHubConnectionStringBuilder.DeviceId, iotHubConnectionStringBuilder.SharedAccessKeyName, iotHubConnectionStringBuilder.SharedAccessKey);
+                return new DeviceAuthenticationWithSharedAccessPolicyKey(
+                    iotHubConnectionStringBuilder.DeviceId, iotHubConnectionStringBuilder.SharedAccessKeyName, iotHubConnectionStringBuilder.SharedAccessKey);
             }
             else if (iotHubConnectionStringBuilder.SharedAccessKey != null)
             {
@@ -32,10 +32,10 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         }
 
-        //public static IAuthenticationMethod CreateAuthenticationWithSharedAccessPolicyKey(string deviceId, string policyName, string key)
-        //{
-        //    return new DeviceAuthenticationWithSharedAccessPolicyKey(deviceId, policyName, key);
-        //}
+        public static IAuthenticationMethod CreateAuthenticationWithSharedAccessPolicyKey(string deviceId, string policyName, string key)
+        {
+            return new DeviceAuthenticationWithSharedAccessPolicyKey(deviceId, policyName, key);
+        }
 
         public static IAuthenticationMethod CreateAuthenticationWithToken(string deviceId, string token)
         {
