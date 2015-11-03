@@ -9,16 +9,12 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Diagnostics.Contracts;
-
-    /*============================================================
-    **
-    ** Class:  ReadOnlyDictionary<TKey, TValue>
-    ** 
-    ** <OWNER>gpaperin</OWNER>
-    **
-    ** Purpose: Read-only wrapper for another generic dictionary.
-    **
-    ===========================================================*/
+    
+    /// <summary>
+    /// Read-only wrapper for another generic dictionary.
+    /// </summary>
+    /// <typeparam name="TKey">Type to be used for keys.</typeparam>
+    /// <typeparam name="TValue">Type to be used for values</typeparam>
 #if !WINDOWS_UWP
     [Serializable]
 #endif
