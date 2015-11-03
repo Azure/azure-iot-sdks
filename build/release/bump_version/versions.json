@@ -19,7 +19,7 @@
       "device": "1.0.0-preview.5",
       "service": "1.0.0-preview.5"
     },
-    "iothub-explorer": "1.0.0-preview.5.a",
+    "iothub-explorer": "1.0.0-preview.5",
     "device-explorer": "1.0.0-preview.5",
     "github-release": "v1.0.0-preview.5"
 }
