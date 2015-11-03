@@ -137,6 +137,6 @@ This sample application sends simulated sensor data to your IoT Hub.
 
 [1]: ./media/service-bus-iot-raspberrypi-raspbian-setup/raspbian01.png
 
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md
 [setup-iothub]: ../../doc/setup_iothub.md
 [device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md

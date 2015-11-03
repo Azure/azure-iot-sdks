@@ -39,7 +39,7 @@ Before you get started, you should:
     node .
     ```
 
-6. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_amqp** application.
+6. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simple_sample_http** application.
 
 [setup-devbox]: devbox_setup.md
 [device-explorer]: ../../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md

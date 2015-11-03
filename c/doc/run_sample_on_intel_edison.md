@@ -144,4 +144,4 @@ Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT
 [img2]: ./media/edison02.png
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md

@@ -16,6 +16,7 @@
 #endif
 
 const char *DEFAULT_CONSUMER_GROUP = "$Default";
+const int DEFAULT_PARTITION_COUNT = 16;
 
 const char* IoTHubAccount_GetEventHubConnectionString(void)
 {
@@ -222,4 +223,28 @@ const char* IoTHubAccount_GetEventhubConsumerGroup(void)
 
     return consumerGroup;
 #endif
+}
+
+const size_t IoTHubAccount_GetIoTHubPartitionCount(void)
+{
+	int value;
+
+#ifdef MBED_BUILD_TIMESTAMP
+	(void)mbed_log("EventHubPartitionCount?\r\n");
+	(void)scanf("%i", &value);
+	(void)mbed_log("Received '%i'\r\n", value);
+#else
+	char *envVarValue = getenv("IOTHUB_PARTITION_COUNT");
+
+	if (envVarValue != NULL)
+	{
+		value = atoi(envVarValue);
+	}
+	else
+	{
+		value = DEFAULT_PARTITION_COUNT;
+	}
+#endif
+
+	return (size_t)value;
 }
