@@ -23,7 +23,14 @@ namespace Microsoft.Azure.Devices.Client
     /// </summary>
     public enum TransportType
     {
+        /// <summary>
+        /// Advanced Message Queuing Protocol transport.
+        /// </summary>
         Amqp,
+
+        /// <summary>
+        /// HyperText Transfer Protocol version 1 transport.
+        /// </summary>
         Http1
     }
 
