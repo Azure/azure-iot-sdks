@@ -23,8 +23,6 @@ public class ServiceClientSample
 {
     private static final String connectionString = "[Connection string goes here]";
     private static final String deviceId = "[Device name goes here]";
-    private static final String primaryKey = "[New primary key goes here]";
-    private static final String secondaryKey = "[New secondary key goes here]";
 
     private static ServiceClient serviceClient = null;
     private static FeedbackReceiver feedbackReceiver = null;

@@ -16,13 +16,12 @@ import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.*;
 import org.apache.qpid.proton.reactor.impl.IO;
-import org.apache.qpid.proton.reactor.impl.ReactorImpl;
 import org.junit.Test;
-import sun.text.resources.FormatData_es_EC;
 
 import java.io.IOException;
-import java.lang.management.ThreadInfo;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
@@ -203,11 +202,8 @@ public class AmqpsReceiverTest {
         //Record the current number of currently running threads
         final int currentThreads = Thread.activeCount();
 
-        //Will spawn a new thread
-        receiver.open();
-
-        //Wait for thread spawned by receiver.open() to complete before verifying calls
-        while(Thread.activeCount()>currentThreads){Thread.sleep(100);}
+        CompletableFuture<Boolean> future = receiver.open();
+        future.join();
 
         new Verifications()
         {
@@ -310,7 +306,7 @@ public class AmqpsReceiverTest {
     // Tests_SRS_AMQPSRECEIVER_14_011: [The function shall asynchronously close the Receiver after running the Reactor.]
     // Tests_SRS_AMQPSRECEIVER_14_012: [The function shall asynchronously release the semaphore.]
     @Test
-    public void beginReceiveAsyncRunCloseRelease() throws IOException, InterruptedException{
+    public void beginReceiveAsyncRunCloseRelease() throws IOException, InterruptedException, ExecutionException {
         final String hostName = "test.host.name";
         final String deviceId = "test-deviceId";
         final String userName = "test-deviceId@sas.test.host.name";
@@ -319,18 +315,19 @@ public class AmqpsReceiverTest {
         new NonStrictExpectations()
         {
             {
+                new Semaphore(anyInt);
+                result = mockSemaphore;
+                new AmqpsReceiverHandler(anyString, anyString, anyString, anyString, (AmqpsReceiver)any);
+                result = mockHandler;
                 mockProton.reactor((BaseHandler)any);
                 result = mockReactor;
             }
         };
 
         final AmqpsReceiver receiver = new AmqpsReceiver(hostName, userName, deviceId, sasToken);
-
-        int initialThreadCount = Thread.activeCount();
-        receiver.open();
-        int endingThreadCount = Thread.activeCount();
-
-        assertEquals(initialThreadCount+1, endingThreadCount);
+        Deencapsulation.setField(receiver, "reactorSemaphore", mockSemaphore);
+        CompletableFuture<Boolean> future = receiver.open();
+        future.join();
 
         new Verifications()
         {
@@ -362,7 +359,8 @@ public class AmqpsReceiverTest {
 
         final AmqpsReceiver receiver = new AmqpsReceiver(hostName, userName, deviceId, sasToken);
 
-        receiver.open();
+        CompletableFuture<Boolean> future = receiver.open();
+        future.join();
 
         new Verifications()
         {
@@ -446,6 +444,8 @@ public class AmqpsReceiverTest {
             {
                 new AmqpsReceiverHandler(anyString, anyString, anyString, anyString, (AmqpsReceiver)any);
                 result = mockHandler;
+                mockEvent.getReactor();
+                result = mockReactor;
             }
         };
 

@@ -5,14 +5,14 @@
 
 package com.microsoft.azure.iothub.transport.amqps;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.engine.HandlerException;
 import org.apache.qpid.proton.reactor.Reactor;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class that overrides the callbacks needed to handle high level open,
