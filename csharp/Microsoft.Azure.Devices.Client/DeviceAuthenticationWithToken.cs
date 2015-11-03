@@ -6,6 +6,9 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using Microsoft.Azure.Devices.Client.Extensions;
 
+    /// <summary>
+    /// Authentication method that uses a shared access signature token. 
+    /// </summary>
 #if WINDOWS_UWP
     internal
 #else
@@ -16,24 +19,40 @@ namespace Microsoft.Azure.Devices.Client
         string deviceId;
         string token;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeviceAuthenticationWithToken"/> class.
+        /// </summary>
+        /// <param name="deviceId">Device Identifier.</param>
+        /// <param name="token">Security Token.</param>
         public DeviceAuthenticationWithToken(string deviceId, string token)
         {
             this.SetDeviceId(deviceId);
             this.SetToken(token);
         }
 
+        /// <summary>
+        /// Gets or sets the device identifier.
+        /// </summary>
         public string DeviceId
         {
             get { return this.deviceId; }
             set { this.SetDeviceId(value); }
         }
 
+        /// <summary>
+        /// Gets or sets the security token associated with the device.
+        /// </summary>
         public string Token
         {
             get { return this.token; }
             set { this.SetToken(value); }
         }
 
+        /// <summary>
+        /// Populates an <see cref="IotHubConnectionStringBuilder"/> instance based on the properties of the current instance.
+        /// </summary>
+        /// <param name="iotHubConnectionStringBuilder">Instance to populate.</param>
+        /// <returns>The populated <see cref="IotHubConnectionStringBuilder"/> instance.</returns>
         public IotHubConnectionStringBuilder Populate(IotHubConnectionStringBuilder iotHubConnectionStringBuilder)
         {
             if (iotHubConnectionStringBuilder == null)

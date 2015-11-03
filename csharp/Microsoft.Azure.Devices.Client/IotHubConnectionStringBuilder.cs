@@ -16,7 +16,9 @@ namespace Microsoft.Azure.Devices.Client
     using SharedAccessSignatureParser = Microsoft.Azure.Devices.Client.SharedAccessSignature;
 #endif
 
-
+    /// <summary>
+    /// Builds a connection string for the IoT Hub service based on the properties populated by the user.
+    /// </summary>
     public sealed class IotHubConnectionStringBuilder
     {
         const char ValuePairDelimiter = ';';
@@ -42,10 +44,19 @@ namespace Microsoft.Azure.Devices.Client
         string iotHubName;
         IAuthenticationMethod authenticationMethod;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IotHubConnectionStringBuilder"/> class.
+        /// </summary>
         IotHubConnectionStringBuilder()
         {
         }
 
+        /// <summary>
+        /// Creates a connection string based on the hostname of the IoT Hub and the authentication method passed as a parameter.
+        /// </summary>
+        /// <param name="hostname">The fully-qualified DNS hostname of IoT Hub</param>
+        /// <param name="authenticationMethod">The authentication method that is used</param>
+        /// <returns>A new instance of the <see cref="IotHubConnectionStringBuilder"/> class with a populated connection string.</returns>
         public static IotHubConnectionStringBuilder Create(string hostname, IAuthenticationMethod authenticationMethod)
         {
             var iotHubConnectionStringBuilder = new IotHubConnectionStringBuilder()
@@ -59,6 +70,11 @@ namespace Microsoft.Azure.Devices.Client
             return iotHubConnectionStringBuilder;
         }
 
+        /// <summary>
+        /// Creates a connection string based on the hostname of the IoT Hub and the authentication method passed as a parameter.
+        /// </summary>
+        /// <param name="iotHubConnectionString">The connection string.</param>
+        /// <returns>A new instance of the <see cref="IotHubConnectionStringBuilder"/> class with a populated connection string.</returns>
         public static IotHubConnectionStringBuilder Create(string iotHubConnectionString)
         {
 #if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
@@ -80,23 +96,41 @@ namespace Microsoft.Azure.Devices.Client
             return iotHubConnectionStringBuilder;
         }
 
+        /// <summary>
+        /// Gets or sets the value of the fully-qualified DNS hostname of the IoT Hub service.
+        /// </summary>
         public string HostName
         {
             get { return this.hostName; }
             set { this.SetHostName(value); }
         }
 
+        /// <summary>
+        /// Gets or sets the authentication method to be used with the IoT Hub service.
+        /// </summary>
         public IAuthenticationMethod AuthenticationMethod {
             get { return this.authenticationMethod; }
             set { this.SetAuthenticationMethod(value); }
         }
 
+        /// <summary>
+        /// Gets the device identifier of the device connecting to the service.
+        /// </summary>
         public string DeviceId { get; internal set; }
 
+        /// <summary>
+        /// Gets the shared acess key name used to connect the device to the IoT Hub service.
+        /// </summary>
         public string SharedAccessKeyName { get; internal set; }
 
+        /// <summary>
+        /// Gets the shared access key used to connect to the IoT Hub service.
+        /// </summary>
         public string SharedAccessKey { get; internal set; }
 
+        /// <summary>
+        /// Gets the shared access signature used to connect to the IoT Hub service.
+        /// </summary>
         public string SharedAccessSignature { get; internal set; }
 
         internal string IotHubName 
@@ -111,6 +145,10 @@ namespace Microsoft.Azure.Devices.Client
         }
 
 #if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+        /// <summary>
+        /// Produces the connection string based on the values of the <see cref="IotHubConnectionStringBuilder"/> instance properties.
+        /// </summary>
+        /// <returns>A properly formatted connection string.</returns>
         public override sealed string ToString()
         {            this.Validate();
 
