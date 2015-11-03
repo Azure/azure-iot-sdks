@@ -202,3 +202,9 @@ csharp/device/.vs/*
 service/java/.idea
 service/java/target
 service/java/iot.service.sdk.java.iml
+
+
+# .NET Micro Framework Emulator files and folders
+OnBoardFlash.dat
+OnBoardFlash.dat.smd
+DOTNETMF_FS_EMULATION*/
