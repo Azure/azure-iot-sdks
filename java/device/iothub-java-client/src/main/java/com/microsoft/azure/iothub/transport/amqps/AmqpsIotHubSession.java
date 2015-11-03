@@ -4,28 +4,18 @@
 package com.microsoft.azure.iothub.transport.amqps;
 
 import com.microsoft.azure.iothub.*;
-import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
-import com.microsoft.azure.iothub.net.IotHubMessageUri;
-import com.microsoft.azure.iothub.net.IotHubEventUri;
 import com.microsoft.azure.iothub.net.IotHubUri;
-
-import org.apache.qpid.jms.JmsConnectionFactory;
-import org.apache.qpid.jms.JmsQueue;
-import org.apache.qpid.jms.message.JmsAmqpMessage;
-import org.apache.qpid.jms.provider.ProviderConstants;
+import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.messaging.Data;
+import org.apache.qpid.proton.amqp.messaging.Properties;
+import org.apache.qpid.proton.engine.HandlerException;
+import org.apache.qpid.proton.message.impl.MessageImpl;
 
 import java.io.IOException;
-import java.util.Enumeration;
-
-import javax.jms.BytesMessage;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 
 /**
  * An AMQPS session for a device and an IoT Hub. Contains functionality for
@@ -54,13 +44,12 @@ public final class AmqpsIotHubSession
 
     /** The client configuration. */
     protected final DeviceClientConfig config;
-    /** The underlying AMQPS connection. */
-    protected Connection connection;
-    /** The AMQPS session. */
-    protected Session session;
+
+    protected AmqpsSender sender = null;
+    protected AmqpsReceiver receiver = null;
 
     /** The last AMQPS message received by the device. */
-    protected JmsAmqpMessage lastMessage;
+    protected AmqpsMessage lastMessage;
 
 
     /**
@@ -100,29 +89,26 @@ public final class AmqpsIotHubSession
             String iotHubName = this.config.getIotHubName();
             String deviceId = this.config.getDeviceId();
 
-            String iotHubUrl = "amqps://" + iotHubHostname;
-
             String iotHubUser = deviceId + "@sas." + iotHubName;
 
             IotHubSasToken sasToken = this.buildToken();
 
             try
             {
-                // Codes_SRS_AMQPSIOTHUBSESSION_11_001: [The function shall establish an AMQPS session with an IoT Hub with the resource URI 'amqps://[urlEncodedDeviceId]@sas.[urlEncodedIotHubName]:[urlEncodedSasToken]@[urlEncodedIotHubHostname].]
-                // Codes_SRS_AMQPSIOTHUBSESSION_11_003: [If an AMQPS session is unable to be established, the function shall throw an IOException.]
-                // JmsConnectionFactory URL-escapes the username and password.
-                ConnectionFactory connFactory = new JmsConnectionFactory(
-                        iotHubUser, sasToken.toString(), iotHubUrl);
-                this.connection = connFactory.createConnection();
-                this.connection.start();
-                // the session will not use transactions.
-                this.session = this.connection.createSession(
-                        false, Session.CLIENT_ACKNOWLEDGE);
+                // Codes_SRS_AMQPSIOTHUBSESSION_11_001: [The function shall establish an AMQPS session with an IoT Hub using the provided host name, user name, device ID, and sas token.]
+                // Codes_SRS_AMQPSIOTHUBSESSION_11_003: [If an AMQPS session is unable to be established for any reason, the function shall throw an IOException.]
+
+                this.sender = null;
+                this.receiver = null;
+                this.sender = new AmqpsSender(iotHubHostname, iotHubUser, deviceId, sasToken.toString());
+                this.receiver = new AmqpsReceiver(iotHubHostname, iotHubUser, deviceId, sasToken.toString());
+                this.sender.open();
+                this.receiver.open();
 
                 this.state = AmqpsIotHubSessionState.OPEN;
             }
             // hide implementation-specific exception.
-            catch (JMSException e)
+            catch (Exception e)
             {
                 throw new IOException(e);
             }
@@ -148,11 +134,12 @@ public final class AmqpsIotHubSession
             try
             {
                 // Codes_SRS_AMQPSIOTHUBSESSION_11_023: [The function shall close the AMQPS session.]
-                this.connection.close();
+                this.sender.close();
+                this.receiver.close();
                 this.state = AmqpsIotHubSessionState.CLOSED;
             }
             // hide implementation-specific exception.
-            catch (JMSException e)
+            catch (Exception e)
             {
                 throw new IOException(e);
             }
@@ -166,10 +153,9 @@ public final class AmqpsIotHubSession
      *
      * @return the status code from sending the event message.
      *
-     * @throws IOException if a message producer could not be created.
+     * @throws IOException if the AmqpsSender is not open
      */
-    public IotHubStatusCode sendEvent(Message message)
-            throws IOException
+    public IotHubStatusCode sendEvent(Message message) throws IOException
     {
         synchronized (AMQPS_SESSION_LOCK)
         {
@@ -180,62 +166,25 @@ public final class AmqpsIotHubSession
                         "Cannot send event using "
                                 + "an AMQPS session that is closed.");
             }
-
+            
             // Codes_SRS_AMQPSIOTHUBSESSION_11_004: [The function shall send an event message to the IoT Hub given in the configuration.]
-            IotHubEventUri eventUri =
-                    new IotHubEventUri(this.config.getIotHubHostname(),
-                            this.config.getDeviceId());
-            String eventPath = eventUri.getPath();
-            Destination eventDest = new JmsQueue(eventPath);
-
-            MessageProducer msgProducer;
-            BytesMessage eventMsg;
-            try
-            {
-                // Codes_SRS_AMQPSIOTHUBSESSION_11_010: [If a message producer could not be successfully registered, the function shall throw an IOException.]
-                msgProducer = this.session.createProducer(eventDest);
-                msgProducer.setTimeToLive(config.getReadTimeoutMillis());
-
-                eventMsg = this.session.createBytesMessage();
-                // Codes_SRS_AMQPSIOTHUBSESSION_11_005: [The function shall send the message body.]
-                eventMsg.writeBytes(message.getBytes());
-                // Codes_SRS_AMQPSIOTHUBSESSION_11_007: [The function shall send all message properties.]
-                for (MessageProperty property : message.getProperties())
-                {
-                    eventMsg.setStringProperty(property.getName(),
-                            property.getValue());
-                }
-                // Codes_SRS_AMQPSIOTHUBSESSION_11_006: [The function shall set the property 'to' to '/devices/[deviceId]/messages/events'.]
-                eventMsg.setStringProperty("to", eventPath);
-            }
-            // hide implementation-specific exception.
-            catch (JMSException e)
-            {
-                throw new IOException(e);
-            }
-
+            // Codes_SRS_AMQPSIOTHUBSESSION_11_005: [The function shall send the message body.]
             // Codes_SRS_AMQPSIOTHUBSESSION_11_008: [If the message was successfully received by the service, the function shall return status code OK_EMPTY.]
             IotHubStatusCode result = IotHubStatusCode.OK_EMPTY;
             try
             {
+                this.sender.send(message.getBytes(), message.messageId);
 
-                msgProducer.send(eventMsg);
             }
-            catch (JMSException e)
+            catch (HandlerException e)
             {
                 System.out.println(e.getMessage());
                 // Codes_SRS_AMQPSIOTHUBSESSION_11_009: [If the message was not successfully received by the service, the function shall return status code ERROR.]
                 result = IotHubStatusCode.ERROR;
             }
-            finally
+            catch (Throwable e)
             {
-                try
-                {
-                    msgProducer.close();
-                } catch (JMSException e)
-                {
-                    throw new IOException(e);
-                }
+                throw e;
             }
 
             return result;
@@ -261,46 +210,15 @@ public final class AmqpsIotHubSession
                                 + "an AMQPS session that is closed.");
             }
 
-            // Codes_SRS_AMQPSIOTHUBSESSION_11_011: [The function shall attempt to consume a message from the IoT Hub given in the configuration.]
-            IotHubMessageUri messageUri =
-                    new IotHubMessageUri(this.config.getIotHubHostname(),
-                            this.config.getDeviceId());
-            String messagePath = messageUri.getPath();
-            Destination messageDest = new JmsQueue(messagePath);
-
-            // Codes_SRS_AMQPSIOTHUBSESSION_11_014: [If the IoT Hub could not be reached, the function shall throw an IOException.]
-            MessageConsumer msgConsumer = null;
             Message msg = null;
-            try
-            {
-                msgConsumer = this.session.createConsumer(messageDest);
-                JmsAmqpMessage message =
-                        (JmsAmqpMessage) msgConsumer.receive(
-                                AMQPS_RECEIVE_TIMEOUT_MILLIS);
-                if (message != null)
-                {
-                    this.lastMessage = message;
-                    msg = amqpsMessageToMessage(
-                            (BytesMessage) message);
-                }
-            }
-            // hide implementation-specific exception.
-            catch (JMSException e)
-            {
-                throw new IOException(e);
-            }
-            finally
-            {
-                if (msgConsumer != null)
-                {
-                    try
-                    {
-                        msgConsumer.close();
-                    } catch (JMSException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
+
+            //Will be given a message if there is one to consume or null
+            // Codes_SRS_AMQPSIOTHUBSESSION_11_011: [The function shall attempt to consume a message from the IoT Hub given in the configuration.]
+            // Codes_SRS_AMQPSIOTHUBSESSION_11_014: [If the IoT Hub could not be reached, the function shall throw an IOException.]
+            AmqpsMessage message = (AmqpsMessage) this.receiver.consumeMessage();
+            if(message!=null) {
+                msg = this.protonMessageToMessage(message);
+                this.lastMessage = message;
             }
 
             return msg;
@@ -345,18 +263,15 @@ public final class AmqpsIotHubSession
                 {
                     // Codes_SRS_AMQPSIOTHUBSESSION_11_015: [If the message result is COMPLETE, the function shall acknowledge the last message with acknowledgement type CONSUMED.]
                     case COMPLETE:
-                        this.lastMessage.acknowledge(
-                                ProviderConstants.ACK_TYPE.CONSUMED);
+                        this.lastMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
                         break;
                     // Codes_SRS_AMQPSIOTHUBSESSION_11_016: [If the message result is ABANDON, the function shall acknowledge the last message with acknowledgement type RELEASED.]
                     case ABANDON:
-                        this.lastMessage.acknowledge(
-                                ProviderConstants.ACK_TYPE.RELEASED);
+                        this.lastMessage.acknowledge(AmqpsMessage.ACK_TYPE.ABANDON);
                         break;
                     // Codes_SRS_AMQPSIOTHUBSESSION_11_017: [If the message result is REJECT, the function shall acknowledge the last message with acknowledgement type POISONED.]
                     case REJECT:
-                        this.lastMessage.acknowledge(
-                                ProviderConstants.ACK_TYPE.POISONED);
+                        this.lastMessage.acknowledge(AmqpsMessage.ACK_TYPE.REJECT);
                         break;
                     default:
                         // should never happen.
@@ -365,7 +280,7 @@ public final class AmqpsIotHubSession
                 }
             }
             // hide implementation-specific exception.
-            catch (JMSException e)
+            catch (Exception e)
             {
                 throw new IOException(e);
             }
@@ -375,32 +290,41 @@ public final class AmqpsIotHubSession
     /**
      * Converts an AMQPS message to a corresponding IoT Hub message.
      *
-     * @param amqpsMsg the AMQPS message.
+     * @param protonMsg the AMQPS message.
      *
      * @return the corresponding IoT Hub message.
-     *
-     * @throws JMSException if the AMQPS message could not be parsed.
      */
-    protected static Message amqpsMessageToMessage(BytesMessage amqpsMsg)
-            throws JMSException
-    {
-        // Codes_SRS_AMQPSIOTHUBSESSION_11_012: [If a message is found, the function shall include the message body in the returned message.]
-        byte[] msgBody = new byte[(int) amqpsMsg.getBodyLength()];
-        amqpsMsg.readBytes(msgBody);
+    protected static Message protonMessageToMessage(MessageImpl protonMsg){
+        Data d = (Data)protonMsg.getBody();
+        Binary b = d.getValue();
+        byte[] msgBody = new byte[b.getLength()];
+        ByteBuffer buffer = b.asByteBuffer();
+        buffer.get(msgBody);
         Message msg = new Message(msgBody);
-        // Codes_SRS_AMQPSIOTHUBSESSION_11_013: [If a message is found, the function shall include all valid application properties in the returned message.]
-        Enumeration amqpsMsgProperties = amqpsMsg.getPropertyNames();
-        while (amqpsMsgProperties.hasMoreElements())
-        {
-            String propertyName = (String) amqpsMsgProperties.nextElement();
-            String propertyValue = amqpsMsg.getStringProperty(propertyName);
-            if (MessageProperty.isValidAppProperty(
-                    propertyName, propertyValue))
-            {
-                msg.setProperty(propertyName, propertyValue);
+
+        Properties properties = protonMsg.getProperties();
+
+        //Call all of the getters for the Proton message Properties and set those properties
+        //in the IoT Hub message properties if they exist.
+        for(Method m : properties.getClass().getMethods()){
+            if(m.getName().startsWith("get")){
+                try {
+                    String propertyName = Character.toLowerCase(m.getName().charAt(3))+ m.getName().substring(4);
+                    Object value = m.invoke(properties);
+                    if(value != null && !propertyName.equals("class")) {
+                        String val = value.toString();
+
+                        if (MessageProperty.isValidAppProperty(propertyName, val)) {
+                            msg.setProperty(propertyName, val);
+                        }
+                    }
+                } catch (IllegalAccessException e) {
+                    System.err.println("Attempted to access private or protected member of class during message conversion.");
+                } catch (InvocationTargetException e) {
+                    System.err.println("Exception thrown while attempting to get member variable. See: " + e.getMessage());
+                }
             }
         }
-
         return msg;
     }
 
@@ -434,7 +358,5 @@ public final class AmqpsIotHubSession
     protected AmqpsIotHubSession()
     {
         this.config = null;
-        this.connection = null;
-        this.session = null;
     }
 }

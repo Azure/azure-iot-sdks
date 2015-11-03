@@ -1,0 +1,9 @@
+azure-iot-sdk-c (0.1.0-3) vivid; urgency=low
+
+  * Initial release
+
+  * Update the dependencies for dev packages (#4812242)
+
+  * Change location of the headers for the sdk (#4576392)
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 20 Oct 2015 17:24:51 +0000
