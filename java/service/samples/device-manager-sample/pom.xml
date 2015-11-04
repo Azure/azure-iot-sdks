@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
     <artifactId>DeviceManagerSample</artifactId>
-    <version>1.0.0-preview.4</version>
+    <version>1.0.0-preview.5</version>
     <name>Device Manager Sample</name>
     <developers>
         <developer>
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
             <artifactId>iothub-service-sdk</artifactId>
-            <version>1.0.0-preview.4</version>
+            <version>1.0.0-preview.5</version>
             <type>jar</type>
         </dependency>
     </dependencies>
