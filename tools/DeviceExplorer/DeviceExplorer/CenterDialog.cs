@@ -25,10 +25,7 @@ namespace DeviceExplorer
             var result = true;
             var sb = new StringBuilder(256);
 
-            var getClassNameResult = GetClassName(windowHandle, sb, sb.Capacity);
-            var dialogBoxName = sb.ToString();
-
-            if (getClassNameResult != 0 && dialogBoxName.Equals("#32770"))
+            if (GetClassName(windowHandle, sb, sb.Capacity) != 0 && sb.ToString().Equals("#32770"))
             {
                 var formRectangle = new System.Drawing.Rectangle(_owner.Location, _owner.Size);
                 Rectangle dialogRectangle;
