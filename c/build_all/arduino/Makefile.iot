@@ -45,7 +45,7 @@ define Build/Configure
 	OBJDUMP="$(TOOLCHAIN_DIR)/bin/$(TARGET_CROSS)objdump" \
 	TARGET_CPPFLAGS="$(TARGET_CPPFLAGS)" \
 	TARGET_CFLAGS="$(TARGET_CFLAGS)" \
-	TARGET_LDFLAGS="$(TARGET_LDFLAGS)" \
+	TARGET_LDFLAGS="$(TARGET_LDFLAGS) -lm" \
 	cmake -DCMAKE_FIND_ROOT_PATH="$(TOOLCHAIN_DIR)" $(PKG_BUILD_DIR)/CMakeLists.txt
 endef
 
@@ -77,4 +77,3 @@ define Package/azure-iot-sdks/install
 endef
 
 $(eval $(call BuildPackage,azure-iot-sdks))
-

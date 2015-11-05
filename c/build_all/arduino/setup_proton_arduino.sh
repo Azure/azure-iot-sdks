@@ -115,10 +115,10 @@ sync_cmake()
     mv arduino-cmake-master $arduino_install_dir
 }
 
-build_openwrt()
+build_openwrt() 
 {
 	echo Build OpenWRT SDK
-
+	
 	cd $openwrt_root/$openwrt_folder/$openwrt_sdk_folder
 
 	./scripts/feeds update -a
@@ -161,9 +161,8 @@ build ()
 
     push_dir $build_root/build
 
-    #cmake .. -DCMAKE_TOOLCHAIN_FILE=~/arduino-cmake/cmake/ArduinoToolchain.cmake -DCMAKE_INSTALL_PREFIX="$install_root" -DSYSINSTALL_BINDINGS=ON -DCMAKE_PREFIX_PATH=$TC/include/openssl -DCMAKE_PREFIX_PATH=$TC/lib -DCMAKE_PREFIX_PATH=$TC/include/uuid
-    make V=s package/openwrt-qpid-proton/compile
-    #make
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=~/arduino-cmake/cmake/ArduinoToolchain.cmake -DCMAKE_INSTALL_PREFIX="$install_root" -DSYSINSTALL_BINDINGS=ON -DCMAKE_PREFIX_PATH=$TC/include/openssl -DCMAKE_PREFIX_PATH=$TC/lib -DCMAKE_PREFIX_PATH=$TC/include/uuid
+    make
     make install
 
     pop_dir
@@ -176,5 +175,5 @@ echo "Install: $install_root"
 #sync_cmake
 #build_cmake
 
-#build_openwrt
+build_openwrt
 build

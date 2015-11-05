@@ -6,24 +6,26 @@ The following document describes the process of connecting an Arduino Yun system
 
 - [Requirements](#requirements)
 - [Before you begin](#beforebegin)
-- [Setup the Arduino Yun Board](#setupboard)
-- [Setup the development environment](#setup)
+- [Setup the OpenWRT SDK](#setup)
 - [Build and run the sample](#buildrunapp)
 
 <a name="requirements"/>
 ## Requirements
 
   - Computer with a Git client installed so that you can access the azure-iot-sdks code on GitHub.
+  - Arduino Yun board.
+  - Debian X86
 
 <a name="beforebegin"/>
 ## Before you begin
 
 Before you begin you will need to create and configure an IoT hub to connect to.
-  1. [Set up your IoT Hub][setup-iothub].
-  1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
-  1. Make note of the Connection String for your device from the previous step.
 
-  > Note: You can skip this step if you just want to build the sample application without running it.
+  1. [Set up your IoT Hub][setup-iothub].
+  2. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
+  3. Make note of the Connection String for your device from the previous step.
+  
+Note: You can skip this step if you just want to build the sample application without running it.
 
 <a name="setupboard"/>
 ## Setup the Arduino Yun board
