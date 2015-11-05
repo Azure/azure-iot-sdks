@@ -5,18 +5,9 @@ set -e
 sdk_repo="http://download.linino.org/linino-utils/OpenWrt-SDK-ar71xx-for-linux-x86_64-gcc-4.6-linaro_uClibc-0.9.33.2-32bit.tar.bz2"
 
 install_root="$HOME"
-openwrt_folder="openwrtsdk"
-
-push_dir ()
-{
-    pushd $1 > /dev/null
-    echo "In ${PWD#$build_root/}"
-}
-
-pop_dir ()
-{
-    popd > /dev/null
-}
+openwrt_folder="openwrt"
+openwrt_sdk_folder="sdk"
+working_dir=$PWD
 
 usage ()
 {
@@ -33,7 +24,7 @@ process_args ()
     do
         if [ "$1" == "-d" ] || [ "$1" == "--installdir" ]
         then
-            $install_root="$2"
+            install_root="$2"
         #elif [ "$1" == "-i" ] || [ "$1" == "--install" ]
         #then
         #    install_root="$2"
@@ -44,26 +35,59 @@ process_args ()
         shift
         shift
     done
-
-#    if [ ! -z "$1" ] && [ -z "$2" ]
-#    then #odd number of arguments
-#        usage
-#    fi
 }
 
-build_openwrt()
+download_proton()
 {
-	echo Downloading LininoIO SDK
+  echo "Downloading Proton"
+}
 
-	if [ ! -d $install_root/$openwrt_folder ]
+download_sdk()
+{
+  read -p "The download and installation may take some time. Do you want to continue? (Y/N)" input_var
+  if [ ! "$input_var" == "y" ] && [ ! "$input_var" == "Y" ]
+  then
+    echo "Exiting..."
+    exit 1
+  fi
+
+	echo "Downloading OpenWRT SDK to $install_root/$openwrt_folder"
+
+  cd $install_root
+
+	if [ ! -d  $openwrt_folder ]
 	then
-		echo "Creating SDK folder"
-		mkdir $install_root/$openwrt_folder
-	else
-		echo "SDK folder exists"
+		mkdir $openwrt_folder
 	fi
 
-cd 
+  # Download the SDK
+  cd $openwrt_folder
+
+  if [ -d $openwrt_sdk_folder ]
+  then
+    rm -r -f $openwrt_sdk_folder
+  fi
+
+  wget $sdk_repo -O openwrtsdk.tar.bz2
+
+  tar xvf openwrtsdk.tar.bz2
+
+  # get folders only
+  folders=(*/)
+
+  # assuming the only and first file is the name of the extracted archive
+  extractedFolder=${folders[0]}
+
+  mv $extractedFolder $openwrt_sdk_folder
+
+  echo "Finished downloading OpenWRT SDK"
+
+  #echo $(dirname .)
+
+  #for entry in "."/*
+  #do
+  #  echo "$entry"
+  #done
 
 	#cd $openwrt_root/$openwrt_folder/$openwrt_sdk_folder
 
@@ -88,7 +112,14 @@ cd
 	#cp build_dir/target-mips_34kc_musl-1.1.11/openssl-1.0.2d/libssl.so* $TC/lib
 }
 
-process_args $*
-echo "Install Dir: $install_root"
+setup_proton()
+{
+  cd $working_dir
+  ./build_proton.sh -s "$install_root/$openwrt_folder/$openwrt_sdk_folder"
+}
 
-build_openwrt
+process_args $*
+echo "Install Dir: $install_root/$openwrt_folder/$openwrt_sdk_folder"
+
+download_sdk
+setup_proton

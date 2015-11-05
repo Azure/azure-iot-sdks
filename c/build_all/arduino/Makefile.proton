@@ -71,9 +71,8 @@ define Package/openwrt-qpid-proton/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/usr/share/proton/examples
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/proton-c/libqpid-proton* $(1)/usr/lib/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/examples/messenger/c/recv* $(1)/usr/share/proton/examples/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/examples/messenger/c/send* $(1)/usr/share/proton/examples/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/examples/c/messenger/recv* $(1)/usr/share/proton/examples/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/examples/c/messenger/send* $(1)/usr/share/proton/examples/
 endef
 
 $(eval $(call BuildPackage,openwrt-qpid-proton))
-
