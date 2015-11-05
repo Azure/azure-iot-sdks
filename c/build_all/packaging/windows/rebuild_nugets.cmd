@@ -90,20 +90,20 @@ cd ..
 cd ..
 
 rem -- Copy Win32 Paho Files.
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\Debug\paho-mqtt3cs.lib" paho_outputs\Win32\Debug
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\Debug\paho-mqtt3cs.pdb" paho_outputs\Win32\Debug
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\Debug\paho-mqtt3cs.dll" paho_outputs\Win32\Debug
+copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.lib" paho_outputs\Win32\Debug
+copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.pdb" paho_outputs\Win32\Debug
+copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.dll" paho_outputs\Win32\Debug
 
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\build\output\paho-mqtt3cs.lib" paho_outputs\Win32\Release
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\build\output\paho-mqtt3cs.dll" paho_outputs\Win32\Release
+copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\build\output\paho-mqtt3cs.lib" paho_outputs\Win32\Release
+copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\build\output\paho-mqtt3cs.dll" paho_outputs\Win32\Release
 
 rem -- Copy 64 bits Paho Files.
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\x64\Debug\paho-mqtt3cs.lib" paho_outputs\x64\Debug
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\x64\Debug\paho-mqtt3cs.pdb" paho_outputs\x64\Debug
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\x64\Debug\paho-mqtt3cs.dll" paho_outputs\x64\Debug
+copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\x64\Debug\paho-mqtt3cs.lib" paho_outputs\x64\Debug
+copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\x64\Debug\paho-mqtt3cs.pdb" paho_outputs\x64\Debug
+copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\x64\Debug\paho-mqtt3cs.dll" paho_outputs\x64\Debug
 
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\x64\Release\paho-mqtt3cs.lib" paho_outputs\x64\Release
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\x64\Release\paho-mqtt3cs.dll" paho_outputs\x64\Release
+copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\x64\Release\paho-mqtt3cs.lib" paho_outputs\x64\Release
+copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\x64\Release\paho-mqtt3cs.dll" paho_outputs\x64\Release
 
 rem -- Copy Header Files
 copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\src\*.h" paho_outputs\include
