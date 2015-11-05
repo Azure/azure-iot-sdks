@@ -8,16 +8,12 @@ package com.microsoft.azure.iot.service.sdk;
 import com.microsoft.azure.iot.service.exceptions.IotHubException;
 import mockit.integration.junit4.JMockit;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.omg.CORBA.Environment;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
 
