@@ -107,7 +107,6 @@ public class RegistryManagerE2ETest
                 System.out.println("Task is not completed yet...");
                 Thread.sleep(10);
             }
-            System.out.println(future.get());
         }
     }
 }

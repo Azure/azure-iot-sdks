@@ -97,7 +97,6 @@ public class IotHubConnectionStringBuilder
         while (stringTokenizer1.hasMoreTokens())
         {
             String currentToken = stringTokenizer1.nextToken();
-            System.out.println(currentToken);
 
             String[] splitString = currentToken.split(IotHubConnectionString.VALUE_PAIR_SEPARATOR, 2);
             if (splitString.length == 2)
@@ -190,7 +189,7 @@ public class IotHubConnectionStringBuilder
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_019: [The function shall throw IllegalArgumentException if the value did not match with the pattern]
         if (!pattern.matcher(value).matches())
         {
-            throw new IllegalArgumentException("The connection string has an invalid value for property. Value: " + value + " Property: " + propertyName + " Regex: " + regex);
+            throw new IllegalArgumentException("The connection string has an invalid value for property.");
         }
     }
 
