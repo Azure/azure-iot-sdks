@@ -16,6 +16,7 @@ import org.omg.CORBA.Environment;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
@@ -38,6 +39,9 @@ public class RegistryManagerE2ETest
                 connectionString = env.get(envName);
             }
         }
+
+        String uuid = UUID.randomUUID().toString();
+        deviceId = deviceId.concat("-" + uuid);
     }
 
     @Test
@@ -51,20 +55,19 @@ public class RegistryManagerE2ETest
 
         // Arrange
         // Check if device exists with the given name
-        RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
         try
         {
-            Device device = regmen.getDevice(deviceId);
+            Device device = registryManager.getDevice(deviceId);
             deviceExist = true;
         } catch (IotHubException e)
         {
-            System.out.println("Initialization OK, no device exist with name: " + deviceId);
         }
         if (deviceExist)
         {
             try
             {
-                regmen.removeDevice(deviceId);
+                registryManager.removeDevice(deviceId);
             } catch (IotHubException|IOException e)
             {
                 System.out.println("Initialization failed, could not remove device: " + deviceId);
@@ -75,23 +78,22 @@ public class RegistryManagerE2ETest
 
         // Create
         Device deviceAdded = Device.createFromId(deviceId);
-        regmen.addDevice(deviceAdded);
+        registryManager.addDevice(deviceAdded);
 
         // Read
-        Device deviceGet = regmen.getDevice(deviceId);
+        Device deviceGet = registryManager.getDevice(deviceId);
 
         // Delete
-        regmen.removeDevice(deviceId);
+        registryManager.removeDevice(deviceId);
 
         // Assert
         assertEquals(deviceId, deviceAdded.getDeviceId());
         assertEquals(deviceId, deviceGet.getDeviceId());
         try
         {
-            Device device = regmen.getDevice(deviceId);
+            Device device = registryManager.getDevice(deviceId);
         } catch (IotHubException e)
         {
-            System.out.println("Clean up OK, no device exist with name: " + deviceId);
         }
     }
 
@@ -101,9 +103,9 @@ public class RegistryManagerE2ETest
         if (!Tools.isNullOrEmpty(connectionString))
         {
             // Arrange
-            RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
+            RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
             // Act
-            regmen.getStatistics();
+            registryManager.getStatistics();
         }
     }
 }
