@@ -19,12 +19,13 @@ var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
 /**
  * @class           module:azure-iothub.Client
  * @classdesc       Creates an IoT Hub service client. Normally, consumers will
- *                  call one of the factory methods, {@link fromConnectionString}
- *                  or {@link fromSharedAccessSignature}, rather than calling
- *                  this constructor directly.
+ *                  call one of the factory methods,
+ *                  {@link module:azure-iothub.Client.fromConnectionString|fromConnectionString} or
+ *                  {@link module:azure-iothub.Client.fromSharedAccessSignature|fromSharedAccessSignature},
+ *                  to create an IoT Hub service Client.
  * @param {Object}  transport   An object that implements the interface
  *                              expected of a transport object, e.g.,
- *                              {@link module:azure-iothub~Transport}.
+ *                              {@link module:azure-iothub~Transport|Transport}.
   * @prop {FeedbackReceiver} FeedbackReceiver
  */
 function Client(transport) {
@@ -42,10 +43,13 @@ function Client(transport) {
 
 /**
  * @method            module:azure-iothub.Client.fromConnectionString
- * @description       Creates an IoT Hub service client.
+ * @description       Creates an IoT Hub service client from the given
+ *                    connection string using the default transport
+ *                    ({@link module:azure-iothub~Transport|Transport}).
  * @param {String}    value   A connection string which encapsulates "service
  *                            connect" permissions on an IoT hub.
- */
+ * @returns {module:azure-iothub.Client}
+*/
 Client.fromConnectionString = function fromConnectionString(value) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_002: [The fromConnectionString method shall throw ReferenceError if the value argument is falsy.]*/
   if (!value) throw new ReferenceError('value is \'' + value + '\'');
@@ -67,9 +71,12 @@ Client.fromConnectionString = function fromConnectionString(value) {
 
 /**
  * @method            module:azure-iothub.Client.fromSharedAccessSignature
- * @description       Creates an IoT Hub service client.
+ * @description       Creates an IoT Hub service client from the given
+ *                    shared access signature using the default transport
+ *                    ({@link module:azure-iothub~Transport|Transport}).
  * @param {String}    value   A shared access signature which encapsulates
  *                            "service connect" permissions on an IoT hub.
+ * @returns {module:azure-iothub.Client}
  */
 Client.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_005: [The fromSharedAccessSignature method shall throw ReferenceError if the value argument is falsy.]*/
@@ -131,8 +138,8 @@ Client.prototype.close = function close(done) {
  * @param {String}    deviceId  The identifier of an existing device identity.
  * @param {}          message   The body of the message to send to the device.
  *                              If `message` is not of type
- *                              {@link module:azure-iot-common.Message}, it
- *                              will be converted.
+ *                              {@link module:azure-iot-common.Message|Message},
+ *                              it will be converted.
  * @param {Function}  done      The function to call when the operation is
  *                              complete. `done` will be called with two
  *                              arguments: an Error object (can be null) and a
