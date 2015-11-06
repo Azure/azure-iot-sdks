@@ -10,28 +10,39 @@ var DefaultTransport = require('./registry_http.js');
 var Device = require('./device.js');
 var endpoint = require('azure-iot-common').endpoint;
 var ServiceToken = require('azure-iot-common').authorization.ServiceToken;
+var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
 
 /**
  * @class           module:azure-iothub.Registry
- * @classdesc       Constructs a Registry object with the given IoT Hub
- *                  connection string and transport object. The Registry class
- *                  provides access to IoT Hub identity service.
- * @param {String}  connString  A connection string which encapsulates the
- *                              appropriate (read and/or write) Registry
- *                              permissions.
+ * @classdesc       Constructs a Registry object with the given transport
+ *                  object. The Registry class provides access to the IoT Hub
+ *                  identity service. Normally, consumers will call one of the
+ *                  factory methods, e.g.,
+ *                  {@link module:azure-iothub.Registry.fromConnectionString|fromConnectionString},
+ *                  to create a Registry object.
  * @param {Object}  transport   An object that implements the interface
  *                              expected of a transport object. See the file
- *                              **node/common/lib/devdoc/https_requirements.docm**
+ *                              **node/service/lib/devdoc/http_requirements.docm**
  *                              for information on what the transport object
  *                              should look like. The
- *                              {@link module:azure-iothub.Http} class is one
- *                              such implementation of the transport.
+ *                              {@link module:azure-iothub.Http|Http} class is
+ *                              one such implementation of the transport.
  */
 /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_001: [The Registry constructor shall accept a transport object]*/
 function Registry(transport) {
   this._transport = transport;
 }
 
+/**
+ * @method          module:azure-iothub.Registry.fromConnectionString
+ * @description     Constructs a Registry object from the given connection
+ *                  string using the default transport
+ *                  ({@link module:azure-iothub.Http|Http}).
+ * @param {String}  value       A connection string which encapsulates the
+ *                              appropriate (read and/or write) Registry
+ *                              permissions.
+ * @returns {module:azure-iothub.Registry}
+ */
 Registry.fromConnectionString = function fromConnectionString(value, Transport) {
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_008: [The fromConnectionString method shall throw ReferenceError if the value argument is falsy.]*/
   if (!value) throw new ReferenceError('value is \'' + value + '\'');
@@ -53,6 +64,33 @@ Registry.fromConnectionString = function fromConnectionString(value, Transport) 
 };
 
 /**
+ * @method            module:azure-iothub.Registry.fromSharedAccessSignature
+ * @description       Constructs a Registry object from the given shared access
+ *                    signature using the default transport
+ *                    ({@link module:azure-iothub.Http|Http}).
+ * @param {String}    value     A shared access signature which encapsulates
+ *                              the appropriate (read and/or write) Registry
+ *                              permissions.
+ * @returns {module:azure-iothub.Registry}
+ */
+Registry.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_011: [The fromSharedAccessSignature method shall throw ReferenceError if the value argument is falsy.]*/
+  if (!value) throw new ReferenceError('value is \'' + value + '\'');
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_012: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a new instance of the default transport (azure-iothub.Http).]*/
+  var sas = SharedAccessSignature.parse(value);
+
+  var config = {
+    host: sas.sr,
+    hubName: sas.sr.split('.', 1)[0],
+    sharedAccessSignature: sas.toString()
+  };
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_013: [The fromSharedAccessSignature method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/
+  return new Registry(new DefaultTransport(config));
+};
+
+/**
  * @method            module:azure-iothub.Registry#create
  * @description       Creates a new device identity on an IoT hub.
  * @param {Object}    deviceInfo  The object must include a `deviceId` property
@@ -60,10 +98,10 @@ Registry.fromConnectionString = function fromConnectionString(value, Transport) 
  * @param {Function}  done        The function to call when the operation is
  *                                complete. `done` will be called with three
  *                                arguments: an Error object (can be null), a
- *                                transport-specific response object useful for
- *                                logging or debugging, and a
- *                                {@link module:azure-iothub.Device} object
- *                                representing the created device.
+ *                                {@link module:azure-iothub.Device|Device}
+ *                                object representing the created device
+ *                                identity, and a transport-specific response
+ *                                object useful for logging or debugging.
  */
 Registry.prototype.create = function (deviceInfo, done) {
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_001: [The create method shall throw ArgumentError if the first argument does not contain a deviceId property.]*/
@@ -89,15 +127,16 @@ Registry.prototype.create = function (deviceInfo, done) {
  * @method            module:azure-iothub.Registry#update
  * @description       Updates an existing device identity on an IoT hub with
  *                    the given device information.
- * @param {Object}    deviceInfo  The object must include a `deviceId` property
- *                                with a valid device identifier.
+ * @param {Object}    deviceInfo  An object which must include a `deviceId`
+ *                                property whose value is a valid device
+ *                                identifier.
  * @param {Function}  done        The function to call when the operation is
  *                                complete. `done` will be called with three
  *                                arguments: an Error object (can be null), a
- *                                transport-specific response object useful for
- *                                logging or debugging, and a
- *                                {@link module:azure-iothub.Device} object
- *                                representing the updated device identity.
+ *                                {@link module:azure-iothub.Device|Device}
+ *                                object representing the updated device
+ *                                identity, and a transport-specific response
+ *                                object useful for logging or debugging.
  */
 Registry.prototype.update = function (deviceInfo, done) {
   /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_003: [The update method shall throw ArgumentError if the first argument does not contain a deviceId property.]*/
@@ -126,10 +165,10 @@ Registry.prototype.update = function (deviceInfo, done) {
  * @param {Function}  done        The function to call when the operation is
  *                                complete. `done` will be called with three
  *                                arguments: an Error object (can be null), a
- *                                transport-specific response object useful for
- *                                logging or debugging, and a
- *                                {@link module:azure-iothub.Device} object
- *                                representing the returned device identity.
+ *                                {@link module:azure-iothub.Device|Device}
+ *                                object representing the created device
+ *                                identity, and a transport-specific response
+ *                                object useful for logging or debugging.
  */
 Registry.prototype.get = function (deviceId, done) {
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_006: [The get method shall throw ReferenceError if the supplied deviceId is falsy.]*/
@@ -155,11 +194,12 @@ Registry.prototype.get = function (deviceId, done) {
  *                    identities on an IoT hub.
  * @param {Function}  done        The function to call when the operation is
  *                                complete. `done` will be called with three
- *                                arguments: an Error object (can be null), a
- *                                transport-specific response object useful for
- *                                logging or debugging, and an array of
- *                                {@link module:azure-iothub.Device} objects
- *                                representing the listed device identities.
+ *                                arguments: an Error object (can be null), an
+ *                                array of
+ *                                {@link module:azure-iothub.Device|Device}
+ *                                objects representing the listed device
+ *                                identities, and a transport-specific response
+ *                                object useful for logging or debugging.
  */
 Registry.prototype.list = function (done) {
   var path = endpoint.devicePath('');
@@ -184,10 +224,12 @@ Registry.prototype.list = function (done) {
  * @description       Removes an existing device identity from an IoT hub.
  * @param {String}    deviceId    The identifier of an existing device identity.
  * @param {Function}  done        The function to call when the operation is
- *                                complete. `done` will be called with two
- *                                arguments: an Error object (can be null) and
- *                                a transport-specific response object useful
- *                                for logging or debugging.
+ *                                complete. `done` will be called with three
+ *                                arguments: an Error object (can be null), an
+ *                                always-null argument (for consistency with
+ *                                the other methods), and a transport-specific
+ *                                response object useful for logging or
+ *                                debugging.
  */
 Registry.prototype.delete = function (deviceId, done) {
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_007: [The delete method shall throw ReferenceError if the supplied deviceId is falsy.]*/
