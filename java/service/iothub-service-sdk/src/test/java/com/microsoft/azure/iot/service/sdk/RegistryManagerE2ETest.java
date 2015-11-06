@@ -5,78 +5,91 @@
 
 package com.microsoft.azure.iot.service.sdk;
 
+import com.microsoft.azure.iot.service.exceptions.IotHubException;
 import mockit.integration.junit4.JMockit;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
+import java.io.IOException;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(JMockit.class)
 public class RegistryManagerE2ETest
 {
+    private static String connectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String connectionString = "";
-    private static String deviceId = "xxx-test-device";
+    private static String deviceId = "java-crud-e2e-test";
 
-    @Test
-    public void addDeviceTest() throws Exception
+    @Before
+    public void setUp()
     {
-        if (!Tools.isNullOrEmpty(connectionString))
+        Map<String, String> env = System.getenv();
+        for (String envName : env.keySet())
         {
-            // Arrange
-            RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
-            Device device = Device.createFromId(deviceId);
-            // Act
-            regmen.addDevice(device);
+            if (envName.equals(connectionStringEnvVarName.toString()))
+            {
+                connectionString = env.get(envName);
+            }
         }
+
+        String uuid = UUID.randomUUID().toString();
+        deviceId = deviceId.concat("-" + uuid);
     }
 
     @Test
-    public void getDeviceTest() throws Exception
+    public void crud_e2e() throws Exception
     {
-        if (!Tools.isNullOrEmpty(connectionString))
+        Boolean deviceExist = false;
+        if (Tools.isNullOrEmpty(connectionString))
         {
-            // Arrange
-            RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
-            // Act
-            Device device = regmen.getDevice(deviceId);
+            throw new IllegalArgumentException("Environment variable is not set: " + connectionStringEnvVarName);
         }
-    }
 
-    @Test
-    public void getDevicesTest() throws Exception
-    {
-        if (!Tools.isNullOrEmpty(connectionString))
+        // Arrange
+        // Check if device exists with the given name
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        try
         {
-            // Arrange
-            RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
-            // Act
-            ArrayList<Device> devices = regmen.getDevices(1000);
+            Device device = registryManager.getDevice(deviceId);
+            deviceExist = true;
+        } catch (IotHubException e)
+        {
         }
-    }
-
-    @Test
-    public void updateDeviceTest() throws Exception
-    {
-        if (!Tools.isNullOrEmpty(connectionString))
+        if (deviceExist)
         {
-            // Arrange
-            RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
-            Device device = Device.createFromId(deviceId);
-            // Act
-            regmen.updateDevice(device);
+            try
+            {
+                registryManager.removeDevice(deviceId);
+            } catch (IotHubException|IOException e)
+            {
+                System.out.println("Initialization failed, could not remove device: " + deviceId);
+                e.printStackTrace();
+            }
         }
-    }
+        // Act
 
-    @Test
-    public void removeDeviceTest() throws Exception
-    {
-        if (!Tools.isNullOrEmpty(connectionString))
+        // Create
+        Device deviceAdded = Device.createFromId(deviceId);
+        registryManager.addDevice(deviceAdded);
+
+        // Read
+        Device deviceGet = registryManager.getDevice(deviceId);
+
+        // Delete
+        registryManager.removeDevice(deviceId);
+
+        // Assert
+        assertEquals(deviceId, deviceAdded.getDeviceId());
+        assertEquals(deviceId, deviceGet.getDeviceId());
+        try
         {
-            // Arrange
-            RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
-            // Act
-            regmen.removeDevice(deviceId);
+            Device device = registryManager.getDevice(deviceId);
+        } catch (IotHubException e)
+        {
         }
     }
 
@@ -86,28 +99,9 @@ public class RegistryManagerE2ETest
         if (!Tools.isNullOrEmpty(connectionString))
         {
             // Arrange
-            RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
+            RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
             // Act
-            regmen.getStatistics();
-        }
-    }
-
-    @Test
-    public void addDeviceAsyncTest() throws Exception
-    {
-        if (!Tools.isNullOrEmpty(connectionString))
-        {
-            // Arrange
-            RegistryManager regmen = RegistryManager.createFromConnectionString(connectionString);
-            Device device = Device.createFromId(deviceId);
-            // Act
-            CompletableFuture<Device> future = regmen.addDeviceAsync(device);
-            while (!future.isDone())
-            {
-                System.out.println("Task is not completed yet...");
-                Thread.sleep(10);
-            }
-            System.out.println(future.get());
+            registryManager.getStatistics();
         }
     }
 }
