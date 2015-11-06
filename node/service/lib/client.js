@@ -3,6 +3,7 @@
 
 'use strict';
 
+var anHourFromNow = require('azure-iot-common').authorization.anHourFromNow;
 var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./transport.js');
 var Message = require('azure-iot-common').Message;
@@ -181,8 +182,3 @@ Client.prototype.getFeedbackReceiver = function getFeedbackReceiver(done) {
 };
 
 module.exports = Client;
-
-function anHourFromNow () {
-  var raw = (Date.now() / 1000) + 3600;
-  return Math.ceil(raw);
-}
