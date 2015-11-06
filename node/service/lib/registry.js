@@ -10,6 +10,7 @@ var DefaultTransport = require('./registry_http.js');
 var Device = require('./device.js');
 var endpoint = require('azure-iot-common').endpoint;
 var ServiceToken = require('azure-iot-common').authorization.ServiceToken;
+var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
 
 /**
  * @class           module:azure-iothub.Registry
@@ -60,6 +61,33 @@ Registry.fromConnectionString = function fromConnectionString(value, Transport) 
 
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_010: [The fromConnectionString method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/
   return new Registry(new Transport(config));
+};
+
+/**
+ * @method            module:azure-iothub.Registry.fromSharedAccessSignature
+ * @description       Constructs a Registry object from the given shared access
+ *                    signature using the default transport
+ *                    ({@link module:azure-iothub.Http|Http}).
+ * @param {String}    value     A shared access signature which encapsulates
+ *                              the appropriate (read and/or write) Registry
+ *                              permissions.
+ * @returns {module:azure-iothub.Registry}
+ */
+Registry.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_011: [The fromSharedAccessSignature method shall throw ReferenceError if the value argument is falsy.]*/
+  if (!value) throw new ReferenceError('value is \'' + value + '\'');
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_012: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a new instance of the default transport (azure-iothub.Http).]*/
+  var sas = SharedAccessSignature.parse(value);
+
+  var config = {
+    host: sas.sr,
+    hubName: sas.sr.split('.', 1)[0],
+    sharedAccessSignature: sas.toString()
+  };
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_013: [The fromSharedAccessSignature method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/
+  return new Registry(new DefaultTransport(config));
 };
 
 /**

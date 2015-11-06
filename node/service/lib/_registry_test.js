@@ -74,8 +74,31 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
       });
 
       /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_010: [The fromConnectionString method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/
-      it('returns an instance of Client', function () {
+      it('returns an instance of Registry', function () {
         var registry = Registry.fromConnectionString(connStr);
+        assert.instanceOf(registry, Registry);
+      });
+    });
+
+    describe('#fromSharedAccessSignature', function () {
+      var token = 'SharedAccessSignature sr=audience&sig=signature&se=expiry&skn=keyname';
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_011: [The fromSharedAccessSignature method shall throw ReferenceError if the value argument is falsy.]*/
+      it('throws when value is falsy', function () {
+        assert.throws(function () {
+          return Registry.fromSharedAccessSignature();
+        }, ReferenceError, 'value is \'undefined\'');
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_012: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a new instance of the default transport (azure-iothub.Http).]*/
+      it('creates an instance of the default transport', function () {
+        var registry = Registry.fromSharedAccessSignature(token);
+        assert.instanceOf(registry._transport, require('./registry_http.js'));
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_013: [The fromSharedAccessSignature method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/
+      it('returns an instance of Registry', function () {
+        var registry = Registry.fromSharedAccessSignature(token);
         assert.instanceOf(registry, Registry);
       });
     });

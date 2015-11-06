@@ -62,7 +62,7 @@ Client.fromConnectionString = function fromConnectionString(value) {
     hubName: cn.HostName.split('.', 1)[0],
     host: cn.HostName,
     keyName: cn.SharedAccessKeyName,
-    sharedAccessSignature: sas
+    sharedAccessSignature: sas.toString()
   };
 
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_004: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(transport).]*/
@@ -89,7 +89,7 @@ Client.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
     hubName: sas.sr.split('.', 1)[0],
     host: sas.sr,
     keyName: sas.skn,
-    sharedAccessSignature: sas
+    sharedAccessSignature: sas.toString()
   };
 
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_007: [The fromSharedAccessSignature method shall return a new instance of the Client object, as by a call to new Client(transport).]*/
