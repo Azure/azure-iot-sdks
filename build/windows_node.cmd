@@ -13,39 +13,17 @@ cd %build-root%\node
 REM Set up links in the npm cache to ensure we're exercising all the code in
 REM the repo, rather than downloading released versions of our packages from
 REM npm.
-
 call build\dev-setup.cmd
+if errorlevel 1 goto :eof
 
-echo.
-echo -- Linting and running tests --
-echo.
+REM Lint all JavaScript code and run unit + integration tests
+call build\build.cmd --min --integration-tests
+if errorlevel 1 goto :eof
 
-cd build
-call build
-if errorlevel 1 goto :unlink
-
-cd ..\common
-call build lintAndAllTests
-if errorlevel 1 goto :unlink
-
-cd ..\device
-call build lintAndAllTests
-if errorlevel 1 goto :unlink
-
-cd ..\service
-call build lintAndAllTests
-if errorlevel 1 goto :unlink
-
-cd ..\..\tools\iothub-explorer
-call npm test
-if errorlevel 1 goto :unlink
-
-:unlink
 REM The 'npm link' commands in this script create symlinks to tracked repo
 REM files from ignored locations (under ./node_modules). This means a call to
 REM 'git clean -xdf' will delete tracked files from the repo's working
 REM directory. To avoid any complications, we'll unlink everything before
 REM exiting.
-
-call %build-root%\node\build\dev-teardown.cmd
-goto :eof
+call build\dev-teardown.cmd
+if errorlevel 1 goto :eof

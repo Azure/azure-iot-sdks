@@ -8,7 +8,7 @@ rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- C# --
-cd %build-root%\csharp\build
+cd %build-root%\csharp\device\build
 echo Y | call build.cmd
 if errorlevel 1 goto :eof
 cd %build-root%

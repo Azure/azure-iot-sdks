@@ -154,7 +154,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
 }
 
 /* Codes_SRS_IOTHUBCLIENT_01_005: [IoTHubClient_Destroy shall free all resources associated with the iotHubClientHandle instance.] */
-void IoTHubClient_Destroy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
+void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
 {
     /* Codes_SRS_IOTHUBCLIENT_01_008: [IoTHubClient_Destroy shall do nothing if parameter iotHubClientHandle is NULL.] */
     if (iotHubClientHandle != NULL)

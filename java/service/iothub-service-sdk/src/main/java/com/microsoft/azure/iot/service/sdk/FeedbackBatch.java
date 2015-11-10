@@ -8,6 +8,10 @@ package com.microsoft.azure.iot.service.sdk;
 import java.time.Instant;
 import java.util.ArrayList;
 
+/**
+ * Data structure for feedback messages received in Json array
+ * Provide getters and setters for batch properties and messages
+ */
 public class FeedbackBatch
 {
     private Instant enqueuedTimeUtc;
@@ -56,17 +60,5 @@ public class FeedbackBatch
     public void setRecords(ArrayList<FeedbackRecord> records)
     {
         this.records = records;
-    }
-
-    public void clone(FeedbackBatch feedbackBatch)
-    {
-        if (feedbackBatch == null)
-        {
-            throw new IllegalArgumentException();
-        }
-        this.setEnqueuedTimeUtc(feedbackBatch.getEnqueuedTimeUtc());
-        this.setUserId(feedbackBatch.getUserId());
-        this.setLockToken(feedbackBatch.getLockToken());
-        this.setRecords(feedbackBatch.getRecords());
     }
 }

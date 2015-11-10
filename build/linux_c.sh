@@ -6,6 +6,6 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 cd $build_root
 
 # -- C --
-./c/build_all/linux/build.sh --run-e2e-tests #-x
+./c/build_all/linux/build.sh #-x
 [ $? -eq 0 ] || exit $?
 

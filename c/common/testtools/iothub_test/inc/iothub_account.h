@@ -21,7 +21,9 @@ extern const char* IoTHubAccount_GetEventhubListenName(void);
 extern const char* IoTHubAccount_GetIoTHubConnString(void);
 extern const char* IoTHubAccount_GetSharedAccessSignature(void);
 extern const char* IoTHubAccount_GetEventhubAccessKey(void);
+extern const size_t IoTHubAccount_GetIoTHubPartitionCount(void);
 extern const char* IoTHubAccount_GetEventhubConsumerGroup(void);
+extern const char* IoTHubAccount_GetProtocolGatewayHostName(void);
 #ifdef __cplusplus
 }
 #endif

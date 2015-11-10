@@ -10,7 +10,7 @@ cd %build-root%\build\release
 set nuget_feed=%1
 
 if not defined nuget_feed (
-	choice /C yn /M "No feed specified. Are you sure you want to publish to Nuget.org?"
+	choice /C yn /M "No feed specified. Are you sure you want to publish to Nuget.org and MBED.org?"
 	if not !errorlevel!==1 goto :eof
 )
 
@@ -30,7 +30,11 @@ cd %build-root%\build\release
 rem -----------------------------------------------------------------------------
 rem -- Release mbed code
 rem -----------------------------------------------------------------------------
-call release_mbed.cmd
+if not defined nuget_feed (
+	call release_mbed.cmd
+) else (
+	echo "Skipping releasing MBED (for dry run)."
+)
 
 rem -----------------------------------------------------------------------------
 rem -- Publish C nuget packages
@@ -63,4 +67,5 @@ call auto_sign_deviceexplorer.cmd
 rem -----------------------------------------------------------------------------
 rem -- Publish node npm packages
 rem -----------------------------------------------------------------------------
+
 rem call release_npm.cmd

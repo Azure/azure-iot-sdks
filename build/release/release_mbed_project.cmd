@@ -61,7 +61,7 @@ echo Pushing changes to repo '%project_name%'...
 hg addremove
 if %errorlevel% neq 0 goto :eof
 
-hg commit -u "%MBED_HG_USER%" -m "v1.0.0-preview.3"
+hg commit -u "%MBED_HG_USER%" -m "v1.0.0-preview.4"
 
 hg push --insecure https://%MBED_USER%:%MBED_PWD%@developer.mbed.org/users/%MBED_USER%/code/%project_name%/
 
@@ -70,5 +70,5 @@ hg push --insecure https://%MBED_USER%:%MBED_PWD%@developer.mbed.org/users/%MBED
 if not defined mbed_plat goto :eof
 if %mbed_plat%=="" goto :eof
 
-echo ..\..\..\c\tools\compilembed\bin\release\compilembed.exe -un %MBED_USER% -pwd **** -r http://developer.mbed.org/users/%MBED_USER%/code/%project_name%/ -plat %mbed_plat%
-..\..\..\c\tools\compilembed\bin\release\compilembed.exe -un %MBED_USER% -pwd %MBED_PWD% -r http://developer.mbed.org/users/%MBED_USER%/code/%project_name%/ -plat %mbed_plat%
+echo ..\..\c\tools\compilembed\bin\release\compilembed.exe -un %MBED_USER% -pwd **** -r http://developer.mbed.org/users/%MBED_USER%/code/%project_name%/ -plat %mbed_plat%
+..\..\c\tools\compilembed\bin\release\compilembed.exe -un %MBED_USER% -pwd %MBED_PWD% -r http://developer.mbed.org/users/%MBED_USER%/code/%project_name%/ -plat %mbed_plat%

@@ -5,7 +5,10 @@
 
 package com.microsoft.azure.iot.service.exceptions;
 
-public class IotHubUnathorizedException extends IotHubException 
+/**
+ * Create unauthorized exception
+ */
+public class IotHubUnathorizedException extends IotHubException
 {
     public IotHubUnathorizedException()
     {

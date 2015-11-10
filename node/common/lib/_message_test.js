@@ -7,7 +7,6 @@ var assert = require('chai').assert;
 var Message = require('./message.js');
 
 var stringTestMsg = "message";
-var propertyNum = 4;
 
 describe('message', function () {
 

@@ -139,6 +139,8 @@ static pn_bytes_t TEST_PN_STRING_BYTES = { 12, "STRING_BYTES" };
 static const char* TEXT_MESSAGE = "Hello From amqptransport Unit Tests";
 static const char* TEST_CHAR = "TestChar";
 
+static const char* TEST_MESSAGE_ID = "FC365F0A-D432-4AB9-8307-59C0EB8F0447";
+
 /*different STRING constructors*/
 static size_t currentSTRING_new_call;
 static size_t whenShallSTRING_new_fail;
@@ -161,6 +163,7 @@ static size_t whenShallSTRING_concat_fail;
 static size_t currentSTRING_concat_with_STRING_call;
 static size_t whenShallSTRING_concat_with_STRING_fail;
 
+static size_t currentCorrelationId;
 
 static size_t currentmalloc_call;
 static size_t whenShallmalloc_fail;
@@ -204,7 +207,12 @@ static pn_bytes_t test_pn_bytes_incorrect_status_name =
     AMQPS_SCHEME
 };
 
+static pn_bytes_t msgid_bytes = { sizeof(TEST_MESSAGE_ID), TEST_MESSAGE_ID };
+
 static pn_atom_t test_pn_atom = { PN_ULONG,(bool)1 };
+static pn_atom_t test_messageId_atom;
+static pn_atom_t test_correlationId_atom;
+static pn_atom_t test_NULL_atom = { PN_NULL, 0 };
 
 std::ostream& operator<<(std::ostream& left, const pn_atom_t& pnAtom)
 {
@@ -349,8 +357,6 @@ public:
     MOCK_STATIC_METHOD_1(, int, pn_error_code, pn_error_t*, es)
     MOCK_METHOD_END(int,0)
 
-
-
     MOCK_STATIC_METHOD_1(, int, pn_messenger_incoming, pn_messenger_t*, messenger)
     MOCK_METHOD_END(int, TEST_PN_GOOD_RESULT)
 
@@ -406,7 +412,19 @@ public:
     MOCK_METHOD_END(int32_t, 0)
 
     MOCK_STATIC_METHOD_1(, pn_atom_t, pn_message_get_correlation_id, pn_message_t*, msg)
-    MOCK_METHOD_END(pn_atom_t, test_pn_atom)
+        pn_atom_t* pnCurrId = &test_NULL_atom;
+        if (currentCorrelationId == 1)
+        {
+            pnCurrId = &test_correlationId_atom;
+        }
+        else if (currentCorrelationId == 2)
+        {
+            pnCurrId = &test_pn_atom;
+        }
+    MOCK_METHOD_END(pn_atom_t, *pnCurrId)
+
+    MOCK_STATIC_METHOD_1(, pn_atom_t, pn_message_get_id, pn_message_t*, msg)
+    MOCK_METHOD_END(pn_atom_t, test_messageId_atom)
 
     MOCK_STATIC_METHOD_1(, pn_data_t*, pn_message_properties, pn_message_t*, msg)
     MOCK_METHOD_END(pn_data_t*, (pn_data_t*)TEST_PN_DATA)
@@ -415,6 +433,9 @@ public:
     MOCK_METHOD_END(int, 0)
 
     MOCK_STATIC_METHOD_2(, int, pn_message_set_id, pn_message_t*, msg, pn_atom_t, id)
+    MOCK_METHOD_END(int, 0)
+
+    MOCK_STATIC_METHOD_2(, int, pn_message_set_correlation_id, pn_message_t*, msg, pn_atom_t, id)
     MOCK_METHOD_END(int, 0)
 
     MOCK_STATIC_METHOD_1(, pn_error_t*, pn_messenger_error, pn_messenger_t*, messenger)
@@ -470,15 +491,14 @@ public:
 
     MOCK_STATIC_METHOD_1(, IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
         IOTHUBMESSAGE_CONTENT_TYPE result2;
-    if(iotHubMessageHandle == TEST_MESSAGE_HANDLE_STRING)
-    {
-        result2 = IOTHUBMESSAGE_STRING;
-    }
-    else
-    {
-        result2 = IOTHUBMESSAGE_BYTEARRAY;
-    }
-
+        if(iotHubMessageHandle == TEST_MESSAGE_HANDLE_STRING)
+        {
+            result2 = IOTHUBMESSAGE_STRING;
+        }
+        else
+        {
+            result2 = IOTHUBMESSAGE_BYTEARRAY;
+        }
     MOCK_METHOD_END(IOTHUBMESSAGE_CONTENT_TYPE, result2)
 
     MOCK_STATIC_METHOD_1(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_Clone, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
@@ -491,6 +511,18 @@ public:
             result2 = TEST_MAP_1_PROPERTY;
         }*/
     MOCK_METHOD_END(MAP_HANDLE, result2)
+
+    MOCK_STATIC_METHOD_2(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetMessageId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, messageId)
+    MOCK_METHOD_END(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK)
+
+    MOCK_STATIC_METHOD_1(, const char*, IoTHubMessage_GetMessageId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
+    MOCK_METHOD_END(const char*, NULL)
+
+    MOCK_STATIC_METHOD_2(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCorrelationId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, messageId)
+    MOCK_METHOD_END(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK)
+
+    MOCK_STATIC_METHOD_1(, const char*, IoTHubMessage_GetCorrelationId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
+    MOCK_METHOD_END(const char*, NULL)
 
     /* DoublyLinkedList mocks */
     MOCK_STATIC_METHOD_1(, void, DList_InitializeListHead, PDLIST_ENTRY, listHead)
@@ -717,13 +749,13 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , pn_data_t*, pn_message
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , pn_subscription_t*, pn_messenger_incoming_subscription, pn_messenger_t*, messenger)
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, pn_messenger_set_client_sasl_mechanism, pn_messenger_t*, messenger, const char*, source)
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , pn_atom_t, pn_message_get_correlation_id, pn_message_t*, msg)
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , pn_atom_t, pn_message_get_id, pn_message_t*, msg)
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, pn_message_set_reply_to, pn_message_t*, msg, const char*, reply_to)
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, pn_message_set_id, pn_message_t*, msg, pn_atom_t, id)
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, pn_message_set_correlation_id, pn_message_t*, msg, pn_atom_t, id)
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , pn_error_t*, pn_messenger_error, pn_messenger_t*, messenger)
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , const char*, pn_error_text, pn_error_t*, error)
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , int, pn_error_code, pn_error_t*, es)
-
-
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromByteArray, const unsigned char*, buffre, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, handle);
@@ -732,6 +764,10 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , IOTHUB_MESSAGE_RESULT,
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , IOTHUB_MESSAGE_HANDLE, IoTHubMessage_Clone, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetMessageId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, messageId);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , const char*, IoTHubMessage_GetMessageId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCorrelationId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, messageId);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , const char*, IoTHubMessage_GetCorrelationId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, DList_InitializeListHead, PDLIST_ENTRY, listHead);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , int, DList_IsListEmpty, PDLIST_ENTRY, listHead);
@@ -827,6 +863,14 @@ static void mocksResetAllCalls(CIoTHubTransportAMQPMocks* mocks)
     currentpn_messenger_status_call = 0;
     whenShallpn_messenger_status_return_alternate = 0;
     alternate_pn_status = PN_STATUS_ACCEPTED;
+
+    test_messageId_atom.type = PN_STRING;
+    test_messageId_atom.u.as_bytes = msgid_bytes;
+
+    test_correlationId_atom.type = PN_STRING;
+    test_correlationId_atom.u.as_bytes = msgid_bytes;
+
+    currentCorrelationId = 0;
 }
 
 static STRING_HANDLE hostStringHandle = (STRING_HANDLE)0x201;
@@ -1394,6 +1438,11 @@ static void mocksFor_processMessages(CIoTHubTransportAMQPMocks &mocks, size_t wh
                     case 11:
                     {
                         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_ABANDONED);
+                        STRICT_EXPECTED_CALL(mocks, pn_messenger_release(TEST_PN_MESSENGER, TEST_PN_TRACKER, 0));
+                        break;
+                    }
+                    case 12:
+                    {
                         STRICT_EXPECTED_CALL(mocks, pn_messenger_release(TEST_PN_MESSENGER, TEST_PN_TRACKER, 0));
                         break;
                     }
@@ -4381,6 +4430,9 @@ TEST_FUNCTION(DoWork_messages_subScribed_nonnull_message_callbacked_accepted_suc
     EXPECTED_CALL(mocks, pn_message_properties(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, pn_data_next(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, pn_data_get_map(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_correlation_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_PTR_ARG));
 
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
@@ -4420,6 +4472,9 @@ TEST_FUNCTION(DoWork_messages_subScribed_nonnull_message_callbacked_rejected_suc
     EXPECTED_CALL(mocks, pn_message_properties(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, pn_data_next(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, pn_data_get_map(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_correlation_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_PTR_ARG));
 
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
@@ -4457,6 +4512,9 @@ TEST_FUNCTION(DoWork_messages_subScribed_nonnull_message_callbacked_abandon_succ
     EXPECTED_CALL(mocks, pn_message_properties(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, pn_data_next(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, pn_data_get_map(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_correlation_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_PTR_ARG));
 
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
@@ -4845,6 +4903,9 @@ TEST_FUNCTION(DoWork_SendEvent_proton_messenger_put_fail)
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(mocks, Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
+
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
     // act
@@ -4902,6 +4963,9 @@ TEST_FUNCTION(DoWork_one_invoke_cleanOut_in_progress_SendEvent_proton_messenger_
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(mocks, Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
+
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
     // act
@@ -4950,6 +5014,9 @@ TEST_FUNCTION(DoWork_SendEvent_proton_messenger_put_fail_with_multiple_waiting_t
     mocksFor_putSecondAfterFirst(mocks);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(mocks, Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
 
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
@@ -5077,6 +5144,8 @@ TEST_FUNCTION(reclaimEventResources_reclaim_work_in_progress_succeed)
     STRICT_EXPECTED_CALL(mocks, DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments(); // Put it on the available.
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(mocks, Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
 
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
@@ -5148,6 +5217,9 @@ TEST_FUNCTION(reclaimEventResources_reclaim_work_in_progress_settle_fail_succeed
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(mocks, Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
+
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
     // act
@@ -5212,6 +5284,8 @@ TEST_FUNCTION(reclaimEventResources_reclaim_work_in_progress_item_timeout)
     STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG)).IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).IgnoreArgument(1);
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
 
     PAMQP_TRANSPORT_STATE transportHandle = (PAMQP_TRANSPORT_STATE)transportFunctions->IoTHubTransport_Create(&config);
 
@@ -5286,6 +5360,9 @@ TEST_FUNCTION(DoWork_SetProperties_succeed)
     STRICT_EXPECTED_CALL(mocks, pn_bytes(strlen(TEST_VALUES1[0]), TEST_VALUES1[0]));
     STRICT_EXPECTED_CALL(mocks, pn_data_exit(IGNORED_PTR_ARG)).IgnoreAllArguments();
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
+
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
     // act
@@ -5303,7 +5380,7 @@ TEST_FUNCTION(DoWork_SetProperties_succeed)
 /* Test_SRS_IOTHUBTRANSPORTTAMQP_07_001: [All IoTHubMessage_Properties shall be enumerated and entered in the pn_message_properties Map.] */
 /*Tests_SRS_IOTHUBTRANSPORTTAMQP_06_081: [sendEvent will take the item that had been the head of the waitingToSend and put it back at the head of the waitingToSend list.]*/
 /*Tests_SRS_IOTHUBTRANSPORTTAMQP_06_082: [sendEvent will then break out of the send loop.]*/
-TEST_FUNCTION(DoWork_SetProperties_put_symbal_fail)
+TEST_FUNCTION(DoWork_SetProperties_put_symbol_fail)
 {
     // arrange
     CIoTHubTransportAMQPMocks mocks;
@@ -5471,6 +5548,9 @@ TEST_FUNCTION(DoWork_GetProperties_Succeed)
     EXPECTED_CALL(mocks, pn_data_get_string(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, pn_data_exit(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_correlation_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_PTR_ARG));
 
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
@@ -5667,6 +5747,9 @@ TEST_FUNCTION(DoWork_cleanOut_in_progress_SendEvent_second_invoke_dowork_status_
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(mocks, Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
 
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
+
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
     transportFunctions->IoTHubTransport_DoWork(transportHandle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -5735,6 +5818,9 @@ TEST_FUNCTION(DoWork_reclaim_work_in_progress_non_success_succeed)
 
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(mocks, Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
 
     TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
 
@@ -5888,6 +5974,8 @@ TEST_FUNCTION(DoWork_DoWork_work_error_causes_reconnect_with_work_in_progress_wa
     transportFunctions->IoTHubTransport_DoWork(transportHandle, TEST_IOTHUB_CLIENT_LL_HANDLE);
 
     BASEIMPLEMENTATION::DList_InsertTailList(&wts, &TEST_SIMPLE_MESSAGE_LIST.entry);
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(mocks, Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
     setupAmqpPrepareBatch(mocks, TEST_HAPPY_PATH);
@@ -5972,6 +6060,9 @@ TEST_FUNCTION(DoWork_DoWork_work_error_causes_reconnect_with_work_in_progress_st
                                                                                        // We do the below explicitly.  The setupAmqpPrepareBatch did it before.
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).IgnoreArgument(1); // Look again to see if any on waiting to send. (in prep batch)
                                                                                        // The below will cause the failure of the proton work.
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetMessageId(TEST_IOTHUB_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
+
     mocksFor_protonWork(mocks, 2);
     transportFunctions->IoTHubTransport_DoWork(transportHandle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     //
@@ -6490,6 +6581,204 @@ TEST_FUNCTION(when_pn_messenger_set_trusted_certificates_fails_initializing_the_
 
     STRICT_EXPECTED_CALL(mocks, pn_messenger_set_trusted_certificates(TEST_PN_MESSENGER, "ab"))
         .SetReturn(1);
+
+    // act
+    transportFunctions->IoTHubTransport_DoWork(transportHandle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    // Cleanup
+    transportFunctions->IoTHubTransport_Destroy(transportHandle);
+}
+
+/* Tests_SRS_IOTHUBTRANSPORTTAMQP_07_003: [If the protocol id is set it will be set as in the MessageId.] */
+TEST_FUNCTION(DoWork_messages_SetIotMessageId_Succeeds)
+{
+    // arrange
+    CIoTHubTransportAMQPMocks mocks;
+
+    DLIST_ENTRY wts;
+    IOTHUBTRANSPORT_CONFIG config = { &TEST_IOTHUBCLIENT_CONFIG, &wts };
+    TRANSPORT_PROVIDER* transportFunctions;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    transportFunctions = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    mocks_createHappyPath(mocks, &config);
+    setupDestroyStateHappyPath(mocks, TEST_HAPPY_PATH);
+    proton_messenger_init_path(mocks, TEST_HAPPY_PATH);
+    mocksFor_rollbackEvent(mocks, 1);
+    mock_renewHappyPath(mocks);
+    STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(0); // From the call to renew if necessary.
+    setupAmqpMessengerDispose(mocks, 2);
+    mocksFor_protonWork(mocks, TEST_HAPPY_PATH);
+    mocksFor_NoTelementry(mocks);
+    mocksFor_processReceives(mocks, 4);
+    mocksFor_processMessages(mocks, 8, false);
+    EXPECTED_CALL(mocks, pn_message_properties(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_data_next(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_data_get_map(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_correlation_id(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, TEST_MESSAGE_ID));
+
+    TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
+
+    transportFunctions->IoTHubTransport_Subscribe(transportHandle);
+
+    // act
+    transportFunctions->IoTHubTransport_DoWork(transportHandle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    // Cleanup
+    transportFunctions->IoTHubTransport_Destroy(transportHandle);
+}
+
+/* Tests_SRS_IOTHUBTRANSPORTTAMQP_07_003: [If the protocol id is set it will be set as in the MessageId.] */
+TEST_FUNCTION(DoWork_messages_SetIotMessageId_Fail)
+{
+    // arrange
+    CIoTHubTransportAMQPMocks mocks;
+
+    DLIST_ENTRY wts;
+    IOTHUBTRANSPORT_CONFIG config = { &TEST_IOTHUBCLIENT_CONFIG, &wts };
+    TRANSPORT_PROVIDER* transportFunctions;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    transportFunctions = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    mocks_createHappyPath(mocks, &config);
+    setupDestroyStateHappyPath(mocks, TEST_HAPPY_PATH);
+    proton_messenger_init_path(mocks, TEST_HAPPY_PATH);
+    mocksFor_rollbackEvent(mocks, 1);
+    mock_renewHappyPath(mocks);
+    STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(0); // From the call to renew if necessary.
+    setupAmqpMessengerDispose(mocks, 2);
+    mocksFor_protonWork(mocks, TEST_HAPPY_PATH);
+    mocksFor_NoTelementry(mocks);
+    mocksFor_processReceives(mocks, 4);
+    mocksFor_processMessages(mocks, 12, false);
+    EXPECTED_CALL(mocks, pn_message_properties(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_data_next(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_data_get_map(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_id(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, TEST_MESSAGE_ID)).SetReturn(IOTHUB_MESSAGE_ERROR);
+
+    TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
+
+    transportFunctions->IoTHubTransport_Subscribe(transportHandle);
+
+    // act
+    transportFunctions->IoTHubTransport_DoWork(transportHandle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    // Cleanup
+    transportFunctions->IoTHubTransport_Destroy(transportHandle);
+}
+
+TEST_FUNCTION(DoWork_messages_SetCorrelationId_Succeeds)
+{
+    // arrange
+    CIoTHubTransportAMQPMocks mocks;
+
+    DLIST_ENTRY wts;
+    IOTHUBTRANSPORT_CONFIG config = { &TEST_IOTHUBCLIENT_CONFIG, &wts };
+    TRANSPORT_PROVIDER* transportFunctions;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    transportFunctions = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    mocks_createHappyPath(mocks, &config);
+    setupDestroyStateHappyPath(mocks, TEST_HAPPY_PATH);
+    proton_messenger_init_path(mocks, TEST_HAPPY_PATH);
+    mocksFor_rollbackEvent(mocks, 1);
+    mock_renewHappyPath(mocks);
+    STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(0); // From the call to renew if necessary.
+    setupAmqpMessengerDispose(mocks, 2);
+    mocksFor_protonWork(mocks, TEST_HAPPY_PATH);
+    mocksFor_NoTelementry(mocks);
+    mocksFor_processReceives(mocks, 4);
+    mocksFor_processMessages(mocks, 8, false);
+    EXPECTED_CALL(mocks, pn_message_properties(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_data_next(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_data_get_map(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_correlation_id(IGNORED_PTR_ARG)).SetReturn(test_correlationId_atom);
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, TEST_MESSAGE_ID));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_SetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE, TEST_MESSAGE_ID));
+
+    TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
+
+    transportFunctions->IoTHubTransport_Subscribe(transportHandle);
+
+    // act
+    transportFunctions->IoTHubTransport_DoWork(transportHandle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    // Cleanup
+    transportFunctions->IoTHubTransport_Destroy(transportHandle);
+}
+
+TEST_FUNCTION(DoWork_messages_pn_message_get_correlation_id_Fail)
+{
+    // arrange
+    CIoTHubTransportAMQPMocks mocks;
+
+    DLIST_ENTRY wts;
+    IOTHUBTRANSPORT_CONFIG config = { &TEST_IOTHUBCLIENT_CONFIG, &wts };
+    TRANSPORT_PROVIDER* transportFunctions;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    transportFunctions = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    mocks_createHappyPath(mocks, &config);
+    setupDestroyStateHappyPath(mocks, TEST_HAPPY_PATH);
+    proton_messenger_init_path(mocks, TEST_HAPPY_PATH);
+    mocksFor_rollbackEvent(mocks, 1);
+    mock_renewHappyPath(mocks);
+    STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(0); // From the call to renew if necessary.
+    setupAmqpMessengerDispose(mocks, 2);
+    mocksFor_protonWork(mocks, TEST_HAPPY_PATH);
+    mocksFor_NoTelementry(mocks);
+    mocksFor_processReceives(mocks, 4);
+    mocksFor_processMessages(mocks, 12, false);
+    EXPECTED_CALL(mocks, pn_message_properties(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_data_next(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_data_get_map(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_correlation_id(IGNORED_PTR_ARG)).SetReturn(test_pn_atom);
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, TEST_MESSAGE_ID));
+
+    TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
+
+    transportFunctions->IoTHubTransport_Subscribe(transportHandle);
+
+    // act
+    transportFunctions->IoTHubTransport_DoWork(transportHandle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    // Cleanup
+    transportFunctions->IoTHubTransport_Destroy(transportHandle);
+}
+
+TEST_FUNCTION(DoWork_messages_SetCorrelationId_Fail)
+{
+    // arrange
+    CIoTHubTransportAMQPMocks mocks;
+
+    DLIST_ENTRY wts;
+    IOTHUBTRANSPORT_CONFIG config = { &TEST_IOTHUBCLIENT_CONFIG, &wts };
+    TRANSPORT_PROVIDER* transportFunctions;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    transportFunctions = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    mocks_createHappyPath(mocks, &config);
+    setupDestroyStateHappyPath(mocks, TEST_HAPPY_PATH);
+    proton_messenger_init_path(mocks, TEST_HAPPY_PATH);
+    mocksFor_rollbackEvent(mocks, 1);
+    mock_renewHappyPath(mocks);
+    STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(0); // From the call to renew if necessary.
+    setupAmqpMessengerDispose(mocks, 2);
+    mocksFor_protonWork(mocks, TEST_HAPPY_PATH);
+    mocksFor_NoTelementry(mocks);
+    mocksFor_processReceives(mocks, 4);
+    mocksFor_processMessages(mocks, 12, false);
+    EXPECTED_CALL(mocks, pn_message_properties(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_data_next(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_data_get_map(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_id(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, pn_message_get_correlation_id(IGNORED_PTR_ARG)).SetReturn(test_correlationId_atom);
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, TEST_MESSAGE_ID));
+    STRICT_EXPECTED_CALL(mocks, IoTHubMessage_SetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE, TEST_MESSAGE_ID)).SetReturn(IOTHUB_MESSAGE_ERROR);
+
+    TRANSPORT_HANDLE transportHandle = transportFunctions->IoTHubTransport_Create(&config);
+
+    transportFunctions->IoTHubTransport_Subscribe(transportHandle);
 
     // act
     transportFunctions->IoTHubTransport_DoWork(transportHandle, TEST_IOTHUB_CLIENT_LL_HANDLE);

@@ -127,6 +127,46 @@ extern IOTHUBMESSAGE_CONTENT_TYPE IoTHubMessage_GetContentType(IOTHUB_MESSAGE_HA
 extern MAP_HANDLE IoTHubMessage_Properties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 
 /**
+* @brief   Gets the MessageId from the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the Message Id.
+*/
+extern const char* IoTHubMessage_GetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
+
+/**
+* @brief   Sets the MessageId for the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   messageId Pointer to the memory location of the messageId
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the messageId was set successfully
+*          or an error code otherwise.
+*/
+extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* messageId);
+
+/**
+* @brief   Gets the CorrelationId from the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the Correlation Id.
+*/
+extern const char* IoTHubMessage_GetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
+
+/**
+* @brief   Sets the CorrelationId for the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   correlationId Pointer to the memory location of the messageId
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the messageId was set successfully
+*          or an error code otherwise.
+*/
+extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* correlationId);
+
+/**
  * @brief   Frees all resources associated with the given message handle.
  *
  * @param   iotHubMessageHandle Handle to the message.

@@ -38,10 +38,18 @@ module.exports = [
         }
     },
     {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/iothub_client/tests/version_unittests/version_unittests.cpp",
+        "search": "(\\\".*\\\")([ \t]*\\,[ \t]*IOTHUB\\_SDK\\_VERSION)",
+        "replaceString": function(versions) {
+            return '"' + versions.c.device + '"$2';
+        }
+    },
+    {
         "taskType": "xmlReplaceTask",
         "filePath": "c/build_all/packaging/windows/Apache.QPID.Proton.AzureIot.nuspec",
         "search": "//*[local-name(.)='package' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']/*[local-name(.)='metadata' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']/*[local-name(.)='version' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']",
-        "replaceString": "c_nuget.device"
+        "replaceString": "qpid_proton_nuget"
     },
     {
         "taskType": "xmlReplaceTask",
@@ -84,7 +92,7 @@ module.exports = [
     ///////////////////////////////////////////////////
     {
         "taskType": "regexReplaceTask",
-        "filePath": "csharp/Microsoft.Azure.Devices.Client/Properties/AssemblyInfo.cs",
+        "filePath": "csharp/device/Microsoft.Azure.Devices.Client/Properties/AssemblyInfo.cs",
         "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
         "replaceString": function(versions) {
             return '$1' + versions.csharp.device + '$2';
@@ -92,7 +100,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "csharp/Microsoft.Azure.Devices.Client.WinRT/Properties/AssemblyInfo.cs",
+        "filePath": "csharp/device/Microsoft.Azure.Devices.Client.WinRT/Properties/AssemblyInfo.cs",
         "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
         "replaceString": function(versions) {
             return '$1' + versions.csharp.device + '$2';
@@ -215,45 +223,27 @@ module.exports = [
     ///////////////////////////////////////////////////
     {
         "taskType": "jsonReplaceTask",
-        "filePath": "node/build/package.json",
-        "search": "version",
-        "replaceString": "node.build"
-    },
-    {
-        "taskType": "jsonReplaceTask",
         "filePath": "node/common/package.json",
         "search": "version",
         "replaceString": "node.common"
     },
     {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/common/package.json",
-        "search": "devDependencies.azure-iot-build",
-        "replaceString": function(versions) {
-            return '^' + versions.node.common;
-        }
-    },
-    {
-        "taskType": "jsonReplaceTask",
+        "taskType": "multiTask",
         "filePath": "node/device/package.json",
-        "search": "version",
-        "replaceString": "node.device"
-    },
-    {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/device/package.json",
-        "search": "dependencies.azure-iot-common",
-        "replaceString": function(versions) {
-            return '^' + versions.node.device;
-        }
-    },
-    {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/device/package.json",
-        "search": "devDependencies.azure-iot-build",
-        "replaceString": function(versions) {
-            return '^' + versions.node.device;
-        }
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.common;
+                }
+            }
+        ]
     },
     {
         "taskType": "jsonReplaceTask",
@@ -264,31 +254,46 @@ module.exports = [
         }
     },
     {
-        "taskType": "jsonReplaceTask",
+        "taskType": "multiTask",
         "filePath": "node/service/package.json",
-        "search": "version",
-        "replaceString": "node.service"
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.service"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.common;
+                }
+            }
+        ]
     },
     {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/service/package.json",
-        "search": "dependencies.azure-iot-common",
-        "replaceString": function(versions) {
-            return '^' + versions.node.service;
-        }
-    },
-    {
-        "taskType": "jsonReplaceTask",
-        "filePath": "node/service/package.json",
-        "search": "devDependencies.azure-iot-build",
-        "replaceString": function(versions) {
-            return '^' + versions.node.service;
-        }
-    },
-    {
-        "taskType": "jsonReplaceTask",
+        "taskType": "multiTask",
         "filePath": "tools/iothub-explorer/package.json",
-        "search": "version",
-        "replaceString": "iothub-explorer"
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "iothub-explorer"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.common;
+                }
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iothub",
+                "replaceString": function(versions) {
+                    return '^' + versions.node.service;
+                }
+            }
+        ]
     }
 ];

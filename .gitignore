@@ -196,9 +196,9 @@ java/**/*dependency-reduced-pom.xml
 typings/**
 .vscode/**
 
-csharp/NuGet/*.exe
-csharp/NuGet/*.nupkg
-csharp/.vs/*
+csharp/device/NuGet/*.exe
+csharp/device/NuGet/*.nupkg
+csharp/device/.vs/*
 service/java/.idea
 service/java/target
 service/java/iot.service.sdk.java.iml

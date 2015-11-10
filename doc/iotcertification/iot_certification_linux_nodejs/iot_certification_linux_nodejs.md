@@ -107,7 +107,7 @@ This section walks you through building, deploying and validating the IoT Client
 
         node --version
 
-    If version is **0.12.x**, then skip next step of installing prerequisite packages. Else uninstall it by issuing following command from command line on the device.
+    If version is **0.12.x or greater**, then skip next step of installing prerequisite packages. Else uninstall it by issuing following command from command line on the device.
 
     **Debian or Ubuntu**
 
@@ -125,19 +125,19 @@ This section walks you through building, deploying and validating the IoT Client
 
     **Debian or Ubuntu**
 
-        curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
+        curl -sL https://deb.nodesource.com/setup_4.x | sudo bash -
 
         sudo apt-get install -y nodejs
 
     **Fedora**
 
-        wget http://nodejs.org/dist/v0.12.7/node-v0.12.7-linux-x64.tar.gz
+        wget http://nodejs.org/dist/v4.2.1/node-v4.2.1-linux-x64.tar.gz
 
-        tar xvf node-v0.12.7-linux-x64.tar.gz
+        tar xvf node-v4.2.1-linux-x64.tar.gz
 
-        sudo mv node-v0.12.7-linux-x64 /opt
+        sudo mv node-v4.2.1-linux-x64 /opt
 
-        echo "export PATH=\$PATH:/opt/node-v0.12.7-linux-x64/bin" >> ~/.bashrc
+        echo "export PATH=\$PATH:/opt/node-v4.2.1-linux-x64/bin" >> ~/.bashrc
 
         source ~/.bashrc
 
@@ -158,6 +158,14 @@ This section walks you through building, deploying and validating the IoT Client
 
 <a name="Step-3-2:-Build"/>
 ## 3.2 Build the samples
+
+-   To validate the source code run the following commands on the device.
+
+        cd ~/azure-iot-sdks/node
+        build/dev-setup.sh
+        build/build.sh | tee LogFile.txt
+
+    ***Note:*** *LogFile.txt in above command should be replaced with a file name where build output will be written.*
 
 -   To update samples run the following command on device.
 
@@ -186,7 +194,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 -   Run the following command before leaving the **~/azure-iot-sdks/node/device/samples** directory
 
-        npm install
+        npm link azure-iot-device
 
     **For registry_sample.js:**
 
@@ -208,15 +216,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 -   Run the following command before leaving the **~/azure-iot-sdks/node/service/samples** directory
 
-        npm install
-
--   Build the SDK code using the following command.
-
-        cd ~/azure-iot-sdks/node/build
-        npm install
-        ./build.sh | tee LogFile.txt
-
-   ***Note:*** *LogFile.txt in above command should be replaced with a file name where build output will be written.*
+        npm link azure-iothub
 
 <a name="Step-3-3:-Run"/>
 ## 3.3 Run and Validate the Samples
