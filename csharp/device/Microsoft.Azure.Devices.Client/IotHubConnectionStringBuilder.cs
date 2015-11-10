@@ -77,17 +77,10 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>A new instance of the <see cref="IotHubConnectionStringBuilder"/> class with a populated connection string.</returns>
         public static IotHubConnectionStringBuilder Create(string iotHubConnectionString)
         {
-#if NETMF
             if (iotHubConnectionString.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("iotHubConnectionString");
             }
-#else
-            if (string.IsNullOrWhiteSpace(iotHubConnectionString))
-            {
-                throw new ArgumentNullException("iotHubConnectionString");
-            }
-#endif
 
             var iotHubConnectionStringBuilder = new IotHubConnectionStringBuilder();
             iotHubConnectionStringBuilder.Parse(iotHubConnectionString);
@@ -288,17 +281,11 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetHostName(string hostname)
         {
-#if NETMF
             if (hostname.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("hostname");
             }
-#else
-            if (string.IsNullOrWhiteSpace(hostname))
-            {
-               throw new ArgumentNullException("hostname");
-            }
-
+#if !NETMF
             ValidateFormat(hostname, HostNamePropertyName, HostNameRegex);
 #endif
 
@@ -308,21 +295,16 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetIotHubName()
         {
-#if NETMF
             this.iotHubName = GetIotHubName(this.HostName);
 
             if (this.IotHubName.IsNullOrWhiteSpace())
             {
+#if NETMF
                 throw new ArgumentException("Missing IOT hub name");
-            }
 #else
-            this.iotHubName = GetIotHubName(this.HostName);
-
-            if (string.IsNullOrWhiteSpace(this.IotHubName))
-            {
                 throw new FormatException("Missing IOT hub name");
-            }
 #endif
+            }
         }
 
         void SetAuthenticationMethod(IAuthenticationMethod authMethod)

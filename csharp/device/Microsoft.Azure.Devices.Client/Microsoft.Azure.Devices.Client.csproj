@@ -112,6 +112,7 @@
     <Compile Include="Common\Exceptions\ServerErrorException.cs" />
     <Compile Include="Common\Exceptions\UnauthorizedException.cs" />
     <Compile Include="Common\Extensions\CommonExtensions.cs" />
+    <Compile Include="Common\Extensions\StringExtensions.cs" />
     <Compile Include="Common\FxCop.cs" />
     <Compile Include="Common\IETagHolder.cs" />
     <Compile Include="Common\IOThreadScheduler.cs" />

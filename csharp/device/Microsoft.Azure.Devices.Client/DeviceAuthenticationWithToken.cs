@@ -70,11 +70,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetDeviceId(string deviceId)
         {
-#if NETMF
             if (token.IsNullOrWhiteSpace())
-#else
-            if (string.IsNullOrWhiteSpace(deviceId))
-#endif
             {
                 throw new ArgumentNullException("deviceId");
             }
@@ -84,22 +80,17 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetToken(string token)
         {
-#if NETMF
             if (token.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("token");
             }
 
+#if NETMF
             if (token.IndexOf(SharedAccessSignatureConstants.SharedAccessSignature) != 0)
             {
                 throw new ArgumentException("Token must be of type SharedAccessSignature");
             }
 #else
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                throw new ArgumentNullException("token");
-            }
-
             if (!token.StartsWith(SharedAccessSignatureConstants.SharedAccessSignature, StringComparison.OrdinalIgnoreCase))
             {
                 throw new ArgumentException("Token must be of type SharedAccessSignature");

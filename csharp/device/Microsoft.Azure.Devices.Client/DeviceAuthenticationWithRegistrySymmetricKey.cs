@@ -89,18 +89,12 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetKeyFromBase64String(string key)
         {
-#if NETMF
             if (key.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("key");
             }
 
-#else
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException("key");
-            }
-
+#if !NETMF
             if (!StringValidationHelper.IsBase64String(key))
             {
                 throw new ArgumentException("Key must be base64 encoded");
@@ -112,11 +106,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetDeviceId(string deviceId)
         {
-#if NETMF
             if (deviceId.IsNullOrWhiteSpace())
-#else
-            if (string.IsNullOrWhiteSpace(deviceId))
-#endif
             {
                 throw new ArgumentNullException("deviceId");
             }

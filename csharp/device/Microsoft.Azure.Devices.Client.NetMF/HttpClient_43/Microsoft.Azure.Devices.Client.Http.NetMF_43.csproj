@@ -47,6 +47,9 @@
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\Extensions\StringExtensions.cs">
       <Link>Common\Extensions\StringExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\Extensions\StringExtensions.NetMF.cs">
+      <Link>Common\Extensions\StringExtensions.NetMF.cs</Link>
+    </Compile>
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\Extensions\WebHeaderCollectionExtensions.cs">
       <Link>Common\Extensions\WebHeaderCollectionExtensions.cs</Link>
     </Compile>

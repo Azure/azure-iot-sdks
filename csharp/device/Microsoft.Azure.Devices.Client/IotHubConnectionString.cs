@@ -131,12 +131,7 @@ namespace Microsoft.Azure.Devices.Client
         public string GetPassword()
         {
             string password;
-#if NETMF
             if (this.SharedAccessSignature.IsNullOrWhiteSpace())
-
-#else
-            if (string.IsNullOrWhiteSpace(this.SharedAccessSignature))
-#endif
             {
                 TimeSpan timeToLive;
                 password = this.BuildToken(out timeToLive);

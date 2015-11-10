@@ -241,13 +241,10 @@ namespace Microsoft.Azure.Devices.Client
 
 #if NETMF
                 string deliveryAckAsString = (string)(this.GetSystemProperty(MessageSystemPropertyNames.Ack) ?? string.Empty);
-
-                if (!deliveryAckAsString.IsNullOrWhiteSpace())
 #else
                 string deliveryAckAsString = this.GetSystemProperty<string>(MessageSystemPropertyNames.Ack);
-
-                if (!string.IsNullOrWhiteSpace(deliveryAckAsString))
 #endif
+                if (!deliveryAckAsString.IsNullOrWhiteSpace())
                 {
                     switch (deliveryAckAsString)
                     {
