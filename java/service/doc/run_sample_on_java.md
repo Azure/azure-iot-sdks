@@ -72,4 +72,4 @@ The documentation can be found [here](https://azure.github.io/azure-iot-sdks/jav
 
 [devbox-setup]: devbox_setup.md
 [setup-iothub]: ../../../doc/setup_iothub.md
-[device-explorer]: ../../../tools/DeviceExplorer/devdoc/how_to_use_device_explorer.md
+[device-explorer]: ../../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
