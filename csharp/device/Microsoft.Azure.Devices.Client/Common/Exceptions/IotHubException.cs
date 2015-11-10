@@ -4,7 +4,7 @@
 namespace Microsoft.Azure.Devices.Client.Exceptions
 {
     using System;
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
     using System.Runtime.Serialization;
 #endif
 
@@ -64,7 +64,7 @@ namespace Microsoft.Azure.Devices.Client.Exceptions
             this.TrackingId = trackingId;
         }
 
-#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !WINDOWS_UWP && !NETMF
         protected IotHubException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

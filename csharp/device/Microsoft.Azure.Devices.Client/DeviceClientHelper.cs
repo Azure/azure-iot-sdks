@@ -6,17 +6,17 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using Microsoft.Azure.Devices.Client.Extensions;
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
     using System.Collections.Generic;
     using System.Threading.Tasks;
 #endif
 
     // C# using aliases cannot name an unbound generic type declaration without supplying type arguments
     // Therefore, define a separate alias for each type argument
-#if WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if WINDOWS_UWP && !NETMF
     using AsyncTask = Windows.Foundation.IAsyncAction;
     using AsyncTaskOfMessage = Windows.Foundation.IAsyncOperation<Message>;
-#elif !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#elif !NETMF
     using AsyncTask = System.Threading.Tasks.Task;
     using AsyncTaskOfMessage = System.Threading.Tasks.Task<Message>;
 #endif
@@ -28,14 +28,14 @@ namespace Microsoft.Azure.Devices.Client
     {
         bool openCalled;
         bool closeCalled;
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         volatile TaskCompletionSource<object> openTaskCompletionSource;
 #endif
 
         protected DeviceClientHelper()
         {
             this.ThisLock = new object();
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
             this.openTaskCompletionSource = new TaskCompletionSource<object>(this);
 #endif
         }
@@ -47,7 +47,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Explicitly open the DeviceClient instance.
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void Open()
         {
             this.EnsureOpened(true);
@@ -63,7 +63,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Close the DeviceClient instance
         /// </summary>
         /// <returns></returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void Close()
         {
 
@@ -96,7 +96,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Receive a message from the device queue using the default timeout.
         /// </summary>
         /// <returns>The receive message or null if there was no message until the default timeout</returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public Message Receive()
         {
             return this.Receive(this.DefaultReceiveTimeout);
@@ -112,7 +112,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Receive a message from the device queue with the specified timeout
         /// </summary>
         /// <returns>The receive message or null if there was no message until the specified time has elapsed</returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public Message Receive(TimeSpan timeout)
         {
             this.EnsureOpened(false);
@@ -130,7 +130,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Deletes a received message from the device queue
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         /// <returns></returns>
         public void Complete(string lockToken)
         {
@@ -154,7 +154,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Deletes a received message from the device queue
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         /// <returns></returns>
         public void Complete(Message message)
         {
@@ -183,7 +183,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Puts a received message back onto the device queue
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         /// <returns></returns>
         public void Abandon(string lockToken)
         {
@@ -212,7 +212,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Puts a received message back onto the device queue
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         /// <returns></returns>
         public void Abandon(Message message)
         {
@@ -241,7 +241,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Deletes a received message from the device queue and indicates to the server that the message could not be processed.
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         /// <returns></returns>
         public void Reject(string lockToken)
         {
@@ -270,7 +270,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Deletes a received message from the device queue and indicates to the server that the message could not be processed.
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         /// <returns></returns>
         public void Reject(Message message)
         {
@@ -299,7 +299,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Sends an event to device hub
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         /// <returns></returns>
         public void SendEvent(Message message)
         {
@@ -329,7 +329,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Sends a batch of events to device hub
         /// </summary>
         /// <returns>The task containing the event</returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         //public void Task SendEventBatchAsync(IEnumerable<Message> messages)
         //{
         //    if (messages == null)
@@ -353,7 +353,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         protected void EnsureOpened(bool explicitOpen)
         {
 
@@ -424,7 +424,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         protected abstract void OnOpen(bool explicitOpen);
 
         protected abstract void OnClose();

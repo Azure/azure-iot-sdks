@@ -5,17 +5,17 @@ namespace Microsoft.Azure.Devices.Client
 {
     using System;
     using Microsoft.Azure.Devices.Client.Extensions;
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
 #endif
 
     // C# using aliases cannot name an unbound generic type declaration without supplying type arguments
     // Therefore, define a separate alias for each type argument
-#if WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if WINDOWS_UWP && !NETMF
     using AsyncTask = Windows.Foundation.IAsyncAction;
     using AsyncTaskOfMessage = Windows.Foundation.IAsyncOperation<Message>;
-#elif !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#elif !NETMF
     using AsyncTask = System.Threading.Tasks.Task;
     using AsyncTaskOfMessage = System.Threading.Tasks.Task<Message>;
 #endif
@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Devices.Client
         const string DeviceId = "DeviceId";
         const string DeviceIdParameterPattern = @"(^\s*?|.*;\s*?)" + DeviceId + @"\s*?=.*";
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         static readonly RegexOptions regexOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, regexOptions);
 #endif
@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Devices.Client
             this.impl = impl;
         }
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         /// <summary>
         /// Create an Amqp DeviceClient from individual parameters
         /// </summary>
@@ -110,7 +110,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString, string deviceId)
         {
-#if WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if WINDOWS_UWP && !NETMF
             return CreateFromConnectionString(connectionString, deviceId, TransportType.Http1);    
 #else
             return CreateFromConnectionString(connectionString, deviceId, TransportType.Amqp);
@@ -148,7 +148,7 @@ namespace Microsoft.Azure.Devices.Client
                 return new DeviceClient(new HttpDeviceClient(iotHubConnectionString));
             }
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             throw new InvalidOperationException("Unsupported Transport Type " + transportType.ToString());
 
 #else
@@ -175,7 +175,7 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentNullException("deviceId");
             }
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
             if (DeviceIdParameterRegex.IsMatch(connectionString))
             {
                 throw new ArgumentException("connectionString must not contain DeviceId keyvalue parameter");
@@ -188,7 +188,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Explicitly open the DeviceClient instance.
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void Open()
         {
             impl.Open();
@@ -204,7 +204,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Close the DeviceClient instance
         /// </summary>
         /// <returns></returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void Close()
         {
             impl.Close();
@@ -220,7 +220,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Receive a message from the device queue using the default timeout.
         /// </summary>
         /// <returns>The receive message or null if there was no message until the default timeout</returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public Message Receive()
         {
             return impl.Receive();
@@ -232,7 +232,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         /// <summary>
         /// Receive a message from the device queue with the specified timeout
         /// </summary>
@@ -251,7 +251,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void Complete(string lockToken)
         {
             impl.Complete(lockToken);
@@ -267,7 +267,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Deletes a received message from the device queue
         /// </summary>
         /// <returns>The previously received message</returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void Complete(Message message)
         {
             impl.Complete(message);
@@ -286,7 +286,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Puts a received message back onto the device queue
         /// </summary>
         /// <returns>The previously received message</returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void Abandon(string lockToken)
         {
             impl.Abandon(lockToken);
@@ -302,7 +302,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Puts a received message back onto the device queue
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void Abandon(Message message)
         {
             impl.Abandon(message);
@@ -322,7 +322,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The previously received message</returns>
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void Reject(string lockToken)
         {
             impl.Reject(lockToken);
@@ -338,7 +338,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Deletes a received message from the device queue and indicates to the server that the message could not be processed.
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void Reject(Message message)
         {
             impl.Reject(message);
@@ -354,7 +354,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Sends an event to device hub
         /// </summary>
         /// <returns>The message containing the event</returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public void SendEvent(Message message)
         {
             impl.SendEvent(message);
@@ -370,7 +370,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Sends a batch of events to device hub
         /// </summary>
         /// <returns>The task containing the event</returns>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         //public void SendEventBatch(Array<Message> messages)
         //{
         //    return impl.SendEventBatchAsync(messages).AsTaskOrAsyncOp();

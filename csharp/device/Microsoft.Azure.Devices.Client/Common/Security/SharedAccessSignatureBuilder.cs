@@ -6,7 +6,7 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using System.Net;
     using Microsoft.Azure.Devices.Client.Extensions;
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
     using System.Collections.Generic;
 #endif
     using System.Globalization;
@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.Security.Cryptography;
 #endif
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
 #else
 #endif
     using System.Text;
@@ -31,7 +31,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public SharedAccessSignatureBuilder()
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             this.TimeToLive = new TimeSpan(0, 20, 0);
 #else
             this.TimeToLive = TimeSpan.FromMinutes(20);
@@ -49,7 +49,7 @@ namespace Microsoft.Azure.Devices.Client
 
             set
             {
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
                 StringValidationHelper.EnsureBase64String(value, "Key");
 #endif
                 this.key = value;
@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Devices.Client
             string expiresOn = BuildExpiresOn(timeToLive);
             string audience = WebUtility.UrlEncode(target);
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
             List<string> fields = new List<string>();
             fields.Add(audience);
             fields.Add(expiresOn);
@@ -80,7 +80,7 @@ namespace Microsoft.Azure.Devices.Client
             // dh://myiothub.azure-devices.net/a/b/c?myvalue1=a
             // <Value for ExpiresOn>
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             string signature = Sign(audience + "\n" + expiresOn, key);
 #else
             string signature = Sign(string.Join("\n", fields), key);
@@ -89,7 +89,7 @@ namespace Microsoft.Azure.Devices.Client
             // Example returned string:
             // SharedAccessSignature sr=ENCODED(dh://myiothub.azure-devices.net/a/b/c?myvalue1=a)&sig=<Signature>&se=<ExpiresOnValue>[&skn=<KeyName>]
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             var buffer = new StringBuilder();
             buffer.Append(SharedAccessSignatureConstants.SharedAccessSignature + " ");
             buffer.Append(SharedAccessSignatureConstants.AudienceFieldName + "=" + audience);
@@ -151,7 +151,7 @@ namespace Microsoft.Azure.Devices.Client
             var sign = CryptographicBuffer.EncodeToBase64String(hash.GetValueAndReset());
             return sign;
         }
-#elif MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#elif NETMF
         static string Sign(string requestString, string key)
         {
             // computing SHA256 signature using a managed code library

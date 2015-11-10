@@ -74,7 +74,7 @@ namespace Microsoft.Azure.Devices.Client
             public const int MaximumMaxDeliveryCount = 100;
             public const int MinimumMaxDeliveryCount = 1;
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             public static readonly TimeSpan DefaultTtl = new TimeSpan(1, 0, 0);
             public static readonly TimeSpan MaximumDefaultTtl = new TimeSpan(2, 0, 0, 0);
             public static readonly TimeSpan MinimumDefaultTtl = new TimeSpan(0, 1, 0);
@@ -87,7 +87,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public static class Feedback
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             public static readonly TimeSpan DefaultLockDuration = new TimeSpan(0, 1, 0);
             public static readonly TimeSpan MaximumLockDuration = new TimeSpan(0, 5, 0);
             public static readonly TimeSpan MinimumLockDuration = new TimeSpan(0, 0, 5);

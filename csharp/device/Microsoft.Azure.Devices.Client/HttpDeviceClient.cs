@@ -9,7 +9,7 @@ namespace Microsoft.Azure.Devices.Client
 
     using Microsoft.Azure.Devices.Client.Extensions;
     using Microsoft.Azure.Devices.Client.Exceptions;
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
     using System.Collections;
     using System.Text;
 #else
@@ -25,7 +25,7 @@ namespace Microsoft.Azure.Devices.Client
 
     sealed class HttpDeviceClient : DeviceClientHelper
     {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         static readonly TimeSpan DefaultOperationTimeout = new TimeSpan(0, 0, 60);
         static readonly TimeSpan DefaultReceiveTimeoutInSeconds = new TimeSpan(0);
         static Hashtable MapMessageProperties2HttpHeaders = new Hashtable();
@@ -56,7 +56,7 @@ namespace Microsoft.Azure.Devices.Client
             this.httpClientHelper = new HttpClientHelper(
                 iotHubConnectionString.HttpsEndpoint,
                 iotHubConnectionString,
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
                 DefaultOperationTimeout);
 #else
                 ExceptionHandlingHelper.GetDefaultErrorMapping(),
@@ -65,7 +65,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
             this.DefaultReceiveTimeout = DefaultReceiveTimeoutInSeconds;
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             // fill MapMessageProperties2HttpHeaders
             MapMessageProperties2HttpHeaders.Add(MessageSystemPropertyNames.Ack, CustomHeaderConstants.Ack);
             MapMessageProperties2HttpHeaders.Add(MessageSystemPropertyNames.CorrelationId, CustomHeaderConstants.CorrelationId);
@@ -120,7 +120,7 @@ namespace Microsoft.Azure.Devices.Client
 
         protected override TimeSpan DefaultReceiveTimeout { get; set; }
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         protected override void OnOpen(bool explicitOpen)
         {
             return;
@@ -132,7 +132,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         protected override void OnClose()
         {
         }
@@ -143,7 +143,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         protected override void OnSendEvent(Message message)
         {
             if (message == null)
@@ -192,7 +192,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         protected override Task OnSendEventAsync(IEnumerable<Message> messages)
         {
             if (messages == null)
@@ -237,7 +237,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         protected override Message OnReceive(TimeSpan timeout)
         {
             // Long-polling is not supported
@@ -433,7 +433,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         protected override void OnComplete(string lockToken)
         {
             var pathTemplate = new StringBuilder(CommonConstants.DeviceBoundPathCompleteTemplate);
@@ -469,7 +469,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         protected override void OnAbandon(string lockToken)
         {
             var pathTemplate = new StringBuilder(CommonConstants.DeviceBoundPathAbandonTemplate);
@@ -504,7 +504,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         protected override void OnReject(string lockToken)
         {
             var pathTemplate = new StringBuilder(CommonConstants.DeviceBoundPathRejectTemplate);
@@ -540,7 +540,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         static Hashtable PrepareCustomHeaders(string toHeader, string messageId, string operation)
         {
             var customHeaders = new Hashtable();
@@ -573,7 +573,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         static string GetRequestUri(string deviceId, string path, Hashtable queryValueDictionary)
         {
             deviceId = WebUtility.UrlEncode(deviceId);
@@ -630,7 +630,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         static string ToJson(IEnumerable<Message> messages)
         {
             using (var sw = new StringWriter())

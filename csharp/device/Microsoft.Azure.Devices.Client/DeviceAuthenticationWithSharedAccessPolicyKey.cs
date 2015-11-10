@@ -59,7 +59,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetDeviceId(string deviceId)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             if (deviceId.IsNullOrWhiteSpace())
 #else
             if (string.IsNullOrWhiteSpace(deviceId))
@@ -73,7 +73,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetKey(string key)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             if (key.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("key");
@@ -95,7 +95,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetPolicyName(string policyName)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             if (policyName.IsNullOrWhiteSpace())
 #else
             if (string.IsNullOrWhiteSpace(policyName))

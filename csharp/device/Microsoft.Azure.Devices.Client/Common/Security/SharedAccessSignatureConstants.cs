@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Devices.Client
         public const string SignedResourceFullFieldName = SharedAccessSignature + " " + AudienceFieldName;
         public const string KeyValueSeparator = "=";
         public const string PairSeparator = "&";
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public static readonly DateTime EpochTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
         public static readonly TimeSpan MaxClockSkew = new TimeSpan(0, 5, 0);
 #else

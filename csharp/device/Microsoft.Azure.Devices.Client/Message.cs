@@ -6,13 +6,13 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using System.IO;
     using System.Threading;
-#if WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if WINDOWS_UWP && !NETMF
     using Windows.Storage.Streams;
-#elif !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#elif !NETMF
     using Microsoft.Azure.Amqp;
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
     using System.Collections;
 #else
     using Microsoft.Azure.Devices.Client.Common.Api;
@@ -32,16 +32,16 @@ namespace Microsoft.Azure.Devices.Client
     /// The data structure represent the message that is used for interacting with IotHub.
     /// </summary>
     public sealed class Message :
-#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !WINDOWS_UWP && !NETMF
         IDisposable, IReadOnlyIndicator
-#elif MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#elif NETMF
         IDisposable
 #elif WINDOWS_UWP
         IReadOnlyIndicator
 #endif
     {
         readonly object messageLock = new object();
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         Stream bodyStream;
 #else
         volatile Stream bodyStream;
@@ -49,13 +49,13 @@ namespace Microsoft.Azure.Devices.Client
         bool disposed;
         bool ownsBodyStream;
         int getBodyCalled;
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         int sizeInBytesCalled;
 #else
         long sizeInBytesCalled;
 #endif
 
-#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !WINDOWS_UWP && !NETMF
         AmqpMessage serializedAmqpMessage;
 #endif
 
@@ -64,7 +64,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public Message()
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             this.Properties = new Hashtable();
             this.SystemProperties = new Hashtable();
             //this.serializedAmqpMessage = null;
@@ -105,7 +105,7 @@ namespace Microsoft.Azure.Devices.Client
         /// form the body stream</param>
         /// <remarks>user should treat the input byte array as immutable when
         /// sending the message.</remarks>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public Message(byte[] byteArray)
             : this(new MemoryStream(byteArray))
 #else
@@ -117,7 +117,7 @@ namespace Microsoft.Azure.Devices.Client
             this.ownsBodyStream = true;
         }
 
-#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !WINDOWS_UWP && !NETMF
         /// <summary>
         /// This constructor is only used in the receive path from Amqp path, 
         /// or in Cloning from a Message that has serialized.
@@ -156,7 +156,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string MessageId
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             get
             {
                 return (string)(this.GetSystemProperty(MessageSystemPropertyNames.MessageId) ?? string.Empty);
@@ -184,7 +184,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string To
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             get
             {
                 return (string)(this.GetSystemProperty(MessageSystemPropertyNames.To) ?? string.Empty);
@@ -212,7 +212,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public DateTimeT ExpiryTimeUtc
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             get
             {
                 return (DateTime)(this.GetSystemProperty(MessageSystemPropertyNames.ExpiryTimeUtc) ?? DateTime.MinValue);
@@ -240,7 +240,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string CorrelationId
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             get
             {
                 return (string)(this.GetSystemProperty(MessageSystemPropertyNames.CorrelationId) ?? string.Empty);
@@ -271,7 +271,7 @@ namespace Microsoft.Azure.Devices.Client
             get
             {
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
                 string deliveryAckAsString = (string)(this.GetSystemProperty(MessageSystemPropertyNames.Ack) ?? string.Empty);
 
                 if (!deliveryAckAsString.IsNullOrWhiteSpace())
@@ -329,7 +329,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public ulong SequenceNumber
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             get
             {
                 return (ulong)(this.GetSystemProperty(MessageSystemPropertyNames.SequenceNumber) ?? 0);
@@ -357,7 +357,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string LockToken
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             get
             {
                 return (string)(this.GetSystemProperty(MessageSystemPropertyNames.LockToken) ?? string.Empty);
@@ -385,7 +385,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public DateTimeT EnqueuedTimeUtc
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             get
             {
                 return (DateTime)(this.GetSystemProperty(MessageSystemPropertyNames.EnqueuedTime) ?? DateTime.MinValue);
@@ -413,7 +413,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public uint DeliveryCount
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             get
             {
                 return (byte)(this.GetSystemProperty(MessageSystemPropertyNames.DeliveryCount) ?? 0);
@@ -442,7 +442,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string UserId
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             get
             {
                 return (string)(this.GetSystemProperty(MessageSystemPropertyNames.UserId) ?? string.Empty);
@@ -468,7 +468,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Gets the dictionary of user properties which are set when user send the data.
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         public Hashtable Properties { get; private set; }
 #else
         /// <summary>
@@ -480,13 +480,13 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Gets the dictionary of system properties which are managed internally.
         /// </summary>
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         internal Hashtable SystemProperties { get; private set; }
 #else
         internal IDictionary<string, object> SystemProperties { get; private set; }
 #endif
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         bool IReadOnlyIndicator.IsReadOnly
         {
             get
@@ -507,7 +507,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !WINDOWS_UWP && !NETMF
         internal AmqpMessage SerializedAmqpMessage
         {
             get
@@ -520,7 +520,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         /// <summary>
         /// Gets or sets the deliveryTag which is used for server side checkpointing.
         /// </summary>
@@ -534,7 +534,7 @@ namespace Microsoft.Azure.Devices.Client
         public Message Clone()
         {
             this.ThrowIfDisposed();
-#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !WINDOWS_UWP && !NETMF
             if (this.serializedAmqpMessage != null)
             {
                 return new Message(this.serializedAmqpMessage);
@@ -550,7 +550,7 @@ namespace Microsoft.Azure.Devices.Client
                 };
             }
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             foreach (var systemProperty in this.SystemProperties.Keys)
             {
                 message.SystemProperties[systemProperty] = this.SystemProperties[systemProperty];
@@ -608,7 +608,7 @@ namespace Microsoft.Azure.Devices.Client
                 return this.bodyStream;
             }
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             return null;
 #else
             return Stream.Null;
@@ -631,7 +631,7 @@ namespace Microsoft.Azure.Devices.Client
                 return new byte[] { };
             }
 
-#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !WINDOWS_UWP && !NETMF
             BufferListStream listStream;
             if ((listStream = this.bodyStream as BufferListStream) != null)
             {
@@ -646,7 +646,7 @@ namespace Microsoft.Azure.Devices.Client
             return ReadFullStream(this.bodyStream);
         }
 
-#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !WINDOWS_UWP && !NETMF
         internal AmqpMessage ToAmqpMessage(bool setBodyCalled = true)
         {
             this.ThrowIfDisposed();
@@ -692,7 +692,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (1 == Interlocked.Exchange(ref this.getBodyCalled, 1))
             {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
                 throw new InvalidOperationException();
 #else
                 throw Fx.Exception.AsError(new InvalidOperationException(ApiResources.MessageBodyConsumed));
@@ -715,7 +715,7 @@ namespace Microsoft.Azure.Devices.Client
 
         static byte[] ReadFullStream(Stream inputStream)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             inputStream.Position = 0;
             byte[] buffer = new byte[inputStream.Length];
 
@@ -739,7 +739,7 @@ namespace Microsoft.Azure.Devices.Client
                 if ((memoryStream = originalStream as MemoryStream) != null)
                 {
                     // Note: memoryStream.GetBuffer() doesn't work
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
                     return new MemoryStream(memoryStream.ToArray(), 0, (int)memoryStream.Length, false, true);
 #endif
                 }
@@ -754,7 +754,7 @@ namespace Microsoft.Azure.Devices.Client
                 if (originalStream.Length == 0)
                 {
                     // This can happen in Stream.Null
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
                     return null;
                 }
 
@@ -770,7 +770,7 @@ namespace Microsoft.Azure.Devices.Client
             return null;
         }
 
-#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !WINDOWS_UWP && !NETMF
         AmqpMessage PopulateAmqpMessageForSend(AmqpMessage message)
         {
             MessageConverter.UpdateAmqpMessageHeadersAndProperties(message, this);
@@ -778,7 +778,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
         object GetSystemProperty(string key)
         {
             // .NetMF doesn't have generics so we have to resort to look for the key and return the object inside. The caller will have to figure out how to handle it
@@ -800,7 +800,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (this.disposed)
             {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
                 throw new Exception("Message disposed");
 #else
                 throw Fx.Exception.ObjectDisposed(ApiResources.MessageDisposed);
@@ -814,7 +814,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 if (disposing)
                 {
-#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !WINDOWS_UWP && !NETMF
                     if (this.serializedAmqpMessage != null)
                     {
                         // in the receive scenario, this.bodyStream is a reference

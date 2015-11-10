@@ -7,7 +7,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.Text;
     using Microsoft.Azure.Devices.Client.Extensions;
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq.Expressions;
@@ -25,7 +25,7 @@ namespace Microsoft.Azure.Devices.Client
         const char ValuePairSeparator = '=';
         const string HostNameSeparator = ".";
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         static readonly RegexOptions regexOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
         static readonly string HostNamePropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.HostName)).Body).Member.Name; // todo: replace with nameof()
@@ -77,7 +77,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>A new instance of the <see cref="IotHubConnectionStringBuilder"/> class with a populated connection string.</returns>
         public static IotHubConnectionStringBuilder Create(string iotHubConnectionString)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             if (iotHubConnectionString.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("iotHubConnectionString");
@@ -144,7 +144,7 @@ namespace Microsoft.Azure.Devices.Client
             return new IotHubConnectionString(this);
         }
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         /// <summary>
         /// Produces the connection string based on the values of the <see cref="IotHubConnectionStringBuilder"/> instance properties.
         /// </summary>
@@ -169,7 +169,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void Parse(string iotHubConnectionString)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             if (iotHubConnectionString == null || iotHubConnectionString == "")
             {
                 throw new ArgumentException("Malformed Token");
@@ -227,7 +227,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void Validate()
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             if (this.DeviceId.IsNullOrWhiteSpace())
             {
                 throw new ArgumentException("DeviceId must be specified in connection string");
@@ -288,7 +288,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetHostName(string hostname)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             if (hostname.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("hostname");
@@ -308,7 +308,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetIotHubName()
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             this.iotHubName = GetIotHubName(this.HostName);
 
             if (this.IotHubName.IsNullOrWhiteSpace())
@@ -337,7 +337,7 @@ namespace Microsoft.Azure.Devices.Client
             this.Validate();
         }
 
-#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+#if !NETMF
         static void ValidateFormat(string value, string propertyName, Regex regex)
         {
             if (!regex.IsMatch(value))
@@ -389,7 +389,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         static string GetIotHubName(string hostName)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             int index = hostName.IndexOf(HostNameSeparator);
 #else
             int index = hostName.IndexOf(HostNameSeparator, StringComparison.OrdinalIgnoreCase);

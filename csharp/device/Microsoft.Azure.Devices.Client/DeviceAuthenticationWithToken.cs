@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetDeviceId(string deviceId)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             if (token.IsNullOrWhiteSpace())
 #else
             if (string.IsNullOrWhiteSpace(deviceId))
@@ -84,7 +84,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetToken(string token)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+#if NETMF
             if (token.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("token");
