@@ -156,27 +156,19 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string MessageId
         {
+            get
+            {
 #if NETMF
-            get
-            {
                 return (string)(this.GetSystemProperty(MessageSystemPropertyNames.MessageId) ?? string.Empty);
-            }
-
-            set
-            {
-                this.SystemProperties[MessageSystemPropertyNames.MessageId] = value;
-            }
 #else
-            get
-            {
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.MessageId);
+#endif
             }
 
             set
             {
                 this.SystemProperties[MessageSystemPropertyNames.MessageId] = value;
             }
-#endif
         }
 
         /// <summary>
@@ -184,27 +176,19 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string To
         {
+            get
+            {
 #if NETMF
-            get
-            {
                 return (string)(this.GetSystemProperty(MessageSystemPropertyNames.To) ?? string.Empty);
-            }
-
-            set
-            {
-                this.SystemProperties[MessageSystemPropertyNames.To] = value;
-            }
 #else
-            get
-            {
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.To);
+#endif
             }
 
             set
             {
                 this.SystemProperties[MessageSystemPropertyNames.To] = value;
             }
-#endif
         }
 
         /// <summary>
@@ -212,27 +196,19 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public DateTimeT ExpiryTimeUtc
         {
+            get
+            {
 #if NETMF
-            get
-            {
                 return (DateTime)(this.GetSystemProperty(MessageSystemPropertyNames.ExpiryTimeUtc) ?? DateTime.MinValue);
-            }
-
-            internal set
-            {
-                this.SystemProperties[MessageSystemPropertyNames.ExpiryTimeUtc] = value;
-            }
 #else
-            get
-            {
                 return this.GetSystemProperty<DateTimeT>(MessageSystemPropertyNames.ExpiryTimeUtc);
+#endif
             }
 
             internal set
             {
                 this.SystemProperties[MessageSystemPropertyNames.ExpiryTimeUtc] = value;
             }
-#endif
         }
 
         /// <summary>
@@ -240,27 +216,19 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string CorrelationId
         {
+            get
+            {
 #if NETMF
-            get
-            {
                 return (string)(this.GetSystemProperty(MessageSystemPropertyNames.CorrelationId) ?? string.Empty);
-            }
-
-            set
-            {
-                this.SystemProperties[MessageSystemPropertyNames.CorrelationId] = value;
-            }
 #else
-            get
-            {
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.CorrelationId);
+#endif
             }
 
             set
             {
                 this.SystemProperties[MessageSystemPropertyNames.CorrelationId] = value;
             }
-#endif
         }
 
         /// <summary>
@@ -329,27 +297,19 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public ulong SequenceNumber
         {
-#if NETMF
             get
             {
+#if NETMF
                 return (ulong)(this.GetSystemProperty(MessageSystemPropertyNames.SequenceNumber) ?? 0);
+#else
+                return this.GetSystemProperty<ulong>(MessageSystemPropertyNames.SequenceNumber);                
+#endif
             }
 
             internal set
             {
                 this.SystemProperties[MessageSystemPropertyNames.SequenceNumber] = value;
             }
-#else
-            get
-            {
-                return this.GetSystemProperty<ulong>(MessageSystemPropertyNames.SequenceNumber);                
-            }
-
-            internal set
-            {
-                this.SystemProperties[MessageSystemPropertyNames.SequenceNumber] =  value;
-            }
-#endif
         }
 
         /// <summary>
@@ -357,27 +317,19 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string LockToken
         {
+            get
+            {
 #if NETMF
-            get
-            {
                 return (string)(this.GetSystemProperty(MessageSystemPropertyNames.LockToken) ?? string.Empty);
-            }
-
-            internal set
-            {
-                this.SystemProperties[MessageSystemPropertyNames.LockToken] = value;
-            }
 #else
-            get
-            {
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.LockToken);
+#endif
             }
 
             internal set
             {
                 this.SystemProperties[MessageSystemPropertyNames.LockToken] = value;
             }
-#endif
         }
 
         /// <summary>
@@ -385,27 +337,19 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public DateTimeT EnqueuedTimeUtc
         {
+            get
+            {
 #if NETMF
-            get
-            {
                 return (DateTime)(this.GetSystemProperty(MessageSystemPropertyNames.EnqueuedTime) ?? DateTime.MinValue);
-            }
-
-            internal set
-            {
-                this.SystemProperties[MessageSystemPropertyNames.EnqueuedTime] = value;
-            }
 #else
-            get
-            {
                 return this.GetSystemProperty<DateTimeT>(MessageSystemPropertyNames.EnqueuedTime);
+#endif
             }
 
             internal set
             {
                 this.SystemProperties[MessageSystemPropertyNames.EnqueuedTime] = value;
             }
-#endif
         }
 
         /// <summary>
@@ -413,27 +357,19 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public uint DeliveryCount
         {
+            get
+            {
 #if NETMF
-            get
-            {
                 return (byte)(this.GetSystemProperty(MessageSystemPropertyNames.DeliveryCount) ?? 0);
-            }
-
-            internal set
-            {
-                this.SystemProperties[MessageSystemPropertyNames.DeliveryCount] = (byte)value;
-            }
 #else
-            get
-            {
                 return this.GetSystemProperty<byte>(MessageSystemPropertyNames.DeliveryCount);
+#endif
             }
 
             internal set
             {
                 this.SystemProperties[MessageSystemPropertyNames.DeliveryCount] = (byte)value;
             }
-#endif
         }
 
         /// <summary>
@@ -442,27 +378,19 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string UserId
         {
+            get
+            {
 #if NETMF
-            get
-            {
                 return (string)(this.GetSystemProperty(MessageSystemPropertyNames.UserId) ?? string.Empty);
-            }
-
-            set
-            {
-                this.SystemProperties[MessageSystemPropertyNames.UserId] = value;
-            }
 #else
-            get
-            {
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.UserId);
+#endif
             }
 
             set
             {
                 this.SystemProperties[MessageSystemPropertyNames.UserId] = value;
             }
-#endif
         }
 
         /// <summary>
@@ -471,10 +399,7 @@ namespace Microsoft.Azure.Devices.Client
 #if NETMF
         public Hashtable Properties { get; private set; }
 #else
-        /// <summary>
-        /// Gets the dictionary of user properties which are set when user send the data.
-        /// </summary>
-        public IDictionary<string, string> Properties { get; private set; }
+         public IDictionary<string, string> Properties { get; private set; }
 #endif
 
         /// <summary>
