@@ -1,7 +1,7 @@
 // 
-//  By Elze Kool see http://www.microframework.nl/2009/09/05/shahmac-digest-class/
+//  Code by Elze Kool
 //  
-namespace ElzeKool
+namespace Microsoft.Azure.Devices.Client
 {
     using System;
 

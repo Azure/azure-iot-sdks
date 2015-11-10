@@ -155,7 +155,7 @@ namespace Microsoft.Azure.Devices.Client
         static string Sign(string requestString, string key)
         {
             // computing SHA256 signature using a managed code library
-            var hmac = ElzeKool.SHA.computeHMAC_SHA256(Convert.FromBase64String(key), Encoding.UTF8.GetBytes(requestString));
+            var hmac = SHA.computeHMAC_SHA256(Convert.FromBase64String(key), Encoding.UTF8.GetBytes(requestString));
             return Convert.ToBase64String(hmac);
 
             // computing SHA256 signature using the .NET Micro Framework classes
