@@ -23,18 +23,7 @@
 
         public override string ToString()
         {
-            return String.Format("Device ID = {0}, Primary Key = {1}, Secondary Key = {2}, ConnectionString = {3}, ConnState = {4}, ActivityTime = {5}, LastConnState = {6}, LastStateUpdatedTime = {7}, MessageCount = {8}, State = {9}, SuspensionReason = {10}\r\n",
-                        this.Id,
-                        this.PrimaryKey,
-                        this.SecondaryKey,
-                        this.ConnectionString,
-                        this.ConnectionState,
-                        this.LastActivityTime,
-                        this.LastConnectionStateUpdatedTime,
-                        this.LastStateUpdatedTime,
-                        this.MessageCount,
-                        this.State,
-                        this.SuspensionReason);
+            return$"Device ID = {this.Id}, Primary Key = {this.PrimaryKey}, Secondary Key = {this.SecondaryKey}, ConnectionString = {this.ConnectionString}, ConnState = {this.ConnectionState}, ActivityTime = {this.LastActivityTime}, LastConnState = {this.LastConnectionStateUpdatedTime}, LastStateUpdatedTime = {this.LastStateUpdatedTime}, MessageCount = {this.MessageCount}, State = {this.State}, SuspensionReason = {this.SuspensionReason}\r\n";
         }
     }
 }

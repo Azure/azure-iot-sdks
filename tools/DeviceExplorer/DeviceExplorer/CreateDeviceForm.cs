@@ -43,23 +43,24 @@ namespace DeviceExplorer
         {
             try
             {
-                Device device = new Device(deviceIDTextBox.Text);
+                var device = new Device(deviceIDTextBox.Text);
                 await registryManager.AddDeviceAsync(device);
                 device = await registryManager.GetDeviceAsync(device.Id);
                 device.Authentication.SymmetricKey.PrimaryKey = primaryKeyTextBox.Text;
                 device.Authentication.SymmetricKey.SecondaryKey = secondaryKeyTextBox.Text;
                 device = await registryManager.UpdateDeviceAsync(device);
 
-                string deviceInfo = String.Format("ID={0}\nPrimaryKey={1}\nSecondaryKey={2}", device.Id, device.Authentication.SymmetricKey.PrimaryKey, device.Authentication.SymmetricKey.SecondaryKey);
-
-                DeviceCreatedForm deviceCreated = new DeviceCreatedForm(device.Id, device.Authentication.SymmetricKey.PrimaryKey, device.Authentication.SymmetricKey.SecondaryKey);
+                var deviceCreated = new DeviceCreatedForm(device.Id, device.Authentication.SymmetricKey.PrimaryKey, device.Authentication.SymmetricKey.SecondaryKey);
                 deviceCreated.ShowDialog();
 
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

@@ -224,7 +224,7 @@ void remote_monitoring_run(void)
 
 						(void)printf("Sending sensor value Temperature = %02f, Humidity = %02f\r\n", thermostat->Temperature, thermostat->Humidity);
 
-                        if (SERIALIZE(&buffer, &bufferSize, thermostat->Temperature, thermostat->ExternalTemperature, thermostat->Humidity, thermostat->DeviceId) != IOT_AGENT_OK)
+                        if (SERIALIZE(&buffer, &bufferSize, thermostat->DeviceId, thermostat->Temperature, thermostat->Humidity, thermostat->ExternalTemperature) != IOT_AGENT_OK)
                         {
                             (void)printf("Failed sending sensor value\r\n");
                         }

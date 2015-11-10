@@ -202,3 +202,7 @@ csharp/device/.vs/*
 service/java/.idea
 service/java/target
 service/java/iot.service.sdk.java.iml
+java/device/doc/api_reference
+java/service/doc/api_reference
+c/build_all/windows/nuget.exe
+csharp/device/build/nuget.exe
