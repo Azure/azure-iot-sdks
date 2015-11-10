@@ -4,6 +4,16 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+    using System.IO;
+    using System.Net;
+#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+    using System.Net.Http.Formatting;
+#endif
+
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+    using System.Collections;
+    using System.Text;
+#else
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Globalization;
@@ -11,32 +21,44 @@ namespace Microsoft.Azure.Devices.Client
     using System.Linq;
     using System.Net;
     using System.Net.Http;
-#if !WINDOWS_UWP
-    using System.Net.Http.Formatting;
-#endif
     using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
+#endif
+
     using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
 
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+    sealed class HttpClientHelper : IDisposable
+#else
     sealed class HttpClientHelper : IHttpClientHelper
+#endif
     {
         readonly Uri baseAddress;
         readonly IAuthorizationHeaderProvider authenticationHeaderProvider;
+
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
         readonly IReadOnlyDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> defaultErrorMapping;
         HttpClient httpClientObj;
+#endif
         bool isDisposed;
 
         public HttpClientHelper(
             Uri baseAddress,
             IAuthorizationHeaderProvider authenticationHeaderProvider,
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+            TimeSpan timeout)
+#else
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> defaultErrorMapping,
             TimeSpan timeout,
             Action<HttpClient> preRequestActionForAllRequests)
+#endif
         {
             this.baseAddress = baseAddress;
             this.authenticationHeaderProvider = authenticationHeaderProvider;
+
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
             this.defaultErrorMapping =
                 new ReadOnlyDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>(defaultErrorMapping);
 
@@ -49,8 +71,17 @@ namespace Microsoft.Azure.Devices.Client
             {
                 preRequestActionForAllRequests(this.httpClientObj);
             }
+#endif
         }
 
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public HttpWebResponse Get(
+            string requestUri,
+            Hashtable customHeaders)
+        {
+            return this.Get(requestUri, customHeaders, true);
+        }
+#else
         public Task<T> GetAsync<T>(
             Uri requestUri,
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
@@ -59,7 +90,50 @@ namespace Microsoft.Azure.Devices.Client
         {
             return this.GetAsync<T>(requestUri, errorMappingOverrides, customHeaders, true, cancellationToken);
         }
+#endif
 
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public HttpWebResponse Get(
+            string requestUri,
+            Hashtable customHeaders,
+            bool throwIfNotFound)
+        {
+            if (throwIfNotFound)
+            {
+
+                using (var webRequest = (HttpWebRequest)WebRequest.Create(new Uri(this.baseAddress.OriginalString + requestUri)))
+                {
+                    webRequest.Method = "GET";
+
+                    // add authorization header
+                    webRequest.Headers.Add("Authorization", this.authenticationHeaderProvider.GetAuthorizationHeader());
+
+                    // add custom headers
+                    AddCustomHeaders(webRequest, customHeaders);
+
+                    // perform request and get response
+                    // don't close the WebResponse here because we may need to read the response stream later 
+                    var webResponse = webRequest.GetResponse() as HttpWebResponse;
+
+                    // message received
+                    return ReadResponseMessageAsync(webResponse);
+                }
+            }
+            else
+            {
+                //this.ExecuteAsync(
+                //   HttpMethod.Get,
+                //   new Uri(this.baseAddress, requestUri),
+                //   (requestMsg, token) => AddCustomHeaders(requestMsg, customHeaders),
+                //   message => message.IsSuccessStatusCode || message.StatusCode == HttpStatusCode.NotFound,
+                //   async (message, token) => result = message.StatusCode == HttpStatusCode.NotFound ? (default(T)) : await ReadResponseMessageAsync<T>(message, token),
+                //   errorMappingOverrides,
+                //   cancellationToken);
+            }
+
+            return null;
+        }
+#else
         public async Task<T> GetAsync<T>(
             Uri requestUri,
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
@@ -93,7 +167,9 @@ namespace Microsoft.Azure.Devices.Client
 
             return result;
         }
+#endif
 
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
         public async Task<T> PutAsync<T>(
             Uri requestUri,
             T entity,
@@ -123,7 +199,35 @@ namespace Microsoft.Azure.Devices.Client
             return result;
 #endif
         }
+#endif
 
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        static HttpWebResponse ReadResponseMessageAsync(HttpWebResponse message)
+        {
+            // TODO
+            // unclear what is the purpose of this method and how to implement it
+            return message;
+            //// T entity = message.Content.ReadAsAsync<T>(token);
+
+            // // Etag in the header is considered authoritative
+            // var eTagHolder = entity as IETagHolder;
+            // if (eTagHolder != null)
+            // {
+            //     if (message.Headers.GetValues("ETag") != null)
+            //     {
+            //         var etagValue = message.Headers.GetValues("ETag");
+
+            //         if (etagValue.Length == 1 && !etagValue[0].IsNullOrWhiteSpace())
+            //         {
+            //             // RDBug 3429280:Make the version field of Device object internal
+            //             eTagHolder.ETag = etagValue[0];
+            //         }
+            //     }
+            // }
+
+            // return entity;
+        }
+#else
         static async Task<T> ReadResponseMessageAsync<T>(HttpResponseMessage message, CancellationToken token)
         {
             if (typeof(T) == typeof (HttpResponseMessage))
@@ -153,6 +257,17 @@ namespace Microsoft.Azure.Devices.Client
             return entity;
 #endif
         }
+#endif
+
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        static void AddCustomHeaders(HttpWebRequest requestMessage, Hashtable customHeaders)
+        {
+            foreach (var header in customHeaders.Keys)
+            {
+                requestMessage.Headers.Add(header as string, customHeaders[header] as string);
+            }
+        }
+#else
 
         static Task AddCustomHeaders(HttpRequestMessage requestMessage, IDictionary<string, string> customHeaders)
         {
@@ -166,7 +281,27 @@ namespace Microsoft.Azure.Devices.Client
 
             return Task.FromResult(0);
         }
+#endif
 
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        static void InsertEtag(HttpWebRequest requestMessage, IETagHolder entity, PutOperationType operationType)
+        {
+            if (operationType == PutOperationType.CreateEntity)
+            {
+                return;
+            }
+
+            if (operationType == PutOperationType.ForceUpdateEntity)
+            {
+                const string etag = "\"*\"";
+                requestMessage.Headers.Add("IfMatch", etag);
+            }
+            else
+            {
+                InsertEtag(requestMessage, entity);
+            }
+        }
+#else
         static void InsertEtag(HttpRequestMessage requestMessage, IETagHolder entity, PutOperationType operationType)
         {
             if (operationType == PutOperationType.CreateEntity)
@@ -184,7 +319,31 @@ namespace Microsoft.Azure.Devices.Client
                 InsertEtag(requestMessage, entity);
             }
         }
+#endif
 
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        static void InsertEtag(HttpWebRequest requestMessage, IETagHolder entity)
+        {
+            if (entity.ETag.IsNullOrWhiteSpace())
+            {
+                throw new ArgumentException("The entity does not have its ETag set.");
+            }
+
+            string etag = entity.ETag;
+
+            if (etag.IndexOf("\"") != 0)
+            {
+                etag = "\"" + etag;
+            }
+
+            if (etag.LastIndexOf("\"") != etag.Length)
+            {
+                etag = etag + "\"";
+            }
+
+            requestMessage.Headers.Add("IfMatch", etag);
+        }
+#else
         static void InsertEtag(HttpRequestMessage requestMessage, IETagHolder entity)
         {
             if (string.IsNullOrWhiteSpace(entity.ETag))
@@ -206,7 +365,9 @@ namespace Microsoft.Azure.Devices.Client
 
             requestMessage.Headers.IfMatch.Add(new EntityTagHeaderValue(etag));
         }
+#endif
 
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
         IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> MergeErrorMapping(
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides)
         {
@@ -222,7 +383,106 @@ namespace Microsoft.Azure.Devices.Client
 
             return mergedMapping;
         }
+#endif
 
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void Post(
+            string requestUri,
+            object entity,
+            Hashtable customHeaders)
+        {
+            using (var webRequest = (HttpWebRequest)WebRequest.Create(new Uri(this.baseAddress.OriginalString + requestUri)))
+            {
+                //webRequest.ProtocolVersion = HttpVersion.Version11;
+                webRequest.KeepAlive = true;
+                webRequest.Method = "POST";
+
+                // add authorization header
+                webRequest.Headers.Add("Authorization", this.authenticationHeaderProvider.GetAuthorizationHeader());
+
+                // add custom headers
+                AddCustomHeaders(webRequest, customHeaders);
+                webRequest.AllowWriteStreamBuffering = true;
+
+                if (entity != null)
+                {
+                    if (entity.GetType().Equals(typeof(MemoryStream)))
+                    {
+                        // need to set these before getting the request stream
+                        webRequest.ContentLength = ((Stream)entity).Length;
+
+                        int totalBytes = 0;
+                        using (var requestStream = webRequest.GetRequestStream())
+                        {
+                            var buffer = new byte[256];
+                            var bytesRead = 0;
+
+                            while ((bytesRead = ((Stream)entity).Read(buffer, 0, 256)) > 0)
+                            {
+                                requestStream.Write(buffer, 0, bytesRead);
+
+                                totalBytes += bytesRead;
+                            }
+                        }
+
+                    }
+                    else if (entity.GetType().Equals(typeof(string)))
+                    {
+
+                        var buffer = Encoding.UTF8.GetBytes(entity as string);
+
+                        // need to set these before getting the request stream
+                        webRequest.ContentLength = buffer.Length;
+                        webRequest.ContentType = CommonConstants.BatchedMessageContentType;
+
+                        int bytesSent = 0;
+
+                        using (var requestStream = webRequest.GetRequestStream())
+                        {
+                            var chunkBytes = 0;
+
+                            while (bytesSent < buffer.Length)
+                            {
+                                // calculate bytes count for this chunk
+                                chunkBytes = (buffer.Length - bytesSent) < 256 ? (buffer.Length - bytesSent) : 256;
+
+                                // write chunk
+                                requestStream.Write(buffer, bytesSent, chunkBytes);
+
+                                // update counter
+                                bytesSent += chunkBytes;
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        // TODO
+                        // requestMsg.Content = new ObjectContent<T>(entity, new JsonMediaTypeFormatter());
+                        webRequest.ContentLength = 0;
+                    }
+                }
+                else
+                {
+                    webRequest.ContentLength = 0;
+                }
+
+                // perform request and get response
+                using (var webResponse = webRequest.GetResponse() as HttpWebResponse)
+                {
+                    if (webResponse.StatusCode == HttpStatusCode.NoContent)
+                    {
+                        // success!
+                        return;
+                    }
+                    else
+                    {
+                        throw new WebException("", null, WebExceptionStatus.ReceiveFailure, webResponse);
+                    }
+                }
+            }
+        }
+#else
         public Task PostAsync<T>(
             Uri requestUri, 
             T entity, 
@@ -265,7 +525,43 @@ namespace Microsoft.Azure.Devices.Client
                 errorMappingOverrides,
                 cancellationToken);
         }
+#endif
 
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void Delete(
+            string requestUri,
+            IETagHolder etag,
+            Hashtable customHeaders)
+        {
+            using (var webRequest = (HttpWebRequest)WebRequest.Create(new Uri(this.baseAddress.OriginalString + requestUri)))
+            {
+                webRequest.Method = "DELETE";
+
+                // add authorization header
+                webRequest.Headers.Add("Authorization", this.authenticationHeaderProvider.GetAuthorizationHeader());
+
+                // add custom headers
+                AddCustomHeaders(webRequest, customHeaders);
+
+                // add ETag header
+                InsertEtag(webRequest, etag);
+
+                // perform request and get response
+                using (var webResponse = webRequest.GetResponse() as HttpWebResponse)
+                {
+                    if (webResponse.StatusCode == HttpStatusCode.NoContent)
+                    {
+                        // success!
+                        return;
+                    }
+                    else
+                    {
+                        throw new WebException("", null, WebExceptionStatus.ReceiveFailure, webResponse);
+                    }
+                }
+            }
+        }
+#else
         public Task DeleteAsync<T>(
             Uri requestUri,
             T entity,
@@ -286,7 +582,9 @@ namespace Microsoft.Azure.Devices.Client
                     errorMappingOverrides,
                     cancellationToken);
         }
+#endif
 
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
         Task ExecuteAsync(
             HttpMethod httpMethod,
             Uri requestUri,
@@ -411,16 +709,20 @@ namespace Microsoft.Azure.Devices.Client
             var exception = mapToExceptionFunc(response);
             return await exception;
         }
+#endif
 
         public void Dispose()
         {
             if (!this.isDisposed)
             {
-                    if (this.httpClientObj != null)
-                    {
-                        this.httpClientObj.Dispose();
-                        this.httpClientObj = null;
-                    }
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+
+                if (this.httpClientObj != null)
+                {
+                    this.httpClientObj.Dispose();
+                    this.httpClientObj = null;
+                }
+#endif
 
                 this.isDisposed = true;
             }

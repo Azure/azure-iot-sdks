@@ -5,19 +5,27 @@ namespace Microsoft.Azure.Devices.Client
 {
     using System;
     using System.Text;
-    using System.Threading.Tasks;
     using System.Net;
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP &&  !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
     using Microsoft.Azure.Amqp;
 #endif
+
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
+    using System.Threading.Tasks;
+#endif
+
     using Microsoft.Azure.Devices.Client.Extensions;
 
     sealed class IotHubConnectionString : IAuthorizationHeaderProvider
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP &&  !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
         , ICbsTokenProvider
 #endif
     {
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        static readonly TimeSpan DefaultTokenTimeToLive = new TimeSpan(1, 0, 0);
+#else
         static readonly TimeSpan DefaultTokenTimeToLive = TimeSpan.FromHours(1);
+#endif
         const string UserSeparator = "@";
 
         public IotHubConnectionString(IotHubConnectionStringBuilder builder)
@@ -35,11 +43,16 @@ namespace Microsoft.Azure.Devices.Client
             this.DeviceId = builder.DeviceId;
 #if WINDOWS_UWP
             this.HttpsEndpoint = new UriBuilder("https", builder.HostName).Uri;
-#else
+#elif !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
             this.HttpsEndpoint = new UriBuilder(Uri.UriSchemeHttps, builder.HostName).Uri;
+#elif MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+            this.HttpsEndpoint = new Uri("https://" + builder.HostName);
 #endif
-#if !WINDOWS_UWP
+
+#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
             this.AmqpEndpoint = new UriBuilder(CommonConstants.AmqpsScheme, builder.HostName, AmqpConstants.DefaultSecurePort).Uri;
+#elif MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+            //this.AmqpEndpoint = "amqps://" + this.HostName + ":" + AmqpConstants.DefaultSecurePort;
 #endif
         }
 
@@ -67,8 +80,14 @@ namespace Microsoft.Azure.Devices.Client
             private set;
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
         public Uri AmqpEndpoint
+        {
+            get;
+            private set;
+        }
+#elif MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public string AmqpEndpoint
         {
             get;
             private set;
@@ -97,10 +116,27 @@ namespace Microsoft.Azure.Devices.Client
             private set;
         }
 
+        public string GetUser()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append(this.SharedAccessKeyName ?? WebUtility.UrlEncode(this.DeviceId));
+            stringBuilder.Append(UserSeparator);
+            stringBuilder.Append("sas.");
+            stringBuilder.Append(this.SharedAccessKeyName == null ? "" : "root.");
+            stringBuilder.Append(this.IotHubName);
+
+            return stringBuilder.ToString();
+        }
+
         public string GetPassword()
         {
             string password;
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+            if (this.SharedAccessSignature.IsNullOrWhiteSpace())
+
+#else
             if (string.IsNullOrWhiteSpace(this.SharedAccessSignature))
+#endif
             {
                 TimeSpan timeToLive;
                 password = this.BuildToken(out timeToLive);
@@ -118,7 +154,7 @@ namespace Microsoft.Azure.Devices.Client
             return this.GetPassword();
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
         Task<CbsToken> ICbsTokenProvider.GetTokenAsync(Uri namespaceAddress, string appliesTo, string[] requiredClaims)
         {
             string tokenValue;
@@ -137,10 +173,12 @@ namespace Microsoft.Azure.Devices.Client
 
             return Task.FromResult(token);
         }
+#elif MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+
 #endif
         public Uri BuildLinkAddress(string path)
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
             throw new NotImplementedException();
 #else
             var builder = new UriBuilder(this.AmqpEndpoint)
@@ -168,7 +206,11 @@ namespace Microsoft.Azure.Devices.Client
 
             if (this.SharedAccessKeyName == null)
             {
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+                builder.Target = this.Audience + "/devices/" + WebUtility.UrlEncode(this.DeviceId);
+#else
                 builder.Target = "{0}/devices/{1}".FormatInvariant(this.Audience, WebUtility.UrlEncode(this.DeviceId));
+#endif
             }
             else
             {

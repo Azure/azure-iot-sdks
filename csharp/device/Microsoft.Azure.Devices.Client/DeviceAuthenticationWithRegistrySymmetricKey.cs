@@ -4,11 +4,17 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+    using Microsoft.Azure.Devices.Client.Extensions;
 
+#if WINDOWS_UWP
+    internal
+#else
+    public
+#endif
     /// <summary>
     /// Authentication method that uses the symmetric key associated with the device in the device registry. 
     /// </summary>
-    public sealed class DeviceAuthenticationWithRegistrySymmetricKey : IAuthenticationMethod
+    sealed class DeviceAuthenticationWithRegistrySymmetricKey : IAuthenticationMethod
     {
         string deviceId;
         byte[] key;
@@ -83,6 +89,13 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetKeyFromBase64String(string key)
         {
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+            if (key.IsNullOrWhiteSpace())
+            {
+                throw new ArgumentNullException("key");
+            }
+
+#else
             if (string.IsNullOrWhiteSpace(key))
             {
                 throw new ArgumentNullException("key");
@@ -92,13 +105,18 @@ namespace Microsoft.Azure.Devices.Client
             {
                 throw new ArgumentException("Key must be base64 encoded");
             }
+#endif
 
             this.key = Convert.FromBase64String(key);
         }
 
         void SetDeviceId(string deviceId)
         {
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+            if (deviceId.IsNullOrWhiteSpace())
+#else
             if (string.IsNullOrWhiteSpace(deviceId))
+#endif
             {
                 throw new ArgumentNullException("deviceId");
             }

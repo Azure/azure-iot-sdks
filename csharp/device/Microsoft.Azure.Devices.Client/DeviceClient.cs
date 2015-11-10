@@ -4,16 +4,18 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+    using Microsoft.Azure.Devices.Client.Extensions;
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
-    using Microsoft.Azure.Devices.Client.Extensions;
+#endif
 
     // C# using aliases cannot name an unbound generic type declaration without supplying type arguments
     // Therefore, define a separate alias for each type argument
-#if WINDOWS_UWP
+#if WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
     using AsyncTask = Windows.Foundation.IAsyncAction;
     using AsyncTaskOfMessage = Windows.Foundation.IAsyncOperation<Message>;
-#else
+#elif !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
     using AsyncTask = System.Threading.Tasks.Task;
     using AsyncTaskOfMessage = System.Threading.Tasks.Task<Message>;
 #endif
@@ -42,8 +44,10 @@ namespace Microsoft.Azure.Devices.Client
         const string DeviceId = "DeviceId";
         const string DeviceIdParameterPattern = @"(^\s*?|.*;\s*?)" + DeviceId + @"\s*?=.*";
 
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
         static readonly RegexOptions regexOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, regexOptions);
+#endif
         readonly DeviceClientHelper impl;
 
         DeviceClient(DeviceClientHelper impl)
@@ -51,6 +55,7 @@ namespace Microsoft.Azure.Devices.Client
             this.impl = impl;
         }
 
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
         /// <summary>
         /// Create an Amqp DeviceClient from individual parameters
         /// </summary>
@@ -84,6 +89,7 @@ namespace Microsoft.Azure.Devices.Client
             var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authenticationMethod);
             return CreateFromConnectionString(connectionStringBuilder.ToString(), transportType);
         }
+#endif
 
         /// <summary>
         /// Create a DeviceClient using Amqp transport from the specified connection string
@@ -92,12 +98,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString)
         {
-#if WINDOWS_UWP
-            return CreateFromConnectionString(connectionString, TransportType.Http1);
-#else
             return CreateFromConnectionString(connectionString, TransportType.Amqp);
-#endif
-
         }
 
         /// <summary>
@@ -109,7 +110,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString, string deviceId)
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP && !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
             return CreateFromConnectionString(connectionString, deviceId, TransportType.Http1);    
 #else
             return CreateFromConnectionString(connectionString, deviceId, TransportType.Amqp);
@@ -139,7 +140,7 @@ namespace Microsoft.Azure.Devices.Client
 #if WINDOWS_UWP
                 throw new NotImplementedException();
 #else
-                return new DeviceClient(new AmqpDeviceClient(iotHubConnectionString));
+                //return new DeviceClient(new AmqpDeviceClient(iotHubConnectionString));
 #endif
             }
             else if (transportType == TransportType.Http1)
@@ -147,7 +148,12 @@ namespace Microsoft.Azure.Devices.Client
                 return new DeviceClient(new HttpDeviceClient(iotHubConnectionString));
             }
 
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+            throw new InvalidOperationException("Unsupported Transport Type " + transportType.ToString());
+
+#else
             throw new InvalidOperationException("Unsupported Transport Type {0}".FormatInvariant(transportType));
+#endif
         }
 
         /// <summary>
@@ -169,10 +175,12 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentNullException("deviceId");
             }
 
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
             if (DeviceIdParameterRegex.IsMatch(connectionString))
             {
                 throw new ArgumentException("connectionString must not contain DeviceId keyvalue parameter");
             }
+#endif
 
             return CreateFromConnectionString(connectionString + ";" + DeviceId + "=" + deviceId, transportType);
         }
@@ -180,29 +188,51 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Explicitly open the DeviceClient instance.
         /// </summary>
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void Open()
+        {
+            impl.Open();
+        }
+#else
         public AsyncTask OpenAsync()
         {
             return impl.OpenAsync().AsTaskOrAsyncOp();
         }
+#endif
 
         /// <summary>
         /// Close the DeviceClient instance
         /// </summary>
         /// <returns></returns>
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void Close()
+        {
+            impl.Close();
+        }
+#else
         public AsyncTask CloseAsync()
         {
             return impl.CloseAsync().AsTaskOrAsyncOp();
         }
+#endif
 
         /// <summary>
         /// Receive a message from the device queue using the default timeout.
         /// </summary>
         /// <returns>The receive message or null if there was no message until the default timeout</returns>
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public Message Receive()
+        {
+            return impl.Receive();
+        }
+#else
         public AsyncTaskOfMessage ReceiveAsync()
         {
             return impl.ReceiveAsync().AsTaskOrAsyncOp();
         }
+#endif
 
+#if !MF_FRAMEWORK_VERSION_V4_3 && !MF_FRAMEWORK_VERSION_V4_4
         /// <summary>
         /// Receive a message from the device queue with the specified timeout
         /// </summary>
@@ -211,6 +241,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             return impl.ReceiveAsync(timeout).AsTaskOrAsyncOp();
         }
+#endif
 
 #if WINDOWS_UWP
         [Windows.Foundation.Metadata.DefaultOverloadAttribute()]
@@ -219,19 +250,34 @@ namespace Microsoft.Azure.Devices.Client
         /// Deletes a received message from the device queue
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
+
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void Complete(string lockToken)
+        {
+            impl.Complete(lockToken);
+        }
+#else
         public AsyncTask CompleteAsync(string lockToken)
         {
             return impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
         }
+#endif
 
         /// <summary>
         /// Deletes a received message from the device queue
         /// </summary>
         /// <returns>The previously received message</returns>
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void Complete(Message message)
+        {
+            impl.Complete(message);
+        }
+#else
         public AsyncTask CompleteAsync(Message message)
         {
             return impl.CompleteAsync(message).AsTaskOrAsyncOp();
         }
+#endif
 
 #if WINDOWS_UWP
         [Windows.Foundation.Metadata.DefaultOverloadAttribute()]
@@ -240,19 +286,33 @@ namespace Microsoft.Azure.Devices.Client
         /// Puts a received message back onto the device queue
         /// </summary>
         /// <returns>The previously received message</returns>
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void Abandon(string lockToken)
+        {
+            impl.Abandon(lockToken);
+        }
+#else
         public AsyncTask AbandonAsync(string lockToken)
         {
             return impl.AbandonAsync(lockToken).AsTaskOrAsyncOp();
         }
+#endif
 
         /// <summary>
         /// Puts a received message back onto the device queue
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void Abandon(Message message)
+        {
+            impl.Abandon(message);
+        }
+#else
         public AsyncTask AbandonAsync(Message message)
         {
             return impl.AbandonAsync(message).AsTaskOrAsyncOp();
         }
+#endif
 
 #if WINDOWS_UWP
         [Windows.Foundation.Metadata.DefaultOverloadAttribute()]
@@ -261,36 +321,66 @@ namespace Microsoft.Azure.Devices.Client
         /// Deletes a received message from the device queue and indicates to the server that the message could not be processed.
         /// </summary>
         /// <returns>The previously received message</returns>
+
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void Reject(string lockToken)
+        {
+            impl.Reject(lockToken);
+        }
+#else
         public AsyncTask RejectAsync(string lockToken)
         {
             return impl.RejectAsync(lockToken).AsTaskOrAsyncOp();
         }
+#endif
 
         /// <summary>
         /// Deletes a received message from the device queue and indicates to the server that the message could not be processed.
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void Reject(Message message)
+        {
+            impl.Reject(message);
+        }
+#else
         public AsyncTask RejectAsync(Message message)
         {
             return impl.RejectAsync(message).AsTaskOrAsyncOp();
         }
+#endif
 
         /// <summary>
         /// Sends an event to device hub
         /// </summary>
         /// <returns>The message containing the event</returns>
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        public void SendEvent(Message message)
+        {
+            impl.SendEvent(message);
+        }
+#else
         public AsyncTask SendEventAsync(Message message)
         {
             return impl.SendEventAsync(message).AsTaskOrAsyncOp();
         }
+#endif
 
         /// <summary>
         /// Sends a batch of events to device hub
         /// </summary>
         /// <returns>The task containing the event</returns>
+#if MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4
+        //public void SendEventBatch(Array<Message> messages)
+        //{
+        //    return impl.SendEventBatchAsync(messages).AsTaskOrAsyncOp();
+        //}
+#else
         public AsyncTask SendEventBatchAsync(IEnumerable<Message> messages)
         {
             return impl.SendEventBatchAsync(messages).AsTaskOrAsyncOp();
         }
+#endif
+
     }
 }
