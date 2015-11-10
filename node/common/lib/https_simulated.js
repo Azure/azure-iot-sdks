@@ -12,20 +12,19 @@ function Response(statusCode) {
 }
 
 function SimulatedHttps() {
-  this.handleRequest = function(config, done, isServiceCall, successMsg) {
+  this.handleRequest = function(config, done) {
 
     if (config.host === INVALID_CONFIG_NAME) {
       done(new Error('getaddrinfo ENOTFOUND bad'));
     }
     else if (config.keyName === INVALID_CONFIG_NAME) {
-      done(new Error(), new Response(isServiceCall ? 401 : 404));
+      done(new Error(), new Response(404));
     }
     else if (config.key === INVALID_CONFIG_NAME) {
       done(new Error(), new Response(401));
     }
     else {
-      var msg = successMsg ? successMsg : new Message('');
-      done(null, new Response(204), msg);
+      done(null, new Response(204), new Message(''));
     }
   };
 }
@@ -49,34 +48,6 @@ SimulatedHttps.prototype.sendFeedback = function (feedbackAction, lockToken, con
   else {
     this.handleRequest(config, done);
   }
-};
-
-SimulatedHttps.prototype.createDevice = function (path, deviceInfo, config, done) {
-  var device = { deviceId: deviceInfo.deviceId };
-  this.handleRequest(config, done, true, new Message(JSON.stringify(device)));
-};
-
-SimulatedHttps.prototype.updateDevice = function (path, deviceInfo, config, done) {
-  var device = { deviceId: deviceInfo.deviceId };
-  this.handleRequest(config, done, true, new Message(JSON.stringify(device)));
-};
-
-SimulatedHttps.prototype.getDevice = function (path, config, done) {
-  var device = { deviceId: 'testDevice' };
-  this.handleRequest(config, done, true, new Message(JSON.stringify(device)));
-};
-
-SimulatedHttps.prototype.listDevice = function (path, config, done) {
-  var devices = [
-    { deviceId: 'testDevice1' },
-    { deviceId: 'testDevice2' }
-  ];
-  this.handleRequest(config, done, true, new Message(JSON.stringify(devices)));
-};
-
-SimulatedHttps.prototype.deleteDevice = function (path, config, done) {
-  var device = { deviceId: 'testDevice' };
-  this.handleRequest(config, done, true, new Message(JSON.stringify(device)));
 };
 
 module.exports = SimulatedHttps;

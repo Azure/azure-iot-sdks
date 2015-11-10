@@ -8,7 +8,7 @@ namespace DeviceExplorer
         public DeviceCreatedForm(string deviceID, string primaryKey, string secondaryKey)
         {
             InitializeComponent();
-            richTextBox.Text = String.Format("ID={0}\nPrimaryKey={1}\nSecondaryKey={2}", deviceID, primaryKey, secondaryKey);
+            richTextBox.Text = $"ID={deviceID}\nPrimaryKey={primaryKey}\nSecondaryKey={secondaryKey}";
         }
 
         private void doneButton_Click(object sender, EventArgs e)

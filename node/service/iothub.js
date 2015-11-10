@@ -3,8 +3,6 @@
 
 'use strict';
 
-var common = require('azure-iot-common');
-
 /**
  * The Azure IoT Service SDK for Node.js allows applications to send messages
  * to devices and get feedback when they're delivered. It also supports
@@ -14,7 +12,8 @@ var common = require('azure-iot-common');
  */
 module.exports = {
   Client: require('./lib/client.js'),
+  ConnectionString: require('./lib/connection_string.js'),
   Device: require('./lib/device.js'),
-  Https: common.Https,
+  Http: require('./lib/registry_http.js'),
   Registry: require('./lib/registry.js')
 };

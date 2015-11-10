@@ -9,10 +9,12 @@ var nopt = require('nopt');
 var uuid = require('uuid');
 var colorsTmpl = require('colors-tmpl');
 var prettyjson = require('prettyjson');
+
 var Message = require('azure-iot-common').Message;
 var Client = require('azure-iothub').Client;
-var Registry = require('azure-iothub').Registry;
+var ConnectionString = require('azure-iothub').ConnectionString;
 var Https = require('azure-iothub').Https;
+var Registry = require('azure-iothub').Registry;
 var EventHubClient = require('./lib/eventhubclient.js');
 
 function Count(val) {
@@ -75,10 +77,11 @@ if (!connString)
   process.exit(1);
 }
 
-var registry = new Registry(connString, new Https());
+var hostname = ConnectionString.parse(connString).HostName;
+var registry = Registry.fromConnectionString(connString);
 
 if (command === 'list') {
-  registry.list(function (err, res, list) {
+  registry.list(function (err, list) {
     if (err) serviceError(err);
     else {
       list.forEach(function (device) {
@@ -99,7 +102,7 @@ else if (command === 'create') {
     else throw e;
   }
 
-  registry.create(info, function (err, res, device) {
+  registry.create(info, function (err, device) {
     if (err) serviceError(err);
     else {
       if (!parsed.raw) {
@@ -111,14 +114,14 @@ else if (command === 'create') {
 }
 else if (command === 'get') {
   if (!arg1) inputError('No device ID given');
-  registry.get(arg1, function (err, res, device) {
+  registry.get(arg1, function (err, device) {
     if (err) serviceError(err);
     else printDevice(device);
   });
 }
 else if (command === 'delete') {
   if (!arg1) inputError('No device ID given');
-  registry.delete(arg1, function (err, res) {
+  registry.delete(arg1, function (err) {
     if (err) serviceError(err);
     else if (!parsed.raw) {
       console.log(colorsTmpl('\n{green}Deleted device ' + arg1 + '{/green}'));
@@ -236,7 +239,7 @@ function serviceError(err) {
 }
 
 function connectionString(device) {
-  return 'HostName=' + registry.config.host + ';' +
+  return 'HostName=' + hostname + ';' +
     'DeviceId=' + device.deviceId + ';' +
     'SharedAccessKey=' + device.authentication.SymmetricKey.primaryKey;
 }

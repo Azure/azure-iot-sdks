@@ -30,6 +30,8 @@ rem -- use PAHO_PATH
 rem -----------------------------------------------------------------------------
 set paho-root=%PAHO_PATH%
 set paho-repo=https://git.eclipse.org/r/paho/org.eclipse.paho.mqtt.c.git
+rem -- Move this to master as soon as the x64 bit configuration is on master.
+set paho-branch=develop
 set package-root=%~dp0\..\packaging\windows
 set paho-build-root=%paho-root%\org.eclipse.paho.mqtt.c
 
@@ -100,7 +102,7 @@ rem -- sync the paho source code
 rem -----------------------------------------------------------------------------
 
 if Exist %paho-root% rmdir %paho-root% /s /q
-git clone %paho-repo% %paho-build-root%
+git clone -b %paho-branch% %paho-repo% %paho-build-root%
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
@@ -147,3 +149,24 @@ if not %errorlevel%==0 exit /b %errorlevel%
 mkdir out64dll
 xcopy /q /y /R .\out32dll\*.* .\out64dll\*.*
 if %errorlevel% neq 0 exit /b %errorlevel%
+
+rem -----------------------------------------------------------------------------
+rem -- build paho 64 bits.
+rem -----------------------------------------------------------------------------
+
+pushd %paho-build-root%
+if exist "%programfiles(x86)%\MSBuild\14.0\\." (
+msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Debug;PlatformToolset=v140;Platform=x64
+msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Release;PlatformToolset=v140;Platform=x64
+goto paho_build_done
+)
+if exist "%programfiles(x86)%\MSBuild\12.0\\." (
+msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Debug;Platform=x64
+msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Release;Platform=x64
+goto paho_build_done
+)
+
+@Echo Paho MQTT needs Visual Studio 2013 or higher in order to build.
+exit /b 1
+:paho_build_done
+if not %errorlevel%==0 exit /b %errorlevel%
