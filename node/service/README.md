@@ -3,8 +3,7 @@ The Azure IoT Service SDK for Node.js helps you build applications that interact
 ## Installation
 
 ```
-npm install azure-iothub
-npm update azure-iothub # to get the latest pre-release version
+npm install azure-iothub@latest
 ```
 
 ## Features

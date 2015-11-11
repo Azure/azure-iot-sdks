@@ -24,6 +24,17 @@
 var internal = require('./authorization_internals');
 
 /**
+ * Returns the seconds elapsed since 1 January 1970 00:00:00 UTC until one
+ * hour from now.
+ * @function anHourFromNow
+ */
+function anHourFromNow() {
+  var raw = (Date.now() / 1000) + 3600;
+  return Math.ceil(raw);
+}
+
+
+/**
  * @class Token
  * @classdesc Constructs a `Token` object.
  * @param {String}  resourceUri   The resource URI to encode into the token
@@ -143,6 +154,7 @@ ServiceToken.prototype.toString = function toString() {
 
 
 module.exports = {
+  anHourFromNow: anHourFromNow,
   Token: Token,
   DeviceToken: DeviceToken,
   ServiceToken: ServiceToken
