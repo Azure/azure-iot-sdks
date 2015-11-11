@@ -37,7 +37,7 @@ const char* IoTHubAccount_GetIoTHubName(void)
 
 	char *iothub_connection_string;
 
-	iothub_connection_string = IoTHubAccount_GetIoTHubConnString();
+	iothub_connection_string = (char*)IoTHubAccount_GetIoTHubConnString();
 
 	if (iothub_connection_string != NULL)
 	{
@@ -52,7 +52,7 @@ const char* IoTHubAccount_GetIoTHubSuffix(void)
 	static char iothub_suffix[256];
 	char *iothub_connection_string;
 
-	iothub_connection_string = IoTHubAccount_GetIoTHubConnString();
+	iothub_connection_string = (char*)IoTHubAccount_GetIoTHubConnString();
 
 	if (iothub_connection_string != NULL)
 	{
@@ -148,7 +148,7 @@ const char* IoTHubAccount_GetEventhubAccessKey(void)
 	char *iothub_connection_string;
 	static char access_key[128];
 
-	if ((iothub_connection_string = IoTHubAccount_GetIoTHubConnString()) != NULL)
+	if ((iothub_connection_string = (char*)IoTHubAccount_GetIoTHubConnString()) != NULL)
 	{
 		STRING_HANDLE iothub_connection_string_str;
 
