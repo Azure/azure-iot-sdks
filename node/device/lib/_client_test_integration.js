@@ -3,32 +3,10 @@
 
 'use strict';
 
+var ConnectionString = require('azure-iot-common').ConnectionString;
 var runTests = require('./_client_test.js');
 
-function getPropertyValue(connectionString, propertyName) {
-  var propertyValue = null;
-  
-  if (connectionString) {  
-    var properties = connectionString.split(";");
-    for(var i = 0; i < properties.length; i++) {
-      var equalPosition = properties[i].indexOf("=");
-      
-      if (equalPosition > 0 && equalPosition < (properties[i].length - 1)) {
-        var name = properties[i].substring(0, equalPosition);
-        var value = properties[i].substring(equalPosition + 1, properties[i].length);
-      
-        if (name === propertyName) {
-              propertyValue = value;
-              break;
-        } 
-      }
-    }
-  }
-  
-  return propertyValue;
-}
-
-var host = getPropertyValue(process.env.IOTHUB_CONNECTION_STRING, "HostName");
+var host = ConnectionString.parse(process.env.IOTHUB_CONNECTION_STRING).HostName;
 var deviceId = process.env.IOTHUB_DEVICE_ID;
 var key = process.env.IOTHUB_DEVICE_KEY;
 
