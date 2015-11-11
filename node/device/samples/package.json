@@ -1,12 +1,18 @@
 {
-  "name": "simple_sample_http",
+  "name": "iot-device-samples",
   "version": "0.0.1",
   "private": true,
-  "description": "Simple sample showing how to connect a nodejs app to Azure IoT Hub",
-  "main": "simple_sample_http.js",
+  "description": "Simple samples demonstrating how to use the Azure IoT device SDK for Node.js",
   "author": "Microsoft Corp.",
   "license": "MIT",
   "dependencies": {
     "azure-iot-device": "^1.0.0-preview.5"
+  },
+  "devDependencies": {
+    "jshint": "^2.8.0"
+  },
+  "scripts": {
+    "lint": "jshint --show-non-errors .",
+    "test": "npm -s run lint"
   }
 }

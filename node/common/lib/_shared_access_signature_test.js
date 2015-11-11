@@ -24,18 +24,18 @@ describe('SharedAccessSignature', function () {
       });
     });
 
-    /*Tests_SRS_NODE_COMMON_SAS_05_006: [The parse method shall throw ArgumentError if any of 'sr', 'sig', 'skn', or 'se' fields are not found in the input argument.]*/
+    /*Tests_SRS_NODE_COMMON_SAS_05_006: [The parse method shall throw ArgumentError if any of fields in the requiredFields argument are not found in the source argument.]*/
     ['sr', 'sig', 'skn', 'se'].forEach(function (key) {
       it('throws if shared access signature is missing ' + key, function () {
         assert.throws(function () {
-          SharedAccessSignature.parse(utils.makeStringWithout(key));
+          SharedAccessSignature.parse(utils.makeStringWithout(key), utils.fields());
         }, ArgumentError, utils.errorMessage(key));
       });
     });
 
     /*Tests_SRS_NODE_COMMON_SAS_05_002: [The parse method shall create a new instance of SharedAccessSignature.]*/
-    /*Tests_SRS_NODE_COMMON_SAS_05_003: [It shall accept a string argument of the form 'name=value[;name=value…]' and for each name extracted it shall create a new property on the SharedAccessSignature object instance.]*/
-    /*Tests_SRS_NODE_COMMON_SAS_05_004: [The value of the property shall be the value extracted from the input argument for the corresponding name.]*/
+    /*Tests_SRS_NODE_COMMON_SAS_05_003: [It shall accept a string argument of the form 'name=value[&name=value…]' and for each name extracted it shall create a new property on the SharedAccessSignature object instance.]*/
+    /*Tests_SRS_NODE_COMMON_SAS_05_004: [The value of the property shall be the value extracted from the source argument for the corresponding name.]*/
     /*Tests_SRS_NODE_COMMON_SAS_05_007: [The generated SharedAccessSignature object shall be returned to the caller.]*/
     it('returns an object with all the properties of the shared access signature', function () {
       var sas = SharedAccessSignature.parse(utils.makeString());
@@ -53,13 +53,16 @@ describe('SharedAccessSignature', function () {
   });
 });
 
-
 var utils = {
   properties: {
     sr: 'audience',
     sig: 'signature',
     skn: 'keyname',
     se: 'expiry'
+  },
+
+  fields: function() {
+    return Object.keys(this.properties);
   },
 
   makeStringWithout: function (skipKey) {
