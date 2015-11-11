@@ -20,11 +20,13 @@ See [Prepare your development environment][devbox-setup] for information about p
 <a name="createproject"/>
 ## Create the project
 
-On your command line, execute the following command to create a new, empty maven project:
+On your command line, execute the following command to create a new, empty maven project in a suitable location on your development machine:
 
 ```
 mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=iot-device -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
 ```
+
+>Note: This is a single, long command. If you are viewing this in GitHub, you must scroll to the right to view the complete command. Your browser may enable you to select the complete comand using a triple-click.
 
 This creates a folder named **iot-device** that contains a project with the standard maven project structure. For more information, see [Maven in 5 Minutes][maven-five-minutes] on the Apache website.
 
