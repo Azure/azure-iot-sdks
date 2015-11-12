@@ -15,8 +15,8 @@ function anHourFromNow () {
 function constructBatchBody(messages)
 {
   var body = '[';
-  
-  messages.forEach(function(message, index, array) {
+
+  messages.forEach(function(message, index) {
     var buffMsg = new Buffer(message.getData() );
 
     if (index > 0) body += ',';
@@ -51,10 +51,10 @@ keyName – (string) the identifier of a device registered with the IoT Hub, or 
 key – (string) the key associated with the device registration or authorization policy.]*/
 function Https() {
   var https = require('https');
-  
+
   this.buildFeedbackRequest = function (method, path, lockToken, config, done) {
     var token = new authorization.DeviceToken(config.host, config.keyName, config.key, anHourFromNow());
-    
+
     var httpHeaders = {
       'Authorization': token.toString(),
       'If-Match': lockToken
@@ -91,7 +91,7 @@ function Https() {
       method: method,
       headers: httpHeaders
     };
-    
+
     var request = https.request(options, function onResponse(response) {
       var responseBody = '';
       response.on('data', function onResponseData(chunk) {
@@ -112,7 +112,7 @@ function Https() {
                 msg.to = response.headers[item];
               }
               else if (item.toLowerCase() === "iothub-expiry") {
-                msg.expiryTime = response.headers[item];
+                msg.expiryTimeUtc = response.headers[item];
               }
               else if (item.toLowerCase() === "iothub-correlationid") {
                 msg.correlationId = response.headers[item];
@@ -359,7 +359,7 @@ Https.prototype.createDevice = function (path, deviceInfo, config, done) {
   };
   /*SRS_NODE_IOTHUB_HTTPS_07_012: [When device methods receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
   err - the standard JavaScript Error object
-  res - the Node.js http.ServerResponse object returned by the transport]  
+  res - the Node.js http.ServerResponse object returned by the transport]
   SRS_NODE_IOTHUB_HTTPS_07_013: [When device methods receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
   err - null
   res - the Node.js http.ServerResponse object returned by the transport
@@ -386,7 +386,7 @@ Https.prototype.updateDevice = function (path, deviceInfo, config, done) {
   };
   /*SRS_NODE_IOTHUB_HTTPS_07_012: [When device methods receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
   err - the standard JavaScript Error object
-  res - the Node.js http.ServerResponse object returned by the transport]  
+  res - the Node.js http.ServerResponse object returned by the transport]
   SRS_NODE_IOTHUB_HTTPS_07_013: [When device methods receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
   err - null
   res - the Node.js http.ServerResponse object returned by the transport

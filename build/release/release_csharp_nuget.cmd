@@ -30,8 +30,8 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 rem -----------------------------------------------------------------------------
 rem -- Create NuGet Package
 rem -----------------------------------------------------------------------------
-pushd %build-root%\csharp\nuget\
-powershell.exe %build-root%\csharp\nuget\make_nuget_package.ps1
+pushd %build-root%\csharp\device\nuget\
+powershell.exe %build-root%\csharp\device\nuget\make_nuget_package.ps1
 if %errorlevel% neq 0 exit /b %errorlevel%
 popd
 
@@ -39,9 +39,9 @@ rem ----------------------------------------------------------------------------
 rem -- Publish csharp NuGet Package
 rem -----------------------------------------------------------------------------
 if not defined nuget_feed (
-	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\nuget\
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\device\nuget\
 	if %errorlevel% neq 0 exit /b %errorlevel%
 ) else (
-	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\nuget\ --feed %nuget_feed%
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\device\nuget\ --feed %nuget_feed%
 	if %errorlevel% neq 0 exit /b %errorlevel%
 )

@@ -74,20 +74,6 @@ The root account is necessary in order to install some libraries required by the
 
 Run the following commands in the terminal window connected to your Raspberry Pi.
 
-- Install the prerequisite packages for the device SDK:
-
-  ```
-  sudo apt-get update
-  sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
-  ```
-  If you get errors running sudo, make sure your root password is set as decribed above.
-
-	> Note: Right-click in a PuTTY terminal window to paste text.
-
-- Navigate to the directory where you want to  install the SDK.  If you're not sure, navigate to your home directory:
-  ```
-  cd ~
-  ```
 - Download the Azure IoT device SDK to your Raspberry Pi:
 
   ```
@@ -98,6 +84,11 @@ Run the following commands in the terminal window connected to your Raspberry Pi
 Then cd to the directory:
   ```
   cd azure-iot-sdks
+  ```
+
+- Prepare your environment by running
+  ```
+  sudo ~/azure-iot-sdks/c/build_all/linux/setup.sh
   ```
 
 - Edit the file ./c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace connection string placeholder with the connection string
@@ -118,7 +109,7 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 - Build a few libraries upon which the samples depend:
 
   ```
-  sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+  sudo ~/azure-iot-sdks/c/build_all/linux/build_paho.sh
   ```
 
 - Finally, build the sample applications:
@@ -133,7 +124,7 @@ you obtained in the "Connecting your device to an IoT hub" step above.
 - Run the **simplesample_amqp** sample:
 
   ```
-  ~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp
   ```
 
 This sample application sends simulated sensor data to your IoT Hub.
@@ -142,15 +133,10 @@ This sample application sends simulated sensor data to your IoT Hub.
 <a name="tips"/>
 ## Tips
 
-- If you just want to build the serializer samples, go to the cmake output folder and navigate to the seriliazer/samples folder, then run the following command:
-
-  ```
-  make -f Makefile all
-  ```
 - On Windows, you can use the [Device Explorer][device-explorer] to see the data your device is sending and receiving.
 
 [1]: ./media/service-bus-iot-raspberrypi-raspbian-setup/raspbian01.png
 
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md
 [setup-iothub]: ../../doc/setup_iothub.md
 [device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md

@@ -54,7 +54,7 @@ You should see the following:
 
   ```
   $ opkg install git
-  $ git clone github.com/Azure/azure-iot-suite-sdks.git
+  $ git clone github.com/Azure/azure-iot-sdks.git
   ```
 
 - You may be prompted to add an RSA key to your device, respond with “yes.”
@@ -85,7 +85,7 @@ We first need to update the credentials in the sample AMPQ app to match those of
   $ ./build.sh
   ```
   **Note:** build.sh creates a folder called "cmake" in your home folder. Inside "cmake" are all the results of the compilation of the complete software.
-  
+
 - Update the ldconfig cache
   While building the Azure IoT SDK, we needed to first build a dependency called [Qpid Proton][qpidproton].
   However, we need to register the resulting library with [ldconfig][ldcconfig] before we can proceed to testing and building our C-language samples.
@@ -144,4 +144,4 @@ Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT
 [img2]: ./media/edison02.png
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md

@@ -14,11 +14,3 @@ then
     echo Generating C API docs failed.
     exit $?
 fi
-
-# -----------------------------------------------------------------------------
-# -- Fix up the line feeds in the generated C docs so that just line
-# -- feed changes aren't flagged as changes by git. We don't care if this
-# -- fails though.
-# -----------------------------------------------------------------------------
-echo Fixing line feeds in generated docs...
-node fix-crlf.js

@@ -1,6 +1,4 @@
-<!-- Copyright (c) Microsoft. All rights reserved. -->
-<!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
-<project>
+<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>send-serialized-event</artifactId>
     <name>Send Serialized Event Sample</name>
@@ -13,7 +11,7 @@
     <parent>
         <groupId>com.microsoft.azure.iothub-java-client</groupId>
         <artifactId>samples</artifactId>
-        <version>1.0.0-preview.4</version>
+        <version>1.0.0-preview.5</version>
     </parent>
     <dependencies>
         <dependency>

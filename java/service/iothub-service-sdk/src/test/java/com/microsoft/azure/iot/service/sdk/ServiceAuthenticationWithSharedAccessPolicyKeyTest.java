@@ -6,55 +6,69 @@
 package com.microsoft.azure.iot.service.sdk;
 
 import mockit.integration.junit4.JMockit;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(JMockit.class)
 public class ServiceAuthenticationWithSharedAccessPolicyKeyTest
 {
-    @Test (expected = Exception.class)
-    public void populateChecksArgument() throws Exception
+    // Tests_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSKEY_12_002: [The function shall throw IllegalArgumentException if the input object is null]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void populate_input_null() throws Exception
     {
-        class TestAuth extends ServiceAuthenticationWithSharedAccessPolicyKey
-        {
-            public TestAuth(String policyName, String key)
-            {
-                super(policyName, key);
-            }
-
-            public void populateTest()
-            {
-                this.populate(null);
-            }
-        }
-        TestAuth testAuth = new TestAuth("", "");
-        testAuth.populateTest();
+        // Arrange
+        String newPolicyName = "XXX";
+        String newPolicyKey = "YYY";
+        ServiceAuthenticationWithSharedAccessPolicyKey auth = new ServiceAuthenticationWithSharedAccessPolicyKey(newPolicyName, newPolicyKey);
+        // Act
+        auth.populate(null);
     }
 
+    // Tests_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSKEY_12_003: [The function shall save the policyName and policyKey to the target object]
+    // Tests_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSKEY_12_004: [The function shall set the access signature (token) to null]
     @Test
-    public void populateTest() throws Exception
+    public void populate_good_case() throws Exception
     {
-        class TestAuth extends ServiceAuthenticationWithSharedAccessPolicyKey
-        {
-            public TestAuth(String policyName, String key)
-            {
-                super(policyName, key);
-            }
-
-            public IotHubConnectionString populateTest(IotHubConnectionString iotHubConnectionString)
-            {
-                return this.populate(iotHubConnectionString);
-            }
-        }
-
-        String deviceID = "Device";
+        // Arrange
+        String regex = "[a-zA-Z0-9_\\-\\.]+$";
+        String iotHubName = "b.c.d";
+        String hostName = "HOSTNAME." + iotHubName;
+        String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessToken = "1234567890abcdefghijklmnopqrstvwxyz=";
+        String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
+        String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        String newPolicyName = "XXX";
+        String newPolicyKey = "YYY";
+        ServiceAuthenticationWithSharedAccessPolicyKey auth = new ServiceAuthenticationWithSharedAccessPolicyKey(newPolicyName, newPolicyKey);
+        // Act
+        auth.populate(iotHubConnectionString);
+        // Assert
+        assertEquals(newPolicyName, iotHubConnectionString.getSharedAccessKeyName());
+        assertEquals(newPolicyKey, iotHubConnectionString.getSharedAccessKey());
+        assertEquals(null, iotHubConnectionString.getSharedAccessSignature());
+        // Act
+        auth.setPolicyName(policyName);
+        auth.setKey(sharedAccessKey);
+        // Assert
+        assertEquals(policyName, auth.getPolicyName());
+        assertEquals(sharedAccessKey, auth.getKey());
+    }
 
-        TestAuth testAuth = new TestAuth(policyName, sharedAccessToken);
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(deviceID, testAuth);
-
-        Assert.assertEquals("PolicyName mismatch!", policyName, iotHubConnectionString.getSharedAccessKeyName());
+    // Tests_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSKEY_12_001: [Provide access to the following properties: policyName, key, token]
+    @Test
+    public void propertyAccess()
+    {
+        // Arrange
+        String policyName = "accessKeyPolicy";
+        String key = "11223344556677889900";
+        // Act
+        ServiceAuthenticationWithSharedAccessPolicyKey auth = new ServiceAuthenticationWithSharedAccessPolicyKey(policyName, key);
+        // Assert
+        assertEquals(policyName, auth.getPolicyName());
+        assertEquals(key, auth.getKey());
     }
 }

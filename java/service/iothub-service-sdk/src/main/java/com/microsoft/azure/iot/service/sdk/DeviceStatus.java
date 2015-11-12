@@ -5,6 +5,9 @@
 
 package com.microsoft.azure.iot.service.sdk;
 
+/**
+ * Enum for device status
+ */
 public enum DeviceStatus
 {
     Enabled,

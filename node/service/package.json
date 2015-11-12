@@ -1,30 +1,37 @@
 {
-    "name": "azure-iothub",
-    "version": "1.0.0-preview.3",
-    "description": "Azure IoT SDK - IoT Hub",
-    "author": "Microsoft Corporation",
-    "license": "MIT",
-    "main": "iothub.js",
-    "dependencies": {
-        "amqp10": "^2.0.0",
-        "azure-iot-common": "^1.0.0-preview.3"
-    },
-    "devDependencies": {
-        "chai": "^3.3.0",
-        "jake": "^8.0.12",
-        "jshint": "^2.8.0",
-        "azure-iot-build": "^1.0.0-preview.4",
-        "simplebuild-jshint": "^1.1.0"
-    },
-    "engines": {
-        "node": "^0.12 || ^4"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Azure/azure-iot-sdks.git"
-    },
-    "bugs": {
-        "url": "https://github.com/Azure/azure-iot-sdks/issues"
-    },
-    "homepage": "https://github.com/Azure/azure-iot-sdks#readme"
+  "name": "azure-iothub",
+  "version": "1.0.0-preview.5",
+  "description": "Azure IoT SDK - IoT Hub",
+  "author": "Microsoft Corporation",
+  "license": "MIT",
+  "main": "iothub.js",
+  "dependencies": {
+    "amqp10": "^2.0.2",
+    "azure-iot-common": "^1.0.0-preview.5"
+  },
+  "devDependencies": {
+    "chai": "^3.3.0",
+    "jshint": "^2.8.0",
+    "mocha": "^2.3.3"
+  },
+  "scripts": {
+    "lint": "jshint --show-non-errors .",
+    "unittest-min": "mocha --reporter dot lib/_*_test.js",
+    "alltest-min": "mocha --reporter dot lib/_*_test*.js",
+    "unittest": "mocha --reporter spec lib/_*_test.js",
+    "alltest": "mocha --reporter spec lib/_*_test*.js",
+    "ci": "npm -s run lint && npm -s run alltest-min",
+    "test": "npm -s run lint && npm -s run unittest"
+  },
+  "engines": {
+    "node": "^0.12 || ^4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Azure/azure-iot-sdks.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Azure/azure-iot-sdks/issues"
+  },
+  "homepage": "https://github.com/Azure/azure-iot-sdks#readme"
 }

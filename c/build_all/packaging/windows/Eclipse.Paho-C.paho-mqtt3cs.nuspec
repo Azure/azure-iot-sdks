@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Eclipse.Paho-C.paho-mqtt3cs</id>
+    <version>1.0.3</version>
+    <title>Eclipse Paho-C mqtt3cs Library</title>
+    <authors>Eclipse Org, Microsoft Corp</authors>
+    <owners>Azure-IoT</owners>
+    <licenseUrl>https://github.com/eclipse/paho.mqtt.c/blob/master/notice.html</licenseUrl>
+    <projectUrl>https://www.eclipse.org/paho/clients/c/</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>This package brings the Paho MQTT C Client, which is a fully fledged MQTT client written in ANSI standard C.</description>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
+    <summary>
+	  The Paho MQTT C Client library provides 2 set of APIs: "Synchronous" and "Asynchronous" Ones. 
+      The API calls will start with MQTTClient for Synchronous APIs, and MQTT Async for Asynchronous ones.
+      This package only contains the Synchronous mqtt3cs with Security (Using Open SSL).
+      Microsoft's contribution to this package was only the packaging for NuGet itself. The library has been developed and is maintained by the Eclipse Foundation.
+	</summary>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>MQTT Paho Eclipse Native x86 x64 package</tags>
+    <dependencies>
+    </dependencies>
+  </metadata>
+    <files>
+	
+	<file src="Eclipse.Paho-C.paho-mqtt3cs_thirdpartynotice.txt" target="thirdpartynotice.txt"/>
+		
+    <!-- these are files for x86 plaform -->
+    <file src="paho_outputs\Win32\Debug\paho-mqtt3cs.lib" target="lib\native\Win32\Debug"/>
+    <file src="paho_outputs\Win32\Debug\paho-mqtt3cs.dll" target="lib\native\Win32\Debug"/>
+    <file src="paho_outputs\Win32\Debug\paho-mqtt3cs.pdb" target="lib\native\Win32\Debug"/>
+    <file src="paho_outputs\Win32\Release\paho-mqtt3cs.lib" target="lib\native\Win32\Release"/>
+    <file src="paho_outputs\Win32\Release\paho-mqtt3cs.dll" target="lib\native\Win32\Release"/>
+    <file src="openssl_outputs\Win32\Debug\" target="lib\native\Win32\Debug"/>
+      
+    <!-- these are files for x64 plaform -->
+    <file src="paho_outputs\x64\Debug\paho-mqtt3cs.lib" target="lib\native\x64\Debug"/>
+    <file src="paho_outputs\x64\Debug\paho-mqtt3cs.dll" target="lib\native\x64\Debug"/>
+    <file src="paho_outputs\x64\Debug\paho-mqtt3cs.pdb" target="lib\native\x64\Debug"/>
+    <file src="paho_outputs\x64\Release\paho-mqtt3cs.lib" target="lib\native\x64\Release"/>
+    <file src="paho_outputs\x64\Release\paho-mqtt3cs.dll" target="lib\native\x64\Release"/>
+    <file src="openssl_outputs\x64\Debug\" target="lib\native\x64\Debug"/>
+
+	<!-- Target File -->
+	<file src="Eclipse.Paho-C.paho-mqtt3cs.targets" target="build\native"/>
+	
+    <!-- include files -->
+    <file src="paho_outputs\include\*.h" target="build\native\include\paho"/>
+</files>
+</package>

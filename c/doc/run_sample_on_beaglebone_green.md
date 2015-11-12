@@ -78,7 +78,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - This SDK sample depends on the presences of a few libraries. Run the following command to build them:
 
   ```
-  sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+  sudo ~/azure-iot-sdks/c/build_all/linux/build_paho.sh
   ```
 
 - You can now build the SDK code using the following command, assuming everything went OK on build\_proton.sh and build\_paho.sh
@@ -93,10 +93,10 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - Now run the **simplesample_amqp** sample by issuing the following commands:
 
   ```
-  ~/cmake/serializer/samples/simplesample_amqp/linux/simplesample_amqp
+  ~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp
   ```
 
 - You can use the DeviceExplorer tool on your desktop machine to see the data your device is sending and receiving.
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md

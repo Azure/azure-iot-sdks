@@ -477,7 +477,7 @@ static char* CreateSendAddress(IOTHUB_VALIDATION_INFO* devhubValInfo)
     return result;
 }
 
-IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, double maxDrainTimeInSeconds)
+IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, time_t receiveTimeRangeStart, double maxDrainTimeInSeconds)
 {
     IOTHUB_TEST_CLIENT_RESULT result = 0;
     if (devhubHandle == NULL || msgCallback == NULL)
@@ -540,10 +540,8 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 						}
 						else
 						{
-							time_t currentSeconds = time(NULL);
-
 							/* 330s = 5:30. 5 minutes for clock skew on the service side and 30s lag for communication timeout. */
-							int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)currentSeconds - 330) * 1000);
+							int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000);
 
 							if ((filter_string_length < 0) ||
 								(pn_data_put_map(filter) != 0) ||
@@ -672,9 +670,14 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
     return result;
 }
 
+IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForRecentEvent(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, double maxDrainTimeInSeconds)
+{
+	return IoTHubTest_ListenForEvent(devhubHandle, msgCallback, partitionCount, context, time(NULL), maxDrainTimeInSeconds);
+}
+
 IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventForMaxDrainTime(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context)
 {
-    return IoTHubTest_ListenForEvent(devhubHandle, msgCallback, partitionCount, context, MAX_DRAIN_TIME);
+    return IoTHubTest_ListenForRecentEvent(devhubHandle, msgCallback, partitionCount, context, MAX_DRAIN_TIME);
 }
 
 IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle, const char* data, size_t len)

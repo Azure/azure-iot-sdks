@@ -5,7 +5,7 @@ The following instructions describe the steps for connecting an [mbed-enabled Fr
 
 ## Requirements
 
-- SSH client, such as [PuTTY](http://www.putty.org/), so you can access the command line.
+- SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the Freescale FRDM-K64F.
 
 - Required hardware: [mbed-enabled Freescale K64F](http://developer.mbed.org/platforms/IBMEthernetKit).
 
@@ -57,7 +57,7 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
 - If the build is successful, a .bin file with the name of your project is generated. Copy the .bin file to the device. Saving the .bin file to the device causes the current terminal session to the device to reset. When it reconnects, reset the terminal again manually, or start a new terminal. This enables the mbed device to reset and start executing the program.
 
-- Connect to the device using an SSH client application, such as PuTTY. You can determine which serial port your device uses by checking the Windows Device Manager:
+- Connect to the device using an SSH terminal program, such as PuTTY. You can determine which serial port your device uses by checking the Windows Device Manager:
 
 	![][6]
 
@@ -73,7 +73,7 @@ The program starts executing. You may have to reset the board (press CTRL+Break 
 
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md
 [1]: ./media/mbed1.png
 [2]: ./media/mbed2.png
 [3]: ./media/mbed3.png

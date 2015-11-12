@@ -23,6 +23,8 @@
 #include "agenttime.h"
 
 #define IOTHUB_APP_PREFIX "iothub-app-"
+const char* IOTHUB_MESSAGE_ID = "iothub-messageid";
+const char* IOTHUB_CORRELATION_ID = "iothub-correlationid";
 
 #define CONTENT_TYPE "Content-Type"
 #define APPLICATION_OCTET_STREAM "application/octet-stream"
@@ -1146,6 +1148,27 @@ static void DoEvent(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClien
                                     }
                                 }
 
+                                // Add the Message Id and the Correlation Id
+                                const char* msgId = IoTHubMessage_GetMessageId(message->messageHandle);
+                                if (goOn && msgId != NULL)
+                                {
+                                    if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, IOTHUB_MESSAGE_ID, msgId) != HTTP_HEADERS_OK)
+                                    {
+                                        LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair\r\n");
+                                        goOn = false;
+                                    }
+                                }
+
+                                const char* corrId = IoTHubMessage_GetCorrelationId(message->messageHandle);
+                                if (goOn && corrId != NULL)
+                                {
+                                    if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, IOTHUB_CORRELATION_ID, corrId) != HTTP_HEADERS_OK)
+                                    {
+                                        LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair\r\n");
+                                        goOn = false;
+                                    }
+                                }
+
                                 if (!goOn)
                                 {
                                     /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
@@ -1461,6 +1484,7 @@ responseContent: a new instance of buffer]
                                 else
                                 {
                                     /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.]*/
+                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_07_008: [The HTTP header of iothub-messageid shall be set in the MessageId.]*/
                                     size_t nHeaders;
                                     if (HTTPHeaders_GetHeaderCount(responseHTTPHeaders, &nHeaders) != HTTP_HEADERS_OK)
                                     {
@@ -1485,11 +1509,40 @@ responseContent: a new instance of buffer]
                                                     /*looks like a property headers*/
                                                     /*there's a guaranteed ':' in the completeHeader, by HTTP_HEADERS module*/
                                                     char* whereIsColon = strchr(completeHeader, ':');
-                                                    *whereIsColon = '\0'; /*cut it down*/
-                                                    if (Map_AddOrUpdate(properties, completeHeader + strlen(IOTHUB_APP_PREFIX), whereIsColon + 2) != MAP_OK) /*whereIsColon+1 is a space because HTTPEHADERS outputs a ": " between name and value*/
+                                                    if (whereIsColon != NULL)
                                                     {
-                                                        free(completeHeader);
-                                                        break;
+                                                        *whereIsColon = '\0'; /*cut it down*/
+                                                        if (Map_AddOrUpdate(properties, completeHeader + strlen(IOTHUB_APP_PREFIX), whereIsColon + 2) != MAP_OK) /*whereIsColon+1 is a space because HTTPEHADERS outputs a ": " between name and value*/
+                                                        {
+                                                            free(completeHeader);
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                else if (strncmp(IOTHUB_MESSAGE_ID, completeHeader, strlen(IOTHUB_MESSAGE_ID)) == 0)
+                                                {
+                                                    char* whereIsColon = strchr(completeHeader, ':');
+                                                    if (whereIsColon != NULL)
+                                                    {
+                                                        *whereIsColon = '\0'; /*cut it down*/
+                                                        if (IoTHubMessage_SetMessageId(receivedMessage, whereIsColon + 2) != IOTHUB_MESSAGE_OK)
+                                                        {
+                                                            free(completeHeader);
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                else if (strncmp(IOTHUB_CORRELATION_ID, completeHeader, strlen(IOTHUB_CORRELATION_ID)) == 0)
+                                                {
+                                                    char* whereIsColon = strchr(completeHeader, ':');
+                                                    if (whereIsColon != NULL)
+                                                    {
+                                                        *whereIsColon = '\0'; /*cut it down*/
+                                                        if (IoTHubMessage_SetCorrelationId(receivedMessage, whereIsColon + 2) != IOTHUB_MESSAGE_OK)
+                                                        {
+                                                            free(completeHeader);
+                                                            break;
+                                                        }
                                                     }
                                                 }
                                                 free(completeHeader);

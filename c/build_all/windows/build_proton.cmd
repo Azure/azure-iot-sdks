@@ -31,7 +31,11 @@ rem ----------------------------------------------------------------------------
 rem -- sync the Proton source code
 rem -----------------------------------------------------------------------------
 
-if Exist %build-root% rmdir %build-root% /s /q
+if Exist %build-root% (
+	del /s /q %build-root%
+	rmdir %build-root% /s /q
+)
+
 git clone -b %proton-branch% %proton-repo% %build-root%
 
 if not %errorlevel%==0 exit /b %errorlevel%

@@ -50,7 +50,7 @@ function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
     { name: 'password is wrong', expect: expect401Response }
   ];
 
-  badConnStrings.forEach(function (test, index, array) {
+  badConnStrings.forEach(function (test, index) {
     it('fails to ' + opName + ' when the ' + tests[index].name, function (done) {
       makeRequestWith(test, tests[index].expect, done);
     });
@@ -170,7 +170,7 @@ function runTests(transportFactory, goodConfig, badConfigs) {
       it('message.lockToken is not entered', function (done) {
         var client = new Client(goodConfig, transportFactory());
         var message = new Message('hello');
-        client.abandon(message, function (err, res) {
+        client.abandon(message, function (err) {
           assert.isNotNull(err);
           done();
         });
@@ -188,7 +188,7 @@ function runTests(transportFactory, goodConfig, badConfigs) {
       it('message.lockToken is not entered', function (done) {
         var client = new Client(goodConfig, transportFactory());
         var message = new Message('hello');
-        client.reject(message, function (err, res) {
+        client.reject(message, function (err) {
           assert.isNotNull(err);
           done();
         });
@@ -206,7 +206,7 @@ function runTests(transportFactory, goodConfig, badConfigs) {
       it('message.lockToken is not entered', function (done) {
         var client = new Client(goodConfig, transportFactory());
         var message = new Message('hello');
-        client.complete(message, function (err, res) {
+        client.complete(message, function (err) {
           assert.isNotNull(err);
           done();
         });

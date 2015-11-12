@@ -1,6 +1,4 @@
-<!-- Copyright (c) Microsoft. All rights reserved. -->
-<!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
-<project>
+<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>iothub-java-client</artifactId>
     <name>IoT Hub Java Client</name>
@@ -13,38 +11,17 @@
     <parent>
         <groupId>com.microsoft.azure.iothub-java-client</groupId>
         <artifactId>iothub-java-client-with-samples</artifactId>
-        <version>1.0.0-preview.4</version>
+        <version>1.0.0-preview.5</version>
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jms_1.1_spec</artifactId>
-            <version>1.1.1</version>
-        </dependency>
-        <!--
-        This is a fork of the Qpid JMS project.
-        It must be manually installed to your local Maven repository through the following steps:
-        * In a folder of your choice, run 'git clone https://github.com/t-kele/qpid-jms.git'.
-        * run 'cd qpid-jms'.
-        * run 'mvn install'.
-        -->
-        <dependency>
             <groupId>org.apache.qpid</groupId>
-            <artifactId>qpid-jms-client</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.12</version>
+            <artifactId>proton-j</artifactId>
+            <version>0.10</version>
+            <type>jar</type>
         </dependency>
         <!-- test dependencies -->
         <dependency>

@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Devices", "Microsoft.Azure.Devices\Microsoft.Azure.Devices.csproj", "{7FC2A03F-36FE-44C5-A1EF-5B1F11458350}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Devices.Api.Test", "Microsoft.Azure.Devices\test\Microsoft.Azure.Devices.Api.Test\Microsoft.Azure.Devices.Api.Test.csproj", "{74A0E4B7-4A50-4665-A7A3-A217D06649D3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A722A278-A765-4C69-A2FF-898FFE2DBE17}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Signed|Any CPU = Signed|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7FC2A03F-36FE-44C5-A1EF-5B1F11458350}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FC2A03F-36FE-44C5-A1EF-5B1F11458350}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FC2A03F-36FE-44C5-A1EF-5B1F11458350}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FC2A03F-36FE-44C5-A1EF-5B1F11458350}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FC2A03F-36FE-44C5-A1EF-5B1F11458350}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{7FC2A03F-36FE-44C5-A1EF-5B1F11458350}.Signed|Any CPU.Build.0 = Release|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Signed|Any CPU.ActiveCfg = Signed|Any CPU
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3}.Signed|Any CPU.Build.0 = Signed|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{74A0E4B7-4A50-4665-A7A3-A217D06649D3} = {A722A278-A765-4C69-A2FF-898FFE2DBE17}
+	EndGlobalSection
+EndGlobal
