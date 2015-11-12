@@ -5,15 +5,17 @@ namespace Microsoft.Azure.Devices
 {
     using System;
     using System.Configuration;
+    using System.Net;
     using System.Net.Security;
+    using System.Net.WebSockets;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading;
     using System.Threading.Tasks;
 
-    using Microsoft.Azure.Devices.Common;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Amqp.Transport;
+    using Microsoft.Azure.Devices.Common;
     using Microsoft.Azure.Devices.Common.Client;
     using Microsoft.Azure.Devices.Common.Data;
 
@@ -181,8 +183,16 @@ namespace Microsoft.Azure.Devices
             var amqpSettings = this.CreateAmqpSettings();
             var tlsTransportSettings = this.CreateTlsTransportSettings();
 
-            var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
-            var transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
+            //var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
+            //var transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
+
+            Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
+            var websocket = CreateClientWebSocket(websocketUri);
+            var transport = new ClientWebSocketTransport(
+                websocket,
+                this.connectionString.IotHubName,
+                null,
+                null);
 
             AmqpConnectionSettings amqpConnectionSettings = new AmqpConnectionSettings()
             {
@@ -212,6 +222,29 @@ namespace Microsoft.Azure.Devices
         {
             // Closing the connection also closes any sessions.
             amqpSession.Connection.SafeClose();
+        }
+
+        ClientWebSocket CreateClientWebSocket(Uri websocketUri)
+        {
+            var websocket = new ClientWebSocket();
+
+            // Set SubProtocol to AMQPWS10
+            websocket.Options.AddSubProtocol(WebSocketConstants.SubProtocols.Amqp10);
+
+            // Check if we're configured to use a proxy server
+            IWebProxy webProxy = WebRequest.DefaultWebProxy;
+            Uri proxyAddress = webProxy != null ? webProxy.GetProxy(websocketUri) : null;
+            if (!websocketUri.Equals(proxyAddress))
+            {
+                // Configure proxy server
+                websocket.Options.Proxy = webProxy;
+            }
+
+            websocket.Options.UseDefaultCredentials = true;
+
+            websocket.ConnectAsync(websocketUri, CancellationToken.None).Wait(CancellationToken.None);  //TODO: Add a timeout
+
+            return websocket;
         }
 
         AmqpSettings CreateAmqpSettings()
