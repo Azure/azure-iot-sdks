@@ -1,29 +1,5 @@
-/*
-Microsoft Azure IoT Device Libraries
-
-Copyright (c) Microsoft Corporation
-All rights reserved.
-
-MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the Software), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,6 +39,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     MAP_HANDLE mapProperties = IoTHubMessage_Properties(message);
     if (mapProperties != NULL)
     {
+        (void)printf("ERROR: message incorrectly contains properties!\r\n");
         const char*const* keys;
         const char*const* values;
         size_t propertyCount = 0;
@@ -95,7 +72,6 @@ static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, v
 }
 
 static char msgText[1024];
-static char propText[1024];
 #define MESSAGE_COUNT 5
 
 void iothub_client_sample_mqtt_run(void)
@@ -118,11 +94,6 @@ void iothub_client_sample_mqtt_run(void)
     }
     else
     {
-        unsigned int timeout = 241000;
-        if (IoTHubClient_LL_SetOption(iotHubClientHandle, "timeout", &timeout) != IOTHUB_CLIENT_OK)
-        {
-            (void)printf("failure to set option \"timeout\"\r\n");
-        }
 
         /* Setting Message call back, so we can receive Commands. */
         if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
@@ -144,13 +115,6 @@ void iothub_client_sample_mqtt_run(void)
                 else
                 {
                     messages[i].messageTrackingId = i;
-
-                    MAP_HANDLE propMap = IoTHubMessage_Properties(messages[i].messageHandle);
-                    sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
-                    if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
-                    {
-                        (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
-                    }
 
                     if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[i].messageHandle, SendConfirmationCallback, &messages[i]) != IOTHUB_CLIENT_OK)
                     {

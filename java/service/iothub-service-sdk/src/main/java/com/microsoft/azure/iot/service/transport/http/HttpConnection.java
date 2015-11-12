@@ -58,7 +58,6 @@ public class HttpConnection
                     protocol);
             throw new IllegalArgumentException(errMsg);
         }
-        System.out.println("PROTOCOL: " + protocol.toString());
 
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_001: [The constructor shall open a connection to the given URL.]
         // Coses_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_002: [The constructor shall throw an IOException if the connection was unable to be opened.]

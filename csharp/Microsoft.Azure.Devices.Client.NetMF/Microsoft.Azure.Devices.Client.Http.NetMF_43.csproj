@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <AssemblyName>Microsoft.Azure.Devices.Client.Http.NetMF_43</AssemblyName>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.Azure.Devices.Client</RootNamespace>
+    <ProjectTypeGuids>{b69e3092-b931-443c-abe7-7e7b65f2a37f};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F232909A-48EC-4E64-9D5D-46734E760ED3}</ProjectGuid>
+    <TargetFrameworkVersion>v4.3</TargetFrameworkVersion>
+    <NetMfTargetsBaseDir Condition="'$(NetMfTargetsBaseDir)'==''">$(MSBuildExtensionsPath32)\Microsoft\.NET Micro Framework\</NetMfTargetsBaseDir>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;HTTP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>HTTP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
+  <ItemGroup>
+    <Compile Include="AuthenticationMethodFactory.cs" />
+    <Compile Include="Common\Api\ClientApiVersionHelper.cs" />
+    <Compile Include="Common\CommonConstants.cs" />
+    <Compile Include="Common\ETagHolder.cs" />
+    <Compile Include="Common\Exceptions\IotHubException.cs" />
+    <Compile Include="Common\Extensions\StringExtensions.cs" />
+    <Compile Include="Common\Extensions\WebHeaderCollectionExtensions.cs" />
+    <Compile Include="Common\IETagHolder.cs" />
+    <Compile Include="Common\Security\SharedAccessSignatureBuilder.cs" />
+    <Compile Include="Common\Security\SharedAccessSignatureConstants.cs" />
+    <Compile Include="Common\SHA.cs" />
+    <Compile Include="Common\WebApi\CustomHeaderConstants.cs" />
+    <Compile Include="DeliveryAcknowledgement.cs" />
+    <Compile Include="DeviceAuthenticationWithRegistrySymmetricKey.cs" />
+    <Compile Include="DeviceAuthenticationWithToken.cs" />
+    <Compile Include="DeviceClient.cs" />
+    <Compile Include="DeviceClientHelper.cs" />
+    <Compile Include="Common\NetMF.HttpUtility.cs" />
+    <Compile Include="HttpClientHelper.cs" />
+    <Compile Include="HttpDeviceClient.cs" />
+    <Compile Include="IAuthenticationMethod.cs" />
+    <Compile Include="IAuthorizationHeaderProvider.cs" />
+    <Compile Include="IotHubConnectionString.cs" />
+    <Compile Include="IotHubConnectionStringBuilder.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="MessageSystemPropertyNames.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PutOperationType.cs" />
+    <Compile Include="ReceiveMode.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.SPOT.IO" />
+    <Reference Include="System" />
+    <Reference Include="System.Http" />
+    <Reference Include="System.IO" />
+  </ItemGroup>
+  <PropertyGroup>
+  </PropertyGroup>
+</Project>
