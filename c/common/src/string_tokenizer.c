@@ -90,8 +90,9 @@ int STRING_TOKENIZER_get_next_token(STRING_TOKENIZER_HANDLE tokenizer, STRING_HA
 			/* Codes_SRS_STRING_04_005: [STRING_TOKENIZER_get_next_token searches the string inside STRING_TOKENIZER_HANDLE for the first character that is NOT contained in the current delimiter] */
 			for (i = 0; i < remainingInputStringSize; i++)
 			{
+				size_t j;
 				bool foundDelimitter = false;
-				for (size_t j = 0; j < delimitterSize; j++)
+				for (j = 0; j < delimitterSize; j++)
 				{
 					if (token->currentPos[i] == delimiters[j])
 					{
@@ -124,11 +125,12 @@ int STRING_TOKENIZER_get_next_token(STRING_TOKENIZER_HANDLE tokenizer, STRING_HA
 				bool foundDelimitter = false;
 				char* endOfTokenPosition=NULL;
 				size_t amountOfCharactersToCopy;
+				size_t j;
 				//At this point the Current Pos is pointing to a character that is point to a nonDelimiter. So, now search for a Delimiter, till the end of the String. 
 				/*Codes_SRS_STRING_04_008: [STRING_TOKENIZER_get_next_token than searches from the start of a token for a character that is contained in the delimiters string.] */
 				/* Codes_SRS_STRING_04_009: [If no such character is found, STRING_TOKENIZER_get_next_token extends the current token to the end of the string inside t, copies the token to output and returns 0.] */
 				/* Codes_SRS_STRING_04_010: [If such a character is found, STRING_TOKENIZER_get_next_token consider it the end of the token and copy it's content to output, updates the current position inside t to the next character and returns 0.] */
-				for (size_t j = 0; j < delimitterSize; j++)
+				for (j = 0; j < delimitterSize; j++)
 				{
 					if ((endOfTokenPosition = strchr(token->currentPos, delimiters[j])) != NULL)
 					{

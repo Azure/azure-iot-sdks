@@ -5,8 +5,10 @@
 // PUT NO INCLUDES BEFORE HERE
 //
 #include <stdlib.h>
+#ifndef WINCE
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
+#endif
 #endif
 #include "gballoc.h"
 

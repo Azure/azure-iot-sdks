@@ -24,9 +24,12 @@ typedef CRITICAL_SECTION MICROMOCK_CRITICAL_SECTION;
 #define MicroMockEnterCriticalSection(...) EnterCriticalSection(__VA_ARGS__)
 #define MicroMockLeaveCriticalSection(...) LeaveCriticalSection(__VA_ARGS__)
 
-
+#ifdef WINCE
+// on Windows CE there is no InitializeCriticalSectionEx
+#define MicroMockInitializeCriticalSection(...) InitializeCriticalSection(__VA_ARGS__)
+#else
 #define MicroMockInitializeCriticalSection(...) InitializeCriticalSectionEx(__VA_ARGS__,2,CRITICAL_SECTION_NO_DEBUG_INFO)
-
+#endif
 
 #define MicroMockDeleteCriticalSection(...) DeleteCriticalSection(__VA_ARGS__)
 #else

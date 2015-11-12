@@ -6,6 +6,12 @@
 #include "malloc.h"
 #include "iot_logging.h"
 
+#ifdef WINCE
+
+const char* Lock_ResultAsString[] = { "OK", "ERROR" };
+
+#endif
+
 DEFINE_ENUM_STRINGS(LOCK_RESULT, LOCK_RESULT_VALUES);
 
 /*SRS_LOCK_99_002:[ This API on success will return a valid lock handle which should be a non NULL value]*/

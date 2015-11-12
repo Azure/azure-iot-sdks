@@ -815,9 +815,9 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_HANDLE_DATA* handleData, ST
     {
         bool isFirst = true;
         PDLIST_ENTRY actual;
+		bool keepGoing = true; /*keepGoing gets sometimes to false from within the loop*/
         /*either all the items enter the list or only some*/
         result = MAKE_PAYLOAD_OK; /*optimistically initializing it*/
-        bool keepGoing = true; /*keepGoing gets sometimes to false from within the loop*/
         while (keepGoing && ((actual = handleData->waitingToSend->Flink) != handleData->waitingToSend))
         {
             size_t messageSize;

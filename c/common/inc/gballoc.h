@@ -12,8 +12,10 @@ extern "C"
 #else
 #include <stdlib.h>
 #endif
+#ifndef WINCE
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
+#endif
 #endif
 
 /* all translation units that need memory measurement need to have GB_MEASURE_MEMORY_FOR_THIS defined */

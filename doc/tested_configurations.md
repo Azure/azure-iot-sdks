@@ -26,6 +26,7 @@ The Azure IoT libraries has been tested on the following OS platforms:
 |:---------------|:------------:|
 |mbed OS| 2.0 |
 |TI-RTOS | 2.x |
+|Windows Embedded Compact | 2013 |
 
 
 
@@ -42,6 +43,7 @@ The [Microsoft Azure IoT device SDK for C](c/device/readme.md) has been tested o
 |Ubuntu Linux| 14.04 | HTTPS, AMQP, MQTT |
 |Windows desktop| 7,8,10 | HTTPS, AMPQ, MQTT |
 |Yocto Linux|2.1  | HTTPS, AMQP|
+|Windows Embedded Compact | 2013 | HTTP |
 
 
 
@@ -107,3 +109,4 @@ Certified for IoT devices have tested compatibility with the Azure IoT SDKs and 
 |Minnowboard Max |Windows 7,8, 10 |C#|
 |Arrow Dragonboard |Windows 10 IoT Core | C#|
 |Freescale FRDM K64 |mbedOS | C|
+|Toradex Colibri and Apalis COM |Windows Embedded Compact 2013 | C|
