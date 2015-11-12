@@ -1,15 +1,15 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for iothubclient_e2etests
+#this is CMakeLists.txt for iothubclient_amqp_e2etests
 cmake_minimum_required(VERSION 3.0)
 
-if(NOT (${use_http} AND ${use_amqp} AND ${use_mqtt}))
-	message(FATAL_ERROR "iothubclient_e2etests being generated without HTTP, AMQP and MQTT support")
+if(NOT (${use_amqp}))
+	message(FATAL_ERROR "iothubclient_amqp_e2etests being generated without AMQP support")
 endif()
 
 compileAsC99()
-set(theseTestsName iothubclient_e2etests)
+set(theseTestsName iothubclient_amqp_e2etests)
 
 set(${theseTestsName}_cpp_files
 	${theseTestsName}.cpp
@@ -34,14 +34,9 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_amqp_transport
-			iothub_client_http_transport
 			common
-			iothub_client_http_transport
-			iothub_client_mqtt_transport
 		)
-		linkHttp(${theseTestsName}_dll)
 		linkProton(${theseTestsName}_dll)
-		linkPaho(${theseTestsName}_dll)
 	endif()
 	
 	if(TARGET ${theseTestsName}_exe)
@@ -49,14 +44,9 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_amqp_transport
-			iothub_client_http_transport
 			common
-			iothub_client_http_transport
-			iothub_client_mqtt_transport
 		)
-		linkHttp(${theseTestsName}_exe)
 		linkProton(${theseTestsName}_exe)	
-		linkPaho(${theseTestsName}_exe)
 	endif()
 else()
 	if(TARGET ${theseTestsName}_exe)
@@ -64,15 +54,10 @@ else()
 			iothub_test
 			iothub_client
 			iothub_client_amqp_transport
-			iothub_client_http_transport
 			common
-			iothub_client_http_transport
-			iothub_client_mqtt_transport
 		)
 		target_link_libraries(${theseTestsName}_exe pthread)
-		linkHttp(${theseTestsName}_exe)
 		linkProton(${theseTestsName}_exe)
-		linkPaho(${theseTestsName}_exe)
 	endif()
 endif()
 

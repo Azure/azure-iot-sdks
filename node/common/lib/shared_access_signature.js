@@ -9,7 +9,7 @@ var FormatError = require('./errors.js').FormatError;
 
 function SharedAccessSignature() {}
 
-SharedAccessSignature.parse = function parse(source) {
+SharedAccessSignature.parse = function parse(source, requiredFields) {
   /*Codes_SRS_NODE_COMMON_SAS_05_001: [The input argument source shall be converted to string if necessary.]*/
   var parts = String(source).split(/\s/);
   /*Codes_SRS_NODE_COMMON_SAS_05_005: [The parse method shall throw FormatError if the shared access signature string does not start with 'SharedAccessSignature<space>'.]*/
@@ -20,16 +20,18 @@ SharedAccessSignature.parse = function parse(source) {
   var dict = createDictionary(parts[1], '&');
   var err = 'The shared access signature is missing the property: ';
 
-  /*Codes_SRS_NODE_COMMON_SAS_05_006: [The parse method shall throw ArgumentError if any of 'sr', 'sig', 'skn', or 'se' fields are not found in the input argument.]*/
-  ['sr', 'sig', 'skn', 'se'].forEach(function (key) {
+  requiredFields = requiredFields || [];
+
+  /*Codes_SRS_NODE_COMMON_SAS_05_006: [The parse method shall throw ArgumentError if any of fields in the requiredFields argument are not found in the source argument.]*/
+  requiredFields.forEach(function (key) {
     if (!(key in dict)) throw new ArgumentError(err + key);
   });
 
   /*Codes_SRS_NODE_COMMON_SAS_05_002: [The parse method shall create a new instance of SharedAccessSignature.]*/
   var sas = new SharedAccessSignature();
 
-  /*Codes_SRS_NODE_COMMON_SAS_05_003: [It shall accept a string argument of the form 'name=value[;name=value…]' and for each name extracted it shall create a new property on the SharedAccessSignature object instance.]*/
-  /*Codes_SRS_NODE_COMMON_SAS_05_004: [The value of the property shall be the value extracted from the input argument for the corresponding name.]*/
+  /*Codes_SRS_NODE_COMMON_SAS_05_003: [It shall accept a string argument of the form 'name=value[&name=value…]' and for each name extracted it shall create a new property on the SharedAccessSignature object instance.]*/
+  /*Codes_SRS_NODE_COMMON_SAS_05_004: [The value of the property shall be the value extracted from the source argument for the corresponding name.]*/
   Object.keys(dict).forEach(function (key) {
     sas[key] = dict[key];
   });

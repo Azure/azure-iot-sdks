@@ -3,7 +3,7 @@
 
 'use strict';
 
-var Base = require('azure-iot-common').Https;
+var Base = require('azure-iot-common').Http;
 
 /*Codes_SRS_NODE_IOTHUB_HTTP_05_001: [The Http constructor shall accept an object with three properties:
 host - (string) the fully-qualified DNS hostname of an IoT hub
@@ -39,10 +39,13 @@ Http.prototype.createDevice = function (path, deviceInfo, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, function (err, response, msg) {
-    if (err) err.response = response;
-    var body = msg ? msg.getData() : msg;
-    done(err, body, response);
+  var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, function (err, body, response) {
+    if (!err) done (null, body, response);
+    else {
+      err.response = response;
+      err.responseBody = body;
+      done(err);
+    }
   });
   request.write(JSON.stringify(deviceInfo));
   request.end();
@@ -73,10 +76,13 @@ Http.prototype.updateDevice = function (path, deviceInfo, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, function (err, response, msg) {
-    if (err) err.response = response;
-    var body = msg ? msg.getData() : msg;
-    done(err, body, response);
+  var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, function (err, body, response) {
+    if (!err) done (null, body, response);
+    else {
+      err.response = response;
+      err.responseBody = body;
+      done(err);
+    }
   });
   request.write(JSON.stringify(deviceInfo));
   request.end();
@@ -102,10 +108,13 @@ Http.prototype.getDevice = function (path, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, response, msg) {
-    if (err) err.response = response;
-    var body = msg ? msg.getData() : msg;
-    done(err, body, response);
+  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
+    if (!err) done (null, body, response);
+    else {
+      err.response = response;
+      err.responseBody = body;
+      done(err);
+    }
   });
   request.end();
 };
@@ -130,10 +139,13 @@ Http.prototype.listDevices = function (path, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, response, msg) {
-    if (err) err.response = response;
-    var body = msg ? msg.getData() : msg;
-    done(err, body, response);
+  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
+    if (!err) done (null, body, response);
+    else {
+      err.response = response;
+      err.responseBody = body;
+      done(err);
+    }
   });
   request.end();
 };
@@ -160,10 +172,13 @@ Http.prototype.deleteDevice = function (path, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('DELETE', path, httpHeaders, config.host, function (err, response, msg) {
-    if (err) err.response = response;
-    var body = msg ? msg.getData() : msg;
-    done(err, body, response);
+  var request = this._http.buildRequest('DELETE', path, httpHeaders, config.host, function (err, body, response) {
+    if (!err) done (null, body, response);
+    else {
+      err.response = response;
+      err.responseBody = body;
+      done(err);
+    }
   });
   request.end();
 };

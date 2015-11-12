@@ -19,11 +19,16 @@ function feedbackPath(id, lockToken) {
   return messagePath(id) + '/' + lockToken;
 }
 
+function versionQueryString() {
+  return '?api-version=2015-08-15-preview';
+}
+
 var endpoint = {
   devicePath: devicePath,
   eventPath: eventPath,
   messagePath: messagePath,
-  feedbackPath: feedbackPath
+  feedbackPath: feedbackPath,
+  versionQueryString: versionQueryString
 };
 
 module.exports = endpoint;

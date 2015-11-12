@@ -23,8 +23,6 @@ This document describes how to run the end to end tests.
     - Populate the following variables in the "iot_device_params.txt"  file by matching the place holders with the ones from the IoT Hub connection string shown above.
       
       - IOTHUB_CONNECTION_STRING=[entire connection string from azure portal]
-      - IOTHUB_POLICY_NAME=[IOTHUB_POLICY_NAME]
-      - IOTHUB_POLICY_KEY=[IOTHUB_POLICY_KEY]
      
     - Locate the Event Hub settings as shown in the figure below
 
@@ -36,6 +34,8 @@ This document describes how to run the end to end tests.
       - IOTHUB_EVENTHUB_CONNECTION_STRING=[Event Hub-compatible endpoint];SharedAccessKeyName=[IOTHUB_POLICY_NAME];SharedAccessKey=[IOTHUB_POLICY_KEY]
       - IOTHUB_EVENTHUB_CONSUMER_GROUP=$Default
       - IOTHUB_PARTITION_COUNT=[Partition count from portal]
+	  
+	  Note: IOTHUB_EVENTHUB_CONSUMER_GROUP is optional. If not provided, the assumed value is "$Default".
 
     - Populate the following variables in the "iot_device_params.txt" by extracting the information from Device Explorer.
 
