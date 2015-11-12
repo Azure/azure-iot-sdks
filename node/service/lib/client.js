@@ -7,7 +7,6 @@ var anHourFromNow = require('azure-iot-common').authorization.anHourFromNow;
 var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./transport.js');
 var Message = require('azure-iot-common').Message;
-var ServiceToken = require('azure-iot-common').authorization.ServiceToken;
 var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
 
 /**
@@ -56,7 +55,7 @@ Client.fromConnectionString = function fromConnectionString(value) {
 
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_003: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a new instance of the default transport (azure-iothub.Transport).]*/
   var cn = ConnectionString.parse(value);
-  var sas = new ServiceToken(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
+  var sas = SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
 
   var config = {
     hubName: cn.HostName.split('.', 1)[0],

@@ -15,6 +15,19 @@ var incompleteSignatures = {
 };
 
 describe('SharedAccessSignature', function () {
+  describe('#create', function () {
+    /*Tests_SRS_NODE_IOTHUB_SAS_05_003: [The create method shall return the result of calling azure-iot-common.SharedAccessSignature.create with following arguments:
+    resourceUri - host
+    keyName - policy
+    key - key
+    expiry - expiry]*/
+    it('creates a shared access signature', function () {
+      var expect = 'SharedAccessSignature sr=host&sig=88JmrIsVYOGmRSjCO1x1LLbv0K001Gikh1rjfJqbQXA%3D&skn=policy&se=12345';
+      var sas = SharedAccessSignature.create('host', 'policy', 'key', 12345);
+      assert.equal(expect, sas.toString());
+    });
+  });
+
   describe('#parse', function () {
     /*Tests_SRS_NODE_IOTHUB_SAS_05_001: [The parse method shall return the result of calling azure-iot-common.SharedAccessSignature.parse.]*/
     /*Tests_SRS_NODE_IOTHUB_SAS_05_002: [It shall throw ArgumentError if any of 'sr', 'sig', 'skn' or 'se' fields are not found in the source argument.]*/

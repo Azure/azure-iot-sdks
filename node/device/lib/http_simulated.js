@@ -5,7 +5,6 @@
 
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var Message = require('azure-iot-common').Message;
-var DeviceToken = require('azure-iot-common').authorization.DeviceToken;
 var SharedAccessSignature = require('./shared_access_signature.js');
 
 function Response(statusCode) {
@@ -29,7 +28,7 @@ function SimulatedHttp(config) {
       done(makeError(404));
     }
     else {
-      var cmpSig = (new DeviceToken(config.host, config.deviceId, 'bad', sig.se)).toString();
+      var cmpSig = (SharedAccessSignature.create(config.host, config.deviceId, 'bad', sig.se)).toString();
       if (config.sharedAccessSignature === cmpSig) {  // bad key
         done(makeError(401));
       }
