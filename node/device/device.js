@@ -5,13 +5,13 @@
  * The `azure-iot-device` module provides a means for devices to send events to and
  * receive messages from an Azure IoT Hub.  The client handles
  * communication with the IoT Hub through a transport supplied by the caller
- * (e.g., [Https]{@linkcode module:adapters/https.Https}).
+ * (e.g., [Http]{@linkcode module:adapters/https.Http}).
  *
  * @example
  * var Device = require('azure-iot-device');
  * var Client = Device.Client;
  * var Message = Device.Message;
- * var Https = Device.Https;
+ * var Http = Device.Http;
  *
  * function print(err, res) {
  *   if (err) console.log(err.toString());
@@ -24,7 +24,7 @@
  *   key: 'password'
  * };
  *
- * var client = new Client(new Https(config));
+ * var client = new Client(new Http(config));
  *
  * client.sendEvent(new Message('hello world'), print);
  *
@@ -45,6 +45,8 @@ var common = require('azure-iot-common');
 
 module.exports = {
     Client: require('./lib/client.js'),
-    Https: common.Https,
-    Message: common.Message
+    ConnectionString: require('./lib/connection_string.js'),
+    Http: require('./lib/http.js'),
+    Message: common.Message,
+    SharedAccessSignature: require('./lib/shared_access_signature.js')
 };

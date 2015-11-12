@@ -51,7 +51,7 @@ To add a device to your IoT hub, you can use the [iothub-explorer][use-iothub-ex
 [azure-portal]: https://portal.azure.com
 [manage-iothub-portal]: http://azure.microsoft.com/en-us/documentation/articles/iot-hub-manage-portal/
 [use-device-explorer]: ../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
-[use-iothub-explorer]: ../c/doc/provision_device.md
+[use-iothub-explorer]: ../tools/iothub-explorer/doc/provision_device.md
 [resource-group-portal]: https://github.com/Azure/azure-content/blob/master/articles/azure-portal/resource-group-portal.md
 
 [1]: media/create-iot-hub1.png

@@ -5,43 +5,72 @@
 
 var assert = require('chai').assert;
 
+var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var Client = require('./client.js');
 var Message = require('azure-iot-common').Message;
-var SimulatedHttps = require('azure-iot-common').SimulatedHttps;
+var SimulatedHttp = require('./http_simulated.js');
 
-function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
+describe('Client', function () {
+  describe('#constructor', function () {
+    /*Tests_SRS_NODE_DEVICE_CLIENT_05_001: [The Client constructor shall throw ReferenceError if the transport argument is falsy.]*/
+    it('throws if transport arg is falsy', function () {
+      [null, undefined, '', 0].forEach(function (transport) {
+        assert.throws(function () {
+          return new Client(transport);
+        }, ReferenceError, 'transport is \'' + transport + '\'');
+      });
+    });
+  });
 
-  /*Tests_SRS_NODE_DEVICE_CLIENT_05_003: [When the sendEvent method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
-  /*Tests_SRS_NODE_DEVICE_CLIENT_05_005: [When the receive method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
-  function makeRequestWith(connString, test, done) {
-    var transport = transportFactory();
-    var client = new Client(connString, transport);
-    requestFn(client, function (err, res, msg) {
-      test(err, res, msg);
+  describe('#fromConnectionString', function () {
+    var connectionString = 'HostName=host;DeviceId=id;SharedAccessKey=key';
+
+    /*Tests_SRS_NODE_DEVICE_CLIENT_05_003: [The fromConnectionString method shall throw ReferenceError if the value argument is falsy.]*/
+    it('throws if value arg is falsy', function () {
+      [null, undefined, '', 0].forEach(function (value) {
+        assert.throws(function () {
+          return Client.fromConnectionString(value);
+        }, ReferenceError, 'value is \'' + value + '\'');
+      });
+    });
+    
+    /*Tests_SRS_NODE_DEVICE_CLIENT_05_004: [If Transport is falsy, fromConnectionString shall use the default transport, Http.]*/
+    /*Tests_SRS_NODE_DEVICE_CLIENT_05_005: [fromConnectionString shall derive and transform the needed parts from the connection string in order to create a new instance of Transport.]*/
+    it('creates an instance of the default transport', function () {
+      var client = Client.fromConnectionString(connectionString);
+      assert.instanceOf(client._transport, require('./http.js'));
+    });
+    
+    /*Tests_SRS_NODE_DEVICE_CLIENT_05_006: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(new Transport(...)).]*/
+    it('returns an instance of Client', function () {
+      var client = Client.fromConnectionString(connectionString);
+      assert.instanceOf(client, Client);
+    });
+  });
+});
+
+function badConfigTests(opName, badConnStrings, Transport, requestFn) {
+
+  function makeRequestWith(connectionString, test, done) {
+    var client = Client.fromConnectionString(connectionString, Transport);
+    requestFn(client, function (err, res) {
+      test(err, res);
       done();
     });
   }
 
-  /*Tests_SRS_NODE_IOTHUB_HTTPS_05_003: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-  /*Tests_SRS_NODE_IOTHUB_HTTPS_05_007: [If receive encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
   function expectNotFoundError(err) {
     assert.include(err.message, 'getaddrinfo ENOTFOUND bad');
   }
 
-  /*Tests_SRS_NODE_IOTHUB_HTTPS_05_004: [When sendEvent receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
-  err - the standard JavaScript Error object
-  res - the Node.js http.ServerResponse object returned by the transport]*/
-  /*Tests_SRS_NODE_IOTHUB_HTTPS_05_008: [When receive receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
-  err - the standard JavaScript Error object
-  res - the Node.js http.ServerResponse object returned by the transport]*/
-  function expect401Response(err, res) {
+  function expect401Response(err) {
     assert.isNotNull(err);
-    assert.equal(res.statusCode, 401);
+    assert.equal(err.response.statusCode, 401);
   }
 
-  function expect404Response(err, res) {
+  function expect404Response(err) {
     assert.isNotNull(err);
-    assert.equal(res.statusCode, 404);
+    assert.equal(err.response.statusCode, 404);
   }
 
   var tests = [
@@ -50,6 +79,8 @@ function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
     { name: 'password is wrong', expect: expect401Response }
   ];
 
+  /*Tests_SRS_NODE_DEVICE_CLIENT_05_016: [When a Client method encounters an error in the transport, the callback function (indicated by the done argument) shall be invoked with the following arguments:
+  err - the standard JavaScript Error object, with a response property that points to a transport-specific response object, and a responseBody property that contains the body of the transport response.]*/
   badConnStrings.forEach(function (test, index) {
     it('fails to ' + opName + ' when the ' + tests[index].name, function (done) {
       makeRequestWith(test, tests[index].expect, done);
@@ -57,30 +88,16 @@ function badConfigTests(opName, badConnStrings, transportFactory, requestFn) {
   });
 }
 
-function runTests(transportFactory, goodConfig, badConfigs) {
+function runTests(Transport, goodConnectionString, badConnectionStrings) {
 
   describe('Client', function () {
     describe('#sendEvent', function () {
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_001: [The Client constructor shall accept a transport object]*/
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_002: [The sendEvent method shall send the event (indicated by the message argument) via the transport associated with the Client instance.]*/
-      /*Tests_SRS_NODE_IOTHUB_HTTPS_05_001: [The Https constructor shall accept a config object with three properties:
-      host – (string) the fully-qualified DNS hostname of an IoT Hub
-      keyName – (string) the identifier of a device registered with the IoT Hub, or the name of an authorization policy
-      key – (string) the key associated with the device registration or authorization policy.]*/
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_003: [When the sendEvent method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
-      /*Tests_SRS_NODE_IOTHUB_HTTPS_05_002: [The sendEvent method shall construct an HTTP request using information supplied by the caller, as follows:
-      POST <config.host>/devices/<config.keyName>/messages/events?api-version=<version> HTTP/1.1
-      Authorization: <token generated from config>
-      iothub-to: /devices/<config.keyName>/messages/events
-      Host: <config.host>
-
-      <message>
-      ]*/
-      /*Tests_SRS_NODE_IOTHUB_HTTPS_05_005: [When sendEvent receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_007: [The sendEvent method shall send the event indicated by the message argument via the transport associated with the Client instance.]*/
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_017: [With the exception of receive, when a Client method completes successfully, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - null
-      res - the Node.js http.ServerResponse object returned by the transport]*/
+      response - a transport-specific response object]*/
       it('sends the event', function (done) {
-        var client = new Client(goodConfig, transportFactory());
+        var client = Client.fromConnectionString(goodConnectionString, Transport);
         var message = new Message('hello');
         client.sendEvent(message, function (err, res) {
           assert.isNull(err);
@@ -89,29 +106,19 @@ function runTests(transportFactory, goodConfig, badConfigs) {
         });
       });
 
-      badConfigTests('send an event', badConfigs, transportFactory, function (client, done) {
+      badConfigTests('send an event', badConnectionStrings, Transport, function (client, done) {
         client.sendEvent(new Message(''), done);
       });
 
     });
 
     describe('#sendEventBatch', function () {
-      /* Test_SRS_NODE_IOTHUB_HTTPS_07_006: [The sendEventBatch method shall construct an HTTP request using information supplied by the caller, as follows:
-      POST <config.host>/devices/<config.keyName>/messages/events?api-version=<version> HTTP/1.1
-      Authorization: <token generated from config>
-      iothub-to: /devices/<config.keyName>/messages/events
-      Content-Type: ‘application/vnd.microsoft.iothub.json’
-      Host: <config.host>
-      {“body”:”<Base64 Message1>”,”properties”:{“<key>”:”<value”}},{ “body”:<Base64 Message1>”}…]*/
-      /* Test_SRS_NODE_IOTHUB_HTTPS_07_007: [If sendEventBatch encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).
-      When sendEventBatch receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
-      err - the standard JavaScript Error object
-      res - the Node.js http.ServerResponse object returned by the transport]*/
-      /* Test_SRS_NODE_IOTHUB_HTTPS_07_008: [When sendEventBatch receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_008: [The sendEventBatch method shall send the list of events (indicated by the messages argument) via the transport associated with the Client instance.]*/
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_017: [With the exception of receive, when a Client method completes successfully, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - null
-      res - the Node.js http.ServerResponse object returned by the transport]*/
+      response - a transport-specific response object]*/
       it('sends the event batch message', function (done) {
-        var client = new Client(goodConfig, transportFactory());
+        var client = Client.fromConnectionString(goodConnectionString, Transport);
         var messages = [];
         for (var i = 0; i < 5; i++) {
           messages[i] = new Message('Event Msg ' + i);
@@ -123,7 +130,7 @@ function runTests(transportFactory, goodConfig, badConfigs) {
         });
       });
 
-      badConfigTests('send an event batch', badConfigs, transportFactory, function (client, done) {
+      badConfigTests('send an event batch', badConnectionStrings, Transport, function (client, done) {
         var messages = [];
         for (var i = 0; i < 5; i++) {
           messages[i] = new Message('Event Msg ' + i);
@@ -133,26 +140,14 @@ function runTests(transportFactory, goodConfig, badConfigs) {
     });
 
     describe('#receive', function () {
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_001: [The Client constructor shall accept a transport object]*/
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_004: [The receive method shall query the IoT Hub for the next message via the transport associated with the Client instance.]*/
-      /*Tests_SRS_NODE_IOTHUB_HTTPS_05_001: [The Https constructor shall accept a config object with three properties:
-      host – (string) the fully-qualified DNS hostname of an IoT Hub
-      keyName – (string) the identifier of a device registered with the IoT Hub, or the name of an authorization policy
-      key – (string) the key associated with the device registration or authorization policy.]*/
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_005: [When the receive method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
-      /*Tests_SRS_NODE_IOTHUB_HTTPS_05_006: [The receive method shall construct an HTTP request using information supplied by the caller, as follows:
-      GET <config.host>/devices/<config.keyName>/messages/devicebound?api-version=<version> HTTP/1.1
-      Authorization: <token generated from config>
-      iothub-to: /devices/<config.keyName>/messages/devicebound
-      Host: <config.host>
-      ]*/
-      /*Tests_SRS_NODE_IOTHUB_HTTPS_05_009: [When receive receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_009: [The receive method shall query the IoT Hub for the next message via the transport associated with the Client instance.]*/
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_018: [When receive completes successfully, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - null
-      res - the Node.js http.ServerResponse object returned by the transport
-      msg – the response body, i.e. the content of the message received from IoT Hub, as an iothub.Message object]*/
+      message - the received Message (for receive), otherwise null
+      response - a transport-specific response object]*/
       it('queries the service for a message', function (done) {
-        var client = new Client(goodConfig, transportFactory());
-        client.receive(function (err, res, msg) {
+        var client = Client.fromConnectionString(goodConnectionString, Transport);
+        client.receive(function (err, msg, res) {
           assert.isNull(err);
           assert.isBelow(res.statusCode, 300);
           assert.instanceOf(msg, Message);
@@ -160,23 +155,37 @@ function runTests(transportFactory, goodConfig, badConfigs) {
         });
       });
 
-      badConfigTests('receive messages', badConfigs, transportFactory, function (client, done) {
-        client.receive(done);
+      badConfigTests('receive messages', badConnectionStrings, Transport, function (client, done) {
+        client.receive(function (err, message, response) {
+          done(err, response);
+        });
       });
     });
 
     describe('#abandon', function () {
-      /* Tests_SRS_NODE_DEVICE_CLIENT_07_001: [The abandon method shall call into the transport’s sendFeedback with the ‘abandon’ keyword and the lockToken.] */
-      it('message.lockToken is not entered', function (done) {
-        var client = new Client(goodConfig, transportFactory());
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_011: [Otherwise it shall invoke the done callback with ArgumentError.]*/
+      it('fails if message doesn\'t have a lock token', function (done) {
+        var client = Client.fromConnectionString(goodConnectionString, Transport);
         var message = new Message('hello');
         client.abandon(message, function (err) {
           assert.isNotNull(err);
+          assert.instanceOf(err, ArgumentError);
+          done();
+        });
+      });
+      
+      it('fails if the lock token doesn\'t match an outstanding message', function (done) {
+        var client = Client.fromConnectionString(goodConnectionString, Transport);
+        var message = new Message('hello');
+        message.lockToken = 'FFA945D3-9808-4648-8DD7-D250DDE66EA9';
+        client.abandon(message, function (err) {
+          assert.isNotNull(err);
+          assert.equal(err.response.statusCode, 412);
           done();
         });
       });
 
-      badConfigTests('abandon', badConfigs, transportFactory, function (client, done) {
+      badConfigTests('abandon', badConnectionStrings, Transport, function (client, done) {
         var message = new Message('hello');
         message.lockToken = '44D56613-DC1A-4DA8-906B-DDCC46090776';
         client.abandon(message, done);
@@ -184,17 +193,29 @@ function runTests(transportFactory, goodConfig, badConfigs) {
     });
 
     describe('#reject', function () {
-      /* SRS_NODE_DEVICE_CLIENT_07_002: [The reject method shall call into the transport’s sendFeedback with the ‘reject’ keyword and the lockToken.] */
-      it('message.lockToken is not entered', function (done) {
-        var client = new Client(goodConfig, transportFactory());
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_013: [Otherwise is shall invoke the done callback with ArgumentError.]*/
+      it('fails if message doesn\'t have a lock token', function (done) {
+        var client = Client.fromConnectionString(goodConnectionString, Transport);
         var message = new Message('hello');
         client.reject(message, function (err) {
           assert.isNotNull(err);
+          assert.instanceOf(err, ArgumentError);
           done();
         });
       });
 
-      badConfigTests('reject', badConfigs, transportFactory, function (client, done) {
+      it('fails if the lock token doesn\'t match an outstanding message', function (done) {
+        var client = Client.fromConnectionString(goodConnectionString, Transport);
+        var message = new Message('hello');
+        message.lockToken = 'FFA945D3-9808-4648-8DD7-D250DDE66EA9';
+        client.reject(message, function (err) {
+          assert.isNotNull(err);
+          assert.equal(err.response.statusCode, 412);
+          done();
+        });
+      });
+
+      badConfigTests('reject', badConnectionStrings, Transport, function (client, done) {
         var message = new Message('hello');
         message.lockToken = '44D56613-DC1A-4DA8-906B-DDCC46090776';
         client.reject(message, done);
@@ -202,9 +223,9 @@ function runTests(transportFactory, goodConfig, badConfigs) {
     });
 
     describe('#complete', function () {
-      /* SRS_NODE_DEVICE_CLIENT_07_003: [The complete method shall call into the transport’s sendFeedback with the ‘complete’ keyword and the lockToken.] */
-      it('message.lockToken is not entered', function (done) {
-        var client = new Client(goodConfig, transportFactory());
+      /*Tests_SRS_NODE_DEVICE_CLIENT_05_015: [Otherwise is shall invoke the done callback with ArgumentError.]*/
+      it('fails if message doesn\'t have a lock token', function (done) {
+        var client = Client.fromConnectionString(goodConnectionString, Transport);
         var message = new Message('hello');
         client.complete(message, function (err) {
           assert.isNotNull(err);
@@ -212,17 +233,24 @@ function runTests(transportFactory, goodConfig, badConfigs) {
         });
       });
 
-      badConfigTests('complete', badConfigs, transportFactory, function (client, done) {
+      it('fails if the lock token doesn\'t match an outstanding message', function (done) {
+        var client = Client.fromConnectionString(goodConnectionString, Transport);
+        var message = new Message('hello');
+        message.lockToken = 'FFA945D3-9808-4648-8DD7-D250DDE66EA9';
+        client.complete(message, function (err) {
+          assert.isNotNull(err);
+          assert.equal(err.response.statusCode, 412);
+          done();
+        });
+      });
+
+      badConfigTests('complete', badConnectionStrings, Transport, function (client, done) {
         var message = new Message('hello');
         message.lockToken = '44D56613-DC1A-4DA8-906B-DDCC46090776';
         client.complete(message, done);
       });
     });
   });
-}
-
-function createTransport() {
-  return new SimulatedHttps();
 }
 
 function makeConnectionString(host, device, key) {
@@ -237,7 +265,7 @@ var badConnStrings = [
 ];
 
 describe('Over simulated HTTPS', function () {
-  runTests(createTransport, connectionString, badConnStrings);
+  runTests(SimulatedHttp, connectionString, badConnStrings);
 });
 
 module.exports = runTests;

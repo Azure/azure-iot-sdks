@@ -3,55 +3,65 @@
 
 'use strict';
 
-var HOSTNAME_LEN = "HostName=".length;
-var DEVICEID_LEN = "DeviceId=".length;
-var SAK_LEN = "SharedAccessKey=".length;
-
-function parseConnString(connString)
-{
-  var config = {
-    host: '',
-    hubName: '',
-    keyName: '',
-    key: ''
-  };
-  var configArray = connString.split(';');
-  configArray.forEach(function(element) {
-    var pos = element.indexOf("HostName=");
-    if (pos >= 0) {
-      config.host = element.substring(pos+HOSTNAME_LEN);
-      // Look for the first period
-      var periodSeparator = config.host.indexOf('.');
-      config.hubName = config.host.substring(0, periodSeparator);
-    }
-    else if ( (pos = element.indexOf("DeviceId=") ) >= 0) {
-      config.keyName = element.substring(pos+DEVICEID_LEN);
-    }
-    else if ( (pos = element.indexOf("SharedAccessKey=") ) >= 0) {
-      config.key = element.substring(pos+SAK_LEN);
-    }
-  });
-  return config;
-}
+var anHourFromNow = require('azure-iot-common').authorization.anHourFromNow;
+var ArgumentError = require('azure-iot-common').errors.ArgumentError;
+var ConnectionString = require('./connection_string.js');
+var DefaultTransport = require('./http.js');
+var DeviceToken = require('azure-iot-common').authorization.DeviceToken;
 
 /**
- * @class Client
- * @classdesc Constructs a {@linkcode Client} object with the given IoT device connection
- *            string and `transport` object.
- * @param {String}  connString    The IoT device connection string
- * @param {Object}  transport     An object that implements the interface
- *                                expected of a transport object. See the
- *                                file **adapters/devdoc/https_requirements.docm**
- *                                for information on what the transport
- *                                object should look like. The {@linkcode Https}
- *                                class is an implementation that uses HTTP as
- *                                the communication protocol.
+ * @class           module:azure-iot-device.Client
+ * @classdesc       Creates an IoT Hub device client. Normally, consumers will
+ *                  call the factory method,
+ *                  {@link module:azure-iot-device.Client.fromConnectionString|fromConnectionString},
+ *                  to create an IoT Hub device client.
+ * @param {Object}  transport   An object that implements the interface
+ *                              expected of a transport object, e.g.,
+ *                              {@link module:azure-iot-device~Http|Http}.
  */
-/*Codes_SRS_NODE_DEVICE_CLIENT_05_001: [The Client constructor shall accept a transport object]*/
-var Client = function (connString, transport) {
-  this.config = parseConnString(connString);
-  this.transport = transport;
+var Client = function (transport) {
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_001: [The Client constructor shall throw ReferenceError if the transport argument is falsy.]*/
+  if (!transport) throw new ReferenceError('transport is \'' + transport + '\'');
+  this._transport = transport;
 };
+
+/**
+ * @method            module:azure-iot-device.Client.fromConnectionString
+ * @description       Creates an IoT Hub device client from the given
+ *                    connection string using the given transport type, or
+ *                    {@link module:azure-iot-device~Http|Http} if no transport
+ *                    type is given.
+ * @param {String}    value   A connection string which encapsulates "device
+ *                            connect" permissions on an IoT hub.
+ * @returns {module:azure-iothub.Client}
+*/
+Client.fromConnectionString = function fromConnectionString(value, Transport) {
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_003: [The fromConnectionString method shall throw ReferenceError if the value argument is falsy.]*/
+  if (!value) throw new ReferenceError('value is \'' + value + '\'');
+
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_004: [If Transport is falsy, fromConnectionString shall use the default transport, Http.]*/
+  Transport = Transport || DefaultTransport;
+
+  /*Tests_SRS_NODE_DEVICE_CLIENT_05_005: [fromConnectionString shall derive and transform the needed parts from the connection string in order to create a new instance of Transport.]*/
+  var cn = ConnectionString.parse(value);
+  var sas = new DeviceToken(cn.HostName, cn.DeviceId, cn.SharedAccessKey, anHourFromNow());
+
+  var config = {
+    host: cn.HostName,
+    deviceId: cn.DeviceId,
+    sharedAccessSignature: sas.toString()
+  };
+
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_006: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(new Transport(...)).]*/
+  return new Client(new Transport(config));
+};
+
+/*Codes_SRS_NODE_DEVICE_CLIENT_05_016: [When a Client method encounters an error in the transport, the callback function (indicated by the done argument) shall be invoked with the following arguments:
+err - the standard JavaScript Error object, with a response property that points to a transport-specific response object, and a responseBody property that contains the body of the transport response.]*/
+/*Codes_SRS_NODE_DEVICE_CLIENT_05_017: [With the exception of receive, when a Client method completes successfully, the callback function (indicated by the done argument) shall be invoked with the following arguments:
+err - null
+response - a transport-specific response object]*/
+
 
 /**
  * The [sendEvent]{@linkcode Client#sendEvent} method sends an event message
@@ -64,9 +74,8 @@ var Client = function (connString, transport) {
  * @see [Message]{@linkcode module:common/message.Message}
  */
 Client.prototype.sendEvent = function(message, done) {
-  /*Codes_SRS_NODE_DEVICE_CLIENT_05_002: [The sendEvent method shall send the event (indicated by the message argument) via the transport associated with the Client instance.]*/
-  /*Codes_SRS_NODE_DEVICE_CLIENT_05_003: [When the sendEvent method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
-  this.transport.sendEvent(message, this.config, done);
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_007: [The sendEvent method shall send the event indicated by the message argument via the transport associated with the Client instance.]*/
+  this._transport.sendEvent(message, done);
 };
 
 /**
@@ -79,9 +88,8 @@ Client.prototype.sendEvent = function(message, done) {
  *                                  `sendEventBatch` completes execution.
  */
 Client.prototype.sendEventBatch = function(messages, done) {
-  /*Codes_SRS_NODE_DEVICE_CLIENT_07_004: [The sendEventBatch method shall send the list of events (indicated by the messages argument) via the transport associated with the Client instance.]*/
-  /*Codes_SRS_NODE_DEVICE_CLIENT_07_005: [When the sendEventBatch method completes the callback function shall be invoked with the same arguments as the underlying transport method’s callback.]*/
-  this.transport.sendEventBatch(messages, this.config, done);
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_008: [The sendEventBatch method shall send the list of events (indicated by the messages argument) via the transport associated with the Client instance.]*/
+  this._transport.sendEventBatch(messages, done);
 };
 
 /**
@@ -91,9 +99,12 @@ Client.prototype.sendEventBatch = function(messages, done) {
  *                              completes execution.
  */
 Client.prototype.receive = function(done) {
-  /*Codes_SRS_NODE_DEVICE_CLIENT_05_004: [The receive method shall query the IoT Hub for the next message via the transport associated with the Client instance.]*/
-  /*Codes_SRS_NODE_DEVICE_CLIENT_05_005: [When the receive method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback.]*/
-  this.transport.receive(this.config, done);
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_009: [The receive method shall query the IoT Hub for the next message via the transport associated with the Client instance.]*/
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_018: [When receive completes successfully, the callback function (indicated by the done argument) shall be invoked with the following arguments:
+  err - null
+  message - the received Message (for receive), otherwise null
+  response - a transport-specific response object]*/
+  this._transport.receive(done);
 };
 
 /**
@@ -105,8 +116,16 @@ Client.prototype.receive = function(done) {
  *                              completes execution.
  */
 Client.prototype.abandon = function(message, done) {
-  /*Codes_SRS_NODE_DEVICE_CLIENT_07_001: [The abandon method shall call into the transport’s sendFeedback with the ‘abandon’ keyword and the lockToken.]*/
-  this.transport.sendFeedback('abandon', message.lockToken, this.config, done);
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_010: [If message has a lockToken property, the abandon method shall abandon message via the transport associated with the Client instance.]*/
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_011: [Otherwise it shall invoke the done callback with ArgumentError.]*/
+  message = message || {};
+  
+  if (!message.lockToken) {
+    done(new ArgumentError('invalid lockToken'));
+  }
+  else {
+    this._transport.sendFeedback('abandon', message.lockToken, done);
+  }
 };
 
 /**
@@ -118,8 +137,16 @@ Client.prototype.abandon = function(message, done) {
  *                              completes execution.
  */
 Client.prototype.reject = function(message, done) {
-  /*Codes_SRS_NODE_DEVICE_CLIENT_07_002: [The reject method shall call into the transport’s sendFeedback with the ‘reject’ keyword and the lockToken.]*/
-  this.transport.sendFeedback('reject', message.lockToken, this.config, done);
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_012: [If message has a lockToken property, the reject method shall reject message via the transport associated with the Client instance.]*/
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_013: [Otherwise is shall invoke the done callback with ArgumentError.]*/
+  message = message || {};
+  
+  if (!message.lockToken) {
+    done(new ArgumentError('invalid lockToken'));
+  }
+  else {
+    this._transport.sendFeedback('reject', message.lockToken, done);
+  }
 };
 
 /**
@@ -131,8 +158,16 @@ Client.prototype.reject = function(message, done) {
  *                              completes execution.
  */
 Client.prototype.complete = function(message, done) {
-  /*Codes_SRS_NODE_DEVICE_CLIENT_07_003: [The complete method shall call into the transport’s sendFeedback with the ‘complete’ keyword and the lockToken.]*/
-  this.transport.sendFeedback('complete', message.lockToken, this.config, done);
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_014: [If message has a lockToken property, the complete method shall complete message via the transport associated with the Client instance.]*/
+  /*Codes_SRS_NODE_DEVICE_CLIENT_05_015: [Otherwise is shall invoke the done callback with ArgumentError.]*/
+  message = message || {};
+  
+  if (!message.lockToken) {
+    done(new ArgumentError('invalid lockToken'));
+  }
+  else {
+    this._transport.sendFeedback('complete', message.lockToken,  done);
+  }
 };
 
 module.exports = Client;

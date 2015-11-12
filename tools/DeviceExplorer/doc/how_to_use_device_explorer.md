@@ -1,7 +1,15 @@
 # How to use Device Explorer for IoT Hub devices
 This topic describes how to download, build and use the Device Explorer tool. You can use this tool to manage devices connecting to your IoT hub. For example, you can register a device with your IoT hub, monitor messages from your devices, and send messages to your devices.
 
-> **Note:** The Device Explorer utility only runs on Windows.
+Device Explorer runs on your local machine and connects to your IoT hub in Azure. It communicates with the following [IoT Hub endpoints][lnk-devguide]:
+
+- *Device identity management* to provision and manage devices registtered with your IoT hub.
+- *Receive device-to-cloud* to enable you to monitor messages sent from your device to your IoT hub.
+- *Send cloud-to-device* to enable you to send messages to your devices from your IoT hub.
+
+> **Note:** The Device Explorer utility only runs on Windows. On other platforms use the [iothub explorer][iothub-explorer] tool.
+
+To learn more about IoT Hub, see [What is Azure IoT Hub?][what-is-iot-hub].
 
 ## Table of Contents
 - [Getting Device Explorer](#download)
@@ -22,7 +30,7 @@ You can either download a pre-built version of Device Explorer or build it yours
 
 ### Download a pre-built version of the Device Explorer application
 
-A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link [DeviceExplorer.msi](https://github.com/Azure/azure-iot-sdks/releases/download/v1.0.0-preview.4/SetupDeviceExplorer.msi). The default installation directory for this application is "C:\Program Files (x86)\Microsoft\DeviceExplorer". You might want to pin the DeviceExplorer.exe application to the taskbar for easier access.
+A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link [DeviceExplorer.msi](https://github.com/Azure/azure-iot-sdks/releases/download/v20151102/SetupDeviceExplorer.msi). The default installation directory for this application is "C:\Program Files (x86)\Microsoft\DeviceExplorer". You might want to pin the DeviceExplorer.exe application to the taskbar for easier access.
 
 
 ### Build the Device Explorer application
@@ -137,3 +145,6 @@ Run your sample application. Device Explorer should now show that the IoT hub ha
 
 [setup-iothub]: ../../../doc/setup_iothub.md
 [protocol-gateway]: https://github.com/Azure/azure-iot-protocol-gateway
+[lnk-devguide]: https://azure.microsoft.com/documentation/articles/iot-hub-devguide/
+[what-is-iot-hub]: https://azure.microsoft.com/documentation/articles/iot-hub-what-is-iot-hub/
+[iothub-explorer]: ../../iothub-explorer/doc/provision_device.md

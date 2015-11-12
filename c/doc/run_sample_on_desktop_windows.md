@@ -46,4 +46,4 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 [devbox-setup]: devbox_setup.md
 [device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md

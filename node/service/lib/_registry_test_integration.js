@@ -3,26 +3,24 @@
 
 'use strict';
 
+var ConnectionString = require('./connection_string.js');
 var runTests = require('./_registry_test.js');
-var Https = require('azure-iot-common').Https;
 
-function createTransport() {
-  return new Https();
+function makeConnectionString(host, policy, key) {
+  return 'HostName='+host+';SharedAccessKeyName='+policy+';SharedAccessKey='+key;
 }
 
-var host = process.env.IOTHUB_NAME + '.' + process.env.IOTHUB_SUFFIX;
-var policy = process.env.IOTHUB_POLICY_NAME;
-var key = process.env.IOTHUB_POLICY_KEY;
+var connectionString = process.env.IOTHUB_CONNECTION_STRING;
 var deviceId = process.env.IOTHUB_DEVICE_ID;
+var cn = ConnectionString.parse(connectionString);
 
-var connectionString = 'HostName='+host+';SharedAccessKeyName='+policy+';SharedAccessKey='+key;
 var badConnStrings = [
-  'HostName=bad;SharedAccessKeyName='+policy+';SharedAccessKey='+key,
-  'HostName='+host+';SharedAccessKeyName=bad;SharedAccessKey='+key,
-  'HostName='+host+';SharedAccessKeyName='+policy+';SharedAccessKey=bad'
+  makeConnectionString('bad',       cn.SharedAccessKeyName, cn.SharedAccessKey),
+  makeConnectionString(cn.HostName, 'bad',                  cn.SharedAccessKey),
+  makeConnectionString(cn.HostName, cn.SharedAccessKeyName, 'bad'             ),
 ];
 
 describe('Over real HTTPS', function () {
-  this.timeout(10000);
-  runTests(createTransport, connectionString, badConnStrings, deviceId);
+  this.timeout(15000);
+  runTests(null, connectionString, badConnStrings, deviceId);
 });
