@@ -3,22 +3,21 @@
 
 'use strict';
 
+var ConnectionString = require('./connection_string.js');
 var runTests = require('./_registry_test.js');
-
-var host = process.env.IOTHUB_NAME + '.' + process.env.IOTHUB_SUFFIX;
-var policy = process.env.IOTHUB_POLICY_NAME;
-var key = process.env.IOTHUB_POLICY_KEY;
-var deviceId = process.env.IOTHUB_DEVICE_ID;
 
 function makeConnectionString(host, policy, key) {
   return 'HostName='+host+';SharedAccessKeyName='+policy+';SharedAccessKey='+key;
 }
 
-var connectionString = makeConnectionString(host, policy, key);
+var connectionString = process.env.IOTHUB_CONNECTION_STRING;
+var deviceId = process.env.IOTHUB_DEVICE_ID;
+var cn = ConnectionString.parse(connectionString);
+
 var badConnStrings = [
-  makeConnectionString('bad', policy, key),
-  makeConnectionString(host, 'bad', key),
-  makeConnectionString(host, policy, 'bad'),
+  makeConnectionString('bad',       cn.SharedAccessKeyName, cn.SharedAccessKey),
+  makeConnectionString(cn.HostName, 'bad',                  cn.SharedAccessKey),
+  makeConnectionString(cn.HostName, cn.SharedAccessKeyName, 'bad'             ),
 ];
 
 describe('Over real HTTPS', function () {

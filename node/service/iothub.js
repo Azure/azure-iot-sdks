@@ -15,5 +15,6 @@ module.exports = {
   ConnectionString: require('./lib/connection_string.js'),
   Device: require('./lib/device.js'),
   Http: require('./lib/registry_http.js'),
-  Registry: require('./lib/registry.js')
+  Registry: require('./lib/registry.js'),
+  SharedAccessSignature: require('./lib/shared_access_signature.js')
 };

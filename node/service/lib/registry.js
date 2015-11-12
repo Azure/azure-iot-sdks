@@ -9,7 +9,6 @@ var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./registry_http.js');
 var Device = require('./device.js');
 var endpoint = require('azure-iot-common').endpoint;
-var ServiceToken = require('azure-iot-common').authorization.ServiceToken;
 var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
 
 /**
@@ -51,7 +50,7 @@ Registry.fromConnectionString = function fromConnectionString(value, Transport) 
 
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_009: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a new instance of the default transport (azure-iothub.Http).]*/
   var cn = ConnectionString.parse(value);
-  var sas = new ServiceToken(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
+  var sas = SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
 
   var config = {
     host: cn.HostName,
@@ -109,7 +108,7 @@ Registry.prototype.create = function (deviceInfo, done) {
     throw new ArgumentError('The object \'deviceInfo\' is missing the property: deviceId');
   }
   else {
-    var path = endpoint.devicePath(deviceInfo.deviceId);
+    var path = endpoint.devicePath(deviceInfo.deviceId) + endpoint.versionQueryString();
     this._transport.createDevice(path, deviceInfo, function (err, body, response) {
       /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_002: [When the create method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
       if (err) {
@@ -144,7 +143,7 @@ Registry.prototype.update = function (deviceInfo, done) {
     throw new ArgumentError('The object \'deviceInfo\' is missing the property: deviceId');
   }
 
-  var path = endpoint.devicePath(deviceInfo.deviceId);
+  var path = endpoint.devicePath(deviceInfo.deviceId) + endpoint.versionQueryString();
   this._transport.updateDevice(path, deviceInfo, function (err, body, response) {
     /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_004: [When the update method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
     if (err) {
@@ -177,7 +176,7 @@ Registry.prototype.get = function (deviceId, done) {
   }
 
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_002: [The get method shall request metadata for the device (indicated by the deviceId argument) from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
-  var path = endpoint.devicePath(deviceId);
+  var path = endpoint.devicePath(deviceId) + endpoint.versionQueryString();
   this._transport.getDevice(path, function (err, body, response) {
     /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_003: [When the get method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback, plus a Device object representing the device information returned from IoT Hub.]*/
     var dev;
@@ -202,7 +201,7 @@ Registry.prototype.get = function (deviceId, done) {
  *                                object useful for logging or debugging.
  */
 Registry.prototype.list = function (done) {
-  var path = endpoint.devicePath('');
+  var path = endpoint.devicePath('') + endpoint.versionQueryString();
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_004: [The list method shall request information about devices from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
   this._transport.listDevices(path, function (err, body, response) {
     var devList = [];
@@ -237,7 +236,7 @@ Registry.prototype.delete = function (deviceId, done) {
     throw new ReferenceError('deviceId is \'' + deviceId + '\'');
   }
 
-  var path = endpoint.devicePath(deviceId);
+  var path = endpoint.devicePath(deviceId) + endpoint.versionQueryString();
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_007: [The delete method shall delete the given device from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
   this._transport.deleteDevice(path, function (err, body, response) {
     /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_005: [When the delete method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null).]*/
