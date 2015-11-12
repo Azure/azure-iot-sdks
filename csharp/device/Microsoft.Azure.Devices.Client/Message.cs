@@ -159,7 +159,7 @@ namespace Microsoft.Azure.Devices.Client
             get
             {
 #if NETMF
-                return (string)(this.GetSystemProperty(MessageSystemPropertyNames.MessageId) ?? string.Empty);
+                return (this.GetSystemProperty(MessageSystemPropertyNames.MessageId)) as string;
 #else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.MessageId);
 #endif
