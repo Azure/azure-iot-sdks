@@ -14,10 +14,10 @@ option(skip_unittests "set skip_unittests to ON to skip unittests (default is OF
 option(compileOption_C "passes a string to the command line of the C compiler" OFF)
 option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
 
-#IF (IN_OPENWRT)
-        ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
-        INCLUDE_DIRECTORIES("$ENV{TOOLCHAIN_DIR}/usr/include" "$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
-#ENDIF(IN_OPENWRT)
+if(IN_OPENWRT)
+	ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
+	INCLUDE_DIRECTORIES("$ENV{TOOLCHAIN_DIR}/usr/include" "$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
+endif()
 
 enable_testing()
 
