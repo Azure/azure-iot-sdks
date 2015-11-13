@@ -10,7 +10,7 @@ There are many ways that you can contribute to the Azure IoT SDKs project:
 The key design principle is that the code makes it easy for people to get data from sensors into Azure IoT services.
 
 ## Contributing Code
-To contribute code you need to issue a Pull Request. All code submissions will be reviewed and tested by the team, and those that meet a high bar for both quality and design/roadmap appropriateness will be merged into the source. Be sure to follow the existing file/folder structure when adding new boards or sensors.
+To contribute code you need to issue a Pull Request against the develop branch. All code submissions will be reviewed and tested by the team, and those that meet a high bar for both quality and design/roadmap appropriateness will be merged into the source. Be sure to follow the existing file/folder structure when adding new boards or sensors.
 
 You must sign a [Contribution License Agreement](https://cla.microsoft.com/) ([CLA](https://cla.microsoft.com/)) before submitting a Pull Request. To complete the CLA, you will need to submit the request via the form and then electronically sign the CLA when you receive the email containing the link to the document.
 
