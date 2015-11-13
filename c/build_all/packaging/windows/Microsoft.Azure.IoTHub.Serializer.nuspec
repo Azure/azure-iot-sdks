@@ -15,7 +15,7 @@
     <copyright>Copyright 2015</copyright>
     <tags>Microsoft Azure IoT Native x86 x64 native package</tags>
     <dependencies>
-	  	  <dependency id="Microsoft.Azure.IoTHub.Common" version="1.0.0-preview-003"/>
+	  	  <dependency id="Microsoft.Azure.IoTHub.Common" version="1.0.0-preview-006"/>
     </dependencies>
   </metadata>
     <files>
