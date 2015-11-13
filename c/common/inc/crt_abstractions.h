@@ -88,6 +88,15 @@ extern int size_tToString(char* destination, size_t destinationSize, size_t valu
 /*else if running on C99 or C11, ISNAN shall be isnan*/
 /*else if running on C89 ... #error and inform user*/
 
+#ifdef IN_OPENWRT
+#undef isnan
+#define isnan(x) __builtin_isnan(x)
+#undef isinf
+#define isinf(x) __builtin_isinf(x)
+#undef signbit
+#define signbit(x) __builtin_signbit(x)
+#endif 
+
 #ifdef _MSC_VER
 #define ISNAN _isnan
 #else
