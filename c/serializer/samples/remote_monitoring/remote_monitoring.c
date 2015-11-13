@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifndef WINCE
 #include "iothubtransportamqp.h"
+#else
+#include "iothubtransporthttp.h"
+#endif
 #include "schemalib.h"
 #include "iothub_client.h"
 #include "serializer.h"
@@ -20,16 +24,32 @@ static const char* hubSuffix = "[IoTHub Suffix, i.e. azure-devices.net]";
 // Define the Model
 BEGIN_NAMESPACE(Contoso);
 
+#ifndef WINCE
 DECLARE_STRUCT(SystemProperties,
     ascii_char_ptr, DeviceID,
     _Bool, Enabled
+	Bool, Enabled
 );
+#else
+DECLARE_STRUCT(SystemProperties,
+ascii_char_ptr, DeviceID,
+bool, Enabled
+);
+#endif
 
+#ifndef WINCE
 DECLARE_STRUCT(DeviceProperties,
 ascii_char_ptr, DeviceID,
 _Bool, HubEnabledState
 );
+#else
+DECLARE_STRUCT(DeviceProperties,
+ascii_char_ptr, DeviceID,
+bool, HubEnabledState
+);
+#endif
 
+#ifndef WINCE
 DECLARE_MODEL(Thermostat,
 
     /* Event data (temperature, external temperature and humidity) */
@@ -49,7 +69,27 @@ DECLARE_MODEL(Thermostat,
     WITH_ACTION(SetTemperature, double, temperature),
 	WITH_ACTION(SetHumidity, double, humidity)
 );
+#else
+DECLARE_MODEL(Thermostat,
 
+	/* Event data (temperature, external temperature and humidity) */
+	WITH_DATA(double, Temperature),
+	WITH_DATA(double, ExternalTemperature),
+	WITH_DATA(double, Humidity),
+	WITH_DATA(ascii_char_ptr, DeviceId),
+
+	/* Device Info - This is command metadata + some extra fields */
+	WITH_DATA(ascii_char_ptr, ObjectType),
+	WITH_DATA(bool, IsSimulatedDevice),
+	WITH_DATA(ascii_char_ptr, Version),
+	WITH_DATA(DeviceProperties, DeviceProperties),
+	WITH_DATA(ascii_char_ptr_no_quotes, Commands),
+
+	/* Commands implemented by the device */
+	WITH_ACTION(SetTemperature, double, temperature),
+	WITH_ACTION(SetHumidity, double, humidity)
+);
+#endif
 END_NAMESPACE(Contoso);
 
 EXECUTE_COMMAND_RESULT SetTemperature(Thermostat* thermostat, double temperature)
@@ -111,9 +151,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
         }
         else
         {
+			EXECUTE_COMMAND_RESULT executeCommandResult;
+
             memcpy(temp, buffer, size);
             temp[size] = '\0';
-            EXECUTE_COMMAND_RESULT executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
+            executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
             result =
                 (executeCommandResult == EXECUTE_COMMAND_ERROR) ? IOTHUBMESSAGE_ABANDONED :
                 (executeCommandResult == EXECUTE_COMMAND_SUCCESS) ? IOTHUBMESSAGE_ACCEPTED :
@@ -133,14 +175,18 @@ void remote_monitoring_run(void)
     else
     {
 		IOTHUB_CLIENT_CONFIG config;
+		IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
 		config.deviceId = deviceId;
 		config.deviceKey = deviceKey;
 		config.iotHubName = hubName;
 		config.iotHubSuffix = hubSuffix;
+#ifndef WINCE
 		config.protocol = AMQP_Protocol;
-
-		IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_Create(&config);
+#else
+		config.protocol = HTTP_Protocol;
+#endif
+		iotHubClientHandle = IoTHubClient_Create(&config);
         if (iotHubClientHandle == NULL)
         {
             (void)printf("Failed on IoTHubClient_CreateFromConnectionString\r\n");

@@ -113,9 +113,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
         }
         else
         {
+            EXECUTE_COMMAND_RESULT executeCommandResult;
+        
             memcpy(temp, buffer, size);
             temp[size] = '\0';
-            EXECUTE_COMMAND_RESULT executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
+            executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
             result =
                 (executeCommandResult == EXECUTE_COMMAND_ERROR) ? IOTHUBMESSAGE_ABANDONED :
                 (executeCommandResult == EXECUTE_COMMAND_SUCCESS) ? IOTHUBMESSAGE_ACCEPTED :
@@ -135,8 +137,9 @@ void simplesample_http_run(void)
     else
     {
         IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
-        srand((unsigned int)time(NULL));
         double avgWindSpeed = 10.0;
+
+        srand((unsigned int)time(NULL));
 
         if (iotHubClientHandle == NULL)
         {
@@ -145,6 +148,8 @@ void simplesample_http_run(void)
         else
         {
             unsigned int minimumPollingTime = 9; /*because it can poll "after 9 seconds" polls will happen effectively at ~10 seconds*/
+            ContosoAnemometer* myWeather;
+            
             if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"MinimumPollingTime\"\r\n");
@@ -158,7 +163,7 @@ void simplesample_http_run(void)
             }
 #endif // MBED_BUILD_TIMESTAMP
 
-            ContosoAnemometer* myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
+            myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
             if (myWeather == NULL)
             {
                 (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");

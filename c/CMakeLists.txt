@@ -80,7 +80,12 @@ endfunction(includeHttp)
 function(linkHttp whatExecutableIsBuilding)
 	includeHttp()
 	if(WIN32)
-		target_link_libraries(${whatExecutableIsBuilding} winhttp.lib)
+    if(WINCE)
+		  target_link_libraries(${whatExecutableIsBuilding} crypt32.lib)
+      target_link_libraries(${whatExecutableIsBuilding} ws2.lib)
+    else()
+		  target_link_libraries(${whatExecutableIsBuilding} winhttp.lib)
+    endif()
 	else()
 		target_link_libraries(${whatExecutableIsBuilding} curl)
 	endif()
@@ -197,14 +202,33 @@ endfunction(build_test_artifacts)
 function(set_platform_files)
 if(WIN32)
 	set(LOCK_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/lock_c11.c PARENT_SCOPE)
+  if (WINCE)
+  	set(HTTP_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/httpapi_wince.cpp PARENT_SCOPE)
+	  set(THREAD_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/threadapi_win32.c PARENT_SCOPE)
+  else()
+  	set(HTTP_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/httpapi_winhttp.c PARENT_SCOPE)
 	set(THREAD_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/threadapi_c11.c PARENT_SCOPE)
-	set(HTTP_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/httpapi_winhttp.c PARENT_SCOPE)
+  endif()
 else()
 	set(LOCK_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/lock_pthreads.c PARENT_SCOPE)
 	set(THREAD_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/threadapi_pthreads.c PARENT_SCOPE)
 	set(HTTP_C_FILE ${CMAKE_CURRENT_LIST_DIR}/common/adapters/httpapi_curl.c PARENT_SCOPE)
 endif()
 endfunction(set_platform_files)
+
+if (WINCE)
+  set(SDKKEY "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows CE Tools\\SDKs\\${CMAKE_GENERATOR_PLATFORM}")
+
+	get_filename_component(wincesdkdir
+		"[${SDKKEY};]"
+		ABSOLUTE)
+    
+	include_directories(${wincesdkdir}/Sdk/Crt/Include/Stl)
+	include_directories(${CMAKE_CURRENT_LIST_DIR}/common/inc/windowsce)
+  
+  add_definitions(-D_CRTDBG_FILE_STDERR=stderr)
+  
+endif()
 
 set_platform_files()
 

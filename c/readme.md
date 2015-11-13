@@ -48,6 +48,7 @@ How to run the sample applications on:
 - [Desktop Windows](doc/run_sample_on_desktop_windows.md)
 - [TI CC3200](doc/run_sample_on_ti_cc3200.md)
 - [openSUSE](doc/run_sample_opensuse.md)
+- [Toradex modules with Windows Embedded Compact 2013](doc/run_sample_on_toradex_wec2013.md)
 
 
 ## SDK directory structure
