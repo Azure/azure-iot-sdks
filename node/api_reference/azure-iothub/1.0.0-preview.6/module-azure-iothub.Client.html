@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Registry</title>
+    <title>JSDoc: Class: Client</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -16,7 +16,7 @@
 <body>
 
 <div id="main">
-    <h1 class="page-title">Class: Registry</h1>
+    <h1 class="page-title">Class: Client</h1>
     
 
 
@@ -29,12 +29,14 @@
         <h2>
             <span class="ancestors"><a href="module-azure-iothub.html">azure-iothub</a>.</span>
         
-        Registry
+        Client
         </h2>
         
-            <div class="class-description"><p>Constructs a Registry object with the given IoT Hub
-                 connection string and transport object. The Registry class
-                 provides access to IoT Hub identity service.</p></div>
+            <div class="class-description"><p>Creates an IoT Hub service client. Normally, consumers will
+                 call one of the factory methods,
+                 <a href="module-azure-iothub.Client.html#.fromConnectionString">fromConnectionString</a> or
+                 <a href="module-azure-iothub.Client.html#.fromSharedAccessSignature">fromSharedAccessSignature</a>,
+                 to create an IoT Hub service Client.</p></div>
         
     
 </header>
@@ -48,7 +50,7 @@
     <h2>Constructor</h2>
     
 
-    <h4 class="name" id="Registry"><span class="type-signature"></span>new Registry<span class="signature">(connString, transport)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Client"><span class="type-signature"></span>new Client<span class="signature">(transport)</span><span class="type-signature"></span></h4>
 
     
 
@@ -87,31 +89,6 @@
 
         <tr>
             
-                <td class="name"><code>connString</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>A connection string which encapsulates the
-                             appropriate (read and/or write) Registry
-                             permissions.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>transport</code></td>
             
 
@@ -129,12 +106,8 @@
             
 
             <td class="description last"><p>An object that implements the interface
-                             expected of a transport object. See the file
-                             <strong>node/common/lib/devdoc/https_requirements.docm</strong>
-                             for information on what the transport object
-                             should look like. The
-                             module:azure-iothub.Https class is one
-                             such implementation of the transport.</p></td>
+                             expected of a transport object, e.g.,
+                             Transport.</p></td>
         </tr>
 
     
@@ -142,6 +115,58 @@
 </table>
 
 
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>FeedbackReceiver</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="FeedbackReceiver.html">FeedbackReceiver</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -175,7 +200,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_registry.js.html">lib/registry.js</a>, <a href="lib_registry.js.html#line40">line 40</a>
+        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line18">line 18</a>
     </li></ul></dd>
     
 
@@ -224,14 +249,16 @@
 
     
 
-    <h4 class="name" id="create"><span class="type-signature"></span>create<span class="signature">(deviceInfo, done)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".fromConnectionString"><span class="type-signature">(static) </span>fromConnectionString<span class="signature">(value)</span><span class="type-signature"> &rarr; {<a href="module-azure-iothub.Client.html">module:azure-iothub.Client</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Creates a new device identity on an IoT hub.</p>
+    <p>Creates an IoT Hub service client from the given
+                   connection string using the default transport
+                   (Transport).</p>
 </div>
 
 
@@ -267,13 +294,13 @@
 
         <tr>
             
-                <td class="name"><code>deviceInfo</code></td>
+                <td class="name"><code>value</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">String</span>
 
 
             
@@ -283,37 +310,8 @@
 
             
 
-            <td class="description last"><p>The object must include a <code>deviceId</code> property
-                               with a valid device identifier.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>done</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The function to call when the operation is
-                               complete. <code>done</code> will be called with three
-                               arguments: an Error object (can be null), a
-                               transport-specific response object useful for
-                               logging or debugging, and a
-                               <a href="module-azure-iothub.Device.html">module:azure-iothub.Device</a> object
-                               representing the created device.</p></td>
+            <td class="description last"><p>A connection string which encapsulates &quot;service
+                           connect&quot; permissions on an IoT hub.</p></td>
         </tr>
 
     
@@ -354,7 +352,311 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_registry.js.html">lib/registry.js</a>, <a href="lib_registry.js.html#line62">line 62</a>
+        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line43">line 43</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="module-azure-iothub.Client.html">module:azure-iothub.Client</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".fromSharedAccessSignature"><span class="type-signature">(static) </span>fromSharedAccessSignature<span class="signature">(value)</span><span class="type-signature"> &rarr; {<a href="module-azure-iothub.Client.html">module:azure-iothub.Client</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Creates an IoT Hub service client from the given
+                   shared access signature using the default transport
+                   (Transport).</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>A shared access signature which encapsulates
+                           &quot;service connect&quot; permissions on an IoT hub.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line71">line 71</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="module-azure-iothub.Client.html">module:azure-iothub.Client</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="close"><span class="type-signature"></span>close<span class="signature">(done)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Closes the connection to an IoT hub.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>done</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The function to call when the operation is
+                           complete. <code>done</code> will be passed an Error object
+                           argument, which will be null if the operation
+                           completed successfully.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line116">line 116</a>
     </li></ul></dd>
     
 
@@ -385,14 +687,282 @@
 
     
 
-    <h4 class="name" id="delete"><span class="type-signature"></span>delete<span class="signature">(deviceId, done)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getFeedbackReceiver"><span class="type-signature"></span>getFeedbackReceiver<span class="signature">(done)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Removes an existing device identity from an IoT hub.</p>
+    <p>Returns a FeedbackReceiver object which emits events when new feedback messages are received by the client.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>done</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The function to call when the operation is
+                             complete. <code>done</code> will be called with two
+                             arguments: an Error object (can be null) and a
+                             FeedbackReceiver object.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line172">line 172</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="open"><span class="type-signature"></span>open<span class="signature">(done)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Opens the connection to an IoT hub.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>done</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The function to call when the operation is
+                           complete. <code>done</code> will be passed an Error object
+                           argument, which will be null if the operation
+                           completed successfully.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line98">line 98</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="send"><span class="type-signature"></span>send<span class="signature">(deviceId, message, done)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Sends a message to a device.</p>
 </div>
 
 
@@ -451,6 +1021,27 @@
 
         <tr>
             
+                <td class="name"><code>message</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The body of the message to send to the device.
+                             If <code>message</code> is not of type
+                             Message,
+                             it will be converted.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>done</code></td>
             
 
@@ -468,10 +1059,10 @@
             
 
             <td class="description last"><p>The function to call when the operation is
-                               complete. <code>done</code> will be called with two
-                               arguments: an Error object (can be null) and
-                               a transport-specific response object useful
-                               for logging or debugging.</p></td>
+                             complete. <code>done</code> will be called with two
+                             arguments: an Error object (can be null) and a
+                             transport-specific response object useful for
+                             logging or debugging.</p></td>
         </tr>
 
     
@@ -512,468 +1103,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_registry.js.html">lib/registry.js</a>, <a href="lib_registry.js.html#line184">line 184</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(deviceId, done)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Requests information about an existing device identity
-                   on an IoT hub.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>deviceId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The identifier of an existing device identity.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>done</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The function to call when the operation is
-                               complete. <code>done</code> will be called with three
-                               arguments: an Error object (can be null), a
-                               transport-specific response object useful for
-                               logging or debugging, and a
-                               <a href="module-azure-iothub.Device.html">module:azure-iothub.Device</a> object
-                               representing the returned device identity.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_registry.js.html">lib/registry.js</a>, <a href="lib_registry.js.html#line129">line 129</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="list"><span class="type-signature"></span>list<span class="signature">(done)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Requests information about the first 1000 device
-                   identities on an IoT hub.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>done</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The function to call when the operation is
-                               complete. <code>done</code> will be called with three
-                               arguments: an Error object (can be null), a
-                               transport-specific response object useful for
-                               logging or debugging, and an array of
-                               <a href="module-azure-iothub.Device.html">module:azure-iothub.Device</a> objects
-                               representing the listed device identities.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_registry.js.html">lib/registry.js</a>, <a href="lib_registry.js.html#line155">line 155</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(deviceInfo, done)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Updates an existing device identity on an IoT hub with
-                   the given device information.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>deviceInfo</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The object must include a <code>deviceId</code> property
-                               with a valid device identifier.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>done</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The function to call when the operation is
-                               complete. <code>done</code> will be called with three
-                               arguments: an Error object (can be null), a
-                               transport-specific response object useful for
-                               logging or debugging, and a
-                               <a href="module-azure-iothub.Device.html">module:azure-iothub.Device</a> object
-                               representing the updated device identity.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_registry.js.html">lib/registry.js</a>, <a href="lib_registry.js.html#line95">line 95</a>
+        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line134">line 134</a>
     </li></ul></dd>
     
 
@@ -1021,7 +1151,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Nov 03 2015 15:17:28 GMT-0800 (Pacific Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Fri Nov 13 2015 16:49:59 GMT-0800 (Pacific Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
