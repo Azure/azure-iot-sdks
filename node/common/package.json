@@ -6,6 +6,7 @@
   "license": "MIT",
   "main": "common.js",
   "dependencies": {
+    "amqp10": "^2.0.2",
     "crypto": "^0.0.3"
   },
   "devDependencies": {

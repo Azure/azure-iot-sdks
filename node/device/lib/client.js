@@ -49,6 +49,7 @@ Client.fromConnectionString = function fromConnectionString(value, Transport) {
   var config = {
     host: cn.HostName,
     deviceId: cn.DeviceId,
+    hubName: cn.HostName.split('.')[0],
     sharedAccessSignature: sas.toString()
   };
 
@@ -108,6 +109,14 @@ Client.prototype.receive = function(done) {
 };
 
 /**
+ * The getReceiver method returns the receiver object that is used to get messages and settle them.
+ * @param {Function} done The callback to be invoked with the receiver object as a parameter.
+ */
+Client.prototype.getReceiver = function (done) {
+  this._transport.getReceiver(done);
+};
+
+/**
  * The `abandon` method directs the IoT Hub to re-enqueue a message
  * message so it may be received again later.
  * @param {Message}   message   The [message]{@linkcode module:common/message.Message}
@@ -124,7 +133,7 @@ Client.prototype.abandon = function(message, done) {
     done(new ArgumentError('invalid lockToken'));
   }
   else {
-    this._transport.sendFeedback('abandon', message.lockToken, done);
+    this._transport.sendFeedback('abandon', message, done);
   }
 };
 
@@ -145,7 +154,7 @@ Client.prototype.reject = function(message, done) {
     done(new ArgumentError('invalid lockToken'));
   }
   else {
-    this._transport.sendFeedback('reject', message.lockToken, done);
+    this._transport.sendFeedback('reject', message, done);
   }
 };
 
@@ -166,7 +175,7 @@ Client.prototype.complete = function(message, done) {
     done(new ArgumentError('invalid lockToken'));
   }
   else {
-    this._transport.sendFeedback('complete', message.lockToken,  done);
+    this._transport.sendFeedback('complete', message,  done);
   }
 };
 

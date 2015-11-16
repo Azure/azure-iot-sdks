@@ -57,11 +57,11 @@ SimulatedHttp.prototype.receive = function (done) {
   });
 };
 
-SimulatedHttp.prototype.sendFeedback = function (feedbackAction, lockToken, done) {
-  if (!lockToken) {
+SimulatedHttp.prototype.sendFeedback = function (feedbackAction, message, done) {
+  if (!message.lockToken) {
     done(new ArgumentError('invalid lockToken'));
   }
-  else if (lockToken === 'FFA945D3-9808-4648-8DD7-D250DDE66EA9') {
+  else if (message.lockToken === 'FFA945D3-9808-4648-8DD7-D250DDE66EA9') {
     done(makeError(412));
   }
   else {

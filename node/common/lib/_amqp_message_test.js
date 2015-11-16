@@ -4,7 +4,7 @@
 'use strict';
 
 var assert = require('chai').assert;
-var Message = require('azure-iot-common').Message;
+var Message = require('./message.js');
 var AmqpMessage = require('./amqp_message.js');
 
 describe('AmqpMessage', function () {
