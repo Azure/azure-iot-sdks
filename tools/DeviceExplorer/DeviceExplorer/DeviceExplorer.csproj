@@ -54,6 +54,13 @@
     <Compile Include="DeviceUpdateForm.Designer.cs">
       <DependentUpon>DeviceUpdateForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ImportDeviceEntity.cs" />
+    <Compile Include="ImportDevicesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ImportDevicesForm.Designer.cs">
+      <DependentUpon>ImportDevicesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -73,6 +80,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DeviceUpdateForm.resx">
       <DependentUpon>DeviceUpdateForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ImportDevicesForm.resx">
+      <DependentUpon>ImportDevicesForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -128,6 +138,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
