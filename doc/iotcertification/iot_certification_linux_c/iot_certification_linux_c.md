@@ -64,7 +64,7 @@ Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-
 
 # Step 2: Register Device
 
-In this section, you will register your device using Device Explorer. The Device
+In this section, you will register your device using DeviceExplorer. The Device
 Explorer is a Windows application that interfaces with Azure IoT Hub and can
 perform the following operations:
 
@@ -76,14 +76,14 @@ perform the following operations:
 -   Monitoring events from your device
 -   Sending messages to your device
 
-To run Device Explorer tool, use following configuration string as described in
+To run DeviceExplorer tool, use following configuration string as described in
 [Step1](#Step-1:-Configure):
 
 -   IoT Hub Connection String
 
 
 **Steps:**
-1.  Click [here](<https://github.com/Azure/azure-iot-sdks/blob/develop/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) to download and install Device Explorer.
+1.  Click [here](<https://github.com/Azure/azure-iot-sdks/blob/develop/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) to download and install DeviceExplorer.
 
 2.  Add connection information under the Configuration tab and click the **Update** button.
 
@@ -91,13 +91,11 @@ To run Device Explorer tool, use following configuration string as described in
 
     a. Click the **Management** tab.
 
-    b. Click **List** button to call the device hub and retrieve a list
-    of devices. If this is your first time, then you shouldn't
-    retrieve anything.
+    b. Your registered devices will be displayed in the list. Incase your device is not there in the list, click **Refresh** button. If this is your first time, then you shouldn't retrieve anything.
 
     c. Click **Create** button to create a device ID and key.
 
-    d. Once created successfully, device will be listed in device explorer.
+    d. Once created successfully, device will be listed in DeviceExplorer.
 
     e. Right click the device and from context menu select "**Copy connection
     string for selected device**".
@@ -176,7 +174,7 @@ Azure IoT SDK.
         static const char* connectionString = "[device connection string]";
 
 -   Replace the above placeholder with device connection string. You can get
-    this from device explorer as explained in [Step 2](#Step-2:-Register), that
+    this from DeviceExplorer as explained in [Step 2](#Step-2:-Register), that
     you copied into Notepad.
 
 -   Save your changes by pressing Ctrl+O and when nano prompts you to save it as
@@ -221,7 +219,7 @@ In this section you will run the end to end test cases for Azure IoT client SDK 
     -   **IOTHUB_EVENTHUB_CONNECTION_STRING:** Connection string to your Event Hub
     -   **IOTHUB_EVENTHUB_CONSUMER_GROUP:** Set value as **$Default**
     -   **IOTHUB_EVENTHUB_LISTEN_NAME:** Name of your Event Hub
-    -   **IOTHUB_SHARED_ACCESS_SIGNATURE:** this value can be generated from Device Explorer
+    -   **IOTHUB_SHARED_ACCESS_SIGNATURE:** this value can be generated from DeviceExplorer
 
         Go to **Configuration** tab &minus;&gt; Click **Generate SAS** button
     -   **IOTHUB_PARTITION_COUNT:** Set value as **16**
@@ -253,14 +251,13 @@ section. These will be needed in [Step 4](#Step-4-2:-Share)
 
 ### 3.4.1 Send Device Events to IOT Hub:
 
-1.  Launch the Device Explorer as explained in [Step 2](#Step-2:-Register) and
+1.  Launch the DeviceExplorer as explained in [Step 2](#Step-2:-Register) and
     navigate to **Data** tab. Select the device name you created from the
     drop-down list of device IDs and click **Monitor** button.
 
     ![DeviceExplorer\_Monitor](images/3_3_1_01.png)
 
-2.  Device Explorer is now monitoring data sent from the selected device to the
-    IoT Hub.
+2.  DeviceExplorer is now monitoring data sent from the selected device to the IoT Hub.
 
 3.  Run the sample by issuing following command.
 
@@ -281,7 +278,7 @@ section. These will be needed in [Step 4](#Step-4-2:-Share)
     **If using HTTP protocol:**
     ![SampleHTTP\_result\_terminal](images/3_3_1_03.png)
 
-5.  Device Explorer should show that IoT Hub has successfully received data sent
+5.  DeviceExplorer should show that IoT Hub has successfully received data sent
     by sample test.
 
     **If using AMQP protocol:**
@@ -293,7 +290,7 @@ section. These will be needed in [Step 4](#Step-4-2:-Share)
 ### 3.4.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your device,
-    go to the **Message To Device** tab in Device Explorer.
+    go to the **Message To Device** tab in DeviceExplorer.
 
 2.  Select the device you created using Device ID drop down.
 
