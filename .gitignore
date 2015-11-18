@@ -192,9 +192,17 @@ java/**/*dependency-reduced-pom.xml
 **/node_modules/
 **/.idea/
 
-csharp/NuGet/*.exe
-csharp/NuGet/*.nupkg
-csharp/.vs/*
+# VS Code stuff
+typings/**
+.vscode/**
+
+csharp/device/NuGet/*.exe
+csharp/device/NuGet/*.nupkg
+csharp/device/.vs/*
 service/java/.idea
 service/java/target
 service/java/iot.service.sdk.java.iml
+java/device/doc/api_reference
+java/service/doc/api_reference
+c/build_all/windows/nuget.exe
+csharp/device/build/nuget.exe

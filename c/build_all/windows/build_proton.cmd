@@ -31,7 +31,11 @@ rem ----------------------------------------------------------------------------
 rem -- sync the Proton source code
 rem -----------------------------------------------------------------------------
 
-if Exist %build-root% rmdir %build-root% /s /q
+if Exist %build-root% (
+	del /s /q %build-root%
+	rmdir %build-root% /s /q
+)
+
 git clone -b %proton-branch% %proton-repo% %build-root%
 
 if not %errorlevel%==0 exit /b %errorlevel%
@@ -55,7 +59,7 @@ if not exist %build-root%\build (
 )
 pushd %build-root%\build
 
-cmake -G "Visual Studio 14 2015" .. 
+cmake -G "Visual Studio 14" .. 
 if not %errorlevel%==0 exit /b %errorlevel%
 
 msbuild /m proton.sln /property:Configuration=Debug
@@ -72,7 +76,7 @@ if not exist %build-root%\build_x64 (
 )
 pushd %build-root%\build_x64
 
-cmake -G "Visual Studio 14 2015 Win64" .. 
+cmake -G "Visual Studio 14 Win64" .. 
 if not %errorlevel%==0 exit /b %errorlevel%
 
 msbuild /m proton.sln /property:Configuration=Debug
@@ -88,7 +92,7 @@ rem ----------------------------------------------------------------------------
 rem -- Create the nuget package
 rem -----------------------------------------------------------------------------
 
-copy %package-root%\%package-id%.* %proton-root%
+copy %package-root%\%package-id%* %proton-root%
 if not %errorlevel%==0 exit /b %errorlevel%
 
 pushd %proton-root%

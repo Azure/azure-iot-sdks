@@ -4,8 +4,11 @@
 'use strict';
 
 module.exports = {
+    authorization: require('./lib/authorization.js'),
+    ConnectionString: require('./lib/connection_string.js'),
     endpoint: require('./lib/endpoint.js'),
-    Https: require('./lib/https.js'),
+    errors: require('./lib/errors.js'),
+    Http: require('./lib/http.js'),
     Message: require('./lib/message.js'),
-    SimulatedHttps: require('./lib/https_simulated.js')
+    SharedAccessSignature: require('./lib/shared_access_signature.js')
 };

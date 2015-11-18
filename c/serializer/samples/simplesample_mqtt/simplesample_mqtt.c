@@ -16,10 +16,6 @@ and removing calls to _DoWork will yield the same results. */
 #include "iothubtransportmqtt.h"
 #include "threadapi.h"
 
-#ifdef MBED_BUILD_TIMESTAMP
-#include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
-
 static const char* connectionString = "[device connection string]";
 
 // Define the Model
@@ -144,19 +140,6 @@ void simplesample_mqtt_run(void)
         }
         else
         {
-            unsigned int minimumPollingTime = 9; /*because it can poll "after 9 seconds" polls will happen effectively at ~10 seconds*/
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
-            {
-                printf("failure to set option \"MinimumPollingTime\"\r\n");
-            }
-
-#ifdef MBED_BUILD_TIMESTAMP
-            // For mbed add the certificate information
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
-            {
-                (void)printf("failure to set option \"TrustedCerts\"\r\n");
-            }
-#endif // MBED_BUILD_TIMESTAMP
 
             ContosoAnemometer* myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
             if (myWeather == NULL)

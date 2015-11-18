@@ -144,6 +144,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "DeviceUpdateForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "DeviceUpdateForm";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DeviceUpdateForm_FormClosing);
             this.ResumeLayout(false);

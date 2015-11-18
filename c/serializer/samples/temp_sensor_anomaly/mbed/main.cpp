@@ -11,6 +11,10 @@
 #include "LM75B.h"
 #include "NTPClient.h"
 
+#ifdef MBED_BUILD_TIMESTAMP
+#include "certs.h"
+#endif // MBED_BUILD_TIMESTAMP
+
 C12832 lcd(D11, D13, D12, D7, D10);
 LM75B sensor(D14, D15);
 DigitalIn Fire(D4);
@@ -286,6 +290,7 @@ int main(void)
          (void)printf("Failed EthernetInterface::init();\r\n");
          return -1;
     }
+        
     (void)printf("done doing a one time EthernetInterface::init();\r\n");
 
     if (setupRealTime() != 0)
@@ -328,6 +333,14 @@ int main(void)
         }
         else
         {
+#ifdef MBED_BUILD_TIMESTAMP
+        	// For mbed add the certificate information
+        	if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+        	{
+            	printf("failure to set option \"TrustedCerts\"\r\n");
+        	}
+#endif // MBED_BUILD_TIMESTAMP
+
             unsigned int minimumPollingTime = 9; /*because it can poll "after 9 seconds" polls will happen effectively at ~10 seconds*/
             if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
             {
@@ -429,4 +442,6 @@ int main(void)
         }
         serializer_deinit();
     }
+    
+    EthernetInterface::disconnect();
 }

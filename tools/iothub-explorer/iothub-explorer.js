@@ -5,16 +5,45 @@
 
 'use strict';
 
-var nopt = require("nopt");
-var colorsTmpl = require('colors-tmpl');
+var fs = require('fs');
+var nopt = require('nopt');
+var uuid = require('uuid');
 var prettyjson = require('prettyjson');
-var Registry = require('azure-iothub').Registry;
+var colorsTmpl = require('colors-tmpl');
+
 var Https = require('azure-iothub').Https;
+var Client = require('azure-iothub').Client;
+var Registry = require('azure-iothub').Registry;
+var Message = require('azure-iot-common').Message;
+var EventHubClient = require('./lib/eventhubclient.js');
+var ConnectionString = require('azure-iothub').ConnectionString;
+var SharedAccessSignature = require('azure-iothub').SharedAccessSignature;
+var anHourFromNow = require('azure-iot-common').authorization.anHourFromNow;
+
+function Count(val) {
+  this.val = +val;
+}
+Count.prototype = {
+  toString: function () { return '' + this.val; },
+  valueOf: function () { return this.val; }
+};
+
+nopt.typeDefs.Count = {
+  type: Count,
+  validate: function validateCount(data, key, val) {
+    val = new Count(val);
+    if (isNaN(val) || !val.valueOf() || val < 0 || val % 1 !== 0) return false;
+    data[key] = val;
+  }
+};
 
 var expected = {
-  "connection-string": Boolean,
-  "display": String,
-  "raw": Boolean
+  'ack': ['none', 'negative', 'positive', 'full'],
+  'connection-string': Boolean,
+  'duration': Count,
+  'display': String,
+  'messages': Count,
+  'raw': Boolean
 };
 
 var parsed = nopt(expected, null, process.argv, 2);
@@ -26,36 +55,85 @@ if (!parsed.argv.remain.length) {
   process.exit(1);
 }
 
-var connString, command, arg;
+var connString, sas, command, arg1, arg2;
 
 if ('HostName=' !== parsed.argv.remain[0].substr(0, 'HostName='.length)) {
   command = parsed.argv.remain[0];
-  arg = parsed.argv.remain[1];
+  arg1 = parsed.argv.remain[1];
+  arg2 = parsed.argv.remain[2];
 }
 else {
   connString = parsed.argv.remain[0];
   command = parsed.argv.remain[1];
-  arg = parsed.argv.remain[2];
+  arg1 = parsed.argv.remain[2];
+  arg2 = parsed.argv.remain[3];
 }
 
 if (command === 'help') {
   usage();
   process.exit(0);
 }
+else if (command === 'logout') {
+  var loc = configLoc();
+  try {
+    fs.unlinkSync(loc.dir + '/' + loc.file);
+  }
+  catch (err) { // swallow file not found exception
+    if (err.code !== 'ENOENT') throw err;
+  }
+  process.exit(0);
+}
+else if (command === 'login' && !connString) {
+  connString = arg1;
+  if (!connString) {
+    inputError('Missing connection string');
+  }
+}
 
 if (!connString)
 {
-  if (!parsed.raw) {
-    inputError('Missing connection string');
-    usage();
+  var loc = configLoc();
+  try {
+    sas = fs.readFileSync(loc.dir + '/' + loc.file, 'utf8');
   }
-  process.exit(1);
+  catch (err) { // swallow file not found exception
+    if (err.code !== 'ENOENT') throw err;
+  }
+
+  if (!sas) {
+    if (!parsed.raw) {
+      inputError('Missing connection string');
+    }
+    process.exit(1);
+  }
+
+  sas = SharedAccessSignature.parse(sas);
 }
 
-var registry = new Registry(connString, new Https());
+var hostname = sas ? sas.sr : ConnectionString.parse(connString).HostName;
 
-if (command === 'list') {
-  registry.list(function (err, res, list) {
+if (command === 'login') {
+  var end = endTime();
+  var cn = ConnectionString.parse(connString);
+  var sas = SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, end);
+  var loc = configLoc();
+
+  if (isNaN(new Date(end * 1000))) {
+    inputError('Invalid duration');
+  }
+
+  fs.mkdir(loc.dir, function () {
+    fs.writeFile(loc.dir + '/' + loc.file, sas.toString(), function (err) {
+      if (err) inputError(err.toString());
+      else if (!parsed.raw) {
+        console.log(colorsTmpl('\n{green}Session started, expires ' + new Date(end * 1000) + ' {/green}'));
+      }
+    });
+  });
+}
+else if (command === 'list') {
+  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
+  registry.list(function (err, list) {
     if (err) serviceError(err);
     else {
       list.forEach(function (device) {
@@ -65,41 +143,131 @@ if (command === 'list') {
   });
 }
 else if (command === 'create') {
-  if (!arg) inputError('No device information given');
+  if (!arg1) inputError('No device information given');
   var info;
   try {
     // 'create' command expects either deviceId or JSON device description
-    info = (arg.charAt(0) !== '{') ? { "deviceId": arg } : JSON.parse(arg);
+    info = (arg1.charAt(0) !== '{') ? { "deviceId": arg1 } : JSON.parse(arg1);
   }
   catch(e) {
     if (e instanceof SyntaxError) inputError('Device information isn\'t valid JSON');
     else throw e;
   }
 
-  registry.create(info, function (err, res, device) {
+  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
+  registry.create(info, function (err, device) {
     if (err) serviceError(err);
     else {
       if (!parsed.raw) {
-        console.log(colorsTmpl('\n{green}Created device ' + arg + '{/green}'));
+        console.log(colorsTmpl('\n{green}Created device ' + arg1 + '{/green}'));
       }
       printDevice(device);
     }
   });
 }
 else if (command === 'get') {
-  if (!arg) inputError('No device ID given');
-  registry.get(arg, function (err, res, device) {
+  if (!arg1) inputError('No device ID given');
+  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
+  registry.get(arg1, function (err, device) {
     if (err) serviceError(err);
     else printDevice(device);
   });
 }
 else if (command === 'delete') {
-  if (!arg) inputError('No device ID given');
-  registry.delete(arg, function (err, res) {
+  if (!arg1) inputError('No device ID given');
+  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
+  registry.delete(arg1, function (err) {
     if (err) serviceError(err);
     else if (!parsed.raw) {
-      console.log(colorsTmpl('\n{green}Deleted device ' + arg + '{/green}'));
+      console.log(colorsTmpl('\n{green}Deleted device ' + arg1 + '{/green}'));
     }
+  });
+}
+else if (command === 'monitor-events') {
+  if (!connString) inputError('\'monitor-events\' requires <connection-string> (for now)');
+  if (!arg1) inputError('No device ID given');
+
+  console.log(colorsTmpl('\n{grey}Monitoring events from device {green}' + arg1 + '{/green}{/grey}'));
+
+  var startTime = Date.now();
+
+  var ehClient = new EventHubClient(connString, 'messages/events/');
+  ehClient.GetPartitionIds().then(function(partitionIds) {
+    partitionIds.forEach(function(partitionId) {
+      ehClient.CreateReceiver('$Default', partitionId).then(function(receiver) {
+          // start receiving
+        receiver.StartReceive(startTime).then(function() {
+          receiver.on('error', function(error) {
+            serviceError(error.description);
+          });
+          receiver.on('eventReceived', function(eventData) {
+            if ((eventData.SystemProperties['iothub-connection-device-id'] === arg1) &&
+                (eventData.SystemProperties['x-opt-enqueued-time'] >= startTime)) {
+              console.log('Event received: ');
+              console.log(eventData.Bytes);
+              console.log('');
+            }
+          });
+        });
+        return receiver;
+      });
+    });
+    return partitionIds;
+  });
+}
+else if (command === 'send') {
+  if (!arg1) inputError('No device ID given');
+  if (!arg2) inputError('No message given');
+
+  var deviceId = arg1;
+  var message = new Message(arg2);
+
+  if (parsed.ack) {
+    message.messageId = uuid.v4();
+    message.ack = parsed.ack;
+  }
+
+  var client = connString ? Client.fromConnectionString(connString) : Client.fromSharedAccessSignature(sas.toString());
+  client.send(deviceId, message, function (err) {
+    if (err) serviceError(err);
+    else {
+      if (!parsed.raw) {
+        var id = '';
+        if (parsed.ack && parsed.ack !== 'none') {
+          id = ' (id: ' + message.messageId + ')';
+        }
+        console.log(colorsTmpl('\n{green}Message sent{/green}' + id));
+      }
+      client.close();
+    }
+  });
+}
+else if (command === 'receive') {
+  var client = connString ? Client.fromConnectionString(connString) : Client.fromSharedAccessSignature(sas.toString());
+  client.getFeedbackReceiver(function (err, receiver) {
+    var messageCount = parsed.messages || 0;
+    var forever = !parsed.messages;
+
+    if (err) serviceError(err);
+    if (!parsed.raw) {
+      console.log(colorsTmpl('\n{yellow}Waiting for feedback...{/yellow} (Ctrl-C to quit)'));
+    }
+
+    receiver.on('errorReceived', function (err) { serviceError(err); });
+    receiver.on('message', function (feedbackRecords) {
+      var output = {
+        'iothub-enqueuedtime': feedbackRecords.annotations.value['iothub-enqueuedtime'],
+        body: feedbackRecords.body
+      };
+
+      var rendered = parsed.raw ?
+        JSON.stringify(output) :
+        '\nFeedback message\n' + prettyjson.render(output);
+
+      console.log(rendered);
+
+      if (!forever && --messageCount === 0) process.exit(0);
+    });
   });
 }
 else {
@@ -126,8 +294,38 @@ function serviceError(err) {
   process.exit(1);
 }
 
+function configLoc() {
+  if (process.platform === 'darwin') {
+    return {
+      dir: process.env.HOME + '/Library/Application Support/iothub-explorer',
+      file: 'config'
+    };
+  }
+  else if (process.platform === 'linux') {
+    return {
+      dir: process.env.HOME,
+      file: '.iothub-explorer'
+    };
+  }
+  else if (process.platform === 'win32') {
+    return {
+      dir: process.env.LOCALAPPDATA + '/iothub-explorer',
+      file: 'config'
+    };
+  }
+  else {
+    inputError('\'login\' not supported on this platform');
+  }
+}
+
+function endTime() {
+  return parsed.duration ?
+    Math.ceil((Date.now() / 1000) + parsed.duration) :
+    anHourFromNow();
+}
+
 function connectionString(device) {
-  return 'HostName=' + registry.config.host + ';' +
+  return 'HostName=' + hostname + ';' +
     'DeviceId=' + device.deviceId + ';' +
     'SharedAccessKey=' + device.authentication.SymmetricKey.primaryKey;
 }
@@ -165,7 +363,9 @@ function printDevice(device) {
     result.push({connectionString: connectionString(device)});
   }
 
-  var output = parsed.raw ? JSON.stringify(result) : '\n' + prettyjson.render(result);
+  var output = parsed.raw ?
+    JSON.stringify(result) :
+    '\n' + prettyjson.render(result);
   console.log(output);
 }
 
@@ -173,17 +373,28 @@ function usage() {
   console.log(colorsTmpl([
     '',
     '{yellow}Usage{/yellow}',
-    '  {green}iothub-explorer{/green} {white}<connection-string> list [--display="<property>,..."] [--connection-string]{/white}',
+    '  {green}iothub-explorer{/green} {white}login <connection-string> [--duration=<num-seconds>]{/white}',
+    '    {grey}Creates a session lasting <num-seconds>; commands during the session can omit <connection-string>',
+    '    Default duration is 3600 (one hour).{/grey}',
+    '  {green}iothub-explorer{/green} {white}logout{/white}',
+    '    {grey}Cancels any session started by \'login\'{/grey}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] list [--display="<property>,..."] [--connection-string]{/white}',
     '    {grey}Returns a list of (at most 1000) devices',
     '    Can optionally display only selected properties and/or connection strings.{/grey}',
-    '  {green}iothub-explorer{/green} {white}<connection-string> get <device-id> [--display="<property>,..."] [--connection-string]{/white}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] get <device-id> [--display="<property>,..."] [--connection-string]{/white}',
     '    {grey}Returns information about the given device',
     '    Can optionally display just the selected properties and/or the connection string.{/grey}',
-    '  {green}iothub-explorer{/green} {white}<connection-string> create <device-id|device-json> [--display="<property>,..."] [--connection-string]{/white}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] create <device-id|device-json> [--display="<property>,..."] [--connection-string]{/white}',
     '    {grey}Adds the given device to the IoT Hub and displays information about it',
     '    Can optionally display just the selected properties and/or the connection string.{/grey}',
-    '  {green}iothub-explorer{/green} {white}<connection-string> delete <device-id>{/white}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] delete <device-id>{/white}',
     '    {grey}Deletes the given device from the IoT Hub.{/grey}',
+    '  {green}iothub-explorer{/green} {white}<connection-string> monitor-events <device-id>{/white}',
+    '    {grey}Monitors and displays the events received from a specific device.{/grey}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] send <device-id> <msg> [--ack="none|positive|negative|full"]{/white}',
+    '    {grey}Sends a cloud-to-device message to the given device, optionally with acknowledgment of receipt{/grey}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] receive [--messages=n]{/white}',
+    '    {grey}Receives feedback about the delivery of cloud-to-device messages; optionally exits after receiving {white}n{/white} messages.{/grey}',
     '  {green}iothub-explorer{/green} {white}help{/white}',
     '    {grey}Displays this help message.{/grey}',
     '',

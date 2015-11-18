@@ -49,9 +49,8 @@ rem // default build options
 set build-clean=0
 set build-config=Debug
 set build-platform=Win32
-set skip-tests=0
-set skip-e2e-tests=0
-set run-longhaul-tests=0
+set CMAKE_run_e2e_tests=OFF
+set CMAKE_run_longhaul_tests=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -59,8 +58,7 @@ if "%1" equ "-c" goto arg-build-clean
 if "%1" equ "--clean" goto arg-build-clean
 if "%1" equ "--config" goto arg-build-config
 if "%1" equ "--platform" goto arg-build-platform
-if "%1" equ "--skip-tests" goto arg-skip-tests
-if "%1" equ "--skip-e2e-tests" goto arg-skip-e2e-tests
+if "%1" equ "--run-e2e-tests" goto arg-run-e2e-tests
 if "%1" equ "--run-longhaul-tests" goto arg-longhaul-tests
 call :usage && exit /b 1
 
@@ -80,16 +78,12 @@ if "%1" equ "" call :usage && exit /b 1
 set build-platform=%1
 goto args-continue
 
-:arg-skip-tests
-set skip-tests=1
-goto args-continue
-
-:arg-skip-e2e-tests
-set skip-e2e-tests=1
+:arg-run-e2e-tests
+set CMAKE_run_e2e_tests=ON
 goto args-continue
 
 :arg-longhaul-tests
-set run-longhaul-tests=1
+set CMAKE_run_longhaul_tests=ON
 goto args-continue
 
 :args-continue
@@ -99,48 +93,25 @@ goto args-loop
 :args-done
 
 rem -----------------------------------------------------------------------------
-rem -- build device explorer
+rem -- restore packages for solutions
 rem -----------------------------------------------------------------------------
 
-call nuget restore "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln"
-if %build-clean%==1 (
-    call :clean-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln" "Release" "Any CPU"
-    if not !errorlevel!==0 exit /b !errorlevel!
-)
-call :build-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln" "Release" "Any CPU"
-if not %errorlevel%==0 exit /b %errorlevel%
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
 
-rem -----------------------------------------------------------------------------
-rem -- build device explorer with installer
-rem -----------------------------------------------------------------------------
-
-call nuget restore "%build-root%\..\tools\deviceexplorer\deviceexplorerwithinstaller.sln"
-if %build-clean%==1 (
-    call :clean-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorerwithinstaller.sln" "Release" "Any CPU"
-    if not !errorlevel!==0 exit /b !errorlevel!
-)
-call :build-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorerwithinstaller.sln" "Release" "Any CPU"
-if not %errorlevel%==0 exit /b %errorlevel%
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
 
 rem -----------------------------------------------------------------------------
 rem -- clean solutions
 rem -----------------------------------------------------------------------------
 
 if %build-clean%==1 (
-    call :clean-a-solution "%build-root%\common\build\windows\common.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
-    
-    call :clean-a-solution "%build-root%\testtools\micromock\build\windows\micromock.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
-    
-    call nuget restore "%build-root%\iothub_client\build\windows\iothub_client.sln"
-    call :clean-a-solution "%build-root%\iothub_client\build\windows\iothub_client.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
-
-    call nuget restore "%build-root%\iothub_client\build\windows\iothub_client_dev.sln"
-    call :clean-a-solution "%build-root%\iothub_client\build\windows\iothub_client_dev.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
-
+	
     call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
     call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
@@ -153,14 +124,6 @@ if %build-clean%==1 (
     call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
     
-    call nuget restore "%build-root%\serializer\build\windows\serializer.sln"
-    call :clean-a-solution "%build-root%\serializer\build\windows\serializer.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
-
-    call nuget restore "%build-root%\serializer\build\windows\serializer_dev.sln"
-    call :clean-a-solution "%build-root%\serializer\build\windows\serializer_dev.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
-    
     call :clean-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
     rem if not %errorlevel%==0 exit /b %errorlevel%
     
@@ -169,113 +132,66 @@ if %build-clean%==1 (
 
     call :clean-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
-)
-rem -----------------------------------------------------------------------------
-rem -- restore packages for solutions
-rem -----------------------------------------------------------------------------
+	
+	call :clean-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
+    if not %errorlevel%==0 exit /b %errorlevel%
+	
+	call :clean-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
+    if not %errorlevel%==0 exit /b %errorlevel%
 
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\common\build\windows\common.sln"
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\build\windows\iothub_client.sln"
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\build\windows\iothub_client_dev.sln"
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\build\windows\serializer.sln"
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\build\windows\serializer_dev.sln"
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
+)
+
 
 
 rem -----------------------------------------------------------------------------
 rem -- build solutions
 rem -----------------------------------------------------------------------------
 
-call :build-a-solution "%build-root%\common\build\windows\common.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
-
-call :build-a-solution "%build-root%\iothub_client\build\windows\iothub_client.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
-
-call :build-a-solution "%build-root%\iothub_client\build\windows\iothub_client_dev.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
-
 call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-rem if not %errorlevel%==0 exit /b %errorlevel%
+if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
-rem if not %errorlevel%==0 exit /b %errorlevel%
+ if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-rem if not %errorlevel%==0 exit /b %errorlevel%
-
-call :build-a-solution "%build-root%\serializer\build\windows\serializer.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
-
-call :build-a-solution "%build-root%\serializer\build\windows\serializer_dev.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-rem if not %errorlevel%==0 exit /b %errorlevel%
+if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
-rem -----------------------------------------------------------------------------
-rem -- run unit tests
-rem -----------------------------------------------------------------------------
+call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
+if not %errorlevel%==0 exit /b %errorlevel%
 
-if %skip-tests%==1 (
-    echo Skipping unit tests...
-) else (
-    call :run-unit-tests "common"
-    if not %errorlevel%==0 exit /b %errorlevel%
-
-    call :run-unit-tests "iothub_client"
-    if not %errorlevel%==0 exit /b %errorlevel%
-
-    call :run-unit-tests "serializer"
-    if not %errorlevel%==0 exit /b %errorlevel%
-)
+call :build-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
+if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
-rem -- run end-to-end tests
+rem -- build with CMAKE and run tests
 rem -----------------------------------------------------------------------------
 
-set __skip=1
-if %skip-tests%==0 if %skip-e2e-tests%==0 set __skip=0
+rmdir /s/q %USERPROFILE%\cmake
+rem no error checking
 
-if %__skip%==1 (
-    echo Skipping end-to-end tests...
-) else (
-    call :run-e2e-tests "iothub_client"
-    if not %errorlevel%==0 exit /b %errorlevel%
+mkdir %USERPROFILE%\cmake
+rem no error checking
 
-    call :run-e2e-tests "serializer"
-    if not %errorlevel%==0 exit /b %errorlevel%
-)
+pushd %USERPROFILE%\cmake
+cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% %build-root%
+if not %errorlevel%==0 exit /b %errorlevel%
 
-rem -----------------------------------------------------------------------------
-rem -- run long-haul tests
-rem -----------------------------------------------------------------------------
+msbuild /m azure_iot_sdks.sln
+if not %errorlevel%==0 exit /b %errorlevel%
 
-set __skip=1
-if %skip-tests%==0 if %run-longhaul-tests%==1 set __skip=0
+ctest -C "debug" -V
+if not %errorlevel%==0 exit /b %errorlevel%
 
-if %__skip%==1 (
-    echo Skipping long-haul tests...
-) else (
-    call :run-longhaul-tests "iothub_client"
-    if not %errorlevel%==0 exit /b %errorlevel%
-)
-
-rem -----------------------------------------------------------------------------
-rem -- done
-rem -----------------------------------------------------------------------------
-
+popd
 goto :eof
 
 
@@ -312,8 +228,7 @@ echo options:
 echo  -c, --clean           delete artifacts from previous build before building
 echo  --config ^<value^>      [Debug] build configuration (e.g. Debug, Release)
 echo  --platform ^<value^>    [Win32] build platform (e.g. Win32, x64, ...)
-echo  --skip-tests          build only, do not run any tests
-echo  --skip-e2e-tests      do not run end-to-end tests
+echo  --run-e2e-tests       run end-to-end tests
 echo  --run-longhaul-tests  run long-haul tests
 goto :eof
 
