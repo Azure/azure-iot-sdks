@@ -22,9 +22,10 @@ namespace Microsoft.Azure.Amqp.Transport
         readonly EndPoint remoteEndPoint;
         readonly string iotHubName;
         volatile CancellationTokenSource writeCancellationTokenSource;
+        bool disposed;
 
         public ClientWebSocketTransport(ClientWebSocket webSocket, string iotHubName, EndPoint localEndpoint, EndPoint remoteEndpoint)
-            : base("clientwebsocket")
+            : base("serverwebsocket")
         {
             this.webSocket = webSocket;
             this.iotHubName = iotHubName;
@@ -94,21 +95,15 @@ namespace Microsoft.Azure.Amqp.Transport
             }
             catch (WebSocketException webSocketException)
             {
-                throw new IOException(
-                    webSocketException.InnerException != null ? webSocketException.InnerException.Message : webSocketException.Message,
-                    webSocketException.InnerException ?? webSocketException);
+                throw new IOException(webSocketException.Message, webSocketException);
             }
             catch (HttpListenerException httpListenerException)
             {
-                throw new IOException(
-                    httpListenerException.InnerException != null ? httpListenerException.InnerException.Message : httpListenerException.Message,
-                    httpListenerException.InnerException ?? httpListenerException);
+                throw new IOException(httpListenerException.Message, httpListenerException);
             }
             catch (TaskCanceledException taskCanceledException)
             {
-                throw new TimeoutException(
-                    taskCanceledException.InnerException != null ? taskCanceledException.InnerException.Message : taskCanceledException.Message,
-                    taskCanceledException.InnerException ?? taskCanceledException);
+                throw new TimeoutException(taskCanceledException.Message, taskCanceledException);
             }
             finally
             {
@@ -127,7 +122,7 @@ namespace Microsoft.Azure.Amqp.Transport
             Fx.AssertAndThrow(args.Buffer != null, "must have buffer to read");
             Fx.AssertAndThrow(args.CompletedCallback != null, "must have a valid callback");
 
-            //  ConnectionUtilities.ValidateBufferBounds(args.Buffer, args.Offset, args.Count);
+            Utils.ValidateBufferBounds(args.Buffer, args.Offset, args.Count);
             args.Exception = null; // null out any exceptions
 
             Task<int> taskResult = this.ReadAsyncCore(args);
@@ -153,21 +148,15 @@ namespace Microsoft.Azure.Amqp.Transport
             }
             catch (WebSocketException webSocketException)
             {
-                throw new IOException(
-                    webSocketException.InnerException != null ? webSocketException.InnerException.Message : webSocketException.Message,
-                    webSocketException.InnerException ?? webSocketException);
+                throw new IOException(webSocketException.Message, webSocketException);
             }
             catch (HttpListenerException httpListenerException)
             {
-                throw new IOException(
-                    httpListenerException.InnerException != null ? httpListenerException.InnerException.Message : httpListenerException.Message,
-                    httpListenerException.InnerException ?? httpListenerException); ;
+                throw new IOException(httpListenerException.Message, httpListenerException);
             }
             catch (TaskCanceledException taskCanceledException)
             {
-                throw new TimeoutException(
-                    taskCanceledException.InnerException != null ? taskCanceledException.InnerException.Message : taskCanceledException.Message,
-                    taskCanceledException.InnerException ?? taskCanceledException);
+                throw new TimeoutException(taskCanceledException.Message, taskCanceledException);
             }
             finally
             {
@@ -234,8 +223,9 @@ namespace Microsoft.Azure.Amqp.Transport
 
         protected override void AbortInternal()
         {
-            if (this.webSocket.State != WebSocketState.Aborted)
+            if (!this.disposed && this.webSocket.State != WebSocketState.Aborted)
             {
+                this.disposed = true;
                 this.webSocket.Abort();
                 this.webSocket.Dispose();
             }
@@ -263,6 +253,7 @@ namespace Microsoft.Azure.Amqp.Transport
         static bool ReadTaskDone(Task<int> taskResult, TransportAsyncCallbackArgs args)
         {
             IAsyncResult result = taskResult;
+            args.BytesTransfered = 0;  // reset bytes transferred
             if (taskResult.IsFaulted)
             {
                 args.Exception = taskResult.Exception;
@@ -276,7 +267,6 @@ namespace Microsoft.Azure.Amqp.Transport
             }
             else if (taskResult.IsCanceled)  // This should not happen since TaskCanceledException is handled in ReadAsyncCore.
             {
-                args.BytesTransfered = 0;
                 return true;
             }
 
@@ -304,6 +294,7 @@ namespace Microsoft.Azure.Amqp.Transport
         static bool WriteTaskDone(Task taskResult, TransportAsyncCallbackArgs args)
         {
             IAsyncResult result = taskResult;
+            args.BytesTransfered = 0;
             if (taskResult.IsFaulted)
             {
                 args.Exception = taskResult.Exception;
@@ -317,7 +308,6 @@ namespace Microsoft.Azure.Amqp.Transport
             }
             else if (taskResult.IsCanceled)  // This should not happen since TaskCanceledException is handled in WriteAsyncCore.
             {
-                args.BytesTransfered = 0;
                 return true;
             }
 
