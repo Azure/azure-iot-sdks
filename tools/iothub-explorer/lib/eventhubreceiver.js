@@ -37,7 +37,7 @@ EventHubReceiver.Error = 'error';
  */
 EventHubReceiver.prototype.StartReceive = function(startTime) {
 	if (startTime !== null) {
-		console.log('Start time:' + startTime);
+		console.log('Listening on endpoint ' + this.endpoint + ' start time: ' + startTime);
 	}
 	
 	var rxName = 'eventhubclient-rx';
@@ -65,7 +65,7 @@ EventHubReceiver.prototype.StartReceive = function(startTime) {
  */
 EventHubReceiver.prototype.StartReceiveFromOffset = function(startOffset) {
 	if (startOffset !== null) {
-		console.log('Start offset:' + startOffset);
+		console.log('Listening on endpoint ' + this.endpoint + ' start offset: ' + startTime);
 	}
 
 	var self = this;

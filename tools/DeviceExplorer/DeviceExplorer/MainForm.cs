@@ -94,7 +94,11 @@ namespace DeviceExplorer
             catch (Exception ex)
             {
                 //Exception will only be thrown on startup if the app settings contain invalid connection strings. No exception will be thrown if app settings contain empty connection strings
-                MessageBox.Show("Device Explorer does not yet contain valid connection strings.\nPlease provide valid connection strings then hit [Update].", String.Format("Attention: {0}", ex.Message), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show(
+                        "Device Explorer does not yet contain valid connection strings.\nPlease provide valid connection strings then hit [Update].", $"Attention: {ex.Message}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
         }
 
@@ -195,7 +199,10 @@ namespace DeviceExplorer
                     UpdateListOfDevices();
                 }
 
-                MessageBox.Show("Settings updated Successfully", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show("Settings updated successfully", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             catch (Exception ex)
             {
@@ -203,12 +210,16 @@ namespace DeviceExplorer
                 //Doing this since exceptions caught here are only of type ArgumentException
                 System.Reflection.MethodBase iotmb = typeof(MainForm).GetMethod("parseIoTHubConnectionString", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-                DialogResult invalidConnectionStringDialogResult = MessageBox.Show("Unable to update Settings.\nPlease ensure that valid connection strings have been provided then hit [Update].\nPress OK to modify the current invalid connection strings, or Cancel to revert to the most recent working connection strings.\n\n" + String.Format("Error: {0}", ex.Message), "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
-
-                //Only revert to the previous connection strings if the user chooses not edit the one they were attempting to use
-                if(invalidConnectionStringDialogResult == DialogResult.Cancel)
+                using (new CenterDialog(this))
                 {
-                    dhConStringTextBox.Text = activeIoTHubConnectionString;
+                    var invalidConnectionStringDialogResult = MessageBox.Show("Unable to update settings.\nPlease ensure that valid connection strings have been provided then hit [Update].\nPress OK to modify the current invalid connection strings, or Cancel to revert to the most recent working connection strings.\n\n" +
+                            $"Error: {ex.Message}", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+
+                    //Only revert to the previous connection strings if the user chooses not edit the one they were attempting to use
+                    if (invalidConnectionStringDialogResult == DialogResult.Cancel)
+                    {
+                        dhConStringTextBox.Text = activeIoTHubConnectionString;
+                    }
                 }
 
                 //Determine the origin of the exception (parseIoTHubConnectionString or parseEventHubConnectionString) and highlight the corresponding textbox
@@ -236,7 +247,10 @@ namespace DeviceExplorer
             }
             catch (Exception ex)
             {
-                MessageBox.Show(String.Format("Unable to generate SAS. Verify connection strings.\n{0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show($"Unable to generate SAS. Verify connection strings.\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -248,13 +262,15 @@ namespace DeviceExplorer
             var devicesProcessor = new DevicesProcessor(activeIoTHubConnectionString, MAX_COUNT_OF_DEVICES, protocolGatewayHost.Text);
             var devicesList = await devicesProcessor.GetDevices();
             devicesList.Sort();
-            devicesGridView.DataSource = devicesList;
+            var sortableDevicesBindingList = new SortableBindingList<DeviceEntity>(devicesList);
+            
+            devicesGridView.DataSource = sortableDevicesBindingList;
             devicesGridView.ReadOnly = true;
             devicesGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
 
             if (devicesList.Count() > MAX_COUNT_OF_DEVICES)
             {
-                deviceCountLabel.Text = MAX_COUNT_OF_DEVICES.ToString() + "+";
+                deviceCountLabel.Text = MAX_COUNT_OF_DEVICES + "+";
             }
             else
             {
@@ -272,7 +288,10 @@ namespace DeviceExplorer
             }
             catch (Exception ex)
             {
-                MessageBox.Show(String.Format("Unable to create new device. Please verify your connection strings.\n{0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show($"Unable to create new device. Please verify your connection strings.\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -293,7 +312,10 @@ namespace DeviceExplorer
             {
                 listDevicesButton.Text = "List";
                 devicesListed = false;
-                MessageBox.Show(String.Format("Unable to retrieve list of devices. Please verify your connection strings.\n{0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show($"Unable to retrieve list of devices. Please verify your connection strings.\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -311,7 +333,10 @@ namespace DeviceExplorer
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -321,18 +346,27 @@ namespace DeviceExplorer
             {
                 RegistryManager registryManager = RegistryManager.CreateFromConnectionString(activeIoTHubConnectionString);
                 string selectedDeviceId = devicesGridView.CurrentRow.Cells[0].Value.ToString();
-                DialogResult dialogResult = MessageBox.Show(String.Format("Are you sure you want to delete the following device?\n[{0}]", selectedDeviceId), "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dialogResult == System.Windows.Forms.DialogResult.Yes)
+                using (new CenterDialog(this))
                 {
-                    await registryManager.RemoveDeviceAsync(selectedDeviceId);
-                    MessageBox.Show("Device deleted successfully!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    await updateDevicesGridView();
-                    await registryManager.CloseAsync();
+                    var dialogResult = MessageBox.Show($"Are you sure you want to delete the following device?\n[{selectedDeviceId}]", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        await registryManager.RemoveDeviceAsync(selectedDeviceId);
+                        using (new CenterDialog(this))
+                        {
+                            MessageBox.Show("Device deleted successfully!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        await updateDevicesGridView();
+                        await registryManager.CloseAsync();
+                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
         #endregion
@@ -348,35 +382,61 @@ namespace DeviceExplorer
             {
                 string selectedDevice = deviceIDsComboBoxForEvent.SelectedItem.ToString();
                 eventHubClient = EventHubClient.CreateFromConnectionString(activeIoTHubConnectionString, "messages/events");
-                eventHubTextBox.Text = String.Format("Receiving events...\r\n");
+                eventHubTextBox.Text = "Receiving events...\r\n";
                 eventHubPartitionsCount = eventHubClient.GetRuntimeInformation().PartitionCount;
                 string partition = EventHubPartitionKeyResolver.ResolveToPartition(selectedDevice, eventHubPartitionsCount);
                 eventHubReceiver = eventHubClient.GetConsumerGroup(consumerGroupName).CreateReceiver(partition, startTime);
 
+                //receive the events from startTime until current time in a single call and process them
+                var events = await eventHubReceiver.ReceiveAsync(int.MaxValue, TimeSpan.FromSeconds(20));
+
+                foreach (var eventData in events)
+                {
+                    var data = Encoding.UTF8.GetString(eventData.GetBytes());
+                    var enqueuedTime = eventData.EnqueuedTimeUtc.ToLocalTime();
+                    var connectionDeviceId = eventData.SystemProperties["iothub-connection-device-id"].ToString();
+
+                    if (string.CompareOrdinal(selectedDevice.ToUpper(), connectionDeviceId.ToUpper()) == 0)
+                    {
+                        eventHubTextBox.Text += $"{enqueuedTime}> Device: [{connectionDeviceId}], Data:[{data}]";
+
+                        if (eventData.Properties.Count > 0)
+                        {
+                            eventHubTextBox.Text += "Properties:\r\n";
+                            foreach (var property in eventData.Properties)
+                            {
+                                eventHubTextBox.Text += $"'{property.Key}': '{property.Value}'\r\n";
+                            }
+                        }
+                        eventHubTextBox.Text += "\r\n";
+                    }
+                }
+
+                //having already received past events, monitor current events in a loop
                 while (true)
                 {
                     ct.ThrowIfCancellationRequested();
 
-                    EventData eventData = await eventHubReceiver.ReceiveAsync(TimeSpan.FromSeconds(1));
+                    var eventData = await eventHubReceiver.ReceiveAsync(TimeSpan.FromSeconds(1));
 
                     if (eventData != null)
                     {
-                        string data = Encoding.UTF8.GetString(eventData.GetBytes());
-                        DateTime enqueuedTime = eventData.EnqueuedTimeUtc.ToLocalTime();
+                        var data = Encoding.UTF8.GetString(eventData.GetBytes());
+                        var enqueuedTime = eventData.EnqueuedTimeUtc.ToLocalTime();
 
                         // Display only data from the selected device; otherwise, skip.
-                        string connectionDeviceId = eventData.SystemProperties["iothub-connection-device-id"].ToString();
+                        var connectionDeviceId = eventData.SystemProperties["iothub-connection-device-id"].ToString();
 
                         if (string.CompareOrdinal(selectedDevice, connectionDeviceId) == 0)
                         {
-                            eventHubTextBox.Text += String.Format("{0}> Device: [{1}], Data:[{2}]", enqueuedTime, connectionDeviceId, data);
+                            eventHubTextBox.Text += $"{enqueuedTime}> Device: [{connectionDeviceId}], Data:[{data}]";
 
                             if (eventData.Properties.Count > 0)
                             {
                                 eventHubTextBox.Text += "Properties:\r\n";
                                 foreach (var property in eventData.Properties)
                                 {
-                                    eventHubTextBox.Text += String.Format("'{0}': '{1}'\r\n", property.Key, property.Value);
+                                    eventHubTextBox.Text += $"'{property.Key}': '{property.Value}'\r\n";
                                 }
                             }
                             eventHubTextBox.Text += "\r\n";
@@ -389,12 +449,15 @@ namespace DeviceExplorer
             {
                 if (ct.IsCancellationRequested)
                 {
-                    eventHubTextBox.Text += String.Format("Stopped Monitoring events. {0}\r\n", ex.Message);
+                    eventHubTextBox.Text += $"Stopped Monitoring events. {ex.Message}\r\n";
                 }
                 else
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    eventHubTextBox.Text += String.Format("Stopped Monitoring events. {0}\r\n", ex.Message);
+                    using (new CenterDialog(this))
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    eventHubTextBox.Text += $"Stopped Monitoring events. {ex.Message}\r\n";
                 }
                 if (eventHubReceiver != null)
                 {
@@ -487,14 +550,17 @@ namespace DeviceExplorer
                 serviceMessage.MessageId = Guid.NewGuid().ToString();
                 await serviceClient.SendAsync(deviceIDsComboBoxForCloudToDeviceMessage.SelectedItem.ToString(), serviceMessage);
 
-                messagesTextBox.Text += String.Format("Sent to Device ID: [{0}], Message:\"{1}\", message Id: {2}\n", deviceIDsComboBoxForCloudToDeviceMessage.SelectedItem.ToString(), cloudToDeviceMessage, serviceMessage.MessageId);
+                messagesTextBox.Text += $"Sent to Device ID: [{deviceIDsComboBoxForCloudToDeviceMessage.SelectedItem.ToString()}], Message:\"{cloudToDeviceMessage}\", message Id: {serviceMessage.MessageId}\n";
 
                 await serviceClient.CloseAsync();
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -522,10 +588,18 @@ namespace DeviceExplorer
                 {
                     await updateDeviceIdsComboBoxes(runIfNullOrEmpty:false);
                 }
+
+                if (e.TabPage == tabManagement)
+                {
+                    UpdateListOfDevices();
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -633,7 +707,7 @@ namespace DeviceExplorer
                     {
                         if (feedbackMessage != null)
                         {
-                            messagesTextBox.Text += String.Format("Message Feedback status: \"{0}\", Description: \"{1}\", Original Message Id: {2}\n", feedbackMessage.StatusCode, feedbackMessage.Description, feedbackMessage.OriginalMessageId);
+                            messagesTextBox.Text += $"Message Feedback status: \"{feedbackMessage.StatusCode}\", Description: \"{feedbackMessage.Description}\", Original Message Id: {feedbackMessage.OriginalMessageId}\n";
                         }
                     }
 
@@ -653,7 +727,7 @@ namespace DeviceExplorer
 
             ctsForFeedbackMonitoring = new CancellationTokenSource();
 
-            messagesTextBox.Text += String.Format("Started monitoring feedback for device {0}.\r\n", deviceIDsComboBoxForCloudToDeviceMessage.SelectedItem.ToString());
+            messagesTextBox.Text += $"Started monitoring feedback for device {deviceIDsComboBoxForCloudToDeviceMessage.SelectedItem.ToString()}.\r\n";
 
             await MonitorFeedback(ctsForFeedbackMonitoring.Token, deviceIDsComboBoxForCloudToDeviceMessage.SelectedItem.ToString());
         }
@@ -662,7 +736,7 @@ namespace DeviceExplorer
         {
             if (ctsForFeedbackMonitoring != null)
             {
-                messagesTextBox.Text += String.Format("Stopped monitoring feedback.\r\n");
+                messagesTextBox.Text += "Stopped monitoring feedback.\r\n";
 
                 ctsForFeedbackMonitoring.Cancel();
                 ctsForFeedbackMonitoring = null;

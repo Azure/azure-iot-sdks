@@ -225,8 +225,6 @@ In this section you will run the end to end test cases for Azure IoT client SDK 
 
         Go to **Configuration** tab &minus;&gt; Click **Generate SAS** button
     -   **IOTHUB_PARTITION_COUNT:** Set value as **16**
-    -   **IOTHUB_POLICY_NAME:** Keep it blank
-    -   **IOTHUB_POLICY_KEY:** Keep it blank
 
 
 -   Set environment variables by running following command on your device:

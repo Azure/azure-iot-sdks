@@ -34,9 +34,10 @@
             // 
             // doneButton
             // 
-            this.doneButton.Location = new System.Drawing.Point(154, 128);
+            this.doneButton.Location = new System.Drawing.Point(116, 104);
+            this.doneButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.doneButton.Name = "doneButton";
-            this.doneButton.Size = new System.Drawing.Size(188, 37);
+            this.doneButton.Size = new System.Drawing.Size(141, 30);
             this.doneButton.TabIndex = 0;
             this.doneButton.Text = "Done";
             this.doneButton.UseVisualStyleBackColor = true;
@@ -44,21 +45,24 @@
             // 
             // richTextBox
             // 
-            this.richTextBox.Location = new System.Drawing.Point(13, 13);
+            this.richTextBox.Location = new System.Drawing.Point(10, 11);
+            this.richTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.richTextBox.Name = "richTextBox";
             this.richTextBox.ReadOnly = true;
-            this.richTextBox.Size = new System.Drawing.Size(519, 98);
+            this.richTextBox.Size = new System.Drawing.Size(390, 80);
             this.richTextBox.TabIndex = 1;
             this.richTextBox.Text = "";
             // 
             // DeviceCreatedForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(544, 177);
+            this.ClientSize = new System.Drawing.Size(408, 144);
             this.Controls.Add(this.richTextBox);
             this.Controls.Add(this.doneButton);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "DeviceCreatedForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Device Created";
             this.ResumeLayout(false);
 

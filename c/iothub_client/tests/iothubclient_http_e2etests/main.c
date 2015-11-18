@@ -6,6 +6,6 @@
 int main(void)
 {
     size_t failedTestCount = 0;
-    RUN_TEST_SUITE(iothubclient_e2etests, failedTestCount); 
+    RUN_TEST_SUITE(iothubclient_http_e2etests, failedTestCount); 
     return failedTestCount;
 }

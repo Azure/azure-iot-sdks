@@ -3,24 +3,21 @@
 
 'use strict';
 
+var ConnectionString = require('azure-iot-common').ConnectionString;
 var runTests = require('./_client_test.js');
-var Https = require('azure-iot-common').Https;
 
-function createTransport() {
-  return new Https();
-}
-
-var host = process.env.IOTHUB_NAME + '.' + process.env.IOTHUB_SUFFIX;
-var keyName = process.env.IOTHUB_DEVICE_ID;
+var host = ConnectionString.parse(process.env.IOTHUB_CONNECTION_STRING).HostName;
+var deviceId = process.env.IOTHUB_DEVICE_ID;
 var key = process.env.IOTHUB_DEVICE_KEY;
-var connectionString = 'HostName='+host+';DeviceId='+keyName+';SharedAccessKey='+key;
+
+var connectionString = 'HostName=' + host + ';DeviceId=' + deviceId + ';SharedAccessKey=' + key;
 var badConnStrings = [
-  'HostName=bad;DeviceId='+keyName+';SharedAccessKey='+key,
-  'HostName='+host+';DeviceId=bad;SharedAccessKey='+key,
-  'HostName='+host+';DeviceId='+keyName+';SharedAccessKey=bad;'
+  'HostName=bad;DeviceId=' + deviceId + ';SharedAccessKey=' + key,
+  'HostName=' + host + ';DeviceId=bad;SharedAccessKey=' + key,
+  'HostName=' + host + ';DeviceId=' + deviceId + ';SharedAccessKey=bad;'
 ];
 
 describe('Over real HTTPS', function () {
-  this.timeout(10000); // default timeout is 2s, but 'hostname is malformed' tests are taking 2.2s on some machines...
-  runTests(createTransport, connectionString, badConnStrings);
+  this.timeout(15000);
+  runTests(null, connectionString, badConnStrings);
 });

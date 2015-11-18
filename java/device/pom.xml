@@ -1,10 +1,8 @@
-<!-- Copyright (c) Microsoft. All rights reserved. -->
-<!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
-<project>
+<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.iothub-java-client</groupId>
     <artifactId>iothub-java-client-with-samples</artifactId>
-    <version>1.0.0-preview.4</version>
+    <version>1.0.0-preview.5</version>
     <name>IoT Hub Java Client With Samples</name>
     <packaging>pom</packaging>
     <developers>
@@ -24,8 +22,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>

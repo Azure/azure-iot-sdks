@@ -7,11 +7,11 @@ var iothub = require('azure-iothub');
 
 var connectionString = '[IoT Connection String]';
 
-var registry = new iothub.Registry(connectionString, new iothub.Https());
+var registry = iothub.Registry.fromConnectionString(connectionString);
 
 // List devices
 console.log('**listing devices...');
-registry.list(function (err, response, deviceList) {
+registry.list(function (err, deviceList) {
   deviceList.forEach(function (device) {
     var key = device.authentication ? device.authentication.SymmetricKey.primaryKey : '<no primary key>';
     console.log(device.deviceId + ': ' + key);
@@ -35,7 +35,7 @@ registry.list(function (err, response, deviceList) {
 });
 
 function printAndContinue(op, next) {
-  return function printResult(err, res, deviceInfo) {
+  return function printResult(err, deviceInfo, res) {
     if (err) console.log(op + ' error: ' + err.toString());
     if (res) console.log(op + ' status: ' + res.statusCode + ' ' + res.statusMessage);
     if (deviceInfo) console.log(op + ' device info: ' + JSON.stringify(deviceInfo));

@@ -4,7 +4,6 @@
 package com.microsoft.azure.iothub.transport.amqps;
 
 import com.microsoft.azure.iothub.*;
-import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.net.IotHubUri;
 import org.apache.qpid.proton.amqp.Binary;

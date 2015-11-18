@@ -47,10 +47,10 @@ xcopy /q /e /y java\device\doc\api_reference %temp_doc_dir%\java\api_reference
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
-rem -- Copy Node JS Device SDK API docs
+rem -- Copy Node.js Device & Service SDK API docs
 rem -----------------------------------------------------------------------------
 mkdir %temp_doc_dir%\node\api_reference
-xcopy /q /e /y node\device\doc\api_reference %temp_doc_dir%\node\api_reference
+xcopy /q /e /y node\out %temp_doc_dir%\node\api_reference
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
