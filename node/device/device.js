@@ -48,5 +48,6 @@ module.exports = {
     ConnectionString: require('./lib/connection_string.js'),
     Http: require('./lib/http.js'),
     Message: common.Message,
-    SharedAccessSignature: require('./lib/shared_access_signature.js')
+    SharedAccessSignature: require('./lib/shared_access_signature.js'),
+    Amqp: require('./lib/amqp.js')
 };

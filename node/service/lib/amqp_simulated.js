@@ -5,30 +5,25 @@
 
 var errors = require('azure-iot-common').errors;
 var EventEmitter = require('events');
-var util = require('util');
+var AmqpReceiver = require('azure-iot-common').AmqpReceiver;
 
-function FeedbackReceiver() {
-  EventEmitter.call(this);
-}
-util.inherits(FeedbackReceiver, EventEmitter);
-
-function SimulatedTransport() {
+function SimulatedAmqp() {
   this._config = {
     sharedAccessSignature: 'ok'
   };
-  this._receiver = new FeedbackReceiver();
-  this.FeedbackReceiver = FeedbackReceiver;
+  this._receiver = new AmqpReceiver(new EventEmitter());
+  this.FeedbackReceiver = AmqpReceiver;
 }
 
-SimulatedTransport.prototype.connect = function connect(done) {
+SimulatedAmqp.prototype.connect = function connect(done) {
   if (!!done) done();
 };
 
-SimulatedTransport.prototype.disconnect = function disconnect(done) {
+SimulatedAmqp.prototype.disconnect = function disconnect(done) {
   if (!!done) done();
 };
 
-SimulatedTransport.prototype.send = function send(deviceId, message, done) {
+SimulatedAmqp.prototype.send = function send(deviceId, message, done) {
   if (done) {
     if (deviceId.search(/^no-device/) !== -1) {
       done(new errors.DeviceNotFoundError());
@@ -47,7 +42,7 @@ SimulatedTransport.prototype.send = function send(deviceId, message, done) {
   }
 };
 
-SimulatedTransport.prototype.getFeedbackReceiver = function (done) {
+SimulatedAmqp.prototype.getReceiver = function (done) {
   if (this._config.sharedAccessSignature === 'fail') {
     done(new Error('error'));
   }
@@ -56,4 +51,4 @@ SimulatedTransport.prototype.getFeedbackReceiver = function (done) {
   }
 };
 
-module.exports = SimulatedTransport;
+module.exports = SimulatedAmqp;

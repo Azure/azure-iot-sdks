@@ -1,11 +1,12 @@
 {
   "name": "azure-iot-common",
-  "version": "1.0.0-preview.5",
+  "version": "1.0.0-preview.6",
   "description": "Azure IoT SDK - Common",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "main": "common.js",
   "dependencies": {
+    "amqp10": "^2.0.2",
     "crypto": "^0.0.3"
   },
   "devDependencies": {

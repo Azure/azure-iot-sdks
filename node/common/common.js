@@ -10,5 +10,8 @@ module.exports = {
     errors: require('./lib/errors.js'),
     Http: require('./lib/http.js'),
     Message: require('./lib/message.js'),
-    SharedAccessSignature: require('./lib/shared_access_signature.js')
+    SharedAccessSignature: require('./lib/shared_access_signature.js'),
+    AmqpMessage: require('./lib/amqp_message.js'),
+    AmqpReceiver: require('./lib/amqp_receiver.js'),
+    Amqp: require('./lib/amqp.js')
 };

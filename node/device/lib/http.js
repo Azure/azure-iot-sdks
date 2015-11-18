@@ -200,8 +200,7 @@ Http.prototype.receive = function (done) {
  * | reject   | Directs the IoT Hub to delete a message from the queue and record that it was rejected. |
  * | complete | Directs the IoT Hub to delete a message from the queue and record that it was accepted. |
  *
- * @param {String}  lockToken An HTTP E-Tag used to manage concurrent updates
- *                            to the device
+ * @param {String}  message   The message for which feedback is being sent.
  * @param {Object}  config    This is a dictionary containing the
  *                            following keys and values:
  *
@@ -214,13 +213,13 @@ Http.prototype.receive = function (done) {
  * @param {Function}      done      The callback to be invoked when
  *                                  `sendFeedback` completes execution.
  */
-Http.prototype.sendFeedback = function (action, lockToken, done) {
+Http.prototype.sendFeedback = function (action, message, done) {
   var config = this._config;
   var method;
-  var path = endpoint.feedbackPath(config.deviceId, lockToken);
+  var path = endpoint.feedbackPath(config.deviceId, message.lockToken);
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature.toString(),
-    'If-Match': lockToken
+    'If-Match': message.lockToken
   };
   
   /*Codes_SRS_NODE_DEVICE_HTTP_05_005: [If the action argument is 'abandon', sendFeedback shall construct an HTTP request using information supplied by the caller, as follows:

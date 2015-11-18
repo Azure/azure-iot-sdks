@@ -8,7 +8,6 @@
       "../build/docs/node-main-page-device.md",
       "common/common.js",
       "common/lib/message.js",
-      "common/lib/https.js",
       "device/device.js",
       "device/lib/client.js"
     ],

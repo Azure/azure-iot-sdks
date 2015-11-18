@@ -59,6 +59,12 @@ module.exports = [
     },
     {
         "taskType": "xmlReplaceTask",
+        "filePath": "c/build_all/packaging/windows/Eclipse.Paho-C.paho-mqtt3cs.nuspec",
+        "search": "//*[local-name(.)='package' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']/*[local-name(.)='metadata' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']/*[local-name(.)='version' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']",
+        "replaceString": "eclipse_paho_nuget"
+    },
+    {
+        "taskType": "xmlReplaceTask",
         "filePath": "c/build_all/packaging/windows/Microsoft.Azure.IoTHub.Common.nuspec",
         "search": "//*[local-name(.)='package' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd']/*[local-name(.)='metadata' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd']/*[local-name(.)='version' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd']",
         "replaceString": "c_nuget.device"

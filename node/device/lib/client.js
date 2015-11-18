@@ -7,7 +7,7 @@ var anHourFromNow = require('azure-iot-common').authorization.anHourFromNow;
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./http.js');
-var DeviceToken = require('azure-iot-common').authorization.DeviceToken;
+var SharedAccessSignature = require('./shared_access_signature.js');
 
 /**
  * @class           module:azure-iot-device.Client
@@ -44,11 +44,12 @@ Client.fromConnectionString = function fromConnectionString(value, Transport) {
 
   /*Tests_SRS_NODE_DEVICE_CLIENT_05_005: [fromConnectionString shall derive and transform the needed parts from the connection string in order to create a new instance of Transport.]*/
   var cn = ConnectionString.parse(value);
-  var sas = new DeviceToken(cn.HostName, cn.DeviceId, cn.SharedAccessKey, anHourFromNow());
+  var sas = SharedAccessSignature.create(cn.HostName, cn.DeviceId, cn.SharedAccessKey, anHourFromNow());
 
   var config = {
     host: cn.HostName,
     deviceId: cn.DeviceId,
+    hubName: cn.HostName.split('.')[0],
     sharedAccessSignature: sas.toString()
   };
 
@@ -108,6 +109,14 @@ Client.prototype.receive = function(done) {
 };
 
 /**
+ * The getReceiver method returns the receiver object that is used to get messages and settle them.
+ * @param {Function} done The callback to be invoked with the receiver object as a parameter.
+ */
+Client.prototype.getReceiver = function (done) {
+  this._transport.getReceiver(done);
+};
+
+/**
  * The `abandon` method directs the IoT Hub to re-enqueue a message
  * message so it may be received again later.
  * @param {Message}   message   The [message]{@linkcode module:common/message.Message}
@@ -119,12 +128,12 @@ Client.prototype.abandon = function(message, done) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_010: [If message has a lockToken property, the abandon method shall abandon message via the transport associated with the Client instance.]*/
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_011: [Otherwise it shall invoke the done callback with ArgumentError.]*/
   message = message || {};
-  
+
   if (!message.lockToken) {
     done(new ArgumentError('invalid lockToken'));
   }
   else {
-    this._transport.sendFeedback('abandon', message.lockToken, done);
+    this._transport.sendFeedback('abandon', message, done);
   }
 };
 
@@ -140,12 +149,12 @@ Client.prototype.reject = function(message, done) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_012: [If message has a lockToken property, the reject method shall reject message via the transport associated with the Client instance.]*/
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_013: [Otherwise is shall invoke the done callback with ArgumentError.]*/
   message = message || {};
-  
+
   if (!message.lockToken) {
     done(new ArgumentError('invalid lockToken'));
   }
   else {
-    this._transport.sendFeedback('reject', message.lockToken, done);
+    this._transport.sendFeedback('reject', message, done);
   }
 };
 
@@ -161,12 +170,12 @@ Client.prototype.complete = function(message, done) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_014: [If message has a lockToken property, the complete method shall complete message via the transport associated with the Client instance.]*/
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_015: [Otherwise is shall invoke the done callback with ArgumentError.]*/
   message = message || {};
-  
+
   if (!message.lockToken) {
     done(new ArgumentError('invalid lockToken'));
   }
   else {
-    this._transport.sendFeedback('complete', message.lockToken,  done);
+    this._transport.sendFeedback('complete', message,  done);
   }
 };
 
