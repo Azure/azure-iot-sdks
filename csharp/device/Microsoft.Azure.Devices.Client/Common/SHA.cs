@@ -1,5 +1,5 @@
 // 
-//  Code by Elze Kool
+//  Original author Elze Kool has dedicated this code (SHA.cs) to the public domain
 //  
 namespace Microsoft.Azure.Devices.Client
 {
