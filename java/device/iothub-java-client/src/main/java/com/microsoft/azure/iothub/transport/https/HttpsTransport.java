@@ -270,13 +270,7 @@ public final class HttpsTransport implements IotHubTransport
     public boolean isEmpty()
     {
         // Codes_SRS_HTTPSTRANSPORT_11_015: [The function shall return true if the waiting list, in progress list, and callback list are all empty, and false otherwise.]
-        if (this.waitingList.isEmpty() && this.inProgressList.isEmpty()
-                && this.callbackList.isEmpty())
-        {
-            return true;
-        }
-
-        return false;
+        return this.waitingList.isEmpty() && this.inProgressList.isEmpty() && this.callbackList.isEmpty();
     }
 
     /**

@@ -308,11 +308,4 @@ public final class AmqpsTransport implements IotHubTransport
 
         return false;
     }
-
-    protected AmqpsTransport()
-    {
-        this.waitingList = null;
-        this.callbackList = null;
-        this.config = null;
-    }
 }
