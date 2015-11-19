@@ -34,7 +34,7 @@ The iothub-explorer tool also enables you to provision multiple new devices at o
 
 1. Create a text file and place the device id of each device you want to provision on a new line within the text file.
 2. Get the connection string for your IoT Hub. See [Setup IoT Hub][setup-iothub] for more details.
-3. Run the following commands in a terminal/shell window from the tools/iothub-explorer folder in the repository using the IoT Hub connection string from the previous step and replacing "mydevice" with your desired device name.
+3. Run the following commands in a terminal/shell window from the tools/iothub-explorer folder in the repository using the IoT Hub connection string from the previous step and replacing "path-to-file" with the path to the file created in step 1.
 
 ```
 npm install
