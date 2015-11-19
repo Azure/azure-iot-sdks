@@ -6,6 +6,7 @@ package com.microsoft.azure.iothub.transport.amqps;
 import com.microsoft.azure.iothub.*;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.net.IotHubUri;
+import com.microsoft.azure.iothub.transport.TransportUtils;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
@@ -25,12 +26,6 @@ import java.nio.ByteBuffer;
  */
 public final class AmqpsIotHubSession
 {
-    /**
-     * The time, in milliseconds, that a message consumer will wait when
-     * receiving a message.
-     */
-    public static final int AMQPS_RECEIVE_TIMEOUT_MILLIS = 3000;
-
     /** The state of the AMQPS session. */
     protected enum AmqpsIotHubSessionState
     {
@@ -91,7 +86,7 @@ public final class AmqpsIotHubSession
 
             String iotHubUser = deviceId + "@sas." + iotHubName;
 
-            IotHubSasToken sasToken = this.buildToken();
+            IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
 
             try
             {
@@ -182,10 +177,6 @@ public final class AmqpsIotHubSession
                 // Codes_SRS_AMQPSIOTHUBSESSION_11_009: [If the message was not successfully received by the service, the function shall return status code ERROR.]
                 result = IotHubStatusCode.ERROR;
             }
-            catch (Throwable e)
-            {
-                throw e;
-            }
 
             return result;
         }
@@ -217,7 +208,7 @@ public final class AmqpsIotHubSession
             // Codes_SRS_AMQPSIOTHUBSESSION_11_014: [If the IoT Hub could not be reached, the function shall throw an IOException.]
             AmqpsMessage message = (AmqpsMessage) this.receiver.consumeMessage();
             if(message!=null) {
-                msg = this.protonMessageToMessage(message);
+                msg = protonMessageToMessage(message);
                 this.lastMessage = message;
             }
 
@@ -326,33 +317,6 @@ public final class AmqpsIotHubSession
             }
         }
         return msg;
-    }
-
-    /**
-     * Generates a valid SAS token from the client configuration.
-     *
-     * @return a SAS token that authenticates the device to the IoT Hub.
-     */
-    protected IotHubSasToken buildToken()
-    {
-        String iotHubHostname = this.config.getIotHubHostname();
-        String deviceId = this.config.getDeviceId();
-        String deviceKey = this.config.getDeviceKey();
-        long tokenValidSecs = this.config.getTokenValidSecs();
-
-        long msgExpiryTime = System.currentTimeMillis() / 1000l + tokenValidSecs + 1l;
-
-        String resourceUri = IotHubUri.getResourceUri(iotHubHostname, deviceId);
-
-        IotHubSasToken sasToken = new IotHubSasToken(resourceUri, deviceId, deviceKey, msgExpiryTime);
-
-        if (this.config.targetHubType == AzureHubType.IoTHub) {
-            sasToken.appendSknValue = false;
-        } else if (this.config.targetHubType == AzureHubType.EventHub) {
-            sasToken.appendSknValue = true;
-        }
-
-        return sasToken;
     }
 
     protected AmqpsIotHubSession()

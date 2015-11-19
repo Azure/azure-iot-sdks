@@ -144,4 +144,8 @@ add_library(iothub_client
 )
 
 add_subdirectory(samples)
+
+if(NOT IN_OPENWRT)
+# Disable tests for OpenWRT
 add_subdirectory(tests)
+endif()

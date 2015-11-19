@@ -80,5 +80,9 @@ ENDIF(WIN32)
 #this is the product (a library)
 add_library(common ${source_c_files} ${source_h_files})
 
+if(NOT IN_OPENWRT)
+# Disable test for OpenWRT
 add_subdirectory(tests)
+endif()
+
 add_subdirectory(testtools)

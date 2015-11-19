@@ -3,7 +3,6 @@
 
 'use strict';
 
-var ServiceToken = require('azure-iot-common').authorization.ServiceToken;
 var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
 
 function Response(statusCode) {
@@ -27,7 +26,7 @@ function SimulatedHttp(config) {
       done(createError());
     }
     else {
-      var cmpSig = (new ServiceToken(sig.sr, sig.skn, 'bad', sig.se)).toString();
+      var cmpSig = SharedAccessSignature.create(sig.sr, sig.skn, 'bad', sig.se).toString();
       if (config.sharedAccessSignature === cmpSig) {  // bad key
         done(createError());
       }

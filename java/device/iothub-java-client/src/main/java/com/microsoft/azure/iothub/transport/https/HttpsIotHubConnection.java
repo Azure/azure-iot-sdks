@@ -5,12 +5,8 @@ package com.microsoft.azure.iothub.transport.https;
 
 import com.microsoft.azure.iothub.*;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
-import com.microsoft.azure.iothub.net.IotHubAbandonUri;
-import com.microsoft.azure.iothub.net.IotHubCompleteUri;
-import com.microsoft.azure.iothub.net.IotHubMessageUri;
-import com.microsoft.azure.iothub.net.IotHubRejectUri;
-import com.microsoft.azure.iothub.net.IotHubEventUri;
-import com.microsoft.azure.iothub.net.IotHubUri;
+import com.microsoft.azure.iothub.net.*;
+import com.microsoft.azure.iothub.transport.TransportUtils;
 
 import java.io.IOException;
 import java.net.URL;
@@ -66,10 +62,9 @@ public class HttpsIotHubConnection
             int readTimeoutMillis = this.config.getReadTimeoutMillis();
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2015-08-15-preview'.]
-            IotHubEventUri eventUri =
-                    new IotHubEventUri(iotHubHostname, deviceId);
+            IotHubEventUri eventUri = new IotHubEventUri(iotHubHostname, deviceId);
             URL eventUrl = new URL("https://" + eventUri.toString());
-            IotHubSasToken sasToken = this.buildToken();
+            IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_003: [The function shall send a POST request.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_004: [The function shall set the request body to the message body.]
@@ -119,7 +114,8 @@ public class HttpsIotHubConnection
             IotHubMessageUri messageUri =
                     new IotHubMessageUri(iotHubHostname, deviceId);
             URL messageUrl = new URL("https://" + messageUri.toString());
-            IotHubSasToken sasToken = this.buildToken();
+
+            IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_014: [The function shall send a GET request.]
             HttpsRequest request =
@@ -242,7 +238,7 @@ public class HttpsIotHubConnection
                             "Invalid message result specified.");
             }
 
-            IotHubSasToken sasToken = this.buildToken();
+            IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_033: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
             request.setReadTimeoutMillis(readTimeoutMillis).
@@ -266,33 +262,6 @@ public class HttpsIotHubConnection
                 throw new IOException(errMsg);
             }
         }
-    }
-
-    /**
-     * Generates a valid SAS token from the client configuration.
-     *
-     * @return a SAS token that authenticates the device to the IoT Hub.
-     */
-    protected IotHubSasToken buildToken()
-    {
-        String iotHubHostname = this.config.getIotHubHostname();
-        String deviceId = this.config.getDeviceId();
-        String deviceKey = this.config.getDeviceKey();
-        long tokenValidSecs = this.config.getTokenValidSecs();
-
-        long msgExpiryTime = System.currentTimeMillis() / 1000l + tokenValidSecs + 1l;
-
-        String resourceUri = IotHubUri.getResourceUri(iotHubHostname, deviceId);
-
-        IotHubSasToken sasToken = new IotHubSasToken(resourceUri, deviceId, deviceKey, msgExpiryTime);
-
-        if (this.config.targetHubType == AzureHubType.IoTHub) {
-            sasToken.appendSknValue = false;
-        } else if (this.config.targetHubType == AzureHubType.EventHub) {
-            sasToken.appendSknValue = true;
-        }
-
-        return sasToken;
     }
 
     /**

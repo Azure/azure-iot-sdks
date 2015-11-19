@@ -5,7 +5,6 @@
 
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var Message = require('azure-iot-common').Message;
-var DeviceToken = require('azure-iot-common').authorization.DeviceToken;
 var SharedAccessSignature = require('./shared_access_signature.js');
 
 function Response(statusCode) {
@@ -29,7 +28,7 @@ function SimulatedHttp(config) {
       done(makeError(404));
     }
     else {
-      var cmpSig = (new DeviceToken(config.host, config.deviceId, 'bad', sig.se)).toString();
+      var cmpSig = (SharedAccessSignature.create(config.host, config.deviceId, 'bad', sig.se)).toString();
       if (config.sharedAccessSignature === cmpSig) {  // bad key
         done(makeError(401));
       }
@@ -58,11 +57,11 @@ SimulatedHttp.prototype.receive = function (done) {
   });
 };
 
-SimulatedHttp.prototype.sendFeedback = function (feedbackAction, lockToken, done) {
-  if (!lockToken) {
+SimulatedHttp.prototype.sendFeedback = function (feedbackAction, message, done) {
+  if (!message.lockToken) {
     done(new ArgumentError('invalid lockToken'));
   }
-  else if (lockToken === 'FFA945D3-9808-4648-8DD7-D250DDE66EA9') {
+  else if (message.lockToken === 'FFA945D3-9808-4648-8DD7-D250DDE66EA9') {
     done(makeError(412));
   }
   else {

@@ -1,25 +1,26 @@
 {
     "c": {
-        "device": "1.0.0-preview.5"
+        "device": "1.0.0-preview.6"
     },
     "c_nuget": {
-        "device": "1.0.0-preview-005"
-    },
-    "qpid_proton_nuget": "0.9.0.1-preview-003",
-    "csharp": {
         "device": "1.0.0-preview-006"
     },
+    "qpid_proton_nuget": "0.9.0.1-preview-003",
+    "eclipse_paho_nuget": "1.0.3",
+    "csharp": {
+        "device": "1.0.0-preview-007"
+    },
     "java": {
-        "device": "1.0.0-preview.5",
-        "service": "1.0.0-preview.5"
+        "device": "1.0.0-preview.6",
+        "service": "1.0.0-preview.6"
     },
     "node": {
- 	  "build": "1.0.0-preview.5",
-	  "common": "1.0.0-preview.5",
-      "device": "1.0.0-preview.5",
-      "service": "1.0.0-preview.5"
+ 	  "build": "1.0.0-preview.6",
+	  "common": "1.0.0-preview.6",
+      "device": "1.0.0-preview.6",
+      "service": "1.0.0-preview.6"
     },
-    "iothub-explorer": "1.0.0-preview.5",
-    "device-explorer": "1.0.0-preview.5",
-    "github-release": "v1.0.0-preview.5"
+    "iothub-explorer": "1.0.0-preview.6",
+    "device-explorer": "1.0.0-preview.6",
+    "github-release": "v1.0.0-preview.6"
 }

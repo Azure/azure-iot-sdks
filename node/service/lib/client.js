@@ -5,15 +5,12 @@
 
 var anHourFromNow = require('azure-iot-common').authorization.anHourFromNow;
 var ConnectionString = require('./connection_string.js');
-var DefaultTransport = require('./transport.js');
+var DefaultTransport = require('./amqp.js');
 var Message = require('azure-iot-common').Message;
-var ServiceToken = require('azure-iot-common').authorization.ServiceToken;
 var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
 
 /**
- * @class FeedbackReceiver
- * @emits FeedbackReceiver#errorReceived
- * @emits FeedbackReceiver#message
+ * @class Client
  */
 
 /**
@@ -56,7 +53,7 @@ Client.fromConnectionString = function fromConnectionString(value) {
 
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_003: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a new instance of the default transport (azure-iothub.Transport).]*/
   var cn = ConnectionString.parse(value);
-  var sas = new ServiceToken(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
+  var sas = SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
 
   var config = {
     hubName: cn.HostName.split('.', 1)[0],
@@ -185,7 +182,7 @@ Client.prototype.getFeedbackReceiver = function getFeedbackReceiver(done) {
   receiver - an instance of Client.FeedbackReceiver]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_028: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_029: [Otherwise the argument err shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.]*/
-  this._transport.getFeedbackReceiver(done);
+  this._transport.getReceiver(done);
 };
 
 module.exports = Client;
