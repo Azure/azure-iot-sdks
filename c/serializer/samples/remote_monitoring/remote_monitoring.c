@@ -16,6 +16,7 @@
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
+
 static const char* deviceId = "[Device Id]";
 static const char* deviceKey = "[Device Key]";
 static const char* hubName = "[IoTHub Name]";
@@ -24,32 +25,16 @@ static const char* hubSuffix = "[IoTHub Suffix, i.e. azure-devices.net]";
 // Define the Model
 BEGIN_NAMESPACE(Contoso);
 
-#ifndef WINCE
 DECLARE_STRUCT(SystemProperties,
     ascii_char_ptr, DeviceID,
     _Bool, Enabled
-	Bool, Enabled
 );
-#else
-DECLARE_STRUCT(SystemProperties,
-ascii_char_ptr, DeviceID,
-bool, Enabled
-);
-#endif
 
-#ifndef WINCE
 DECLARE_STRUCT(DeviceProperties,
 ascii_char_ptr, DeviceID,
 _Bool, HubEnabledState
 );
-#else
-DECLARE_STRUCT(DeviceProperties,
-ascii_char_ptr, DeviceID,
-bool, HubEnabledState
-);
-#endif
 
-#ifndef WINCE
 DECLARE_MODEL(Thermostat,
 
     /* Event data (temperature, external temperature and humidity) */
@@ -69,27 +54,7 @@ DECLARE_MODEL(Thermostat,
     WITH_ACTION(SetTemperature, double, temperature),
 	WITH_ACTION(SetHumidity, double, humidity)
 );
-#else
-DECLARE_MODEL(Thermostat,
 
-	/* Event data (temperature, external temperature and humidity) */
-	WITH_DATA(double, Temperature),
-	WITH_DATA(double, ExternalTemperature),
-	WITH_DATA(double, Humidity),
-	WITH_DATA(ascii_char_ptr, DeviceId),
-
-	/* Device Info - This is command metadata + some extra fields */
-	WITH_DATA(ascii_char_ptr, ObjectType),
-	WITH_DATA(bool, IsSimulatedDevice),
-	WITH_DATA(ascii_char_ptr, Version),
-	WITH_DATA(DeviceProperties, DeviceProperties),
-	WITH_DATA(ascii_char_ptr_no_quotes, Commands),
-
-	/* Commands implemented by the device */
-	WITH_ACTION(SetTemperature, double, temperature),
-	WITH_ACTION(SetHumidity, double, humidity)
-);
-#endif
 END_NAMESPACE(Contoso);
 
 EXECUTE_COMMAND_RESULT SetTemperature(Thermostat* thermostat, double temperature)

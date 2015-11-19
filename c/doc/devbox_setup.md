@@ -115,11 +115,18 @@ This script uses **cmake** to make a folder called "cmake" in your home director
  - Install [Visual Studio 2013][visual-studio]. You can use the free Community Edition if you meet the licensing requirements.
  Be sure to include Visual C++ and NuGet Package Manager.
  - Install [Application Builder for Windows Embedded Compact 2013][application-builder]
- - Install [Toradex Windows Embedded Compact 2013 SDK][toradex-CE8-sdk].
+ - Install [Toradex Windows Embedded Compact 2013 SDK][toradex-CE8-sdk] or your own SDK.
  - Install [git](http://www.git-scm.com) making sure git.exe can be run from a command line.
 
  - Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest release version.
 
+ If you installed a different SDK please check azure-iot-sdks\\c\\build_all\\windowsce\\build.cmd and replace:
+ ```
+ set SDKNAME=TORADEX_CE800
+ set PROCESSOR=arm
+ ```
+ with a reference to the name of the SDK and the processor architecture (arm/x86) you plan to use.
+ 
  ### Verify your environment
 
  You can build the Windows samples to verify that your environment is set up correctly.

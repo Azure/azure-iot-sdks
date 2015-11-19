@@ -2,7 +2,7 @@
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 @setlocal EnableExtensions EnableDelayedExpansion
-rem echo off
+echo off
 
 set current-path=%~dp0
 rem // remove trailing slash
@@ -81,9 +81,12 @@ rem no error checking
 
 pushd "%USERPROFILE%\cmake_ce8"
 
+rem if you plan to use a different SDK you need to change SDKNAME to the name of your SDK. Ensure that this is also changed in the sample solutions iothub_client_sample_http, simplesample_http and remote_monitoring
 set SDKNAME=TORADEX_CE800
+set PROCESSOR=arm
 
-cmake -DWINCE=TRUE -DCMAKE_SYSTEM_NAME=WindowsCE -DCMAKE_SYSTEM_VERSION=8.0 -DCMAKE_SYSTEM_PROCESSOR=arm -DCMAKE_GENERATOR_TOOLSET=CE800 -DCMAKE_GENERATOR_PLATFORM=%SDKNAME% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Duse_amqp=FALSE -Duse_mqtt=FALSE %build-root%
+cmake -DWINCE=TRUE -DCMAKE_SYSTEM_NAME=WindowsCE -DCMAKE_SYSTEM_VERSION=8.0 -DCMAKE_SYSTEM_PROCESSOR=%PROCESSOR% -DCMAKE_GENERATOR_TOOLSET=CE800 -DCMAKE_GENERATOR_PLATFORM=%SDKNAME% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Duse_amqp=FALSE -Duse_mqtt=FALSE %build-root%
+
 if not %errorlevel%==0 exit /b %errorlevel%
 
 msbuild /m azure_iot_sdks.sln
@@ -138,9 +141,6 @@ call :build-a-solution "%build-root%\serializer\samples\simplesample_http\window
 if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windowsce\remote_monitoring.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
-
-call :build-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windowsce\temp_sensor_anomaly.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
 popd

@@ -117,18 +117,11 @@ extern jmp_buf g_ExceptionJump;
     static const TEST_FUNCTION_DATA STR_CONCAT(TestFunctionData, EXPAND_1(CTEST_INC(__COUNTER__))) = { NULL, NULL, NULL, NULL, CTEST_TEST_FUNCTION }; \
     const TEST_FUNCTION_DATA TestListHead_##testSuiteName = { NULL, NULL, &STR_CONCAT(TestFunctionData, EXPAND_1(CTEST_DEC(CTEST_DEC(__COUNTER__)))), NULL, CTEST_END_SUITE }; \
 
-#ifdef WINCE
-// some macro-magic to bypass Windows CE compiler limitations
 #define CTEST_RUN_TEST_SUITE(testSuiteName, ...) \
 { \
 extern C_LINKAGE TEST_FUNCTION_DATA C2(TestListHead_,FIRST_ARG(testSuiteName)); \
 IF(COUNT_ARG(__VA_ARGS__),__VA_ARGS__ += ,) RunTests(&C2(TestListHead_, FIRST_ARG(testSuiteName)), TOSTRING(FIRST_ARG(testSuiteName))); \
 } //
-#else
-#define CTEST_RUN_TEST_SUITE(testSuiteName, ...) \
-extern C_LINKAGE TEST_FUNCTION_DATA C2(TestListHead_,FIRST_ARG(testSuiteName)); \
-IF(COUNT_ARG(__VA_ARGS__),__VA_ARGS__ += ,) RunTests(&C2(TestListHead_, FIRST_ARG(testSuiteName)), TOSTRING(FIRST_ARG(testSuiteName)))
-#endif
 
 typedef const char* char_ptr;
 typedef void* void_ptr;

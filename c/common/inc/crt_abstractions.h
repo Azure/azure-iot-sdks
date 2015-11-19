@@ -33,6 +33,23 @@ typedef bool _Bool;
 #else
 #include <stdbool.h>
 #endif
+#else 
+/* WINCE does not support bool as C datatype */
+#define __bool_true_false_are_defined	1
+
+#define HAS_STDBOOL
+
+#define _Bool bool
+
+#ifdef __cplusplus
+#define _CSTDBOOL_
+#else
+typedef unsigned char bool;
+
+#define false	0
+#define true	1
+
+#endif
 #endif
 #else
 #if defined __STDC_VERSION__

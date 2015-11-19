@@ -51,6 +51,7 @@ int CALLBACK SSLValidateCertHook( DWORD  dwType, LPVOID pvArg,
 	PCCERT_CONTEXT pCertInStore = NULL, pCertPassed = NULL, pPrevCertContext = NULL;
 	const LPCTSTR SystemStore[] = { _T("CA"), _T("ROOT"), _T("MY") };
 	unsigned int i;
+  int retcode=SSL_ERR_NO_CERT;
 
 	//The only thing we can handle
 	if (dwType != SSL_CERT_X509)
@@ -85,23 +86,19 @@ int CALLBACK SSLValidateCertHook( DWORD  dwType, LPVOID pvArg,
 
 			if (pCertInStore)
 			{
-				//It's enough if we have a certificate from te same issuer
+				//It's enough if we have a certificate from the same issuer
 				if (g_SslOptions == SSL_OPT_ISSUER_CHECK)
 				{
-					CertFreeCertificateContext(pCertInStore);
-					CertCloseStore(hCertStore, 0);
-					CertFreeCertificateContext(pCertPassed);
-					return SSL_ERR_OKAY;
+					retcode=SSL_ERR_OKAY;
+          break;
 				}
 				else if (g_SslOptions == SSL_OPT_STRICT_CHECK)
 				{
 					//Compare (exact match) the certificate with the one we have found
 					if (CertCompareCertificate(X509_ASN_ENCODING, pCertInStore->pCertInfo, pCertPassed->pCertInfo))
 					{
-						CertFreeCertificateContext(pCertInStore);
-						CertCloseStore(hCertStore, 0);
-						CertFreeCertificateContext(pCertPassed);
-						return SSL_ERR_OKAY;
+  					retcode=SSL_ERR_OKAY;
+            break;
 					}
 				}
 			}
@@ -110,18 +107,17 @@ int CALLBACK SSLValidateCertHook( DWORD  dwType, LPVOID pvArg,
 		} while (pCertInStore);
 
 		CertCloseStore(hCertStore, 0);
+    
+    if (retcode!=SSL_ERR_NO_CERT)
+      break;
 	}
 
 	if (pCertInStore)
 		CertFreeCertificateContext(pCertInStore);
 
-	if (hCertStore)
-		CertCloseStore(hCertStore, 0);
+	CertFreeCertificateContext(pCertPassed);
 
-	if (pCertPassed)
-		CertFreeCertificateContext(pCertPassed);
-
-	return SSL_ERR_NO_CERT;
+	return retcode;
 }
 
 // Initializes SSL layer, called only once on initialization
