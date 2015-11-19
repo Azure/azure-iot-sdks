@@ -143,38 +143,12 @@ else if (command === 'list') {
   });
 }
 else if (command === 'create') {
-  if (!arg1) inputError('No device information given');
-  var info;
-  try {
-    // 'create' command expects either deviceId or JSON device description
-    info = (arg1.charAt(0) !== '{') ? { "deviceId": arg1 } : JSON.parse(arg1);
-  }
-  catch(e) {
-    if (e instanceof SyntaxError) inputError('Device information isn\'t valid JSON');
-    else throw e;
-  }
-
-  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
-  registry.create(info, function (err, device) {
-    if (err) serviceError(err);
-    else {
-      if (!parsed.raw) {
-        console.log(colorsTmpl('\n{green}Created device ' + arg1 + '{/green}'));
-      }
-      printDevice(device);
-    }
-  });
+  createDevice(arg1);
 }
 else if (command === 'import'){
   if(!arg1) inputError('Import file not specified');
-  console.log(colorsTmpl('\n{green}Check if import file exists{/green}'));
   
-  if(fs.existsSync(arg1))
-  {
-    console.log(colorsTmpl('\n{green}Import file exists{/green}'));
-  }
-  else
-  {
+  if(!fs.existsSync(arg1)) {
     inputError("Import file does not exist");
   }
   
@@ -297,10 +271,19 @@ else {
   usage();
 }
 
-function createDevice(deviceId){
-  //info = (arg1.charAt(0) !== '{') ? { "deviceId": arg1 } : JSON.parse(arg1);
-    var info = { "deviceId": deviceId };
-    console.log(info);
+function createDevice(device){
+    if(!device) inputError('No device information given');
+
+    var info;
+    try{
+      // 'create' command expects either deviceId or JSON device description
+      info = (device.charAt(0) !== '{') ? { "deviceId": device } : JSON.parse(device);
+    }
+    catch(e) {
+      if (e instanceof SyntaxError) inputError('Device information isn\'t valid JSON');
+      else throw e;
+    }
+    
     var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
     registry.create(info, function (err, device) {
     if (err) serviceError(err);
