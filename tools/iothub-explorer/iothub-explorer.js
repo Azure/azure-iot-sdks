@@ -143,27 +143,23 @@ else if (command === 'list') {
   });
 }
 else if (command === 'create') {
-  if (!arg1) inputError('No device information given');
-  var info;
-  try {
-    // 'create' command expects either deviceId or JSON device description
-    info = (arg1.charAt(0) !== '{') ? { "deviceId": arg1 } : JSON.parse(arg1);
+  createDevice(arg1);
+}
+else if (command === 'import'){
+  if(!arg1) inputError('Import file not specified');
+  
+  if(!fs.existsSync(arg1)) {
+    inputError("Import file does not exist");
   }
-  catch(e) {
-    if (e instanceof SyntaxError) inputError('Device information isn\'t valid JSON');
-    else throw e;
+  
+  var data = fs.readFileSync(arg1, 'utf-8');
+  
+  var deviceIds = data.split('\n');
+  
+  for(var i=0; i<deviceIds.length; i++){
+    var deviceId = deviceIds[i].replace('\r','');
+    createDevice(deviceId);
   }
-
-  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
-  registry.create(info, function (err, device) {
-    if (err) serviceError(err);
-    else {
-      if (!parsed.raw) {
-        console.log(colorsTmpl('\n{green}Created device ' + arg1 + '{/green}'));
-      }
-      printDevice(device);
-    }
-  });
 }
 else if (command === 'get') {
   if (!arg1) inputError('No device ID given');
@@ -273,6 +269,31 @@ else if (command === 'receive') {
 else {
   inputError('\'' + command + '\' is not a valid command');
   usage();
+}
+
+function createDevice(device){
+    if(!device) inputError('No device information given');
+
+    var info;
+    try{
+      // 'create' command expects either deviceId or JSON device description
+      info = (device.charAt(0) !== '{') ? { "deviceId": device } : JSON.parse(device);
+    }
+    catch(e) {
+      if (e instanceof SyntaxError) inputError('Device information isn\'t valid JSON');
+      else throw e;
+    }
+    
+    var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
+    registry.create(info, function (err, device) {
+    if (err) serviceError(err);
+    else {
+      if (!parsed.raw) {
+        console.log(colorsTmpl('\n{green}Created device ' + deviceId + '{/green}'));
+      }
+      printDevice(device);
+    }
+  });
 }
 
 function inputError(message) {
@@ -387,6 +408,9 @@ function usage() {
     '  {green}iothub-explorer{/green} {white}[<connection-string>] create <device-id|device-json> [--display="<property>,..."] [--connection-string]{/white}',
     '    {grey}Adds the given device to the IoT Hub and displays information about it',
     '    Can optionally display just the selected properties and/or the connection string.{/grey}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] import <filepath> [--display="<property>,..."] [--connection-string]{/white}',
+    '    {grey}Adds the devices specified in the file to the IoT Hub and displays information about them',
+    '    Can optionally display just the selected properties and/or the connection string of each device.{/grey}',
     '  {green}iothub-explorer{/green} {white}[<connection-string>] delete <device-id>{/white}',
     '    {grey}Deletes the given device from the IoT Hub.{/grey}',
     '  {green}iothub-explorer{/green} {white}<connection-string> monitor-events <device-id>{/white}',
