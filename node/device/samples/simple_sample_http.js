@@ -7,7 +7,7 @@ var device = require('azure-iot-device');
 
 var connectionString = '[IoT Hub device connection string]';
 
-var client = new device.Client.fromConnectionString(connectionString);
+var client = device.Client.fromConnectionString(connectionString);
 
 // Create a message and send it to the IoT hub every second
 setInterval(function () {
