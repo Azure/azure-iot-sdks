@@ -133,6 +133,14 @@ This section walks you through building, deploying and validating the IoT Client
 
         Use equivalent commands on the target OS
 
+    ***Note:*** *this setup process requires cmake version 3.0 or higher.* 
+    
+    *You can verify the current version installed in your environment using the  following command.*
+
+        cmake --version
+
+    *For information about how to upgrade your version of cmake to 3.2 on Ubuntu 14.04, see <http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04>.*
+    
 -   Download the SDK to the board by issuing the following command in PuTTY:
 
         git clone https://github.com/Azure/azure-iot-sdks.git
@@ -253,9 +261,11 @@ section. These will be needed in [Step 4](#Step-4-2:-Share)
     by sample test.
 
     **If using AMQP protocol:**
+    
     ![SampleAMQP\_result\_DeviceExplorer](images/3_3_1_04.png)
 
     **If using HTTP protocol:**
+    
     ![SampleHTTP\_result\_DeviceExplorer](images/3_3_1_05.png)
 
 ### 3.3.2 Receive messages from IoT Hub
