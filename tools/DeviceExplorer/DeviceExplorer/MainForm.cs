@@ -4,7 +4,6 @@ using Microsoft.Azure.Devices.Common.Security;
 using Microsoft.ServiceBus.Messaging;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -754,19 +753,6 @@ namespace DeviceExplorer
             {
                 StopMonitoringFeedback();
             }
-        }
-
-        private void importDevicesButton_Click(object sender, EventArgs e)
-        {
-            var importForm = new ImportDevicesForm(activeIoTHubConnectionString);
-
-            importForm.DeviceImported += ImportForm_DeviceImported;
-            importForm.ShowDialog();
-        }
-
-        private void ImportForm_DeviceImported(object sender, EventArgs e)
-        {
-            UpdateListOfDevices();
         }
     }
 }
