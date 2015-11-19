@@ -54,7 +54,7 @@ As part of the sign up process, you will receive the connection string.
 <a name="Step_2"/>
 # Step 2: Register Device
 
-In this section, you will register your device using Device Explorer. The Device Explorer is a Windows application that interfaces with Azure IoT Hub and can perform the following operations:
+In this section, you will register your device using DeviceExplorer. The DeviceExplorer is a Windows application that interfaces with Azure IoT Hub and can perform the following operations:
 
 -   Device management
     -   Create new devices
@@ -64,13 +64,13 @@ In this section, you will register your device using Device Explorer. The Device
 -   Monitoring events from your device
 -   Sending messages to your device
 
-To run Device Explorer tool, use following configuration string as described in [Step1](#Step_1):
+To run DeviceExplorer tool, use following configuration string as described in [Step1](#Step_1):
 
 -   IoT Hub Connection String
     
 
 **Steps:**
-1.  Click [here](<https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) to download and install Device Explorer
+1.  Click [here](<https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) to download and install DeviceExplorer.
 
 2.  Add connection information under the Configuration tab and click the **Update** button.
 
@@ -78,13 +78,11 @@ To run Device Explorer tool, use following configuration string as described in 
 
     a. Click the **Management** tab.
 
-    b. Click **List** button to call the device hub and retrieve a list
-    of devices. If this is your first time, then you shouldn't
-    retrieve anything.
+    b. Your registered devices will be visible in the list. In case your device is not there in the list, click **Refresh** button. If this is your first time, then you shouldn't retrieve anything.
 
     c. Click **Create** button to create a device ID and key.
 
-    d. Once created successfully, device will be listed in device explorer.
+    d. Once created successfully, device will be listed in DeviceExplorer.
 
     e. Right click the device and from context menu select "**Copy connection
     string for selected device**".
@@ -115,11 +113,11 @@ section. These will be needed in [Step 4](#Step_4_2).*
 <a name="Step_3_2_1"/>
 ### 3.2.1 Send Device Events to IoT Hub
 
-1.  Launch the Device Explorer as explained in [Step 2](#Step_2) and navigate to **Data** tab. Select the device name you created from the drop-down list of device IDs and click **Monitor** button.
+1.  Launch the DeviceExplorer as explained in [Step 2](#Step_2) and navigate to **Data** tab. Select the device name you created from the drop-down list of device IDs and click **Monitor** button.
 
     ![DeviceExplorer\_Monitor](images/3_2_1_01.png)
 
-2.  Device Explorer is now monitoring data sent from the selected device to the IoT Hub.
+2.  DeviceExplorer is now monitoring data sent from the selected device to the IoT Hub.
 
 3.  Use simple sample created after porting client libraries to send device events to IoT Hub.
 
@@ -127,7 +125,7 @@ section. These will be needed in [Step 4](#Step_4_2).*
 ### 3.2.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your device,
-    go to the **Messages to Device** tab in Device Explorer.
+    go to the **Messages to Device** tab in DeviceExplorer.
 
 2.  Select the device you created using Device ID drop down.
 
