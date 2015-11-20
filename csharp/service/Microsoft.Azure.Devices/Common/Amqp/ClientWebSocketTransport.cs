@@ -16,6 +16,7 @@ namespace Microsoft.Azure.Amqp.Transport
     {
         static readonly AsyncCallback onReadComplete = OnReadComplete;
         static readonly AsyncCallback onWriteComplete = OnWriteComplete;
+        static readonly TimeSpan CloseTimeout = TimeSpan.FromSeconds(30);
 
         readonly ClientWebSocket webSocket;
         readonly EndPoint localEndPoint;
@@ -25,7 +26,7 @@ namespace Microsoft.Azure.Amqp.Transport
         bool disposed;
 
         public ClientWebSocketTransport(ClientWebSocket webSocket, string iotHubName, EndPoint localEndpoint, EndPoint remoteEndpoint)
-            : base("serverwebsocket")
+            : base("clientwebsocket")
         {
             this.webSocket = webSocket;
             this.iotHubName = iotHubName;
@@ -179,7 +180,7 @@ namespace Microsoft.Azure.Amqp.Transport
             var webSocketState = this.webSocket.State;
             if (webSocketState != WebSocketState.Closed && webSocketState != WebSocketState.Aborted)
             {
-                this.CloseInternalAsync(TimeSpan.FromSeconds(30)).Fork();
+                this.CloseInternalAsync(CloseTimeout).Fork();
             }
 
             return true;
@@ -294,7 +295,7 @@ namespace Microsoft.Azure.Amqp.Transport
         static bool WriteTaskDone(Task taskResult, TransportAsyncCallbackArgs args)
         {
             IAsyncResult result = taskResult;
-            args.BytesTransfered = 0;
+            args.BytesTransfered = 0; // reset bytes transferred
             if (taskResult.IsFaulted)
             {
                 args.Exception = taskResult.Exception;
@@ -322,12 +323,8 @@ namespace Microsoft.Azure.Amqp.Transport
                 return;
             }
 
-            if (webSocketState == WebSocketState.Aborted)
-            {
-                throw new ObjectDisposedException(this.GetType().Name);
-            }
-
-            if (webSocketState == WebSocketState.Closed ||
+            if (webSocketState == WebSocketState.Aborted ||
+                webSocketState == WebSocketState.Closed ||
                 webSocketState == WebSocketState.CloseReceived ||
                 webSocketState == WebSocketState.CloseSent)
             {

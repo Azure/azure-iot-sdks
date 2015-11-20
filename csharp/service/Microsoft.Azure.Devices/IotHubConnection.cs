@@ -183,16 +183,35 @@ namespace Microsoft.Azure.Devices
             var amqpSettings = this.CreateAmqpSettings();
             var tlsTransportSettings = this.CreateTlsTransportSettings();
 
-            //var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
-            //var transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
+            var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
+            TransportBase transport;
+            try
+            {
+                transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
+            }
+            catch (Exception e)
+            {
+                if (Fx.IsFatal(e))
+                {
+                    throw;
+                }
 
-            Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
-            var websocket = CreateClientWebSocket(websocketUri);
-            var transport = new ClientWebSocketTransport(
-                websocket,
-                this.connectionString.IotHubName,
-                null,
-                null);
+                // Amqp transport over TCP failed. Retry Amqp transport over WebSocket
+                if (timeoutHelper.RemainingTime() != TimeSpan.Zero)
+                {
+                    Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
+                    var websocket = await this.CreateClientWebSocket(websocketUri, timeoutHelper.RemainingTime());
+                    transport = new ClientWebSocketTransport(
+                        websocket,
+                        this.connectionString.IotHubName,
+                        null,
+                        null);
+                }
+                else
+                {
+                    throw e;
+                }
+            }
 
             AmqpConnectionSettings amqpConnectionSettings = new AmqpConnectionSettings()
             {
@@ -224,12 +243,12 @@ namespace Microsoft.Azure.Devices
             amqpSession.Connection.SafeClose();
         }
 
-        ClientWebSocket CreateClientWebSocket(Uri websocketUri)
+        async Task<ClientWebSocket> CreateClientWebSocket(Uri websocketUri, TimeSpan timeout)
         {
             var websocket = new ClientWebSocket();
 
-            // Set SubProtocol to AMQPWS10
-            websocket.Options.AddSubProtocol(WebSocketConstants.SubProtocols.Amqp10);
+            // Set SubProtocol to AMQPWSB10
+            websocket.Options.AddSubProtocol(WebSocketConstants.SubProtocols.Amqpwsb10);
 
             // Check if we're configured to use a proxy server
             IWebProxy webProxy = WebRequest.DefaultWebProxy;
@@ -242,7 +261,10 @@ namespace Microsoft.Azure.Devices
 
             websocket.Options.UseDefaultCredentials = true;
 
-            websocket.ConnectAsync(websocketUri, CancellationToken.None).Wait(CancellationToken.None);  //TODO: Add a timeout
+            using (var cancellationTokenSource = new CancellationTokenSource(timeout))
+            {
+                await websocket.ConnectAsync(websocketUri, cancellationTokenSource.Token);
+            }
 
             return websocket;
         }

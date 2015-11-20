@@ -11,7 +11,7 @@ namespace Microsoft.Azure.Amqp.Transport
 
         internal static class SubProtocols
         {
-            public const string Amqp10 = "AMQPWSB10";
+            public const string Amqpwsb10 = "AMQPWSB10";
         }
     }
 }
