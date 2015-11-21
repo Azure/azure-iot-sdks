@@ -98,7 +98,11 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString)
         {
+#if WINDOWS_UWP && !NETMF
+            return CreateFromConnectionString(connectionString, TransportType.Http1);
+#else
             return CreateFromConnectionString(connectionString, TransportType.Amqp);
+#endif
         }
 
         /// <summary>
@@ -137,7 +141,7 @@ namespace Microsoft.Azure.Devices.Client
             var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
             if (transportType == TransportType.Amqp)
             {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || NETMF
                 throw new NotImplementedException();
 #else
                 //return new DeviceClient(new AmqpDeviceClient(iotHubConnectionString));
