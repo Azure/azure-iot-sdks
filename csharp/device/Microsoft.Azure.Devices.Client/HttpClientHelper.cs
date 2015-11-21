@@ -116,7 +116,7 @@ namespace Microsoft.Azure.Devices.Client
                     var webResponse = webRequest.GetResponse() as HttpWebResponse;
 
                     // message received
-                    return ReadResponseMessageAsync(webResponse);
+                    return webResponse;
                 }
             }
             else
@@ -201,33 +201,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if NETMF
-        static HttpWebResponse ReadResponseMessageAsync(HttpWebResponse message)
-        {
-            // TODO
-            // unclear what is the purpose of this method and how to implement it
-            return message;
-            //// T entity = message.Content.ReadAsAsync<T>(token);
-
-            // // Etag in the header is considered authoritative
-            // var eTagHolder = entity as IETagHolder;
-            // if (eTagHolder != null)
-            // {
-            //     if (message.Headers.GetValues("ETag") != null)
-            //     {
-            //         var etagValue = message.Headers.GetValues("ETag");
-
-            //         if (etagValue.Length == 1 && !etagValue[0].IsNullOrWhiteSpace())
-            //         {
-            //             // RDBug 3429280:Make the version field of Device object internal
-            //             eTagHolder.ETag = etagValue[0];
-            //         }
-            //     }
-            // }
-
-            // return entity;
-        }
-#else
+#if !NETMF
         static async Task<T> ReadResponseMessageAsync<T>(HttpResponseMessage message, CancellationToken token)
         {
             if (typeof(T) == typeof (HttpResponseMessage))
