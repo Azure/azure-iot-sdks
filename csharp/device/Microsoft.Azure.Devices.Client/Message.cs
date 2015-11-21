@@ -4,16 +4,22 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Threading;
-#if WINDOWS_UWP
+#if WINDOWS_UWP && !NETMF
     using Windows.Storage.Streams;
-#else
+#elif !NETMF
     using Microsoft.Azure.Amqp;
 #endif
+
+#if NETMF
+    using System.Collections;
+#else
     using Microsoft.Azure.Devices.Client.Common.Api;
+    using System.Collections.Generic;
+#endif
     using Microsoft.Azure.Devices.Client.Exceptions;
+    using Microsoft.Azure.Devices.Client.Extensions;
 
     // TODO: can we use DateTimeOffset for WinRT as well? With conversion to local time?
 #if WINDOWS_UWP
@@ -26,18 +32,30 @@ namespace Microsoft.Azure.Devices.Client
     /// The data structure represent the message that is used for interacting with IotHub.
     /// </summary>
     public sealed class Message :
-#if !WINDOWS_UWP
-        IDisposable,
-#endif
+#if !WINDOWS_UWP && !NETMF
+        IDisposable, IReadOnlyIndicator
+#elif NETMF
+        IDisposable
+#elif WINDOWS_UWP
         IReadOnlyIndicator
+#endif
     {
         readonly object messageLock = new object();
+#if NETMF
+        Stream bodyStream;
+#else
         volatile Stream bodyStream;
+#endif
         bool disposed;
         bool ownsBodyStream;
         int getBodyCalled;
+#if NETMF
+        int sizeInBytesCalled;
+#else
         long sizeInBytesCalled;
-#if !WINDOWS_UWP
+#endif
+
+#if !WINDOWS_UWP && !NETMF
         AmqpMessage serializedAmqpMessage;
 #endif
 
@@ -46,11 +64,17 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public Message()
         {
+#if NETMF
+            this.Properties = new Hashtable();
+            this.SystemProperties = new Hashtable();
+            //this.serializedAmqpMessage = null;
+#else
             this.Properties = new ReadOnlyDictionary45<string, string>(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), this);
             this.SystemProperties = new ReadOnlyDictionary45<string, object>(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase), this);
             this.InitializeWithStream(Stream.Null, true);
 #if !WINDOWS_UWP
             this.serializedAmqpMessage = null;
+#endif
 #endif
         }
 
@@ -81,13 +105,19 @@ namespace Microsoft.Azure.Devices.Client
         /// form the body stream</param>
         /// <remarks>user should treat the input byte array as immutable when
         /// sending the message.</remarks>
+#if NETMF
+        public Message(byte[] byteArray)
+            : this(new MemoryStream(byteArray))
+#else
         public Message([System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute] byte[] byteArray)
             : this(new MemoryStream(byteArray))
+#endif
         {
             // reset the owning of the steams
             this.ownsBodyStream = true;
         }
-#if !WINDOWS_UWP
+
+#if !WINDOWS_UWP && !NETMF
         /// <summary>
         /// This constructor is only used in the receive path from Amqp path, 
         /// or in Cloning from a Message that has serialized.
@@ -128,7 +158,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             get
             {
+#if NETMF
+                return (this.GetSystemProperty(MessageSystemPropertyNames.MessageId)) as string;
+#else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.MessageId);
+#endif
             }
 
             set
@@ -144,7 +178,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             get
             {
+#if NETMF
+                return (string)(this.GetSystemProperty(MessageSystemPropertyNames.To) ?? string.Empty);
+#else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.To);
+#endif
             }
 
             set
@@ -160,7 +198,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             get
             {
+#if NETMF
+                return (DateTime)(this.GetSystemProperty(MessageSystemPropertyNames.ExpiryTimeUtc) ?? DateTime.MinValue);
+#else
                 return this.GetSystemProperty<DateTimeT>(MessageSystemPropertyNames.ExpiryTimeUtc);
+#endif
             }
 
             internal set
@@ -176,7 +218,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             get
             {
+#if NETMF
+                return (string)(this.GetSystemProperty(MessageSystemPropertyNames.CorrelationId) ?? string.Empty);
+#else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.CorrelationId);
+#endif
             }
 
             set
@@ -192,9 +238,12 @@ namespace Microsoft.Azure.Devices.Client
         {
             get
             {
+#if NETMF
+                string deliveryAckAsString = (string)(this.GetSystemProperty(MessageSystemPropertyNames.Ack) ?? string.Empty);
+#else
                 string deliveryAckAsString = this.GetSystemProperty<string>(MessageSystemPropertyNames.Ack);
-
-                if (!string.IsNullOrWhiteSpace(deliveryAckAsString))
+#endif
+                if (!deliveryAckAsString.IsNullOrWhiteSpace())
                 {
                     switch (deliveryAckAsString)
                     {
@@ -246,12 +295,16 @@ namespace Microsoft.Azure.Devices.Client
         {
             get
             {
+#if NETMF
+                return (ulong)(this.GetSystemProperty(MessageSystemPropertyNames.SequenceNumber) ?? 0);
+#else
                 return this.GetSystemProperty<ulong>(MessageSystemPropertyNames.SequenceNumber);                
+#endif
             }
 
             internal set
             {
-                this.SystemProperties[MessageSystemPropertyNames.SequenceNumber] =  value;
+                this.SystemProperties[MessageSystemPropertyNames.SequenceNumber] = value;
             }
         }
 
@@ -262,7 +315,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             get
             {
+#if NETMF
+                return (string)(this.GetSystemProperty(MessageSystemPropertyNames.LockToken) ?? string.Empty);
+#else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.LockToken);
+#endif
             }
 
             internal set
@@ -278,7 +335,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             get
             {
+#if NETMF
+                return (DateTime)(this.GetSystemProperty(MessageSystemPropertyNames.EnqueuedTime) ?? DateTime.MinValue);
+#else
                 return this.GetSystemProperty<DateTimeT>(MessageSystemPropertyNames.EnqueuedTime);
+#endif
             }
 
             internal set
@@ -294,7 +355,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             get
             {
+#if NETMF
+                return (byte)(this.GetSystemProperty(MessageSystemPropertyNames.DeliveryCount) ?? 0);
+#else
                 return this.GetSystemProperty<byte>(MessageSystemPropertyNames.DeliveryCount);
+#endif
             }
 
             internal set
@@ -311,7 +376,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             get
             {
+#if NETMF
+                return (string)(this.GetSystemProperty(MessageSystemPropertyNames.UserId) ?? string.Empty);
+#else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.UserId);
+#endif
             }
 
             set
@@ -323,13 +392,22 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Gets the dictionary of user properties which are set when user send the data.
         /// </summary>
-        public IDictionary<string, string> Properties { get; private set; }
+#if NETMF
+        public Hashtable Properties { get; private set; }
+#else
+         public IDictionary<string, string> Properties { get; private set; }
+#endif
 
         /// <summary>
         /// Gets the dictionary of system properties which are managed internally.
         /// </summary>
+#if NETMF
+        internal Hashtable SystemProperties { get; private set; }
+#else
         internal IDictionary<string, object> SystemProperties { get; private set; }
+#endif
 
+#if !NETMF
         bool IReadOnlyIndicator.IsReadOnly
         {
             get
@@ -337,6 +415,7 @@ namespace Microsoft.Azure.Devices.Client
                 return Interlocked.Read(ref this.sizeInBytesCalled) == 1;
             }
         }
+#endif
 
 #if !WINDOWS_UWP
         public
@@ -349,7 +428,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !NETMF
         internal AmqpMessage SerializedAmqpMessage
         {
             get
@@ -361,11 +440,13 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 #endif
+
+#if !NETMF
         /// <summary>
         /// Gets or sets the deliveryTag which is used for server side checkpointing.
         /// </summary>
         internal ArraySegment<byte> DeliveryTag { get; set; }
-
+#endif
         /// <summary>
         /// Makes a clone of the current event data instance.
         /// </summary>
@@ -374,7 +455,7 @@ namespace Microsoft.Azure.Devices.Client
         public Message Clone()
         {
             this.ThrowIfDisposed();
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !NETMF
             if (this.serializedAmqpMessage != null)
             {
                 return new Message(this.serializedAmqpMessage);
@@ -390,6 +471,17 @@ namespace Microsoft.Azure.Devices.Client
                 };
             }
 
+#if NETMF
+            foreach (var systemProperty in this.SystemProperties.Keys)
+            {
+                message.SystemProperties[systemProperty] = this.SystemProperties[systemProperty];
+            }
+
+            foreach (var property in this.Properties.Keys)
+            {
+                message.Properties.Add(property, this.Properties[property]);
+            }
+#else
             foreach (var systemProperty in this.SystemProperties)
             {
                 // MessageId would already be there.
@@ -407,6 +499,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 message.Properties.Add(property);
             }
+#endif
 
             return message;
         }
@@ -436,9 +529,14 @@ namespace Microsoft.Azure.Devices.Client
                 return this.bodyStream;
             }
 
+#if NETMF
+            return null;
+#else
             return Stream.Null;
+#endif
         }
 #endif
+
         /// <summary>
         /// This methods return the body stream as a byte array
         /// </summary>
@@ -454,7 +552,7 @@ namespace Microsoft.Azure.Devices.Client
                 return new byte[] { };
             }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !NETMF
             BufferListStream listStream;
             if ((listStream = this.bodyStream as BufferListStream) != null)
             {
@@ -469,7 +567,7 @@ namespace Microsoft.Azure.Devices.Client
             return ReadFullStream(this.bodyStream);
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !NETMF
         internal AmqpMessage ToAmqpMessage(bool setBodyCalled = true)
         {
             this.ThrowIfDisposed();
@@ -515,7 +613,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (1 == Interlocked.Exchange(ref this.getBodyCalled, 1))
             {
+#if NETMF
+                throw new InvalidOperationException();
+#else
                 throw Fx.Exception.AsError(new InvalidOperationException(ApiResources.MessageBodyConsumed));
+#endif
             }
         }
 
@@ -534,11 +636,20 @@ namespace Microsoft.Azure.Devices.Client
 
         static byte[] ReadFullStream(Stream inputStream)
         {
+#if NETMF
+            inputStream.Position = 0;
+            byte[] buffer = new byte[inputStream.Length];
+
+            inputStream.Read(buffer, 0, (int)inputStream.Length);
+
+            return buffer;
+#else
             using (var ms = new MemoryStream())
             {
                 inputStream.CopyTo(ms);
                 return ms.ToArray();
             }
+#endif
         }
 
         static Stream CloneStream(Stream originalStream)
@@ -549,7 +660,9 @@ namespace Microsoft.Azure.Devices.Client
                 if ((memoryStream = originalStream as MemoryStream) != null)
                 {
                     // Note: memoryStream.GetBuffer() doesn't work
+#if !NETMF
                     return new MemoryStream(memoryStream.ToArray(), 0, (int)memoryStream.Length, false, true);
+#endif
                 }
 #if !WINDOWS_UWP
                 ICloneable cloneable;
@@ -562,16 +675,23 @@ namespace Microsoft.Azure.Devices.Client
                 if (originalStream.Length == 0)
                 {
                     // This can happen in Stream.Null
+#if NETMF
+                    return null;
+                }
+
+                throw new Exception("Does not support cloning of Stream Type: " + originalStream.GetType());
+#else
                     return Stream.Null;
                 }
 
                 throw Fx.AssertAndThrow("Does not support cloning of Stream Type: " + originalStream.GetType());
+#endif
             }
 
             return null;
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !NETMF
         AmqpMessage PopulateAmqpMessageForSend(AmqpMessage message)
         {
             MessageConverter.UpdateAmqpMessageHeadersAndProperties(message, this);
@@ -579,6 +699,13 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
+#if NETMF
+        object GetSystemProperty(string key)
+        {
+            // .NetMF doesn't have generics so we have to resort to look for the key and return the object inside. The caller will have to figure out how to handle it
+            return this.SystemProperties[key];
+        }
+#else
         T GetSystemProperty<T>(string key)
         {
             if (this.SystemProperties.ContainsKey(key))
@@ -588,12 +715,17 @@ namespace Microsoft.Azure.Devices.Client
 
             return default(T);
         }
+#endif
 
         void ThrowIfDisposed()
         {
             if (this.disposed)
             {
+#if NETMF
+                throw new Exception("Message disposed");
+#else
                 throw Fx.Exception.ObjectDisposed(ApiResources.MessageDisposed);
+#endif
             }
         }
 
@@ -603,7 +735,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 if (disposing)
                 {
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !NETMF
                     if (this.serializedAmqpMessage != null)
                     {
                         // in the receive scenario, this.bodyStream is a reference

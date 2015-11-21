@@ -4,7 +4,8 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
-
+    using Microsoft.Azure.Devices.Client.Extensions;
+    
     /// <summary>
     /// Authentication method that uses the symmetric key associated with the device in the device registry. 
     /// </summary>
@@ -83,22 +84,24 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetKeyFromBase64String(string key)
         {
-            if (string.IsNullOrWhiteSpace(key))
+            if (key.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("key");
             }
 
+#if !NETMF
             if (!StringValidationHelper.IsBase64String(key))
             {
                 throw new ArgumentException("Key must be base64 encoded");
             }
+#endif
 
             this.key = Convert.FromBase64String(key);
         }
 
         void SetDeviceId(string deviceId)
         {
-            if (string.IsNullOrWhiteSpace(deviceId))
+            if (deviceId.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("deviceId");
             }

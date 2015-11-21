@@ -5,19 +5,27 @@ namespace Microsoft.Azure.Devices.Client
 {
     using System;
     using System.Text;
-    using System.Threading.Tasks;
     using System.Net;
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP &&  !NETMF
     using Microsoft.Azure.Amqp;
 #endif
+
+#if !NETMF
+    using System.Threading.Tasks;
+#endif
+
     using Microsoft.Azure.Devices.Client.Extensions;
 
     sealed class IotHubConnectionString : IAuthorizationHeaderProvider
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP &&  !NETMF
         , ICbsTokenProvider
 #endif
     {
+#if NETMF
+        static readonly TimeSpan DefaultTokenTimeToLive = new TimeSpan(1, 0, 0);
+#else
         static readonly TimeSpan DefaultTokenTimeToLive = TimeSpan.FromHours(1);
+#endif
         const string UserSeparator = "@";
 
         public IotHubConnectionString(IotHubConnectionStringBuilder builder)
@@ -35,10 +43,13 @@ namespace Microsoft.Azure.Devices.Client
             this.DeviceId = builder.DeviceId;
 #if WINDOWS_UWP
             this.HttpsEndpoint = new UriBuilder("https", builder.HostName).Uri;
-#else
+#elif !NETMF
             this.HttpsEndpoint = new UriBuilder(Uri.UriSchemeHttps, builder.HostName).Uri;
+#elif NETMF
+            this.HttpsEndpoint = new Uri("https://" + builder.HostName);
 #endif
-#if !WINDOWS_UWP
+
+#if !WINDOWS_UWP && !NETMF
             this.AmqpEndpoint = new UriBuilder(CommonConstants.AmqpsScheme, builder.HostName, AmqpConstants.DefaultSecurePort).Uri;
 #endif
         }
@@ -67,8 +78,14 @@ namespace Microsoft.Azure.Devices.Client
             private set;
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !NETMF
         public Uri AmqpEndpoint
+        {
+            get;
+            private set;
+        }
+#elif NETMF
+        public string AmqpEndpoint
         {
             get;
             private set;
@@ -97,10 +114,22 @@ namespace Microsoft.Azure.Devices.Client
             private set;
         }
 
+        public string GetUser()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append(this.SharedAccessKeyName ?? WebUtility.UrlEncode(this.DeviceId));
+            stringBuilder.Append(UserSeparator);
+            stringBuilder.Append("sas.");
+            stringBuilder.Append(this.SharedAccessKeyName == null ? "" : "root.");
+            stringBuilder.Append(this.IotHubName);
+
+            return stringBuilder.ToString();
+        }
+
         public string GetPassword()
         {
             string password;
-            if (string.IsNullOrWhiteSpace(this.SharedAccessSignature))
+            if (this.SharedAccessSignature.IsNullOrWhiteSpace())
             {
                 TimeSpan timeToLive;
                 password = this.BuildToken(out timeToLive);
@@ -118,7 +147,7 @@ namespace Microsoft.Azure.Devices.Client
             return this.GetPassword();
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !NETMF
         Task<CbsToken> ICbsTokenProvider.GetTokenAsync(Uri namespaceAddress, string appliesTo, string[] requiredClaims)
         {
             string tokenValue;
@@ -137,10 +166,12 @@ namespace Microsoft.Azure.Devices.Client
 
             return Task.FromResult(token);
         }
+#elif NETMF
+
 #endif
         public Uri BuildLinkAddress(string path)
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || NETMF
             throw new NotImplementedException();
 #else
             var builder = new UriBuilder(this.AmqpEndpoint)
@@ -168,7 +199,11 @@ namespace Microsoft.Azure.Devices.Client
 
             if (this.SharedAccessKeyName == null)
             {
+#if NETMF
+                builder.Target = this.Audience + "/devices/" + WebUtility.UrlEncode(this.DeviceId);
+#else
                 builder.Target = "{0}/devices/{1}".FormatInvariant(this.Audience, WebUtility.UrlEncode(this.DeviceId));
+#endif
             }
             else
             {
