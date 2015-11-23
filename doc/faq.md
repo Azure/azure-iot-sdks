@@ -7,6 +7,10 @@ This document contains both general FAQs about the Microsoft Azure IoT device SD
 - [Using Visual Studio 2013](#vs2013)
 - [Line-endings in repository zip archive](#lineendings)
 
+**Microsoft Azure IoT device SDK for C**
+
+- [Installing CMake manually](#cmake)
+
 **Microsoft Azure IoT device SDK for .NET FAQs**
 
 - [UWP support for Microsoft.Azure.Devices.Client](#uwpsupport)
@@ -36,6 +40,26 @@ Note: You can download the free Community edition of Visual Studio 2015 [here](h
 ## Line-endings in repository zip archive
 
 If you download a zip archive of this repository to a Windows machine, you may encounter errors when you run some of the scripts. This is due to the way GitHub handles line-endings in zip archives. For more information, see http://stackoverflow.com/questions/17347611/downloading-a-zip-from-github-removes-newlines-from-text-files.
+
+<a name="cmake"/>
+## Installing CMake manually
+
+If your Linux OS does not include CMake 3.0 and it is not possible to use a package installer, you can install CMake as follows:
+
+```
+wget https://cmake.org/files/v3.4/cmake-3.4.0-Linux-i386.sh
+chmod u+x cmake-3.4.0-Linux-i386.sh
+./cmake-3.4.0-Linux-i386.sh --help
+Usage: ./cmake-3.4.0-Linux-i386.sh [options]
+Options: [defaults in brackets after descriptions]
+  --help            print this message
+  --prefix=dir      directory in which to install
+  --include-subdir  include the cmake-3.4.0-Linux-i386 subdirectory
+  --exclude-subdir  exclude the cmake-3.4.0-Linux-i386 subdirectory
+```
+
+Make sure that the directory where you install CMake is on your path by exporting it. Alternatively, if you use the option `--prefix=/usr` when you install CMake it replaces your current installation.
+
 
 <a name="uwpsupport"/>
 ## UWP support for Microsoft.Azure.Devices.Client
