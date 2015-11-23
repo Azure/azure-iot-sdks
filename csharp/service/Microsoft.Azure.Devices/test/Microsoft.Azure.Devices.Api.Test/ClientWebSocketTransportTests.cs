@@ -3,17 +3,17 @@
 
 namespace Microsoft.Azure.Devices.Api.Test
 {
-    using System.Net.WebSockets;
-    using Microsoft.Azure.Amqp;
-    using Microsoft.Azure.Amqp.Transport;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using System;
     using System.Net;
+    using System.Net.WebSockets;
     using System.Threading;
     using System.Threading.Tasks;
-    using Common;
 
-    // These tests can only be run in Administrator mode
+    using Microsoft.Azure.Amqp;
+    using Microsoft.Azure.Amqp.Transport;
+    using Microsoft.Azure.Devices.Common;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
     [TestClass]
     public class ClientWebSocketTransportTests
     {
@@ -67,6 +67,7 @@ namespace Microsoft.Azure.Devices.Api.Test
             clientWebSocketTransport.ReadAsync(args);
         }
 
+        // The following tests can only be run in Administrator mode
         [TestMethod]
         [TestCategory("CIT")]
         [TestCategory("WebSocket")]
