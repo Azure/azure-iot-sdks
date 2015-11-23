@@ -695,9 +695,7 @@ public:
     MOCK_METHOD_END(time_t, 0);
 
     MOCK_STATIC_METHOD_4(, STRING_HANDLE, SASToken_Create, STRING_HANDLE, key, STRING_HANDLE, scope, STRING_HANDLE, keyName, size_t, expiry)
-    MOCK_METHOD_END(STRING_HANDLE, malloc(1));
-
-
+    MOCK_METHOD_END(STRING_HANDLE, (STRING_HANDLE)malloc(1));
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , pn_message_t*, pn_message);

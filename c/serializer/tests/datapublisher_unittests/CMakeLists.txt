@@ -13,11 +13,9 @@ ${theseTestsName}.cpp
 
 set(${theseTestsName}_c_files
 ../../src/datapublisher.c
-
-../../../common/src/gballoc.c
+${SHARED_UTIL_SRC_FOLDER}/gballoc.c
 ${LOCK_C_FILE}
-
-../../../common/src/crt_abstractions.c
+${SHARED_UTIL_SRC_FOLDER}/crt_abstractions.c
 )
 
 set(${theseTestsName}_h_files

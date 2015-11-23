@@ -30,8 +30,10 @@ ENDIF(WIN32)
 
 include_directories(. ${IOTHUB_CLIENT_INC_FOLDER})
 
+link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
+
 add_executable(remote_monitoring ${remote_monitoring_c_files} ${remote_monitoring_h_files})
-target_link_libraries(remote_monitoring serializer iothub_client iothub_client_amqp_transport common)
+target_link_libraries(remote_monitoring serializer iothub_client iothub_client_amqp_transport aziotsharedutil)
 linkProton(remote_monitoring)
 
 if(WIN32)

@@ -20,15 +20,20 @@ IF(WIN32)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
-include_directories(. ${COMMON_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
+include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
+link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
 
 add_executable(temp_sensor_anomaly ${temp_sensor_anomaly_c_files} ${temp_sensor_anomaly_h_files})
 
 target_link_libraries(temp_sensor_anomaly 
 	serializer 
 	iothub_client 
-	iothub_client_http_transport 
-	common
 	iothub_client_http_transport)
 
+if(WIN32)
+	target_link_libraries(temp_sensor_anomaly ${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil.lib)
+else()
+	target_link_libraries(temp_sensor_anomaly aziotsharedutil pthread)
+endif()
+	
 linkHttp(temp_sensor_anomaly)

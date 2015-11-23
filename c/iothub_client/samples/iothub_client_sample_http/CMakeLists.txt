@@ -38,13 +38,12 @@ target_link_libraries(iothub_client_sample_http
 #iothubclient is here only because locking... in gballoc no less.
 	iothub_client
 	iothub_client_http_transport
-	common
-	iothub_client_http_transport
 )
 
 if(WIN32)
+	target_link_libraries(iothub_client_sample_http ${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil.lib)
 else()
-target_link_libraries(iothub_client_sample_http curl)
+	target_link_libraries(iothub_client_sample_http aziotsharedutil pthread)
 endif()
 	
 linkHttp(iothub_client_sample_http)

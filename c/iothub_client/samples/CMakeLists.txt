@@ -4,14 +4,22 @@
 #this is CMakeLists.txt for samples. There's noithig here, except redirections to 
 #individual protocol samples
 
-if(${use_amqp})
-	add_subdirectory(iothub_client_sample_amqp)
-endif()
+function(add_sample_directory whatIsBuilding)
+	add_subdirectory(${whatIsBuilding})
+
+	set_target_properties(${whatIsBuilding}
+			   PROPERTIES
+			   FOLDER "IotHub_Samples")
+endfunction()
 
 if(${use_http})
-	add_subdirectory(iothub_client_sample_http)
+	add_sample_directory(iothub_client_sample_http)
+endif()
+
+if(${use_amqp})
+	add_sample_directory(iothub_client_sample_amqp)
 endif()
 
 if(${use_mqtt})
-	add_subdirectory(iothub_client_sample_mqtt)
+	add_sample_directory(iothub_client_sample_mqtt)
 endif()

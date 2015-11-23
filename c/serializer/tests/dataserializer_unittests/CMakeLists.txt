@@ -13,10 +13,8 @@ ${theseTestsName}.cpp
 
 set(${theseTestsName}_c_files
 ../../src/dataserializer.c
-
-../../../common/src/gballoc.c
+${SHARED_UTIL_SRC_FOLDER}/gballoc.c
 ${LOCK_C_FILE}
-
 )
 
 set(${theseTestsName}_h_files

@@ -12,8 +12,8 @@ set(${theseTestsName}_cpp_files
 )
 
 set(${theseTestsName}_c_files
-	../../../common/src/gballoc.c
-	${LOCK_C_FILE}
+	${SHARED_UTIL_SRC_FOLDER}/gballoc.c
+	${LOCK_C_FILE}	
 )
 
 set(${theseTestsName}_h_files

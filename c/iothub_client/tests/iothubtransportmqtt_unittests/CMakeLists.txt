@@ -17,8 +17,6 @@ ${theseTestsName}.cpp
 
 set(${theseTestsName}_c_files
 ../../src/iothubtransportmqtt.c
-
-../../../common/src/crt_abstractions.c
 )
 
 set(${theseTestsName}_h_files

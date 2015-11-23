@@ -12,11 +12,9 @@ ${theseTestsName}.cpp
 
 set(${theseTestsName}_c_files
 ../../src/codefirst.c
-
-../../../common/src/gballoc.c
+${SHARED_UTIL_SRC_FOLDER}/gballoc.c
 ${LOCK_C_FILE}
-
-../../../common/src/strings.c
+${SHARED_UTIL_SRC_FOLDER}/strings.c
 )
 
 set(${theseTestsName}_h_files

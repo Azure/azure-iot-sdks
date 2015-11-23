@@ -8,7 +8,7 @@ if(NOT (${use_amqp}))
 	message(FATAL_ERROR "iothubclient_amqp_e2etests being generated without AMQP support")
 endif()
 
-compileAsC99()
+compileAsC11()
 set(theseTestsName iothubclient_amqp_e2etests)
 
 set(${theseTestsName}_cpp_files
@@ -25,16 +25,13 @@ include_directories(${IOTHUB_TEST_INC_FOLDER})
 
 build_test_artifacts(${theseTestsName} ON)
 
-
-
-
 if(WIN32)
 	if(TARGET ${theseTestsName}_dll)
 		target_link_libraries(${theseTestsName}_dll
 			iothub_test
 			iothub_client
 			iothub_client_amqp_transport
-			common
+			${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil
 		)
 		linkProton(${theseTestsName}_dll)
 	endif()
@@ -44,7 +41,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_amqp_transport
-			common
+			${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil
 		)
 		linkProton(${theseTestsName}_exe)	
 	endif()
@@ -54,7 +51,7 @@ else()
 			iothub_test
 			iothub_client
 			iothub_client_amqp_transport
-			common
+			aziotsharedutil
 		)
 		target_link_libraries(${theseTestsName}_exe pthread)
 		linkProton(${theseTestsName}_exe)

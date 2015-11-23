@@ -50,22 +50,21 @@ DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUE
 
 namespace BASEIMPLEMENTATION
 {
-#define Lock(x) (LOCK_OK + gballocState - gballocState) /*compiler warning about constant in if condition*/
-#define Unlock(x) (LOCK_OK + gballocState - gballocState)
-#define Lock_Init() (LOCK_HANDLE)0x42
-#define Lock_Deinit(x) (LOCK_OK + gballocState - gballocState)
-#include "gballoc.c"
-#undef Lock
-#undef Unlock
-#undef Lock_Init
-#undef Lock_Deinit
+    #define Lock(x) (LOCK_OK + gballocState - gballocState) /*compiler warning about constant in if condition*/
+    #define Unlock(x) (LOCK_OK + gballocState - gballocState)
+    #define Lock_Init() (LOCK_HANDLE)0x42
+    #define Lock_Deinit(x) (LOCK_OK + gballocState - gballocState)
+    #include "gballoc.c"
+    #undef Lock
+    #undef Unlock
+    #undef Lock_Init
+    #undef Lock_Deinit
 
-#include "doublylinkedlist.c"
-#include "strings.c"
-#include "buffer.c"
-#include "base64.c"
-#include "map.c"
-
+    #include "doublylinkedlist.c"
+    #include "base64.c"
+    #include "strings.c"
+    #include "map.c"
+    #include "buffer.c"
 };
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
@@ -650,7 +649,7 @@ public:
         }
         else
         {
-            result2 = malloc(1);
+            result2 = (HTTP_HEADERS_HANDLE)malloc(1);
         }
     MOCK_METHOD_END(HTTP_HEADERS_HANDLE, result2)
 
@@ -663,7 +662,7 @@ public:
         }
         else
         {
-            result2 = malloc(1);
+            result2 = (HTTP_HEADERS_HANDLE)malloc(1);
         }
     MOCK_METHOD_END(HTTP_HEADERS_HANDLE, result2)
 
@@ -1064,7 +1063,7 @@ public:
     MOCK_METHOD_END(STRING_HANDLE, (((whenShallURL_Encode_String_fail > 0) && (currentURL_Encode_String_call == whenShallURL_Encode_String_fail)) ? (STRING_HANDLE)NULL : BASEIMPLEMENTATION::STRING_construct(textEncode)));
 
     MOCK_STATIC_METHOD_3(, HTTPAPIEX_SAS_HANDLE, HTTPAPIEX_SAS_Create, STRING_HANDLE, key, STRING_HANDLE, uriResource, STRING_HANDLE, keyName)
-    MOCK_METHOD_END(HTTPAPIEX_SAS_HANDLE, malloc(1))
+    MOCK_METHOD_END(HTTPAPIEX_SAS_HANDLE, (HTTPAPIEX_SAS_HANDLE)malloc(1))
 
     MOCK_STATIC_METHOD_1(, void, HTTPAPIEX_SAS_Destroy, HTTPAPIEX_SAS_HANDLE, handle)
         free(handle);

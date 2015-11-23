@@ -37,12 +37,12 @@ add_executable(iothub_client_sample_amqp ${iothub_client_sample_amqp_c_files} ${
 target_link_libraries(iothub_client_sample_amqp
 		iothub_client
 		iothub_client_amqp_transport
-		common
 	)
 	
 if(WIN32)
+	target_link_libraries(iothub_client_sample_amqp ${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil.lib)
 else()
-	target_link_libraries(iothub_client_sample_amqp pthread)
+	target_link_libraries(iothub_client_sample_amqp aziotsharedutil pthread)
 endif()
 
 linkProton(iothub_client_sample_amqp)

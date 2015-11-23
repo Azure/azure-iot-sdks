@@ -34,7 +34,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_http_transport
-			common
+			${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil
 			iothub_client_http_transport
 		)
 		linkProton(${theseTestsName}_dll)
@@ -46,7 +46,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_http_transport
-			common
+			${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil
 			iothub_client_http_transport
 		)
 		linkProton(${theseTestsName}_exe)	
@@ -58,7 +58,7 @@ else()
 			iothub_test
 			iothub_client
 			iothub_client_http_transport
-			common
+			aziotsharedutil
 			iothub_client_http_transport
 		)
 		target_link_libraries(${theseTestsName}_exe pthread)

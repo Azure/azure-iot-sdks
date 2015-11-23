@@ -1224,7 +1224,7 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR))
             .IgnoreArgument(1)
-            .SetReturn((STRING_TOKENIZER_HANDLE)NULL);
+            .SetReturn((STRING_HANDLE)NULL);
 
         ///act
         auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);

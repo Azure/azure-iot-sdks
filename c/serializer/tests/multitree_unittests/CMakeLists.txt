@@ -13,8 +13,7 @@ ${theseTestsName}.cpp
 
 set(${theseTestsName}_c_files
 ../../src/multitree.c
-
-../../../common/src/crt_abstractions.c
+${SHARED_UTIL_SRC_FOLDER}/crt_abstractions.c
 )
 
 set(${theseTestsName}_h_files
