@@ -209,7 +209,7 @@ namespace Microsoft.Azure.Devices
                 }
                 else
                 {
-                    throw e;
+                    throw;
                 }
             }
 
