@@ -14,18 +14,19 @@
     <parent>
         <groupId>com.microsoft.azure.iothub-java-client</groupId>
         <artifactId>iothub-java-client-with-samples</artifactId>
-        <version>1.0.0-preview.4</version>
+        <version>1.0.0-preview.6</version>
     </parent>
     <modules>
         <module>send-event</module>
 		<module>send-serialized-event</module>
         <module>handle-messages</module>
+        <module>send-receive-sample</module>
     </modules>
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.iothub-java-client</groupId>
             <artifactId>iothub-java-client</artifactId>
-            <version>1.0.0-preview.4</version>
+            <version>1.0.0-preview.6</version>
         </dependency>
     </dependencies>
     <build>

@@ -3,41 +3,100 @@
 
 package samples.com.microsoft.azure.iothub;
 
-import com.microsoft.azure.iothub.DeviceClient;
-import com.microsoft.azure.iothub.IotHubClientProtocol;
-import com.microsoft.azure.iothub.Message;
-import com.microsoft.azure.iothub.IotHubStatusCode;
-import com.microsoft.azure.iothub.IotHubEventCallback;
+import com.microsoft.azure.iothub.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.Scanner;
 
-import javax.naming.SizeLimitExceededException;
 
-
-/** Sends a number of event messages to an IoT Hub. */
-public class SendEvent
+/**
+ * Handles messages from an IoT Hub. Default protocol is to use
+ * HTTPS transport.
+ */
+public class SendReceive
 {
-    protected static class EventCallback
-            implements IotHubEventCallback
+    /** Used as a counter in the message callback. */
+    protected static class Counter
     {
-        public void execute(IotHubStatusCode status, Object context)
+        protected int num;
+
+        public Counter(int num)
         {
+            this.num = num;
+        }
+
+        public int get()
+        {
+            return this.num;
+        }
+
+        public void increment()
+        {
+            this.num++;
+        }
+
+        @Override
+        public String toString()
+        {
+            return Integer.toString(this.num);
+        }
+    }
+
+    protected static class MessageCallback
+            implements com.microsoft.azure.iothub.MessageCallback
+    {
+        public IotHubMessageResult execute(Message msg,
+                Object context)
+        {
+            Counter counter = (Counter) context;
+            System.out.println(
+                    "Received message " + counter.toString()
+                            + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+
+            int switchVal = counter.get() % 3;
+            IotHubMessageResult res;
+            switch (switchVal)
+            {
+                case 0:
+                    res = IotHubMessageResult.COMPLETE;
+                    break;
+                case 1:
+                    res = IotHubMessageResult.ABANDON;
+                    break;
+                case 2:
+                    res = IotHubMessageResult.REJECT;
+                    break;
+                default:
+                    // should never happen.
+                    throw new IllegalStateException(
+                            "Invalid message result specified.");
+            }
+
+            System.out.println(
+                    "Responding to message " + counter.toString()
+                            + " with " + res.name());
+
+            counter.increment();
+
+            return res;
+        }
+    }
+
+    protected static class EventCallback implements IotHubEventCallback{
+        public void execute(IotHubStatusCode status, Object context){
             Integer i = (Integer) context;
-            System.out.println("IoT Hub responded to message " + i.toString()
-                    + " with status " + status.name());
+            System.out.println("IoT Hub responded to message "+i.toString()
+                + " with status " + status.name());
         }
     }
 
     /**
-     * Sends a number of messages to an IoT Hub. Default protocol is to
-     * use HTTPS transport.
+     * Receives requests from an IoT Hub. Default protocol is to use
+     * HTTPS transport.
      *
-     * @param args args[0] = IoT Hub connection string; args[1] = number of
-     * requests to send; args[2] = protocol (one of 'https' or 'amqps',
-     * optional).
+     * @param args args[0] = IoT Hub connection string; args[1] = protocol (one
+     * of 'https' or 'amqps', optional).
      */
     public static void main(String[] args)
             throws IOException, URISyntaxException
@@ -108,11 +167,19 @@ public class SendEvent
 
         System.out.println("Successfully created an IoT Hub client.");
 
+        MessageCallback callback = new MessageCallback();
+        Counter counter = new Counter(0);
+        client.setMessageCallback(callback, counter);
+
+        System.out.println("Successfully set message callback.");
+
         client.open();
 
         System.out.println("Opened connection to IoT Hub.");
-        System.out.println("Sending the "
-                + "following event messages:");
+
+        System.out.println("Beginning to receive messages...");
+
+        System.out.println("Sending the following event messages: ");
 
         new Thread(() -> {
             for (int i = 0; i < numRequests; ++i)
@@ -124,22 +191,25 @@ public class SendEvent
                     msg.setProperty("messageCount", Integer.toString(i));
                     System.out.println(msgStr);
 
-                    EventCallback callback = new EventCallback();
-                    client.sendEventAsync(msg, callback, i);
+                    EventCallback eventCallback = new EventCallback();
+                    client.sendEventAsync(msg, eventCallback, i);
                 }
                 catch (Exception e)
                 {
                 }
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }).start();
 
+        System.out.println("Press any key to exit...");
+
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
+
         client.close();
 
         System.out.println("Shutting down...");
