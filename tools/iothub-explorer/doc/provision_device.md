@@ -26,7 +26,8 @@ Created device mydevice
 -
   connectionString: HostName=<hostname>;DeviceId=mydevice;SharedAccessKey=<device-key>
 ```
-Copy the device connection string information for later use.
+
+Copy the device connection string information for later use. The samples in this repository use connection strings in the format `HostName=hub-name.azure-devices.net;DeviceId=device-id;SharedAccessKey=key`.
 
 To get help on using the iothub-explorer tool to perform other tasks such as listing devices, deleting devices, and sending commands to devices, enter the following command:
 
