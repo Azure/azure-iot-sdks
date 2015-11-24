@@ -9,8 +9,6 @@ import com.microsoft.azure.iothub.MessageProperty;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import javax.naming.SizeLimitExceededException;
-
 /**
  * Builds a batched IoT Hub request body as a JSON array. The batched message
  * has a maximum size of 256 kb.

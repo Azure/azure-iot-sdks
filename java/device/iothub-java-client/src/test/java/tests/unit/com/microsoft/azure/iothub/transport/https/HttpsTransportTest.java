@@ -14,6 +14,7 @@ import com.microsoft.azure.iothub.transport.https.HttpsBatchMessage;
 import com.microsoft.azure.iothub.transport.https.HttpsMessage;
 import com.microsoft.azure.iothub.transport.https.HttpsSingleMessage;
 import com.microsoft.azure.iothub.transport.https.HttpsTransport;
+import com.microsoft.azure.iothub.transport.https.SizeLimitExceededException;
 import com.microsoft.azure.iothub.transport.IotHubCallbackPacket;
 import com.microsoft.azure.iothub.transport.IotHubOutboundPacket;
 import junit.framework.AssertionFailedError;
@@ -29,8 +30,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
-
-import javax.naming.SizeLimitExceededException;
 
 /** Unit tests for HttpsTransport. */
 public class HttpsTransportTest

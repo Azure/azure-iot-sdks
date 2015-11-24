@@ -9,13 +9,12 @@ import static org.junit.Assert.assertThat;
 import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.transport.https.HttpsSingleMessage;
 import com.microsoft.azure.iothub.transport.https.HttpsBatchMessage;
+import com.microsoft.azure.iothub.transport.https.SizeLimitExceededException;
 
 import org.junit.Test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
-import javax.naming.SizeLimitExceededException;
 
 /** Integration tests for HttpsBatchMessage. */
 public class HttpsBatchMessageIT
