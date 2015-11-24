@@ -55,13 +55,16 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 xcopy /q /y /R %proton-build-root%\build\proton-c\Release\qpid-proton.dll %client-build-root%\build\tosign\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-xcopy /q /y /R "%paho-build-root%\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.dll" %client-build-root%\build\tosign\
-if %errorlevel% neq 0 exit /b %errorlevel%
-
 xcopy /q /y /R %openSSL-build-root%\bin\libeay32.dll %client-build-root%\build\tosign\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy /q /y /R %openSSL-build-root%\bin\ssleay32.dll %client-build-root%\build\tosign\
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R "%paho-build-root%\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.dll" %client-build-root%\build\signed\debug_paho-mqtt3cs.dll
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R "%paho-build-root%\Windows Build\Build\output\paho-mqtt3cs.dll" %client-build-root%\build\signed\release_paho-mqtt3cs.dll 
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -- Auto-sign the native "win32" dlls placed in the "tosign" Folder
@@ -75,13 +78,16 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 xcopy /q /y /R %client-build-root%\build\signed\qpid-proton.dll %proton-build-root%\build\proton-c\Release\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-xcopy /q /y /R  %client-build-root%\build\signed\paho-mqtt3cs.dll "%paho-build-root%\Windows Build\paho-mqtt3cs\Debug\"
-if %errorlevel% neq 0 exit /b %errorlevel%
-
 xcopy /q /y /R %client-build-root%\build\signed\libeay32.dll %openSSL-build-root%\bin\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy /q /y /R  %client-build-root%\build\signed\ssleay32.dll %openSSL-build-root%\bin\
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %client-build-root%\build\signed\debug_paho-mqtt3cs.dll "%paho-build-root%\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.dll"
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %client-build-root%\build\signed\release_paho-mqtt3cs.dll "%paho-build-root%\Windows Build\Build\output\paho-mqtt3cs.dll"
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -- Clean directories
@@ -99,6 +105,12 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 xcopy /q /y /R %proton-build-root%\build_x64\proton-c\Release\qpid-proton.dll %client-build-root%\build\tosign\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
+xcopy /q /y /R "%paho-build-root%\Windows Build\x64\Debug\paho-mqtt3cs.dll" %client-build-root%\build\tosign\debug_paho-mqtt3cs.dll
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R "%paho-build-root%\Windows Build\x64\Release\paho-mqtt3cs.dll" %client-build-root%\build\tosign\release_paho-mqtt3cs.dll
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 rem -- Auto-sign the native "x64" dlls placed in the "tosign" Folder
 csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=401 /d="Signing Azure IoT Native Client binaries"
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -108,6 +120,12 @@ xcopy /q /y /R %client-build-root%\build\signed\qpid-protond.dll %proton-build-r
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy /q /y /R %client-build-root%\build\signed\qpid-proton.dll %proton-build-root%\build_x64\proton-c\Release\
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %client-build-root%\build\signed\debug_paho-mqtt3cs.dll" "%paho-build-root%\Windows Build\x64\Debug\paho-mqtt3cs.dll"
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %client-build-root%\build\signed\relase_paho-mqtt3cs.dll" "%paho-build-root%\Windows Build\x64\Release\paho-mqtt3cs.dll"
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -- Clean directories

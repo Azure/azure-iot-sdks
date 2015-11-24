@@ -16,6 +16,7 @@
 #endif
 
 const char *DEFAULT_CONSUMER_GROUP = "$Default";
+const int DEFAULT_PARTITION_COUNT = 16;
 
 const char* IoTHubAccount_GetEventHubConnectionString(void)
 {
@@ -34,7 +35,7 @@ const char* IoTHubAccount_GetIoTHubName(void)
 {
 	static char iothub_name[128];
 
-	char *iothub_connection_string;
+	const char *iothub_connection_string;
 
 	iothub_connection_string = IoTHubAccount_GetIoTHubConnString();
 
@@ -49,7 +50,7 @@ const char* IoTHubAccount_GetIoTHubName(void)
 const char* IoTHubAccount_GetIoTHubSuffix(void)
 {
 	static char iothub_suffix[256];
-	char *iothub_connection_string;
+	const char *iothub_connection_string;
 
 	iothub_connection_string = IoTHubAccount_GetIoTHubConnString();
 
@@ -144,7 +145,7 @@ const char* IoTHubAccount_GetSharedAccessSignature(void)
 
 const char* IoTHubAccount_GetEventhubAccessKey(void)
 {
-	char *iothub_connection_string;
+	const char *iothub_connection_string;
 	static char access_key[128];
 
 	if ((iothub_connection_string = IoTHubAccount_GetIoTHubConnString()) != NULL)
@@ -222,4 +223,28 @@ const char* IoTHubAccount_GetEventhubConsumerGroup(void)
 
     return consumerGroup;
 #endif
+}
+
+const size_t IoTHubAccount_GetIoTHubPartitionCount(void)
+{
+	int value;
+
+#ifdef MBED_BUILD_TIMESTAMP
+	(void)mbed_log("EventHubPartitionCount?\r\n");
+	(void)scanf("%i", &value);
+	(void)mbed_log("Received '%i'\r\n", value);
+#else
+	char *envVarValue = getenv("IOTHUB_PARTITION_COUNT");
+
+	if (envVarValue != NULL)
+	{
+		value = atoi(envVarValue);
+	}
+	else
+	{
+		value = DEFAULT_PARTITION_COUNT;
+	}
+#endif
+
+	return (size_t)value;
 }

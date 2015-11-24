@@ -5,14 +5,17 @@
 
 var device = require('azure-iot-device');
 
-var connectionString = '[IoT Device Connection String]';
+var connectionString = '[IoT Hub device connection string]';
 
-var client = new device.Client(connectionString, new device.Https());
+var client = new device.Client.fromConnectionString(connectionString);
 
-// Create a message and send it to the IoT Hub every second
-setInterval(function(){
+// Create a message and send it to the IoT hub every second
+setInterval(function () {
   var windSpeed = 10 + (Math.random() * 4); // range: [10, 14]
-  var data = JSON.stringify({ deviceId: 'myFirstDevice', windSpeed: windSpeed });
+  var data = JSON.stringify({
+    deviceId: 'myFirstDevice',
+    windSpeed: windSpeed
+  });
   var message = new device.Message(data);
   message.properties.add('myproperty', 'myvalue');
   console.log("Sending message: " + message.getData());
@@ -20,15 +23,12 @@ setInterval(function(){
 }, 1000);
 
 // Monitor messages from IoT Hub and print them in the console.
-setInterval(function(){
-  client.receive(function (err, res, msg) {
-    if (!err && res.statusCode !== 204) {
+setInterval(function () {
+  client.receive(function (err, msg, res) {
+    if (err) printResultFor('receive')(err, res);
+    else if (res.statusCode !== 204) {
       console.log('Received data: ' + msg.getData());
       client.complete(msg, printResultFor('complete'));
-    }
-    else if (err)
-    {
-      printResultFor('receive')(err, res);
     }
   });
 }, 1000);

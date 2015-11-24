@@ -5,11 +5,13 @@
 
 module.exports = {
     authorization: require('./lib/authorization.js'),
-    createDictionary: require('./lib/dictionary.js'),
+    ConnectionString: require('./lib/connection_string.js'),
     endpoint: require('./lib/endpoint.js'),
     errors: require('./lib/errors.js'),
-    Https: require('./lib/https.js'),
+    Http: require('./lib/http.js'),
     Message: require('./lib/message.js'),
     SharedAccessSignature: require('./lib/shared_access_signature.js'),
-    SimulatedHttps: require('./lib/https_simulated.js')
+    AmqpMessage: require('./lib/amqp_message.js'),
+    AmqpReceiver: require('./lib/amqp_receiver.js'),
+    Amqp: require('./lib/amqp.js')
 };

@@ -7,6 +7,7 @@ var assert = require('chai').assert;
 var Client = require('./client.js');
 var errors = require('azure-iot-common').errors;
 var Message = require('azure-iot-common').Message;
+var AmqpReceiver = require('azure-iot-common').AmqpReceiver;
 
 describe('Client', function () {
   describe('#constructor', function () {
@@ -31,7 +32,7 @@ describe('Client', function () {
     /*Tests_SRS_NODE_IOTHUB_CLIENT_05_003: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a new instance of the default transport (azure-iothub.Transport).]*/
     it('creates an instance of the default transport', function () {
       var client = Client.fromConnectionString(connStr);
-      assert.instanceOf(client._transport, require('./transport.js'));
+      assert.instanceOf(client._transport, require('./amqp.js'));
     });
 
     /*Tests_SRS_NODE_IOTHUB_CLIENT_05_004: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(transport).]*/
@@ -54,7 +55,7 @@ describe('Client', function () {
     /*Tests_SRS_NODE_IOTHUB_CLIENT_05_006: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a new instance of the default transport (azure-iothub.Transport).]*/
     it('creates an instance of the default transport', function () {
       var client = Client.fromSharedAccessSignature(token);
-      assert.instanceOf(client._transport, require('./transport.js'));
+      assert.instanceOf(client._transport, require('./amqp.js'));
     });
 
     /*Tests_SRS_NODE_IOTHUB_CLIENT_05_007: [The fromSharedAccessSignature method shall return a new instance of the Client object, as by a call to new Client(transport).]*/
@@ -234,7 +235,7 @@ function transportSpecificTests(opts) {
         testSubject.getFeedbackReceiver(function (err, receiver) {
           if (err) done(err);
           else {
-            assert.instanceOf(receiver, testSubject.FeedbackReceiver);
+            assert.instanceOf(receiver, AmqpReceiver);
             done();
           }
         });
@@ -322,7 +323,7 @@ function transportSpecificTests(opts) {
 module.exports = transportSpecificTests;
 
 describe('Over simulated AMQP', function () {
-  var SimulatedTransport = require('./transport_simulated.js');
+  var SimulatedTransport = require('./amqp_simulated.js');
   var opts = {
     transport: function () { return new SimulatedTransport(); },
     connectionString: null,

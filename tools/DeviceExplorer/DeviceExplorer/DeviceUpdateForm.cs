@@ -59,7 +59,10 @@ namespace DeviceExplorer
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show(ex.Message);
+                }
             }
         }
 
@@ -83,18 +86,27 @@ namespace DeviceExplorer
                     updatedDevice.Authentication.SymmetricKey.PrimaryKey = primaryKeyTextBox.Text;
                     updatedDevice.Authentication.SymmetricKey.SecondaryKey = secondaryKeyTextBox.Text;
                     await registryManager.UpdateDeviceAsync(updatedDevice, true);
-                    MessageBox.Show("Device udpated successfully!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    using (new CenterDialog(this))
+                    {
+                        MessageBox.Show("Device updated successfully", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                     this.Close();
                 }
                 else
                 {
-                    MessageBox.Show("Device not found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    using (new CenterDialog(this))
+                    {
+                        MessageBox.Show("Device not found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                     this.Close();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

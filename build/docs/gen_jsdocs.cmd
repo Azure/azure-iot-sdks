@@ -4,14 +4,21 @@
 @setlocal EnableExtensions EnableDelayedExpansion
 @echo off
 
-set build-root=%~dp0..\..
-cd %build-root%\node
+cd %~dp0..\..\node
+if exist out rd /s /q out
 
 rem -----------------------------------------------------------------------------
-rem -- Generate device JS docs
+rem -- Generate Node.js Device SDK docs
 rem -----------------------------------------------------------------------------
-set doc-target-dir=%build-root%\node\device\doc\api_reference
-if exist %doc-target-dir% rd /s /q %doc-target-dir%
-mkdir %doc-target-dir%
-jsdoc -c ..\build\docs\jsdoc-device.conf.json -d %doc-target-dir%
+call :jsdoc "Microsoft Azure IoT Device SDK for Node.js" "--package device/package.json -c ../build/docs/jsdoc-device.conf.json"
 
+rem -----------------------------------------------------------------------------
+rem -- Generate Node.js Service SDK docs
+rem -----------------------------------------------------------------------------
+call :jsdoc "Microsoft Azure IoT Service SDK for Node.js" "--readme service/README.md --package service/package.json -c ../build/docs/jsdoc-service.conf.json"
+
+goto :eof
+
+:jsdoc
+cmd /c "set "JSDOC_TITLE=%~1" && jsdoc %~2"
+goto :eof

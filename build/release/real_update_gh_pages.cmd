@@ -42,15 +42,22 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 rem -----------------------------------------------------------------------------
 rem -- Copy Java Device SDK API docs
 rem -----------------------------------------------------------------------------
-mkdir %temp_doc_dir%\java\api_reference
-xcopy /q /e /y java\device\doc\api_reference %temp_doc_dir%\java\api_reference
+mkdir %temp_doc_dir%\java\device\api_reference
+xcopy /q /e /y java\device\doc\api_reference %temp_doc_dir%\java\device\api_reference
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
-rem -- Copy Node JS Device SDK API docs
+rem -- Copy Java Service SDK API docs
+rem -----------------------------------------------------------------------------
+mkdir %temp_doc_dir%\java\service\api_reference
+xcopy /q /e /y java\service\doc\api_reference %temp_doc_dir%\java\service\api_reference
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+rem -----------------------------------------------------------------------------
+rem -- Copy Node.js Device & Service SDK API docs
 rem -----------------------------------------------------------------------------
 mkdir %temp_doc_dir%\node\api_reference
-xcopy /q /e /y node\device\doc\api_reference %temp_doc_dir%\node\api_reference
+xcopy /q /e /y node\out %temp_doc_dir%\node\api_reference
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------

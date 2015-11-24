@@ -5,6 +5,7 @@ This document contains both general FAQs about the Microsoft Azure IoT device SD
 **Microsoft Azure IoT SDKs**
 
 - [Using Visual Studio 2013](#vs2013)
+- [Line-endings in repository zip archive](#lineendings)
 
 **Microsoft Azure IoT device SDK for .NET FAQs**
 
@@ -30,6 +31,11 @@ Note: You can download the free Community edition of Visual Studio 2015 [here](h
 4. Change the **Platform Toolset** to **Visual Studio 2013 (v120)**, then click **OK**.
 
    ![][1]
+
+<a name="lineendings"/>
+## Line-endings in repository zip archive
+
+If you download a zip archive of this repository to a Windows machine, you may encounter errors when you run some of the scripts. This is due to the way GitHub handles line-endings in zip archives. For more information, see http://stackoverflow.com/questions/17347611/downloading-a-zip-from-github-removes-newlines-from-text-files.
 
 <a name="uwpsupport"/>
 ## UWP support for Microsoft.Azure.Devices.Client
