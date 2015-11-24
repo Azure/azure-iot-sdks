@@ -587,7 +587,6 @@ public class AmqpsIotHubConnectionTest {
                 new CompletableFuture<>();
                 //For now, but this should change to be a bit more specific ensuring the message was added in the tuple
                 mockQueue.add(any); times = 1;
-                mockQueue.remove(); times = 2;
             }
         };
     }
