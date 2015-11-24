@@ -97,7 +97,7 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
-	include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER})
+	include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER} ${PROTON_C_INCLUDES})
 	includeProton()
 endif()
 
