@@ -44,26 +44,14 @@
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\Exceptions\IotHubException.cs">
       <Link>Common\Exceptions\IotHubException.cs</Link>
     </Compile>
-    <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\Extensions\StringExtensions.cs">
-      <Link>Common\Extensions\StringExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\Extensions\WebHeaderCollectionExtensions.cs">
-      <Link>Common\Extensions\WebHeaderCollectionExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\IETagHolder.cs">
       <Link>Common\IETagHolder.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\NetMF.WebUtility.cs">
-      <Link>Common\NetMF.WebUtility.cs</Link>
     </Compile>
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\Security\SharedAccessSignatureBuilder.cs">
       <Link>Common\Security\SharedAccessSignatureBuilder.cs</Link>
     </Compile>
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\Security\SharedAccessSignatureConstants.cs">
       <Link>Common\Security\SharedAccessSignatureConstants.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\SHA.cs">
-      <Link>Common\SHA.cs</Link>
     </Compile>
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\WebApi\CustomHeaderConstants.cs">
       <Link>Common\WebApi\CustomHeaderConstants.cs</Link>
@@ -79,18 +67,6 @@
     </Compile>
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\DeviceAuthenticationWithToken.cs">
       <Link>DeviceAuthenticationWithToken.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Microsoft.Azure.Devices.Client\DeviceClient.cs">
-      <Link>DeviceClient.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Microsoft.Azure.Devices.Client\DeviceClientHelper.cs">
-      <Link>DeviceClientHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Microsoft.Azure.Devices.Client\HttpClientHelper.cs">
-      <Link>HttpClientHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Microsoft.Azure.Devices.Client\HttpDeviceClient.cs">
-      <Link>HttpDeviceClient.cs</Link>
     </Compile>
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\IAuthenticationMethod.cs">
       <Link>IAuthenticationMethod.cs</Link>
@@ -112,6 +88,30 @@
     </Compile>
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\PutOperationType.cs">
       <Link>PutOperationType.cs</Link>
+    </Compile>
+    <Compile Include="..\HttpClient_43\Common\Extensions\NetMFStringExtensions.cs">
+      <Link>Common\Extensions\NetMFStringExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\HttpClient_43\Common\Extensions\WebHeaderCollectionExtensions.cs">
+      <Link>Common\Extensions\WebHeaderCollectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\HttpClient_43\Common\NetMF.WebUtility.cs">
+      <Link>Common\NetMF.WebUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\HttpClient_43\Common\SHA.cs">
+      <Link>Common\SHA.cs</Link>
+    </Compile>
+    <Compile Include="..\HttpClient_43\DeviceClient.cs">
+      <Link>DeviceClient.cs</Link>
+    </Compile>
+    <Compile Include="..\HttpClient_43\DeviceClientHelper.cs">
+      <Link>DeviceClientHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\HttpClient_43\HttpClientHelper.cs">
+      <Link>HttpClientHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\HttpClient_43\HttpDeviceClient.cs">
+      <Link>HttpDeviceClient.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

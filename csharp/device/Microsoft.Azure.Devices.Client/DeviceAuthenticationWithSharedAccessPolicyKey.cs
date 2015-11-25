@@ -9,7 +9,7 @@ namespace Microsoft.Azure.Devices.Client
     /// <summary>
     /// Authentication method that uses a shared access policy key. 
     /// </summary>
-    sealed class DeviceAuthenticationWithSharedAccessPolicyKey : IAuthenticationMethod
+    public sealed class DeviceAuthenticationWithSharedAccessPolicyKey : IAuthenticationMethod
     {
         string deviceId;
         string policyName;

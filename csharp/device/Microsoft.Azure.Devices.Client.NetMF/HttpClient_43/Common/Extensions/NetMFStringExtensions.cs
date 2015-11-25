@@ -1,34 +1,18 @@
-namespace Microsoft.Azure.Devices.Client.Extensions
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace Microsoft.Azure.Devices.Client
 {
-    static class StringExtensions
+    public static class NetMFStringExtensions
     {
         public static bool IsNullOrWhiteSpace(this string value)
         {
-#if NETMF
-            if (value == null || value == "")
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-#else
-            return string.IsNullOrWhiteSpace(value);
-#endif
+            return value == null || value == "";
         }
 
-#if NETMF
         public static bool IsNullOrEmpty(this string value)
         {
-            if (value == null || value == "")
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return value == null || value == "";
         }
 
         #region DateTime string parser 
@@ -92,7 +76,5 @@ namespace Microsoft.Azure.Devices.Client.Extensions
         }
 
         #endregion
-
-#endif
     }
 }

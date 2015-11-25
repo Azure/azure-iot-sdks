@@ -19,7 +19,6 @@ namespace Microsoft.Azure.Devices.Client
     using System.Security.Cryptography;
 #endif
     using System.Text;
-    
 
     sealed class SharedAccessSignatureBuilder
     {

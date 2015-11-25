@@ -164,6 +164,11 @@ namespace Microsoft.Azure.Devices.Client.Extensions
             }
         }
 
+        public static bool IsNullOrWhiteSpace(this string value)
+        {
+            return string.IsNullOrWhiteSpace(value);
+        }
+
         public static string RemoveWhitespace(this string value)
         {
             return new string(value.Where(c => !char.IsWhiteSpace(c)).ToArray());

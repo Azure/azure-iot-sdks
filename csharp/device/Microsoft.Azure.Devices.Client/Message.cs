@@ -67,7 +67,6 @@ namespace Microsoft.Azure.Devices.Client
 #if NETMF
             this.Properties = new Hashtable();
             this.SystemProperties = new Hashtable();
-            //this.serializedAmqpMessage = null;
 #else
             this.Properties = new ReadOnlyDictionary45<string, string>(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), this);
             this.SystemProperties = new ReadOnlyDictionary45<string, object>(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase), this);
@@ -159,7 +158,7 @@ namespace Microsoft.Azure.Devices.Client
             get
             {
 #if NETMF
-                return (this.GetSystemProperty(MessageSystemPropertyNames.MessageId)) as string;
+                return this.GetSystemProperty(MessageSystemPropertyNames.MessageId) as string ?? string.Empty;
 #else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.MessageId);
 #endif
@@ -179,7 +178,7 @@ namespace Microsoft.Azure.Devices.Client
             get
             {
 #if NETMF
-                return (string)(this.GetSystemProperty(MessageSystemPropertyNames.To) ?? string.Empty);
+                return this.GetSystemProperty(MessageSystemPropertyNames.To) as string ?? string.Empty;
 #else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.To);
 #endif
@@ -219,7 +218,7 @@ namespace Microsoft.Azure.Devices.Client
             get
             {
 #if NETMF
-                return (string)(this.GetSystemProperty(MessageSystemPropertyNames.CorrelationId) ?? string.Empty);
+                return this.GetSystemProperty(MessageSystemPropertyNames.CorrelationId) as string ?? string.Empty;
 #else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.CorrelationId);
 #endif
@@ -239,7 +238,7 @@ namespace Microsoft.Azure.Devices.Client
             get
             {
 #if NETMF
-                string deliveryAckAsString = (string)(this.GetSystemProperty(MessageSystemPropertyNames.Ack) ?? string.Empty);
+                string deliveryAckAsString = this.GetSystemProperty(MessageSystemPropertyNames.Ack) as string ?? string.Empty;
 #else
                 string deliveryAckAsString = this.GetSystemProperty<string>(MessageSystemPropertyNames.Ack);
 #endif
@@ -316,7 +315,7 @@ namespace Microsoft.Azure.Devices.Client
             get
             {
 #if NETMF
-                return (string)(this.GetSystemProperty(MessageSystemPropertyNames.LockToken) ?? string.Empty);
+                return this.GetSystemProperty(MessageSystemPropertyNames.LockToken) as string ?? string.Empty;
 #else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.LockToken);
 #endif
@@ -377,7 +376,7 @@ namespace Microsoft.Azure.Devices.Client
             get
             {
 #if NETMF
-                return (string)(this.GetSystemProperty(MessageSystemPropertyNames.UserId) ?? string.Empty);
+                return this.GetSystemProperty(MessageSystemPropertyNames.UserId) as string ?? string.Empty;
 #else
                 return this.GetSystemProperty<string>(MessageSystemPropertyNames.UserId);
 #endif
@@ -614,7 +613,7 @@ namespace Microsoft.Azure.Devices.Client
             if (1 == Interlocked.Exchange(ref this.getBodyCalled, 1))
             {
 #if NETMF
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("The message body cannot be read multiple times. To reuse it store the value after reading.");
 #else
                 throw Fx.Exception.AsError(new InvalidOperationException(ApiResources.MessageBodyConsumed));
 #endif

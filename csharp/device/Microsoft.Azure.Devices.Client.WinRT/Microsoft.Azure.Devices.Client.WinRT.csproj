@@ -207,9 +207,6 @@
     <Compile Include="$(DeviceClientDir)\PutOperationType.cs" />
     <Compile Include="$(DeviceClientDir)\WinRTHelpers.cs" />
     <Compile Include="$(DeviceClientDir)\WinRTResources.cs" />
-    <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Extensions\StringExtensions.cs">
-      <Link>StringExtensions.cs</Link>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
