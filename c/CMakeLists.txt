@@ -13,6 +13,8 @@ option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (d
 option(skip_unittests "set skip_unittests to ON to skip unittests (default is OFF)[if possible, they are always build]" OFF)
 option(compileOption_C "passes a string to the command line of the C compiler" OFF)
 option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
+SET(PROTON_C_INCLUDES "" CACHE STRING "directory where proton-c include files resides. Not needed if the proton_build.sh file is successfully run")
+SET(PROTON_LIB "qpid-proton" CACHE STRING "name of the qpid c library. This can be a fully qualified path or simply the name of the lib")
 
 if(IN_OPENWRT)
 	ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
@@ -41,8 +43,8 @@ endif()
 function(includeProton)
 	if(WIN32)
 		include_directories($ENV{proton_path}/qpid-proton/proton-c/include)
-	else()
-		#nothing to do here, it is assumed qpid-proton has been installed and headers and libraries are in the system
+	elseif( NOT "${PRONTON_C_INCLUDES}" STREQUAL "" )
+		include_directories(${PRONTON_C_INCLUDES})
 	endif()
 endfunction(includeProton)
 
@@ -57,7 +59,7 @@ function(linkProton whatExecutableIsBuilding)
 			file(COPY $ENV{proton_path}/qpid-proton/build_x64/proton-c/Debug/qpid-protond.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 		endif()
 	else()
-		target_link_libraries(${whatExecutableIsBuilding} qpid-proton)
+		target_link_libraries(${whatExecutableIsBuilding} ${PROTON_LIB})
 	endif()
 endfunction(linkProton)
 
