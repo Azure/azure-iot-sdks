@@ -416,11 +416,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (!this.isDisposed)
             {
-                    if (this.httpClientObj != null)
-                    {
-                        this.httpClientObj.Dispose();
-                        this.httpClientObj = null;
-                    }
+                if (this.httpClientObj != null)
+                {
+                    this.httpClientObj.Dispose();
+                    this.httpClientObj = null;
+                }
 
                 this.isDisposed = true;
             }
