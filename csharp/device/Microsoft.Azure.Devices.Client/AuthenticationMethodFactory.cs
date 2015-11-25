@@ -28,7 +28,11 @@ namespace Microsoft.Azure.Devices.Client
                 return new DeviceAuthenticationWithToken(iotHubConnectionStringBuilder.DeviceId, iotHubConnectionStringBuilder.SharedAccessSignature);
             }
 
+#if NETMF
+            throw new InvalidOperationException("Unsupported Authentication Method " + iotHubConnectionStringBuilder.ToString());
+#else
             throw new InvalidOperationException("Unsupported Authentication Method {0}".FormatInvariant(iotHubConnectionStringBuilder));
+#endif
         }
 
         /// <summary>
