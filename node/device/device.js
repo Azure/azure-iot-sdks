@@ -47,6 +47,7 @@ module.exports = {
     Client: require('./lib/client.js'),
     ConnectionString: require('./lib/connection_string.js'),
     Http: require('./lib/http.js'),
+    Mqtt: require('./lib/mqtt.js'),
     Message: common.Message,
     SharedAccessSignature: require('./lib/shared_access_signature.js'),
     Amqp: require('./lib/amqp.js')

@@ -9,12 +9,7 @@ namespace Microsoft.Azure.Devices.Client
     /// <summary>
     /// Authentication method that uses a shared access signature token. 
     /// </summary>
-#if WINDOWS_UWP
-    internal
-#else
-    public
-#endif
-    sealed class DeviceAuthenticationWithToken : IAuthenticationMethod
+    public sealed class DeviceAuthenticationWithToken : IAuthenticationMethod
     {
         string deviceId;
         string token;
@@ -70,7 +65,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetDeviceId(string deviceId)
         {
-            if (token.IsNullOrWhiteSpace())
+            if (deviceId.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("deviceId");
             }

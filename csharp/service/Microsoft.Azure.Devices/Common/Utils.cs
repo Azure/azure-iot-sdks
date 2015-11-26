@@ -103,5 +103,39 @@ namespace Microsoft.Azure.Devices.Common
                 Thread.Sleep(CommonConstants.ProcessThreadCheckInterval);
             }
         }
+
+        public static void ValidateBufferBounds(byte[] buffer, int offset, int size)
+        {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException("buffer");
+            }
+
+            ValidateBufferBounds(buffer.Length, offset, size);
+        }
+
+        static void ValidateBufferBounds(int bufferSize, int offset, int size)
+        {
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException("offset", offset, ApiResources.ArgumentMustBeNonNegative);
+            }
+
+            if (offset > bufferSize)
+            {
+                throw new ArgumentOutOfRangeException("offset", offset, ApiResources.OffsetExceedsBufferSize.FormatInvariant(bufferSize));
+            }
+
+            if (size <= 0)
+            {
+                throw new ArgumentOutOfRangeException("size", size, ApiResources.ArgumentMustBePositive);
+            }
+
+            int remainingBufferSpace = bufferSize - offset;
+            if (size > remainingBufferSpace)
+            {
+                throw new ArgumentOutOfRangeException("size", size, ApiResources.SizeExceedsRemainingBufferSpace.FormatInvariant(remainingBufferSpace));
+            }
+        }
     }
 }

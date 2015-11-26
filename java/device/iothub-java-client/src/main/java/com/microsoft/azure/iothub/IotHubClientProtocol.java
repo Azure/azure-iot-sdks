@@ -9,5 +9,5 @@ package com.microsoft.azure.iothub;
  */
 public enum IotHubClientProtocol
 {
-    HTTPS, AMQPS
+    HTTPS, AMQPS, MQTT
 }

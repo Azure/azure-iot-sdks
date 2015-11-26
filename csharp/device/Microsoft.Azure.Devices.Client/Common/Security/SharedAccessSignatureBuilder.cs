@@ -23,7 +23,6 @@ namespace Microsoft.Azure.Devices.Client
 #else
 #endif
     using System.Text;
-    
 
     sealed class SharedAccessSignatureBuilder
     {

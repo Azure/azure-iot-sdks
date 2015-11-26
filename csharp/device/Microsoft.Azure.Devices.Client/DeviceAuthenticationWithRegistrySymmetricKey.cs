@@ -5,16 +5,11 @@ namespace Microsoft.Azure.Devices.Client
 {
     using System;
     using Microsoft.Azure.Devices.Client.Extensions;
-
-#if WINDOWS_UWP
-    internal
-#else
-    public
-#endif
+    
     /// <summary>
     /// Authentication method that uses the symmetric key associated with the device in the device registry. 
     /// </summary>
-    sealed class DeviceAuthenticationWithRegistrySymmetricKey : IAuthenticationMethod
+    public sealed class DeviceAuthenticationWithRegistrySymmetricKey : IAuthenticationMethod
     {
         string deviceId;
         byte[] key;

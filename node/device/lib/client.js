@@ -50,11 +50,27 @@ Client.fromConnectionString = function fromConnectionString(value, Transport) {
     host: cn.HostName,
     deviceId: cn.DeviceId,
     hubName: cn.HostName.split('.')[0],
-    sharedAccessSignature: sas.toString()
+    sharedAccessSignature: sas.toString(),
+    gatewayHostName: cn.GatewayHostName
   };
 
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_006: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(new Transport(...)).]*/
   return new Client(new Transport(config));
+};
+
+/**
+ * @method            module:azure-iot-device.Client.connect
+ * @description       Call the transport layer CONNECT function if the
+ *                    transport layer implements it
+ * @returns calls the given callback
+ */
+Client.prototype.open = function (done) {
+  /* Codes_SRS_NODE_DEVICE_CLIENT_12_001: [The open function shall call the transport connect function] */
+  if (typeof this._transport.connect === 'function') {
+    this._transport.connect(function () {
+      done();
+    });
+  } 
 };
 
 /*Codes_SRS_NODE_DEVICE_CLIENT_05_016: [When a Client method encounters an error in the transport, the callback function (indicated by the done argument) shall be invoked with the following arguments:

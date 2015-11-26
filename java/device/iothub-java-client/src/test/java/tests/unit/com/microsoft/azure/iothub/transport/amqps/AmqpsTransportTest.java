@@ -5,26 +5,28 @@ package tests.unit.com.microsoft.azure.iothub.transport.amqps;
 
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertTrue;
 
 import com.microsoft.azure.iothub.*;
+import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.MessageCallback;
-import com.microsoft.azure.iothub.transport.amqps.AmqpsIotHubSession;
-import com.microsoft.azure.iothub.transport.amqps.AmqpsTransport;
+import com.microsoft.azure.iothub.transport.amqps.*;
 import com.microsoft.azure.iothub.transport.IotHubCallbackPacket;
 import com.microsoft.azure.iothub.transport.IotHubOutboundPacket;
 
 import junit.framework.AssertionFailedError;
-import mockit.MockUp;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
-import mockit.VerificationsInOrder;
+import mockit.*;
+import org.apache.qpid.proton.message.*;
+import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /** Unit tests for AmqpsTransport. */
 public class AmqpsTransportTest
@@ -33,45 +35,49 @@ public class AmqpsTransportTest
     DeviceClientConfig mockConfig;
 
     @Mocked
-    AmqpsIotHubSession mockSession;
+    AmqpsIotHubConnection mockConnection;
+
+    @Mocked
+    AmqpsMessage mockAmqpsMessage;
+
+    @Mocked
+    AmqpsIotHubConnectionBaseHandler mockHandler;
 
     // Tests_SRS_AMQPSTRANSPORT_11_019: [The function shall open an AMQPS session with the IoT Hub given in the configuration.]
     @Test
-    public void openOpensAmqpsSession() throws IOException
-    {
+    public void openOpensAmqpsConnection() throws IOException, ExecutionException, InterruptedException {
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubSession(mockConfig);
-                result = mockSession;
+                new AmqpsIotHubConnection(mockConfig);
+                result = mockConnection;
             }
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
         transport.open();
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         new Verifications()
         {
             {
-                expectedSession.open();
+                expectedConnection.open();
             }
         };
     }
 
     // Tests_SRS_AMQPSTRANSPORT_11_020: [If an AMQPS session is already open, the function shall do nothing.]
     @Test
-    public void openDoesNothingIfAlreadyOpened() throws IOException
-    {
+    public void openDoesNothingIfAlreadyOpened() throws IOException, ExecutionException, InterruptedException {
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
         transport.open();
         transport.open();
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         new Verifications()
         {
             {
-                expectedSession.open();
+                expectedConnection.open();
                 times = 1;
             }
         };
@@ -79,33 +85,33 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_11_021: [The function shall close an AMQPS session with the IoT Hub given in the configuration.]
     @Test
-    public void closeClosesAmqpsSession() throws IOException
+    public void closeClosesAmqpsConnection() throws IOException
     {
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
         transport.open();
         transport.close();
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         new Verifications()
         {
             {
-                expectedSession.close();
+                expectedConnection.close();
             }
         };
     }
 
     // Tests_SRS_AMQPSTRANSPORT_11_023: [If the AMQPS session is closed, the function shall do nothing.]
     @Test
-    public void closeDoesNothingIfSessionNeverOpened() throws IOException
+    public void closeDoesNothingIfConnectionNeverOpened() throws IOException
     {
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
         transport.close();
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         new Verifications()
         {
             {
-                expectedSession.close();
+                expectedConnection.close();
                 times = 0;
             }
         };
@@ -113,18 +119,18 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_11_023: [If the AMQPS session is closed, the function shall do nothing.]
     @Test
-    public void closeDoesNothingIfSessionAlreadyClosed() throws IOException
+    public void closeDoesNothingIfConnectionAlreadyClosed() throws IOException
     {
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
         transport.open();
         transport.close();
         transport.close();
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         new Verifications()
         {
             {
-                expectedSession.close();
+                expectedConnection.close();
                 times = 1;
             }
         };
@@ -187,20 +193,20 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_11_004: [The function shall attempt to send every message on its waiting list, one at a time.]
     // Tests_SRS_AMQPSTRANSPORT_11_005: [If no AMQPS session exists with the IoT Hub, the function shall establish one.]
+    //TODO: Improve with async-safe tests.
     @Test
     public void sendMessagesSendsAllMessages(
             @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket,
-            @Mocked final AmqpsIotHubSession mockSession)
+            @Mocked final IotHubOutboundPacket mockPacket)
             throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubSession(mockConfig);
-                result = mockSession;
+                new AmqpsIotHubConnection(mockConfig);
+                result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
                 mockPacket.getMessage();
@@ -214,112 +220,11 @@ public class AmqpsTransportTest
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
 
-        final AmqpsIotHubSession expectedSession = mockSession;
-        new Verifications()
-        {
-            {
-                expectedSession.sendEvent(mockMsg);
-                times = 2;
-            }
-        };
+        assertTrue(transport.isEmpty());
     }
 
-    // Tests_SRS_AMQPSTRANSPORT_11_006: [For each message being sent, the function shall send the message and add the IoT Hub status code along with the callback and context to the callback list.]
-    @Test
-    public <T extends Queue> void sendMessagesAddsToCallbackQueue(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket,
-            @Mocked final IotHubCallbackPacket mockCallbackPacket)
-            throws IOException
-    {
-        final Queue mockQueue = new MockUp<T>()
-        {
-
-        }.getMockInstance();
-        final Map<String, Object> context = new HashMap<>();
-        new NonStrictExpectations()
-        {
-            {
-                new AmqpsIotHubSession(mockConfig);
-                result = mockSession;
-                new IotHubOutboundPacket(mockMsg, mockCallback, context);
-                result = mockPacket;
-                mockPacket.getCallback();
-                result = mockCallback;
-                mockPacket.getContext();
-                result = context;
-                mockSession.sendEvent((Message) any);
-                returns(IotHubStatusCode.OK_EMPTY, IotHubStatusCode.ERROR);
-                new IotHubCallbackPacket(IotHubStatusCode.OK_EMPTY,
-                        mockCallback, context);
-                result = mockCallbackPacket;
-                new IotHubCallbackPacket(IotHubStatusCode.ERROR, mockCallback,
-                        context);
-                result = mockCallbackPacket;
-            }
-        };
-
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
-        transport.addMessage(mockMsg, mockCallback, context);
-        transport.addMessage(mockMsg, mockCallback, context);
-        transport.sendMessages();
-
-        new VerificationsInOrder()
-        {
-            {
-                new IotHubCallbackPacket(IotHubStatusCode.OK_EMPTY,
-                        mockCallback, context);
-                mockQueue.add(mockCallbackPacket);
-                new IotHubCallbackPacket(IotHubStatusCode.ERROR, mockCallback,
-                        context);
-                mockQueue.add(mockCallbackPacket);
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSTRANSPORT_11_007: [If the IoT Hub could not be reached, the message shall be buffered to be sent again next time.]
-    @Test
-    public void sendMessagesBuffersFailedMessages(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
-    {
-        final Map<String, Object> context = new HashMap<>();
-        new NonStrictExpectations()
-        {
-            {
-                mockSession.sendEvent((Message) any);
-                result = new IOException(anyString);
-                result = IotHubStatusCode.OK_EMPTY;
-            }
-        };
-
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
-        transport.addMessage(mockMsg, mockCallback, context);
-        try
-        {
-            transport.sendMessages();
-            throw new AssertionFailedError();
-        }
-        catch (IOException e)
-        {
-
-        }
-        transport.sendMessages();
-
-        final AmqpsIotHubSession expectedSession = mockSession;
-        new Verifications()
-        {
-            {
-                expectedSession.sendEvent(mockMsg);
-                times = 2;
-            }
-        };
-    }
+    //TODO: // Tests_SRS_AMQPSTRANSPORT_11_006: [For each message being sent, the function shall send the message and add the IoT Hub status code along with the callback and context to the callback list.]
+    //TODO: // Tests_SRS_AMQPSTRANSPORT_11_007: [If the IoT Hub could not be reached, the message shall be buffered to be sent again next time.]
 
     // Tests_SRS_AMQPSTRANSPORT_11_015: [If the IoT Hub could not be reached, the function shall throw an IOException.]
     @Test(expected = IOException.class)
@@ -333,14 +238,14 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubSession(mockConfig);
-                result = mockSession;
+                new AmqpsIotHubConnection(mockConfig);
+                result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
                 mockPacket.getMessage();
                 result = mockMsg;
-                mockSession.sendEvent(mockMsg);
-                result = new IOException(anyString);
+                Deencapsulation.invoke(mockConnection, "getCompletionStatus");
+                result = new Exception();
             }
         };
 
@@ -352,24 +257,29 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_11_034: [If the function throws any exception or error, it shall also close the AMQPS session.]
     @Test
-    public void sendMessagesClosesAmqpsSessionIfSendFails(
+    public void sendMessagesClosesAmqpsConnectionIfSendFails(
             @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
+            @Mocked final IotHubOutboundPacket mockPacket,
+            @Mocked final LinkedList<IotHubOutboundPacket> mockQueue)
             throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubSession(mockConfig);
-                result = mockSession;
+                new AmqpsIotHubConnection(mockConfig);
+                result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
                 mockPacket.getMessage();
                 result = mockMsg;
-                mockSession.sendEvent(mockMsg);
-                result = new OutOfMemoryError();
+                new LinkedList<>();
+                result = mockQueue;
+                mockQueue.size();
+                result = 1;
+                mockQueue.remove();
+                result = new Exception();
             }
         };
 
@@ -386,36 +296,35 @@ public class AmqpsTransportTest
 
         }
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         new Verifications()
         {
             {
-                expectedSession.close();
+                expectedConnection.close();
             }
         };
     }
 
     // Tests_SRS_AMQPSTRANSPORT_11_026: [If the transport had previously encountered any exception or error while open, it shall reopen a new AMQPS session with the IoT Hub given in the configuration.]
     @Test
-    public void sendMessagesReopensAmqpsSessionIfSendFails(
+    public void sendMessagesReopensAmqpsConnectionIfSendFails(
             @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
-    {
+            throws IOException, ExecutionException, InterruptedException {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubSession(mockConfig);
-                result = mockSession;
+                new AmqpsIotHubConnection(mockConfig);
+                result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
                 mockPacket.getMessage();
                 result = mockMsg;
-                mockSession.sendEvent(mockMsg);
-                result = new OutOfMemoryError();
-                result = IotHubStatusCode.OK_EMPTY;
+                Deencapsulation.invoke(mockConnection, "getCompletionStatus");
+                result = new Exception();
+                result = new Boolean(true);
             }
         };
 
@@ -433,14 +342,13 @@ public class AmqpsTransportTest
         }
         transport.sendMessages();
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         final DeviceClientConfig expectedConfig = mockConfig;
         new VerificationsInOrder()
         {
             {
-                expectedSession.sendEvent((Message) any);
-                new AmqpsIotHubSession(expectedConfig);
-                expectedSession.open();
+                new AmqpsIotHubConnection(expectedConfig);
+                expectedConnection.open();
             }
         };
     }
@@ -463,101 +371,7 @@ public class AmqpsTransportTest
         transport.sendMessages();
     }
 
-    // Tests_SRS_AMQPSTRANSPORT_11_008: [The function shall invoke all callbacks on its callback queue.]
-    @Test
-    public void invokeCallbacksInvokesAllCallbacks(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket,
-            @Mocked final IotHubCallbackPacket mockCallbackPacket)
-            throws IOException
-    {
-        final Map<String, Object> context = new HashMap<>();
-        new NonStrictExpectations()
-        {
-            {
-                new AmqpsIotHubSession(mockConfig);
-                result = mockSession;
-                mockCallbackPacket.getStatus();
-                returns(IotHubStatusCode.OK_EMPTY, IotHubStatusCode.ERROR);
-                mockCallbackPacket.getCallback();
-                result = mockCallback;
-                mockCallbackPacket.getContext();
-                result = context;
-            }
-        };
-
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
-        transport.addMessage(mockMsg, mockCallback, context);
-        transport.addMessage(mockMsg, mockCallback, context);
-        transport.sendMessages();
-        transport.invokeCallbacks();
-
-        final IotHubEventCallback expectedCallback = mockCallback;
-        final Map<String, Object> expectedContext = context;
-        new VerificationsInOrder()
-        {
-            {
-                expectedCallback.execute(
-                        IotHubStatusCode.OK_EMPTY, expectedContext);
-                expectedCallback.execute(
-                        IotHubStatusCode.ERROR, expectedContext);
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSTRANSPORT_11_009: [If an exception is thrown during the callback, the function shall drop the callback from the queue.]
-    @Test
-    public void invokeCallbacksDropsFailedCallback(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket,
-            @Mocked final IotHubCallbackPacket mockCallbackPacket)
-            throws IOException
-    {
-        final Map<String, Object> context = new HashMap<>();
-        new NonStrictExpectations()
-        {
-            {
-                new AmqpsIotHubSession(mockConfig);
-                result = mockSession;
-                mockCallbackPacket.getStatus();
-                result = IotHubStatusCode.OK_EMPTY;
-                mockCallbackPacket.getCallback();
-                result = mockCallback;
-                mockCallbackPacket.getContext();
-                result = context;
-                mockCallback.execute(IotHubStatusCode.OK_EMPTY, context);
-                result = new IllegalStateException();
-                result = null;
-            }
-        };
-
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
-        transport.addMessage(mockMsg, mockCallback, context);
-        transport.sendMessages();
-        try
-        {
-            transport.invokeCallbacks();
-            throw new AssertionFailedError();
-        }
-        catch (IllegalStateException e)
-        {
-            transport.invokeCallbacks();
-        }
-
-        final IotHubEventCallback expectedCallback = mockCallback;
-        final Map<String, Object> expectedContext = context;
-        new VerificationsInOrder()
-        {
-            {
-                expectedCallback.execute(
-                        IotHubStatusCode.OK_EMPTY, expectedContext);
-            }
-        };
-    }
+    //TODO: // Tests_SRS_AMQPSTRANSPORT_11_008: [The function shall invoke all callbacks on its callback queue.]
 
     // Tests_SRS_AMQPSTRANSPORT_11_030: [If the AMQPS session is closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
@@ -614,6 +428,7 @@ public class AmqpsTransportTest
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
+        transport.addMessage(mockMsg, mockCallback, context);
         boolean testIsEmpty = transport.isEmpty();
 
         final boolean expectedIsEmpty = false;
@@ -648,9 +463,17 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_11_010: [The function shall attempt to consume a message from the IoT Hub.]
     @Test
     public void handleMessageAttemptsToReceiveMessage(
-            @Mocked final MessageCallback mockCallback)
+            @Mocked final MessageCallback mockCallback,
+            @Mocked final Message mockMsg)
             throws IOException
     {
+        new MockUp<AmqpsUtilities>(){
+            @Mock
+            Message protonMessageToMessage(MessageImpl msg){
+                return mockMsg;
+            }
+        };
+
         final Object context = new Object();
         new NonStrictExpectations()
         {
@@ -666,11 +489,11 @@ public class AmqpsTransportTest
         transport.open();
         transport.handleMessage();
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         new Verifications()
         {
             {
-                expectedSession.receiveMessage();
+                expectedConnection.consumeMessage();
             }
         };
     }
@@ -681,6 +504,13 @@ public class AmqpsTransportTest
             @Mocked final MessageCallback mockCallback,
             @Mocked final Message mockMsg) throws IOException
     {
+        new MockUp<AmqpsUtilities>(){
+            @Mock
+            Message protonMessageToMessage(MessageImpl msg){
+                return mockMsg;
+            }
+        };
+
         final Object context = new Object();
         new NonStrictExpectations()
         {
@@ -689,8 +519,8 @@ public class AmqpsTransportTest
                 result = mockCallback;
                 mockConfig.getMessageContext();
                 result = context;
-                mockSession.receiveMessage();
-                result = mockMsg;
+                mockConnection.consumeMessage();
+                result = mockAmqpsMessage;
             }
         };
 
@@ -715,6 +545,13 @@ public class AmqpsTransportTest
             @Mocked final MessageCallback mockCallback,
             @Mocked final Message mockMsg) throws IOException
     {
+        new MockUp<AmqpsUtilities>(){
+            @Mock
+            Message protonMessageToMessage(MessageImpl msg){
+                return mockMsg;
+            }
+        };
+
         final Object context = new Object();
         final IotHubMessageResult messageResult =
                 IotHubMessageResult.COMPLETE;
@@ -725,8 +562,8 @@ public class AmqpsTransportTest
                 result = mockCallback;
                 mockConfig.getMessageContext();
                 result = context;
-                mockSession.receiveMessage();
-                result = mockMsg;
+                mockConnection.consumeMessage();
+                result = mockAmqpsMessage;
                 mockCallback.execute((Message) any, any);
                 result = messageResult;
             }
@@ -736,13 +573,13 @@ public class AmqpsTransportTest
         transport.open();
         transport.handleMessage();
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         final IotHubMessageResult expectedMessageResult =
                 messageResult;
         new Verifications()
         {
             {
-                expectedSession.sendMessageResult(
+                expectedConnection.sendMessageResult(
                         expectedMessageResult);
             }
         };
@@ -750,10 +587,18 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_11_014: [If no AMQPS session exists with the IoT Hub, the function shall establish one.]
     @Test
-    public void handleMessageCreatesAmqpsSessionIfNoneExists(
-            @Mocked final MessageCallback mockCallback)
+    public void handleMessageCreatesAmqpsConnectionIfNoneExists(
+            @Mocked final MessageCallback mockCallback,
+            @Mocked final Message mockMsg)
             throws IOException
     {
+        new MockUp<AmqpsUtilities>(){
+            @Mock
+            Message protonMessageToMessage(MessageImpl msg){
+                return mockMsg;
+            }
+        };
+
         final Object context = new Object();
         new NonStrictExpectations()
         {
@@ -773,7 +618,7 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                new AmqpsIotHubSession(expectedConfig);
+                new AmqpsIotHubConnection(expectedConfig);
             }
         };
     }
@@ -784,6 +629,13 @@ public class AmqpsTransportTest
             @Mocked final MessageCallback mockCallback,
             @Mocked final Message mockMsg) throws IOException
     {
+        new MockUp<AmqpsUtilities>(){
+            @Mock
+            Message protonMessageToMessage(MessageImpl msg){
+                return mockMsg;
+            }
+        };
+
         final Object context = new Object();
         new NonStrictExpectations()
         {
@@ -792,7 +644,7 @@ public class AmqpsTransportTest
                 result = mockCallback;
                 mockConfig.getMessageContext();
                 result = context;
-                mockSession.receiveMessage();
+                mockConnection.consumeMessage();
                 result = new IOException();
             }
         };
@@ -804,7 +656,7 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_11_035: [If the function throws any exception or error, it shall also close the AMQPS session.]
     @Test
-    public void handleMessageClosesAmqpsSessionIfSessionFails(
+    public void handleMessageClosesAmqpsConnectionIfConnectionFails(
             @Mocked final MessageCallback mockCallback,
             @Mocked final Message mockMsg) throws IOException
     {
@@ -816,9 +668,6 @@ public class AmqpsTransportTest
                 result = mockCallback;
                 mockConfig.getMessageContext();
                 result = context;
-                mockSession.receiveMessage();
-                result = new NullPointerException();
-                result = null;
             }
         };
 
@@ -833,21 +682,27 @@ public class AmqpsTransportTest
 
         }
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         new VerificationsInOrder()
         {
             {
-                expectedSession.close();
+                expectedConnection.close();
             }
         };
     }
 
     // Tests_SRS_AMQPSTRANSPORT_11_031: [If the transport had previously encountered any exception or error while open, it shall reopen a new AMQPS session with the IoT Hub given in the configuration.]
     @Test
-    public void handleMessageReopensAmqpsSessionIfSessionFails(
+    public void handleMessageReopensAmqpsConnectionIfConnectionFails(
             @Mocked final MessageCallback mockCallback,
-            @Mocked final Message mockMsg) throws IOException
-    {
+            @Mocked final Message mockMsg) throws IOException, ExecutionException, InterruptedException {
+        new MockUp<AmqpsUtilities>(){
+            @Mock
+            Message protonMessageToMessage(MessageImpl msg){
+                return mockMsg;
+            }
+        };
+
         final Object context = new Object();
         new NonStrictExpectations()
         {
@@ -856,7 +711,7 @@ public class AmqpsTransportTest
                 result = mockCallback;
                 mockConfig.getMessageContext();
                 result = context;
-                mockSession.receiveMessage();
+                mockConnection.consumeMessage();
                 result = new NullPointerException();
                 result = null;
             }
@@ -874,14 +729,14 @@ public class AmqpsTransportTest
         }
         transport.handleMessage();
 
-        final AmqpsIotHubSession expectedSession = mockSession;
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
         final DeviceClientConfig expectedConfig = mockConfig;
         new VerificationsInOrder()
         {
             {
-                expectedSession.receiveMessage();
-                new AmqpsIotHubSession(expectedConfig);
-                expectedSession.open();
+                expectedConnection.consumeMessage();
+                new AmqpsIotHubConnection(expectedConfig);
+                expectedConnection.open();
             }
         };
     }

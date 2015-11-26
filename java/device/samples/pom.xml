@@ -18,6 +18,7 @@
         <module>send-event</module>
 		<module>send-serialized-event</module>
         <module>handle-messages</module>
+        <module>send-receive-sample</module>
     </modules>
     <dependencies>
         <dependency>

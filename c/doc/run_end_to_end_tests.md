@@ -31,7 +31,7 @@ This document describes how to run the end to end tests.
     - Populate the following variables as described below.
 
       - IOTHUB_EVENTHUB_LISTEN_NAME=[Event Hub-compatible name]
-      - IOTHUB_EVENTHUB_CONNECTION_STRING=[Event Hub-compatible endpoint];SharedAccessKeyName=[IOTHUB_POLICY_NAME];SharedAccessKey=[IOTHUB_POLICY_KEY]
+      - IOTHUB_EVENTHUB_CONNECTION_STRING=Endpoint=[Event Hub-compatible endpoint];SharedAccessKeyName=[IOTHUB_POLICY_NAME];SharedAccessKey=[IOTHUB_POLICY_KEY]
       - IOTHUB_EVENTHUB_CONSUMER_GROUP=$Default
       - IOTHUB_PARTITION_COUNT=[Partition count from portal]
 	  
