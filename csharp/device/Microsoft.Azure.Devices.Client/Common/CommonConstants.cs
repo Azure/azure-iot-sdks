@@ -74,13 +74,28 @@ namespace Microsoft.Azure.Devices.Client
             public const int MaximumMaxDeliveryCount = 100;
             public const int MinimumMaxDeliveryCount = 1;
 
+#if NETMF
+            public static readonly TimeSpan DefaultTtl = new TimeSpan(1, 0, 0);
+            public static readonly TimeSpan MaximumDefaultTtl = new TimeSpan(2, 0, 0, 0);
+            public static readonly TimeSpan MinimumDefaultTtl = new TimeSpan(0, 1, 0);
+#else
             public static readonly TimeSpan DefaultTtl = TimeSpan.FromHours(1);
             public static readonly TimeSpan MaximumDefaultTtl = TimeSpan.FromDays(2);
             public static readonly TimeSpan MinimumDefaultTtl = TimeSpan.FromMinutes(1);
+#endif
         }
 
         public static class Feedback
         {
+#if NETMF
+            public static readonly TimeSpan DefaultLockDuration = new TimeSpan(0, 1, 0);
+            public static readonly TimeSpan MaximumLockDuration = new TimeSpan(0, 5, 0);
+            public static readonly TimeSpan MinimumLockDuration = new TimeSpan(0, 0, 5);
+
+            public static readonly TimeSpan DefaultTtl = new TimeSpan(1, 0, 0);
+            public static readonly TimeSpan MaximumTtl = new TimeSpan(48, 0, 0);
+            public static readonly TimeSpan MinimumTtl = new TimeSpan(0, 1, 0);
+#else
             public static readonly TimeSpan DefaultLockDuration = TimeSpan.FromMinutes(1);
             public static readonly TimeSpan MaximumLockDuration = TimeSpan.FromMinutes(5);
             public static readonly TimeSpan MinimumLockDuration = TimeSpan.FromSeconds(5);
@@ -88,6 +103,7 @@ namespace Microsoft.Azure.Devices.Client
             public static readonly TimeSpan DefaultTtl = TimeSpan.FromHours(1);
             public static readonly TimeSpan MaximumTtl = TimeSpan.FromHours(48);
             public static readonly TimeSpan MinimumTtl = TimeSpan.FromMinutes(1);
+#endif
 
             public const int DefaultMaxDeliveryCount = 10;
             public const int MaximumMaxDeliveryCount = 100;

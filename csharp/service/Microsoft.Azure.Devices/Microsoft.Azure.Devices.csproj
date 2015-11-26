@@ -91,6 +91,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ApiResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Common\Amqp\ClientWebSocketTransport.cs" />
+    <Compile Include="Common\Amqp\WebSocketConstants.cs" />
     <Compile Include="Common\Exceptions\ErrorCode.cs" />
     <Compile Include="Common\PerfectHash.cs" />
     <Compile Include="AuthenticationMechanism.cs" />
@@ -238,6 +240,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Common\Resources.resx" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

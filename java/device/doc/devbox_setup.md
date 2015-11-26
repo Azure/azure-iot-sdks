@@ -9,11 +9,7 @@ This document describes how to prepare your development environment to use the *
 
 <a name="installjava"/>
 ## Install Java JDK SE
-<<<<<<< HEAD
-To run the SDK you will need **Java SE 1.7+** (preferably **Java SE 1.8+**).
-=======
-To run the samples in the IoT Device SDK for Java you will need **Java SE 1.7** if running on Windows or **Java SE 1.8+** if running on Linux.
->>>>>>> master
+To use the SDK and run the samples you will need **Java SE 8**.
 
 ### Windows
 For downloads and installation instructions go here: http://www.oracle.com/technetwork/java/javase/downloads/index.html
@@ -33,7 +29,7 @@ sudo add-apt-repository ppa:openjdk-r/ppa
 ```
 
 
-On Linux, Java JDK 1.8 can be installed as follows:
+On Linux, the Java OpenJDK 8 can be installed as follows:
 
 ```
 sudo apt-get update

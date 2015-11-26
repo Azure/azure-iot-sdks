@@ -57,6 +57,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="ClientWebSocketTransportTests.cs" />
     <Compile Include="ConnectionString\ServiceClientConnectionStringExceptionTests.cs" />
     <Compile Include="ConnectionString\ServiceClientConnectionStringTests.cs" />
     <Compile Include="RegistryManagerTests.cs" />

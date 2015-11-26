@@ -8,6 +8,7 @@ import com.microsoft.azure.iothub.transport.https.HttpsTransport;
 import com.microsoft.azure.iothub.transport.IotHubReceiveTask;
 import com.microsoft.azure.iothub.transport.IotHubSendTask;
 import com.microsoft.azure.iothub.transport.IotHubTransport;
+import com.microsoft.azure.iothub.transport.mqtt.MqttTransport;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -56,6 +57,7 @@ public final class DeviceClient
      * polling for messages.
      */
     public static final long DEFAULT_RECEIVE_PERIOD_MILLIS_AMQPS = 5000l;
+    public static final long DEFAULT_RECEIVE_PERIOD_MILLIS_MQTT = 5000l;
     public static final long DEFAULT_RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     /** The hostname attribute name in a connection string. */
@@ -64,6 +66,8 @@ public final class DeviceClient
     public static final String DEVICE_ID_ATTRIBUTE = "DeviceId=";
     /** The shared access key attribute name in a connection string. */
     public static final String SHARED_ACCESS_KEY_ATTRIBUTE = "SharedAccessKey=";
+    /** The gateway hostname attribute name in a connection string. */
+    public static final String GATEWAY_HOSTNAME_ATTRIBUTE = "GatewayHostName=";
 
     /**
      * The charset used for URL-encoding the device ID in the connection
@@ -109,24 +113,21 @@ public final class DeviceClient
         String hostname = null;
         String deviceId = null;
         String sharedAccessKey = null;
+        String gatewayHostName = null;
         for (String attr : connStringAttrs)
         {
             // Codes_SRS_DEVICECLIENT_11_043: [The constructor shall save the IoT Hub hostname as the value of 'HostName' in the connection string.]
             if (attr.startsWith(HOSTNAME_ATTRIBUTE))
             {
-                hostname = attr.substring(
-                        HOSTNAME_ATTRIBUTE.length());
+                hostname = attr.substring(HOSTNAME_ATTRIBUTE.length());
             }
             // Codes_SRS_DEVICECLIENT_11_044: [The constructor shall save the device ID as the UTF-8 URL-decoded value of 'DeviceId' in the connection string.]
             else if (attr.startsWith(DEVICE_ID_ATTRIBUTE))
             {
-                String urlEncodedDeviceId = attr.substring(
-                        DEVICE_ID_ATTRIBUTE.length());
+                String urlEncodedDeviceId = attr.substring(DEVICE_ID_ATTRIBUTE.length());
                 try
                 {
-                    deviceId = URLDecoder.decode(
-                            urlEncodedDeviceId,
-                            CONNECTION_STRING_CHARSET.name());
+                    deviceId = URLDecoder.decode(urlEncodedDeviceId,CONNECTION_STRING_CHARSET.name());
                 }
                 catch (UnsupportedEncodingException e)
                 {
@@ -137,34 +138,15 @@ public final class DeviceClient
             // Codes_SRS_DEVICECLIENT_11_045: [The constructor shall save the device key as the value of 'SharedAccessKey' in the connection string.]
             else if (attr.startsWith(SHARED_ACCESS_KEY_ATTRIBUTE))
             {
-                sharedAccessKey = attr.substring(
-                        SHARED_ACCESS_KEY_ATTRIBUTE.length());
+                sharedAccessKey = attr.substring(SHARED_ACCESS_KEY_ATTRIBUTE.length());
+            }
+            else if (attr.startsWith(GATEWAY_HOSTNAME_ATTRIBUTE))
+            {
+                gatewayHostName = attr.substring(GATEWAY_HOSTNAME_ATTRIBUTE.length());
             }
         }
 
-        initIotHubClient(hostname, deviceId, sharedAccessKey, protocol);
-    }
-
-    /**
-     * Constructor that takes configuration parameters as arguments.
-     *
-     * @param iotHubHostname the IoT Hub hostname.
-     * @param deviceId the device ID.
-     * @param deviceKey the device key.
-     * @param protocol the communication protocol used (i.e. HTTPS).
-     *
-     * @throws IllegalArgumentException if any of {@code iotHubHostname},
-     * {@code deviceId}, {@code deviceKey}, or {@code protocol} are
-     * {@code null}; or if {@code iotHubHostname} does not contain a valid IoT
-     * Hub name as its prefix.
-     * @throws URISyntaxException if the IoT Hub hostname does not conform to
-     * RFC 3986.
-     */
-    public DeviceClient(String iotHubHostname, String deviceId,
-                        String deviceKey, IotHubClientProtocol protocol)
-            throws URISyntaxException
-    {
-        initIotHubClient(iotHubHostname, deviceId, deviceKey, protocol);
+        initIotHubClient(hostname, gatewayHostName, deviceId, sharedAccessKey, protocol);
     }
 
     /**
@@ -300,6 +282,7 @@ public final class DeviceClient
      * Initializes an IoT Hub device client with the given parameters.
      *
      * @param iotHubHostname the IoT Hub hostname.
+     * @param gatewayHostName the Protocol Gateway hostname.
      * @param deviceId the device ID.
      * @param deviceKey the device key.
      * @param protocol the communication protocol used (i.e. HTTPS).
@@ -310,7 +293,7 @@ public final class DeviceClient
      * @throws URISyntaxException if the IoT Hub hostname does not conform to
      * RFC 3986.
      */
-    protected void initIotHubClient(String iotHubHostname, String deviceId,
+    protected void initIotHubClient(String iotHubHostname, String gatewayHostName, String deviceId,
             String deviceKey, IotHubClientProtocol protocol)
             throws URISyntaxException
     {
@@ -341,8 +324,7 @@ public final class DeviceClient
         }
 
         // Codes_SRS_DEVICECLIENT_11_052: [The constructor shall save the IoT Hub hostname, device ID, and device key as configuration parameters.]
-        this.config = new DeviceClientConfig(
-                iotHubHostname, deviceId, deviceKey);
+        this.config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
         // Codes_SRS_DEVICECLIENT_11_046: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
         // Codes_SRS_DEVICECLIENT_11_004: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
         switch (protocol)
@@ -354,6 +336,10 @@ public final class DeviceClient
             case AMQPS:
                 this.transport = new AmqpsTransport(this.config);
                 current_receive_period_millis = DEFAULT_RECEIVE_PERIOD_MILLIS_AMQPS;
+                break;
+            case MQTT:
+                this.transport = new MqttTransport(this.config);
+                current_receive_period_millis = DEFAULT_RECEIVE_PERIOD_MILLIS_MQTT;
                 break;
             default:
                 // should never happen.

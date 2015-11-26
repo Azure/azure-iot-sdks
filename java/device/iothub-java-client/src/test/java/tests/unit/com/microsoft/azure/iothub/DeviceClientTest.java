@@ -34,6 +34,7 @@ public class DeviceClientTest
 
     // Tests_SRS_DEVICECLIENT_11_042: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', with keys and values separated by '='.]
     // Tests_SRS_DEVICECLIENT_11_043: [The constructor shall save the IoT Hub hostname as the value of 'HostName' in the connection string.]
+    // Tests_SRS_DEVICECLIENT_15_053: [If no value for 'GatewayHostName' is found in the connection string, the function shall continue setting up the other parameters.]
     @Test
     public void connStringConstructorSavesHostname(
             @Mocked final AmqpsTransport mockTransport)
@@ -49,7 +50,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new DeviceClientConfig(expectedHostname, anyString, anyString);
+                new DeviceClientConfig(expectedHostname, anyString, anyString, anyString);
             }
         };
     }
@@ -70,7 +71,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new DeviceClientConfig(anyString, expectedDeviceId, anyString);
+                new DeviceClientConfig(anyString, anyString, expectedDeviceId, anyString);
             }
         };
     }
@@ -91,8 +92,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new DeviceClientConfig(anyString, anyString,
-                        expectedSharedAccessKey);
+                new DeviceClientConfig(anyString, anyString, anyString, expectedSharedAccessKey);
             }
         };
     }
@@ -194,124 +194,24 @@ public class DeviceClientTest
         new DeviceClient(connString, null);
     }
 
-    // Tests_SRS_DEVICECLIENT_11_052: [The constructor shall save the IoT Hub hostname, device ID, and device key as configuration parameters.]
+    // Tests_SRS_DEVICECLIENT_11_042: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', with keys and values separated by '='.]
+    // Tests_SRS_DEVICECLIENT_15_052: [The constructor shall save the Protocol Gateway hostname as the value of ' GatewayHostName' in the connection string.]
     @Test
-    public void constructorSavesConfigParams(
-            @Mocked final AmqpsTransport mockTransport)
-            throws URISyntaxException
+    public void connStringConstructorSavesGatewayHostname() throws URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                        + "SharedAccessKey=adjkl234j52=;GatewayHostName=testGatewayHostNAme";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
-        new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        new DeviceClient(connString, protocol);
 
+        final String expectedGatewayHostName = "testGatewayHostNAme";
         new Verifications()
         {
             {
-                new DeviceClientConfig(iotHubHostname, deviceId,
-                        deviceKey);
+                new DeviceClientConfig(anyString, expectedGatewayHostName, anyString, anyString);
             }
         };
-    }
-
-    // Tests_SRS_DEVICECLIENT_11_004: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
-    @Test
-    public void constructorInitializesHttpsTransport(
-            @Mocked final HttpsTransport mockTransport)
-            throws URISyntaxException
-    {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
-
-        new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
-
-        new Verifications()
-        {
-            {
-                new HttpsTransport((DeviceClientConfig) any);
-            }
-        };
-    }
-
-    // Tests_SRS_DEVICECLIENT_11_004: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
-    @Test
-    public void constructorInitializesAmqpsTransport(
-            @Mocked final AmqpsTransport mockTransport)
-            throws URISyntaxException
-    {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
-        new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
-
-        new Verifications()
-        {
-            {
-                new AmqpsTransport((DeviceClientConfig) any);
-            }
-        };
-    }
-
-    // Tests_SRS_DEVICECLIENT_11_025: [If iotHubHostname is null, the constructor shall throw an IllegalArgumentException.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorRejectsNullIotHubHostname(
-            @Mocked final AmqpsTransport mockTransport)
-            throws URISyntaxException
-    {
-        final String iotHubHostname = null;
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
-        new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
-    }
-
-    // Tests_SRS_DEVICECLIENT_11_026: [If deviceId is null, the constructor shall throw an IllegalArgumentException.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorRejectsNullDeviceId(
-            @Mocked final AmqpsTransport mockTransport)
-            throws URISyntaxException
-    {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = null;
-        final String deviceKey = "test-devicekey";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
-        new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
-    }
-
-    // Tests_SRS_DEVICECLIENT_11_027: [If deviceKey is null, the constructor shall throw an IllegalArgumentException.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorRejectsNullDeviceKey(
-            @Mocked final AmqpsTransport mockTransport)
-            throws URISyntaxException
-    {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = null;
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
-        new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
-    }
-
-    // Tests_SRS_DEVICECLIENT_11_034: [If protocol is null, the constructor shall throw an IllegalArgumentException.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorRejectsNullProtocol(
-            @Mocked final AmqpsTransport mockTransport)
-            throws URISyntaxException
-    {
-        final String iotHubHostname = "test-iothub-name";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
-        final IotHubClientProtocol protocol = null;
-
-        new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
     }
 
     // Tests_SRS_DEVICECLIENT_11_035: [The function shall open the transport to communicate with an IoT Hub.]
@@ -323,13 +223,11 @@ public class DeviceClientTest
             @Mocked final IotHubSendTask mockTask)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                        + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
 
         final AmqpsTransport expectedTransport = mockTransport;
@@ -350,13 +248,12 @@ public class DeviceClientTest
             @Mocked final IotHubSendTask mockTask)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                        + "SharedAccessKey=adjkl234j52=";
+
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
 
         final long expectedSendPeriodMillis = 5000l;
@@ -379,13 +276,11 @@ public class DeviceClientTest
             @Mocked final IotHubSendTask mockTask)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                        + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
 
         final long expectedReceivePeriodMillis = 5000l;
@@ -408,9 +303,8 @@ public class DeviceClientTest
             @Mocked final IotHubSendTask mockTask)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         new NonStrictExpectations()
         {
@@ -420,8 +314,7 @@ public class DeviceClientTest
             }
         };
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
     }
 
@@ -434,13 +327,10 @@ public class DeviceClientTest
             @Mocked final IotHubSendTask mockTask)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
         client.open();
 
@@ -464,9 +354,8 @@ public class DeviceClientTest
             @Mocked final IotHubReceiveTask mockReceiveTask)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
         new NonStrictExpectations()
         {
@@ -476,8 +365,7 @@ public class DeviceClientTest
             }
         };
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
         client.close();
 
@@ -500,9 +388,8 @@ public class DeviceClientTest
             @Mocked final IotHubReceiveTask mockReceiveTask)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
         new NonStrictExpectations()
         {
@@ -512,8 +399,7 @@ public class DeviceClientTest
             }
         };
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
         client.close();
 
@@ -535,9 +421,8 @@ public class DeviceClientTest
             @Mocked final IotHubReceiveTask mockReceiveTask)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         new NonStrictExpectations()
         {
@@ -547,8 +432,7 @@ public class DeviceClientTest
             }
         };
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.close();
 
         final AmqpsTransport expectedTransport = mockTransport;
@@ -570,9 +454,8 @@ public class DeviceClientTest
             @Mocked final IotHubReceiveTask mockReceiveTask)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         new NonStrictExpectations()
         {
@@ -582,8 +465,7 @@ public class DeviceClientTest
             }
         };
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
         client.close();
         client.close();
@@ -607,14 +489,12 @@ public class DeviceClientTest
             @Mocked final IotHubEventCallback mockCallback)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
         client.sendEventAsync(mockMsg, mockCallback, context);
 
@@ -634,14 +514,12 @@ public class DeviceClientTest
             @Mocked final IotHubEventCallback mockCallback)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
         client.sendEventAsync(null, mockCallback, context);
     }
@@ -655,14 +533,12 @@ public class DeviceClientTest
             @Mocked final IotHubEventCallback mockCallback)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.sendEventAsync(mockMsg, mockCallback, context);
     }
 
@@ -675,9 +551,8 @@ public class DeviceClientTest
             @Mocked final IotHubEventCallback mockCallback)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
@@ -688,8 +563,7 @@ public class DeviceClientTest
             }
         };
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
         client.close();
         client.sendEventAsync(mockMsg, mockCallback, context);
@@ -703,14 +577,12 @@ public class DeviceClientTest
             @Mocked final MessageCallback mockCallback)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.setMessageCallback(mockCallback, context);
 
         new Verifications()
@@ -729,14 +601,12 @@ public class DeviceClientTest
             @Mocked final MessageCallback mockCallback)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.setMessageCallback(mockCallback, context);
 
         new Verifications()
@@ -755,14 +625,12 @@ public class DeviceClientTest
             @Mocked final AmqpsTransport mockTransport)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.setMessageCallback(null, context);
     }
 
@@ -773,13 +641,11 @@ public class DeviceClientTest
             @Mocked final AmqpsTransport mockTransport)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
 
         long someMiliseconds = 4;
         client.setOption(null, someMiliseconds);
@@ -792,13 +658,11 @@ public class DeviceClientTest
             @Mocked final HttpsTransport mockTransport)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
 
         long someMiliseconds = 4;
         client.setOption("thisIsNotAHandledOption", someMiliseconds);
@@ -811,14 +675,12 @@ public class DeviceClientTest
             @Mocked final AmqpsTransport mockTransport)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         long someMiliseconds = 4;
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
 
             client.setOption("SetMinimumPollingInterval", someMiliseconds);
 
@@ -831,13 +693,11 @@ public class DeviceClientTest
             @Mocked final HttpsTransport mockTransport)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.setOption("SetMinimumPollingInterval", "thisIsNotALong");
     }
 
@@ -848,13 +708,11 @@ public class DeviceClientTest
             @Mocked final HttpsTransport mockTransport)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
         long value = 3;
         client.setOption("SetMinimumPollingInterval", value);
@@ -867,13 +725,11 @@ public class DeviceClientTest
             @Mocked final HttpsTransport mockTransport)
             throws IOException, URISyntaxException
     {
-        final String iotHubHostname = "test-iothubhostname";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
 
-        DeviceClient client =
-                new DeviceClient(iotHubHostname, deviceId, deviceKey, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol);
         long value = 3;
         client.setOption("SetMinimumPollingInterval", value);
 

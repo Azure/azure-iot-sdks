@@ -27,6 +27,7 @@ Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
 	)
 )
 
+echo Deleting any existing .nupkg files...
 del *.nupkg
 
 rem -- Copy all Win32 files from cmake build directory to the repo directory
