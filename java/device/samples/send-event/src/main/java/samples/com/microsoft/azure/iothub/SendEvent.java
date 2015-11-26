@@ -3,18 +3,11 @@
 
 package samples.com.microsoft.azure.iothub;
 
-import com.microsoft.azure.iothub.DeviceClient;
-import com.microsoft.azure.iothub.IotHubClientProtocol;
-import com.microsoft.azure.iothub.Message;
-import com.microsoft.azure.iothub.IotHubStatusCode;
-import com.microsoft.azure.iothub.IotHubEventCallback;
+import com.microsoft.azure.iothub.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.Scanner;
-
-import javax.naming.SizeLimitExceededException;
 
 
 /** Sends a number of event messages to an IoT Hub. */
@@ -36,7 +29,7 @@ public class SendEvent
      * use HTTPS transport.
      *
      * @param args args[0] = IoT Hub connection string; args[1] = number of
-     * requests to send; args[2] = protocol (one of 'https' or 'amqps',
+     * requests to send; args[2] = protocol (one of 'https' or 'amqps' or 'mqtt',
      * optional).
      */
     public static void main(String[] args)
@@ -84,6 +77,10 @@ public class SendEvent
             else if (protocolStr.equals("amqps"))
             {
                 protocol = IotHubClientProtocol.AMQPS;
+            }
+            else if (protocolStr.equals("mqtt"))
+            {
+                protocol = IotHubClientProtocol.MQTT;
             }
             else
             {
@@ -140,6 +137,7 @@ public class SendEvent
 
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
+
         client.close();
 
         System.out.println("Shutting down...");
