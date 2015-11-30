@@ -18,57 +18,83 @@ import java.net.URISyntaxException;
 /** Unit tests for IoTHubClientConfig. */
 public class DeviceClientConfigTest
 {
-    // Tests_SRS_DEVICECLIENTCONFIG_11_014: [If the IoT Hub hostname is not a valid URI, the constructor shall throw a URISyntaxException.]
+    // Tests_SRS_DEVICECLIENTCONFIG_11_014: [If the IoT Hub hostname is not a valid URI,
+    // the constructor shall throw a URISyntaxException.]
     @Test(expected = URISyntaxException.class)
     public void constructorFailsForInvalidHostname() throws URISyntaxException
     {
         final String illegalIotHubHostname = "test.iothubhostname}{";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        new DeviceClientConfig(illegalIotHubHostname, deviceId, deviceKey);
+        new DeviceClientConfig(illegalIotHubHostname, gatewayHostName, deviceId, deviceKey);
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_11_015: [If the IoT Hub hostname does not contain a '.', the function shall throw an IllegalArgumentException.]
+    // Tests_SRS_DEVICECLIENTCONFIG_11_015: [If the IoT Hub hostname does not contain a '.',
+    // the function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
     public void constructorFailsForHostnameWithoutIotHubName()
             throws URISyntaxException
     {
         final String illegalIotHubHostname = "badiothubhostname";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        new DeviceClientConfig(illegalIotHubHostname, deviceId, deviceKey);
+        new DeviceClientConfig(illegalIotHubHostname, gatewayHostName, deviceId, deviceKey);
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_11_001: [The constructor shall save the IoT Hub hostname, device ID, and device key.]
+    // Tests_SRS_DEVICECLIENTCONFIG_11_001: [The constructor shall save the IoT Hub hostname,
+    // Protocol Gateway hostname, device ID, and device key.]
     // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
     @Test
     public void getIotHubHostnameReturnsIotHubHostname()
             throws URISyntaxException
     {
         final String iotHubHostname = "test.iothubhostname";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        DeviceClientConfig config =
-                new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
         String testIotHubHostname = config.getIotHubHostname();
 
         final String expectedIotHubHostname = iotHubHostname;
         assertThat(testIotHubHostname, is(expectedIotHubHostname));
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub name given in the constructor, where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.]
+    // Tests_SRS_DEVICECLIENTCONFIG_11_001: [The constructor shall save the IoT Hub hostname,
+    // Protocol Gateway hostname, device ID, and device key.]
+    // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
+    @Test
+    public void getGatewayHostnameReturnsIotHubHostname()
+            throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String gatewayHostName = "testGatewayHostName";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
+        String testGatewayHostName = config.getGatewayHostName();
+
+        final String expectedGatewayHostName = gatewayHostName;
+        assertThat(testGatewayHostName, is(expectedGatewayHostName));
+    }
+
+    // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub name given in the constructor,
+    // where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.]
     @Test
     public void getIotHubNameReturnsIotHubName() throws URISyntaxException
     {
         final String iotHubHostname = "test.iothubhostname";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
         DeviceClientConfig config =
-                new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+                new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
         String testIotHubName = config.getIotHubName();
 
         final String expectedIotHubName = "test";
@@ -80,11 +106,11 @@ public class DeviceClientConfigTest
     public void getDeviceIdReturnsDeviceId() throws URISyntaxException
     {
         final String iotHubHostname = "test.iothubhostname";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        DeviceClientConfig config =
-                new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
         String testDeviceId = config.getDeviceId();
 
         final String expectedDeviceId = deviceId;
@@ -96,11 +122,11 @@ public class DeviceClientConfigTest
     public void getDeviceKeyReturnsDeviceKey() throws URISyntaxException
     {
         final String iotHubHostname = "test.iothubhostname";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        DeviceClientConfig config =
-                new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
         String testDeviceKey = config.getDeviceKey();
 
         final String expectedDeviceKey = deviceKey;
@@ -112,11 +138,11 @@ public class DeviceClientConfigTest
     public void getMessageValidSecsReturnsConstant() throws URISyntaxException
     {
         final String iotHubHostname = "test.iothubhostname";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        DeviceClientConfig config =
-                new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
         long testMessageValidSecs = config.getTokenValidSecs();
 
         final long expectedMessageValidSecs = 600;
@@ -131,15 +157,14 @@ public class DeviceClientConfigTest
             throws URISyntaxException
     {
         final String iotHubHostname = "test.iothubhostname";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        DeviceClientConfig config =
-                new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
-        MessageCallback testCallback =
-                config.getMessageCallback();
+        MessageCallback testCallback = config.getMessageCallback();
 
         final MessageCallback expectedCallback = mockCallback;
         assertThat(testCallback, is(expectedCallback));
@@ -153,11 +178,11 @@ public class DeviceClientConfigTest
             throws URISyntaxException
     {
         final String iotHubHostname = "test.iothubhostname";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        DeviceClientConfig config =
-                new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
         Object testContext = config.getMessageContext();
@@ -171,11 +196,11 @@ public class DeviceClientConfigTest
     public void getReadTimeoutMillisReturnsConstant() throws URISyntaxException
     {
         final String iotHubHostname = "test.iothubhostname";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        DeviceClientConfig config =
-                new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
         int testReadTimeoutMillis = config.getReadTimeoutMillis();
 
         final int expectedReadTimeoutMillis = 240000;
@@ -188,11 +213,11 @@ public class DeviceClientConfigTest
             throws URISyntaxException
     {
         final String iotHubHostname = "test.iothubhostname";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        DeviceClientConfig config =
-                new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
         int testMessageLockTimeoutSecs = config.getMessageLockTimeoutSecs();
 
         final int expectedMessageLockTimeoutSecs = 180;
@@ -200,28 +225,32 @@ public class DeviceClientConfigTest
                 is(expectedMessageLockTimeoutSecs));
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_08_012: [Configuration shall expose an option to define if client will connect to an IoT Hub or an Event Hub directly]
+    // Tests_SRS_DEVICECLIENTCONFIG_08_012: [Configuration shall expose an option to define if client
+    // will connect to an IoT Hub or an Event Hub directly]
     @Test(expected = URISyntaxException.class)
     public void defaultAzureHubTypeIsIoTHub() throws URISyntaxException
     {
         final String illegalIotHubHostname = "test.iothubhostname}{";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        DeviceClientConfig config = new DeviceClientConfig(illegalIotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(illegalIotHubHostname, gatewayHostName, deviceId, deviceKey);
 
         assertThat(config.targetHubType, is(AzureHubType.IoTHub));
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_08_012: [Configuration shall expose an option to define if client will connect to an IoT Hub or an Event Hub directly]
+    // Tests_SRS_DEVICECLIENTCONFIG_08_012: [Configuration shall expose an option to define
+    // if client will connect to an IoT Hub or an Event Hub directly]
     @Test(expected = URISyntaxException.class)
     public void targetHubTypeSetToEventHub() throws URISyntaxException
     {
         final String illegalIotHubHostname = "test.iothubhostname}{";
+        final String gatewayHostName = null;
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
 
-        DeviceClientConfig config = new DeviceClientConfig(illegalIotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(illegalIotHubHostname,gatewayHostName, deviceId, deviceKey);
         config.targetHubType = AzureHubType.EventHub;
 
         assertThat(config.targetHubType, is(AzureHubType.EventHub));
