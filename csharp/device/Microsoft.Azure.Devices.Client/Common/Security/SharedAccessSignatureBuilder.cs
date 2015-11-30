@@ -18,6 +18,10 @@ namespace Microsoft.Azure.Devices.Client
 #else
     using System.Security.Cryptography;
 #endif
+
+#if !NETMF
+#else
+#endif
     using System.Text;
 
     sealed class SharedAccessSignatureBuilder

@@ -51,6 +51,8 @@ namespace Microsoft.Azure.Devices.Client
 
 #if !WINDOWS_UWP && !NETMF
             this.AmqpEndpoint = new UriBuilder(CommonConstants.AmqpsScheme, builder.HostName, AmqpConstants.DefaultSecurePort).Uri;
+#elif NETMF
+            //this.AmqpEndpoint = "amqps://" + this.HostName + ":" + AmqpConstants.DefaultSecurePort;
 #endif
         }
 
@@ -84,6 +86,12 @@ namespace Microsoft.Azure.Devices.Client
             get;
             private set;
         }
+#elif NETMF
+        public string AmqpEndpoint
+        {
+            get;
+            private set;
+        }
 #endif
         public string Audience
         {
@@ -106,6 +114,18 @@ namespace Microsoft.Azure.Devices.Client
         {
             get;
             private set;
+        }
+
+        public string GetUser()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append(this.SharedAccessKeyName ?? WebUtility.UrlEncode(this.DeviceId));
+            stringBuilder.Append(UserSeparator);
+            stringBuilder.Append("sas.");
+            stringBuilder.Append(this.SharedAccessKeyName == null ? "" : "root.");
+            stringBuilder.Append(this.IotHubName);
+
+            return stringBuilder.ToString();
         }
 
         public string GetPassword()
@@ -148,6 +168,8 @@ namespace Microsoft.Azure.Devices.Client
 
             return Task.FromResult(token);
         }
+#elif NETMF
+
 #endif
         public Uri BuildLinkAddress(string path)
         {
