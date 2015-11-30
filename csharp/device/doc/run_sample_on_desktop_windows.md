@@ -34,5 +34,5 @@ Before you get started, you should:
 
 
 [setup-devbox-windows]: devbox_setup.md
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[device-explorer]: ../../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [setup-iothub]: ../../doc/setup_iothub.md
