@@ -250,6 +250,28 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         client.complete(message, done);
       });
     });
+    
+    /*Tests_SRS_NODE_DEVICE_HTTP_16_005: [The getReceiver method shall call the done method passed as argument with the receiver object as a parameter]*/ 
+    /*Tests_SRS_NODE_DEVICE_HTTP_16_006: [The getReceiver method shall return the same unique instance if called multiple times in a row]*/ 
+    describe('#getReceiver', function() {
+      it('returns the same receiver instance if called multiple times', function() {
+        var client = Client.fromConnectionString(goodConnectionString, Transport);
+        var firstInstance = null;
+        var secondInstance = null;
+        
+        client.getReceiver(function(receiver) {
+          firstInstance = receiver;
+        });
+        
+        client.getReceiver(function(receiver) {
+          secondInstance = receiver;
+        });
+        
+        assert.isNotNull(firstInstance);
+        assert.isNotNull(secondInstance);
+        assert.equal(firstInstance, secondInstance);
+      });
+    });
   });
 }
 

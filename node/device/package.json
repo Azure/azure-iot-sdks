@@ -6,12 +6,14 @@
   "license": "MIT",
   "main": "device.js",
   "dependencies": {
-    "azure-iot-common": "^1.0.0-preview.7"
+    "azure-iot-common": "^1.0.0-preview.7",
+    "node-crontab": "^0.0.8"
   },
   "devDependencies": {
     "chai": "^3.3.0",
     "jshint": "^2.8.0",
-    "mocha": "^2.3.3"
+    "mocha": "^2.3.3",
+    "sinon": "^1.17.2"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",

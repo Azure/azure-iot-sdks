@@ -14,7 +14,7 @@ var humidity = 50;
 var externalTemperature = 55;
 
 // Create IoT Hub client
-var client = new device.Client.fromConnectionString(connectionString);
+var client = device.Client.fromConnectionString(connectionString);
 
 // Helper function to print results for an operation
 function printErrorFor(op) {
