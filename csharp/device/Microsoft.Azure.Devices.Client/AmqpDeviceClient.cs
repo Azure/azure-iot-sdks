@@ -26,9 +26,9 @@ namespace Microsoft.Azure.Devices.Client
 
         int eventsDeliveryTag;
 
-        public AmqpDeviceClient(IotHubConnectionString connectionString)
+        public AmqpDeviceClient(IotHubConnectionString connectionString, bool useWebSocketOnly)
         {
-            this.IotHubConnection = connectionCache.GetConnection(connectionString);
+            this.IotHubConnection = connectionCache.GetConnection(connectionString, useWebSocketOnly);
             this.deviceId = connectionString.DeviceId;
             this.openTimeout = IotHubConnection.DefaultOpenTimeout;
             this.operationTimeout = IotHubConnection.DefaultOperationTimeout;
@@ -72,7 +72,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
-            return new AmqpDeviceClient(iotHubConnectionString);
+            return new AmqpDeviceClient(iotHubConnectionString, false);
         }
 
         // This Finalizer gets cancelled when/if the user calls CloseAsync.

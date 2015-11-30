@@ -83,6 +83,8 @@
   <ItemGroup>
     <Compile Include="AmqpClientHelper.cs" />
     <Compile Include="Common\ActionItem.cs" />
+    <Compile Include="Common\Amqp\ClientWebSocketTransport.cs" />
+    <Compile Include="Common\Amqp\WebSocketConstants.cs" />
     <Compile Include="Common\Api\ApiResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -123,6 +125,7 @@
     </Compile>
     <Compile Include="Common\SignalGate.cs" />
     <Compile Include="Common\TrackingHelper.cs" />
+    <Compile Include="Common\Utils.cs" />
     <Compile Include="Common\WaitCallbackActionItem.cs" />
     <Compile Include="CredentialScope.cs" />
     <Compile Include="Common\WebApi\CustomHeaderConstants.cs" />
