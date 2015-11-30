@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString, string deviceId)
         {
-            return CreateFromConnectionString(connectionString, deviceId, TransportType.Amqp);
+            return CreateFromConnectionString(connectionString, deviceId, TransportType.Http1);
         }
         
         /// <summary>
