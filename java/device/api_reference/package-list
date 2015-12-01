@@ -4,3 +4,4 @@ com.microsoft.azure.iothub.net
 com.microsoft.azure.iothub.transport
 com.microsoft.azure.iothub.transport.amqps
 com.microsoft.azure.iothub.transport.https
+com.microsoft.azure.iothub.transport.mqtt
