@@ -25,7 +25,7 @@
   </metadata>
   <files>
     <file src="..\..\..\..\thirdpartynotice.txt" target="thirdpartynotice.txt" />
-    <file src="..\bin\release\Microsoft.Azure.Devices.dll" target="lib\net451\Microsoft.Azure.Devices.dll" />
-    <file src="..\bin\release\Microsoft.Azure.Devices.XML" target="lib\net451\Microsoft.Azure.Devices.XML" />
+    <file src="..\bin\release_delay_sign\Microsoft.Azure.Devices.dll" target="lib\net451\Microsoft.Azure.Devices.dll" />
+    <file src="..\bin\release_delay_sign\Microsoft.Azure.Devices.XML" target="lib\net451\Microsoft.Azure.Devices.XML" />
   </files>
 </package>
