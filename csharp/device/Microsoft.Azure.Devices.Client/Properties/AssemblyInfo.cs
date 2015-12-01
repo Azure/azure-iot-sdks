@@ -23,8 +23,15 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 
 // Product Friends
+#if (DEBUG || RELEASE)
 [assembly: InternalsVisibleTo("Microsoft.Azure.Devices.Client.Test")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+#endif
+
+#if (RELEASE_DELAY_SIGN)
+[assembly: AssemblyDelaySignAttribute(true)]
+[assembly: AssemblyKeyFileAttribute("35MSSharedLib1024.snk")]
+#endif
 
 // Version information for an assembly follows semantic versioning 1.0.0 (because
 // NuGet didn't support semver 2.0.0 before VS 2015). See semver.org for details.
