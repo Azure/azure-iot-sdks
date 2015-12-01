@@ -124,7 +124,7 @@ public class MqttIotHubConnection {
      *
      * @return the status code from sending the event message.
      *
-     * @throws IOException if the MqttIotHubConnectionHandler is not open
+     * @throws IllegalStateException if the MqttIotHubConnectionHandler is not open
      */
     public IotHubStatusCode sendEvent(Message message) throws IllegalStateException
     {

@@ -380,17 +380,11 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
     //==============================================================================
 
     /**
-     * Create Proton message using given content byte array
-     * @param content The content byte array.
-     */
-    public synchronized CompletableFuture<Integer> createBinaryMessage(byte[] content){
-        return this.createBinaryMessage(content, null);
-    }
-
-    /**
      * Create Proton message using given content byte array and messageId
      * @param content The content byte array.
      * @param messageId The message ID of the message.
+     *
+     * @return a CompletableFuture for the sent message.
      */
     public synchronized CompletableFuture<Integer> createBinaryMessage(byte[] content, Object messageId){
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_048: [The function shall lock sending on the AmqpsIotHubConnection.]
