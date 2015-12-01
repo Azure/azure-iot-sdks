@@ -12,7 +12,7 @@ You can leverage the power of the Windows platform and Visual Studio to create i
 
 Before you get started, you should:
 
-- [Setup your IoT Hub][setup-iothub]
+- [Setup your IoT Hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md)
 - Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
 
 ## Setting Up You Device
@@ -62,7 +62,7 @@ On the **Review Changes** dialog, click **OK**, then accept the license terms. T
 
 ## Build and run the Device Explorer tool
 
-You can use the Device Explorer sample application on your Windows desktop machine to create and register a device ID and symmetric key for your device. The Device Explorer interfaces with Azure IoT Hubs, and has some basic capabilities. For more info, check out [How to use Device Explorer][device-explorer].
+You can use the Device Explorer sample application on your Windows desktop machine to create and register a device ID and symmetric key for your device. The Device Explorer interfaces with Azure IoT Hubs, and has some basic capabilities. For more info, check out [How to use Device Explorer](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
 
 - **Device management**: creates device IDs and obtains a list of registered devices on your IoT Hub.
 - **Monitors and consumes data** sent by your devices to your IoT Hub.
