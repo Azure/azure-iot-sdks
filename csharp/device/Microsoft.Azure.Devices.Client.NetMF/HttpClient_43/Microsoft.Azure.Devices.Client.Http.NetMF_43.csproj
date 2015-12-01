@@ -24,7 +24,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE,MF_FRAMEWORK_VERSION_V4_3</DefineConstants>
+    <DefineConstants>TRACE,MF_FRAMEWORK_VERSION_V4_3,NETMF</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
