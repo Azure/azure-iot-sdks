@@ -113,6 +113,18 @@ module.exports = [
         }
     },
     ///////////////////////////////////////////////////
+    // C# Service SDK
+    ///////////////////////////////////////////////////
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "csharp/service/Microsoft.Azure.Devices/Properties/AssemblyInfo.cs",
+        "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
+        "replaceString": function(versions) {
+            return '$1' + versions.csharp.service + '$2';
+        }
+    },
+
+    ///////////////////////////////////////////////////
     // Java Device SDK POM files
     ///////////////////////////////////////////////////
     {

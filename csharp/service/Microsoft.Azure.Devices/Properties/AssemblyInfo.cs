@@ -27,6 +27,10 @@ using System.Runtime.InteropServices;
 // NuGet didn't support semver 2.0.0 before VS 2015). See semver.org for details.
 [assembly: AssemblyInformationalVersion("1.0.0-preview-004")]
 
-// Product Friends
+#if (RELEASE_DELAY_SIGN)
+[assembly: AssemblyDelaySignAttribute(true)]
+[assembly: AssemblyKeyFileAttribute("35MSSharedLib1024.snk")]
+#else
 [assembly: InternalsVisibleTo("Microsoft.Azure.Devices.Api.Test")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+#endif
