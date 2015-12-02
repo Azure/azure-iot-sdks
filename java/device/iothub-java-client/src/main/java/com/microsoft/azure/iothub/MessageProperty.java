@@ -109,6 +109,8 @@ public final class MessageProperty {
     /**
      * Equivalent to property.getName().equalsIgnoreCase(name).
      *
+     * @param name the property name.
+     *
      * @return true if the given name is the property name.
      */
     public boolean hasSameName(String name) {

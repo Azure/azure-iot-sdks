@@ -6,6 +6,7 @@
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var Message = require('azure-iot-common').Message;
 var SharedAccessSignature = require('./shared_access_signature.js');
+var EventEmitter = require('events');
 
 function Response(statusCode) {
   this.statusCode = statusCode;
@@ -18,6 +19,7 @@ function makeError(statusCode) {
 }
 
 function SimulatedHttp(config) {
+  this._receiver = null;
   this.handleRequest = function(done) {
     var sig = SharedAccessSignature.parse(config.sharedAccessSignature);
 
@@ -55,6 +57,11 @@ SimulatedHttp.prototype.receive = function (done) {
   this.handleRequest(function (err, response) {
     done(err, err ? null : new Message(''), response);
   });
+};
+
+SimulatedHttp.prototype.getReceiver = function (done) {
+  if(!this._receiver) { this._receiver = new EventEmitter(); }
+  done(this._receiver);
 };
 
 SimulatedHttp.prototype.sendFeedback = function (feedbackAction, message, done) {

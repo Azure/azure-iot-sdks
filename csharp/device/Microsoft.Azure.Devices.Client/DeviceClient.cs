@@ -31,7 +31,12 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// HyperText Transfer Protocol version 1 transport.
         /// </summary>
-        Http1
+        Http1,
+
+        /// <summary>
+        /// Advanced Message Queuing Protocol transport over WebSocket.
+        /// </summary>
+        Amqp_WebSocket
     }
 
     /// <summary>
@@ -134,12 +139,12 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
-            if (transportType == TransportType.Amqp)
+            if (transportType == TransportType.Amqp || transportType == TransportType.Amqp_WebSocket)
             {
 #if WINDOWS_UWP
                 throw new NotImplementedException();
 #else
-                return new DeviceClient(new AmqpDeviceClient(iotHubConnectionString));
+                return new DeviceClient(new AmqpDeviceClient(iotHubConnectionString, (transportType == TransportType.Amqp_WebSocket) ? true : false));
 #endif
             }
             else if (transportType == TransportType.Http1)

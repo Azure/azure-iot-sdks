@@ -16,7 +16,7 @@ if not defined nuget_feed (
 )
 
 rem -----------------------------------------------------------------------------
-rem -- Delay Sign csharp client
+rem -- Delay Sign csharp device & service clients
 rem -----------------------------------------------------------------------------
 call %build-root%\build\release\delay_sign_csharp.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -28,10 +28,18 @@ call %build-root%\build\release\auto_sign_csharp_client.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
-rem -- Create NuGet Package
+rem -- Create Device Client NuGet Package
 rem -----------------------------------------------------------------------------
 pushd %build-root%\csharp\device\nuget\
 powershell.exe %build-root%\csharp\device\nuget\make_nuget_package.ps1
+if %errorlevel% neq 0 exit /b %errorlevel%
+popd
+
+rem -----------------------------------------------------------------------------
+rem -- Create Service Client NuGet Package
+rem -----------------------------------------------------------------------------
+pushd %build-root%\csharp\service\Microsoft.Azure.Devices\nuget\
+powershell.exe %build-root%\csharp\service\Microsoft.Azure.Devices\nuget\make_nuget_package.ps1
 if %errorlevel% neq 0 exit /b %errorlevel%
 popd
 
@@ -41,7 +49,13 @@ rem ----------------------------------------------------------------------------
 if not defined nuget_feed (
 	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\device\nuget\
 	if %errorlevel% neq 0 exit /b %errorlevel%
+
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\service\Microsoft.Azure.Devices\nuget\
+	if %errorlevel% neq 0 exit /b %errorlevel%
 ) else (
 	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\device\nuget\ --feed %nuget_feed%
+	if %errorlevel% neq 0 exit /b %errorlevel%
+
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\service\Microsoft.Azure.Devices\nuget\ --feed %nuget_feed%
 	if %errorlevel% neq 0 exit /b %errorlevel%
 )

@@ -45,6 +45,18 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_Delay_Sign|AnyCPU'">
+    <OutputPath>bin\Release_Delay_Sign\</OutputPath>
+    <DefineConstants>TRACE;RELEASE_DELAY_SIGN</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\Microsoft.Azure.Devices.Client.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>1591</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Azure.Amqp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Azure.Amqp.1.0.0-preview-003\lib\net451\Microsoft.Azure.Amqp.dll</HintPath>
@@ -83,6 +95,8 @@
   <ItemGroup>
     <Compile Include="AmqpClientHelper.cs" />
     <Compile Include="Common\ActionItem.cs" />
+    <Compile Include="Common\Amqp\ClientWebSocketTransport.cs" />
+    <Compile Include="Common\Amqp\WebSocketConstants.cs" />
     <Compile Include="Common\Api\ApiResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -123,6 +137,7 @@
     </Compile>
     <Compile Include="Common\SignalGate.cs" />
     <Compile Include="Common\TrackingHelper.cs" />
+    <Compile Include="Common\Utils.cs" />
     <Compile Include="Common\WaitCallbackActionItem.cs" />
     <Compile Include="CredentialScope.cs" />
     <Compile Include="Common\WebApi\CustomHeaderConstants.cs" />
