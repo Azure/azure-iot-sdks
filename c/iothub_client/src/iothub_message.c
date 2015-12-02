@@ -32,7 +32,7 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
 
 static bool ContainsOnlyUsAscii(const char* asciiValue)
 {
-    bool result = true;;
+    bool result = true;
     const char* iterator = asciiValue;
     while (iterator != NULL && *iterator != '\0')
     {

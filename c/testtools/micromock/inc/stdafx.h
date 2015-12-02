@@ -24,9 +24,7 @@ typedef CRITICAL_SECTION MICROMOCK_CRITICAL_SECTION;
 #define MicroMockEnterCriticalSection(...) EnterCriticalSection(__VA_ARGS__)
 #define MicroMockLeaveCriticalSection(...) LeaveCriticalSection(__VA_ARGS__)
 
-
-#define MicroMockInitializeCriticalSection(...) InitializeCriticalSectionEx(__VA_ARGS__,2,CRITICAL_SECTION_NO_DEBUG_INFO)
-
+#define MicroMockInitializeCriticalSection(...) InitializeCriticalSection(__VA_ARGS__)
 
 #define MicroMockDeleteCriticalSection(...) DeleteCriticalSection(__VA_ARGS__)
 #else
