@@ -817,9 +817,9 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_HANDLE_DATA* handleData, ST
     {
         bool isFirst = true;
         PDLIST_ENTRY actual;
+		bool keepGoing = true; /*keepGoing gets sometimes to false from within the loop*/
         /*either all the items enter the list or only some*/
         result = MAKE_PAYLOAD_OK; /*optimistically initializing it*/
-        bool keepGoing = true; /*keepGoing gets sometimes to false from within the loop*/
         while (keepGoing && ((actual = handleData->waitingToSend->Flink) != handleData->waitingToSend))
         {
             size_t messageSize;
@@ -1105,6 +1105,9 @@ static void DoEvent(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClien
                             {
                                 size_t i;
                                 bool goOn = true;
+                                const char* msgId;
+                                const char* corrId;
+                                
                                 for (i = 0; (i < count) && goOn; i++)
                                 {
                                     /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_123: [Every property name shall add  to the message size the length of the property name + the length of the property value + 16 bytes.] */
@@ -1149,7 +1152,7 @@ static void DoEvent(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClien
                                 }
 
                                 // Add the Message Id and the Correlation Id
-                                const char* msgId = IoTHubMessage_GetMessageId(message->messageHandle);
+                                msgId = IoTHubMessage_GetMessageId(message->messageHandle);
                                 if (goOn && msgId != NULL)
                                 {
                                     if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, IOTHUB_MESSAGE_ID, msgId) != HTTP_HEADERS_OK)
@@ -1159,7 +1162,7 @@ static void DoEvent(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClien
                                     }
                                 }
 
-                                const char* corrId = IoTHubMessage_GetCorrelationId(message->messageHandle);
+                                corrId = IoTHubMessage_GetCorrelationId(message->messageHandle);
                                 if (goOn && corrId != NULL)
                                 {
                                     if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, IOTHUB_CORRELATION_ID, corrId) != HTTP_HEADERS_OK)

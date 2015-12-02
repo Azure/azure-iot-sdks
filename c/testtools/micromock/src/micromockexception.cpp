@@ -22,7 +22,7 @@ const TCHAR* MicroMockExceptionToString(_In_ MICROMOCK_EXCEPTION exceptionCode)
     switch (exceptionCode)
     {
     default:
-        return "Invalid exception code";
+        return _T("Invalid exception code");
 
     case MICROMOCK_EXCEPTION_INVALID_VALIDATE_BUFFERS:
         return _MACROSTR(MICROMOCK_EXCEPTION_INVALID_VALIDATE_BUFFERS);
