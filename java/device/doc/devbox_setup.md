@@ -5,6 +5,8 @@ This document describes how to prepare your development environment to use the *
 - [Java JDK SE](#installjava)
 - [Maven 3](#installmaven)
 - [Azure IoT device SDK for Java](#installiot)
+	- [Build from source](#installiotsource)
+	- [Include using Maven](#installiotmaven)
 - [Application Samples](#samplecode)
 
 <a name="installjava"/>
@@ -102,6 +104,11 @@ You can verify that the environment variables necessary to run **_Maven 3_** hav
 <a name="installiot"/>
 ## Install Azure IoT device SDK for Java
 
+- There are two ways to get the .jar library for the Azure IoT device SDK. You may either download the source code and build on your machine, or include the project as a dependency in your project if your project is a Maven project. Both methods are described below.
+
+<a name="installiotsource">
+### Build Azure IoT device SDK for Java from Sources
+
 - Get a copy of the **Azure IoT device SDK** from GitHub. You should fetch a copy of the source from the **master** branch of the GitHub repository: <https://github.com/Azure/azure-iot-sdks>
 
 - When you have obtained a copy of the source, you can build the SDK for Java.
@@ -122,15 +129,19 @@ The compiled JAR file with all dependencies bundled in can then be found at:
 
 When you're ready to use the Java SDK in your own project, include this JAR file in your project to use the IoT device SDK.
 
-_In the future, the IoT device SDK for Java will be uploaded to the Maven central repository.
-Then, it can be included as a dependency in your project by including the following block
-in your pom.xml file:_
+<a name="installiotmaven">
+### Get Azure IoT device SDK for Java from Maven (as a dependency)
+_This is the recommended method of including the Azure IoT Device SDK in your project, however this method will only work if your project is a Maven project_
 
+- Navigate to http://search.maven.org, search for **com.microsoft.azure.iothub-java-client** and take not of the latest version number (or the version number of whichever version of the sdk you desire to use).
+
+In your main pom.xml file, add the Azure IoT Device SDK as a dependency using your desired version as follows:
 ```
 <dependency>
     <groupId>com.microsoft.azure.iothub-java-client</groupId>
     <artifactId>iothub-java-client</artifactId>
-    <version>0.2.0</version>
+    <version>1.0.0-preview.7</version>
+	<!--This is the current version number as of the writing of this document. Yours may be different.-->
 </dependency>
 ```
 
