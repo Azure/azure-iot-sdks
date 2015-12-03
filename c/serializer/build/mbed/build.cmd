@@ -14,18 +14,34 @@ rem ----------------------------------------------------------------------------
 rem -- build iothub schema client samples
 rem -----------------------------------------------------------------------------
 
-call %build-root%\samples\temp_sensor_anomaly\mbed\buildsample.bat
+call :compile temp_sensor_anomaly %build-root%\samples\temp_sensor_anomaly\mbed
 if not %errorlevel%==0 exit /b %errorlevel%
 
-call %build-root%\samples\simplesample_amqp\mbed\buildsample.bat
+call :compile simplesample_amqp %build-root%\samples\simplesample_amqp\mbed
 if not %errorlevel%==0 exit /b %errorlevel%
 
-call %build-root%\samples\simplesample_http\mbed\buildsample.bat
+call :compile simplesample_http %build-root%\samples\simplesample_http\mbed
 if not %errorlevel%==0 exit /b %errorlevel%
 
-call %build-root%\samples\remote_monitoring\mbed\buildsample.bat
+call :compile remote_monitoring %build-root%\samples\remote_monitoring\mbed
 if not %errorlevel%==0 exit /b %errorlevel%
 
+goto:eof
 
+rem -----------------------------------------------------------------------------
+rem -- helper subroutines
+rem -----------------------------------------------------------------------------
 
-goto :eof
+:compile
+setlocal EnableExtensions
+set "project_name=%~1"
+set "project_path=%~2"
+set "cmake_project_bin_path=%project_name%_cmake_build"
+
+mkdir %cmake_project_bin_path%
+cd %cmake_project_bin_path%
+cmake %project_path%
+set CMAKE_ERROR_CODE=%ERRORLEVEL%
+cd ..
+exit /b %CMAKE_ERROR_CODE%
+goto:eof

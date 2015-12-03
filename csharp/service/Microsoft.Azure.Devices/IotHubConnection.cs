@@ -32,13 +32,15 @@ namespace Microsoft.Azure.Devices
         readonly AccessRights accessRights;
         readonly FaultTolerantAmqpObject<AmqpSession> faultTolerantSession;
         readonly IOThreadTimer refreshTokenTimer;
+        readonly bool useWebSocketOnly;
 
-        public IotHubConnection(IotHubConnectionString connectionString, AccessRights accessRights)
+        public IotHubConnection(IotHubConnectionString connectionString, AccessRights accessRights, bool useWebSocketOnly)
         {
             this.connectionString = connectionString;
             this.accessRights = accessRights;
             this.faultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
             this.refreshTokenTimer = new IOThreadTimer(s => ((IotHubConnection)s).OnRefreshToken(), this, false);
+            this.useWebSocketOnly = useWebSocketOnly;
         }
 
         internal IotHubConnectionString ConnectionString
@@ -181,35 +183,36 @@ namespace Microsoft.Azure.Devices
             this.refreshTokenTimer.Cancel();
 
             var amqpSettings = this.CreateAmqpSettings();
-            var tlsTransportSettings = this.CreateTlsTransportSettings();
-
-            var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
             TransportBase transport;
-            try
+            if (this.useWebSocketOnly)
             {
-                transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
+                // Try only Amqp transport over WebSocket
+                transport = await this.CreateClientWebSocketTransport(timeoutHelper.RemainingTime());
             }
-            catch (Exception e)
-            {
-                if (Fx.IsFatal(e))
+            else
+            {             
+                var tlsTransportSettings = this.CreateTlsTransportSettings();
+                var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
+                try
                 {
-                    throw;
+                    transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
                 }
+                catch (Exception e)
+                {
+                    if (Fx.IsFatal(e))
+                    {
+                        throw;
+                    }
 
-                // Amqp transport over TCP failed. Retry Amqp transport over WebSocket
-                if (timeoutHelper.RemainingTime() != TimeSpan.Zero)
-                {
-                    Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
-                    var websocket = await this.CreateClientWebSocket(websocketUri, timeoutHelper.RemainingTime());
-                    transport = new ClientWebSocketTransport(
-                        websocket,
-                        this.connectionString.IotHubName,
-                        null,
-                        null);
-                }
-                else
-                {
-                    throw;
+                    // Amqp transport over TCP failed. Retry Amqp transport over WebSocket
+                    if (timeoutHelper.RemainingTime() != TimeSpan.Zero)
+                    {
+                        transport = await this.CreateClientWebSocketTransport(timeoutHelper.RemainingTime());
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
             }
 
@@ -267,6 +270,18 @@ namespace Microsoft.Azure.Devices
             }
 
             return websocket;
+        }
+
+        async Task<TransportBase> CreateClientWebSocketTransport(TimeSpan timeout)
+        {
+            TimeoutHelper timeoutHelper = new TimeoutHelper(timeout);
+            Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
+            var websocket = await this.CreateClientWebSocket(websocketUri, timeoutHelper.RemainingTime());
+            return new ClientWebSocketTransport(
+                websocket,
+                this.connectionString.IotHubName,
+                null,
+                null);
         }
 
         AmqpSettings CreateAmqpSettings()

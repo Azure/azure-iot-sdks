@@ -10,12 +10,16 @@
 
 HANDLE MicroMockCreateMutex(void)
 {
-    return CreateMutex(NULL, FALSE, NULL);
+    return CreateMutexW(NULL, FALSE, NULL);
 }
 
 HANDLE MicroMockCreateGlobalSemaphore(const char* name, unsigned int highWaterCount)
 {
-    HANDLE temp = CreateSemaphore(NULL, highWaterCount, highWaterCount, name);
+    // we need to convert name to unicode to pass it to the OS APIs
+    wchar_t namew[_MAX_PATH+1];
+
+    MultiByteToWideChar(CP_UTF8,0,name,-1,namew,_MAX_PATH+1);
+    HANDLE temp = CreateSemaphoreW(NULL, highWaterCount, highWaterCount, namew);
     return temp;
 }
 

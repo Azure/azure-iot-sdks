@@ -118,8 +118,10 @@ extern jmp_buf g_ExceptionJump;
     const TEST_FUNCTION_DATA TestListHead_##testSuiteName = { NULL, NULL, &STR_CONCAT(TestFunctionData, EXPAND_1(CTEST_DEC(CTEST_DEC(__COUNTER__)))), NULL, CTEST_END_SUITE }; \
 
 #define CTEST_RUN_TEST_SUITE(testSuiteName, ...) \
+{ \
 extern C_LINKAGE TEST_FUNCTION_DATA C2(TestListHead_,FIRST_ARG(testSuiteName)); \
-IF(COUNT_ARG(__VA_ARGS__),__VA_ARGS__ += ,) RunTests(&C2(TestListHead_, FIRST_ARG(testSuiteName)), TOSTRING(FIRST_ARG(testSuiteName)))
+IF(COUNT_ARG(__VA_ARGS__),__VA_ARGS__ += ,) RunTests(&C2(TestListHead_, FIRST_ARG(testSuiteName)), TOSTRING(FIRST_ARG(testSuiteName))); \
+} //
 
 typedef const char* char_ptr;
 typedef void* void_ptr;

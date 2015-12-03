@@ -5,6 +5,7 @@
 
 var Base = require('azure-iot-common').Http;
 var endpoint = require('azure-iot-common').endpoint;
+var HttpReceiver = require('./http_receiver.js');
 
 /*Codes_SRS_NODE_DEVICE_HTTP_05_009: [When any Http method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
 err - the standard JavaScript Error object, with the Node.js http.ServerResponse object attached as the property response]*/
@@ -146,6 +147,7 @@ Http.prototype.sendEventBatch = function (messages, done) {
 };
 
 /**
+ * @deprecated getReceiver should be used instead.
  * The receive method queries the IoT Hub (as the device indicated in the
  * `config` parameter) for the next message in the queue.
  * @param {Object}  config            This is a dictionary containing the
@@ -256,6 +258,18 @@ Http.prototype.sendFeedback = function (action, message, done) {
   /*Codes_SRS_NODE_DEVICE_HTTP_05_008: [If any Http method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
   var request = this._http.buildRequest(method, path, httpHeaders, config.host, handleResponse(done));
   request.end();
+};
+
+/**
+ * This methods gets the unique instance of the receiver that is used to asynchronously retrieve messages from the IoT Hub service.
+ * @param {Function}      done      The callback to be invoked when `getReceiver` completes execution, passing the receiver object as an argument.
+ */
+Http.prototype.getReceiver = function getReceiver (done) {
+  if (!this._receiver) {
+    this._receiver = new HttpReceiver(this._config, this._http);
+  }
+  
+  done(this._receiver);
 };
 
 module.exports = Http;

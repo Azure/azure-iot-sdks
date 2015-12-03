@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifndef WINCE
 #include "iothubtransportamqp.h"
+#else
+#include "iothubtransporthttp.h"
+#endif
 #include "schemalib.h"
 #include "iothub_client.h"
 #include "serializer.h"
@@ -11,6 +15,7 @@
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
+
 
 static const char* deviceId = "[Device Id]";
 static const char* deviceKey = "[Device Key]";
@@ -111,9 +116,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
         }
         else
         {
+			EXECUTE_COMMAND_RESULT executeCommandResult;
+
             memcpy(temp, buffer, size);
             temp[size] = '\0';
-            EXECUTE_COMMAND_RESULT executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
+            executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
             result =
                 (executeCommandResult == EXECUTE_COMMAND_ERROR) ? IOTHUBMESSAGE_ABANDONED :
                 (executeCommandResult == EXECUTE_COMMAND_SUCCESS) ? IOTHUBMESSAGE_ACCEPTED :
@@ -133,14 +140,18 @@ void remote_monitoring_run(void)
     else
     {
 		IOTHUB_CLIENT_CONFIG config;
+		IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
 		config.deviceId = deviceId;
 		config.deviceKey = deviceKey;
 		config.iotHubName = hubName;
 		config.iotHubSuffix = hubSuffix;
+#ifndef WINCE
 		config.protocol = AMQP_Protocol;
-
-		IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_Create(&config);
+#else
+		config.protocol = HTTP_Protocol;
+#endif
+		iotHubClientHandle = IoTHubClient_Create(&config);
         if (iotHubClientHandle == NULL)
         {
             (void)printf("Failed on IoTHubClient_CreateFromConnectionString\r\n");

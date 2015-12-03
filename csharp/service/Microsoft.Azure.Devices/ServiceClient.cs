@@ -5,7 +5,23 @@ namespace Microsoft.Azure.Devices
 {
     using System.Threading;
     using System.Threading.Tasks;
-    
+
+    /// <summary>
+    /// Transport types supported by ServiceClient - Amqp and Amqp over WebSocket only
+    /// </summary>
+    public enum TransportType
+    {
+        /// <summary>
+        /// Advanced Message Queuing Protocol transport.
+        /// </summary>
+        Amqp,
+
+        /// <summary>
+        /// Advanced Message Queuing Protocol transport over WebSocket only.
+        /// </summary>
+        Amqp_WebSocket
+    }
+
     /// <summary>
     /// Contains methods that services can use to send messages to devices
     /// </summary>
@@ -25,8 +41,19 @@ namespace Microsoft.Azure.Devices
         /// <returns></returns>
         public static ServiceClient CreateFromConnectionString(string connectionString)
         {
+            return CreateFromConnectionString(connectionString, TransportType.Amqp);
+        }
+
+        /// <summary>
+        /// Create ServiceClient from the specified connection string using specified Transport Type
+        /// </summary>
+        /// <param name="connectionString">Connection string for the iothub</param>
+        /// <param name="transportType">Specifies whether Amqp or Amqp over Websocket transport is used</param>
+        /// <returns></returns>
+        public static ServiceClient CreateFromConnectionString(string connectionString, TransportType transportType)
+        {
             var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
-            var serviceClient = new AmqpServiceClient(iotHubConnectionString);
+            var serviceClient = new AmqpServiceClient(iotHubConnectionString, (transportType == TransportType.Amqp_WebSocket) ? true : false);
             return serviceClient;
         }
 
