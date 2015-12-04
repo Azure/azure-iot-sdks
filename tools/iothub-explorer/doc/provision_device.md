@@ -38,4 +38,4 @@ iothub-explorer --help
 > Note: Windows users also have the option of using the [Device Explorer][device-explorer] application to provision devices.
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[device-explorer]: ../../DeviceExplorer/doc/provision_device.md
