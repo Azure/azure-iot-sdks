@@ -6,6 +6,7 @@ namespace Microsoft.Azure.Devices.Common
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Reflection;
     using System.Threading;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -136,6 +137,13 @@ namespace Microsoft.Azure.Devices.Common
             {
                 throw new ArgumentOutOfRangeException("size", size, ApiResources.SizeExceedsRemainingBufferSpace.FormatInvariant(remainingBufferSpace));
             }
+        }
+
+        public static string GetClientVersion()
+        {
+            var a = Assembly.GetExecutingAssembly();
+            var attribute = (AssemblyInformationalVersionAttribute)a.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), true)[0];
+            return a.GetName().Name + "/" + attribute.InformationalVersion + ";";
         }
     }
 }

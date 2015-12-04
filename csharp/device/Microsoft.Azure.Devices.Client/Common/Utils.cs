@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+    using System.Reflection;
     using Microsoft.Azure.Devices.Client.Common;
     using Microsoft.Azure.Devices.Client.Extensions;
 
@@ -41,6 +42,13 @@ namespace Microsoft.Azure.Devices.Client
             {
                 throw new ArgumentOutOfRangeException("size", size, Resources.SizeExceedsRemainingBufferSpace.FormatInvariant(remainingBufferSpace));
             }
+        }
+
+        public static string GetClientVersion()
+        {
+            var a = Assembly.GetExecutingAssembly();
+            var attribute = (AssemblyInformationalVersionAttribute)a.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), true)[0];
+            return a.GetName().Name + "/" + attribute.InformationalVersion + ";";
         }
     }
 }
