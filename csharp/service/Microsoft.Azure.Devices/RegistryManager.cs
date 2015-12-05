@@ -28,7 +28,6 @@ namespace Microsoft.Azure.Devices
         /// <summary>
         /// Closes the RegistryManager instance and disposes its resources.
         /// </summary>
-        /// <returns></returns>
         public abstract Task CloseAsync();
 
         /// <summary>
@@ -219,7 +218,7 @@ namespace Microsoft.Azure.Devices
         /// </summary>
         /// <param name="exportBlobContainerUri"></param>
         /// <param name="excludeKeys"></param>
-        /// <returns></returns>
+        /// <returns>JobProperties of the newly created job.</returns>
         public abstract Task<JobProperties> ExportDevicesAsync(string exportBlobContainerUri, bool excludeKeys);
 
         /// <summary>
@@ -228,14 +227,31 @@ namespace Microsoft.Azure.Devices
         /// <param name="exportBlobContainerUri"></param>
         /// <param name="excludeKeys"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <returns>JobProperties of the newly created job.</returns>
         public abstract Task<JobProperties> ExportDevicesAsync(string exportBlobContainerUri, bool excludeKeys, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Creates a new bulk job to import device registrations into the IoT Hub.
+        /// </summary>
+        /// <param name="importBlobContainerUri"></param>
+        /// <param name="outputBlobContainerUri"></param>
+        /// <returns>JobProperties of the newly created job.</returns>
+        public abstract Task<JobProperties> ImportDevicesAsync(string importBlobContainerUri, string outputBlobContainerUri);
+
+        /// <summary>
+        /// Creates a new bulk job to import device registrations into the IoT Hub.
+        /// </summary>
+        /// <param name="importBlobContainerUri"></param>
+        /// <param name="outputBlobContainerUri"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>JobProperties of the newly created job.</returns>
+        public abstract Task<JobProperties> ImportDevicesAsync(string importBlobContainerUri, string outputBlobContainerUri, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets the job with the specified ID.
         /// </summary>
         /// <param name="jobId"></param>
-        /// <returns></returns>
+        /// <returns>JobProperties of the job specified by the provided jobId.</returns>
         public abstract Task<JobProperties> GetJobAsync(string jobId);
 
         /// <summary>
@@ -243,27 +259,26 @@ namespace Microsoft.Azure.Devices
         /// </summary>
         /// <param name="jobId"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <returns>JobProperties of the job specified by the provided jobId.</returns>
         public abstract Task<JobProperties> GetJobAsync(string jobId, CancellationToken cancellationToken);
 
         /// <summary>
         /// List all jobs for the IoT Hub.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>IEnumerable of JobProperties of all jobs for this IoT Hub.</returns>
         public abstract Task<IEnumerable<JobProperties>> GetJobsAsync();
 
         /// <summary>
         /// List all jobs for the IoT Hub.
         /// </summary>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <returns>IEnumerable of JobProperties of all jobs for this IoT Hub.</returns>
         public abstract Task<IEnumerable<JobProperties>> GetJobsAsync(CancellationToken cancellationToken);
 
         /// <summary>
         /// Cancels/Deletes the job with the specified ID.
         /// </summary>
         /// <param name="jobId"></param>
-        /// <returns></returns>
         public abstract Task CancelJobAsync(string jobId);
 
         /// <summary>
@@ -271,7 +286,6 @@ namespace Microsoft.Azure.Devices
         /// </summary>
         /// <param name="jobId"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         public abstract Task CancelJobAsync(string jobId, CancellationToken cancellationToken);
     }
 }

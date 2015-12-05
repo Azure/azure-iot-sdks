@@ -205,6 +205,7 @@
     <Compile Include="ETagHolder.cs" />
     <Compile Include="ExceptionHandlingHelper.cs" />
     <Compile Include="ExportDevicesRequest.cs" />
+    <Compile Include="ExportImportDevice.cs" />
     <Compile Include="ExportImportRequest.cs" />
     <Compile Include="FeedbackBatch.cs" />
     <Compile Include="FeedbackReceiver.cs" />
@@ -216,6 +217,7 @@
     <Compile Include="IAuthorizationHeaderProvider.cs" />
     <Compile Include="IHttpClientHelper.cs" />
     <Compile Include="ImportDevicesRequest.cs" />
+    <Compile Include="ImportMode.cs" />
     <Compile Include="IotHubApiResources.cs" />
     <Compile Include="IotHubConnection.cs" />
     <Compile Include="IotHubConnectionString.cs" />

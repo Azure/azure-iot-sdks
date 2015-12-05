@@ -8,15 +8,18 @@ namespace Microsoft.Azure.Devices
     using Newtonsoft.Json.Converters;
 
     /// <summary>
-    /// Used when executing bulk jobs to delineate available actions.
+    /// Used to delineate job actions.
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum JobType
     {
         [EnumMember(Value = "unknown")]
-        Unknown,
+        Unknown = 0,
 
         [EnumMember(Value = "export")]
         ExportDevices,
+
+        [EnumMember(Value = "import")]
+        ImportDevices,
     }
 }
