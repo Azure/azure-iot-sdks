@@ -6,7 +6,7 @@
   "author": "Microsoft Corp.",
   "license": "MIT",
   "dependencies": {
-    "azure-iot-device": "^1.0.0-preview.7"
+    "azure-iot-device": "1.0.0-preview.8"
   },
   "devDependencies": {
     "jshint": "^2.8.0"

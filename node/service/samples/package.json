@@ -6,6 +6,6 @@
   "author": "Microsoft Corp.",
   "license": "MIT",
   "dependencies": {
-    "azure-iothub": "^1.0.0-preview.4"
+    "azure-iothub": "1.0.0-preview.8"
   }
 }
