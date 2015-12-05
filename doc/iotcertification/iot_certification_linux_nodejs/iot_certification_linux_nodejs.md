@@ -6,17 +6,17 @@ How to certify IoT devices running Linux with Azure IoT SDK
 # Table of Contents
 
 -   [Introduction](#Introduction)
--   [Step 1: Configure Azure IoT Hub](#Step-1:-Configure)
--   [Step 2: Register Device](#Step-2:-Register)
--   [Step 3: Build and validate the sample using Node JS client libraries](#Step-3:-Build)
-    -   [3.1 Load the Azure IoT bits and prerequisites on device](#Step-3-1:-Load)
-    -   [3.2 Build the samples](#Step-3-2:-Build)
-    -   [3.3 Run and Validate the Samples](#Step-3-3:-Run)
--   [Step 4: Package and Share](#Step-4:-Package-Share)
-    -   [4.1 Package build logs and sample test results](#Step-4-1:-Package)
-    -   [4.2 Share package with Engineering Support](#Step-4-2:-Share)
-    -   [4.3 Next steps](#Step-4-3:-Next)
--   [Step 5: Troubleshooting](#Step-5:-Troubleshooting)
+-   [Step 1: Configure Azure IoT Hub](#Configure)
+-   [Step 2: Register Device](#Register)
+-   [Step 3: Build and validate the sample using Node JS client libraries](#Build)
+    -   [3.1 Load the Azure IoT bits and prerequisites on device](#Load)
+    -   [3.2 Build the samples](#BuildSamples)
+    -   [3.3 Run and Validate the Samples](#Run)
+-   [Step 4: Package and Share](#PackageShare)
+    -   [4.1 Package build logs and sample test results](#Package)
+    -   [4.2 Share package with Engineering Support](#Share)
+    -   [4.3 Next steps](#Next)
+-   [Step 5: Troubleshooting](#Troubleshooting)
 
 <a name="Introduction"/>
 # Introduction
@@ -40,7 +40,7 @@ Before executing any of the steps below, read through each process, step by step
 
 ***Note:*** *If you haven’t contacted Microsoft about being an Azure Certified for IoT partner, please submit this [form](<https://iotcert.cloudapp.net/>) first to request it and then follow these instructions.*
 
-<a name="Step-1:-Configure"/>
+<a name="Configure"/>
 # Step 1: Sign Up To Azure IoT Hub
 
 Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service.
@@ -51,10 +51,10 @@ As part of the sign up process, you will receive the connection string.
 
           HostName=[YourIoTHubName];CredentialType=SharedAccessSignature;CredentialScope=[ContosoIotHub];SharedAccessKeyName=[YourAccessKeyName];SharedAccessKey=[YourAccessKey]
 
-<a name="Step-2:-Register"/>
+<a name="Register"/>
 # Step 2: Register Device
 
-In this section, you will register your device using Device Explorer. The Device Explorer is a Windows application that interfaces with Azure IoT Hub and can perform the following operations:
+In this section, you will register your device using DeviceExplorer. The DeviceExplorer is a Windows application that interfaces with Azure IoT Hub and can perform the following operations:
 
 -   Device management
     -   Create new devices
@@ -64,12 +64,12 @@ In this section, you will register your device using Device Explorer. The Device
 -   Monitoring events from your device.
 -   Sending messages to your device.
 
-To run Device Explorer tool, follow the configuration strings as described in  [Step1](#Step-1:-Configure):
+To run DeviceExplorer tool, follow the configuration strings as described in  [Step1](#Configure):
 
 -   IoT Hub Connection String
 
 **Steps:**
-1.   Click [here](<https://github.com/Azure/azure-iot-sdks/blob/develop/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) to download and install Device Explorer.
+1.   Click [here](<https://github.com/Azure/azure-iot-sdks/blob/develop/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) to download and install DeviceExplorer.
 
 2.  Add connection information under the Configuration tab and click the **Update** button.
 
@@ -77,26 +77,26 @@ To run Device Explorer tool, follow the configuration strings as described in  [
 
     a. Click the **Management** tab.
 
-    b. Click **List** button to call the device hub and retrieve a list of devices. If this is your first time, then you shouldn't retrieve anything.
+    b. Your registered devices will be visible in the list. In case your device is not there in the list, click **Refresh** button. If this is your first time, then you shouldn't retrieve anything.
 
     c. Click **Create** button to create a device ID and key.
 
-    d. Once created successfully, device will be listed in device explorer.
+    d. Once created successfully, device will be listed in DeviceExplorer.
 
     e. Right click the device and from context menu select "**Copy connection string for selected device**".
 
     f. Save this information in Notepad. You will need this information in later steps.
 
 ***Not running Windows on your PC?*** - Please send us an email on
-<azureiotcertified@microsoft.com> and we will follow up with you with
+<iotcert@microsoft.com> and we will follow up with you with
 instructions.
 
-<a name="Step-3:-Build"/>
+<a name="Build"/>
 # Step 3: Build and validate the sample using Node JS client libraries
 
 This section walks you through building, deploying and validating the IoT Client SDK on your device running a Linux operating system. You will install necessary prerequisites on your device.  Once done,  you will build and deploy the IoT Client SDK and validate the sample tests required for IoT certification with the Azure IoT SDK.
 
-<a name="Step-3-1:-Load"/>
+<a name="Load"/>
 ## 3.1 Load the Azure IoT bits and prerequisites on device
 
 -   Open a PuTTY session and connect to the device.
@@ -156,7 +156,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 -   Verify that you now have a copy of the source code under the directory ~/azure-iot-sdks.
 
-<a name="Step-3-2:-Build"/>
+<a name="BuildSamples"/>
 ## 3.2 Build the samples
 
 -   To validate the source code run the following commands on the device.
@@ -186,7 +186,7 @@ This section walks you through building, deploying and validating the IoT Client
 
         var connectionString = "[IoT Device Connection String]";
 
--   Replace the above placeholder with device connection string. You can get this from device explorer as explained in [Step 2](#Step-2:-Register), that you copied into Notepad.
+-   Replace the above placeholder with device connection string. You can get this from DeviceExplorer as explained in [Step 2](#Register), that you copied into Notepad.
 
 -   Save your changes by pressing Ctrl+O and when nano prompts you to save it as the same file, just press ENTER.
 
@@ -208,7 +208,7 @@ This section walks you through building, deploying and validating the IoT Client
 
         var connectionString = "[IoT Connection String]";
 
--   Replace the above placeholder with "IoT Hub Connection String" which you used        in  [Step 2](#Step-2:-Register) for device registration.
+-   Replace the above placeholder with "IoT Hub Connection String" which you used        in  [Step 2](#Register) for device registration.
 
 -   Save your changes by pressing Ctrl+O and when nano prompts you to save it as the same file, just press ENTER.
 
@@ -218,58 +218,58 @@ This section walks you through building, deploying and validating the IoT Client
 
         npm link azure-iothub
 
-<a name="Step-3-3:-Run"/>
+<a name="Run"/>
 ## 3.3 Run and Validate the Samples
 
 In this section you will run the Azure IoT client SDK samples to validate communication between your device and Azure IoT Hub service. You will send messages to the Azure IoT Hub service and validate that IoT Hub has successfully receive the data. You will also monitor any messages send from the Azure IoT Hub to client.
 
-**Note:** Take screen shots of all operations, like sample screen shots, performed in below sections. These will be needed in [Step 4](#Step-4-2:-Share)
+**Note:** Take screen shots of all operations, like sample screen shots, performed in below sections. These will be needed in [Step 4](#Share)
 
 ### 3.3.1 Send Device Events to IOT Hub:
 
-1.  Launch the Device Explorer as explained in [Step 2](#Step-2:-Register) and navigate to **Data** tab. Select the device name you created from the drop-down list of device IDs, click **Monitor** button.
+1.  Launch the DeviceExplorer as explained in [Step 2](#Register) and navigate to **Data** tab. Select the device name you created from the drop-down list of device IDs, click **Monitor** button.
 
     ![DeviceExplorer_Monitor](images/3_3_1_01.png)
 
-2.  Device Explorer is now monitoring data sent from the selected device to the IoT Hub.
+2.  DeviceExplorer is now monitoring data sent from the selected device to the IoT Hub.
 
 3.  Run the sample by issuing following command:
 
-        node ~/azure-iot-sdks/node/samples/simple_sample_http.js
+        node ~/azure-iot-sdks/node/device/samples/simple_sample_http.js
 
 4. Verify that data has been successfully sent and received. If any, then you may have incorrectly copied the device hub connection information.
 
    ![Simple_Sample_result_terminal](images/3_3_1_02.png)
 
-5.  Device Explorer should show that IoT Hub has successfully received data sent by sample test.
+5.  DeviceExplorer should show that IoT Hub has successfully received data sent by sample test.
 
     ![Simple_Sample_result_DeviceExplorer](images/3_3_1_03.png)
 
 6.  Run the sample by issuing following command and then repeat step 4 to 5:
 
-        node ~/azure-iot-sdks/node/samples/send_batch_http.js
+        node ~/azure-iot-sdks/node/device/samples/send_batch_http.js
 
     ![Send_Batch_result_terminal](images/3_3_1_04.png)
     ![Send_Batch_result_DeviceExplorer](images/3_3_1_05.png)
 
 7.  Run the sample to register a device by issuing following command:
 
-        node ~/azure-iot-sdks/node/samples/registry_sample.js
+        node ~/azure-iot-sdks/node/service/samples/registry_sample.js
 
 8.  Verify that you receive information for new device created in the messages.
 
-    ![Registry_Sample_result_DeviceExplorer](images/3_3_1_06.png)
+    ![Registry_Sample_result_DeviceExplorer](images/3_3_1_06.PNG)
 
-9.  In Device Explorer, go to Management tab and click List button. Your new device should show up in the list.
+9.  In DeviceExplorer, go to Management tab and click List button. Your new device should show up in the list.
 
     ![Registry_Sample_result_DeviceExplorer](images/3_3_1_07.png)
 
-**Note:** The registry_sample.js sample will create and delete a device. In order to see it in the Device Explorer tool you will need to refresh your devices before the sample finishes running.
+**Note:** The registry_sample.js sample will create and delete a device. In order to see it in the DeviceExplorer tool you will need to refresh your devices before the sample finishes running.
 
 ### 3.3.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your
-    device, go to the **Message To Device** tab in Device Explorer.
+    device, go to the **Message To Device** tab in DeviceExplorer.
 
 2.  Select the device you created using Device ID drop down.
 
@@ -282,10 +282,10 @@ In this section you will run the Azure IoT client SDK samples to validate commun
 
     ![MessageSend_terminal](images/3_3_2_02.png)
 
-<a name="Step-4:-Package-Share"/>
+<a name="PackageShare"/>
 # Step 4: Package and Share
 
-<a name="Step-4-1:-Package"/>
+<a name="Package"/>
 ## 4.1 Package build logs and sample test results
 
 Package following artifacts from your device:
@@ -299,17 +299,17 @@ Package following artifacts from your device:
 
 4.  If you made any changes to above steps for your hardware, send us clear instructions of how to run this sample with your hardware (explicitly highlighting the new steps for customers). As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/node/doc>)
 
-<a name="Step-4-2:-Share"/>
+<a name="Share"/>
 ## 4.2 Share package with Engineering Support
 
-Share the package in email to <azureiotcertified@microsoft.com>.
+Share the package in email to <iotcert@microsoft.com>.
 
-<a name="Step-4-3:-Next"/>
+<a name="Next"/>
 ## 4.3 Next steps
 
 Once you shared the documents with us, we will contact you in the following 48 to 72 business hours with next steps.
 
-<a name="Step-5:-Troubleshooting"/>
+<a name="Troubleshooting"/>
 # Step 5: Troubleshooting
 
-Please contact engineering support on <azureiotcertified@microsoft.com> for help with troubleshooting.
+Please contact engineering support on <iotcert@microsoft.com> for help with troubleshooting.

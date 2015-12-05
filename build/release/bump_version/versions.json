@@ -16,11 +16,11 @@
         "service": "1.0.0-preview.7"
     },
     "node": {
-        "common": "1.0.0-preview.7",
-        "device": "1.0.0-preview.7",
-        "service": "1.0.0-preview.7"
+        "common": "1.0.0-preview.8",
+        "device": "1.0.0-preview.8",
+        "service": "1.0.0-preview.8"
     },
-    "iothub-explorer": "1.0.0-preview.7",
+    "iothub-explorer": "1.0.0-preview.8",
     "device-explorer": "1.0.0-preview.7",
     "github-release": "v1.0.0-preview.7"
 }
