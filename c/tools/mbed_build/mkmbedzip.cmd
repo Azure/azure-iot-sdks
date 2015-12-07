@@ -25,6 +25,8 @@ if not exist "%sample_path%" (
 
 for %%i in ("%sample_path%\..\..\..\..") do set "root_path=%%~fi"
 
+for %%i in ("%sample_path%\..\..\..\..\..\..") do set "repo_root=%%~fi"
+
 call "%~dp0\checkdep.cmd" 7-Zip 7z.exe "%ProgramFiles%\7-Zip"
 if %ERRORLEVEL% neq 0 goto :eof
 
@@ -42,14 +44,14 @@ MKDIR %outdir%
 echo.
 echo Gathering files to zip...
 
-@REM  Copy common code
-COPY %root_path%\common\src\*.c %outdir%
-COPY %root_path%\common\inc\*.h %outdir%
+@REM  Copy shared-Util code
+COPY %repo_root%\azure-c-shared-utility\c\src\*.c %outdir%
+COPY %repo_root%\azure-c-shared-utility\c\inc\*.h %outdir%
 
 @REM  Copy mbed-specific common code
-COPY /Y %root_path%\common\adapters\*mbed.c %outdir%
-COPY /Y %root_path%\common\adapters\*mbed.cpp %outdir%
-COPY /Y %root_path%\common\adapters\wolfssl_connection.* %outdir%
+COPY /Y %repo_root%\azure-c-shared-utility\c\adapters\*mbed.c %outdir%
+COPY /Y %repo_root%\azure-c-shared-utility\c\adapters\*mbed.cpp %outdir%
+COPY /Y %repo_root%\azure-c-shared-utility\c\adapters\wolfssl_connection.* %outdir%
 
 @REM  Copy iothub_client code
 COPY %root_path%\iothub_client\src\*.c %outdir%

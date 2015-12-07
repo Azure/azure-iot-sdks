@@ -15,6 +15,19 @@ Be sure to include Visual C++ and NuGet Package Manager.
 
 - Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest release version.
 
+### Preparing Azure Shared Utility
+
+ 1. Clone the [azure-c-shared-utility](https://github.com/Azure/azure-c-shared-utility.git) in a structure like below:
+
+	\| ...
+
+	\|\-\-\- azure-c-shared-utility
+
+	\|\-\-\- azure-iot-sdk
+ 
+ 2.  On Windows run the build script azure-c-shared-utility/c/build_all/Windows/build.cmd
+     On Linux run the build script azure-c-shared-utility/c/build_all/Linux/build.sh
+
 ### Preparing Qpid Proton libraries in Windows
 
 The AMQP samples require the Qpid Proton-C library.  There are two alternative ways to obtain the library-- via NuGet (recommended) or by downloading the source from GitHub and building it yourself.

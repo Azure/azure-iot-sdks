@@ -178,12 +178,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" />
+  <Import Project="packages\Microsoft.Azure.C.SharedUtility.1.0.0-preview-000\build\native\Microsoft.Azure.C.SharedUtility.targets" Condition="Exists('packages\Microsoft.Azure.C.SharedUtility.1.0.0-preview-000\build\native\Microsoft.Azure.C.SharedUtility.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.C.SharedUtility.1.0.0-preview-000\build\native\Microsoft.Azure.C.SharedUtility.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.C.SharedUtility.1.0.0-preview-000\build\native\Microsoft.Azure.C.SharedUtility.targets'))" />
     <Error Condition="!Exists('packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Apache.QPID.Proton.AzureIot.0.9.0.1-preview-003\build\native\Apache.QPID.Proton.AzureIot.targets'))" />
     <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
     <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets'))" />

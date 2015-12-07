@@ -16,7 +16,7 @@
     <tags>MQTT Microsoft Azure IoT Native x86 native package</tags>
     <dependencies>
 	  <dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.0-preview-006"/>
-	  <dependency id="Microsoft.Azure.IoTHub.Common" version="1.0.0-preview-006"/>
+	  <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.0-preview-006"/>
 	  
     </dependencies>
   </metadata>
