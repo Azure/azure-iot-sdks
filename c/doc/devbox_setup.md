@@ -81,7 +81,7 @@ You can build the Windows samples to verify that your environment is set up corr
 
 This script uses cmake to make a folder called "cmake" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the solution and run tests.
 
-  > Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [Run sample on Windows](run_sample_on_Windows.md).
+  > Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [Run sample on Windows](run_sample_on_desktop_windows.md).
 
 To view the projects and examine the source code, open the **azure_iot_sdks.sln** solution files in Visual Studio.
 
