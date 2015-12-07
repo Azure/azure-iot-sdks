@@ -1,5 +1,4 @@
-<?xml version="1.0"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+<?xml version="1.0"?><package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Eclipse.Paho-C.paho-mqtt3cs</id>
     <version>1.0.3</version>
@@ -17,7 +16,7 @@
       This package only contains the Synchronous mqtt3cs with Security (Using Open SSL).
       Microsoft's contribution to this package was only the packaging for NuGet itself. The library has been developed and is maintained by the Eclipse Foundation.
 	</summary>
-    <releaseNotes></releaseNotes>
+    <releaseNotes/>
     <copyright>Copyright 2015</copyright>
     <tags>MQTT Paho Eclipse Native x86 x64 package</tags>
     <dependencies>

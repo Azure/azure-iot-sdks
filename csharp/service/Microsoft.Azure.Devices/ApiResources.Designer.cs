@@ -61,6 +61,24 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value of this argument must be non-negative..
+        /// </summary>
+        internal static string ArgumentMustBeNonNegative {
+            get {
+                return ResourceManager.GetString("ArgumentMustBeNonNegative", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value of this argument must be positive..
+        /// </summary>
+        internal static string ArgumentMustBePositive {
+            get {
+                return ResourceManager.GetString("ArgumentMustBePositive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The connection string is not well formed..
         /// </summary>
         internal static string ConnectionStringIsNotWellFormed {
@@ -196,6 +214,15 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The specified offset exceeds the buffer size ({0} bytes)..
+        /// </summary>
+        internal static string OffsetExceedsBufferSize {
+            get {
+                return ResourceManager.GetString("OffsetExceedsBufferSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The parameter {0} cannot be null, empty or whitespace..
         /// </summary>
         internal static string ParameterCannotBeNullOrWhitespace {
@@ -219,6 +246,15 @@ namespace Microsoft.Azure.Devices {
         internal static string RegistryManagerInstanceAlreadyClosed {
             get {
                 return ResourceManager.GetString("RegistryManagerInstanceAlreadyClosed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified size exceeds the remaining buffer space ({0} bytes)..
+        /// </summary>
+        internal static string SizeExceedsRemainingBufferSpace {
+            get {
+                return ResourceManager.GetString("SizeExceedsRemainingBufferSpace", resourceCulture);
             }
         }
     }

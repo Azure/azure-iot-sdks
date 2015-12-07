@@ -113,6 +113,18 @@ module.exports = [
         }
     },
     ///////////////////////////////////////////////////
+    // C# Service SDK
+    ///////////////////////////////////////////////////
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "csharp/service/Microsoft.Azure.Devices/Properties/AssemblyInfo.cs",
+        "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
+        "replaceString": function(versions) {
+            return '$1' + versions.csharp.service + '$2';
+        }
+    },
+
+    ///////////////////////////////////////////////////
     // Java Device SDK POM files
     ///////////////////////////////////////////////////
     {
@@ -245,9 +257,7 @@ module.exports = [
             {
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.common;
-                }
+                "replaceString": "node.common"
             }
         ]
     },
@@ -255,9 +265,7 @@ module.exports = [
         "taskType": "jsonReplaceTask",
         "filePath": "node/device/samples/package.json",
         "search": "dependencies.azure-iot-device",
-        "replaceString": function(versions) {
-            return '^' + versions.node.device;
-        }
+        "replaceString": "node.device"
     },
     {
         "taskType": "multiTask",
@@ -271,11 +279,15 @@ module.exports = [
             {
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.common;
-                }
+                "replaceString": "node.common"
             }
         ]
+    },
+    {
+        "taskType": "jsonReplaceTask",
+        "filePath": "node/service/samples/package.json",
+        "search": "dependencies.azure-iothub",
+        "replaceString": "node.service"
     },
     {
         "taskType": "multiTask",
@@ -289,16 +301,12 @@ module.exports = [
             {
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.common;
-                }
+                "replaceString": "node.common"
             },
             {
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iothub",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.service;
-                }
+                "replaceString": "node.service"
             }
         ]
     }

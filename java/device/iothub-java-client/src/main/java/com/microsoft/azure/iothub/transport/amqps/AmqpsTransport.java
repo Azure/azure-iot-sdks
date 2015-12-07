@@ -16,6 +16,7 @@ import com.microsoft.azure.iothub.transport.IotHubTransport;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * <p>
@@ -37,8 +38,8 @@ public final class AmqpsTransport implements IotHubTransport
 
     protected AmqpsTransportState state;
 
-    /** The AMQPS session with an IoT Hub. */
-    protected AmqpsIotHubSession session;
+    /** The {@link AmqpsIotHubConnection} underlying this transport. */
+    protected AmqpsIotHubConnection connection;
 
     /** Messages waiting to be sent to an IoT Hub. */
     protected final Queue<IotHubOutboundPacket> waitingList;
@@ -80,8 +81,12 @@ public final class AmqpsTransport implements IotHubTransport
         }
 
         // Codes_SRS_AMQPSTRANSPORT_11_019: [The function shall open an AMQPS session with the IoT Hub given in the configuration.]
-        this.session = new AmqpsIotHubSession(this.config);
-        this.session.open();
+        this.connection = new AmqpsIotHubConnection(this.config);
+        try {
+            this.connection.open();
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
 
         this.state = AmqpsTransportState.OPEN;
     }
@@ -102,7 +107,9 @@ public final class AmqpsTransport implements IotHubTransport
         }
 
         // Codes_SRS_AMQPSTRANSPORT_11_021: [The function shall close an AMQPS session with the IoT Hub given in the configuration.]
-        this.session.close();
+        if(this.connection != null) {
+            this.connection.close();
+        }
         this.state = AmqpsTransportState.CLOSED;
     }
 
@@ -157,17 +164,29 @@ public final class AmqpsTransport implements IotHubTransport
             throw new IllegalStateException(
                     "AMQPS transport is already closed.");
         }
-        if (this.waitingList.size() <= 0)
-        {
-            return;
-        }
         // Codes_SRS_AMQPSTRANSPORT_11_026: [If the transport had previously encountered any exception or error while open, it shall reopen a new AMQPS session with the IoT Hub given in the configuration.]
-        if (this.state == AmqpsTransportState.CRASHED)
+        synchronized(this)
         {
             // an AMQPS session must be manually managed,
             // so we reopen a new session to avoid encountering corrupted state.
-            this.close();
-            this.open();
+            if (this.state == AmqpsTransportState.CRASHED){
+                try {
+                    if(this.connection != null) {
+                        this.connection.close();
+                    }
+                    this.open();
+                } catch (Throwable e) {
+                    this.connection.close();
+                    this.connection = null;
+                    this.state = AmqpsTransportState.CRASHED;
+                    System.out.println("The Amqps Transport crashed while trying to reopen because: " + e.getMessage());
+                    return;
+                }
+            }
+        }
+        if (this.waitingList.size() <= 0)
+        {
+            return;
         }
 
         // Codes_SRS_AMQPSTRANSPORT_11_004: [The function shall attempt to send every message on its waiting list, one at a time.]
@@ -175,28 +194,46 @@ public final class AmqpsTransport implements IotHubTransport
         {
             while (!this.waitingList.isEmpty())
             {
-                // Codes_SRS_AMQPSTRANSPORT_11_007: [If the IoT Hub could not be reached, the message shall be buffered to be sent again next time.]
-                IotHubOutboundPacket packet = this.waitingList.peek();
+                IotHubOutboundPacket packet = this.waitingList.remove();
+                new Thread(() -> {
+                    // Codes_SRS_AMQPSTRANSPORT_11_006: [For each message being sent, the function shall send the message and add the IoT Hub status code along with the callback and context to the callback list.]
+                    // Codes_SRS_AMQPSTRANSPORT_11_015: [If the IoT Hub could not be reached, the function shall throw an IOException.]
+                    // Codes_SRS_AMQPSTRANSPORT_11_005: [If no AMQPS session exists with the IoT Hub, the function shall establish one.]
+                    IotHubStatusCode status = IotHubStatusCode.ERROR;
 
-                // Codes_SRS_AMQPSTRANSPORT_11_006: [For each message being sent, the function shall send the message and add the IoT Hub status code along with the callback and context to the callback list.]
-                // Codes_SRS_AMQPSTRANSPORT_11_015: [If the IoT Hub could not be reached, the function shall throw an IOException.]
-                // Codes_SRS_AMQPSTRANSPORT_11_005: [If no AMQPS session exists with the IoT Hub, the function shall establish one.]
-                IotHubStatusCode status =
-                        this.session.sendEvent(packet.getMessage());
-
-                IotHubCallbackPacket callbackPacket =
-                        new IotHubCallbackPacket(status, packet.getCallback(),
-                                packet.getContext());
-                this.waitingList.remove();
-                this.callbackList.add(callbackPacket);
+                    try {
+                        CompletableFuture<Boolean> futureStatus = connection.scheduleSend(packet.getMessage().getBytes(), packet.getMessage().messageId);
+                        Boolean result = futureStatus.get();
+                        if(result.booleanValue()){
+                            status = IotHubStatusCode.OK_EMPTY;
+                        }
+                    }
+                    // Codes_SRS_AMQPSTRANSPORT_11_007: [If the IoT Hub could not be reached, the message shall be buffered to be sent again next time.]
+                    catch(IllegalStateException e){
+                        this.waitingList.add(packet);
+                        System.out.println("Failed to send message because: " + e);
+                    }
+                    catch(Exception e){
+                        System.out.println("Failed to send message because: " + e);
+                    }
+                    //Instead of adding to callback packet, just invoke callbacks here in thread.
+                    IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(status, packet.getCallback(), packet.getContext());
+                    IotHubEventCallback callback = callbackPacket.getCallback();
+                    callback.execute(callbackPacket.getStatus(), packet.getContext());
+                }).start();
             }
+
+            //This future completes after all messages on the waiting list have been sent by the underlying Connection
+            Boolean status = this.connection.getCompletionStatus();
         }
         catch (Throwable e)
         {
             // Codes_SRS_AMQPSTRANSPORT_11_034: [If the function throws any exception or error, it shall also close the AMQPS session.]
-            this.session.close();
+            this.connection.close();
+            this.connection = null;
             this.state = AmqpsTransportState.CRASHED;
-            throw e;
+            System.out.println("The Amqps Transport crashed. All previously queued messages will be sent. All unqueued messages will be queued.");
+            throw new IOException(e);
         }
     }
 
@@ -258,20 +295,31 @@ public final class AmqpsTransport implements IotHubTransport
             return;
         }
         // Codes_SRS_AMQPSTRANSPORT_11_031: [If the transport had previously encountered any exception or error while open, it shall reopen a new AMQPS session with the IoT Hub given in the configuration.]
-        if (this.state == AmqpsTransportState.CRASHED)
+        synchronized(this)
         {
             // an AMQPS session must be manually managed,
             // so we reopen a new session to avoid encountering corrupted state.
-            this.close();
-            this.open();
+            if (this.state == AmqpsTransportState.CRASHED){
+                try {
+                    if(this.connection != null) {
+                        this.connection.close();
+                    }
+                    this.open();
+                } catch (Throwable e) {
+                    this.connection.close();
+                    this.connection = null;
+                    this.state = AmqpsTransportState.CRASHED;
+                    return;
+                }
+            }
         }
 
         try
         {
-            // Codes_SRS_AMQPSTRANSPORT_11_014: [If no AMQPS session exists with the IoT Hub, the function shall establish one.] 
+            // Codes_SRS_AMQPSTRANSPORT_11_014: [If no AMQPS session exists with the IoT Hub, the function shall establish one.]
             // Codes_SRS_AMQPSTRANSPORT_11_017: [If the IoT Hub could not be reached, the function shall throw an IOException.]
             // Codes_SRS_AMQPSTRANSPORT_11_010: [The function shall attempt to consume a message from the IoT Hub.]
-            Message message = this.session.receiveMessage();
+            Message message = AmqpsUtilities.protonMessageToMessage((AmqpsMessage) this.connection.consumeMessage());
             // Codes_SRS_AMQPSTRANSPORT_11_011: [If a message is found and a message callback is registered, the function shall invoke the callback on the message.]
             if (message != null)
             {
@@ -279,13 +327,13 @@ public final class AmqpsTransport implements IotHubTransport
                         callback.execute(message, context);
 
                 // Codes_SRS_AMQPSTRANSPORT_11_012: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
-                this.session.sendMessageResult(result);
+                this.connection.sendMessageResult(result);
             }
         }
         catch (Throwable e)
         {
             // Codes_SRS_AMQPSTRANSPORT_11_035: [If the function throws any exception or error, it shall also close the AMQPS session.]
-            this.session.close();
+            this.connection.close();
             this.state = AmqpsTransportState.CRASHED;
             throw e;
         }
@@ -307,12 +355,5 @@ public final class AmqpsTransport implements IotHubTransport
         }
 
         return false;
-    }
-
-    protected AmqpsTransport()
-    {
-        this.waitingList = null;
-        this.callbackList = null;
-        this.config = null;
     }
 }

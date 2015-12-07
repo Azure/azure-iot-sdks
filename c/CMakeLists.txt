@@ -13,6 +13,8 @@ option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (d
 option(skip_unittests "set skip_unittests to ON to skip unittests (default is OFF)[if possible, they are always build]" OFF)
 option(compileOption_C "passes a string to the command line of the C compiler" OFF)
 option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
+SET(PROTON_C_INCLUDES "" CACHE STRING "directory where proton-c include files resides. Not needed if the proton_build.sh file is successfully run")
+SET(PROTON_LIB "qpid-proton" CACHE STRING "name of the qpid c library. This can be a fully qualified path or simply the name of the lib")
 
 #Use solution folders. 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -58,8 +60,8 @@ endif()
 function(includeProton)
 	if(WIN32)
 		include_directories($ENV{proton_path}/qpid-proton/proton-c/include)
-	else()
-		#nothing to do here, it is assumed qpid-proton has been installed and headers and libraries are in the system
+	elseif( NOT "${PRONTON_C_INCLUDES}" STREQUAL "" )
+		include_directories(${PRONTON_C_INCLUDES})
 	endif()
 endfunction(includeProton)
 
@@ -74,7 +76,7 @@ function(linkProton whatExecutableIsBuilding)
 			file(COPY $ENV{proton_path}/qpid-proton/build_x64/proton-c/Debug/qpid-protond.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 		endif()
 	else()
-		target_link_libraries(${whatExecutableIsBuilding} qpid-proton)
+		target_link_libraries(${whatExecutableIsBuilding} ${PROTON_LIB})
 	endif()
 endfunction(linkProton)
 
@@ -101,7 +103,12 @@ endfunction(includeHttp)
 function(linkHttp whatExecutableIsBuilding)
 	includeHttp()
 	if(WIN32)
+    if(WINCE)
+		  target_link_libraries(${whatExecutableIsBuilding} crypt32.lib)
+      target_link_libraries(${whatExecutableIsBuilding} ws2.lib)
+    else()
 		target_link_libraries(${whatExecutableIsBuilding} winhttp.lib)
+    endif()
 	else()
 		target_link_libraries(${whatExecutableIsBuilding} curl)
 	endif()
@@ -163,7 +170,7 @@ endfunction()
 
 function(windows_unittests_add_exe whatIsBuilding)
     link_directories(${whatIsBuilding}_exe ${MICROMOCK_UNITTEST_LIB_DIR} ${CTEST_LIB_DIR} ${SHARED_UTIL_LIB_DIR} $ENV{VCInstallDir}UnitTest/lib)
-
+	
 	add_executable(${whatIsBuilding}_exe
 		${${whatIsBuilding}_cpp_files} 
 		${${whatIsBuilding}_h_files} 
@@ -224,7 +231,7 @@ function(build_test_artifacts whatIsBuilding use_gballoc)
 	else()
 		include_directories(${sharedutil_include_directories})
 	endif()
-	
+
 	#setting output type
 	if(WIN32)
 		#to disable running e2e or longhaul or unittests tests for windows, we build the the same thing as "static library" so it is not picked up by visual studio
@@ -249,7 +256,7 @@ function(build_test_artifacts whatIsBuilding use_gballoc)
 			windows_unittests_add_exe(${whatIsBuilding} ${ARGN})
 		endif()
 	endif()
-
+	
 endfunction(build_test_artifacts)
 
 if(WIN32)

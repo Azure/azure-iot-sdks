@@ -38,7 +38,7 @@ Add the following new **dependency** section after the existing one to include t
 <dependency>
   <groupId>com.microsoft.azure.iothub-java-client</groupId>
   <artifactId>iothub-java-client</artifactId>
-  <version>1.0.0-preview.4</version>
+  <version>1.0.0-preview.7</version>
 </dependency>
 ```
 

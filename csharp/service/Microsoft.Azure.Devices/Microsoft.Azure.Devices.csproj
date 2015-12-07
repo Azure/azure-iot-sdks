@@ -46,6 +46,18 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_Delay_Sign|AnyCPU'">
+    <OutputPath>bin\Release_Delay_Sign\</OutputPath>
+    <DefineConstants>TRACE;RELEASE_DELAY_SIGN</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\Microsoft.Azure.Devices.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>1591</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Azure.Amqp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Azure.Amqp.1.0.0-preview-003\lib\net451\Microsoft.Azure.Amqp.dll</HintPath>
@@ -91,6 +103,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ApiResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Common\Amqp\ClientWebSocketTransport.cs" />
+    <Compile Include="Common\Amqp\WebSocketConstants.cs" />
     <Compile Include="Common\Exceptions\ErrorCode.cs" />
     <Compile Include="Common\PerfectHash.cs" />
     <Compile Include="AuthenticationMechanism.cs" />
@@ -238,6 +252,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Common\Resources.resx" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

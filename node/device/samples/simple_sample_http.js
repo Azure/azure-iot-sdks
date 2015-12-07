@@ -7,7 +7,7 @@ var device = require('azure-iot-device');
 
 var connectionString = '[IoT Hub device connection string]';
 
-var client = new device.Client.fromConnectionString(connectionString);
+var client = device.Client.fromConnectionString(connectionString);
 
 // Create a message and send it to the IoT hub every second
 setInterval(function () {
@@ -23,6 +23,25 @@ setInterval(function () {
 }, 1000);
 
 // Monitor messages from IoT Hub and print them in the console.
+client.getReceiver(function(receiver) {
+  // Example of use of the 'interval' option:
+  receiver.setOptions({ interval: 1, at: null, cron: null, drain: true });
+  
+  // Example of use of the 'at' option:
+  // var date = new Date(new Date().getTime()+ 1000);
+  // receiver.setOptions({ interval: null, at: date, cron: null, drain: true });
+  
+  // Example of use of the 'cron' option:
+  //receiver.setOptions({ interval: null, at: null, cron: "* * * * *", drain: true });
+  receiver.on('message', function(msg) { 
+    console.log('Message: ' + msg.data); 
+    receiver.complete(msg, printResultFor('complete'));
+    // abandon and reject obey the same pattern.
+  });
+  
+  receiver.on('errorReceived', printResultFor('error'));  
+});
+
 setInterval(function () {
   client.receive(function (err, msg, res) {
     if (err) printResultFor('receive')(err, res);

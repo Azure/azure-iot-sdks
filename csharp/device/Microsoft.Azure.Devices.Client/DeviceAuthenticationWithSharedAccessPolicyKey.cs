@@ -3,8 +3,9 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
+    using Microsoft.Azure.Devices.Client.Extensions;
     using System;
-    
+
     /// <summary>
     /// Authentication method that uses a shared access policy key. 
     /// </summary>
@@ -76,7 +77,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetDeviceId(string deviceId)
         {
-            if (string.IsNullOrWhiteSpace(deviceId))
+            if (deviceId.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("deviceId");
             }
@@ -86,22 +87,25 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetKey(string key)
         {
-            if (string.IsNullOrWhiteSpace(key))
+            if (key.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("key");
             }
+
+#if !NETMF
 
             if (!StringValidationHelper.IsBase64String(key))
             {
                 throw new ArgumentException("Key must be base64 encoded");
             }
+#endif
 
             this.key = key;
         }
 
         void SetPolicyName(string policyName)
         {
-            if (string.IsNullOrWhiteSpace(policyName))
+            if (policyName.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException("policyName");
             }

@@ -4,6 +4,7 @@ This document describes how to prepare your development environment to use the *
 
 - [Setting up a Windows development environment](#windows)
 - [Setting up a Linux development environment](#linux)
+- [Setting up a Windows Embedded Compact 2013 development environment](#windowsce)
 - [Sample applications](#samplecode)
 
 <a name="windows"/>
@@ -121,12 +122,53 @@ This script uses **cmake** to make a folder called "cmake" in your home director
 
  > Note: you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
 
+ <a name="windowsce"/>
+ ## Set up a Windows Embedded Compact 2013 development environment
+
+ - Install [Visual Studio 2013][visual-studio]. You can use the free Community Edition if you meet the licensing requirements.
+ Be sure to include Visual C++ and NuGet Package Manager.
+ - Install [Application Builder for Windows Embedded Compact 2013][application-builder]
+ - Install [Toradex Windows Embedded Compact 2013 SDK][toradex-CE8-sdk] or your own SDK.
+ - Install [git](http://www.git-scm.com) making sure git.exe can be run from a command line.
+
+ - Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest release version.
+
+ If you installed a different SDK please check azure-iot-sdks\\c\\build_all\\windowsce\\build.cmd and replace:
+ ```
+ set SDKNAME=TORADEX_CE800
+ set PROCESSOR=arm
+ ```
+ with a reference to the name of the SDK and the processor architecture (arm/x86) you plan to use.
+ 
+ ### Verify your environment
+
+ You can build the Windows samples to verify that your environment is set up correctly.
+
+ 1. Open a Visual Studio 2013 Developer command prompt.
+
+ 2. Navigate to the **c\\build_all\\windowsce** folder in your local copy of the repository.
+
+ 3. Run the following command:
+
+   ```
+   build.cmd --skip-e2e-tests
+   ```
+
+ This script uses cmake to make a folder called "cmake_ce8" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the solution and run tests.
+
+   > Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [running a C sample application on Windows Embedded Compact 2013 on a Toradex module](run_sample_on_toradex_wec2013.md).
+
+ To view the projects and examine the source code, open the **azure_iot_sdks.sln** solution files in Visual Studio.
+
+ You can use one of the sample applications as a template to get started when you are creating your own client applications.
+
 <a name="samplecode"/>
 ## Sample applications
 
 This repository contains various C sample applications that illustrate how to use the Azure IoT device SDK for C. For more information, see the [Read Me][readme].
 
-
 [visual-studio]: https://www.visualstudio.com/
 [readme]: ../readme.md
 [device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[toradex-CE8-sdk]:http://docs.toradex.com/102578
+[application-builder]:http://www.microsoft.com/en-us/download/details.aspx?id=38819

@@ -15,15 +15,11 @@ cd %build-root%
 
 REM -- Java --
 cd %build-root%\java\device
-call mvn verify
+call mvn verify -Dmaven.test.skip=true
 if errorlevel 1 goto :eof
 cd %build-root%
 
 REM -- C --
-echo Y | call %build-root%\c\build_all\windows\build.cmd --run-e2e-tests
+echo Y | call %build-root%\c\build_all\windows\build.cmd --skip-unittests
 if errorlevel 1 goto :eof
 cd %build-root%
-
-REM -- Node.js --
-call %build-root%\build\windows_node.cmd
-if errorlevel 1 goto :eof

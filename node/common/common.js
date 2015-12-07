@@ -9,6 +9,7 @@ module.exports = {
     endpoint: require('./lib/endpoint.js'),
     errors: require('./lib/errors.js'),
     Http: require('./lib/http.js'),
+    Mqtt: require('./lib/mqtt.js'),
     Message: require('./lib/message.js'),
     SharedAccessSignature: require('./lib/shared_access_signature.js'),
     AmqpMessage: require('./lib/amqp_message.js'),

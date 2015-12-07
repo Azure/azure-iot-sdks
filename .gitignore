@@ -206,3 +206,8 @@ java/device/doc/api_reference
 java/service/doc/api_reference
 c/build_all/windows/nuget.exe
 csharp/device/build/nuget.exe
+
+# .NET Micro Framework Emulator files and folders
+OnBoardFlash.dat
+OnBoardFlash.dat.smd
+DOTNETMF_FS_EMULATION*/
