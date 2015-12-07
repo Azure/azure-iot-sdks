@@ -40,10 +40,5 @@ target_link_libraries(simplesample_http
 	iothub_client_http_transport 
 )
 
-if(WIN32)
-	target_link_libraries(simplesample_http ${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil.lib)
-else()
-	target_link_libraries(simplesample_http aziotsharedutil pthread)
-endif()
-
+linkSharedUtil(simplesample_http)
 linkHttp(simplesample_http)

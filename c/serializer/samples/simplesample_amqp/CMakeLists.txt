@@ -33,10 +33,7 @@ link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
 
 add_executable(simplesample_amqp ${simplesample_amqp_c_files} ${simplesample_amqp_h_files})
 
-target_link_libraries(simplesample_amqp serializer iothub_client iothub_client_amqp_transport aziotsharedutil)
-linkProton(simplesample_amqp)
+target_link_libraries(simplesample_amqp serializer iothub_client iothub_client_amqp_transport)
 
-if(WIN32)
-else()
-	target_link_libraries(simplesample_amqp pthread)
-endif()
+linkSharedUtil(simplesample_amqp)
+linkProton(simplesample_amqp)

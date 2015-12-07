@@ -29,11 +29,6 @@ target_link_libraries(temp_sensor_anomaly
 	serializer 
 	iothub_client 
 	iothub_client_http_transport)
-
-if(WIN32)
-	target_link_libraries(temp_sensor_anomaly ${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil.lib)
-else()
-	target_link_libraries(temp_sensor_anomaly aziotsharedutil pthread)
-endif()
 	
+linkSharedUtil(temp_sensor_anomaly)
 linkHttp(temp_sensor_anomaly)

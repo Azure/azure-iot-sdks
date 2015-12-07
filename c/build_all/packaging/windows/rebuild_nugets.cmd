@@ -34,16 +34,10 @@ rem -- Copy all Win32 files from cmake build directory to the repo directory
 xcopy /q /y /R %USERPROFILE%\cmake_Win32\iothub_client\Debug\*.* %client-root%\build_output\c\win32\debug\*.*
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-xcopy /q /y /R %USERPROFILE%\cmake_Win32\common\Debug\*.* %client-root%\build_output\c\win32\debug\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
-
 xcopy /q /y /R %USERPROFILE%\cmake_Win32\serializer\Debug\*.* %client-root%\build_output\c\win32\debug\*.*
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy /q /y /R %USERPROFILE%\cmake_Win32\iothub_client\Release\*.* %client-root%\build_output\c\win32\release\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-xcopy /q /y /R %USERPROFILE%\cmake_Win32\common\Release\*.* %client-root%\build_output\c\win32\release\*.*
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy /q /y /R %USERPROFILE%\cmake_Win32\serializer\Release\*.* %client-root%\build_output\c\win32\release\*.*
@@ -53,16 +47,10 @@ rem -- Copy all x64 files from cmake build directory to the repo directory
 xcopy /q /y /R %USERPROFILE%\cmake_x64\iothub_client\Debug\*.* %client-root%\build_output\c\x64\debug\*.*
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-xcopy /q /y /R %USERPROFILE%\cmake_x64\common\Debug\*.* %client-root%\build_output\c\x64\debug\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
-
 xcopy /q /y /R %USERPROFILE%\cmake_x64\serializer\Debug\*.* %client-root%\build_output\c\x64\debug\*.*
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy /q /y /R %USERPROFILE%\cmake_x64\iothub_client\Release\*.* %client-root%\build_output\c\x64\release\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-xcopy /q /y /R %USERPROFILE%\cmake_x64\common\Release\*.* %client-root%\build_output\c\x64\release\*.*
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy /q /y /R %USERPROFILE%\cmake_x64\serializer\Release\*.* %client-root%\build_output\c\x64\release\*.*
@@ -72,7 +60,6 @@ rem -- Package Nuget
 nuget pack Microsoft.Azure.IoTHub.HttpTransport.nuspec
 nuget pack Microsoft.Azure.IoTHub.AmqpTransport.nuspec
 nuget pack Microsoft.Azure.IoTHub.IoTHubClient.nuspec
-nuget pack Microsoft.Azure.IoTHub.Common.nuspec
 
 rem because nuget cannot access absolute files given by environment variables
 mkdir paho_outputs

@@ -36,14 +36,8 @@ add_executable(simplesample_mqtt ${simplesample_mqtt_c_files} ${simplesample_mqt
 target_link_libraries(simplesample_mqtt 
 	serializer 
 	iothub_client
-	iothub_client_mqtt_transport 
-	aziotsharedutil
 	iothub_client_mqtt_transport
-	iothub_client
 	)
+	
+linkSharedUtil(simplesample_mqtt)
 linkPaho(simplesample_mqtt)
-
-if(WIN32)
-else()
-	target_link_libraries(simplesample_mqtt pthread)
-endif()

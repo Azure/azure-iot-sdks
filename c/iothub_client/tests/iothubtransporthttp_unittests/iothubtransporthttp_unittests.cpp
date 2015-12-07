@@ -63,8 +63,8 @@ namespace BASEIMPLEMENTATION
     #include "doublylinkedlist.c"
     #include "base64.c"
     #include "strings.c"
-    #include "map.c"
     #include "buffer.c"
+    #include "map.c"
 };
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
@@ -554,6 +554,9 @@ public:
         }
     MOCK_METHOD_END(STRING_HANDLE, result2)
 
+    MOCK_STATIC_METHOD_1(, STRING_HANDLE, STRING_new_with_memory, const char*, memory)
+    MOCK_METHOD_END(STRING_HANDLE, BASEIMPLEMENTATION::STRING_new_with_memory(memory) )
+
     MOCK_STATIC_METHOD_1(, STRING_HANDLE, STRING_clone, STRING_HANDLE, handle)
         STRING_HANDLE result2;
         currentSTRING_clone_call++;
@@ -625,8 +628,6 @@ public:
     MOCK_STATIC_METHOD_2(, int, STRING_concat_with_STRING, STRING_HANDLE, s1, STRING_HANDLE, s2)
         currentSTRING_concat_with_STRING_call++;
     MOCK_METHOD_END(int, (((currentSTRING_concat_with_STRING_call > 0) && (currentSTRING_concat_with_STRING_call == whenShallSTRING_concat_with_STRING_fail)) ? __LINE__ : BASEIMPLEMENTATION::STRING_concat_with_STRING(s1, s2)));
-
-
 
 
     MOCK_STATIC_METHOD_1(, int, STRING_empty, STRING_HANDLE, s)
@@ -959,9 +960,20 @@ public:
         result2 = BASEIMPLEMENTATION::BUFFER_length(handle);
     MOCK_METHOD_END(size_t, result2)
 
+    MOCK_STATIC_METHOD_2(, int, BUFFER_pre_build, BUFFER_HANDLE, handle, size_t, size);
+    MOCK_METHOD_END(int, BASEIMPLEMENTATION::BUFFER_pre_build(handle, size))
+
+    MOCK_STATIC_METHOD_2(, int, BUFFER_content, BUFFER_HANDLE, handle, const unsigned char**, content);
+    MOCK_METHOD_END(int, BASEIMPLEMENTATION::BUFFER_content(handle, content))
+
+    MOCK_STATIC_METHOD_2(, int, BUFFER_size, BUFFER_HANDLE, handle, size_t*, size);
+    MOCK_METHOD_END(int, BASEIMPLEMENTATION::BUFFER_size(handle, size))
+
     MOCK_STATIC_METHOD_2(, STRING_HANDLE, Base64_Encode_Bytes, const unsigned char*, source, size_t, size);
         currentBase64_Encode_Bytes_call++;
     MOCK_METHOD_END(STRING_HANDLE, (((currentBase64_Encode_Bytes_call > 0) && (currentBase64_Encode_Bytes_call == whenShallBase64_Encode_Bytes_fail)) ? ((STRING_HANDLE)NULL) : BASEIMPLEMENTATION::Base64_Encode_Bytes(source, size)));
+
+
 
     MOCK_STATIC_METHOD_4(, MAP_RESULT, Map_GetInternals, MAP_HANDLE, handle, const char*const**, keys, const char*const**, values, size_t*, count)
     switch ((uintptr_t)handle)
@@ -1110,6 +1122,7 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , int, STRING_concat_wit
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , int, STRING_empty, STRING_HANDLE, s1);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , const char*, STRING_c_str, STRING_HANDLE, s);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , size_t, STRING_length, STRING_HANDLE, handle);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , STRING_HANDLE, STRING_new_with_memory, const char*, memory);
 
 
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportHttpMocks, , HTTP_HEADERS_HANDLE, HTTPHeaders_Alloc);
@@ -1149,6 +1162,10 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, BUFFER_delete, B
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , int, BUFFER_build, BUFFER_HANDLE, handle, const unsigned char*, source, size_t, size)
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , unsigned char*, BUFFER_u_char, BUFFER_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , size_t, BUFFER_length, BUFFER_HANDLE, handle);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , int, BUFFER_pre_build, BUFFER_HANDLE, handle, size_t, size);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , int, BUFFER_content, BUFFER_HANDLE, handle, const unsigned char**, content);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , int, BUFFER_size, BUFFER_HANDLE, handle, size_t*, size);
+
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , STRING_HANDLE, Base64_Encode_Bytes, const unsigned char*, source, size_t, size);
 
@@ -5911,6 +5928,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
             .IgnoreArgument(1);
 
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
+
         /*starting to prepare the "big" payload*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
@@ -6037,6 +6056,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
+
         /*this is first batched payload*/
         {
             STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(message1.messageHandle));
@@ -6151,6 +6172,8 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
             .IgnoreArgument(1);
+
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
 
         /*starting to prepare the "big" payload*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
@@ -6273,6 +6296,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
             .IgnoreArgument(1);
 
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
+
         /*starting to prepare the "big" payload*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
@@ -6375,6 +6400,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
             .IgnoreArgument(1);
 
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
+
         /*starting to prepare the "big" payload*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
@@ -6465,6 +6492,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
             .IgnoreArgument(1);
 
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
+
         /*starting to prepare the "big" payload*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
@@ -6534,6 +6563,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
             .IgnoreArgument(1);
 
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
+
         /*starting to prepare the "big" payload*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
@@ -6597,6 +6628,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
             .IgnoreArgument(1);
 
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
+
         /*starting to prepare the "big" payload*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
@@ -6652,6 +6685,8 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
             .IgnoreArgument(1);
+
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
 
         /*starting to prepare the "big" payload*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
@@ -6899,6 +6934,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
+
         /*this is first batched payload*/
         {
             STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(message4.messageHandle));
@@ -6990,6 +7027,8 @@ responseContent: a new instance of buffer]
             STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2);
+
+            EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
 
             STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
                 .IgnoreArgument(1);
@@ -7090,6 +7129,9 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
             .IgnoreArgument(1);
+
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG))
+            .ExpectedAtLeastTimes(2);
 
         /*starting to prepare the "big" payload*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
@@ -7261,6 +7303,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG))
+            .ExpectedAtLeastTimes(2);
         /*this is first batched payload*/
         {
             STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(message1.messageHandle));
@@ -7415,6 +7459,9 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG))
+            .ExpectedAtLeastTimes(2);
 
         /*this is first batched payload*/
         {
@@ -7576,6 +7623,9 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, STRING_construct("["));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG))
+            .ExpectedAtLeastTimes(2);
 
         /*this is first batched payload*/
         {
@@ -7963,6 +8013,8 @@ responseContent: a new instance of buffer]
             .IgnoreArgument(3)
             .IgnoreArgument(4);
 
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
+
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, ",\"properties\":"))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "{"))
@@ -8011,6 +8063,8 @@ responseContent: a new instance of buffer]
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
+
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, ",\"properties\":"))
             .IgnoreArgument(1);
@@ -8253,6 +8307,9 @@ responseContent: a new instance of buffer]
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
+
+        EXPECTED_CALL(mocks, STRING_new_with_memory(IGNORED_PTR_ARG))
+            .ExpectedAtLeastTimes(2);
 
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, ",\"properties\":"))
             .IgnoreArgument(1);

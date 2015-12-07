@@ -3,11 +3,6 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-set(TESTTOOL_DIR ${REPO_DIR}/azure-c-shared-utility/c/testtools) 
-set(MICROMOCK_INC_FOLDER ${TESTTOOL_DIR}/micromock/inc)
-set(TESTRUNNERSWITCHER_INC_FOLDER ${TESTTOOL_DIR}/testrunnerswitcher/inc)
-set(CTEST_INC_FOLDER ${TESTTOOL_DIR}/ctest/inc)
-
 #this is CMakeLists for serializer e2e folder
 add_subdirectory(agentmacros_unittests)
 add_subdirectory(agenttypesystem_unittests)
