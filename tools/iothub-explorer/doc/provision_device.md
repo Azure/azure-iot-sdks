@@ -29,6 +29,32 @@ Created device mydevice
 
 Copy the device connection string information for later use. The samples in this repository use connection strings in the format `HostName=hub-name.azure-devices.net;DeviceId=device-id;SharedAccessKey=key`.
 
+## Provision multiple devices in your IoT hub
+
+The iothub-explorer tool also enables you to provision multiple new devices at once. To provision multiple new devices:
+
+1. Create a text file and place the device id of each device you want to provision on a new line within the text file.
+2. Get the connection string for your IoT Hub. See [Setup IoT Hub][setup-iothub] for more details.
+3. Run the following commands in a terminal/shell window from the tools/iothub-explorer folder in the repository using the IoT Hub connection string from the previous step and replacing "path-to-file" with the path to the file created in step 1.
+
+```
+npm install
+node iothub-explorer.js <iothub-connection-string> import <path-to-file> --connection-string
+```
+
+For each device created, you should see a response like this:
+
+```
+Created device mydevice
+
+-
+...
+-
+  connectionString: HostName=<hostname>;DeviceId=mydevice;SharedAccessKey=<device-key>
+```
+Copy the device connection string information for later use.
+
+
 To get help on using the iothub-explorer tool to perform other tasks such as listing devices, deleting devices, and sending commands to devices, enter the following command:
 
 ```
