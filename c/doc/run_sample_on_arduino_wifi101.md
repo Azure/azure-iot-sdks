@@ -44,30 +44,30 @@ This section shows you how to set up a development environment for the Azure IoT
 <a name="build"/>
 ## Build the sample
 
-1. Open the ```simplesample_http``` example in the Arduino IDE, ```File -> Examples -> AzureIoT -> sdk -> simplesample_http```
-2. In ```simplesample_http.ino```, update the following line with your WiFi accesspoint's SSID:
+1. In the Arduino IDE, select ```Arduino/Genuino Zero (Programming Port)``` as the board in the ```Tools -> Board``` menu.
+2. Open the ```simplesample_http``` example in the Arduino IDE, ```File -> Examples -> AzureIoT -> sdk -> simplesample_http```
+3. In ```simplesample_http.ino```, update the following line with your WiFi accesspoint's SSID:
    ```
    char ssid[] = "yourNetwork"; //  your network SSID (name)
    ```
-3. Update the following line with your WiFi accesspoint's password:
+4. Update the following line with your WiFi accesspoint's password:
    ```
    char pass[] = "secretPassword";    // your network password (use for WPA, or use as key for WEP)
    ```
-4. Locate the following code in the ```simplesample_http.c```:
+5. Locate the following code in the ```simplesample_http.c```:
    ```
    static const char* connectionString = "[device connection string]";
    ```
-5. Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
-6. The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to 7repare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
+6. Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
+7. The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
 8. Press the ```Verify``` button in the Arduino IDE to build the sample sketch.  
 
 <a name="deploy"/>
 ## Deploy the sample
 
 1. Follow the steps from the [build](#build) section.
-2. Connect the board to and the WiFi Shield 101 and connect the programming port of the board to your computer with a USB cable.
-3. In the Arduino IDE, select ```Arduino/Genuino Zero (Programming Port)``` as the board in the ```Tools -> Board``` menu.
-4. Select serial port associated with the board in the ```Tools -> Port``` menu.
+2. Connect the board to the WiFi Shield 101 and then connect the programming port of the board to your computer with a USB cable.
+3. Select serial port associated with the board in the ```Tools -> Port``` menu.
 5. Press the ```Upload``` button in the Arduino IDE to build and upload the sample sketch.
 
 <a name="run"/>
