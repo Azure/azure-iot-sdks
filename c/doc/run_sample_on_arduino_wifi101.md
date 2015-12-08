@@ -6,7 +6,7 @@ The following document describes the process of connecting an Arduino WiFi Shiel
 
 - [Requirements](#requirements)
 - [Before you begin](#beforebegin)
-- [Setup the OpenWRT SDK](#setup)
+- [Setup the development environment](#setup)
 - [Build the sample](#build)
 - [Deploy the sample](#deploy)
 - [Run the sample](#run)
@@ -39,24 +39,27 @@ This section shows you how to set up a development environment for the Azure IoT
   * ```RTCZero```
   * ```AzureIoT```
 
-2. Flash the root certificate of the Azure IoT hub host (```<name>.azure-devices.net``` found in Connection String from [earlier](#beforebegin)). Using the instructions available on the ["Firmware/Certificates updater for the Arduino Wifi 101 Shield"](https://github.com/arduino-libraries/WiFi101-FirmwareUpdater#usage) page.
+2. Flash the root certificate of the Azure IoT hub host, ```<name>.azure-devices.net``` found in Connection String from [earlier](#beforebegin), using the instructions available on the ["Firmware/Certificates updater for the Arduino Wifi 101 Shield"](https://github.com/arduino-libraries/WiFi101-FirmwareUpdater#usage) page.
 
- <a name="build"/>
+<a name="build"/>
 ## Build the sample
 
 1. Open the ```simplesample_http``` example in the Arduino IDE, ```File -> Examples -> AzureIoT -> sdk -> simplesample_http```
-2. In ```simplesample_http.ino``` update the following lines with your WiFi accesspoints SSID and password:
+2. In ```simplesample_http.ino```, update the following line with your WiFi accesspoint's SSID:
    ```
    char ssid[] = "yourNetwork"; //  your network SSID (name)
+   ```
+3. Update the following line with your WiFi accesspoint's password:
+   ```
    char pass[] = "secretPassword";    // your network password (use for WPA, or use as key for WEP)
    ```
-3. Locate the following code in the ```simplesample_http.c```:
+4. Locate the following code in the ```simplesample_http.c```:
    ```
    static const char* connectionString = "[device connection string]";
    ```
-4. Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
-5. The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
-6. Press the ```Verify``` button in the Arduino IDE to build the sample sketch.  
+5. Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
+6. The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to 7repare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
+8. Press the ```Verify``` button in the Arduino IDE to build the sample sketch.  
 
 <a name="deploy"/>
 ## Deploy the sample
