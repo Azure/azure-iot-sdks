@@ -49,6 +49,7 @@ How to run the sample applications on:
 - [TI CC3200](doc/run_sample_on_ti_cc3200.md)
 - [openSUSE](doc/run_sample_opensuse.md)
 - [Arduino Yun](doc/run_sample_on_arduino_yun.md)
+- [Arduino WiFi 101 Shield](doc/run_sample_on_arduino_wifi101.md)
 
 ## SDK directory structure
 All C specific resources are located in the **azure-iot-sdks\c** folder. A description of the directories follows:
