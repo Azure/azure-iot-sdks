@@ -13,20 +13,23 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 
 This repository contains the following IoT device SDKs:
 
-- [Azure IoT device SDK for C](c/readme.md)
 - [Azure IoT device SDK for .NET](csharp/device/readme.md)
-- [Azure IoT device SDK for Java](java/device/readme.md)
+- [Azure IoT device SDK for C](c/readme.md)
 - [Azure IoT device SDK for Node.js](node/device/readme.md)
+- [Azure IoT device SDK for Java](java/device/readme.md)
 
 Each language SDK includes sample code and documentation in addition to the library code.
 
-## OS platforms and hardware compatibility
+### OS platforms and hardware compatibility
 
 Azure IoT device SDKs can be used with a broad range of OS platforms and devices. See [OS Platforms and hardware compatibility](doc/tested_configurations.md).
 
 ## Microsoft Azure IoT service SDKs
 
-The IoT Service SDKs for Java and node.js are coming soon.
+The Azure IoT Service SDKs help you to build applications that interact with your devices and manage device identities in your IoT hub.
+
+- [Azure IoT service SDK for Node.js](node/service/readme.md)
+- [Azure IoT service SDK for Java](java/service/readme.md)
 
 **Note:** To manage an IoT hub using a .NET application, use the **Microsoft.Azure.Devices** NuGet package.
 
