@@ -30,7 +30,7 @@ You can either download a pre-built version of Device Explorer or build it yours
 
 ### Download a pre-built version of the Device Explorer application
 
-A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link [Downloads](https://github.com/Azure/azure-iot-sdks/releases) (Scroll down for __DeviceExplorer.msi__). The default installation directory for this application is "C:\Program Files (x86)\Microsoft\DeviceExplorer". You might want to pin the DeviceExplorer.exe application to the taskbar for easier access.
+A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link:  [Downloads](https://github.com/Azure/azure-iot-sdks/releases) (Scroll down for __SetupDeviceExplorer.msi__). The default installation directory for this application is "C:\Program Files (x86)\Microsoft\DeviceExplorer". You might want to pin the DeviceExplorer.exe application to the taskbar for easier access.
 
 
 ### Build the Device Explorer application
