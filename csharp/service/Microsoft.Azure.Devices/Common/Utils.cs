@@ -11,7 +11,7 @@ namespace Microsoft.Azure.Devices.Common
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
-    public static class Utils
+    static class Utils
     {
         public static bool IsValidBase64(string input, out int lengthInBytes)
         {

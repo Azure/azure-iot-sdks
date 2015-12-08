@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Devices.Client.Common;
     using Microsoft.Azure.Devices.Client.Extensions;
 
-    public static class Utils
+    static class Utils
     {
         public static void ValidateBufferBounds(byte[] buffer, int offset, int size)
         {
