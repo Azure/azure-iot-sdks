@@ -321,7 +321,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 msg.Headers.Add(HttpRequestHeader.Authorization.ToString(), this.authenticationHeaderProvider.GetAuthorizationHeader());
 #if !WINDOWS_UWP
-                msg.Headers.Add(HttpRequestHeader.UserAgent.ToString(), Utils.GetClientVersion());
+                msg.Headers.UserAgent.ParseAdd(Utils.GetClientVersion());
 #endif
                 if (modifyRequestMessageAsync != null) await modifyRequestMessageAsync(msg, cancellationToken);
 

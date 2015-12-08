@@ -48,7 +48,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             var a = Assembly.GetExecutingAssembly();
             var attribute = (AssemblyInformationalVersionAttribute)a.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), true)[0];
-            return a.GetName().Name + "/" + attribute.InformationalVersion + ";";
+            return a.GetName().Name + "/" + attribute.InformationalVersion;
         }
     }
 }
