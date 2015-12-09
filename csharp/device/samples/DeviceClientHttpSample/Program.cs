@@ -63,6 +63,12 @@ namespace Microsoft.Azure.Devices.Client.Samples
                     await deviceClient.CompleteAsync(receivedMessage);
                 }
 
+                //  Note: In this sample, the polling interval is set to 
+                //  10 seconds to enable you to see messages as they are sent.
+                //  To enable an IoT solution to scale, you should extend this //  interval. For example, to scale to 1 million devices, set 
+                //  the polling interval to 25 minutes.
+                //  For further information, see
+                //  https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
                 Thread.Sleep(10000);
             }
         }
