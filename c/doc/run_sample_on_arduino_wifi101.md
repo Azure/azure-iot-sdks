@@ -1,4 +1,4 @@
-# Arduino WiFi 101 Shield Setup
+# Arduino WiFi Shield 101 Setup
 
 The following document describes the process of connecting an Arduino WiFi Shield 101 based system to the Azure IoT Hub.
 
