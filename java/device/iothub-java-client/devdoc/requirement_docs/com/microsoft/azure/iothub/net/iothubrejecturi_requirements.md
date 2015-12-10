@@ -22,13 +22,15 @@ public final class IotHubRejectUri
 }
 ```
 
+
 ### IotHubRejectUri
 
 ```java
 public IotHubRejectUri(String iotHubHostname, String deviceId, String eTag; 
 ```
 
-** SRS_IOTHUBREJECTURI_11_001: [The constructor returns a URI with the format `[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2015-08-15-preview` (the query parameters can be in any order).] ** 
+**SRS_IOTHUBREJECTURI_11_001: [**The constructor returns a URI with the format `[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2015-08-15-preview` (the query parameters can be in any order).**]**
+
 
 ### toString
 
@@ -36,7 +38,8 @@ public IotHubRejectUri(String iotHubHostname, String deviceId, String eTag;
 @Override public String toString();
 ```
 
-** SRS_IOTHUBREJECTURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format `[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2015-08-15-preview` (the query parameters can be in any order).] ** 
+**SRS_IOTHUBREJECTURI_11_002: [**The string representation of the IoT Hub event URI shall be constructed with the format `[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2015-08-15-preview` (the query parameters can be in any order).**]**
+
 
 ### getHostname
 
@@ -44,7 +47,8 @@ public IotHubRejectUri(String iotHubHostname, String deviceId, String eTag;
 public String getHostname();
 ```
 
-** SRS_IOTHUBREJECTURI_11_003: [The function shall return the hostname given in the constructor.] ** 
+**SRS_IOTHUBREJECTURI_11_003: [**The function shall return the hostname given in the constructor.**]**
+
 
 ### getPath
 
@@ -52,7 +56,4 @@ public String getHostname();
 public String getPath();
 ```
 
-** SRS_IOTHUBREJECTURI_11_004: [The function shall return a URI with the format `/devices/[deviceId]/messages/devicebound/[eTag]`.] ** 
-
-
-
+**SRS_IOTHUBREJECTURI_11_004: [**The function shall return a URI with the format `/devices/[deviceId]/messages/devicebound/[eTag]`.**]**

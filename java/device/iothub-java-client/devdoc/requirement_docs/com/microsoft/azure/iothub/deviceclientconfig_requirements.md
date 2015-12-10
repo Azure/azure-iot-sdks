@@ -39,11 +39,11 @@ public final class DeviceClientConfig
 public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceKey);
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_001: [The constructor shall save the IoT Hub hostname, Protocol Gateway hostname, device ID, and device key.] **
+** SRS_DEVICECLIENTCONFIG_11_001: [**The constructor shall save the IoT Hub hostname, Protocol Gateway hostname, device ID, and device key.**] **
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_014: [If the IoT Hub hostname and Protocol Gateway hostname are not valid URIs, the constructor shall throw a URISyntaxException.] **
+** SRS_DEVICECLIENTCONFIG_11_014: [**If the IoT Hub hostname and Protocol Gateway hostname are not valid URIs, the constructor shall throw a URISyntaxException.**] **
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_015: [If the IoT Hub hostname does not contain a '.', the function shall throw an IllegalArgumentException.] **
+** SRS_DEVICECLIENTCONFIG_11_015: [**If the IoT Hub hostname does not contain a '.', the function shall throw an IllegalArgumentException.**] **
 
 
 ### targetHubType
@@ -52,7 +52,7 @@ public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceK
 public AzureHubType targetHubType;
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_08_012: [Configuration shall expose an option to define if client will connect to an IoT Hub or an Event Hub directly] **
+** SRS_DEVICECLIENTCONFIG_08_012: [**Configuration shall expose an option to define if client will connect to an IoT Hub or an Event Hub directly] **
 
 
 ### getIotHubHostname
@@ -61,7 +61,7 @@ public AzureHubType targetHubType;
 public String getIotHubHostname();
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.] **
+** SRS_DEVICECLIENTCONFIG_11_002: [**The function shall return the IoT Hub hostname given in the constructor.**] **
 
 
 ### getIotHubName
@@ -70,7 +70,7 @@ public String getIotHubHostname();
 public String getIotHubName();
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub name given in the constructor, where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.] ** 
+** SRS_DEVICECLIENTCONFIG_11_002: [**The function shall return the IoT Hub name given in the constructor, where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.**] ** 
 
 
 ### getDeviceId
@@ -79,7 +79,7 @@ public String getIotHubName();
 public String getDeviceId();
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_003: [The function shall return the device ID given in the constructor.] **
+** SRS_DEVICECLIENTCONFIG_11_003: [**The function shall return the device ID given in the constructor.**] **
 
 
 ### getDeviceKey
@@ -88,7 +88,7 @@ public String getDeviceId();
 public String getDeviceKey();
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_004: [The function shall return the device key given in the constructor.] **
+** SRS_DEVICECLIENTCONFIG_11_004: [**The function shall return the device key given in the constructor.**] **
 
 
 ### getMessageValidSecs
@@ -97,7 +97,7 @@ public String getDeviceKey();
 public long getMessageValidSecs();
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_005: [The function shall return 600s.] **
+** SRS_DEVICECLIENTCONFIG_11_005: [**The function shall return 600s.**] **
 
 
 ### setMessageCallback
@@ -106,7 +106,7 @@ public long getMessageValidSecs();
 public void setMessageCallback(MessageCallback  callback, Object context);
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.] ** 
+** SRS_DEVICECLIENTCONFIG_11_006: [**The function shall set the message callback, with its associated context.**] ** 
 
 
 ### getReadTimeoutMillis
@@ -115,7 +115,7 @@ public void setMessageCallback(MessageCallback  callback, Object context);
 public int getReadTimeoutMillis();
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_012: [The function shall return 240000ms.] **
+** SRS_DEVICECLIENTCONFIG_11_012: [**The function shall return 240000ms.**] **
 
 
 ### getMessageCallback
@@ -124,7 +124,7 @@ public int getReadTimeoutMillis();
 public MessageCallback getMessageCallback();
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_010: [The function shall return the current message callback.] ** 
+** SRS_DEVICECLIENTCONFIG_11_010: [**The function shall return the current message callback.**] ** 
 
 
 ### getMessageContext
@@ -133,7 +133,7 @@ public MessageCallback getMessageCallback();
 public Object getMessageContext();
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_011: [The function shall return the current message context.] **
+** SRS_DEVICECLIENTCONFIG_11_011: [**The function shall return the current message context.**] **
 
 
 ### getMessageLockTimeoutSecs
@@ -142,4 +142,4 @@ public Object getMessageContext();
 public int getMessageLockTimeoutSecs();
 ```
 
-** DeviceClientConfigDEVICECLIENTCONFIG_11_013: [The function shall return 180s.] **
+** SRS_DEVICECLIENTCONFIG_11_013: [**The function shall return 180s.**] **

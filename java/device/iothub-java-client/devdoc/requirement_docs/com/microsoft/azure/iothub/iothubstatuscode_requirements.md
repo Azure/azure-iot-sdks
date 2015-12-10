@@ -26,7 +26,6 @@ public enum IotHubStatusCode
 public static IotHubStatusCode getIotHubStatusCode(int httpsStatus);
 ```
 
-** SRS_IOTHUBSTATUSCODE_11_001: [The function shall convert the given HTTPS status code to the corresponding IoT Hub status code.] ** 
+**SRS_IOTHUBSTATUSCODE_11_001: [**The function shall convert the given HTTPS status code to the corresponding IoT Hub status code.**]**
 
-** SRS_IOTHUBSTATUSCODE_11_002: [If the given HTTPS status code does not map to an IoT Hub status code, the function return status code ERROR.] ** 
-
+**SRS_IOTHUBSTATUSCODE_11_002: [**If the given HTTPS status code does not map to an IoT Hub status code, the function return status code ERROR.**]**

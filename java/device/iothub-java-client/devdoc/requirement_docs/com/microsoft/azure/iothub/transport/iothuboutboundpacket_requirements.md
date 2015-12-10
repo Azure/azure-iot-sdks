@@ -25,7 +25,7 @@ public final class IotHubOutboundPacket
 public IotHubOutboundPacket(Message message, IotHubEventCallback callback, Object callbackContext);
 ```
 
-** SRS_IOTHUBOUTBOUNDPACKET_11_001: [The constructor shall save the message, callback, and callback context.] ** 
+   **SRS_IOTHUBOUTBOUNDPACKET_11_001: [**The constructor shall save the message, callback, and callback context.**]**
 
 
 ### getMessage
@@ -34,7 +34,7 @@ public IotHubOutboundPacket(Message message, IotHubEventCallback callback, Objec
 public Message getMessage();
 ```
 
-** SRS_IOTHUBOUTBOUNDPACKET_11_002: [The function shall return the message given in the constructor.] ** 
+**SRS_IOTHUBOUTBOUNDPACKET_11_002: [**The function shall return the message given in the constructor.**]**
 
 
 ### getCallback
@@ -43,7 +43,7 @@ public Message getMessage();
 public IotHubEventCallback getCallback();
 ```
 
-** SRS_IOTHUBOUTBOUNDPACKET_11_003: [The function shall return the callback given in the constructor.] **
+**SRS_IOTHUBOUTBOUNDPACKET_11_003: [**The function shall return the callback given in the constructor.**]**
 
 
 ### getCallbackContext
@@ -52,4 +52,4 @@ public IotHubEventCallback getCallback();
 public Object getCallbackContext();
 ```
 
-** SRS_IOTHUBOUTBOUNDPACKET_11_004: [The function shall return the callback context given in the constructor.] ** 
+**SRS_IOTHUBOUTBOUNDPACKET_11_004: [**The function shall return the callback context given in the constructor.**]**

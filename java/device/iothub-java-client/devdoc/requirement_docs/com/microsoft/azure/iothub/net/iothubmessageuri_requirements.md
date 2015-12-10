@@ -21,13 +21,15 @@ public final class IotHubMessageUri
 }
 ```
 
+
 ### IotHubMessageUri
 
 ```java
 public IotHubMessageUri(String iotHubHostname, String deviceId); 
 ```
 
-** SRS_IOTHUBMESSAGEURI_11_001: [The constructor returns a URI with the format `[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2015-08-15-preview`.] ** 
+**SRS_IOTHUBMESSAGEURI_11_001: [**The constructor returns a URI with the format `[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2015-08-15-preview`.**]**
+
 
 ### toString
 
@@ -35,7 +37,8 @@ public IotHubMessageUri(String iotHubHostname, String deviceId);
 @Override public String toString();
 ```
 
-** SRS_IOTHUBMESSAGEURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format `[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2015-08-15-preview`.] ** 
+**SRS_IOTHUBMESSAGEURI_11_002: [**The string representation of the IoT Hub event URI shall be constructed with the format `[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2015-08-15-preview`.**]**
+
 
 ### getHostname
 
@@ -43,7 +46,8 @@ public IotHubMessageUri(String iotHubHostname, String deviceId);
 public String getHostname();
 ```
 
-** SRS_IOTHUBMESSAGEURI_11_003: [The function shall return the hostname given in the constructor.] ** 
+**SRS_IOTHUBMESSAGEURI_11_003: [**The function shall return the hostname given in the constructor.**]**
+
 
 ### getPath
 
@@ -51,4 +55,4 @@ public String getHostname();
 public String getPath();
 ```
 
-** SRS_IOTHUBMESSAGEURI_11_004: [The function shall return a URI with the format `/devices/[deviceId]/messages/devicebound`.] ** 
+**SRS_IOTHUBMESSAGEURI_11_004: [**The function shall return a URI with the format `/devices/[deviceId]/messages/devicebound`.**]**

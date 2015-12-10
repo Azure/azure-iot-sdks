@@ -30,7 +30,7 @@ public class HttpsResponse
 public HttpsResponse(int status, String body, Map<String, List<String>> headerFields, String errorReason);
 ```
 
-** SRS_HTTPSRESPONSE_11_001: [The constructor shall store the input arguments so that the getters can return them later.] **
+**SRS_HTTPSRESPONSE_11_001: [**The constructor shall store the input arguments so that the getters can return them later.**]**
 
 
 ### getStatus
@@ -39,7 +39,7 @@ public HttpsResponse(int status, String body, Map<String, List<String>> headerFi
 public int getStatus();
 ```
 
-** SRS_HTTPSRESPONSE_11_002: [The function shall return the status code given in the constructor.] **
+**SRS_HTTPSRESPONSE_11_002: [**The function shall return the status code given in the constructor.**]**
 
 
 ### getBody
@@ -48,7 +48,7 @@ public int getStatus();
 public byte[] getBody();
 ```
 
-** SRS_HTTPSRESPONSE_11_003: [The function shall return a copy of the body given in the constructor.] **
+**SRS_HTTPSRESPONSE_11_003: [**The function shall return a copy of the body given in the constructor.**]**
 
 
 ### getHeaderField
@@ -57,11 +57,11 @@ public byte[] getBody();
 public String getHeaderField(String field);
 ```
 
-** SRS_HTTPSRESPONSE_11_004: [The function shall return a comma-separated list of the values associated with the header field name.] **
+**SRS_HTTPSRESPONSE_11_004: [**The function shall return a comma-separated list of the values associated with the header field name.**]**
 
-** SRS_HTTPSRESPONSE_11_008: [The function shall match the header field name in a case-insensitive manner.] **
+**SRS_HTTPSRESPONSE_11_008: [**The function shall match the header field name in a case-insensitive manner.**]**
 
-** SRS_HTTPSRESPONSE_11_006: [If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.] **
+**SRS_HTTPSRESPONSE_11_006: [**If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.**]**
 
 
 ### getErrorReason
@@ -70,4 +70,4 @@ public String getHeaderField(String field);
 public byte[] getErrorReason();
 ```
 
-** SRS_HTTPSRESPONSE_11_007: [The function shall return the error reason given in the constructor.] **
+**SRS_HTTPSRESPONSE_11_007: [**The function shall return the error reason given in the constructor.**]**
