@@ -61,6 +61,7 @@ Amqp.prototype.connect = function connect(done) {
     .then(function () {
       /*Codes_SRS_NODE_COMMON_AMQP_16_002: [The connect method shall establish a connection with the IoT hub instance and call the done() callback if given as argument] */
       if (done) done();
+      return null;
     })
     .catch(function (err) {
       /*Codes_SRS_NODE_COMMON_AMQP_16_003: [The connect method shall call the done callback if the connection fails.] */
@@ -78,6 +79,7 @@ Amqp.prototype.disconnect = function disconnect(done) {
     .then(function () {
       /*Codes_SRS_NODE_COMMON_AMQP_16_004: [The disconnect method shall call the done callback when the application/service has been successfully disconnected from the service] */
       if (done) done();
+      return null;
     })
     .catch(function (err) {
       /*SRS_NODE_COMMON_AMQP_16_005: [The disconnect method shall call the done callback and pass the error as a parameter if the disconnection is unsuccessful] */
@@ -110,6 +112,7 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
         sender.send(msg)
           .then(function (state) {
               if (done) done(null, state);
+              return null;
             })
             .catch(function (err) {
               /*Codes_SRS_NODE_IOTHUB_AMQPCOMMON_16_007: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
@@ -127,6 +130,7 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
             });
             
             sendAction(this._sender, amqpMessage, done);
+            return null;
           }.bind(this));
       } else {
         sendAction(this._sender, amqpMessage, done);
@@ -165,6 +169,7 @@ Amqp.prototype._setupReceiverLink = function setupReceiverLink(endpoint, done) {
         .then(function (receiver) {
           this._receiver = new AmqpReceiver(receiver);
           done(null, this._receiver);
+          return null;
         }.bind(this))
         .catch(function (err) {
           if (done) done(translateError(err));
