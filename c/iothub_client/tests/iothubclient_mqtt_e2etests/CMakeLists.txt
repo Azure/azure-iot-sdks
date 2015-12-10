@@ -8,7 +8,7 @@ if(NOT (${use_amqp} AND ${use_mqtt}))
 	message(FATAL_ERROR "iothubclient_mqtt_e2etests being generated without AMQP and MQTT support")
 endif()
 
-compileAsC99()
+compileAsC11()
 set(theseTestsName iothubclient_mqtt_e2etests)
 
 set(${theseTestsName}_cpp_files
@@ -25,16 +25,13 @@ include_directories(${IOTHUB_TEST_INC_FOLDER})
 
 build_test_artifacts(${theseTestsName} ON)
 
-
-
-
 if(WIN32)
 	if(TARGET ${theseTestsName}_dll)
 		target_link_libraries(${theseTestsName}_dll
 			iothub_test
 			iothub_client
 			iothub_client_mqtt_transport
-			common
+			${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil
 			iothub_client_mqtt_transport
 		)
 		linkProton(${theseTestsName}_dll)
@@ -46,7 +43,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_mqtt_transport
-			common
+			${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil
 			iothub_client_mqtt_transport
 		)
 		linkProton(${theseTestsName}_exe)
@@ -58,7 +55,7 @@ else()
 			iothub_test
 			iothub_client
 			iothub_client_mqtt_transport
-			common
+			aziotsharedutil
 			iothub_client_mqtt_transport
 		)
 		target_link_libraries(${theseTestsName}_exe pthread)
