@@ -1,6 +1,6 @@
-# Arduino WiFi Shield 101 Setup
+# Arduino WiFi Shield 101 and MKR1000 Setup
 
-The following document describes the process of connecting an Arduino WiFi Shield 101 based system to the Azure IoT Hub.
+The following document describes the process of connecting an Arduino WiFi Shield 101 or MKR1000 based system to the Azure IoT Hub.
 
 ## Table of Contents
 
@@ -15,8 +15,9 @@ The following document describes the process of connecting an Arduino WiFi Shiel
 ## Requirements
 
   - A computer with the [Arduino IDE](https://www.arduino.cc/en/Main/Software) version 1.6.6 or later installed.
-  - [Arduino or Genuino Zero board](https://www.arduino.cc/en/Main/ArduinoBoardZero).
-  - [Arduino or Genuino WiFi Shield 101](https://www.arduino.cc/en/Main/ArduinoWiFiShield101).
+  - One of the following:
+    - [Arduiono or Genuino MKR1000](https://www.arduino.cc/en/Main/ArduinoMKR1000)
+    - [Arduino or Genuino Zero board](https://www.arduino.cc/en/Main/ArduinoBoardZero) and [Arduino or Genuino WiFi Shield 101](https://www.arduino.cc/en/Main/ArduinoWiFiShield101).
 
 <a name="beforebegin"/>
 ## Before you begin
@@ -32,7 +33,7 @@ Note: You can skip this step if you just want to build the sample application wi
 <a name="setup"/>
 ## Setup the development environment
 
-This section shows you how to set up a development environment for the Azure IoT device SDK with the Arduino or Genuino WiFi 101 shield.
+This section shows you how to set up a development environment for the Azure IoT device SDK with the Arduino or Genuino WiFi 101 shield or MKR1000 board.
 
 1. Open the Arduino IDE and install the following libraries using the ```Library Manager```, which can be accessed via ```Sketch -> Include Library -> Managed Libraries ...```
   * ```WiFi101```
@@ -44,7 +45,7 @@ This section shows you how to set up a development environment for the Azure IoT
 <a name="build"/>
 ## Build the sample
 
-1. In the Arduino IDE, select ```Arduino/Genuino Zero (Programming Port)``` as the board in the ```Tools -> Board``` menu.
+1. In the Arduino IDE, select ```Arduino/Genuino MKR1000``` or ```Arduino/Genuino Zero (Programming Port)``` as the board in the ```Tools -> Board``` menu.
 2. Open the ```simplesample_http``` example in the Arduino IDE, ```File -> Examples -> AzureIoT -> sdk -> simplesample_http```
 3. In ```simplesample_http.ino```, update the following line with your WiFi accesspoint's SSID:
    ```
@@ -66,9 +67,9 @@ This section shows you how to set up a development environment for the Azure IoT
 ## Deploy the sample
 
 1. Follow the steps from the [build](#build) section.
-2. Connect the board to the WiFi Shield 101 and then connect the programming port of the board to your computer with a USB cable.
+2. If you are using the Zero, connect the board to the WiFi Shield 101 and then connect the programming port of the board to your computer with a USB cable. For the MKR1000, connect the board to your computer with a USB cable.
 3. Select serial port associated with the board in the ```Tools -> Port``` menu.
-5. Press the ```Upload``` button in the Arduino IDE to build and upload the sample sketch.
+4. Press the ```Upload``` button in the Arduino IDE to build and upload the sample sketch.
 
 <a name="run"/>
 ## Run the sample
