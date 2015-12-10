@@ -320,7 +320,9 @@ namespace Microsoft.Azure.Devices.Client
             using (var msg = new HttpRequestMessage(httpMethod, requestUri))
             {
                 msg.Headers.Add(HttpRequestHeader.Authorization.ToString(), this.authenticationHeaderProvider.GetAuthorizationHeader());
-
+#if !WINDOWS_UWP
+                msg.Headers.UserAgent.ParseAdd(Utils.GetClientVersion());
+#endif
                 if (modifyRequestMessageAsync != null) await modifyRequestMessageAsync(msg, cancellationToken);
 
                 // TODO: pradeepc - find out the list of exceptions that HttpClient can throw.

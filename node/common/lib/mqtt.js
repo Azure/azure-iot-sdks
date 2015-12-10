@@ -41,6 +41,7 @@ function Mqtt(config) {
 }
 /* SRS_NODE_HTTP_12_005: The CONNECT method shall call connect on MQTT.JS  library and return a promise with the result */
 Mqtt.prototype.connect = function (done) {
+    this.client = mqtt.connect(this._gatewayHostName, this._options);
     if (done) {
         var errCallback = function (error) {
             done(error);
@@ -52,7 +53,6 @@ Mqtt.prototype.connect = function (done) {
             done();
         }.bind(this));
     }
-    this.client = mqtt.connect(this._gatewayHostName, this._options);
 };
 
 /* Codes_SRS_NODE_HTTP_12_006: The PUBLISH method shall throw ReferenceError “Invalid message” if the message is falsy */
@@ -102,7 +102,7 @@ Mqtt.prototype.receive = function (done) {
     this.client.on('message', function(topic, msg) {
         this.client.removeListener('error', errCallback);
         if (done) done(topic, msg);
-    });
+    }.bind(this));
 };
 
 module.exports = Mqtt;

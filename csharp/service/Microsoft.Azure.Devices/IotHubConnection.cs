@@ -88,7 +88,7 @@ namespace Microsoft.Azure.Devices
                 LinkName = Guid.NewGuid().ToString("N") // Use a human readable link name to help with debugging
             };
 
-            linkSettings.AddProperty(IotHubAmqpProperty.TimeoutName, timeoutHelper.RemainingTime().TotalMilliseconds);
+            SetLinkSettingsCommonProperties(linkSettings, timeoutHelper.RemainingTime());
 
             var link = new SendingAmqpLink(linkSettings);
             link.AttachTo(session);
@@ -121,7 +121,7 @@ namespace Microsoft.Azure.Devices
                 LinkName = Guid.NewGuid().ToString("N") // Use a human readable link name to help with debuggin
             };
 
-            linkSettings.AddProperty(IotHubAmqpProperty.TimeoutName, timeoutHelper.RemainingTime().TotalMilliseconds);
+            SetLinkSettingsCommonProperties(linkSettings, timeoutHelper.RemainingTime());
 
             var link = new ReceivingAmqpLink(linkSettings);
             link.AttachTo(session);
@@ -152,7 +152,7 @@ namespace Microsoft.Azure.Devices
                 LinkName = Guid.NewGuid().ToString("N") // Use a human readable link name to help with debuggin
             };
 
-            linkSettings.AddProperty(IotHubAmqpProperty.TimeoutName, timeoutHelper.RemainingTime().TotalMilliseconds);
+            SetLinkSettingsCommonProperties(linkSettings, timeoutHelper.RemainingTime());
 
             var link = new RequestResponseAmqpLink(session, linkSettings);
 
@@ -293,6 +293,14 @@ namespace Microsoft.Azure.Devices
             amqpSettings.TransportProviders.Add(amqpTransportProvider);
 
             return amqpSettings;
+        }
+
+        static AmqpLinkSettings SetLinkSettingsCommonProperties(AmqpLinkSettings linkSettings, TimeSpan timeSpan)
+        {
+            linkSettings.AddProperty(IotHubAmqpProperty.TimeoutName, timeSpan.TotalMilliseconds);
+            linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, Utils.GetClientVersion());
+
+            return linkSettings;
         }
 
         TlsTransportSettings CreateTlsTransportSettings()
