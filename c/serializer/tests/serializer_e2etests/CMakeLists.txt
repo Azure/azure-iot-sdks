@@ -34,7 +34,7 @@ if(WIN32)
 			iothub_client
 			iothub_client_amqp_transport
 			iothub_client_http_transport
-			${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil
+			aziotsharedutil
 			iothub_client_http_transport	
 		)
 		linkProton(${theseTestsName}_dll)
@@ -48,7 +48,7 @@ if(WIN32)
 			iothub_client
 			iothub_client_amqp_transport
 			iothub_client_http_transport
-			${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil
+			aziotsharedutil
 			iothub_client_http_transport	
 		)
 		linkProton(${theseTestsName}_exe)

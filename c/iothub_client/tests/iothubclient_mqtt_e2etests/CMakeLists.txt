@@ -31,7 +31,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_mqtt_transport
-			${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil
+			aziotsharedutil
 			iothub_client_mqtt_transport
 		)
 		linkProton(${theseTestsName}_dll)
@@ -43,7 +43,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_mqtt_transport
-			${SHARED_UTIL_LIB_DIR}/Debug/aziotsharedutil
+			aziotsharedutil
 			iothub_client_mqtt_transport
 		)
 		linkProton(${theseTestsName}_exe)
