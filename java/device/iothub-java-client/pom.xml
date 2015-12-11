@@ -2,6 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>iothub-java-client</artifactId>
     <name>IoT Hub Java Client</name>
+    <description>The Microsoft Azure IoT Device SDK for Java</description>
     <developers>
         <developer>
             <id>microsoft</id>
@@ -16,12 +17,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <repositories>
-        <repository>
-            <id>eclipse-paho</id>
-            <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-        </repository>
-    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.apache.qpid</groupId>
@@ -97,31 +92,6 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>with-deps</shadedClassifierName>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
