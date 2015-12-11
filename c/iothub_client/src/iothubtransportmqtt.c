@@ -135,7 +135,7 @@ static bool msgarrvd(void* context, const MQTTAPI_Message* message)
             if (IoTHubClient_LL_MessageCallback(state->savedClientHandle, IoTHubMessage) != IOTHUBMESSAGE_ACCEPTED)
             {
                 /* Codes_SRS_IOTHUBTRANSPORTMQTT_04_052: [If this calls fails, it shall return false] */
-                LogError("Noficiation not accepted by our client. \r\n");
+                LogError("Event not accepted by our client. \r\n");
                 result = false;
             }
             else
