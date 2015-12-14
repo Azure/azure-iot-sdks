@@ -221,7 +221,7 @@ To log AMQP frames, set the environment variable PN_TRACE_FRM=1.
 The documentation can be found at:
 
 ```
-http://azure.github.io/azure-iot-sdks/java/api_reference/index.html
+http://azure.github.io/azure-iot-sdks/java/device/api_reference/index.html
 ```
 
 
