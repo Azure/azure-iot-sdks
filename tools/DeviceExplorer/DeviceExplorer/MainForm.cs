@@ -27,6 +27,7 @@ namespace DeviceExplorer
         private bool devicesListed = false;
         private static int eventHubPartitionsCount;
         private static string activeIoTHubConnectionString;
+        private string iotHubHostName;
 
         private static string cloudToDeviceMessage;
 
@@ -76,6 +77,8 @@ namespace DeviceExplorer
 
             updateDeviceButton.Enabled = false;
             deleteDeviceButton.Enabled = false;
+            sasTokenButton.Enabled = false;
+
         }
 
         /// <summary>
@@ -109,6 +112,7 @@ namespace DeviceExplorer
             try
             {
                 var builder = IotHubConnectionStringBuilder.Create(connectionString);
+                iotHubHostName = builder.HostName;
 
                 targetTextBox.Text = builder.HostName;
                 keyValueTextBox.Text = builder.SharedAccessKey;
@@ -304,9 +308,9 @@ namespace DeviceExplorer
         {
             try
             {
-                listDevicesButton.Text = "Refresh";
-                devicesListed = true;
                 await updateDevicesGridView();
+                devicesListed = true;
+                listDevicesButton.Text = "Refresh";
             }
             catch (Exception ex)
             {
@@ -689,6 +693,7 @@ namespace DeviceExplorer
         {
             updateDeviceButton.Enabled = true;
             deleteDeviceButton.Enabled = true;
+            sasTokenButton.Enabled = true;
         }
 
         private async Task MonitorFeedback(CancellationToken ct, string deviceId)
@@ -752,6 +757,26 @@ namespace DeviceExplorer
             else
             {
                 StopMonitoringFeedback();
+            }
+        }
+
+        private async void sasTokenButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                RegistryManager registryManager = RegistryManager.CreateFromConnectionString(activeIoTHubConnectionString);
+                SASTokenForm sasForm = new SASTokenForm(registryManager, MAX_COUNT_OF_DEVICES, iotHubHostName);
+                sasForm.ShowDialog(this);
+                sasForm.Dispose();
+                await updateDevicesGridView();
+                await registryManager.CloseAsync();
+            }
+            catch (Exception ex)
+            {
+                using (new CenterDialog(this))
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
     }
