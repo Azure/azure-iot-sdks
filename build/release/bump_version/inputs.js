@@ -173,6 +173,12 @@ module.exports = [
         "search": "//project/parent/version",
         "replaceString": "java.device"
     },
+	{
+        "taskType": "xmlReplaceTask",
+        "filePath": "java/device/samples/send-receive-sample/pom.xml",
+        "search": "//project/parent/version",
+        "replaceString": "java.device"
+    },
     ///////////////////////////////////////////////////
     // Java Service SDK POM files
     ///////////////////////////////////////////////////
