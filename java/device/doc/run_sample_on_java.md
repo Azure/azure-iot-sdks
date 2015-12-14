@@ -49,7 +49,7 @@ To learn how to create a Java application that communicates with an IoT hub from
 
 ## Documentation
 
-The documentation can be found [here](https://azure.github.io/azure-iot-sdks/java/api_reference/index.html).
+The documentation can be found [here](https://azure.github.io/azure-iot-sdks/java/device/api_reference/index.html).
 
 [create-from-scratch]: how_to_build_a_java_app_from_scratch.md
 [devbox-setup]: devbox_setup.md
