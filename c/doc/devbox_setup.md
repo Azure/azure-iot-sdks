@@ -14,21 +14,30 @@ This document describes how to prepare your development environment to use the *
 Be sure to include Visual C++ and NuGet Package Manager.
 - Install [git](http://www.git-scm.com) making sure git.exe can be run from a command line.
 
-- Clone the latest version of this repository to your local machine. Use the **master** branch to ensure you fetch the latest release version.
+- Clone the latest version of this repository to your local machine with the recursive parameter
+```
+git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+```
+Use the **master** branch to ensure you fetch the latest release version.
 
 ### Preparing Azure Shared Utility
 
- 1. Clone the [azure-c-shared-utility](https://github.com/Azure/azure-c-shared-utility.git) in a structure like below:
+ 1. Cloning the repository will bring in the Azure-C-Shared-Utility dependency and give you the following directory structure: 
 
 	\| ...
 
-	\|\-\-\- azure-c-shared-utility
-
 	\|\-\-\- azure-iot-sdk
- 
- 2.  On Windows run the build script azure-c-shared-utility/c/build_all/Windows/build.cmd
-     On Linux run the build script azure-c-shared-utility/c/build_all/Linux/build.sh
 
+	\|\-\-\-\-\-\- c
+  
+	\|\-\-\-\-\-\-\-\-\- azure-c-shared-utility
+ 
+ 2.  If you have a previous version of the repository you will need to run the following commands:
+```
+    git submodule init
+    git submodule update
+```   
+ 
 ### Preparing Qpid Proton libraries in Windows
 
 The AMQP samples require the Qpid Proton-C library.  There are two alternative ways to obtain the library-- via NuGet (recommended) or by downloading the source from GitHub and building it yourself.
@@ -108,9 +117,15 @@ You can use one of the sample applications as a template to get started when you
 
 This section shows you how to set up a development environment for the Azure IoT device SDK for C on Ubuntu.
 
-**Note:** this setup process requires **cmake** version 3.0 or higher. You can verify the current version installed in your environment using the `cmake --version` command. For information about how to upgrade your version of cmake to 3.2 on Ubuntu 14.04, see http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04.
+**Note:** this setup process requires **cmake** version 3.0 or higher and **gcc** version 4.9 or higher. You can verify the current version installed in your environment using the `cmake --version` command. For information about how to upgrade your version of cmake to 3.2 on Ubuntu 14.04, see http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04.
 
-1. Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the Ubuntu machine you are using.
+this library requires **gcc** version 4.9 or higher. You can verify the current version installed in your environment using the `gcc --version` command. For information about how to upgrade your version of gcc on Ubuntu 14.04, see http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04.
+
+1. Clone the latest version of this repository to your Ubuntu machine with the recursive parameter
+```
+git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+```
+Use the **master** branch to ensure you fetch the latest release version.
 
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
