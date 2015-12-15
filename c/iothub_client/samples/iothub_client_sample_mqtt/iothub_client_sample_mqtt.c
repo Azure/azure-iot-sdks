@@ -10,6 +10,8 @@
 #include "crt_abstractions.h"
 #include "iothubtransportmqtt.h"
 
+/*String containing Hostname, Device Id & Device Key in the format:             */
+/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
 static const char* connectionString = "[device connection string]";
 static int callbackCounter;
 

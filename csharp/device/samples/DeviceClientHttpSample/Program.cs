@@ -10,7 +10,11 @@ namespace Microsoft.Azure.Devices.Client.Samples
 {
     class Program
     {
+        // String containing Hostname, Device Id & Device Key in one of the following formats:
+        //  "HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
+        //  "HostName=<iothub_host_name>;CredentialType=SharedAccessSignature;DeviceId=<device_id>;SharedAccessSignature=SharedAccessSignature sr=<iot_host>/devices/<device_id>&sig=<token>&se=<expiry_time>";
         private const string DeviceConnectionString = "<replace>";
+
         private static int MESSAGE_COUNT = 5;
 
         static void Main(string[] args)
