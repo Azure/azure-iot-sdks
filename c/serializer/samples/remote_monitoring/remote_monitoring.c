@@ -11,11 +11,11 @@
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
-
-static const char* deviceId = "[Device Id]";
-static const char* deviceKey = "[Device Key]";
-static const char* hubName = "[IoTHub Name]";
-static const char* hubSuffix = "[IoTHub Suffix, i.e. azure-devices.net]";
+// HostName=FaisterRemote.azure-devices.net;DeviceId=amqplite;SharedAccessKey=LailFrHPsNyxGVtHO8nk3w==
+static const char* deviceId = "amqplite";
+static const char* deviceKey = "LailFrHPsNyxGVtHO8nk3w==";
+static const char* hubName = "FaisterRemote";
+static const char* hubSuffix = "azure-devices.net";
 
 // Define the Model
 BEGIN_NAMESPACE(Contoso);

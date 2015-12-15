@@ -34,6 +34,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Devices.Client/1.0.0-preview-007": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -230,14 +238,6 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
-        }
-      },
-      "Newtonsoft.Json/6.0.8": {
-        "compile": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
-        },
-        "runtime": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -1608,6 +1608,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Devices.Client/1.0.0-preview-007": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -1847,14 +1855,6 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
-        }
-      },
-      "Newtonsoft.Json/6.0.8": {
-        "compile": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
-        },
-        "runtime": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -3272,6 +3272,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Devices.Client/1.0.0-preview-007": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -3497,14 +3505,6 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
-        }
-      },
-      "Newtonsoft.Json/6.0.8": {
-        "compile": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
-        },
-        "runtime": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -4908,6 +4908,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Devices.Client/1.0.0-preview-007": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -5152,14 +5160,6 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
-        }
-      },
-      "Newtonsoft.Json/6.0.8": {
-        "compile": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
-        },
-        "runtime": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -6577,6 +6577,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Devices.Client/1.0.0-preview-007": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -6802,14 +6810,6 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
-        }
-      },
-      "Newtonsoft.Json/6.0.8": {
-        "compile": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
-        },
-        "runtime": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -8213,6 +8213,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Devices.Client/1.0.0-preview-007": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -8457,14 +8465,6 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
-        }
-      },
-      "Newtonsoft.Json/6.0.8": {
-        "compile": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
-        },
-        "runtime": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -9882,6 +9882,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Devices.Client/1.0.0-preview-007": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -10107,14 +10115,6 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
-        }
-      },
-      "Newtonsoft.Json/6.0.8": {
-        "compile": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
-        },
-        "runtime": {
-          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -11538,6 +11538,19 @@
         "package/services/metadata/core-properties/4f6f732debe548beaa1183418e8d65cc.psmdcp"
       ]
     },
+    "Microsoft.Azure.Devices.Client/1.0.0-preview-007": {
+      "sha512": "/XmSTnMBhAXO4KTiHbwhgeMwp5xHgDpXjls7ZQB/F0MbiGo7w9T6G5RdGSqiOcMvOk+XaT/ZVJ/MA/Gg4XLdVw==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/net45/Microsoft.Azure.Devices.Client.dll",
+        "lib/uap10.0/Microsoft.Azure.Devices.Client.winmd",
+        "Microsoft.Azure.Devices.Client.nuspec",
+        "package/services/metadata/core-properties/57e69f41c56045d693d1712e69df23a7.psmdcp",
+        "thirdpartynotice.txt"
+      ]
+    },
     "Microsoft.CSharp/4.0.0": {
       "sha512": "oWqeKUxHXdK6dL2CFjgMcaBISbkk+AqEg+yvJHE4DElNzS4QaTsCflgkkqZwVlWby1Dg9zo9n+iCAMFefFdJ/A==",
       "type": "Package",
@@ -12189,31 +12202,6 @@
         "ref/net46/Microsoft.Win32.Primitives.dll",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._"
-      ]
-    },
-    "Newtonsoft.Json/6.0.8": {
-      "sha512": "7ut47NDedTW19EbL0JpFDYUP62fcuz27hJrehCDNajdCS5NtqL+E39+7Um3OkNc2wl2ym7K8Ln5eNuLus6mVGQ==",
-      "type": "Package",
-      "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
-        "lib/net20/Newtonsoft.Json.dll",
-        "lib/net20/Newtonsoft.Json.xml",
-        "lib/net35/Newtonsoft.Json.dll",
-        "lib/net35/Newtonsoft.Json.xml",
-        "lib/net40/Newtonsoft.Json.dll",
-        "lib/net40/Newtonsoft.Json.xml",
-        "lib/net45/Newtonsoft.Json.dll",
-        "lib/net45/Newtonsoft.Json.xml",
-        "lib/netcore45/Newtonsoft.Json.dll",
-        "lib/netcore45/Newtonsoft.Json.xml",
-        "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.dll",
-        "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.xml",
-        "lib/portable-net45+wp80+win8+wpa81+aspnetcore50/Newtonsoft.Json.dll",
-        "lib/portable-net45+wp80+win8+wpa81+aspnetcore50/Newtonsoft.Json.xml",
-        "Newtonsoft.Json.nuspec",
-        "package/services/metadata/core-properties/d6cceb7474b245aab29598e10c6e65d6.psmdcp",
-        "tools/install.ps1"
       ]
     },
     "System.AppContext/4.0.0": {
@@ -14917,6 +14905,7 @@
       "Microsoft.ApplicationInsights >= 1.0.0",
       "Microsoft.ApplicationInsights.PersistenceChannel >= 1.0.0",
       "Microsoft.ApplicationInsights.WindowsApps >= 1.0.0",
+      "Microsoft.Azure.Devices.Client >= 1.0.0-preview-007",
       "Microsoft.NETCore.UniversalWindowsPlatform >= 5.0.0"
     ],
     "UAP,Version=v10.0": []
