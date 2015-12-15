@@ -137,12 +137,6 @@
       <Name>Windows IoT Extensions for the UWP</Name>
     </SDKReference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Microsoft.Azure.Devices.Client.WinRT\Microsoft.Azure.Devices.Client.WinRT.csproj">
-      <Project>{e68da0b4-2f93-4850-a6ae-1d87dde7f063}</Project>
-      <Name>Microsoft.Azure.Devices.Client.WinRT</Name>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

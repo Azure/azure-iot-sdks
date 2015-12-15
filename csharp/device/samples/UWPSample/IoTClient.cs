@@ -13,7 +13,7 @@ namespace Microsoft.Azure.Devices.Client.Samples
     class IoTClient
     {
         private static int MESSAGE_COUNT = 5;
-        private const string DeviceConnectionString = "<replace>";
+        private const string DeviceConnectionString = "HostName=FaisterRemote.azure-devices.net;DeviceId=asiaiotgbbb93da8a716f44e8ca9e45d7026b47418;SharedAccessKey=hfvowIY+CqyCtkkkhCtqB0DiuLcDIYmTheaNdbECSik=";
 
         public async static Task Start()
         {
