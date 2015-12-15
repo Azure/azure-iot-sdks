@@ -1,15 +1,7 @@
 module.exports = [
     ///////////////////////////////////////////////////
-    // Device Explorer how-to doc
+    // Device Explorer
     ///////////////////////////////////////////////////
-    {
-        "taskType": "regexReplaceTask",
-        "filePath": "tools/DeviceExplorer/doc/how_to_use_device_explorer.md",
-        "search": "(https\\:\\/\\/github.com\\/Azure\\/azure-iot-sdks\\/releases\\/download\\/).*(\\/SetupDeviceExplorer.msi)",
-        "replaceString": function(versions) {
-            return '$1' + versions['github-release'] + '$2';
-        }
-    },
     {
         "taskType": "regexReplaceTask",
         "filePath": "tools/DeviceExplorer/DeviceExplorer/Properties/AssemblyInfo.cs",
@@ -244,6 +236,14 @@ module.exports = [
         "filePath": "node/common/package.json",
         "search": "version",
         "replaceString": "node.common"
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "node/device/readme.md",
+        "search": "(http\\:\\/\\/azure.github.io\\/azure-iot-sdks\\/node\\/api_reference\\/azure-iot-device\\/).*(\\/index.html)",
+        "replaceString": function(versions) {
+            return '$1' + versions.node.device + '$2';
+        }
     },
     {
         "taskType": "multiTask",
