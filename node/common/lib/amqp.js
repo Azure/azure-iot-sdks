@@ -40,6 +40,11 @@ function Amqp(saslPlainUri, autoSettleMessages) {
   this._sender = null;
   
   this.uri = saslPlainUri;
+  
+  if (this.uri.startsWith('wss')) {
+    var wsTransport = require('amqp10-transport-ws');
+    wsTransport.register(amqp10.TransportProvider);
+  }
 }
 
 /**
@@ -61,6 +66,7 @@ Amqp.prototype.connect = function connect(done) {
     .then(function () {
       /*Codes_SRS_NODE_COMMON_AMQP_16_002: [The connect method shall establish a connection with the IoT hub instance and call the done() callback if given as argument] */
       if (done) done();
+      return null;
     })
     .catch(function (err) {
       /*Codes_SRS_NODE_COMMON_AMQP_16_003: [The connect method shall call the done callback if the connection fails.] */
@@ -78,6 +84,7 @@ Amqp.prototype.disconnect = function disconnect(done) {
     .then(function () {
       /*Codes_SRS_NODE_COMMON_AMQP_16_004: [The disconnect method shall call the done callback when the application/service has been successfully disconnected from the service] */
       if (done) done();
+      return null;
     })
     .catch(function (err) {
       /*SRS_NODE_COMMON_AMQP_16_005: [The disconnect method shall call the done callback and pass the error as a parameter if the disconnection is unsuccessful] */
@@ -108,13 +115,13 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
     else {
       var sendAction = function (sender, msg, done) {
         sender.send(msg)
-          .then(function (state) {
-              if (done) done(null, state);
-            })
-            .catch(function (err) {
-              /*Codes_SRS_NODE_IOTHUB_AMQPCOMMON_16_007: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-              if (done) done(translateError(err));
-            });
+              .then(function (state) {
+                  if (done) done(null, state);
+              })
+              .catch(function (err) {
+                /*Codes_SRS_NODE_IOTHUB_AMQPCOMMON_16_007: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
+                if (done) done(translateError(err));
+              });
       };
       
       if (!this._sender) {
@@ -124,9 +131,11 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
             /*Codes_SRS_NODE_COMMON_AMQP_16_007: [If send encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
             this._sender.on('errorReceived', function (err) {
               if (done) done(translateError(err));
+              return null;
             });
             
             sendAction(this._sender, amqpMessage, done);
+            return null;
           }.bind(this));
       } else {
         sendAction(this._sender, amqpMessage, done);

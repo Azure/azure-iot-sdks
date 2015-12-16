@@ -27,9 +27,12 @@ client.open(function (){
   }, 1000);
   
   // Monitor messages from IoT Hub and print them in the console.
-  client.receive(function (topic, msg) {
+  client.receive(function (err, msg) {
+    if (err) {
+      console.error(err);
+    } else {
       console.log('Received data: ' + msg.toString());
     }
-  );
+  });
 });
 
