@@ -25,6 +25,12 @@ setInterval(function () {
 }, 1000);
 
 // Monitor messages from IoT Hub and print them in the console.
+//  Note: In this sample, the polling interval is set to 1 second
+//  to enable you to see messages as they are sent. To enable an
+//  IoT solution to scale, you should extend this interval. For
+//  example, to scale to 1 million devices, set the polling
+//  interval to 25 minutes. For further information, see
+//  https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
 client.getReceiver(function(receiver) {
   // Example of use of the 'interval' option:
   receiver.setOptions({ interval: 1, at: null, cron: null, drain: true });
@@ -44,6 +50,13 @@ client.getReceiver(function(receiver) {
   receiver.on('errorReceived', printResultFor('error'));  
 });
 
+// Poll for new messages from IoT Hub every second.
+//  Note: In this sample, the polling interval is set to 1 second
+//  to enable you to see messages as they are sent. To enable an
+//  IoT solution to scale, you should extend this interval. For
+//  example, to scale to 1 million devices, set the polling
+//  interval to 25 minutes. For further information, see
+//  https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
 setInterval(function () {
   client.receive(function (err, msg, res) {
     if (err) printResultFor('receive')(err, res);
