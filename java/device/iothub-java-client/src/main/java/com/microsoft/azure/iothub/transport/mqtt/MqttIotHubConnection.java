@@ -4,30 +4,39 @@
 package com.microsoft.azure.iothub.transport.mqtt;
 
 import com.microsoft.azure.iothub.DeviceClientConfig;
-import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.transport.TransportUtils;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.io.IOException;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class MqttIotHubConnection {
-
+public class MqttIotHubConnection implements MqttCallback
+{
     /** The MQTT connection lock. */
     protected static final Object MQTT_CONNECTION_LOCK = new Object();
 
-    protected enum ConnectionState
+    /** The received mqtt messages lock */
+    protected static final Object RECEIVED_MESSAGES_QUEUE_LOCK = new Object();
+
+    private MqttAsyncClient asyncClient;
+
+    public enum ConnectionState
     {
         OPEN, CLOSED
     }
 
-    protected ConnectionState state;
-
     protected final DeviceClientConfig config;
+    private Queue<Message> receivedMessagesQueue  = new LinkedBlockingQueue<>();
+    protected ConnectionState state = ConnectionState.CLOSED;
 
-    MqttIotHubConnectionHandler handler;
+    private String publishTopic;
+    private String subscribeTopic;
+    private MqttConnectOptions connectionOptions = new MqttConnectOptions();
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
@@ -38,7 +47,7 @@ public class MqttIotHubConnection {
     {
         synchronized (MQTT_CONNECTION_LOCK)
         {
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_018: [The constructor shall throw a new IllegalArgumentException
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_003: [The constructor shall throw a new IllegalArgumentException
             // if any of the parameters of the configuration is null or empty.]
             if(config == null){
                 throw new IllegalArgumentException("The DeviceClientConfig cannot be null.");
@@ -62,7 +71,11 @@ public class MqttIotHubConnection {
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_001: [The constructor shall save the configuration.]
             this.config = config;
-            this.state = ConnectionState.CLOSED;
+
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_002: [The constructor shall create the publish and subscribe
+            // topic for the specified device id.]
+            this.publishTopic = "devices/" + this.config.getDeviceId() + "/messages/events";
+            this.subscribeTopic = "devices/" + this.config.getDeviceId() + "/messages/devicebound";
         }
     }
 
@@ -71,32 +84,41 @@ public class MqttIotHubConnection {
      * configuration. If the connection is already open, the function shall do
      * nothing.
      *
-     * @throws IllegalArgumentException if connection parameters are null or empty.
      * @throws IOException if a connection could not to be established.
      */
-    public void open() throws IOException, IllegalArgumentException
+    public void open() throws IOException
     {
         synchronized (MQTT_CONNECTION_LOCK)
         {
-            //Codes_SRS_MQTTIOTHUBCONNECTION_15_004: [If the MQTT connection is already open,
+            //Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [If the MQTT connection is already open,
             // the function shall do nothing.]
             if (this.state == ConnectionState.OPEN)
             {
                 return;
             }
 
-            String gatewayHostName = this.config.getGatewayHostName();
-            String deviceId = this.config.getDeviceId();
-            IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
-
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_002: [The function shall establish an MQTT connection
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_004: [The function shall establish an MQTT connection
             // with an IoT Hub using the provided host name, user name, device ID, and sas token.]
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_003: [If an MQTT connection is unable to be established
-            // for any reason, the function shall throw an IOException.]
+            try
+            {
+                IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
 
-            this.handler = new MqttIotHubConnectionHandler(gatewayHostName, deviceId, sasToken.toString());
-            this.handler.open();
-            this.state = ConnectionState.OPEN;
+                this.asyncClient = new MqttAsyncClient(this.config.getGatewayHostName(), this.config.getDeviceId(), new MemoryPersistence());
+                asyncClient.setCallback(this);
+
+                this.updateConnectionOptions(this.config.getDeviceId(), sasToken.toString());
+                this.connect(connectionOptions);
+
+                this.subscribe();
+
+                this.state = ConnectionState.OPEN;
+            }
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established
+            // for any reason, the function shall throw an IOException.]
+            catch (MqttException e)
+            {
+                throw new IOException("Error initializing MQTT connection:" + e.getMessage());
+            }
         }
     }
 
@@ -107,14 +129,30 @@ public class MqttIotHubConnection {
      */
     public void close()
     {
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [If the MQTT session is closed, the function shall do nothing.]
-        if (this.state == ConnectionState.CLOSED) {
-            return;
-        }
+        synchronized (MQTT_CONNECTION_LOCK)
+        {
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_007: [If the MQTT session is closed, the function shall do nothing.]
+            if (this.state == ConnectionState.CLOSED) {
+                return;
+            }
 
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_005: [The function shall close the MQTT session.]
-        this.handler.close();
-        this.state = ConnectionState.CLOSED;
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [**The function shall close the MQTT connection.]
+            try
+            {
+                IMqttToken unsubscribeToken = this.asyncClient.unsubscribe(this.subscribeTopic);
+                unsubscribeToken.waitForCompletion();
+
+                IMqttToken disconnectToken = this.asyncClient.disconnect();
+                disconnectToken.waitForCompletion();
+            }
+            catch (MqttException e)
+            {
+                //do nothing, since connection is closed anyway.
+            }
+
+            this.state = ConnectionState.CLOSED;
+            this.asyncClient = null;
+        }
     }
 
     /**
@@ -124,40 +162,45 @@ public class MqttIotHubConnection {
      *
      * @return the status code from sending the event message.
      *
-     * @throws IllegalStateException if the MqttIotHubConnectionHandler is not open
+     * @throws IllegalStateException if the MqttIotHubConnection is not open
      */
     public IotHubStatusCode sendEvent(Message message) throws IllegalStateException
     {
         synchronized (MQTT_CONNECTION_LOCK)
         {
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_019: [If the message is null,
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_010: [If the message is null or empty,
             // the function shall return status code BAD_FORMAT.]
-            if (message == null)
+            if (message == null || message.getBytes() == null || message.getBytes().length == 0)
             {
                 return IotHubStatusCode.BAD_FORMAT;
             }
 
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_012: [If the MQTT session is closed,
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_013: [If the MQTT connection is closed,
             // the function shall throw an IllegalStateException.]
             if (this.state == ConnectionState.CLOSED)
             {
-                throw new IllegalStateException("Cannot send event using a closed MQTT session");
+                throw new IllegalStateException("Cannot send event using a closed MQTT connection");
             }
 
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_007: [The function shall send an event message
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_008: [The function shall send an event message
             // to the IoT Hub given in the configuration.]
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_008: [The function shall send the message body.]
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_010: [If the message was successfully received by the service,
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_009: [The function shall send the message payload.]
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_011: [If the message was successfully received by the service,
             // the function shall return status code OK_EMPTY.]
             IotHubStatusCode result = IotHubStatusCode.OK_EMPTY;
+
             try
             {
-                this.handler.send(message.getBytes(), message.messageId);
+                MqttMessage mqttMessage = new MqttMessage(message.getBytes());
+                mqttMessage.setQos(qos);
+
+                IMqttDeliveryToken publishToken = asyncClient.publish(publishTopic, mqttMessage);
+                publishToken.waitForCompletion();
             }
-            catch(Exception e)
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_012: [If the message was not successfully
+            // received by the service, the function shall return status code ERROR.]
+            catch(MqttException e)
             {
-                // Codes_SRS_MQTTIOTHUBCONNECTION_15_011: [If the message was not successfully received by the service,
-                // the function shall return status code ERROR.]
                 result = IotHubStatusCode.ERROR;
             }
 
@@ -170,54 +213,129 @@ public class MqttIotHubConnection {
      *
      * @return the message received, or null if none exists.
      *
-     * @throws IOException if the IoT Hub could not be reached.
+     * @throws IllegalStateException if the connection state is currently closed.
      */
-    public Message receiveMessage() throws IOException
+    public Message receiveMessage() throws IllegalStateException
     {
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_013: [The function shall attempt to consume a message
-        // from the IoT Hub given in the configuration.]
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_014: [If a message is found, the function shall include
-        // the message body in the returned message.]
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_015: [If a message is found, the function shall include
-        // all valid application properties in the returned message.]
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_016: [If the IoT Hub could not be reached,
-        // the function shall throw an IOException.]
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_017: [If the MQTT session is closed,
+        // Codes_SRS_MQTTIOTHUBCONNECTION_15_015: [If the MQTT connection is closed,
         // the function shall throw an IllegalStateException.]
+        if (this.state == ConnectionState.CLOSED)
+        {
+            throw new IllegalStateException("The MQTT connection is currently closed. Call open() before attempting" +
+                    "to receive a message.");
+        }
 
-        //todo iliel implement real functionality
+        Message message = null;
 
-        throw new NotImplementedException();
+        // Codes_SRS_MQTTIOTHUBCONNECTION_15_014: [The function shall attempt to consume a message
+        // from the received messages queue.]
+        synchronized (RECEIVED_MESSAGES_QUEUE_LOCK)
+        {
+            if (this.receivedMessagesQueue.size() > 0)
+            {
+                message = this.receivedMessagesQueue.remove();
+            }
+        }
+
+        return message;
     }
 
     /**
-     * Sends the message result for the previously received
-     * message.
-     *
-     * @param result the message result (one of {@link IotHubMessageResult#COMPLETE},
-     *               {@link IotHubMessageResult#ABANDON}, or {@link IotHubMessageResult#REJECT}).
-     *
-     * @throws IllegalStateException if {@code sendMessageResult} is called before
-     * {@link #receiveMessage()} is called.
-     * @throws IOException if the IoT Hub could not be reached.
+     * Event fired when the connection with the MQTT broker is lost.
+     * @param throwable Reason for losing the connection.
      */
-    public void sendMessageResult(IotHubMessageResult result) throws IOException
+    @Override
+    public void connectionLost(Throwable throwable)
     {
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_018: [If the message result is COMPLETE,
-        // the function shall acknowledge the last message message with acknowledgement type CONSUMED.]
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_019: [If the message result is ABANDON,
-        // the function shall acknowledge the last message message with acknowledgement type RELEASED.]
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_020: [If the message result is REJECT,
-        // the function shall acknowledge the last message message with acknowledgement type POISONED.]
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_021: [If sendMessageResult(result) is called
-        // before a message is received, the function shall throw an IllegalStateException.]
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_022: [If the acknowledgement fails,
-        // the function shall throw an IOException.]
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_023: [If the MQTT session is closed,
-        // the function shall throw an IllegalStateException.]
+        synchronized (MQTT_CONNECTION_LOCK)
+        {
+            // Codes_SRS_MQTTIOTHUBCONNECTION_15_016: [The function shall attempt to reconnect to the IoTHub
+            // in a loop with an exponential backoff until it succeeds]
+            int currentReconnectionAttempt = 0;
+            boolean connected = false;
+            while (!connected)
+            {
+                try
+                {
+                    // Codes_SRS_MQTTIOTHUBCONNECTION_15_17: [The function shall generate a new sas token to be
+                    // used for connecting to the mqtt broker.]
+                    IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
 
-        //todo iliel implement real functionality
+                    this.updateConnectionOptions(this.config.getDeviceId(), sasToken.toString());
+                    this.connect(this.connectionOptions);
+                    connected = true;
+                }
+                catch (MqttException connectionException)
+                {
+                    try
+                    {
+                        currentReconnectionAttempt++;
 
-        throw new NotImplementedException();
+                        // Codes_SRS_MQTTIOTHUBCONNECTION_15_018: [The maximum wait interval
+                        // until a reconnect is attempted shall be 60 seconds.]
+                        Thread.sleep(TransportUtils.generateSleepInterval(currentReconnectionAttempt));
+                    }
+                    catch (InterruptedException exception)
+                    {
+                        // do nothing, reconnection attempts will continue
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void messageArrived(String topic, MqttMessage mqttMessage)
+    {
+        // Codes_SRS_MQTTIOTHUBCONNECTION_15_019: [A new message is created using the payload
+        // from the received MqttMessage]
+        Message message = new Message(mqttMessage.getPayload());
+
+        // Codes_SRS_MQTTIOTHUBCONNECTION_15_020: [The newly created message is added to the received messages queue.]
+        synchronized (RECEIVED_MESSAGES_QUEUE_LOCK)
+        {
+            this.receivedMessagesQueue.add(message);
+        }
+    }
+
+    @Override
+    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
+    {
+    }
+
+    private void connect(MqttConnectOptions connectionOptions) throws MqttException
+    {
+        if (!this.asyncClient.isConnected())
+        {
+            IMqttToken connectToken = this.asyncClient.connect(connectionOptions);
+            connectToken.waitForCompletion();
+        }
+    }
+
+    private void subscribe() throws MqttException
+    {
+        IMqttToken subToken = this.asyncClient.subscribe(this.subscribeTopic, qos);
+        subToken.waitForCompletion();
+    }
+
+    //mqtt connection options
+    private static final int keepAliveInterval = 20;
+    private static final int mqttVersion = 4;
+    private static final boolean setCleanSession = true;
+    private static final int qos = 1;
+
+    /**
+     * Generates the connection options for the mqtt broker connection.
+     *
+     * @param userName the user name for the mqtt broker connection.
+     * @param userPassword the user password for the mqtt broker connection.
+     */
+    private void updateConnectionOptions(String userName, String userPassword)
+    {
+        this.connectionOptions.setKeepAliveInterval(keepAliveInterval);
+        this.connectionOptions.setCleanSession(setCleanSession);
+        this.connectionOptions.setMqttVersion(mqttVersion);
+        this.connectionOptions.setUserName(userName);
+        this.connectionOptions.setPassword(userPassword.toCharArray());
     }
 }

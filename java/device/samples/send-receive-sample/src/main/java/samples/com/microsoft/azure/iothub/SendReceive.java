@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Scanner;
 
-
 /**
  * Handles messages from an IoT Hub. Default protocol is to use
  * HTTPS transport.
@@ -83,6 +82,23 @@ public class SendReceive
         }
     }
 
+    // Our MQTT doesn't support abandon/reject, so we will only display the messaged received
+    // from IoTHub and return COMPLETE
+    protected static class MessageCallbackMqtt implements com.microsoft.azure.iothub.MessageCallback
+    {
+        public IotHubMessageResult execute(Message msg, Object context)
+        {
+            Counter counter = (Counter) context;
+            System.out.println(
+                    "Received message " + counter.toString()
+                            + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+
+            counter.increment();
+
+            return IotHubMessageResult.COMPLETE;
+        }
+    }
+
     protected static class EventCallback implements IotHubEventCallback{
         public void execute(IotHubStatusCode status, Object context){
             Integer i = (Integer) context;
@@ -96,7 +112,7 @@ public class SendReceive
      * HTTPS transport.
      *
      * @param args args[0] = IoT Hub connection string; args[1] = protocol (one
-     * of 'https' or 'amqps', optional).
+     * of 'https', 'amqps' or 'mqtt', optional).
      */
     public static void main(String[] args)
             throws IOException, URISyntaxException
@@ -110,7 +126,7 @@ public class SendReceive
                     "Expected 2 or 3 arguments but received:\n%d. The program "
                             + "should be called with the: "
                             + "following args: [IoT Hub connection string] "
-                            + "[number of requests to send] (https | amqps).\n",
+                            + "[number of requests to send] (https | amqps | mqtt).\n",
                     args.length);
             return;
         }
@@ -144,15 +160,19 @@ public class SendReceive
             {
                 protocol = IotHubClientProtocol.AMQPS;
             }
+            else if (protocolStr.equals("mqtt"))
+            {
+                protocol = IotHubClientProtocol.MQTT;
+            }
             else
             {
                 System.out.format(
-                        "Expected argument 2 to be one of 'https' or 'amqps' "
+                        "Expected argument 2 to be one of 'https', 'amqps' or 'mqtt'"
                                 + "but received %s. The program should be "
                                 + "called with the: following args: "
                                 + "[IoT Hub connection string] "
                                 + "[number of requests to send] "
-                                + "(https | amqps)."
+                                + "(https | amqps | mqtt)."
                                 + "\n",
                         protocolStr);
                 return;
@@ -167,9 +187,18 @@ public class SendReceive
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        MessageCallback callback = new MessageCallback();
-        Counter counter = new Counter(0);
-        client.setMessageCallback(callback, counter);
+        if (protocol == IotHubClientProtocol.MQTT)
+        {
+            MessageCallbackMqtt callback = new MessageCallbackMqtt();
+            Counter counter = new Counter(0);
+            client.setMessageCallback(callback, counter);
+        }
+        else
+        {
+            MessageCallback callback = new MessageCallback();
+            Counter counter = new Counter(0);
+            client.setMessageCallback(callback, counter);
+        }
 
         System.out.println("Successfully set message callback.");
 
@@ -190,7 +219,6 @@ public class SendReceive
                     Message msg = new Message(msgStr);
                     msg.setProperty("messageCount", Integer.toString(i));
                     System.out.println(msgStr);
-
                     EventCallback eventCallback = new EventCallback();
                     client.sendEventAsync(msg, eventCallback, i);
                 }

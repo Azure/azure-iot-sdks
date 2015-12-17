@@ -44,7 +44,7 @@ public class SendEvent
                     "Expected 2 or 3 arguments but received:\n%d. The program "
                             + "should be called with the: "
                             + "following args: [IoT Hub connection string] "
-                            + "[number of requests to send] (https | amqps).\n",
+                            + "[number of requests to send] (https | amqps | mqtt).\n",
                     args.length);
             return;
         }
@@ -85,12 +85,12 @@ public class SendEvent
             else
             {
                 System.out.format(
-                        "Expected argument 2 to be one of 'https' or 'amqps' "
+                        "Expected argument 2 to be one of 'https', 'amqps' or 'mqtt'"
                                 + "but received %s. The program should be "
                                 + "called with the: following args: "
                                 + "[IoT Hub connection string] "
                                 + "[number of requests to send] "
-                                + "(https | amqps)."
+                                + "(https | amqps | mqtt)."
                                 + "\n",
                         protocolStr);
                 return;
