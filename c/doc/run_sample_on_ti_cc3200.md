@@ -91,6 +91,10 @@ Flash the `simplesample_http.bin` file to your CC3200 Launchpad.
 
 > Note: The root CA certificate - "Baltimore CyberTrust Root" has to be flashed to CC3200 Launchpad to the location `/cert/ms.der`. This location is referenced in `tirtos/cc3200/main.c` and is used by SimpleLink TLS stack.
 
+Here's why you need the Baltimore root CA - it's the root CA for `*.azure-devices.net`, the IoT Hub endpoint and it's the only way for the tiny CC3200 to verify the chain of trust:
+
+![image](https://cloud.githubusercontent.com/assets/6472374/11576321/71207be4-9a1e-11e5-9332-fa99fdbd31f9.png)
+
 The detailed information about the flash tool can be found in the [CC3200 UniFlash wiki](http://processors.wiki.ti.com/index.php/CC31xx_%26_CC32xx_UniFlash). The section [GUI Interface](http://processors.wiki.ti.com/index.php/CC31xx_%26_CC32xx_UniFlash#GUI_Interface) walks through the steps for using the UniFlash tool.
 
 Flash the application (.bin file) to the /sys/mcuimg.bin under System Files. For the certificate, [add a new file](http://processors.wiki.ti.com/index.php/CC31xx_%26_CC32xx_UniFlash#Adding_a_new_file_to_the_device) in the path /cert/ms.der and provide the path to the "Baltimore CyberTrust Root" certificate (.der format). The ms.der file is available at <AZURE_INSTALL_DIR>\azure-iot-sdks\c\certs\ms.der.

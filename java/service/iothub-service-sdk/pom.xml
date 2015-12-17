@@ -4,6 +4,7 @@
     <artifactId>iothub-service-sdk</artifactId>
     <version>1.0.0-preview.7</version>
     <name>IotHub Java Service SDK</name>
+    <description>The Microsoft Azure IoT Service SDK for Java</description>
     <developers>
         <developer>
             <id>microsoft</id>
@@ -75,11 +76,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
             </plugin>
         </plugins>
     </build>

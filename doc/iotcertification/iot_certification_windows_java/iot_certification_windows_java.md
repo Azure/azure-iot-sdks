@@ -211,18 +211,18 @@ section. These will be needed in [Step 4](#Step_4_2).*
 5.  Verify that the confirmation messages show an OK. If not, then you may have incorrectly copied the device hub connection information.
 
     **If using AMQP protocol:**  
-    ![Terminal\_AMQP\_send\_event](images/terminal_amqp_send_event.png)
+    ![Terminal\_AMQP\_send\_event](images/terminal_amqp_send_event.PNG)
 
     **If using HTTP protocol:**  
-    ![Terminal\_HTTP\_send\_event](images/terminal_http_send_event.png)
+    ![Terminal\_HTTP\_send\_event](images/terminal_http_send_event.PNG)
 
 6.  DeviceExplorer should show that IoT Hub has successfully received data sent by sample test.
 
     **If using AMQP protocol:**  
-    ![DeviceExplorer\_AMQP\_message\_received](images/device_explorer_amqp_message_received.png)
+    ![DeviceExplorer\_AMQP\_message\_received](images/device_explorer_amqp_message_received.PNG)
 
     **If using HTTP protocol:**  
-    ![DeviceExplorer\_HTTP\_message\_received](images/device_explorer_http_message_received.png)
+    ![DeviceExplorer\_HTTP\_message\_received](images/device_explorer_http_message_received.PNG)
 
 <a name="Step_3_2_2"/>
 ### 3.2.2 Receive messages from IoT Hub
@@ -258,10 +258,10 @@ section. These will be needed in [Step 4](#Step_4_2).*
 6.  You should be able to see the command received in the console window for the client sample.
 
     **If using AMQP protocol:**  
-    ![Terminal\_AMQP\_message\_received](images/terminal_amqp_message_received.png)
+    ![Terminal\_AMQP\_message\_received](images/terminal_amqp_message_received.PNG)
 
     **If using HTTP protocol:**  
-    ![Terminal\_HTTP\_message\_received](images/terminal_http_message_received.png)
+    ![Terminal\_HTTP\_message\_received](images/terminal_http_message_received.PNG)
 
 <a name="Step_4"/>
 # Step 4: Package and Share

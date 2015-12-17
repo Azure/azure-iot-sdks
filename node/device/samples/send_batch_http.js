@@ -4,6 +4,9 @@
 'use strict';
 
 var device = require('azure-iot-device');
+
+// String containing Hostname, Device Id & Device Key in the following formats:
+//  "HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
 var connectionString = '[IoT Hub device connection string]';
 var client = device.Client.fromConnectionString(connectionString);
 

@@ -43,8 +43,9 @@ public class SendEvent
             System.out.format(
                     "Expected 2 or 3 arguments but received:\n%d. The program "
                             + "should be called with the: "
-                            + "following args: [IoT Hub connection string] "
-                            + "[number of requests to send] (https | amqps | mqtt).\n",
+                            + "following args: \n"
+                            + "[Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                            + "[number of requests to send] (https | amqps).\n",
                     args.length);
             return;
         }
@@ -85,12 +86,12 @@ public class SendEvent
             else
             {
                 System.out.format(
-                        "Expected argument 2 to be one of 'https', 'amqps' or 'mqtt'"
+                        "Expected argument 2 to be one of 'https' or 'amqps' "
                                 + "but received %s. The program should be "
-                                + "called with the: following args: "
-                                + "[IoT Hub connection string] "
-                                + "[number of requests to send] "
-                                + "(https | amqps | mqtt)."
+                                + "called with the: following args:\n"
+                                + "[Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                                + "[number of requests to send]\n"
+                                + "(https | amqps).\n"
                                 + "\n",
                         protocolStr);
                 return;

@@ -17,7 +17,7 @@ For more information on how to use this library refer to the documents below:
 - [Provision devices](../../tools/iothub-explorer/doc/provision_device.md)
 - [Using the DeviceExplorer application to test IoT Hub device connectivity](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
 - [Run the node.js sample application](doc/run_sample.md)
-- [Node API reference](http://azure.github.io/azure-iot-sdks/node/api_reference/index.html)
+- [Node API reference](http://azure.github.io/azure-iot-sdks/node/api_reference/azure-iot-device/1.0.0-preview.7/index.html)
 
 ## Directory structure of repository
 

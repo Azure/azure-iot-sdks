@@ -1,15 +1,7 @@
 module.exports = [
     ///////////////////////////////////////////////////
-    // Device Explorer how-to doc
+    // Device Explorer
     ///////////////////////////////////////////////////
-    {
-        "taskType": "regexReplaceTask",
-        "filePath": "tools/DeviceExplorer/doc/how_to_use_device_explorer.md",
-        "search": "(https\\:\\/\\/github.com\\/Azure\\/azure-iot-sdks\\/releases\\/download\\/).*(\\/SetupDeviceExplorer.msi)",
-        "replaceString": function(versions) {
-            return '$1' + versions['github-release'] + '$2';
-        }
-    },
     {
         "taskType": "regexReplaceTask",
         "filePath": "tools/DeviceExplorer/DeviceExplorer/Properties/AssemblyInfo.cs",
@@ -62,12 +54,6 @@ module.exports = [
         "filePath": "c/build_all/packaging/windows/Eclipse.Paho-C.paho-mqtt3cs.nuspec",
         "search": "//*[local-name(.)='package' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']/*[local-name(.)='metadata' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']/*[local-name(.)='version' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']",
         "replaceString": "eclipse_paho_nuget"
-    },
-    {
-        "taskType": "xmlReplaceTask",
-        "filePath": "c/build_all/packaging/windows/Microsoft.Azure.IoTHub.Common.nuspec",
-        "search": "//*[local-name(.)='package' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd']/*[local-name(.)='metadata' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd']/*[local-name(.)='version' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd']",
-        "replaceString": "c_nuget.device"
     },
     {
         "taskType": "xmlReplaceTask",
@@ -173,6 +159,12 @@ module.exports = [
         "search": "//project/parent/version",
         "replaceString": "java.device"
     },
+	{
+        "taskType": "xmlReplaceTask",
+        "filePath": "java/device/samples/send-receive-sample/pom.xml",
+        "search": "//project/parent/version",
+        "replaceString": "java.device"
+    },
     ///////////////////////////////////////////////////
     // Java Service SDK POM files
     ///////////////////////////////////////////////////
@@ -244,6 +236,14 @@ module.exports = [
         "filePath": "node/common/package.json",
         "search": "version",
         "replaceString": "node.common"
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "node/device/readme.md",
+        "search": "(http\\:\\/\\/azure.github.io\\/azure-iot-sdks\\/node\\/api_reference\\/azure-iot-device\\/).*(\\/index.html)",
+        "replaceString": function(versions) {
+            return '$1' + versions.node.device + '$2';
+        }
     },
     {
         "taskType": "multiTask",

@@ -50,5 +50,6 @@ module.exports = {
     Mqtt: require('./lib/mqtt.js'),
     Message: common.Message,
     SharedAccessSignature: require('./lib/shared_access_signature.js'),
-    Amqp: require('./lib/amqp.js')
+    Amqp: require('./lib/amqp.js'),
+    AmqpWS: require('./lib/amqp_ws.js')
 };
