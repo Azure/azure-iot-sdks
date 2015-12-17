@@ -45,7 +45,7 @@ public class TransportUtils {
      */
     public static byte generateSleepInterval(int currentAttempt)
     {
-        if (currentAttempt > 5)
+        if (currentAttempt > 7)
         {
             return sleepIntervals[6];
         }
