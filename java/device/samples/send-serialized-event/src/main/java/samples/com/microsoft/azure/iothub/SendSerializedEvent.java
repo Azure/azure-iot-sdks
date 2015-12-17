@@ -93,8 +93,8 @@ public class SendSerializedEvent {
     }
 
     private static void printUsage(){
-        System.out.println("Expected arguments:");
-        System.out.println("[IoT Hub connection string] [https | amqps | mqtt] [deviceId] [windSpeed]");
+        System.out.println("[Device connection string*] [https | amqps | mqtt] [deviceId] [windSpeed]");
+        System.out.println("*String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n");
     }
 
     /**
