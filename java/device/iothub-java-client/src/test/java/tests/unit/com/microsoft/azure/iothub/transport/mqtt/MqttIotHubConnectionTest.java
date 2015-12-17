@@ -354,7 +354,6 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                mockMqttAsyncClient.unsubscribe(subscribeTopic);
                 mockMqttAsyncClient.disconnect();
             }
         };
@@ -411,7 +410,7 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                mockMqttAsyncClient.unsubscribe(subscribeTopic); times = 1;
+                mockMqttAsyncClient.disconnect(); times = 1;
             }
         };
     }

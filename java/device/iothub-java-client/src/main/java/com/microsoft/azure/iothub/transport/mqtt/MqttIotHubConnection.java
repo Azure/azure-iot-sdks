@@ -20,9 +20,6 @@ public class MqttIotHubConnection implements MqttCallback
     /** The MQTT connection lock. */
     protected static final Object MQTT_CONNECTION_LOCK = new Object();
 
-    /** The received mqtt messages lock */
-    protected static final Object RECEIVED_MESSAGES_QUEUE_LOCK = new Object();
-
     private MqttAsyncClient asyncClient;
 
     public enum ConnectionState
@@ -37,6 +34,14 @@ public class MqttIotHubConnection implements MqttCallback
     private String publishTopic;
     private String subscribeTopic;
     private MqttConnectOptions connectionOptions = new MqttConnectOptions();
+
+
+    //mqtt connection options
+    private static final int keepAliveInterval = 20;
+    private static final int mqttVersion = 4;
+    private static final boolean setCleanSession = true;
+    private static final int qos = 1;
+
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
@@ -139,9 +144,6 @@ public class MqttIotHubConnection implements MqttCallback
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [**The function shall close the MQTT connection.]
             try
             {
-                IMqttToken unsubscribeToken = this.asyncClient.unsubscribe(this.subscribeTopic);
-                unsubscribeToken.waitForCompletion();
-
                 IMqttToken disconnectToken = this.asyncClient.disconnect();
                 disconnectToken.waitForCompletion();
             }
@@ -229,12 +231,10 @@ public class MqttIotHubConnection implements MqttCallback
 
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_014: [The function shall attempt to consume a message
         // from the received messages queue.]
-        synchronized (RECEIVED_MESSAGES_QUEUE_LOCK)
+
+        if (this.receivedMessagesQueue.size() > 0)
         {
-            if (this.receivedMessagesQueue.size() > 0)
-            {
-                message = this.receivedMessagesQueue.remove();
-            }
+            message = this.receivedMessagesQueue.remove();
         }
 
         return message;
@@ -292,15 +292,14 @@ public class MqttIotHubConnection implements MqttCallback
         Message message = new Message(mqttMessage.getPayload());
 
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_020: [The newly created message is added to the received messages queue.]
-        synchronized (RECEIVED_MESSAGES_QUEUE_LOCK)
-        {
-            this.receivedMessagesQueue.add(message);
-        }
+
+        this.receivedMessagesQueue.add(message);
     }
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
     {
+        //there is no need for anything here, since we already call waitForCompletion after publishing a message.
     }
 
     private void connect(MqttConnectOptions connectionOptions) throws MqttException
@@ -317,12 +316,6 @@ public class MqttIotHubConnection implements MqttCallback
         IMqttToken subToken = this.asyncClient.subscribe(this.subscribeTopic, qos);
         subToken.waitForCompletion();
     }
-
-    //mqtt connection options
-    private static final int keepAliveInterval = 20;
-    private static final int mqttVersion = 4;
-    private static final boolean setCleanSession = true;
-    private static final int qos = 1;
 
     /**
      * Generates the connection options for the mqtt broker connection.

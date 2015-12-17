@@ -35,19 +35,27 @@ public class TransportUtils {
         return sasToken;
     }
 
+    private static byte[] sleepIntervals = {1, 2, 4, 8, 16, 32, 60};
+
     /** Generates a reconnection time with an exponential backoff
      * and a maximum value of 60 seconds.
      *
      * @param currentAttempt the number of attempts
      * @return the sleep interval until the next attempt.
      */
-    public static int generateSleepInterval(int currentAttempt)
+    public static byte generateSleepInterval(int currentAttempt)
     {
-        int interval = (int)((Math.pow(2, currentAttempt) - 1) * 1000);
-        if (interval > 60000)
+        if (currentAttempt > 5)
         {
-            interval = 60000;
+            return sleepIntervals[6];
         }
-        return interval;
+        else if (currentAttempt > 0)
+        {
+            return sleepIntervals[currentAttempt - 1];
+        }
+        else
+        {
+            return 0;
+        }
     }
 }
