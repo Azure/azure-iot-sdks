@@ -1,7 +1,8 @@
 {
-  "name": "release_npm",
+  "name": "prepare-aziot-release",
   "version": "0.0.1",
   "main": "app.js",
+  "bin": "app.js",
   "description": "Push each of our npm packages to their own orphaned branch on a fork, and print their tarball URIs.",
   "private": true,
   "author": "Microsoft Corp.",
