@@ -30,7 +30,7 @@ public final class MqttTransport implements IotHubTransport
 
     /** The state of the MQTT transport. */
     protected enum MqttTransportState {
-        OPEN, CRASHED, CLOSED
+        OPEN, CLOSED
     }
 
     protected MqttTransportState state;
@@ -90,10 +90,8 @@ public final class MqttTransport implements IotHubTransport
      * Closes all resources used to communicate with an IoT Hub. Once {@code close()} is
      * called, the transport is no longer usable. If the transport is already
      * closed, the function shall do nothing.
-     *
-     * @throws IOException if an error occurs in closing the transport.
      */
-    public void close() throws IOException
+    public void close()
     {
         // Codes_SRS_MQTTTRANSPORT_15_006: [If the MQTT connection is closed, the function shall do nothing.]
         if (this.state == MqttTransportState.CLOSED)
@@ -121,7 +119,7 @@ public final class MqttTransport implements IotHubTransport
     public void addMessage(
             Message message,
             IotHubEventCallback callback,
-            Object callbackContext)
+            Object callbackContext) throws IllegalStateException
     {
         // Codes_SRS_MQTTTRANSPORT_15_008: [If the transport is closed,
         // the function shall throw an IllegalStateException.]
@@ -143,19 +141,19 @@ public final class MqttTransport implements IotHubTransport
      * in the previous attempt.
      * </p>
      * If one has not already been created, the function will initialize an
-     * MQTT session with the IoT Hub specified in the configuration.
+     * MQTT connection with the IoT Hub specified in the configuration.
      *
-     * @throws IOException if the server could not be reached.
      * @throws IllegalStateException if the transport has not been opened or is closed.
      */
-    public void sendMessages() throws IOException
+    public void sendMessages() throws IllegalStateException
     {
-        // Codes_SRS_MQTTTRANSPORT_15_015: [If the MQTT connection is closed,
+        // Codes_SRS_MQTTTRANSPORT_15_012: [If the MQTT connection is closed,
         // the function shall throw an IllegalStateException.]
         if (this.state == MqttTransportState.CLOSED)
         {
             throw new IllegalStateException("MQTT transport is closed.");
         }
+
         if (this.waitingList.size() <= 0)
         {
             return;
@@ -163,41 +161,25 @@ public final class MqttTransport implements IotHubTransport
 
         // Codes_SRS_MQTTTRANSPORT_15_009: [The function shall attempt to send every message
         // on its waiting list, one at a time.]
-        try
+        while (!this.waitingList.isEmpty())
         {
-            // Codes_SRS_MQTTTRANSPORT_15_014: [If the transport had previously encountered any exception or error
-            // while open, it shall reopen a new MQTT connection with the IoT Hub given in the configuration.]
-            if (this.state == MqttTransportState.CRASHED)
-            {
-                this.close();
-                this.open();
-            }
+            IotHubOutboundPacket packet = this.waitingList.remove();
 
-            while(!this.waitingList.isEmpty())
+            try
             {
-                // Codes_SRS_MQTTTRANSPORT_15_011: [If the IoT Hub could not be reached,
-                // the message shall be buffered to be sent again next time.]
-                IotHubOutboundPacket packet = this.waitingList.peek();
-
-                // Codes_SRS_MQTTTRANSPORT_15_010: [For each message being sent, the function shall send the message
-                // and add the IoT Hub status code along with the callback and context to the callback list.]
-                // Codes_SRS_MQTTTRANSPORT_15_012: [If the IoT Hub could not be reached,
-                // the function shall throw an IOException.]
                 IotHubStatusCode status = this.mqttIotHubConnection.sendEvent(packet.getMessage());
 
-                IotHubCallbackPacket callbackPacket =
-                        new IotHubCallbackPacket(status, packet.getCallback(), packet.getContext());
-                this.waitingList.remove();
+                // Codes_SRS_MQTTTRANSPORT_15_010: [For each message being sent, the function shall add
+                // the IoT Hub status code along with the callback and context to the callback list.]
+                IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(status, packet.getCallback(), packet.getContext());
                 this.callbackList.add(callbackPacket);
             }
-        }
-        catch(Throwable e)
-        {
-            // Codes_SRS_MQTTTRANSPORT_15_013: [If the function throws any exception or error,
-            // it shall also close the MQTT connection.]
-            this.mqttIotHubConnection.close();
-            this.state = MqttTransportState.CRASHED;
-            throw e;
+            // Codes_SRS_MQTTTRANSPORT_15_011: [If the IoT Hub could not be reached, the message
+            // shall be buffered to be sent again next time.]
+            catch (IllegalStateException e)
+            {
+                this.waitingList.add(packet);
+            }
         }
     }
 
@@ -206,19 +188,19 @@ public final class MqttTransport implements IotHubTransport
      *
      * @throws IllegalStateException if the transport has not been opened or is closed.
      */
-    public void invokeCallbacks()
+    public void invokeCallbacks() throws IllegalStateException
     {
-        // Codes_SRS_MQTTTRANSPORT_15_018: [If the transport is closed,
+        // Codes_SRS_MQTTTRANSPORT_15_014: [If the transport is closed,
         // the function shall throw an IllegalStateException.]
         if (this.state == MqttTransportState.CLOSED)
         {
             throw new IllegalStateException("MQTT transport is closed.");
         }
 
-        // Codes_SRS_MQTTTRANSPORT_15_016: [The function shall invoke all callbacks on the callback queue.]
+        // Codes_SRS_MQTTTRANSPORT_15_013: [The function shall invoke all callbacks on the callback queue.]
         while (!this.callbackList.isEmpty())
         {
-            // Codes_SRS_MQTTTRANSPORT_15_017: [If an exception is thrown during the callback,
+            // Codes_SRS_MQTTTRANSPORT_15_015: [If an exception is thrown during the callback,
             // the function shall drop the callback from the queue.]
             IotHubCallbackPacket packet = this.callbackList.remove();
 
@@ -238,12 +220,11 @@ public final class MqttTransport implements IotHubTransport
      * </p>
      * If no message callback is set, the function will do nothing.
      *
-     * @throws IOException if the server could not be reached.
      * @throws IllegalStateException if the transport has not been opened or is closed.
      */
-    public void handleMessage() throws IOException
+    public void handleMessage() throws IllegalStateException
     {
-        // Codes_SRS_MQTTTRANSPORT_15_025: [If the MQTT connection is closed,
+        // Codes_SRS_MQTTTRANSPORT_15_018: [If the MQTT connection is closed,
         // the function shall throw an IllegalStateException.]
         if (this.state == MqttTransportState.CLOSED)
         {
@@ -256,38 +237,21 @@ public final class MqttTransport implements IotHubTransport
         {
             return;
         }
-        // Codes_SRS_MQTTTRANSPORT_15_024: [If the transport had previously encountered any exception or error
-        // while open, it shall reopen a new MQTT connection with the IoT Hub given in the configuration.]
-        if (this.state == MqttTransportState.CRASHED)
-        {
-            this.close();
-            this.open();
-        }
 
         try
         {
-            // Codes_SRS_MQTTTRANSPORT_15_022: [If the IoT Hub could not be reached,
-            // the function shall throw an IOException.]
-            // Codes_SRS_MQTTTRANSPORT_15_019: [The function shall attempt to consume a message from the IoT Hub.]
+            // Codes_SRS_MQTTTRANSPORT_15_016: [The function shall attempt to consume a message from the IoT Hub.]
             Message message = this.mqttIotHubConnection.receiveMessage();
 
-            // Codes_SRS_MQTTTRANSPORT_15_020: [If a message is found and a message callback is registered,
+            // Codes_SRS_MQTTTRANSPORT_15_017: [If a message is found and a message callback is registered,
             // the function shall invoke the callback on the message.]
             if (message != null)
             {
-                IotHubMessageResult result = callback.execute(message, context);
-
-                // Codes_SRS_MQTTTRANSPORT_15_021: [The function shall return the message result
-                // (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
-                this.mqttIotHubConnection.sendMessageResult(result);
+                callback.execute(message, context);
             }
         }
-        catch (Throwable e)
+        catch (IllegalStateException e)
         {
-            // Codes_SRS_MQTTTRANSPORT_15_023: [If the function throws any exception or error,
-            // it shall also close the MQTT connection.]
-            this.mqttIotHubConnection.close();
-            this.state = MqttTransportState.CRASHED;
             throw e;
         }
     }
@@ -301,7 +265,7 @@ public final class MqttTransport implements IotHubTransport
      */
     public boolean isEmpty()
     {
-        // Codes_SRS_MQTTTRANSPORT_15_027: [The function shall return true if the waiting list, in progress list,
+        // Codes_SRS_MQTTTRANSPORT_15_019: [The function shall return true if the waiting list
         // and callback list are all empty, and false otherwise.]
         if (this.waitingList.isEmpty() && this.callbackList.isEmpty())
         {

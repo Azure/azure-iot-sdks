@@ -102,8 +102,6 @@ public void invokeCallbacks();
 
 **SRS_AMQPSTRANSPORT_11_008: [**The function shall invoke all callbacks on its callback queue.**]**
 
-**SRS_AMQPSTRANSPORT_11_009: [**If an exception is thrown during the callback, the function shall drop the callback from the queue.**]**
-
 **SRS_AMQPSTRANSPORT_11_030: [**If the AMQPS session is closed, the function shall throw an IllegalStateException.**]**
 
 

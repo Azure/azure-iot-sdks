@@ -72,8 +72,8 @@ public class MqttTransportTest {
         };
     }
 
-    // Tests_SRS_MQTTTRANSPORT_15_005: [The function shall close the MQTT connection 
-    // with the IoT Hub given in the configuration.] 
+    // Tests_SRS_MQTTTRANSPORT_15_005: [The function shall close the MQTT connection
+    // with the IoT Hub given in the configuration.]
     @Test
     public void closeClosesMqttConnection() throws IOException
     {
@@ -138,7 +138,6 @@ public class MqttTransportTest {
     {
         final Queue mockQueue = new MockUp<T>()
         {
-
         }.getMockInstance();
         final Map<String, Object> context = new HashMap<>();
 
@@ -287,7 +286,7 @@ public class MqttTransportTest {
         {
             {
                 mockConnection.sendEvent((Message) any);
-                result = new IOException(anyString);
+                result = new IllegalStateException(anyString);
                 result = IotHubStatusCode.OK_EMPTY;
             }
         };
@@ -295,14 +294,7 @@ public class MqttTransportTest {
         MqttTransport transport = new MqttTransport(mockConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
-        try
-        {
-            transport.sendMessages();
-            throw new AssertionFailedError();
-        }
-        catch (IOException e)
-        {
-        }
+        transport.sendMessages();
         transport.sendMessages();
 
         final MqttIotHubConnection expectedConnection = mockConnection;
@@ -315,132 +307,7 @@ public class MqttTransportTest {
         };
     }
 
-    // Tests_SRS_MQTTTRANSPORT_15_012: [If the IoT Hub could not be reached, the function shall throw an IOException.]
-    @Test(expected = IOException.class)
-    public void sendMessagesThrowsIOExceptionIfSendFails(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
-    {
-        final Map<String, Object> context = new HashMap<>();
-        new NonStrictExpectations()
-        {
-            {
-                new MqttIotHubConnection(mockConfig);
-                result = mockConnection;
-                new IotHubOutboundPacket(mockMsg, mockCallback, context);
-                result = mockPacket;
-                mockPacket.getMessage();
-                result = mockMsg;
-                mockConnection.sendEvent(mockMsg);
-                result = new IOException(anyString);
-            }
-        };
-
-        MqttTransport transport = new MqttTransport(mockConfig);
-        transport.open();
-        transport.addMessage(mockMsg, mockCallback, context);
-        transport.sendMessages();
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_013: [If the function throws any exception or error,
-    // it shall also close the MQTT connection.]
-    @Test
-    public void sendMessagesClosesMqttConnectionIfSendFails(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
-    {
-        final Map<String, Object> context = new HashMap<>();
-        new NonStrictExpectations()
-        {
-            {
-                new MqttIotHubConnection(mockConfig);
-                result = mockConnection;
-                new IotHubOutboundPacket(mockMsg, mockCallback, context);
-                result = mockPacket;
-                mockPacket.getMessage();
-                result = mockMsg;
-                mockConnection.sendEvent(mockMsg);
-                result = new OutOfMemoryError();
-            }
-        };
-
-        MqttTransport transport = new MqttTransport(mockConfig);
-        try
-        {
-            transport.open();
-            transport.addMessage(mockMsg, mockCallback, context);
-            transport.sendMessages();
-            throw new AssertionError();
-        }
-        catch (Throwable e)
-        {
-        }
-
-        final MqttIotHubConnection expectedConnection = mockConnection;
-        new Verifications()
-        {
-            {
-                expectedConnection.close();
-            }
-        };
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_014: [If the transport had previously encountered any exception or error while open,
-    // it shall reopen a new MQTT connection with the IoT Hub given in the configuration.]
-    @Test
-    public void sendMessagesReopensMqttConnectionIfSendFails(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
-    {
-        final Map<String, Object> context = new HashMap<>();
-        new NonStrictExpectations()
-        {
-            {
-                new MqttIotHubConnection(mockConfig);
-                result = mockConnection;
-                new IotHubOutboundPacket(mockMsg, mockCallback, context);
-                result = mockPacket;
-                mockPacket.getMessage();
-                result = mockMsg;
-                mockConnection.sendEvent(mockMsg);
-                result = new OutOfMemoryError();
-                result = IotHubStatusCode.OK_EMPTY;
-            }
-        };
-
-        MqttTransport transport = new MqttTransport(mockConfig);
-        try
-        {
-            transport.open();
-            transport.addMessage(mockMsg, mockCallback, context);
-            transport.sendMessages();
-            throw new AssertionError();
-        }
-        catch (Throwable e)
-        {
-
-        }
-        transport.sendMessages();
-
-        final MqttIotHubConnection expectedConnection = mockConnection;
-        final DeviceClientConfig expectedConfig = mockConfig;
-        new VerificationsInOrder()
-        {
-            {
-                expectedConnection.sendEvent((Message) any);
-                new MqttIotHubConnection(expectedConfig);
-                expectedConnection.open();
-            }
-        };
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_015: [If the MQTT connection is closed,
+    // Tests_SRS_MQTTTRANSPORT_15_011: [If the MQTT connection is closed,
     // the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void sendMessagesFailsIfTransportNeverOpened() throws IOException
@@ -449,7 +316,7 @@ public class MqttTransportTest {
         transport.sendMessages();
     }
 
-    // Tests_SRS_MQTTTRANSPORT_15_015: [If the MQTT connection is closed,
+    // Tests_SRS_MQTTTRANSPORT_15_011: [If the MQTT connection is closed,
     // the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void sendMessagesFailsIfTransportClosed() throws IOException
@@ -460,7 +327,7 @@ public class MqttTransportTest {
         transport.sendMessages();
     }
 
-    // Tests_SRS_MQTTTRANSPORT_15_016: [The function shall invoke all callbacks on the callback queue.]
+    // Tests_SRS_MQTTTRANSPORT_15_013: [The function shall invoke all callbacks on the callback queue.]
     @Test
     public void invokeCallbacksInvokesAllCallbacks(
             @Mocked final Message mockMsg,
@@ -501,7 +368,25 @@ public class MqttTransportTest {
         };
     }
 
-    // Tests_SRS_MQTTTRANSPORT_15_017: [If an exception is thrown during the callback,
+    // Tests_SRS_MQTTTRANSPORT_15_014: [If the transport is closed, the function shall throw an IllegalStateException.]
+    @Test(expected = IllegalStateException.class)
+    public void invokeCallbacksFailsIfTransportNeverOpened() throws IOException
+    {
+        MqttTransport transport = new MqttTransport(mockConfig);
+        transport.invokeCallbacks();
+    }
+
+    // Tests_SRS_MQTTTRANSPORT_15_014: [If the transport is closed, the function shall throw an IllegalStateException.]
+    @Test(expected = IllegalStateException.class)
+    public void invokeCallbacksFailsIfTransportAlreadyClosed() throws IOException
+    {
+        MqttTransport transport = new MqttTransport(mockConfig);
+        transport.open();
+        transport.close();
+        transport.invokeCallbacks();
+    }
+
+    // Tests_SRS_MQTTTRANSPORT_15_015: [If an exception is thrown during the callback,
     // the function shall drop the callback from the queue.]
     @Test
     public void invokeCallbacksDropsFailedCallback(
@@ -552,25 +437,7 @@ public class MqttTransportTest {
         };
     }
 
-    // Tests_SRS_MQTTTRANSPORT_15_018: [If the transport is closed, the function shall throw an IllegalStateException.]
-    @Test(expected = IllegalStateException.class)
-    public void invokeCallbacksFailsIfTransportNeverOpened() throws IOException
-    {
-        MqttTransport transport = new MqttTransport(mockConfig);
-        transport.invokeCallbacks();
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_018: [If the transport is closed, the function shall throw an IllegalStateException.]
-    @Test(expected = IllegalStateException.class)
-    public void invokeCallbacksFailsIfTransportAlreadyClosed() throws IOException
-    {
-        MqttTransport transport = new MqttTransport(mockConfig);
-        transport.open();
-        transport.close();
-        transport.invokeCallbacks();
-    }
-
-    // Tests_SRS_MqttTransport_11_013: [The function shall return true if the waiting list
+    // Tests_SRS_MqttTransport_11_019: [The function shall return true if the waiting list
     // and callback list are all empty, and false otherwise.]
     @Test
     public void isEmptyReturnsFalseIfWaitingListIsNotEmpty(
@@ -588,7 +455,7 @@ public class MqttTransportTest {
         assertThat(testIsEmpty, is(expectedIsEmpty));
     }
 
-    // Tests_SRS_MqttTransport_11_013: [The function shall return true if the waiting list
+    // Tests_SRS_MqttTransport_11_019: [The function shall return true if the waiting list
     // and callback list are all empty, and false otherwise.]
     @Test
     public void isEmptyReturnsFalseIfCallbackListIsNotEmpty(
@@ -610,7 +477,7 @@ public class MqttTransportTest {
         assertThat(testIsEmpty, is(expectedIsEmpty));
     }
 
-    // Tests_SRS_MqttTransport_11_013: [The function shall return true if the waiting list
+    // Tests_SRS_MqttTransport_11_019: [The function shall return true if the waiting list
     // and callback list are all empty, and false otherwise.]
     @Test
     public void isEmptyReturnsTrueIfEmpty(
@@ -633,7 +500,7 @@ public class MqttTransportTest {
         assertThat(testIsEmpty, is(expectedIsEmpty));
     }
 
-    // Tests_SRS_MQTTTRANSPORT_15_019: [The function shall attempt to consume a message from the IoT Hub.]
+    // Tests_SRS_MQTTTRANSPORT_15_016: [The function shall attempt to consume a message from the IoT Hub.]
     @Test
     public void handleMessageAttemptsToReceiveMessage(@Mocked final MessageCallback mockCallback) throws IOException
     {
@@ -661,7 +528,7 @@ public class MqttTransportTest {
         };
     }
 
-    // Tests_SRS_MQTTTRANSPORT_15_020: [If a message is found and a message callback is registered,
+    // Tests_SRS_MQTTTRANSPORT_15_017: [If a message is found and a message callback is registered,
     // the function shall invoke the callback on the message.]
     @Test
     public void handleMessageInvokesCallbackIfMessageReceived(
@@ -696,180 +563,7 @@ public class MqttTransportTest {
         };
     }
 
-    // Tests_SRS_MQTTTRANSPORT_15_021: [The function shall return the message result
-    // (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
-    @Test
-    public void handleMessageSendsMessageResultIfCallbackReceived(
-            @Mocked final MessageCallback mockCallback,
-            @Mocked final Message mockMsg) throws IOException
-    {
-        final Object context = new Object();
-        final IotHubMessageResult messageResult = IotHubMessageResult.COMPLETE;
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getMessageCallback();
-                result = mockCallback;
-                mockConfig.getMessageContext();
-                result = context;
-                mockConnection.receiveMessage();
-                result = mockMsg;
-                mockCallback.execute((Message) any, any);
-                result = messageResult;
-            }
-        };
-
-        MqttTransport transport = new MqttTransport(mockConfig);
-        transport.open();
-        transport.handleMessage();
-
-        final MqttIotHubConnection expectedConnection = mockConnection;
-        final IotHubMessageResult expectedMessageResult = messageResult;
-        new Verifications()
-        {
-            {
-                expectedConnection.sendMessageResult(expectedMessageResult);
-            }
-        };
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_022: [If no MQTT connection exists with the IoT Hub,
-    // the function shall establish one.]
-    @Test
-    public void handleMessageCreatesMqttConnectionIfNoneExists(
-            @Mocked final MessageCallback mockCallback)
-            throws IOException
-    {
-        final Object context = new Object();
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getMessageCallback();
-                result = mockCallback;
-                mockConfig.getMessageContext();
-                result = context;
-            }
-        };
-
-        MqttTransport transport = new MqttTransport(mockConfig);
-        transport.open();
-        transport.handleMessage();
-
-        final DeviceClientConfig expectedConfig = mockConfig;
-        new Verifications()
-        {
-            {
-                new MqttIotHubConnection(expectedConfig);
-            }
-        };
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_023: [If the IoT Hub could not be reached, the function shall throw an IOException.]
-    @Test(expected = IOException.class)
-    public void handleMessageThrowsIOExceptionIfReceiveFails(
-            @Mocked final MessageCallback mockCallback) throws IOException
-    {
-        final Object context = new Object();
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getMessageCallback();
-                result = mockCallback;
-                mockConfig.getMessageContext();
-                result = context;
-                mockConnection.receiveMessage();
-                result = new IOException();
-            }
-        };
-
-        MqttTransport transport = new MqttTransport(mockConfig);
-        transport.open();
-        transport.handleMessage();
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_024: [If the function throws any exception or error,
-    // it shall also close the MQTT connection.]
-    @Test
-    public void handleMessageClosesMqttConnectionIfConnectionFails(
-            @Mocked final MessageCallback mockCallback) throws IOException
-    {
-        final Object context = new Object();
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getMessageCallback();
-                result = mockCallback;
-                mockConfig.getMessageContext();
-                result = context;
-                mockConnection.receiveMessage();
-                result = new NullPointerException();
-                result = null;
-            }
-        };
-
-        MqttTransport transport = new MqttTransport(mockConfig);
-        try
-        {
-            transport.open();
-            transport.handleMessage();
-        }
-        catch (Throwable e)
-        {
-        }
-
-        final MqttIotHubConnection expectedConnection = mockConnection;
-        new VerificationsInOrder()
-        {
-            {
-                expectedConnection.close();
-            }
-        };
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_025: [If the transport had previously encountered any exception or error while open,
-    // it shall reopen a new MQTT connection with the IoT Hub given in the configuration.]
-    @Test
-    public void handleMessageReopensMqttConnectionIfConnectionFails(
-            @Mocked final MessageCallback mockCallback) throws IOException
-    {
-        final Object context = new Object();
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getMessageCallback();
-                result = mockCallback;
-                mockConfig.getMessageContext();
-                result = context;
-                mockConnection.receiveMessage();
-                result = new NullPointerException();
-                result = null;
-            }
-        };
-
-        MqttTransport transport = new MqttTransport(mockConfig);
-        try
-        {
-            transport.open();
-            transport.handleMessage();
-        }
-        catch (Throwable e)
-        {
-        }
-        transport.handleMessage();
-
-        final MqttIotHubConnection expectedConnection = mockConnection;
-        final DeviceClientConfig expectedConfig = mockConfig;
-        new VerificationsInOrder()
-        {
-            {
-                expectedConnection.receiveMessage();
-                new MqttIotHubConnection(expectedConfig);
-                expectedConnection.open();
-            }
-        };
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_026: [If the MQTT connection is closed,
+    // Tests_SRS_MQTTTRANSPORT_15_018: [If the MQTT connection is closed,
     // the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void handleMessageFailsIfTransportNeverOpened() throws IOException
@@ -878,7 +572,7 @@ public class MqttTransportTest {
         transport.handleMessage();
     }
 
-    // Tests_SRS_MQTTTRANSPORT_15_026: [If the MQTT connection is closed,
+    // Tests_SRS_MQTTTRANSPORT_15_018: [If the MQTT connection is closed,
     // the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void handleMessageFailsIfTransportAlreadyClosed() throws IOException

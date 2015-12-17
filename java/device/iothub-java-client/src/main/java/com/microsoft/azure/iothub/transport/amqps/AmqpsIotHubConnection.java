@@ -215,14 +215,12 @@ public final class AmqpsIotHubConnection extends BaseHandler {
             Message m = null;
 
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_019: [The function shall attempt to remove a message from the queue.]
-            try {
+            if (this.receivedMessageQueue.size() > 0)
+            {
                 m = this.receivedMessageQueue.remove();
                 this.lastMessage = (AmqpsMessage)m;
             }
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_020: [The function shall return the message if one was pulled from the queue, otherwise it shall return null.]
-            catch (NoSuchElementException e) {
-                return null;
-            }
             return m;
         } else {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_018: [If the AmqpsIotHubConnectionBaseHandler has not been initialized, the function shall throw a new IOException.]
