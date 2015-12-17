@@ -9,10 +9,14 @@
    Simply changing the using the convenience layer (functions not having _LL)
    and removing calls to _DoWork will yield the same results. */
 
-#include <iothub_client_ll.h>
-#include <iothub_message.h>
-#include <crt_abstractions.h>
-#include <iothubtransporthttp.h>
+#ifdef ARDUINO
+#include "AzureIoT.h"
+#else
+#include "iothub_client_ll.h"
+#include "iothub_message.h"
+#include "crt_abstractions.h"
+#include "iothubtransporthttp.h"
+#endif
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
