@@ -3,10 +3,10 @@ var indexSectionsWithContent =
   0: "abdeghilmpstuvw",
   1: "i",
   2: "abhilmstv",
-  3: "bghilmstu",
+  3: "bdghilmstu",
   4: "dip",
-  5: "hilst",
-  6: "hilst",
+  5: "hilt",
+  6: "hlt",
   7: "bdegsw",
   8: "m"
 };

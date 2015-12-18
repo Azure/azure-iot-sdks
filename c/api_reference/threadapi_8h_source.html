@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>Microsoft Azure IoT Device SDK for C: c/common/inc/threadapi.h Source File</title>
+<title>Microsoft Azure IoT Device SDK for C: c/azure-c-shared-utility/c/inc/threadapi.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.0.0-preview.7</span>
+   &#160;<span id="projectnumber">1.0.0-preview.8</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -82,7 +82,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_1784a01aa976a8c78ef5dfc3737bcac8.html">c</a></li><li class="navelem"><a class="el" href="dir_cdcbff5a6a1122bd9bb23b5044523779.html">common</a></li><li class="navelem"><a class="el" href="dir_e7e6b493d3d7754f3ea1acccc5db86e9.html">inc</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_1784a01aa976a8c78ef5dfc3737bcac8.html">c</a></li><li class="navelem"><a class="el" href="dir_61a9c8b11d2290811efc64f9f8aab03f.html">azure-c-shared-utility</a></li><li class="navelem"><a class="el" href="dir_4d022b97b825a6486a754f89a7f5e400.html">c</a></li><li class="navelem"><a class="el" href="dir_d828e6b88ae878aca874d11d8e156263.html">inc</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -110,7 +110,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">    THREADAPI_NO_MEMORY,        \</span></div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">    THREADAPI_ERROR</span></div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
-<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="threadapi_8h.html#a66fa1f9dc4dba46aff5a1a9f7b013d2a">   29</a></span>&#160;DEFINE_ENUM(<a class="code" href="threadapi_8h.html#aa3ec4389c15a7208ff9dfe12533781cd">THREADAPI_RESULT</a>, THREADAPI_RESULT_VALUES);</div>
+<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="threadapi_8h.html#a66fa1f9dc4dba46aff5a1a9f7b013d2a">   29</a></span>&#160;<a class="code" href="iothub__message_8h.html#af3e30e923bcfe74bceffa8aa83cc4a02">DEFINE_ENUM</a>(<a class="code" href="threadapi_8h.html#aa3ec4389c15a7208ff9dfe12533781cd">THREADAPI_RESULT</a>, THREADAPI_RESULT_VALUES);</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keyword">typedef</span> <span class="keywordtype">void</span>* THREAD_HANDLE;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
@@ -130,6 +130,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="threadapi_8h_html_aed50c815f4090261c06968bb90644b50"><div class="ttname"><a href="threadapi_8h.html#aed50c815f4090261c06968bb90644b50">ThreadAPI_Create</a></div><div class="ttdeci">THREADAPI_RESULT ThreadAPI_Create(THREAD_HANDLE *threadHandle, THREAD_START_FUNC func, void *arg)</div><div class="ttdoc">Creates a thread with the entry point specified by the func argument. </div></div>
 <div class="ttc" id="threadapi_8h_html_a304fd6867f922d6321f36569d1769d04"><div class="ttname"><a href="threadapi_8h.html#a304fd6867f922d6321f36569d1769d04">ThreadAPI_Exit</a></div><div class="ttdeci">void ThreadAPI_Exit(int res)</div><div class="ttdoc">This function is called by a thread when the thread exits. </div></div>
 <div class="ttc" id="threadapi_8h_html_aa80bce4748cbe10f4b726f2ea3168609"><div class="ttname"><a href="threadapi_8h.html#aa80bce4748cbe10f4b726f2ea3168609">ThreadAPI_Join</a></div><div class="ttdeci">THREADAPI_RESULT ThreadAPI_Join(THREAD_HANDLE threadHandle, int *res)</div><div class="ttdoc">Blocks the calling thread by waiting on the thread identified by the threadHandle argument to complet...</div></div>
+<div class="ttc" id="iothub__message_8h_html_af3e30e923bcfe74bceffa8aa83cc4a02"><div class="ttname"><a href="iothub__message_8h.html#af3e30e923bcfe74bceffa8aa83cc4a02">DEFINE_ENUM</a></div><div class="ttdeci">DEFINE_ENUM(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES)</div><div class="ttdoc">Enumeration specifying the status of calls to various APIs in this module. </div></div>
 <div class="ttc" id="threadapi_8h_html_a9ce3ec671e3aa3ca28a3e93c514dac56"><div class="ttname"><a href="threadapi_8h.html#a9ce3ec671e3aa3ca28a3e93c514dac56">ThreadAPI_Sleep</a></div><div class="ttdeci">void ThreadAPI_Sleep(unsigned int milliseconds)</div><div class="ttdoc">Sleeps the current thread for the given number of milliseconds. </div></div>
 <div class="ttc" id="threadapi_8h_html_aa3ec4389c15a7208ff9dfe12533781cd"><div class="ttname"><a href="threadapi_8h.html#aa3ec4389c15a7208ff9dfe12533781cd">THREADAPI_RESULT</a></div><div class="ttdeci">enum THREADAPI_RESULT_TAG THREADAPI_RESULT</div><div class="ttdoc">Enumeration specifying the possible return values for the APIs in this module. </div></div>
 </div><!-- fragment --></div><!-- contents -->

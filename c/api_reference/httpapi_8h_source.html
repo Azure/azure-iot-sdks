@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>Microsoft Azure IoT Device SDK for C: c/common/inc/httpapi.h Source File</title>
+<title>Microsoft Azure IoT Device SDK for C: c/azure-c-shared-utility/c/inc/httpapi.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.0.0-preview.7</span>
+   &#160;<span id="projectnumber">1.0.0-preview.8</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -82,7 +82,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_1784a01aa976a8c78ef5dfc3737bcac8.html">c</a></li><li class="navelem"><a class="el" href="dir_cdcbff5a6a1122bd9bb23b5044523779.html">common</a></li><li class="navelem"><a class="el" href="dir_e7e6b493d3d7754f3ea1acccc5db86e9.html">inc</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_1784a01aa976a8c78ef5dfc3737bcac8.html">c</a></li><li class="navelem"><a class="el" href="dir_61a9c8b11d2290811efc64f9f8aab03f.html">azure-c-shared-utility</a></li><li class="navelem"><a class="el" href="dir_4d022b97b825a6486a754f89a7f5e400.html">c</a></li><li class="navelem"><a class="el" href="dir_d828e6b88ae878aca874d11d8e156263.html">inc</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -107,7 +107,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">#include &lt;stddef.h&gt;</span></div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">typedef</span> <span class="keywordtype">void</span>* HTTP_HANDLE;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>HTTP_HANDLE_DATA_TAG* HTTP_HANDLE;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#define AMBIGUOUS_STATUS_CODE           (300)</span></div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
@@ -132,7 +132,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">HTTPAPI_SET_TIMEOUTS_FAILED                  \</span></div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
-<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="httpapi_8h.html#a98e397f3dccc10de6bd136785012ca87">   54</a></span>&#160;DEFINE_ENUM(<a class="code" href="httpapi_8h.html#accb5e25e6c8d9765e5abe53132708480">HTTPAPI_RESULT</a>, HTTPAPI_RESULT_VALUES);</div>
+<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="httpapi_8h.html#a98e397f3dccc10de6bd136785012ca87">   54</a></span>&#160;<a class="code" href="iothub__message_8h.html#af3e30e923bcfe74bceffa8aa83cc4a02">DEFINE_ENUM</a>(<a class="code" href="httpapi_8h.html#accb5e25e6c8d9765e5abe53132708480">HTTPAPI_RESULT</a>, HTTPAPI_RESULT_VALUES);</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#define HTTPAPI_REQUEST_TYPE_VALUES\</span></div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="preprocessor">    HTTPAPI_REQUEST_GET,            \</span></div>
@@ -142,7 +142,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor">    HTTPAPI_REQUEST_PATCH           \</span></div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
-<div class="line"><a name="l00066"></a><span class="lineno"><a class="line" href="httpapi_8h.html#a81bf3649034ead3dd83e2fd34571e89c">   66</a></span>&#160;DEFINE_ENUM(<a class="code" href="httpapi_8h.html#ad3df2a926e7d91868324660f83dcd66d">HTTPAPI_REQUEST_TYPE</a>, HTTPAPI_REQUEST_TYPE_VALUES);</div>
+<div class="line"><a name="l00066"></a><span class="lineno"><a class="line" href="httpapi_8h.html#a81bf3649034ead3dd83e2fd34571e89c">   66</a></span>&#160;<a class="code" href="iothub__message_8h.html#af3e30e923bcfe74bceffa8aa83cc4a02">DEFINE_ENUM</a>(<a class="code" href="httpapi_8h.html#ad3df2a926e7d91868324660f83dcd66d">HTTPAPI_REQUEST_TYPE</a>, HTTPAPI_REQUEST_TYPE_VALUES);</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="keyword">extern</span> <a class="code" href="httpapi_8h.html#accb5e25e6c8d9765e5abe53132708480">HTTPAPI_RESULT</a> <a class="code" href="httpapi_8h.html#a0a73dc1b76c522a36b0f201d1a80c3d4">HTTPAPI_Init</a>(<span class="keywordtype">void</span>);</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;</div>
@@ -171,6 +171,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="httpapi_8h_html_a126e89db045f53ecc3438eecea2efc84"><div class="ttname"><a href="httpapi_8h.html#a126e89db045f53ecc3438eecea2efc84">HTTPAPI_SetOption</a></div><div class="ttdeci">HTTPAPI_RESULT HTTPAPI_SetOption(HTTP_HANDLE handle, const char *optionName, const void *value)</div><div class="ttdoc">Sets the option named optionName bearing the value value for the HTTP_HANDLE handle. </div></div>
 <div class="ttc" id="httpapi_8h_html_aed5a7f4253357457399d03dad763d904"><div class="ttname"><a href="httpapi_8h.html#aed5a7f4253357457399d03dad763d904">HTTPAPI_CloseConnection</a></div><div class="ttdeci">void HTTPAPI_CloseConnection(HTTP_HANDLE handle)</div><div class="ttdoc">Closes a connection created with HTTPAPI_CreateConnection. </div></div>
 <div class="ttc" id="httpapi_8h_html_afa60b8d96e73b2fe592b591208ef66b1"><div class="ttname"><a href="httpapi_8h.html#afa60b8d96e73b2fe592b591208ef66b1">HTTPAPI_ExecuteRequest</a></div><div class="ttdeci">HTTPAPI_RESULT HTTPAPI_ExecuteRequest(HTTP_HANDLE handle, HTTPAPI_REQUEST_TYPE requestType, const char *relativePath, HTTP_HEADERS_HANDLE httpHeadersHandle, const unsigned char *content, size_t contentLength, unsigned int *statusCode, HTTP_HEADERS_HANDLE responseHeadersHandle, BUFFER_HANDLE responseContent)</div><div class="ttdoc">Sends the HTTP request to the host and handles the response for the HTTP call. </div></div>
+<div class="ttc" id="iothub__message_8h_html_af3e30e923bcfe74bceffa8aa83cc4a02"><div class="ttname"><a href="iothub__message_8h.html#af3e30e923bcfe74bceffa8aa83cc4a02">DEFINE_ENUM</a></div><div class="ttdeci">DEFINE_ENUM(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES)</div><div class="ttdoc">Enumeration specifying the status of calls to various APIs in this module. </div></div>
 <div class="ttc" id="httpapi_8h_html_accb5e25e6c8d9765e5abe53132708480"><div class="ttname"><a href="httpapi_8h.html#accb5e25e6c8d9765e5abe53132708480">HTTPAPI_RESULT</a></div><div class="ttdeci">enum HTTPAPI_RESULT_TAG HTTPAPI_RESULT</div><div class="ttdoc">Enumeration specifying the possible return values for the APIs in this module. </div></div>
 <div class="ttc" id="httpapi_8h_html_ad4a4aab991408a4dbf0c018eae727985"><div class="ttname"><a href="httpapi_8h.html#ad4a4aab991408a4dbf0c018eae727985">HTTPAPI_CloneOption</a></div><div class="ttdeci">HTTPAPI_RESULT HTTPAPI_CloneOption(const char *optionName, const void *value, const void **savedValue)</div><div class="ttdoc">Clones the option named optionName bearing the value value into the pointer savedValue. </div></div>
 <div class="ttc" id="httpheaders_8h_html"><div class="ttname"><a href="httpheaders_8h.html">httpheaders.h</a></div><div class="ttdoc">This is a utility module that handles HTTP message-headers. </div></div>

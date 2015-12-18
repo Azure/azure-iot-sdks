@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>Microsoft Azure IoT Device SDK for C: c/common/inc/map.h Source File</title>
+<title>Microsoft Azure IoT Device SDK for C: c/azure-c-shared-utility/c/inc/map.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.0.0-preview.7</span>
+   &#160;<span id="projectnumber">1.0.0-preview.8</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -82,7 +82,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_1784a01aa976a8c78ef5dfc3737bcac8.html">c</a></li><li class="navelem"><a class="el" href="dir_cdcbff5a6a1122bd9bb23b5044523779.html">common</a></li><li class="navelem"><a class="el" href="dir_e7e6b493d3d7754f3ea1acccc5db86e9.html">inc</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_1784a01aa976a8c78ef5dfc3737bcac8.html">c</a></li><li class="navelem"><a class="el" href="dir_61a9c8b11d2290811efc64f9f8aab03f.html">azure-c-shared-utility</a></li><li class="navelem"><a class="el" href="dir_4d022b97b825a6486a754f89a7f5e400.html">c</a></li><li class="navelem"><a class="el" href="dir_d828e6b88ae878aca874d11d8e156263.html">inc</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -117,9 +117,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">    MAP_KEYNOTFOUND, \</span></div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">    MAP_FILTER_REJECT</span></div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;DEFINE_ENUM(MAP_RESULT, MAP_RESULT_VALUES);</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<a class="code" href="iothub__message_8h.html#af3e30e923bcfe74bceffa8aa83cc4a02">DEFINE_ENUM</a>(MAP_RESULT, MAP_RESULT_VALUES);</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">typedef</span> <span class="keywordtype">void</span>* MAP_HANDLE;</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>MAP_HANDLE_DATA_TAG* MAP_HANDLE;</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">typedef</span> int (*MAP_FILTER_CALLBACK)(<span class="keyword">const</span> <span class="keywordtype">char</span>* mapProperty, <span class="keyword">const</span> <span class="keywordtype">char</span>* mapValue);</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
@@ -155,6 +155,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="map_8h_html_a76142fc262744d64715a597eac0ed9ff"><div class="ttname"><a href="map_8h.html#a76142fc262744d64715a597eac0ed9ff">Map_Create</a></div><div class="ttdeci">MAP_HANDLE Map_Create(MAP_FILTER_CALLBACK mapFilterFunc)</div><div class="ttdoc">Creates a new, empty map. </div></div>
 <div class="ttc" id="map_8h_html_acab6921eb142a4d60b1fc65f82b4432c"><div class="ttname"><a href="map_8h.html#acab6921eb142a4d60b1fc65f82b4432c">Map_Clone</a></div><div class="ttdeci">MAP_HANDLE Map_Clone(MAP_HANDLE handle)</div><div class="ttdoc">Creates a copy of the map indicated by handle and returns a handle to it. </div></div>
 <div class="ttc" id="map_8h_html_a5a39e57aff544ff7880294b32233366b"><div class="ttname"><a href="map_8h.html#a5a39e57aff544ff7880294b32233366b">Map_Destroy</a></div><div class="ttdeci">void Map_Destroy(MAP_HANDLE handle)</div><div class="ttdoc">Release all resources associated with the map. </div></div>
+<div class="ttc" id="iothub__message_8h_html_af3e30e923bcfe74bceffa8aa83cc4a02"><div class="ttname"><a href="iothub__message_8h.html#af3e30e923bcfe74bceffa8aa83cc4a02">DEFINE_ENUM</a></div><div class="ttdeci">DEFINE_ENUM(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES)</div><div class="ttdoc">Enumeration specifying the status of calls to various APIs in this module. </div></div>
 <div class="ttc" id="map_8h_html_a0dd145d19021b3e80d53868d61cbc684"><div class="ttname"><a href="map_8h.html#a0dd145d19021b3e80d53868d61cbc684">Map_Add</a></div><div class="ttdeci">MAP_RESULT Map_Add(MAP_HANDLE handle, const char *key, const char *value)</div><div class="ttdoc">Adds a key/value pair to the map. </div></div>
 <div class="ttc" id="map_8h_html_a766b6de5f152f5ba2669aa0832899e6d"><div class="ttname"><a href="map_8h.html#a766b6de5f152f5ba2669aa0832899e6d">Map_ContainsKey</a></div><div class="ttdeci">MAP_RESULT Map_ContainsKey(MAP_HANDLE handle, const char *key, bool *keyExists)</div><div class="ttdoc">This function returns a boolean value in keyExists if the map contains a key with the same value the ...</div></div>
 <div class="ttc" id="map_8h_html_a3c232f8741686b794a1a767117012497"><div class="ttname"><a href="map_8h.html#a3c232f8741686b794a1a767117012497">Map_AddOrUpdate</a></div><div class="ttdeci">MAP_RESULT Map_AddOrUpdate(MAP_HANDLE handle, const char *key, const char *value)</div><div class="ttdoc">Adds/updates a key/value pair to the map. </div></div>

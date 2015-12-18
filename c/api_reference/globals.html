@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.0.0-preview.7</span>
+   &#160;<span id="projectnumber">1.0.0-preview.8</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -131,6 +131,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </li>
 <li>DECLARE_STRUCT
 : <a class="el" href="serializer_8h.html#aeeaee7762d880f428ed4ba88ca7db1e6">serializer.h</a>
+</li>
+<li>DEFINE_ENUM()
+: <a class="el" href="iothub__message_8h.html#af3e30e923bcfe74bceffa8aa83cc4a02">iothub_message.h</a>
+, <a class="el" href="iothub__client__ll_8h.html#a93358acceb1561c4e0fe06a82c55038f">iothub_client_ll.h</a>
+, <a class="el" href="schemalib_8h.html#ac54b2d38fc1462dd1c30bfd041a0d29e">schemalib.h</a>
 </li>
 </ul>
 
@@ -253,30 +258,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>IOTHUB_CLIENT_CONFIG
 : <a class="el" href="iothub__client__ll_8h.html#ac14a59dcc227623976d044d1805b5e22">iothub_client_ll.h</a>
 </li>
-<li>IOTHUB_CLIENT_CONFIRMATION_RESULT
-: <a class="el" href="iothub__client__ll_8h.html#a4577382ad30d162f2b9cf461ead5639b">iothub_client_ll.h</a>
-</li>
-<li>IOTHUB_CLIENT_CONFIRMATION_RESULT_TAG
-: <a class="el" href="iothub__client__ll_8h.html#af338feaaafa37bd3352967a1fe52c9e7">iothub_client_ll.h</a>
-</li>
-<li>IOTHUB_CLIENT_RESULT
-: <a class="el" href="iothub__client__ll_8h.html#acab188935ec8a12092ab518112268bfd">iothub_client_ll.h</a>
-</li>
-<li>IOTHUB_CLIENT_RESULT_TAG
-: <a class="el" href="iothub__client__ll_8h.html#a1dcfcf0cc4f3d27d4fe24642929e0e05">iothub_client_ll.h</a>
-</li>
-<li>IOTHUB_CLIENT_STATUS
-: <a class="el" href="iothub__client__ll_8h.html#a06bec2310f92a54329a1f39b0804ee88">iothub_client_ll.h</a>
-</li>
-<li>IOTHUB_CLIENT_STATUS_TAG
-: <a class="el" href="iothub__client__ll_8h.html#aad29ba44eb4ad88bf10e7d3d43138bf7">iothub_client_ll.h</a>
-</li>
-<li>IOTHUB_MESSAGE_RESULT
-: <a class="el" href="iothub__message_8h.html#ab826e84207e0513abcf6825fa72c7a7f">iothub_message.h</a>
-</li>
-<li>IOTHUB_MESSAGE_RESULT_TAG
-: <a class="el" href="iothub__message_8h.html#a5f8a34b4b03e4133e9612c584852891b">iothub_message.h</a>
-</li>
 <li>IoTHubClient_Create()
 : <a class="el" href="iothub__client_8h.html#a7e4253f4df8cdef79cbe44d33c73547d">iothub_client.h</a>
 </li>
@@ -334,12 +315,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>IoTHubMessage_Clone()
 : <a class="el" href="iothub__message_8h.html#ab5c68ff6fbb9dbe613c8b981f4c202b4">iothub_message.h</a>
 </li>
-<li>IOTHUBMESSAGE_CONTENT_TYPE
-: <a class="el" href="iothub__message_8h.html#a1540154c626623da1ecf6fab5b380c27">iothub_message.h</a>
-</li>
-<li>IOTHUBMESSAGE_CONTENT_TYPE_TAG
-: <a class="el" href="iothub__message_8h.html#a3bac0fe02b09114764eba2d1e9168669">iothub_message.h</a>
-</li>
 <li>IoTHubMessage_CreateFromByteArray()
 : <a class="el" href="iothub__message_8h.html#acaa3b835c12fb0254938af052f0fcb6f">iothub_message.h</a>
 </li>
@@ -348,12 +323,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </li>
 <li>IoTHubMessage_Destroy()
 : <a class="el" href="iothub__message_8h.html#a8303de9790f32c3b0aebac6cfb0e80bf">iothub_message.h</a>
-</li>
-<li>IOTHUBMESSAGE_DISPOSITION_RESULT
-: <a class="el" href="iothub__client__ll_8h.html#a988b1c83b28d268c642d72dcab8228a4">iothub_client_ll.h</a>
-</li>
-<li>IOTHUBMESSAGE_DISPOSITION_RESULT_TAG
-: <a class="el" href="iothub__client__ll_8h.html#ad6c1da5dbe6e1dd6746ab930b377d531">iothub_client_ll.h</a>
 </li>
 <li>IoTHubMessage_GetByteArray()
 : <a class="el" href="iothub__message_8h.html#afac0461ed8c3d522bbf2a4cfa9f3f957">iothub_message.h</a>
@@ -439,23 +408,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>SERIALIZE
 : <a class="el" href="serializer_8h.html#a18c48c356331a3ff3084ff604da29b91">serializer.h</a>
 </li>
-<li>SERIALIZER_CONFIG
-: <a class="el" href="schemalib_8h.html#af53bee224fe8926ea9e23f0e09ab7910">schemalib.h</a>
-</li>
-<li>SERIALIZER_CONFIG_TAG
-: <a class="el" href="schemalib_8h.html#a613fbcf6251d7de13a480b6a4a7e315c">schemalib.h</a>
-</li>
 <li>serializer_deinit()
 : <a class="el" href="schemalib_8h.html#a7a6d4835d9608c78de209ca23b9817c2">schemalib.h</a>
 </li>
 <li>serializer_init()
 : <a class="el" href="schemalib_8h.html#a0efca90998d764b66602d0046333d4bd">schemalib.h</a>
-</li>
-<li>SERIALIZER_RESULT
-: <a class="el" href="schemalib_8h.html#ad17b49367136d353b37ac80b2fd0e920">schemalib.h</a>
-</li>
-<li>SERIALIZER_RESULT_TAG
-: <a class="el" href="schemalib_8h.html#a960fe6038a4c443849a51328561a3cdc">schemalib.h</a>
 </li>
 <li>serializer_setconfig()
 : <a class="el" href="schemalib_8h.html#aa60c0c7fb365aff62ccdf052dd96a5d7">schemalib.h</a>
