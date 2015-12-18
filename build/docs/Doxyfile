@@ -766,15 +766,15 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = mainpage.dox \
-                         ../../c/common/inc/agenttime.h \
-                         ../../c/common/inc/base64.h \
-                         ../../c/common/inc/httpapi.h \
-                         ../../c/common/inc/httpapi.h \
-                         ../../c/common/inc/httpapiex.h \
-                         ../../c/common/inc/httpheaders.h \
-                         ../../c/common/inc/threadapi.h \
-                         ../../c/common/inc/lock.h \
-                         ../../c/common/inc/map.h \
+                         ../../c/azure-c-shared-utility/c/inc/agenttime.h \
+                         ../../c/azure-c-shared-utility/c/inc/base64.h \
+                         ../../c/azure-c-shared-utility/c/inc/httpapi.h \
+                         ../../c/azure-c-shared-utility/c/inc/httpapi.h \
+                         ../../c/azure-c-shared-utility/c/inc/httpapiex.h \
+                         ../../c/azure-c-shared-utility/c/inc/httpheaders.h \
+                         ../../c/azure-c-shared-utility/c/inc/threadapi.h \
+                         ../../c/azure-c-shared-utility/c/inc/lock.h \
+                         ../../c/azure-c-shared-utility/c/inc/map.h \
                          ../../c/iothub_client/inc/version.h \
                          ../../c/iothub_client/inc/iothub_message.h \
                          ../../c/iothub_client/inc/iothub_client_ll.h \
