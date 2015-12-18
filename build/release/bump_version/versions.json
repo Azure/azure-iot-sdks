@@ -3,7 +3,7 @@
         "device": "1.0.0-preview.8"
     },
     "c_nuget": {
-        "device": "1.0.0-preview-008"
+        "device": "1.0.0-preview-010"
     },
     "qpid_proton_nuget": "0.9.0.1-preview-003",
     "eclipse_paho_nuget": "1.0.3",
