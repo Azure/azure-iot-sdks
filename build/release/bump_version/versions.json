@@ -17,7 +17,14 @@
     },
     "node": {
         "common": "1.0.0-preview.9",
+        "amqp-base": "1.0.0-preview.9",
+        "http-base": "1.0.0-preview.9",
+        "mqtt-base": "1.0.0-preview.9",
         "device": "1.0.0-preview.9",
+        "device-amqp": "1.0.0-preview.9",
+        "device-amqp-ws": "1.0.0-preview.9",
+        "device-http": "1.0.0-preview.9",
+        "device-mqtt": "1.0.0-preview.9",
         "service": "1.0.0-preview.9"
     },
     "iothub-explorer": "1.0.0-preview.9",

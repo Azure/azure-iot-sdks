@@ -3,11 +3,11 @@
 
 'use strict';
 
-var anHourFromNow = require('azure-iot-common').authorization.anHourFromNow;
+var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./amqp.js');
 var Message = require('azure-iot-common').Message;
-var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
+var SharedAccessSignature = require('./shared_access_signature.js');
 
 /**
  * @class Client

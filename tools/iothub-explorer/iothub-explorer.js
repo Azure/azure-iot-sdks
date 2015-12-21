@@ -18,7 +18,7 @@ var Message = require('azure-iot-common').Message;
 var EventHubClient = require('./lib/eventhubclient.js');
 var ConnectionString = require('azure-iothub').ConnectionString;
 var SharedAccessSignature = require('azure-iothub').SharedAccessSignature;
-var anHourFromNow = require('azure-iot-common').authorization.anHourFromNow;
+var anHourFromNow = require('azure-iot-common').anHourFromNow;
 
 function Count(val) {
   this.val = +val;

@@ -60,10 +60,31 @@ else
 fi
 echo ""
 
-lint_and_test $node_root/common
+lint_and_test $node_root/common/core
 [ $? -eq 0 ] || exit $?
 
-lint_and_test $node_root/device
+lint_and_test $node_root/common/transport/amqp
+[ $? -eq 0 ] || exit $?
+
+lint_and_test $node_root/common/transport/http
+[ $? -eq 0 ] || exit $?
+
+lint_and_test $node_root/common/transport/mqtt
+[ $? -eq 0 ] || exit $?
+
+lint_and_test $node_root/device/core
+[ $? -eq 0 ] || exit $?
+
+lint_and_test $node_root/device/transport/amqp
+[ $? -eq 0 ] || exit $?
+
+lint_and_test $node_root/device/transport/amqp-ws
+[ $? -eq 0 ] || exit $?
+
+lint_and_test $node_root/device/transport/http
+[ $? -eq 0 ] || exit $?
+
+lint_and_test $node_root/device/transport/mqtt
 [ $? -eq 0 ] || exit $?
 
 lint_and_test $node_root/service
