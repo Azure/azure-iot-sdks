@@ -51,7 +51,7 @@ While not strictly required, we recommend that you install the following tools f
   TIRTOS_INSTALLATION_DIR ?= C:/ti/tirtos_simplelink_2_14_01_20
   NS_INSTALLATION_DIR     ?= C:/ti/ns_1_10_00_00_eng
   CC3200SDK_INSTALLATION_DIR ?= C:/ti/CC3200SDK_1.1.0/cc3200-sdk
-  ti.targets.arm.elf.M4  ?= C:/ti/cgt_arm_5.2.5
+  ti.targets.arm.elf.M4  ?= C:/ti/ti-cgt-arm_5.2.5
   ```
 
 2. Open a Windows command prompt.
