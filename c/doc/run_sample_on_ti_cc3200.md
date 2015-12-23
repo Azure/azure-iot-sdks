@@ -28,7 +28,7 @@ Required hardware: [CC3200 Launchpad](http://www.ti.com/tool/cc3200-launchxl).
 This procedure assumes you have already installed the Azure IoT SDK on your development machine. These instructions refer to the folder that contains the Azure IoT SDK on your local machine as `<AZURE_INSTALL_DIR>`.
 
 > **Note:** You can install the Azure IoT SDK using
-`git clone https://github.com/Azure/azure-iot-sdks.git`
+`git clone --recursive https://github.com/Azure/azure-iot-sdks.git`
 
 While not strictly required, we recommend that you install the following tools from TI in the same directory and that you use directory names without any whitespace. This documentation assumes that you install everything in `C:\ti`.
 
@@ -51,7 +51,7 @@ While not strictly required, we recommend that you install the following tools f
   TIRTOS_INSTALLATION_DIR ?= C:/ti/tirtos_simplelink_2_14_01_20
   NS_INSTALLATION_DIR     ?= C:/ti/ns_1_10_00_00_eng
   CC3200SDK_INSTALLATION_DIR ?= C:/ti/CC3200SDK_1.1.0/cc3200-sdk
-  ti.targets.arm.elf.M4  ?= C:/ti/cgt_arm_5.2.5
+  ti.targets.arm.elf.M4  ?= C:/ti/ti-cgt-arm_5.2.5
   ```
 
 2. Open a Windows command prompt.
