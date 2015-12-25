@@ -54,6 +54,8 @@ While not strictly required, we recommend that you install the following tools f
   ti.targets.arm.elf.M4  ?= C:/ti/ti-cgt-arm_5.2.5
   ```
 
+It is also recommended that you add the xdc tools folder (```C:/ti/xdctools_3_31_01_33_core```) to your path in order to avoid errors related to finding gmake.exe during the build process.
+
 2. Open a Windows command prompt.
 
 3. In the Windows command prompt, run the following commands (be sure to replace the paths with your installation paths).
