@@ -53,7 +53,6 @@ While not strictly required, we recommend that you install the following tools f
   CC3200SDK_INSTALLATION_DIR ?= C:/ti/CC3200SDK_1.1.0/cc3200-sdk
   ti.targets.arm.elf.M4  ?= C:/ti/ti-cgt-arm_5.2.5
   ```
-
 It is also recommended that you add the xdc tools folder (```C:/ti/xdctools_3_31_01_33_core```) to your path in order to avoid errors related to finding gmake.exe during the build process.
 
 2. Open a Windows command prompt.
@@ -98,6 +97,8 @@ Here's why you need the Baltimore root CA - it's the root CA for `*.azure-device
 ![image](https://cloud.githubusercontent.com/assets/6472374/11576321/71207be4-9a1e-11e5-9332-fa99fdbd31f9.png)
 
 The detailed information about the flash tool can be found in the [CC3200 UniFlash wiki](http://processors.wiki.ti.com/index.php/CC31xx_%26_CC32xx_UniFlash). The section [GUI Interface](http://processors.wiki.ti.com/index.php/CC31xx_%26_CC32xx_UniFlash#GUI_Interface) walks through the steps for using the UniFlash tool.
+
+It is recommended to program the latest service pack binary using the Uniflash tool before running the sample (in order to avoid issues with DNS lookup). The latest service pack can be found here: http://www.ti.com/tool/cc3200sdk.
 
 Flash the application (.bin file) to the /sys/mcuimg.bin under System Files. For the certificate, [add a new file](http://processors.wiki.ti.com/index.php/CC31xx_%26_CC32xx_UniFlash#Adding_a_new_file_to_the_device) in the path /cert/ms.der and provide the path to the "Baltimore CyberTrust Root" certificate (.der format). The ms.der file is available at <AZURE_INSTALL_DIR>\azure-iot-sdks\c\certs\ms.der.
 
