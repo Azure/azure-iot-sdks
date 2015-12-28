@@ -109,6 +109,8 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
     const char* iotHubSuffix;
 
     const char* protocolGatewayHostName;
+
+    const char* sharedAccessSignature;
 } IOTHUB_CLIENT_CONFIG;
 
 /**
