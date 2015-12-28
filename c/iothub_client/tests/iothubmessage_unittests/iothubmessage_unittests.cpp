@@ -99,6 +99,8 @@ static size_t whenShallSTRING_concat_with_STRING_fail;
 static MAP_FILTER_CALLBACK g_mapFilterFunc;
 
 static const unsigned char c[1] = { '3' };
+static const char* TEST_MESSAGE_ID = "3820ADAE-E3CA-4065-843A-A6BDE950D8DC";
+static const char* TEST_MESSAGE_ID2 = "052BA01A-ECBF-48CF-BC7B-64B315D898B7";
 
 TYPED_MOCK_CLASS(CIoTHubMessageMocks, CGlobalMock)
 {
@@ -130,6 +132,9 @@ public:
     MOCK_STATIC_METHOD_1(, void, gballoc_free, void*, ptr)
         BASEIMPLEMENTATION::gballoc_free(ptr);
     MOCK_VOID_METHOD_END()
+
+    MOCK_STATIC_METHOD_2(, int, mallocAndStrcpy_s, char**, destination, const char*, source)
+    MOCK_METHOD_END(int, (*destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(source) + 1), strcpy(*destination, source), 0))
 
     /* BUFFER Mocks */
     MOCK_STATIC_METHOD_0(, BUFFER_HANDLE, BUFFER_new)
@@ -262,71 +267,71 @@ public:
     }
     MOCK_METHOD_END(STRING_HANDLE, result2)
 
-        MOCK_STATIC_METHOD_1(, STRING_HANDLE, STRING_clone, STRING_HANDLE, handle)
+    MOCK_STATIC_METHOD_1(, STRING_HANDLE, STRING_clone, STRING_HANDLE, handle)
         STRING_HANDLE result2;
-    currentSTRING_clone_call++;
-    if (whenShallSTRING_clone_fail > 0)
-    {
-        if (currentSTRING_clone_call == whenShallSTRING_clone_fail)
+        currentSTRING_clone_call++;
+        if (whenShallSTRING_clone_fail > 0)
         {
-            result2 = (STRING_HANDLE)NULL;
+            if (currentSTRING_clone_call == whenShallSTRING_clone_fail)
+            {
+                result2 = (STRING_HANDLE)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::STRING_clone(handle);
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::STRING_clone(handle);
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::STRING_clone(handle);
-    }
     MOCK_METHOD_END(STRING_HANDLE, result2)
 
-        MOCK_STATIC_METHOD_1(, STRING_HANDLE, STRING_construct, const char*, source)
+    MOCK_STATIC_METHOD_1(, STRING_HANDLE, STRING_construct, const char*, source)
         STRING_HANDLE result2;
-    currentSTRING_construct_call++;
-    if (whenShallSTRING_construct_fail > 0)
-    {
-        if (currentSTRING_construct_call == whenShallSTRING_construct_fail)
+        currentSTRING_construct_call++;
+        if (whenShallSTRING_construct_fail > 0)
         {
-            result2 = (STRING_HANDLE)NULL;
+            if (currentSTRING_construct_call == whenShallSTRING_construct_fail)
+            {
+                result2 = (STRING_HANDLE)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::STRING_construct(source);
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::STRING_construct(source);
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::STRING_construct(source);
-    }
     MOCK_METHOD_END(STRING_HANDLE, result2)
 
-        MOCK_STATIC_METHOD_2(, STRING_HANDLE, STRING_construct_n, const char*, source, size_t, size)
+    MOCK_STATIC_METHOD_2(, STRING_HANDLE, STRING_construct_n, const char*, source, size_t, size)
         STRING_HANDLE result2;
-    currentSTRING_construct_n_call++;
-    if (whenShallSTRING_construct_n_fail > 0)
-    {
-        if (currentSTRING_construct_n_call == whenShallSTRING_construct_n_fail)
+        currentSTRING_construct_n_call++;
+        if (whenShallSTRING_construct_n_fail > 0)
         {
-            result2 = (STRING_HANDLE)NULL;
+            if (currentSTRING_construct_n_call == whenShallSTRING_construct_n_fail)
+            {
+                result2 = (STRING_HANDLE)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::STRING_construct_n(source, size);
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::STRING_construct_n(source, size);
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::STRING_construct_n(source, size);
-    }
     MOCK_METHOD_END(STRING_HANDLE, result2)
 
-        MOCK_STATIC_METHOD_1(, void, STRING_delete, STRING_HANDLE, s)
+    MOCK_STATIC_METHOD_1(, void, STRING_delete, STRING_HANDLE, s)
         BASEIMPLEMENTATION::STRING_delete(s);
     MOCK_VOID_METHOD_END()
 
-        MOCK_STATIC_METHOD_2(, int, STRING_concat, STRING_HANDLE, s1, const char*, s2)
+    MOCK_STATIC_METHOD_2(, int, STRING_concat, STRING_HANDLE, s1, const char*, s2)
         currentSTRING_concat_call++;
     MOCK_METHOD_END(int, (((whenShallSTRING_concat_fail > 0) && (currentSTRING_concat_call == whenShallSTRING_concat_fail)) ? __LINE__ : BASEIMPLEMENTATION::STRING_concat(s1, s2)));
 
@@ -351,6 +356,7 @@ public:
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubMessageMocks, , void*, gballoc_malloc, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubMessageMocks, , void*, gballoc_realloc, void*, ptr, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubMessageMocks, , void, gballoc_free, void*, ptr);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubMessageMocks, , int, mallocAndStrcpy_s, char**, destination, const char*, source);
 
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubMessageMocks, , BUFFER_HANDLE, BUFFER_new);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubMessageMocks, , BUFFER_HANDLE, BUFFER_create, const unsigned char*, source, size_t, size);
@@ -760,6 +766,8 @@ BEGIN_TEST_SUITE(iothubmessage_unittests)
         STRICT_EXPECTED_CALL(mocks, BUFFER_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(h));
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)).IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)).IgnoreArgument(1);
 
         ///act
         IoTHubMessage_Destroy(h);
@@ -783,6 +791,8 @@ BEGIN_TEST_SUITE(iothubmessage_unittests)
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(h));
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)).IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)).IgnoreArgument(1);
 
         ///act
         IoTHubMessage_Destroy(h);
@@ -1244,4 +1254,277 @@ BEGIN_TEST_SUITE(iothubmessage_unittests)
         ///cleanup
         IoTHubMessage_Destroy(h);
     }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_012: [if any of the parameters are NULL then IoTHubMessage_SetMessageId shall return a IOTHUB_MESSAGE_INVALID_ARG value.] */
+    TEST_FUNCTION(IoTHubMessage_SetMessageId_NULL_handle_Fails)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+
+        ///act
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageId(NULL, TEST_MESSAGE_ID);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_012: [if any of the parameters are NULL then IoTHubMessage_SetMessageId shall return a IOTHUB_MESSAGE_INVALID_ARG value.] */
+    TEST_FUNCTION(IoTHubMessage_SetMessageId_NULL_MessageId_Fails)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        auto h = IoTHubMessage_CreateFromByteArray(c, 1);
+        mocks.ResetAllCalls();
+
+        ///act
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageId(h, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubMessage_Destroy(h);
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_015: [IoTHubMessage_SetMessageId finishes successfully it shall return IOTHUB_MESSAGE_OK.] */
+    TEST_FUNCTION(IoTHubMessage_SetMessageId_SUCCEED)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        auto h = IoTHubMessage_CreateFromByteArray(c, 1);
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MESSAGE_ID))
+            .IgnoreArgument(1);
+
+        ///act
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageId(h, TEST_MESSAGE_ID);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubMessage_Destroy(h);
+    }
+
+    /* SRS_IOTHUBMESSAGE_07_013: [If the IOTHUB_MESSAGE_HANDLE messageId is not NULL, then the IOTHUB_MESSAGE_HANDLE messageId will be deallocated.] */
+    TEST_FUNCTION(IoTHubMessage_SetMessageId_MessageId_Not_NULL_SUCCEED)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        auto h = IoTHubMessage_CreateFromByteArray(c, 1);
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MESSAGE_ID))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MESSAGE_ID2))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageId(h, TEST_MESSAGE_ID);
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+
+        result = IoTHubMessage_SetMessageId(h, TEST_MESSAGE_ID2);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubMessage_Destroy(h);
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_010: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetMessageId shall return a NULL value.] */
+    TEST_FUNCTION(IoTHubMessage_GetMessageId_NULL_handle_Fails)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        mocks.ResetAllCalls();
+
+        ///act
+        const char* result = IoTHubMessage_GetMessageId(NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_011: [IoTHubMessage_GetMessageId shall return the messageId as a const char*.] */
+    TEST_FUNCTION(IoTHubMessage_GetMessageId_MessageId_Not_Set_Fails)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        auto handle = IoTHubMessage_CreateFromString("c, 1");
+        mocks.ResetAllCalls();
+
+        ///act
+        const char* result = IoTHubMessage_GetMessageId(handle);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubMessage_Destroy(handle);
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_011: [IoTHubMessage_GetMessageId shall return the messageId as a const char*.] */
+    TEST_FUNCTION(IoTHubMessage_GetMessageId_SUCCEED)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        auto handle = IoTHubMessage_CreateFromString("c, 1");
+        IOTHUB_MESSAGE_RESULT msgResult = IoTHubMessage_SetMessageId(handle, TEST_MESSAGE_ID);
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, msgResult);
+        //
+        mocks.ResetAllCalls();
+
+        ///act
+        const char* result = IoTHubMessage_GetMessageId(handle);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, TEST_MESSAGE_ID, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubMessage_Destroy(handle);
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_016: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetCorrelationId shall return a NULL value.] */
+    TEST_FUNCTION(IoTHubMessage_GetCorrelationId_NULL_handle_Fails)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        mocks.ResetAllCalls();
+
+        ///act
+        const char* result = IoTHubMessage_GetCorrelationId(NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_016: [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetCorrelationId shall return a NULL value.] */
+    TEST_FUNCTION(IoTHubMessage_GetCorrelationId_MessageId_Not_Set_Fails)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        auto handle = IoTHubMessage_CreateFromString("c, 1");
+        mocks.ResetAllCalls();
+
+        ///act
+        const char* result = IoTHubMessage_GetCorrelationId(handle);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubMessage_Destroy(handle);
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_017: [IoTHubMessage_GetCorrelationId shall return the correlationId as a const char*.] */
+    TEST_FUNCTION(IoTHubMessage_GetCorrelationId_SUCCEED)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        auto handle = IoTHubMessage_CreateFromString("c, 1");
+        IOTHUB_MESSAGE_RESULT msgResult = IoTHubMessage_SetCorrelationId(handle, TEST_MESSAGE_ID);
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, msgResult);
+        //
+        mocks.ResetAllCalls();
+
+        ///act
+        const char* result = IoTHubMessage_GetCorrelationId(handle);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, TEST_MESSAGE_ID, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubMessage_Destroy(handle);
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_018: [if any of the parameters are NULL then IoTHubMessage_SetCorrelationId shall return a IOTHUB_MESSAGE_INVALID_ARG value.]*/
+    TEST_FUNCTION(IoTHubMessage_SetCorrelationId_NULL_CorrelationId_Fails)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        auto h = IoTHubMessage_CreateFromByteArray(c, 1);
+        mocks.ResetAllCalls();
+
+        ///act
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCorrelationId(h, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubMessage_Destroy(h);
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_021: [IoTHubMessage_SetCorrelationId finishes successfully it shall return IOTHUB_MESSAGE_OK.] */
+    TEST_FUNCTION(IoTHubMessage_SetCorrelationId_SUCCEED)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        auto h = IoTHubMessage_CreateFromByteArray(c, 1);
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MESSAGE_ID))
+            .IgnoreArgument(1);
+
+        ///act
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCorrelationId(h, TEST_MESSAGE_ID);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubMessage_Destroy(h);
+    }
+
+    /* Tests_SRS_IOTHUBMESSAGE_07_019: [If the IOTHUB_MESSAGE_HANDLE correlationId is not NULL, then the IOTHUB_MESSAGE_HANDLE correlationId will be deallocated.] */
+    TEST_FUNCTION(IoTHubMessage_SetCorrelationId_CorrelationId_Not_NULL_SUCCEED)
+    {
+        ///arrange
+        CIoTHubMessageMocks mocks;
+        auto h = IoTHubMessage_CreateFromByteArray(c, 1);
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MESSAGE_ID))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MESSAGE_ID2))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCorrelationId(h, TEST_MESSAGE_ID);
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+
+        result = IoTHubMessage_SetCorrelationId(h, TEST_MESSAGE_ID2);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubMessage_Destroy(h);
+    }
+
 END_TEST_SUITE(iothubmessage_unittests)

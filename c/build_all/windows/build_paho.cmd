@@ -16,6 +16,7 @@ goto :eof
 goto :eof
 
 :continueWithInstallation
+
 rem -----------------------------------------------------------------------------
 rem -- use OpenSSLDir
 rem -----------------------------------------------------------------------------
@@ -27,7 +28,6 @@ set openSSL-branch=OpenSSL_1_0_1-stable
 rem -----------------------------------------------------------------------------
 rem -- use PAHO_PATH
 rem -----------------------------------------------------------------------------
-
 set paho-root=%PAHO_PATH%
 set paho-repo=https://git.eclipse.org/r/paho/org.eclipse.paho.mqtt.c.git
 set package-root=%~dp0\..\packaging\windows
@@ -72,7 +72,7 @@ git clone -b %openSSL-branch% %openSSL-repo% %openSSL-build-root%
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
-rem -- build OpenSSL
+rem -- build OpenSSL 32 bits
 rem -----------------------------------------------------------------------------
 
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86 
@@ -91,6 +91,10 @@ if not %errorlevel%==0 exit /b %errorlevel%
 call nmake -f ms\ntdll.mak install
 if not %errorlevel%==0 exit /b %errorlevel%
 
+mkdir out32dllForNuget
+xcopy /q /y /R .\out32dll\*.* .\out32dllForNuget\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 rem -----------------------------------------------------------------------------
 rem -- sync the paho source code
 rem -----------------------------------------------------------------------------
@@ -100,19 +104,46 @@ git clone %paho-repo% %paho-build-root%
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
-rem -- build paho
+rem -- build paho 32 bits.
 rem -----------------------------------------------------------------------------
 
 pushd %paho-build-root%
 if exist "%programfiles(x86)%\MSBuild\14.0\\." (
 msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Debug;PlatformToolset=v140 
+msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Release;PlatformToolset=v140
 goto paho_build_done
 )
 if exist "%programfiles(x86)%\MSBuild\12.0\\." (
 msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Debug
+msbuild ".\Windows Build\paho-mqtt3cs\paho-mqtt3cs.vcxproj" /p:Configuration=Release
 goto paho_build_done
 )
+
 @Echo Paho MQTT needs Visual Studio 2013 or higher in order to build.
 exit /b 1
 :paho_build_done
 if not %errorlevel%==0 exit /b %errorlevel%
+
+rem -----------------------------------------------------------------------------
+rem -- build OpenSSL 64 bits
+rem -----------------------------------------------------------------------------
+
+call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64 
+if not %errorlevel%==0 exit /b %errorlevel%
+
+pushd %openSSL-build-root%
+perl Configure VC-WIN64A
+if not %errorlevel%==0 exit /b %errorlevel%
+
+call ms\do_win64a
+if not %errorlevel%==0 exit /b %errorlevel%
+
+call nmake -f ms\ntdll.mak clean
+if not %errorlevel%==0 exit /b %errorlevel%
+
+call nmake -f ms\ntdll.mak
+if not %errorlevel%==0 exit /b %errorlevel%
+
+mkdir out64dll
+xcopy /q /y /R .\out32dll\*.* .\out64dll\*.*
+if %errorlevel% neq 0 exit /b %errorlevel%

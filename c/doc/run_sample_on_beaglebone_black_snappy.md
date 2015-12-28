@@ -24,7 +24,7 @@ This file contains the following information:
 ## Requirements
 
 - Computer with GitHub installed and access to the [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub private repository.
-- SSH client, such as [PuTTY](http://www.putty.org/), so you can access the command line.
+- SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the BeagleBone Black.
 - Either the Chrome or Firefox web browser, so you can browse to the embedded webserver on your your board.
 - The boards come with all the required software; however, to update the board and run the current sample you must use FTP or a USB driver to copy your files. You can also use [WinSCP](http://winscp.net/eng/index.php).
 - Required hardware: [Beagleboard-BeagleBone](http://www.amazon.com/Beagleboard-BeagleBone-Starter-Case--Power-Supply--Micro/dp/B00P6TV9V4/ref=sr_1_3?ie=UTF8&qid=1426002583&sr=8-3&keywords=beaglebone).
@@ -187,7 +187,7 @@ To run this tool, you need connection and configuration information for your IoT
 - Install the prerequisite packages by issuing the following commands from the command line on the board:
 
 		sudo apt-get update
-		sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git
+		sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
 
 - Download the SDK to the board by issuing the following command in PuTTY:
 
@@ -229,30 +229,30 @@ To run this tool, you need connection and configuration information for your IoT
 
 - This SDK sample depends on the presences of a few libraries. Run the following command to build them:
 
-		sudo ~/azure-iot-suite-sdks/c/build_all/linux/build_paho.sh
+		sudo ~/azure-iot-sdks/c/build_all/linux/build_paho.sh
 
 - You can now build the SDK code using the following command, assuming everything went OK on build\_proton.sh and build\_paho.sh
 
 		~/azure-iot-sdks/c/build_all/linux/build.sh
 
 	**Note:** Ignore the following error if you receive it: **"crtabstractions\_unittests/crtabstractions\_unittests.cpp:119:5"**.
+	**Note:** build.sh creates a folder called "cmake" in your home folder. Inside "cmake" are all the results of the compilation of the complete software.
 
 <a name="Run-the-samples"/>
 ## Run the samples
 
 - Run the **iothub\_client\_sample\_amqp** sample by issuing the following command:
 
-		~/azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
+		~/cmake/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
 
 - Verify that the **Confirmation** messages show an **OK**. If not, then you may have incorrectly pasted the device hub connection information.
 
 <a name="Tips"/>
 ## Tips
 
-- If you just want to build iothub\_client, run the following commands:
+- If you just want to build iothub\_client, go to the cmake output directory and navigate to the iothub_client/samples folder then run the following command:
 
-		cd ~/azure-iot-sdks/c/iothub_client/build/linux
-		make -f makefile.linux all
+		make -f Makefile all
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md

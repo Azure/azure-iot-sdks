@@ -1,0 +1,31 @@
+{
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc","closure"]
+  },
+  "source": {
+    "include": [
+      "service/iothub.js",
+      "service/lib/client.js",
+      "service/lib/device.js",
+      "service/lib/registry.js"
+    ],
+    "includePattern": ".+\\.js(doc)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false
+  },
+  "markdown": {
+    "tags": [
+      "module"
+    ]
+  },
+  "opts": {
+    "template": "../build/docs/iot-doc-template"
+  }
+}

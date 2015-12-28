@@ -12,10 +12,3 @@ rem -- Generate C API docs
 rem -----------------------------------------------------------------------------
 doxygen
 
-rem -----------------------------------------------------------------------------
-rem -- Fix up the line feeds in the generated C docs so that just line
-rem -- feed changes aren't flagged as changes by git. We don't care if this
-rem -- fails though.
-rem -----------------------------------------------------------------------------
-echo Fixing line feeds in generated docs...
-node fix-crlf.js
