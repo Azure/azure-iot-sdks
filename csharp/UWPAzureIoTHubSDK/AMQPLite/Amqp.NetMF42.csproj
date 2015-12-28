@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <AssemblyName>Amqp.NetMF</AssemblyName>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Amqp</RootNamespace>
+    <ProjectTypeGuids>{b69e3092-b931-443c-abe7-7e7b65f2a37f};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C80D0C64-C34A-4DF4-9E26-E1D2F4FFEFC8}</ProjectGuid>
+    <NetMfTargetsBaseDir Condition="'$(NetMfTargetsBaseDir)'==''">$(MSBuildExtensionsPath32)\Microsoft\.NET Micro Framework\</NetMfTargetsBaseDir>
+    <TargetFrameworkVersion>v4.2</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+    <IntermediateOutputPath>..\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETMF</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <DefineConstants>TRACE;NETMF</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
+  <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
+  <ItemGroup>
+    <Compile Include="Connection.cs" />
+    <Compile Include="AmqpException.cs" />
+    <Compile Include="ByteBuffer.cs" />
+    <Compile Include="Address.cs" />
+    <Compile Include="AmqpObject.cs" />
+    <Compile Include="LinkedList.cs" />
+    <Compile Include="Framing\AmqpSequence.cs" />
+    <Compile Include="Framing\AmqpValue.cs" />
+    <Compile Include="Framing\Data.cs" />
+    <Compile Include="NETMF\TimeoutException.cs" />
+    <Compile Include="NETMF\List.cs" />
+    <Compile Include="NETMF\Map.cs" />
+    <Compile Include="NETMF\Fx.cs" />
+    <Compile Include="NETMF\SRAmqp.cs" />
+    <Compile Include="NetMF\SRAmqp.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SRAmqp.resx</DependentUpon>
+    </Compile>
+    <Compile Include="NETMF\TcpTransport.cs" />
+    <Compile Include="Sasl\SaslExternalProfile.cs" />
+    <Compile Include="Trace.cs" />
+    <Compile Include="Framing\ApplicationProperties.cs" />
+    <Compile Include="Framing\Reader.cs" />
+    <Compile Include="Framing\ProtocolHeader.cs" />
+    <Compile Include="Framing\Footer.cs" />
+    <Compile Include="Framing\MessageAnnotations.cs" />
+    <Compile Include="Framing\DeliveryAnnotations.cs" />
+    <Compile Include="Framing\Properties.cs" />
+    <Compile Include="Framing\Header.cs" />
+    <Compile Include="ReceiverLink.cs" />
+    <Compile Include="Sasl\SaslMechanisms.cs" />
+    <Compile Include="Sasl\SaslCode.cs" />
+    <Compile Include="Sasl\SaslOutcome.cs" />
+    <Compile Include="Sasl\SaslResponse.cs" />
+    <Compile Include="Sasl\SaslChallenge.cs" />
+    <Compile Include="Sasl\SaslInit.cs" />
+    <Compile Include="Sasl\SaslPlainProfile.cs" />
+    <Compile Include="Sasl\SaslProfile.cs" />
+    <Compile Include="SenderLink.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="Framing\Target.cs" />
+    <Compile Include="Framing\Source.cs" />
+    <Compile Include="Link.cs" />
+    <Compile Include="SequenceNumber.cs" />
+    <Compile Include="Session.cs" />
+    <Compile Include="Framing\Frame.cs" />
+    <Compile Include="Delivery.cs" />
+    <Compile Include="Framing\Begin.cs" />
+    <Compile Include="Framing\Attach.cs" />
+    <Compile Include="Framing\Close.cs" />
+    <Compile Include="Framing\Accepted.cs" />
+    <Compile Include="Framing\Codec.cs" />
+    <Compile Include="Framing\Dispose.cs" />
+    <Compile Include="Framing\Outcome.cs" />
+    <Compile Include="Framing\Received.cs" />
+    <Compile Include="Framing\Modified.cs" />
+    <Compile Include="Framing\Rejected.cs" />
+    <Compile Include="Framing\Released.cs" />
+    <Compile Include="Framing\DeliveryState.cs" />
+    <Compile Include="Framing\Transfer.cs" />
+    <Compile Include="Framing\Flow.cs" />
+    <Compile Include="Framing\End.cs" />
+    <Compile Include="Framing\Detach.cs" />
+    <Compile Include="Framing\Open.cs" />
+    <Compile Include="Framing\ReceiverSettleMode.cs" />
+    <Compile Include="Framing\SenderSettleMode.cs" />
+    <Compile Include="ITransport.cs" />
+    <Compile Include="Types\DescribedMap.cs" />
+    <Compile Include="Types\DescribedValue.cs" />
+    <Compile Include="Types\Fields.cs" />
+    <Compile Include="Types\RestrictedDescribed.cs" />
+    <Compile Include="Types\Symbol.cs" />
+    <Compile Include="Types\Map.cs" />
+    <Compile Include="Types\ErrorCode.cs" />
+    <Compile Include="Types\Encoder.cs" />
+    <Compile Include="AmqpBitConverter.cs" />
+    <Compile Include="Types\Descriptor.cs" />
+    <Compile Include="Types\FormatCode.cs" />
+    <Compile Include="Types\Described.cs" />
+    <Compile Include="Types\DescribedList.cs" />
+    <Compile Include="Framing\Error.cs" />
+    <Compile Include="Types\FixedWidth.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.SPOT.Native" />
+    <Reference Include="Microsoft.SPOT.Net.Security" />
+    <Reference Include="System" />
+    <Reference Include="System.Net.Security" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SRAmqp.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>NETMF\SRAmqp.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

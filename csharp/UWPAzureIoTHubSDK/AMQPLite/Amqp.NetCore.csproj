@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{35F64888-3446-444D-8E44-128378434AB3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Amqp</RootNamespace>
+    <AssemblyName>Amqp.NetCore</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile>Profile32</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <IntermediateOutputPath>..\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+    <OutputPath>..\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <IntermediateOutputPath>..\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+    <OutputPath>..\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+  </ItemGroup>
+  <ItemGroup>
+    <TargetPlatform Include="WindowsPhoneApp, Version=8.1" />
+    <TargetPlatform Include="Windows, Version=8.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SRAmqp.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>WinRT\SRAmqp.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Amqp</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Address.cs" />
+    <Compile Include="AmqpBitConverter.cs" />
+    <Compile Include="AmqpException.cs" />
+    <Compile Include="AmqpObject.cs" />
+    <Compile Include="ByteBuffer.cs" />
+    <Compile Include="Connection.cs" />
+    <Compile Include="Delivery.cs" />
+    <Compile Include="Framing\Accepted.cs" />
+    <Compile Include="Framing\AmqpSequence.cs" />
+    <Compile Include="Framing\AmqpValue.cs" />
+    <Compile Include="Framing\ApplicationProperties.cs" />
+    <Compile Include="Framing\Attach.cs" />
+    <Compile Include="Framing\Begin.cs" />
+    <Compile Include="Framing\Close.cs" />
+    <Compile Include="Framing\Codec.cs" />
+    <Compile Include="Framing\Data.cs" />
+    <Compile Include="Framing\DeliveryAnnotations.cs" />
+    <Compile Include="Framing\DeliveryState.cs" />
+    <Compile Include="Framing\Detach.cs" />
+    <Compile Include="Framing\Dispose.cs" />
+    <Compile Include="Framing\End.cs" />
+    <Compile Include="Framing\Error.cs" />
+    <Compile Include="Framing\Flow.cs" />
+    <Compile Include="Framing\Footer.cs" />
+    <Compile Include="Framing\Frame.cs" />
+    <Compile Include="Framing\Header.cs" />
+    <Compile Include="Framing\MessageAnnotations.cs" />
+    <Compile Include="Framing\Modified.cs" />
+    <Compile Include="Framing\Open.cs" />
+    <Compile Include="Framing\Outcome.cs" />
+    <Compile Include="Framing\Properties.cs" />
+    <Compile Include="Framing\ProtocolHeader.cs" />
+    <Compile Include="Framing\Reader.cs" />
+    <Compile Include="Framing\Received.cs" />
+    <Compile Include="Framing\ReceiverSettleMode.cs" />
+    <Compile Include="Framing\Rejected.cs" />
+    <Compile Include="Framing\Released.cs" />
+    <Compile Include="Framing\SenderSettleMode.cs" />
+    <Compile Include="Framing\Source.cs" />
+    <Compile Include="Framing\Target.cs" />
+    <Compile Include="Framing\Transfer.cs" />
+    <Compile Include="ITransport.cs" />
+    <Compile Include="Link.cs" />
+    <Compile Include="LinkedList.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="NetCore\ConnectionFactory.cs" />
+    <Compile Include="NetCore\TcpTransport.cs" />
+    <Compile Include="NetCore\WebSocketTransport.cs" />
+    <Compile Include="Net\AmqpSettings.cs" />
+    <Compile Include="Net\AsyncPump.cs" />
+    <Compile Include="Net\IAsyncTransport.cs" />
+    <Compile Include="Net\TaskExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\StoreAssemblyInfo.cs" />
+    <Compile Include="ReceiverLink.cs" />
+    <Compile Include="Sasl\SaslChallenge.cs" />
+    <Compile Include="Sasl\SaslCode.cs" />
+    <Compile Include="Sasl\SaslExternalProfile.cs" />
+    <Compile Include="Sasl\SaslInit.cs" />
+    <Compile Include="Sasl\SaslMechanisms.cs" />
+    <Compile Include="Sasl\SaslOutcome.cs" />
+    <Compile Include="Sasl\SaslPlainProfile.cs" />
+    <Compile Include="Sasl\SaslProfile.cs" />
+    <Compile Include="Sasl\SaslResponse.cs" />
+    <Compile Include="SenderLink.cs" />
+    <Compile Include="SequenceNumber.cs" />
+    <Compile Include="Session.cs" />
+    <Compile Include="Trace.cs" />
+    <Compile Include="Types\Described.cs" />
+    <Compile Include="Types\DescribedList.cs" />
+    <Compile Include="Types\DescribedMap.cs" />
+    <Compile Include="Types\DescribedValue.cs" />
+    <Compile Include="Types\Descriptor.cs" />
+    <Compile Include="Types\Encoder.cs" />
+    <Compile Include="Types\ErrorCode.cs" />
+    <Compile Include="Types\Fields.cs" />
+    <Compile Include="Types\FixedWidth.cs" />
+    <Compile Include="Types\FormatCode.cs" />
+    <Compile Include="Types\Map.cs" />
+    <Compile Include="Types\RestrictedDescribed.cs" />
+    <Compile Include="Types\Symbol.cs" />
+    <Compile Include="WinRT\Fx.cs" />
+    <Compile Include="WinRT\List.cs" />
+    <Compile Include="WinRT\Map.cs" />
+    <Compile Include="WinRT\SRAmqp.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SRAmqp.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
