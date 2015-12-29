@@ -87,13 +87,13 @@ sudo apt-get install maven
 
 Please verify the following:
 
-- `PATH` environment variable contain the full path to the bin folder containing **_Maven 3_**.
+Ensure the `PATH` environment variable contains the full path to the bin folder containing **_Maven 3_**.
 
 	```
 	which mvn
 	echo $PATH
 	```
-	Ensure that the bin directory shown by the ```which mvn``` command matches one of the directories shown in your $PATH variable.
+Ensure that the bin directory shown by the ```which mvn``` command matches one of the directories shown in your $PATH variable.
 	If it does not:
 	```
 	export PATH=/path/to/mvn/bin:$PATH
