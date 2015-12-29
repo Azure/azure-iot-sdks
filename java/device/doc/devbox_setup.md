@@ -108,9 +108,7 @@ You can verify that the environment variables necessary to run **_Maven 3_** hav
 
 <a name="installiotsource">
 ### Build Azure IoT device SDK for Java from Sources
-
 - Get a copy of the **Azure IoT device SDK** from GitHub. You should fetch a copy of the source from the **master** branch of the GitHub repository: <https://github.com/Azure/azure-iot-sdks>
-
 - When you have obtained a copy of the source, you can build the SDK for Java.
 
 Open a command prompt and use the following commands for the steps above:
