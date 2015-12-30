@@ -65,7 +65,7 @@ setInterval(function () {
       client.complete(msg, printResultFor('complete'));
     }
   });
-}, 1000);
+}, 1500000);
 
 // Helper function to print results in the console
 function printResultFor(op) {
