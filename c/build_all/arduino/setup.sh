@@ -74,10 +74,12 @@ setup_iot()
     cd "src"
 
     git pull
+    git submodule init
+    git submodule update
   else
     echo Cloning repo
     # src doesn't exists so clone
-    git clone $iot_repo
+    git clone $iot_repo --recursive
     mv $iot_dir src
 
     # Patching the build files
