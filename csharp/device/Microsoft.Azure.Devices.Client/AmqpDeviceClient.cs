@@ -21,6 +21,7 @@ namespace Microsoft.Azure.Devices.Client
         readonly FaultTolerantAmqpObject<SendingAmqpLink> faultTolerantEventSendingLink;
         readonly FaultTolerantAmqpObject<ReceivingAmqpLink> faultTolerantDeviceBoundReceivingLink;
         readonly IotHubConnection IotHubConnection;
+        readonly IotHubConnectionString iotHubConnectionString;
         readonly TimeSpan openTimeout;
         readonly TimeSpan operationTimeout;
 
@@ -35,6 +36,7 @@ namespace Microsoft.Azure.Devices.Client
             this.DefaultReceiveTimeout = IotHubConnection.DefaultOperationTimeout;
             this.faultTolerantEventSendingLink = new FaultTolerantAmqpObject<SendingAmqpLink>(this.CreateEventSendingLinkAsync, this.IotHubConnection.CloseLink);
             this.faultTolerantDeviceBoundReceivingLink = new FaultTolerantAmqpObject<ReceivingAmqpLink>(this.CreateDeviceBoundReceivingLinkAsync, this.IotHubConnection.CloseLink);
+            this.iotHubConnectionString = connectionString;
         }
 
         /// <summary>
@@ -326,7 +328,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/events", HttpUtility.UrlEncode(this.deviceId));
 
-            return await this.IotHubConnection.CreateSendingLinkAsync(path, timeout);
+            return await this.IotHubConnection.CreateSendingLinkAsync(path, this.iotHubConnectionString, this.deviceId, timeout);
         }
 
         async Task<ReceivingAmqpLink> GetDeviceBoundReceivingLinkAsync()
@@ -344,7 +346,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/deviceBound", HttpUtility.UrlEncode(this.deviceId));
 
-            return await this.IotHubConnection.CreateReceivingLink(path, timeout, DefaultPrefetchCount);
+            return await this.IotHubConnection.CreateReceivingLink(path, this.iotHubConnectionString, this.deviceId, timeout, DefaultPrefetchCount);
         }
     }
 }

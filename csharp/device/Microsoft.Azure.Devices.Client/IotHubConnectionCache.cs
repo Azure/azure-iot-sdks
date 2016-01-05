@@ -26,20 +26,15 @@ namespace Microsoft.Azure.Devices.Client
 
         public IotHubConnection GetConnection(IotHubConnectionString connectionString, bool useWebSocketOnly)
         {
-            if (connectionString.SharedAccessKeyName != null)
+            // Always use connection caching
+            CachedConnection cachedConnection;
+            do
             {
-                // Use connection caching
-                CachedConnection cachedConnection;
-                do
-                {
-                    cachedConnection = this.connections.GetOrAdd(connectionString, k => new CachedConnection(this, new IotHubConnection(k, this.accessRights, useWebSocketOnly)));
-                }
-                while (!cachedConnection.TryAddRef());
-
-                return cachedConnection.Connection;
+                cachedConnection = this.connections.GetOrAdd(connectionString, k => new CachedConnection(this, new IotHubConnection(k, this.accessRights, useWebSocketOnly)));
             }
+            while (!cachedConnection.TryAddRef());
 
-            return new IotHubConnection(connectionString, this.accessRights, useWebSocketOnly);
+            return cachedConnection.Connection;
         }
 
         public async Task ReleaseConnectionAsync(IotHubConnection connection)
@@ -72,10 +67,7 @@ namespace Microsoft.Azure.Devices.Client
                 }
 
                 return connectionString1.IotHubName == connectionString2.IotHubName &&
-                    connectionString1.AmqpEndpoint == connectionString2.AmqpEndpoint &&
-                    connectionString1.SharedAccessKey == connectionString2.SharedAccessKey &&
-                    connectionString1.SharedAccessKeyName == connectionString2.SharedAccessKeyName &&
-                    connectionString1.SharedAccessSignature == connectionString2.SharedAccessSignature;
+                    connectionString1.AmqpEndpoint == connectionString2.AmqpEndpoint;
             }
 
             public int GetHashCode(IotHubConnectionString connectionString)
@@ -87,10 +79,8 @@ namespace Microsoft.Azure.Devices.Client
 
                 int hash = HashCode.CombineHashCodes(
                     HashCode.SafeGet(connectionString.IotHubName),
-                    HashCode.SafeGet(connectionString.AmqpEndpoint),
-                    HashCode.SafeGet(connectionString.SharedAccessKey),
-                    HashCode.SafeGet(connectionString.SharedAccessKeyName),
-                    HashCode.SafeGet(connectionString.SharedAccessSignature));
+                    HashCode.SafeGet(connectionString.AmqpEndpoint));
+
                 return hash;
             }
         }
