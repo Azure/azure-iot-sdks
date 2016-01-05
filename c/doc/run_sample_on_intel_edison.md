@@ -42,6 +42,8 @@ Git is a widely used distributed version control tool, we will need to install G
 
     ```
     $ opkg update
+    $ opkg install nodejs
+   
     ```
 
 You should see the following:
@@ -54,7 +56,7 @@ You should see the following:
 
   ```
   $ opkg install git
-  $ git clone github.com/Azure/azure-iot-sdks.git
+  $ git clone --recursive https://github.com/Azure/azure-iot-suite-sdks.git
   ```
 
 - You may be prompted to add an RSA key to your device, respond with “yes.”
@@ -74,46 +76,84 @@ We first need to update the credentials in the sample AMPQ app to match those of
 - Edit "/c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c" as given below using vi or your favorite text editor:
  - Replace the "IoT Hub connection” aka “connectionString” string placeholder with your info as below (static const char* ….) When you are finished the result should look like the below connection string with your own credentials instead of the placeholders in brackets.
   **IMPORTANT**: Replace items in brackets with your credentials or the sample will not function
-  ```
-  static const char* connectionString = “HostName=[YOUR-HOST-NAME];CredentialScope=Device;DeviceId=[YOUR-DEVICE-ID];SharedAccessKey=[YOUR-ACCESS-KEY";
-  ```
+ 
+            static const char* connectionString = “HostName=[YOUR-HOST-NAME];CredentialScope=Device;DeviceId=[YOUR-DEVICE-ID];SharedAccessKey=[YOUR-ACCESS-KEY";
+  
+- Azure IoT SDKs require cmake 3.0 or higher. Follow the steps below to install cmake 3.4
+  
+        $ wget https://cmake.org/files/v3.4/cmake-3.4.0-Linux-i386.sh  
+        $ chmod u+x cmake-3.4.0-Linux-i386.sh  
+        $ ./cmake-3.4.0-Linux-i386.sh --prefix=/usr
+  
+  **Note**:--prefix=/usr will replace your current cmake with the latest one.
+   
+- Use following steps to build proton libraries and Azure IoT SDK
+   
+1. Run following command to build proton libraries
 
-- In the terminal, enter /c/build_all/linux and execute the following steps:
-  ```
-  $ opkg install util-linux-libuuid-dev
-  $ ./build_proton.sh
-  $ ./build.sh
-  ```
-  **Note:** build.sh creates a folder called "cmake" in your home folder. Inside "cmake" are all the results of the compilation of the complete software.
+              cd azure-iot-sdks/c/build_all/linux   
+              /build_proton.sh`
+2.  The above command will fail in some point but we need the part before  
+    failure.
+3.  Go to file: <Folder where qpid  proton is, usually your root home
+    folder>\\qpid-proton\*proton-c/bindings/CMakeLists.txt and edit this file
+    removing "python" from "BINDINGS"\*
+4. Edit the Build Proton script using following command:
 
-- Update the ldconfig cache
-  While building the Azure IoT SDK, we needed to first build a dependency called [Qpid Proton][qpidproton].
-  However, we need to register the resulting library with [ldconfig][ldcconfig] before we can proceed to testing and building our C-language samples.
-  To do that, we need to first locate where the Proton lib is and then copy it into the /lib folder in Yocto.
+          vi ~/azure-iot-sdks/c/build_all/linux/build_proton.sh
+5.  Remove or comment "sync\_proton" line in build\_proton.sh, otherwise it
+    will sync again the overwrite your change.
+
+6.  In the terminal, enter /c/build\_all/linux and execute the following steps:
+    
+         $ opkg install util-linux-libuuid-dev $ 
+         ./build_proton.sh
+
+          
+- Update the ldconfig Cache
+  
+  While building the Azure IoT SDK, we needed to first build a dependency called [Qpid Proton][qpidproton]. However, we need to register the resulting library with [ldconfig][ldcconfig] before we can proceed to testing and building our C-language samples. To do that, we need to first locate where the Proton library is located and then copy it into the /lib folder in Yocto.
 
 - Add libqpid-proton.so.2 to shared libs by running the following terminal commands:
-  ```
-  $ find -name 'libqpid-proton.so.2’
-  ```
+
+               $ find -name 'libqpid-proton.so.2’
+    
   - Copy the directory you are given by this command to your clipboard
-    ```
-    $ cp [directory_to_libqpid-proton.so.2] /lib
-    ```
+    
+               $ cp [directory_to_libqpid-proton.so.2] /lib
+    
   - Replace [directory_to_libqpid-proton.so.2] with the result of the “find” command from the first step
-    ```
-    $ ldconfig
-    ```
+   
+               $ ldconfig
+    
   - This will automatically update the cache, its a one line command
-    ```
-    $ ldconfig -v | grep "libqpid-p*”
-    ```
+    
+               $ ldconfig -v | grep "libqpid-p*”
+   
 If you completed the operation correctly, you will see "libqpid-proton.so.2” listed
 Now that we have added Qpid Proton to our ldcache, we are able to build the sample C project which relies on Proton:
 
-- Navigate to: ~/cmake/iothub_client/samples/iothub_client_sample_amqp
-  ```
-  ./iothub_client_sample_amqp
-  ```
+- Edit build.sh script to get rid of the command nproc
+   
+          vi ./build.sh
+    
+- Change line "make --jobs=nproc" to "make --jobs=2"
+- Set necessary environment variables
+    
+        export CFLAGS="-I/home/root/qpid-proton/proton-c/include"
+        export CPPFLAGS="-I/home/root/qpid-proton/proton-c/include"
+        export LDFLAGS="-L/lib/"
+
+- Build the Azure IoT sdk
+   
+        cd ~/azure-iot-sdks/c/build_all/linux
+        ./build.sh --no-mqtt --no-amqp --no-http
+    
+- Navigate back to: /c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp/linux and run the following commands
+  
+        make -f makefile.linux
+        ./iothub_client_sample_amqp
+    
 
 The result should be the following:
 
@@ -121,12 +161,12 @@ The result should be the following:
 # ./iothub_client_sample_amqp
 hub_client/samples/iothub_client_sample_amqp/linux#
 Starting the IoTHub client sample AMQP...
-IoTHubClient_SetMessageCallback...successful.
-IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SetNotificationCallback...successful.
+IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
 Press any key to exit the application.
 Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[1] received for message tracking id = 1 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[2] received for message tracking id = 2 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[3] received for message tracking id = 3 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[4] received for message tracking id = 4 with result = IOTHUB_CLIENT_CONFIRMATION_OK
 ```
@@ -144,4 +184,4 @@ Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT
 [img2]: ./media/edison02.png
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md
+[provision-device]: ./provision_device.md
