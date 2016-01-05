@@ -63,17 +63,10 @@ HttpReceiver.prototype._startReceiver = function startReceiver() {
       this._receiverStarted = true;
     } else if (this._opts.at) {
       /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_003: [if opts.at is set, messages shall be received at the Date and time specified.]*/
-      var now = new Date().getTime();
       var at = new Date(this._opts.at).getTime();
-      var diff = at - now;
-      if (diff < 0) {
-        // Looks like we're already late. receive messages right away.
-        // We do not set the "_receiverStarted" value though because we're not starting anything.
-        this._receive.bind(this)();
-      } else {
-        this._timeoutObj = setTimeout(this._receive.bind(this), diff);    
-        this._receiverStarted = true;  
-      }
+      var diff = Math.max(at - Date.now(), 0);
+      this._timeoutObj = setTimeout(this._receive.bind(this), diff);    
+      this._receiverStarted = true;  
     } else if (this._opts.cron) {
       /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_020: [If opts.cron is set messages shall be received according to the schedule described by the expression.]*/
       this.cronObj = cron.scheduleJob(this._opts.cron, this._receive.bind(this));
