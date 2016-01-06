@@ -580,6 +580,7 @@ static void clientTransportAMQP_Destroy(TRANSPORT_HANDLE handle)
         STRING_delete(transportState->devicesPortionPath);
         STRING_delete(transportState->cbsAddress);
         STRING_delete(transportState->deviceKey);
+        STRING_delete(transportState->sharedAccessSignature);
         STRING_delete(transportState->zeroLengthString);
         if (transportState->trustedCertificates != NULL)
         {
@@ -758,6 +759,16 @@ static int putToken(PAMQP_TRANSPORT_STATE transportState, STRING_HANDLE token)
 static void renewIfNecessaryTheCBS(PAMQP_TRANSPORT_STATE transportState)
 {
 
+	if (transportState->sharedAccessSignature != NULL
+			&& STRING_length(transportState->sharedAccessSignature) > 0) {
+		if (transportState->putTokenWasSuccessful == true) {
+			return;
+		} else if (transportState->putTokenWasSuccessful == false) {
+			putToken(transportState, transportState->sharedAccessSignature);
+			return;
+		}
+	}
+
     //
     // There is an expiry stored in the state.  It has the last expiry value used to define a
     // sas token.  If we are within 20 minutes OR we're PAST that expiration generate a new
@@ -883,6 +894,7 @@ static bool protonMessengerInit(PAMQP_TRANSPORT_STATE amqpState)
             //We've got the subscription.  Now we attempt to connect to the cbs.
             /*Codes_During messenger initialization a state variable known as lastExpiryUsed will be set to zero.*/
             amqpState->lastExpiryUsed = 0;
+            amqpState->putTokenWasSuccessful = false;
             /*Codes_SRS_IOTHUBTRANSPORTTAMQP_06_159: [renewIfNecessaryCBS will be invoked.]*/
             renewIfNecessaryTheCBS(amqpState);
             /*Codes_SRS_IOTHUBTRANSPORTTAMQP_06_160: [If after renewIfNecessaryCBS is invoked, the state variable putTokenWasSuccessful is false then the messenger initialization fails.]*/
@@ -1543,6 +1555,17 @@ static STRING_HANDLE createHost(const IOTHUBTRANSPORT_CONFIG* config)
     return result;
 }
 
+static bool copySharedKeyAndSasSignature(PAMQP_TRANSPORT_STATE state, const IOTHUBTRANSPORT_CONFIG* config) {
+	if(config->upperConfig->deviceKey != NULL && strlen(config->upperConfig->deviceKey) > 0) {
+		state->deviceKey = STRING_construct(config->upperConfig->deviceKey);
+		return true;
+	} else if(config->upperConfig->sharedAccessSignature != NULL && strlen(config->upperConfig->sharedAccessSignature) > 0) {
+		state->sharedAccessSignature = STRING_construct(config->upperConfig->sharedAccessSignature);
+		return true;
+	}
+	return false;
+}
+
 static TRANSPORT_HANDLE clientTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG* config)
 {
     PAMQP_TRANSPORT_STATE amqpState = NULL;
@@ -1560,9 +1583,9 @@ static TRANSPORT_HANDLE clientTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG*
     {
         LogError("invalid configuration (NULL deviceId detected)\r\n");
     }
-    else if (config->upperConfig->deviceKey == NULL)
+    else if (config->upperConfig->deviceKey == NULL && config->upperConfig->sharedAccessSignature == NULL)
     {
-        LogError("invalid configuration (NULL deviceKey detected)\r\n");
+        LogError("invalid configuration (NULL deviceKey detected or sharedAcceddSignature detected)\r\n");
     }
     else if (config->upperConfig->iotHubName == NULL)
     {
@@ -1582,7 +1605,7 @@ static TRANSPORT_HANDLE clientTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG*
         LogError("deviceName is too long\r\n");
     }
     else if ((strlen(config->upperConfig->deviceId) == 0) ||
-             (strlen(config->upperConfig->deviceKey) == 0) ||
+             ((config->upperConfig->deviceKey != NULL && strlen(config->upperConfig->deviceKey) == 0) && (config->upperConfig->sharedAccessSignature != NULL && strlen(config->upperConfig->sharedAccessSignature) == 0)) ||
              (strlen(config->upperConfig->iotHubName) == 0) ||
              (strlen(config->upperConfig->iotHubSuffix) == 0))
     {
@@ -1605,6 +1628,7 @@ static TRANSPORT_HANDLE clientTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG*
             amqpState->devicesPortionPath = NULL;
             amqpState->cbsAddress = NULL;
             amqpState->deviceKey = NULL;
+            amqpState->sharedAccessSignature = NULL;
             amqpState->savedClientHandle = NULL;
             amqpState->messenger = NULL;
             amqpState->messageSubscription = NULL;
@@ -1670,7 +1694,7 @@ static TRANSPORT_HANDLE clientTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG*
                             (!createEventAddress(amqpState)) ||
                             (!createMessageAddress(amqpState)) ||
                             (!createCbsAddress(amqpState, STRING_c_str(host))) ||
-                            ((amqpState->deviceKey = STRING_construct(config->upperConfig->deviceKey)) == NULL) ||
+                            (!copySharedKeyAndSasSignature(amqpState, config)) ||
                             ((amqpState->zeroLengthString = STRING_new()) == NULL))
                         {
                             /*Codes_SRS_IOTHUBTRANSPORTTAMQP_06_092: [If creating the urledDeviceId fails for any reason then clientTransportAMQP_Create shall fail and return NULL.]*/

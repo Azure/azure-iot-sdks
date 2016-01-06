@@ -73,6 +73,8 @@ typedef struct AMQP_TRANSPORT_STATE_TAG
     // Needed for device scoped key names.
     STRING_HANDLE zeroLengthString;
 
+
+    STRING_HANDLE sharedAccessSignature;
     //
     // This is the proton object that controls all aspects of the connection to the cloud.
     //
