@@ -11,6 +11,16 @@ to Azure IoT. This library uses
 with the Azure IoT hub. A sample application is provided to know the
 usage of the APIs.
 
+Prerequisites
+=============
+
+-   Visual Studio 2015 with UWP development support
+
+-   Nuget package for
+    [AQMPNetlite](https://www.nuget.org/packages/AMQPNetLite/) (1.1.5
+    – Latest) is required for the UWPIoTHubSDK library and
+    TestUWPIoTHubSDK projects.
+
 Features
 ========
 

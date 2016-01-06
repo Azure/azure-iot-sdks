@@ -3,6 +3,14 @@
   "version": 1,
   "targets": {
     "UAP,Version=v10.0": {
+      "AMQPNetLite/1.1.5": {
+        "compile": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        },
+        "runtime": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -1538,6 +1546,14 @@
       }
     },
     "UAP,Version=v10.0/win10-arm": {
+      "AMQPNetLite/1.1.5": {
+        "compile": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        },
+        "runtime": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -3163,6 +3179,14 @@
       }
     },
     "UAP,Version=v10.0/win10-arm-aot": {
+      "AMQPNetLite/1.1.5": {
+        "compile": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        },
+        "runtime": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -4760,6 +4784,14 @@
       }
     },
     "UAP,Version=v10.0/win10-x64": {
+      "AMQPNetLite/1.1.5": {
+        "compile": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        },
+        "runtime": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -6390,6 +6422,14 @@
       }
     },
     "UAP,Version=v10.0/win10-x64-aot": {
+      "AMQPNetLite/1.1.5": {
+        "compile": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        },
+        "runtime": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -7987,6 +8027,14 @@
       }
     },
     "UAP,Version=v10.0/win10-x86": {
+      "AMQPNetLite/1.1.5": {
+        "compile": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        },
+        "runtime": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -9617,6 +9665,14 @@
       }
     },
     "UAP,Version=v10.0/win10-x86-aot": {
+      "AMQPNetLite/1.1.5": {
+        "compile": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        },
+        "runtime": {
+          "lib/netcore451/Amqp.NetCore.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -11215,6 +11271,58 @@
     }
   },
   "libraries": {
+    "AMQPNetLite/1.1.5": {
+      "sha512": "UIdVYrpWw6f1fH0wjjE9SYkMLtgVjk9Jr0MTe7zXrNaKxJvYOkGidPV+V31GFk//nKO0wv+cOn/aB//sWDwFoA==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "AMQPNetLite.nuspec",
+        "lib/net35/Amqp.Net35.dll",
+        "lib/net35/Amqp.Net35.pdb",
+        "lib/net45/Amqp.Net.dll",
+        "lib/net45/Amqp.Net.pdb",
+        "lib/net-cf/Amqp.NetCF39.dll",
+        "lib/net-cf/Amqp.NetCF39.pdb",
+        "lib/net-cf/DeployFileList.txt",
+        "lib/netcore451/Amqp.NetCore.dll",
+        "lib/netcore451/Amqp.NetCore.pdb",
+        "lib/netcore451/Amqp.NetCore.pri",
+        "lib/netmf42/Amqp.NetMF.dll",
+        "lib/netmf42/Amqp.NetMF.pdb",
+        "lib/netmf42/be/Amqp.NetMF.pdb",
+        "lib/netmf42/be/Amqp.NetMF.pdbx",
+        "lib/netmf42/be/Amqp.NetMF.pe",
+        "lib/netmf42/le/Amqp.NetMF.pdb",
+        "lib/netmf42/le/Amqp.NetMF.pdbx",
+        "lib/netmf42/le/Amqp.NetMF.pe",
+        "lib/netmf43/Amqp.NetMF.dll",
+        "lib/netmf43/Amqp.NetMF.pdb",
+        "lib/netmf43/be/Amqp.NetMF.pdb",
+        "lib/netmf43/be/Amqp.NetMF.pdbx",
+        "lib/netmf43/be/Amqp.NetMF.pe",
+        "lib/netmf43/le/Amqp.NetMF.pdb",
+        "lib/netmf43/le/Amqp.NetMF.pdbx",
+        "lib/netmf43/le/Amqp.NetMF.pe",
+        "lib/netmf44/Amqp.NetMF.dll",
+        "lib/netmf44/Amqp.NetMF.pdb",
+        "lib/netmf44/be/Amqp.NetMF.pdb",
+        "lib/netmf44/be/Amqp.NetMF.pdbx",
+        "lib/netmf44/be/Amqp.NetMF.pe",
+        "lib/netmf44/le/Amqp.NetMF.pdb",
+        "lib/netmf44/le/Amqp.NetMF.pdbx",
+        "lib/netmf44/le/Amqp.NetMF.pe",
+        "lib/windows8/Amqp.Store.dll",
+        "lib/windows8/Amqp.Store.pdb",
+        "lib/windows8/Amqp.Store.pri",
+        "lib/windowsphone8/Amqp.WP.dll",
+        "lib/windowsphone8/Amqp.WP.pdb",
+        "lib/wpa81/Amqp.NetCore.dll",
+        "lib/wpa81/Amqp.NetCore.pdb",
+        "lib/wpa81/Amqp.NetCore.pri",
+        "package/services/metadata/core-properties/6006f26beb014a66ab543672181ca492.psmdcp"
+      ]
+    },
     "Microsoft.CSharp/4.0.0": {
       "sha512": "oWqeKUxHXdK6dL2CFjgMcaBISbkk+AqEg+yvJHE4DElNzS4QaTsCflgkkqZwVlWby1Dg9zo9n+iCAMFefFdJ/A==",
       "type": "Package",
@@ -14566,6 +14674,7 @@
   },
   "projectFileDependencyGroups": {
     "": [
+      "AMQPNetLite >= 1.1.5",
       "Microsoft.NETCore.UniversalWindowsPlatform >= 5.0.0"
     ],
     "UAP,Version=v10.0": []
