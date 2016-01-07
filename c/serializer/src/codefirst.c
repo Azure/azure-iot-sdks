@@ -441,7 +441,7 @@ SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLEC
 
 AGENT_DATA_TYPE_TYPE CodeFirst_GetPrimitiveType(const char* typeName)
 {
-#if USE_FLOATS
+#ifndef NO_FLOATS
     if (strcmp(typeName, "double") == 0)
     {
         return EDM_DOUBLE_TYPE;
