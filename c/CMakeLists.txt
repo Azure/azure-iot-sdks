@@ -26,7 +26,7 @@ if(IN_OPENWRT)
 	ADD_DEFINITIONS(-DNO_FLOATS)
 endif()
 
-if(NOT use_floats)
+if("${use_floats}" STREQUAL "OFF")
 	ADD_DEFINITIONS(-DNO_FLOATS)
 endif()
 
