@@ -1789,6 +1789,7 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 break;
             }
 
+#ifdef USE_FLOATS
             case(EDM_SINGLE_TYPE):
             {
                 /*C89 standard says: When a float is promoted to double or long double, or a double is promoted to long double, its value is unchanged*/
@@ -1911,6 +1912,7 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 }
                 break;
             }
+#endif
 
             case(EDM_COMPLEX_TYPE_TYPE) :
             {
