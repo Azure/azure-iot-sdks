@@ -4,6 +4,12 @@
 cmake_minimum_required(VERSION 3.0)
 #this is CMakeLists for serializer
 
+option(use_floats "if use_floats is used, serializer will use floats in its typesystem" ON)
+
+if(${use_floats})
+	add_definitions(-DUSE_FLOATS)
+endif()
+
 compileAsC99()
 
 set(serializer_c_files

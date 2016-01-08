@@ -4189,7 +4189,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-#ifndef NO_FLOATS
+#ifdef USE_FLOATS
         /*Tests_SRS_AGENT_TYPE_SYSTEM_99_041:[ Creates an AGENT_DATA_TYPE containing an EDM_DOUBLE from double]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_DOUBLE_succeeds_1)
         {
@@ -12078,7 +12078,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-#ifndef NO_FLOATS
+#ifdef USE_FLOATS
         /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Positive_Value_Succeeds)
         {

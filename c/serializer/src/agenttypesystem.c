@@ -1789,7 +1789,7 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 break;
             }
 
-#ifndef NO_FLOATS
+#ifdef USE_FLOATS
             case(EDM_SINGLE_TYPE):
             {
                 /*C89 standard says: When a float is promoted to double or long double, or a double is promoted to long double, its value is unchanged*/
