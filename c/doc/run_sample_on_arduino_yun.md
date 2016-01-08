@@ -70,14 +70,27 @@ Note: you will not be able to run the samples until you configure them with a va
 OpenWRT Yun Image:
 
 ```
-scp bin/ar71xx/packages/azure-iot-sdks_1-1_ar71xx.ipk root@arduino.local:/tmp
+scp ~/openwrt/sdk/build_dir/target-mips_r2_uClibc-0.9.33.2/azure-iot-sdks-1/serializer/samples/simplesample_http/simplesample_http root@arduino.local:/tmp
 ```
 
 LininoIO Yun Image:
 
 ```
-scp bin/ar71xx/packages/azure-iot-sdks_1-1_ar71xx.ipk root@linino.local:/tmp
+scp ~/openwrt/sdk/build_dir/target-mips_r2_uClibc-0.9.33.2/azure-iot-sdks-1/serializer/samples/simplesample_http/simplesample_http root@linino.local:/tmp
 ```
+
+Note that the uClibc version might be different on your setup and you might need to adjust the path accordingly.
+
+## Make sure the certificates are installed
+
+Install the ca-certificates package like below:
+
+```
+wget https://downloads.openwrt.org/snapshots/trunk/ar71xx/generic/packages/base/ca-certificates_20151214_ar71xx.ipk --no-check-certificate
+opkg install ca-certificates_20151214_ar71xx.ipk
+```
+
+You might get an error message at this step(return code 127), but the certificates will be installed.
 
 <a name="run"/>
 ## Run the sample
@@ -85,16 +98,9 @@ scp bin/ar71xx/packages/azure-iot-sdks_1-1_ar71xx.ipk root@linino.local:/tmp
 The following instructions assumes the device is flashed with OpenWRT Yun. If you are using LininoIO, substitute `arduino` with `linino` and use the default password `doghunter`.
 
 1. Open shell and enter `ssh root@arduino.local` Enter the device password. By default it is, `arduino` for OpenWRT Yun Image or `doghunter` for LininoIO.
-2. Install the package.
-
-```
-opkg install /tmp/azure-iot-sdks_1-1_ar71xx.ipk
-```
-
-3. Navigate to /usr/share/azure-iot-sdk/samples
-4. run **./simplesample_http**
-5. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_http** application.
-7. See "Send cloud-to-device messages" in the document [How to use Device Explorer for IoT Hub devices][device-explorer] for instructions on sending messages with the **DeviceExplorer** utility.
+2. Run the sample **/tmp/simplesample_http**
+3. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_http** application.
+4. See "Send cloud-to-device messages" in the document [How to use Device Explorer for IoT Hub devices][device-explorer] for instructions on sending messages with the **DeviceExplorer** utility.
 
 [setup-devbox-linux]: devbox_setup.md
 [device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
