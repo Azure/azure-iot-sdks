@@ -38,7 +38,7 @@ While not strictly required, we recommend that you install the following tools f
 
 - Install [TI-RTOS SDK for SimpleLink](http://downloads.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/tirtos/index.html) 2.14.01.20 or above
 
-- Install [NS package](http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/ns/ns_1_10_00_00_eng.zip). Please note, the NS package is a pre-release version. It's content and the download location are subject to change.
+- Install [NS package](http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/ns/ns_1_10_00_03.zip). Please note, the NS package is a pre-release version. It's content and the download location are subject to change.
 
 - Install [TI ARM Compiler](http://software-dl.ti.com/ccs/esd/test/ti_cgt_tms470_5.2.5_windows_installer.exe) 5.2.2 or above
 
@@ -49,7 +49,7 @@ While not strictly required, we recommend that you install the following tools f
   ```
   XDCTOOLS_INSTALLATION_DIR ?= C:/ti/xdctools_3_31_01_33_core
   TIRTOS_INSTALLATION_DIR ?= C:/ti/tirtos_simplelink_2_14_01_20
-  NS_INSTALLATION_DIR     ?= C:/ti/ns_1_10_00_00_eng
+  NS_INSTALLATION_DIR     ?= C:/ti/ns_1_10_00_03
   CC3200SDK_INSTALLATION_DIR ?= C:/ti/CC3200SDK_1.1.0/cc3200-sdk
   ti.targets.arm.elf.M4  ?= C:/ti/ti-cgt-arm_5.2.5
   ```
@@ -73,8 +73,6 @@ Before building the application, complete the following steps:
 2. Open the file `tirtos/cc3200/main.c`. Search for "USER STEP" and update the current date-time macros.
 
 3. Open the file `tirtos/cc3200/wificonfig.h`. Search for "USER STEP" and update the WIFI SSID and SECURITY_KEY macros.
-
-4. Download the [elf2cc32 executable for Windows](https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32.exe?raw=true) or [elf2cc32 executable for Linux](https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32?raw=true) to the folder <AZURE_INSTALL_DIR>\azure-iot-sdks\c\serializer\samples\simplesample_http\tirtos\cc3200\tools. This tool is needed for converting the simplesample_http.out to simplesample_http.bin file.
 
 In the Windows command prompt, enter the following commands to build the application:
 

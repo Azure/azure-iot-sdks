@@ -23,10 +23,10 @@ ifeq ("$(SHELL)","sh.exe")
 #For Windows
         RMDIR  = rmdir /S /Q
         remove = del $(subst /,\,$1)
-        binconv = tools/elf2cc32.exe
+        binconv = $(NS_INSTALLATION_DIR)/tools/elf2cc32.exe
 else
 #For Linux
         RMDIR  = rm -rf
         remove = rm -f $1
-        binconv = tools/elf2cc32
+        binconv = $(NS_INSTALLATION_DIR)/tools/elf2cc32
 endif
