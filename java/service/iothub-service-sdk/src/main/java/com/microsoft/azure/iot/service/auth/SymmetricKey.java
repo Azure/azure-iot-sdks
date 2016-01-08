@@ -11,9 +11,9 @@ package com.microsoft.azure.iot.service.auth;
  */
 public class SymmetricKey
 {
-    private final int MinKeyLengthInBytes = 16;
-    private final int MaxKeyLengthInBytes = 64;
-    private final String DeviceKeyLengthInvalid = "DeviceKeyLengthInvalid";
+    private transient final int MinKeyLengthInBytes = 16;
+    private transient final int MaxKeyLengthInBytes = 64;
+    private transient final String DeviceKeyLengthInvalid = "DeviceKeyLengthInvalid";
 
     private String primaryKey;
     private String secondaryKey;
