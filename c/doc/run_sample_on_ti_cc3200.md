@@ -54,6 +54,10 @@ While not strictly required, we recommend that you install the following tools f
   ti.targets.arm.elf.M4  ?= C:/ti/ti-cgt-arm_5.2.5
   ```
 
+TI ARM compiler will build the C runtime library when the make is run the first time. This build requires gmake.exe and searchs it on the environment path. It is recommended that you add the folder containing gmake.exe to your path. Alternately, XDCtools product (```C:/ti/xdctools_3_31_01_33_core```) which also contains gmake.exe can be added to the path. But note, it is recommended to remove the XDCtools from the path after the libraries are built to avoid conflicts when you use newer versions of XDCtools.
+
+For detailed information about building TI's C runtime library, please read the [Mklib wiki](http://processors.wiki.ti.com/index.php/Mklib).
+
 2. Open a Windows command prompt.
 
 3. In the Windows command prompt, run the following commands (be sure to replace the paths with your installation paths).
