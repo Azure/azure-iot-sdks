@@ -46,7 +46,7 @@ define Build/Configure
   STRIP="$(TOOLCHAIN_DIR)/bin/$(TARGET_CROSS)strip" \
   OBJCOPY="$(TOOLCHAIN_DIR)/bin/$(TARGET_CROSS)objcopy" \
   OBJDUMP="$(TOOLCHAIN_DIR)/bin/$(TARGET_CROSS)objdump" \
-  cmake -DCMAKE_FIND_ROOT_PATH="$(TOOLCHAIN_DIR)" $(PKG_BUILD_DIR)/CMakeLists.txt -DIN_OPENWRT=1 -Duse_amqp:bool=OFF -Duse_http:bool=ON -Duse_mqtt:bool=OFF -Dskip_unittests:bool=ON
+  cmake -DCMAKE_FIND_ROOT_PATH="$(TOOLCHAIN_DIR)" $(PKG_BUILD_DIR)/CMakeLists.txt -DIN_OPENWRT=1 -Duse_amqp:bool=OFF -Duse_http:bool=ON -Duse_mqtt:bool=OFF -Dskip_unittests:bool=ON -Duse_floats:bool=OFF
 endef
 
 define Build/InstallDev
