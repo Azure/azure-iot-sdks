@@ -32,6 +32,11 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>azure-storage</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
             <artifactId>iothub-service-sdk</artifactId>
             <version>1.0.0-preview.8</version>

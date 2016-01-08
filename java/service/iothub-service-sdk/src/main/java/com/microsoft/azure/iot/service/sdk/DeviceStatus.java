@@ -5,11 +5,16 @@
 
 package com.microsoft.azure.iot.service.sdk;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Enum for device status
  */
 public enum DeviceStatus
 {
+    @SerializedName("enabled")
     Enabled,
+
+    @SerializedName("disabled")
     Disabled
 }

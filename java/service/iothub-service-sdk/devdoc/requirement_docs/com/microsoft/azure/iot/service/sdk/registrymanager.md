@@ -229,3 +229,87 @@ public RegistryStatistics getStatistics();
 public CompletableFuture<RegistryStatistics> getStatisticsAsync();
 ```
 **SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_060: [** The function shall create an async wrapper around the getStatistics() function call, handle the return value or delegate exception **]**
+
+### exportDevices
+
+```java
+public JobProperties exportDevices(String exportBlobContainerUri, Boolean excludeKeys) throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+```
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_061: [** The function shall throw IllegalArgumentException if any of the input parameters is null **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_062: [** The function shall get the URL for the bulk export job creation **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_063: [** The function shall create a new SAS token for the bulk export job **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_064: [** The function shall create a new HttpRequest for the export job creation **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_065: [** The function shall send the created request and get the response **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_066: [** The function shall verify the response status and throw proper Exception **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_067: [** The function shall create a new JobProperties object from the response and return it **]**
+
+### exportDevicesAsync
+
+```java
+    public CompletableFuture<JobProperties> exportDevicesAsync(String exportBlobContainerUri, Boolean excludeKeys) throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+```
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_068: [** The function shall create an async wrapper around the exportDevices() function call, handle the return value or delegate exception **]**
+
+### importDevices
+
+```java
+    public JobProperties importDevices(String importBlobContainerUri, String outputBlobContainerUri) throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+```
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_069: [** The function shall throw IllegalArgumentException if any of the input parameters is null **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_070: [** The function shall get the URL for the bulk import job creation **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_071: [** The function shall create a new SAS token for the bulk import job **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_072: [** The function shall create a new HttpRequest for the bulk import job creation **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_073: [** The function shall send the created request and get the response **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_074: [** The function shall verify the response status and throw proper Exception **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_075: [** The function shall create a new JobProperties object from the response and return it **]**
+
+### importDevicesAsync
+
+```java
+    public CompletableFuture<JobProperties> importDevicesAsync(String importBlobContainerUri, String outputBlobContainerUri) throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+```
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_076: [** The function shall create an async wrapper around the importDevices() function call, handle the return value or delegate exception **]**
+
+### getJob
+
+```java
+    public JobProperties getJob(String jobId) throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+```
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_077: [** The function shall throw IllegalArgumentException if the input parameter is null **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_078: [** The function shall get the URL for the get request **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_079: [** The function shall create a new SAS token for the get request **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_080: [** The function shall create a new HttpRequest for getting the properties of a job **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_081: [** The function shall send the created request and get the response **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_082: [** The function shall verify the response status and throw proper Exception **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_083: [** The function shall create a new JobProperties object from the response and return it **]**
+
+### getJobAsync
+
+```java
+        public CompletableFuture<JobProperties> getJobAsync(String jobId) throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+```
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_084: [** The function shall create an async wrapper around the getJob() function call, handle the return value or delegate exception **]**
