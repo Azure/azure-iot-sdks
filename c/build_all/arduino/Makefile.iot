@@ -55,7 +55,7 @@ define Build/InstallDev
 	$(CP) $(PKG_BUILD_DIR)/iothub_client/inc/* $(STAGING_DIR)/usr/include/
 	$(CP) $(PKG_BUILD_DIR)/serializer/inc/* $(STAGING_DIR)/usr/include/
 	$(INSTALL_DIR) $(STAGING_DIR)/usr/lib
-	$(CP) $(PKG_BUILD_DIR)/azure-c-shared-utility/*.a $(STAGING_DIR)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/azure-c-shared-utility/c/*.a $(STAGING_DIR)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/iothub_client/*.a $(STAGING_DIR)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/serializer/*.a $(STAGING_DIR)/usr/lib/
 endef
