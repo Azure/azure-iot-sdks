@@ -37,6 +37,7 @@ if(${use_http})
 	set(iothub_client_http_transport_h_files
 		${iothub_client_ll_transport_h_files}
 		./inc/iothubtransporthttp.h
+		./inc/iothub_client_private.h
 	)
 endif()
 
