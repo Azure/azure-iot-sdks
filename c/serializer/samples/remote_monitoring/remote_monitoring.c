@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifndef WINCE
 #include "iothubtransportamqp.h"
+#else
+#include "iothubtransporthttp.h"
+#endif
 #include "schemalib.h"
 #include "iothub_client.h"
 #include "serializer.h"
@@ -11,6 +15,7 @@
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
+
 
 static const char* deviceId = "[Device Id]";
 static const char* deviceKey = "[Device Key]";
@@ -33,9 +38,9 @@ _Bool, HubEnabledState
 DECLARE_MODEL(Thermostat,
 
     /* Event data (temperature, external temperature and humidity) */
-	WITH_DATA(double, Temperature),
-	WITH_DATA(double, ExternalTemperature),
-	WITH_DATA(double, Humidity),
+	WITH_DATA(int, Temperature),
+	WITH_DATA(int, ExternalTemperature),
+	WITH_DATA(int, Humidity),
 	WITH_DATA(ascii_char_ptr, DeviceId),
 
 	/* Device Info - This is command metadata + some extra fields */
@@ -46,22 +51,22 @@ DECLARE_MODEL(Thermostat,
     WITH_DATA(ascii_char_ptr_no_quotes, Commands),
 
     /* Commands implemented by the device */
-    WITH_ACTION(SetTemperature, double, temperature),
-	WITH_ACTION(SetHumidity, double, humidity)
+    WITH_ACTION(SetTemperature, int, temperature),
+	WITH_ACTION(SetHumidity, int, humidity)
 );
 
 END_NAMESPACE(Contoso);
 
-EXECUTE_COMMAND_RESULT SetTemperature(Thermostat* thermostat, double temperature)
+EXECUTE_COMMAND_RESULT SetTemperature(Thermostat* thermostat, int temperature)
 {
-    (void)printf("Received temperature %.02fs\r\n", temperature);
+    (void)printf("Received temperature %d\r\n", temperature);
 	thermostat->Temperature = temperature;
     return EXECUTE_COMMAND_SUCCESS;
 }
 
-EXECUTE_COMMAND_RESULT SetHumidity(Thermostat* thermostat, double humidity)
+EXECUTE_COMMAND_RESULT SetHumidity(Thermostat* thermostat, int humidity)
 {
-	(void)printf("Received humidity %.02fs\r\n", humidity);
+	(void)printf("Received humidity %d\r\n", humidity);
 	thermostat->Humidity = humidity;
 	return EXECUTE_COMMAND_SUCCESS;
 }
@@ -111,9 +116,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
         }
         else
         {
+			EXECUTE_COMMAND_RESULT executeCommandResult;
+
             memcpy(temp, buffer, size);
             temp[size] = '\0';
-            EXECUTE_COMMAND_RESULT executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
+            executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
             result =
                 (executeCommandResult == EXECUTE_COMMAND_ERROR) ? IOTHUBMESSAGE_ABANDONED :
                 (executeCommandResult == EXECUTE_COMMAND_SUCCESS) ? IOTHUBMESSAGE_ACCEPTED :
@@ -133,14 +140,18 @@ void remote_monitoring_run(void)
     else
     {
 		IOTHUB_CLIENT_CONFIG config;
+		IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
 		config.deviceId = deviceId;
 		config.deviceKey = deviceKey;
 		config.iotHubName = hubName;
 		config.iotHubSuffix = hubSuffix;
+#ifndef WINCE
 		config.protocol = AMQP_Protocol;
-
-		IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_Create(&config);
+#else
+		config.protocol = HTTP_Protocol;
+#endif
+		iotHubClientHandle = IoTHubClient_Create(&config);
         if (iotHubClientHandle == NULL)
         {
             (void)printf("Failed on IoTHubClient_CreateFromConnectionString\r\n");
@@ -212,9 +223,9 @@ void remote_monitoring_run(void)
                         STRING_delete(commandsMetadata);
                     }
 
-					thermostat->Temperature = 50.0;
-					thermostat->ExternalTemperature = 55.0;
-					thermostat->Humidity = 50.0;
+					thermostat->Temperature = 50;
+					thermostat->ExternalTemperature = 55;
+					thermostat->Humidity = 50;
 					thermostat->DeviceId = (char*)deviceId;
 
                     while (1)
@@ -222,7 +233,7 @@ void remote_monitoring_run(void)
                         unsigned char*buffer;
                         size_t bufferSize;
 
-						(void)printf("Sending sensor value Temperature = %02f, Humidity = %02f\r\n", thermostat->Temperature, thermostat->Humidity);
+						(void)printf("Sending sensor value Temperature = %d, Humidity = %d\r\n", thermostat->Temperature, thermostat->Humidity);
 
                         if (SERIALIZE(&buffer, &bufferSize, thermostat->DeviceId, thermostat->Temperature, thermostat->Humidity, thermostat->ExternalTemperature) != IOT_AGENT_OK)
                         {

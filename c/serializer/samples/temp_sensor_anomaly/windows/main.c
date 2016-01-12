@@ -17,7 +17,7 @@ BEGIN_NAMESPACE(Contoso);
 
 DECLARE_STRUCT(SystemProperties,
 ascii_char_ptr, DeviceID,
-_Bool, Enabled
+bool, Enabled
 );
 
 DECLARE_MODEL(FrdmDevice,
@@ -97,9 +97,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
         }
         else
         {
+            EXECUTE_COMMAND_RESULT executeCommandResult;
+          
             memcpy(temp, buffer, size);
             temp[size] = '\0';
-            EXECUTE_COMMAND_RESULT executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
+            executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
             result =
                 (executeCommandResult == EXECUTE_COMMAND_ERROR) ? IOTHUBMESSAGE_ABANDONED :
                 (executeCommandResult == EXECUTE_COMMAND_SUCCESS) ? IOTHUBMESSAGE_ACCEPTED :
@@ -127,13 +129,19 @@ int main(void)
         }
         else
         {
-            unsigned int minimumPollingTime = 9; /*because it can poll "after 9 seconds" polls will happen effectively at ~10 seconds*/
+            FrdmDevice* frdmDevice;
+            // Because it can poll "after 9 seconds" polls will happen 
+            // effectively at ~10 seconds.
+            // Note that for scalabilty, the default value of minimumPollingTime
+            // is 25 minutes. For more information, see:
+            // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
+            unsigned int minimumPollingTime = 9;
             if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"MinimumPollingTime\"\r\n");
             }
 
-            FrdmDevice* frdmDevice = CREATE_MODEL_INSTANCE(Contoso, FrdmDevice, true);
+            frdmDevice = CREATE_MODEL_INSTANCE(Contoso, FrdmDevice, true);
             if (frdmDevice == NULL)
             {
                 (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");

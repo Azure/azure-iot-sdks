@@ -46,11 +46,9 @@ public class HandleMessages
         }
     }
 
-    protected static class MessageCallback
-            implements com.microsoft.azure.iothub.MessageCallback
+    protected static class MessageCallback implements com.microsoft.azure.iothub.MessageCallback
     {
-        public IotHubMessageResult execute(Message msg,
-                Object context)
+        public IotHubMessageResult execute(Message msg, Object context)
         {
             Counter counter = (Counter) context;
             System.out.println(
@@ -72,17 +70,31 @@ public class HandleMessages
                     break;
                 default:
                     // should never happen.
-                    throw new IllegalStateException(
-                            "Invalid message result specified.");
+                    throw new IllegalStateException("Invalid message result specified.");
             }
 
-            System.out.println(
-                    "Responding to message " + counter.toString()
-                            + " with " + res.name());
+            System.out.println("Responding to message " + counter.toString() + " with " + res.name());
 
             counter.increment();
 
             return res;
+        }
+    }
+
+    // Our MQTT doesn't support abandon/reject, so we will only display the messaged received
+    // from IoTHub and return COMPLETE
+    protected static class MessageCallbackMqtt implements com.microsoft.azure.iothub.MessageCallback
+    {
+        public IotHubMessageResult execute(Message msg, Object context)
+        {
+            Counter counter = (Counter) context;
+            System.out.println(
+                    "Received message " + counter.toString()
+                            + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+
+            counter.increment();
+
+            return IotHubMessageResult.COMPLETE;
         }
     }
 
@@ -91,7 +103,7 @@ public class HandleMessages
      * HTTPS transport.
      *
      * @param args args[0] = IoT Hub connection string; args[1] = protocol (one
-     * of 'https' or 'amqps', optional).
+     * of 'https', 'amqps' or 'mqtt', optional).
      */
     public static void main(String[] args)
             throws IOException, URISyntaxException
@@ -105,7 +117,7 @@ public class HandleMessages
                     "Expected 1 or 2 arguments but received:\n%d. "
                             + "The program should be called with the: "
                             + "following args: "
-                            + "[IoT Hub connection string] (https | amqps).\n",
+                            + "[IoT Hub connection string] (https | amqps | mqtt).\n",
                     args.length);
             return;
         }
@@ -127,13 +139,17 @@ public class HandleMessages
             {
                 protocol = IotHubClientProtocol.AMQPS;
             }
+            else if (protocolStr.equals("mqtt"))
+            {
+                protocol = IotHubClientProtocol.MQTT;
+            }
             else
             {
                 System.out.format(
-                        "Expected argument 1 to be one of 'https' or 'amqps' "
+                        "Expected argument 1 to be one of 'https', 'amqps' or 'mqtt' "
                                 + "but received %s. The program should be "
                                 + "called with the: following args: "
-                                + "[IoT Hub connection string] (https | amqps)."
+                                + "[IoT Hub connection string] (https | amqps | mqtt)."
                                 + "\n",
                         protocolStr);
                 return;
@@ -148,9 +164,18 @@ public class HandleMessages
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        MessageCallback callback = new MessageCallback();
-        Counter counter = new Counter(0);
-        client.setMessageCallback(callback, counter);
+        if (protocol == IotHubClientProtocol.MQTT)
+        {
+            MessageCallbackMqtt callback = new MessageCallbackMqtt();
+            Counter counter = new Counter(0);
+            client.setMessageCallback(callback, counter);
+        }
+        else
+        {
+            MessageCallback callback = new MessageCallback();
+            Counter counter = new Counter(0);
+            client.setMessageCallback(callback, counter);
+        }
 
         System.out.println("Successfully set message callback.");
 

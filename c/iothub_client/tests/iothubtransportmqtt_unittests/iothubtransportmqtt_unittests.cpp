@@ -359,25 +359,27 @@ public:
         PDLIST_ENTRY entry = BASEIMPLEMENTATION::DList_RemoveHeadList(listHead);
     MOCK_METHOD_END(PDLIST_ENTRY, entry)
 
+    MOCK_STATIC_METHOD_2(, int, mallocAndStrcpy_s, char**, destination, const char*, source)
+    MOCK_METHOD_END(int, (*destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(source) + 1), strcpy(*destination, source), 0))
 
-        MOCK_STATIC_METHOD_1(, void*, gballoc_malloc, size_t, size)
+    MOCK_STATIC_METHOD_1(, void*, gballoc_malloc, size_t, size)
         void* result2;
-    currentmalloc_call++;
-    if (whenShallmalloc_fail>0)
-    {
-        if (currentmalloc_call == whenShallmalloc_fail)
+        currentmalloc_call++;
+        if (whenShallmalloc_fail>0)
         {
-            result2 = (void*)NULL;
+            if (currentmalloc_call == whenShallmalloc_fail)
+            {
+                result2 = (void*)NULL;
+            }
+            else
+            {
+                result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
+            }
         }
         else
         {
             result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
         }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
-    }
     MOCK_METHOD_END(void*, result2);
 
     MOCK_STATIC_METHOD_2(, void*, gballoc_realloc, void*, ptr, size_t, size)
@@ -531,6 +533,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , PDLIST_ENTRY, DList_Re
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , void*, gballoc_malloc, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportMqttMocks, , void*, gballoc_realloc, void*, ptr, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , void, gballoc_free, void*, ptr);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportMqttMocks, , int, mallocAndStrcpy_s, char**, destination, const char*, source);
 
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , void, eventConfirmationCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , int, messageCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback);
@@ -753,15 +756,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
@@ -781,8 +784,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, MQTTAPI_Create(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -878,22 +881,22 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         whenShallSTRING_construct_fail = 5;
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
@@ -923,26 +926,26 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
             .IgnoreArgument(1)
             .SetReturn((int)__LINE__);
 
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
@@ -972,15 +975,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
@@ -988,8 +991,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
             .SetReturn((int)__LINE__);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
@@ -1019,15 +1022,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
@@ -1037,8 +1040,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
             .SetReturn((int)__LINE__);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
@@ -1069,15 +1072,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
@@ -1090,8 +1093,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
@@ -1123,15 +1126,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
@@ -1141,14 +1144,14 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
             .IgnoreArgument(1)
-			.SetReturn((int)__LINE__);
+            .SetReturn((int)__LINE__);
 
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
@@ -1168,41 +1171,41 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
     }
 
 
-	/* Tests_SRS_IOTHUBTRANSPORTMQTT_04_008: [If creating the string fail for any reason then IoTHubTransportMqtt_Create shall fail and return NULL.] */
-	TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_string_construct_sasTokenSr_fails_fail)
-	{
-		// arrange
-		CIoTHubTransportMqttMocks mocks;
+    /* Tests_SRS_IOTHUBTRANSPORTMQTT_04_008: [If creating the string fail for any reason then IoTHubTransportMqtt_Create shall fail and return NULL.] */
+    TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_string_construct_sasTokenSr_fails_fail)
+    {
+        // arrange
+        CIoTHubTransportMqttMocks mocks;
 
-		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_PROTOCOL_GATEWAY_HOSTNAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
-
-
-		whenShallSTRING_construct_fail = 4;
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_PROTOCOL_GATEWAY_HOSTNAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
 
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, gballoc_free(NULL))
-			.IgnoreArgument(1);
+        whenShallSTRING_construct_fail = 4;
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
 
-		// act
-		auto result = IoTHubTransportMqtt_Create(&TEST_CONFIG);
 
-		// assert
-		ASSERT_IS_NULL(result);
-	}
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(NULL))
+            .IgnoreArgument(1);
+
+        // act
+        auto result = IoTHubTransportMqtt_Create(&TEST_CONFIG);
+
+        // assert
+        ASSERT_IS_NULL(result);
+    }
 
 
     /* Tests_SRS_IOTHUBTRANSPORTMQTT_04_008: [If creating the string fail for any reason then IoTHubTransportMqtt_Create shall fail and return NULL.] */
@@ -1218,15 +1221,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
@@ -1241,8 +1244,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
@@ -1274,15 +1277,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
@@ -1299,8 +1302,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
@@ -1355,15 +1358,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
@@ -1383,8 +1386,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, MQTTAPI_Create(IGNORED_PTR_ARG))
             .IgnoreArgument(1)
@@ -1392,8 +1395,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
@@ -1426,15 +1429,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
@@ -1454,8 +1457,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, MQTTAPI_Create(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -1474,8 +1477,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(NULL))
             .IgnoreArgument(1);
 
@@ -1500,15 +1503,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
-		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "."))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_IOTHUB_SUFFIX))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct("devices/"));
         STRICT_EXPECTED_CALL(mocks, STRING_concat(NULL, TEST_DEVICE_ID))
@@ -1528,8 +1531,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_c_str(NULL))
+            .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, MQTTAPI_Create(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -1543,8 +1546,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
@@ -1588,8 +1591,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
-			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(NULL))

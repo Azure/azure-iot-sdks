@@ -51,10 +51,8 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-    <Import Project="packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" />
-    <Import Project="packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
-    <Import Project="packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -92,15 +90,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>GB_MEASURE_MEMORY_FOR_THIS;GB_DEBUG_ALLOC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRTDBG_MAP_ALLOC;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;..\..\..\inc;..\..\..\..\common\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\$(Configuration)\paho-mqtt3cs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\$(Configuration)\paho-mqtt3cs.dll" "$(OutDir)"</Command>
+      <Command></Command>
     </PostBuildEvent>
     <CustomBuildStep>
       <Command>
@@ -114,15 +112,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>GB_MEASURE_MEMORY_FOR_THIS;GB_DEBUG_ALLOC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRTDBG_MAP_ALLOC;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;..\..\..\inc;..\..\..\..\common\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\$(Platform)\$(Configuration)\paho-mqtt3cs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\$(Platform)\$(Configuration)\paho-mqtt3cs.dll" "$(OutDir)"</Command>
+      <Command></Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,17 +132,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;..\..\..\inc;..\..\..\..\common\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\..\build\output\paho-mqtt3cs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\..\build\output\paho-mqtt3cs.dll" "$(OutDir)"</Command>
+      <Command></Command>
     </PostBuildEvent>
     <CustomBuildStep>
       <Command>
@@ -160,17 +158,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;..\..\..\inc;..\..\..\..\common\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\$(Platform)\$(Configuration)\paho-mqtt3cs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(PAHO_PATH)\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\$(Platform)\$(Configuration)\paho-mqtt3cs.dll" "$(OutDir)"</Command>
+      <Command></Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -184,12 +182,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-009\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-009\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
+    <Import Project="packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-009\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-009\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" />
+    <Import Project="packages\Microsoft.Azure.C.SharedUtility.1.0.0-preview-003\build\native\Microsoft.Azure.C.SharedUtility.targets" Condition="Exists('packages\Microsoft.Azure.C.SharedUtility.1.0.0-preview-003\build\native\Microsoft.Azure.C.SharedUtility.targets')" />
+  </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.Common.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.Common.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-003\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.C.SharedUtility.1.0.0-preview-003\build\native\Microsoft.Azure.C.SharedUtility.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.C.SharedUtility.1.0.0-preview-003\build\native\Microsoft.Azure.C.SharedUtility.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-009\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.0-preview-009\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-009\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.0-preview-009\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets'))" />
   </Target>
 </Project>

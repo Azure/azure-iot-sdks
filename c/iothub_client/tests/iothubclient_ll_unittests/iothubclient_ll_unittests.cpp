@@ -1224,7 +1224,7 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR))
             .IgnoreArgument(1)
-            .SetReturn((STRING_TOKENIZER_HANDLE)NULL);
+            .SetReturn((STRING_HANDLE)NULL);
 
         ///act
         auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
@@ -2713,8 +2713,7 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
         mocks.ResetAllCalls();
 
-        STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, "a", "b"))
-            .IgnoreArgument(1);
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, "a", "b"));
 
         ///act
         auto result = IoTHubClient_LL_SetOption(handle, "a", "b");
@@ -2736,8 +2735,7 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
         mocks.ResetAllCalls();
 
-        STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, "a", "b"))
-            .IgnoreArgument(1)
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, "a", "b"))
             .SetReturn(IOTHUB_CLIENT_INDEFINITE_TIME); 
 
         ///act

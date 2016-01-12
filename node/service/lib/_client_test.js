@@ -7,7 +7,7 @@ var assert = require('chai').assert;
 var Client = require('./client.js');
 var errors = require('azure-iot-common').errors;
 var Message = require('azure-iot-common').Message;
-var AmqpReceiver = require('azure-iot-common').AmqpReceiver;
+var AmqpReceiver = require('azure-iot-amqp-base').AmqpReceiver;
 
 describe('Client', function () {
   describe('#constructor', function () {

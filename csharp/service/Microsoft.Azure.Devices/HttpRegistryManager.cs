@@ -356,6 +356,23 @@ namespace Microsoft.Azure.Devices
             return this.CreateJobAsync(jobProperties, ct);
         }
 
+        public override Task<JobProperties> ImportDevicesAsync(string importBlobContainerUri, string outputBlobContainerUri)
+        {
+            return this.ImportDevicesAsync(importBlobContainerUri, outputBlobContainerUri, CancellationToken.None);
+        }
+
+        public override Task<JobProperties> ImportDevicesAsync(string importBlobContainerUri, string outputBlobContainerUri, CancellationToken ct)
+        {
+            var jobProperties = new JobProperties()
+            {
+                Type = JobType.ImportDevices,
+                InputBlobContainerUri = importBlobContainerUri,
+                OutputBlobContainerUri = outputBlobContainerUri
+            };
+
+            return this.CreateJobAsync(jobProperties, ct);
+        }
+        
         Task<JobProperties> CreateJobAsync(JobProperties jobProperties, CancellationToken ct)
         {
             this.EnsureInstanceNotClosed();
@@ -405,10 +422,13 @@ namespace Microsoft.Azure.Devices
             var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
             errorMappingOverrides.Add(HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new JobNotFoundException(jobId)));
 
-            IETagHolder temp = null;
+            IETagHolder jobETag = new ETagHolder()
+            {
+                ETag = jobId
+            };
             return this.httpClientHelper.DeleteAsync(
                 GetJobUri("/{0}".FormatInvariant(jobId)),
-                temp,
+                jobETag,
                 errorMappingOverrides,
                 null,
                 cancellationToken);

@@ -211,10 +211,10 @@ public final class AmqpsTransport implements IotHubTransport
                     // Codes_SRS_AMQPSTRANSPORT_11_007: [If the IoT Hub could not be reached, the message shall be buffered to be sent again next time.]
                     catch(IllegalStateException e){
                         this.waitingList.add(packet);
-                        System.out.println("Failed to send message because: " + e);
+                        System.out.println("Failed to send message because: " + e.getMessage());
                     }
                     catch(Exception e){
-                        System.out.println("Failed to send message because: " + e);
+                        System.out.println("Failed to send message because: " + e.getMessage());
                     }
                     //Instead of adding to callback packet, just invoke callbacks here in thread.
                     IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(status, packet.getCallback(), packet.getContext());

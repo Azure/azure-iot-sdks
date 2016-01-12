@@ -38,13 +38,7 @@ target_link_libraries(iothub_client_sample_http
 #iothubclient is here only because locking... in gballoc no less.
 	iothub_client
 	iothub_client_http_transport
-	common
-	iothub_client_http_transport
 )
 
-if(WIN32)
-else()
-target_link_libraries(iothub_client_sample_http curl)
-endif()
-	
+linkSharedUtil(iothub_client_sample_http)
 linkHttp(iothub_client_sample_http)

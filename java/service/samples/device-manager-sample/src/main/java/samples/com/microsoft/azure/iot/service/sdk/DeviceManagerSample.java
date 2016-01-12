@@ -15,22 +15,19 @@ import java.net.URISyntaxException;
 /** Manages device on IotHub - CRUD operations */
 public class DeviceManagerSample
 {
-    private static final String connectionString = "[Connection string goes here]";
-    private static final String deviceId = "[Device name goes here]";
-
     /**
      * @param args
      * @throws IOException
      * @throws URISyntaxException
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, Exception
+    public static void main(String[] args) throws Exception
     {
         System.out.println("Starting sample...");
         
         System.out.println("Add Device started");
         AddDevice();
         System.out.println("Add Device finished");
-        
+
         System.out.println("Get Device started");
         GetDevice();
         System.out.println("Get Device finished");
@@ -48,19 +45,21 @@ public class DeviceManagerSample
     
     private static void AddDevice() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(DeviceManagerSample.connectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
-        Device device = Device.createFromId(deviceId);
+        Device device = Device.createFromId(SampleUtils.deviceId);
         try
         {
             device = registryManager.addDevice(device);
 
             System.out.println("Device created: " + device.getDeviceId());
             System.out.println("Device key: " + device.getPrimaryKey());
-        } catch (IotHubException iote)
+        }
+        catch (IotHubException iote)
         {
             iote.printStackTrace();
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -68,21 +67,23 @@ public class DeviceManagerSample
     
     private static void GetDevice() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(DeviceManagerSample.connectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
         Device returnDevice = null;
         try
         {
-            returnDevice = registryManager.getDevice(deviceId);
+            returnDevice = registryManager.getDevice(SampleUtils.deviceId);
 
             System.out.println("Device: " + returnDevice.getDeviceId());
             System.out.println("Device primary key: " + returnDevice.getPrimaryKey());
             System.out.println("Device secondary key: " + returnDevice.getSecondaryKey());
             System.out.println("Device eTag: " + returnDevice.geteTag());
-        } catch (IotHubException iote)
+        }
+        catch (IotHubException iote)
         {
             iote.printStackTrace();
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -93,9 +94,9 @@ public class DeviceManagerSample
         String primaryKey = "[New primary key goes here]";
         String secondaryKey = "[New secondary key goes here]";
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(DeviceManagerSample.connectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
-        Device device = Device.createFromId(deviceId);
+        Device device = Device.createFromId(SampleUtils.deviceId);
         device.getSymmetricKey().setPrimaryKey(primaryKey);
         device.getSymmetricKey().setSecondaryKey(secondaryKey);
         try
@@ -105,10 +106,12 @@ public class DeviceManagerSample
             System.out.println("Device updated: " + device.getDeviceId());
             System.out.println("Device primary key: " + device.getPrimaryKey());
             System.out.println("Device secondary key: " + device.getSecondaryKey());
-        } catch (IotHubException iote)
+        }
+        catch (IotHubException iote)
         {
             iote.printStackTrace();
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -116,17 +119,18 @@ public class DeviceManagerSample
     
     private static void RemoveDevice() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(DeviceManagerSample.connectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
         try
         {
-            registryManager.removeDevice(deviceId);
-
-            System.out.println("Device removed: " + deviceId);
-        } catch (IotHubException iote)
+            registryManager.removeDevice(SampleUtils.deviceId);
+            System.out.println("Device removed: " + SampleUtils.deviceId);
+        }
+        catch (IotHubException iote)
         {
             iote.printStackTrace();
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
         }

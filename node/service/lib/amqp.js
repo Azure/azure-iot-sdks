@@ -3,8 +3,8 @@
 
 'use strict';
 
-var Base = require('azure-iot-common').Amqp;
-var Endpoint = require('azure-iot-common').endpoint;
+var Base = require('azure-iot-amqp-base').Amqp;
+var endpoint = require('azure-iot-common').endpoint;
 
 /** 
  * @class Amqp
@@ -63,7 +63,7 @@ Amqp.prototype.disconnect = function disconnect(done) {
 /*Codes_SRS_NODE_IOTHUB_SERVICE_AMQP_16_005: [If send encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/ 
 Amqp.prototype.send = function send(deviceId, message, done) {
   var serviceEndpoint = '/messages/devicebound';
-  var deviceEndpoint = Endpoint.messagePath(encodeURIComponent(deviceId));
+  var deviceEndpoint = endpoint.messagePath(encodeURIComponent(deviceId));
   this._amqp.send(message, serviceEndpoint, deviceEndpoint, done);
 };
 

@@ -19,6 +19,7 @@ To learn more about IoT Hub, see [What is Azure IoT Hub?][what-is-iot-hub].
   - [Create device](#createdevice)
   - [Update device](#updatedevice)
   - [Delete device](#deletedevice)
+  - [SAS Token](#sastoken)
   - [Get device connection string or data](#getdatadevice)
 - [Monitor device-to-cloud events](#monitor)
 - [Send cloud-to-device messages](#send)
@@ -30,7 +31,7 @@ You can either download a pre-built version of Device Explorer or build it yours
 
 ### Download a pre-built version of the Device Explorer application
 
-A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link [DeviceExplorer.msi](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-30/SetupDeviceExplorer.msi). The default installation directory for this application is "C:\Program Files (x86)\Microsoft\DeviceExplorer". You might want to pin the DeviceExplorer.exe application to the taskbar for easier access.
+A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link:  [Downloads](https://github.com/Azure/azure-iot-sdks/releases) (Scroll down for __SetupDeviceExplorer.msi__). The default installation directory for this application is "C:\Program Files (x86)\Microsoft\DeviceExplorer". You might want to pin the DeviceExplorer.exe application to the taskbar for easier access.
 
 
 ### Build the Device Explorer application
@@ -83,6 +84,11 @@ Creating a device adds device details to the device identity registry. IoT Hub u
 ### Delete device
 
 - Click **Delete** to delete the selected devices from the connected IoT hub.
+
+<a name="sastoken"/>
+### SAS Token
+
+- Click **SAS Token...** to generate a device specific connection string with SAS token.
 
 <a name="getdatadevice"/>
 ### Get device connection string or configuration data

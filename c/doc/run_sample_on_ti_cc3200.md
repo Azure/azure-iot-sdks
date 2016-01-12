@@ -28,7 +28,7 @@ Required hardware: [CC3200 Launchpad](http://www.ti.com/tool/cc3200-launchxl).
 This procedure assumes you have already installed the Azure IoT SDK on your development machine. These instructions refer to the folder that contains the Azure IoT SDK on your local machine as `<AZURE_INSTALL_DIR>`.
 
 > **Note:** You can install the Azure IoT SDK using
-`git clone https://github.com/Azure/azure-iot-sdks.git`
+`git clone --recursive https://github.com/Azure/azure-iot-sdks.git`
 
 While not strictly required, we recommend that you install the following tools from TI in the same directory and that you use directory names without any whitespace. This documentation assumes that you install everything in `C:\ti`.
 
@@ -51,7 +51,7 @@ While not strictly required, we recommend that you install the following tools f
   TIRTOS_INSTALLATION_DIR ?= C:/ti/tirtos_simplelink_2_14_01_20
   NS_INSTALLATION_DIR     ?= C:/ti/ns_1_10_00_00_eng
   CC3200SDK_INSTALLATION_DIR ?= C:/ti/CC3200SDK_1.1.0/cc3200-sdk
-  ti.targets.arm.elf.M4  ?= C:/ti/cgt_arm_5.2.5
+  ti.targets.arm.elf.M4  ?= C:/ti/ti-cgt-arm_5.2.5
   ```
 
 2. Open a Windows command prompt.
@@ -90,6 +90,10 @@ In the Windows command prompt, enter the following commands to build the applica
 Flash the `simplesample_http.bin` file to your CC3200 Launchpad.
 
 > Note: The root CA certificate - "Baltimore CyberTrust Root" has to be flashed to CC3200 Launchpad to the location `/cert/ms.der`. This location is referenced in `tirtos/cc3200/main.c` and is used by SimpleLink TLS stack.
+
+Here's why you need the Baltimore root CA - it's the root CA for `*.azure-devices.net`, the IoT Hub endpoint and it's the only way for the tiny CC3200 to verify the chain of trust:
+
+![image](https://cloud.githubusercontent.com/assets/6472374/11576321/71207be4-9a1e-11e5-9332-fa99fdbd31f9.png)
 
 The detailed information about the flash tool can be found in the [CC3200 UniFlash wiki](http://processors.wiki.ti.com/index.php/CC31xx_%26_CC32xx_UniFlash). The section [GUI Interface](http://processors.wiki.ti.com/index.php/CC31xx_%26_CC32xx_UniFlash#GUI_Interface) walks through the steps for using the UniFlash tool.
 

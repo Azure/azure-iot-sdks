@@ -6,14 +6,14 @@ IoT Hub only allows connections from known devices that present valid credential
 
 ## Provision the device in your IoT hub
 
-The iothub-explorer tool enables you to provision devices in your IoT hub. It runs on any computer where Node.js is available. To provision a new device:
+The iothub-explorer tool enables you to provision devices in your IoT hub. It runs on any computer where Node.js is available. For your convininence the tool is also published to  npm, preventing you from having to clone the repository or download the code. To provision a new device:
 
 1. Get the connection string for your IoT Hub. See [Setup IoT Hub][setup-iothub] for more details.
-2. Run the following commands in a terminal/shell window from the tools/iothub-explorer folder in the repository using the IoT Hub connection string from the previous step and replacing "mydevice" with your desired device name.
+2. Run the following commands in a terminal/shell window on your machine after making sure [node](http://nodejs.org) is installed. When running the commands, use the IoT Hub connection string from the previous step and replace "mydevice" with your desired device name.
 
 ```
-npm install
-node iothub-explorer.js <iothub-connection-string> create mydevice --connection-string
+npm install -g iothub-explorer
+iothub-explorer <iothub-connection-string> create mydevice --connection-string
 ```
 
 You should see a response like this:
@@ -32,10 +32,10 @@ Copy the device connection string information for later use. The samples in this
 To get help on using the iothub-explorer tool to perform other tasks such as listing devices, deleting devices, and sending commands to devices, enter the following command:
 
 ```
-node iothub-explorer.js
+iothub-explorer --help
 ```
 
 > Note: Windows users also have the option of using the [Device Explorer][device-explorer] application to provision devices.
 
 [setup-iothub]: ../../doc/setup_iothub.md
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[device-explorer]: ../../DeviceExplorer/doc/how_to_use_device_explorer.md

@@ -2,7 +2,7 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for iothubtransportmqtt_unittests
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.11)
 
 if(NOT ${use_mqtt})
 	message(FATAL_ERROR "iothubtransportmqtt_unittests being generated without mqtt support")
@@ -17,8 +17,6 @@ ${theseTestsName}.cpp
 
 set(${theseTestsName}_c_files
 ../../src/iothubtransportmqtt.c
-
-../../../common/src/crt_abstractions.c
 )
 
 set(${theseTestsName}_h_files

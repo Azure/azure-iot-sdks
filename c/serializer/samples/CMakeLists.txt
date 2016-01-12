@@ -4,17 +4,25 @@
 #this is CMakeLists.txt for serializer samples. There's nothing here, except redirections to 
 #individual samples
 
+function(add_sample_directory whatIsBuilding)
+	add_subdirectory(${whatIsBuilding})
+
+	set_target_properties(${whatIsBuilding}
+			   PROPERTIES
+			   FOLDER "Serializer_Samples")
+endfunction()
+
 if(${use_amqp})
-	add_subdirectory(remote_monitoring)
-	add_subdirectory(simplesample_amqp)
+	add_sample_directory(remote_monitoring)
+	add_sample_directory(simplesample_amqp)
 endif()
 
 if(${use_http})
-	add_subdirectory(simplesample_http)
-	add_subdirectory(temp_sensor_anomaly)
+	add_sample_directory(simplesample_http)
+	add_sample_directory(temp_sensor_anomaly)
 endif()
 
 if(${use_mqtt})
-	add_subdirectory(simplesample_mqtt)
+	add_sample_directory(simplesample_mqtt)
 endif()
 

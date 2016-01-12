@@ -33,17 +33,10 @@ include_directories(.)
 
 add_executable(iothub_client_sample_amqp ${iothub_client_sample_amqp_c_files} ${iothub_client_sample_amqp_h_files})
 
-
 target_link_libraries(iothub_client_sample_amqp
 		iothub_client
-		iothub_client_amqp_transport
-		common
-	)
-	
-if(WIN32)
-else()
-	target_link_libraries(iothub_client_sample_amqp pthread)
-endif()
+		iothub_client_amqp_transport)
 
+linkSharedUtil(iothub_client_sample_amqp)
 linkProton(iothub_client_sample_amqp)
 

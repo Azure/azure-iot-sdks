@@ -6,7 +6,7 @@
 var amqp10 = require('amqp10');
 var Promise = require('bluebird');
 
-var anHourFromNow = require('azure-iot-common').authorization.anHourFromNow;
+var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var ConnectionString = require('azure-iot-common').ConnectionString;
 var EventHubReceiver = require('./eventhubreceiver.js');
 var SharedAccessSignature = require('azure-iothub').SharedAccessSignature;

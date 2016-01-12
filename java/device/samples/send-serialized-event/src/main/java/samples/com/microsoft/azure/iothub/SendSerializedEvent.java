@@ -47,6 +47,8 @@ public class SendSerializedEvent {
                             protocol = IotHubClientProtocol.HTTPS;
                         } else if (rawArguments[1].equals("amqps")) {
                             protocol = IotHubClientProtocol.AMQPS;
+                        } else if (rawArguments[1].equals("mqtt")) {
+                            protocol = IotHubClientProtocol.MQTT;
                         } else {
                             throw new Exception("Invalid protocol: " + rawArguments[2]);
                         }
@@ -91,15 +93,15 @@ public class SendSerializedEvent {
     }
 
     private static void printUsage(){
-        System.out.println("Expected arguments:");
-        System.out.println("[IoT Hub connection string] [https | amqps] [deviceId] [windSpeed]");
+        System.out.println("[Device connection string*] [https | amqps | mqtt] [deviceId] [windSpeed]");
+        System.out.println("*String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n");
     }
 
     /**
      * Sends a number of messages to an IoT Hub. Default protocol is to
      * use HTTPS transport.
      *
-     * @param args args[0] = IoT Hub connection string; args[1] = protocol (one of 'https' or 'amqps', * optional);
+     * @param args args[0] = IoT Hub connection string; args[1] = protocol (one of 'https', 'amqps' or 'mqtt', * optional);
      * args[2] = temperature (integer; default = 65); args[3] = humidity (integer; default = 72).
      */
     public static void main(String[] args)

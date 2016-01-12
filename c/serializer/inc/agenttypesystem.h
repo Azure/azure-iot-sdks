@@ -53,6 +53,47 @@ typedef struct EDM_BINARY_TAG
 
 DEFINE_ENUM(EDM_BOOLEANS, EDM_BOOLEANS_VALUES);
 
+/*ispositiveinfinity*/
+
+#ifdef _MSC_VER
+#define ISPOSITIVEINFINITY(x) ((_finite((x))==0) && ((_fpclass((x)) & _FPCLASS_PINF) == _FPCLASS_PINF))
+#else
+#if defined __STDC_VERSION__
+#if ((__STDC_VERSION__  == 199901L) || (__STDC_VERSION__ == 201112L))
+/*C99 compiler or C11*/
+#define ISPOSITIVEINFINITY(x) (isinf((x)) && (signbit((x))==0))
+#else
+#error update this file to contain the latest C standard.
+#endif
+#else
+#ifdef __cplusplus 
+#define ISPOSITIVEINFINITY(x) (std::isinf((x)) && (signbit((x))==0))
+#else
+#error unknown (or C89) compiler, must provide a definition for ISPOSITIVEINFINITY
+#endif
+#endif
+#endif
+
+#ifdef _MSC_VER
+/*not exactly signbit*/
+#define ISNEGATIVEINFINITY(x) ((_finite((x))==0) && ((_fpclass((x)) & _FPCLASS_NINF) == _FPCLASS_NINF))
+#else
+#if defined __STDC_VERSION__
+#if ((__STDC_VERSION__  == 199901L) || (__STDC_VERSION__ == 201112L))
+/*C99 compiler or C11*/
+#define ISNEGATIVEINFINITY(x) (isinf((x)) && (signbit((x))!=0))
+#else
+#error update this file to contain the latest C standard.
+#endif
+#else
+#ifdef __cplusplus 
+#define ISNEGATIVEINFINITY(x) (std::isinf((x)) && (signbit((x)) != 0))
+#else
+#error unknown (or C89) compiler, must provide a definition for ISNEGATIVEINFINITY
+#endif
+#endif
+#endif
+
 /*Binary-valued logic.*/
 typedef struct EDM_BOOLEAN_TAG
 {

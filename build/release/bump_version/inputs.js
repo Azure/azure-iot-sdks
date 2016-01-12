@@ -1,15 +1,7 @@
 module.exports = [
     ///////////////////////////////////////////////////
-    // Device Explorer how-to doc
+    // Device Explorer
     ///////////////////////////////////////////////////
-    {
-        "taskType": "regexReplaceTask",
-        "filePath": "tools/DeviceExplorer/doc/how_to_use_device_explorer.md",
-        "search": "(https\\:\\/\\/github.com\\/Azure\\/azure-iot-sdks\\/releases\\/download\\/).*(\\/SetupDeviceExplorer.msi)",
-        "replaceString": function(versions) {
-            return '$1' + versions['github-release'] + '$2';
-        }
-    },
     {
         "taskType": "regexReplaceTask",
         "filePath": "tools/DeviceExplorer/DeviceExplorer/Properties/AssemblyInfo.cs",
@@ -62,12 +54,6 @@ module.exports = [
         "filePath": "c/build_all/packaging/windows/Eclipse.Paho-C.paho-mqtt3cs.nuspec",
         "search": "//*[local-name(.)='package' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']/*[local-name(.)='metadata' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']/*[local-name(.)='version' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd']",
         "replaceString": "eclipse_paho_nuget"
-    },
-    {
-        "taskType": "xmlReplaceTask",
-        "filePath": "c/build_all/packaging/windows/Microsoft.Azure.IoTHub.Common.nuspec",
-        "search": "//*[local-name(.)='package' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd']/*[local-name(.)='metadata' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd']/*[local-name(.)='version' and namespace-uri(.)='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd']",
-        "replaceString": "c_nuget.device"
     },
     {
         "taskType": "xmlReplaceTask",
@@ -173,6 +159,12 @@ module.exports = [
         "search": "//project/parent/version",
         "replaceString": "java.device"
     },
+	{
+        "taskType": "xmlReplaceTask",
+        "filePath": "java/device/samples/send-receive-sample/pom.xml",
+        "search": "//project/parent/version",
+        "replaceString": "java.device"
+    },
     ///////////////////////////////////////////////////
     // Java Service SDK POM files
     ///////////////////////////////////////////////////
@@ -241,13 +233,69 @@ module.exports = [
     ///////////////////////////////////////////////////
     {
         "taskType": "jsonReplaceTask",
-        "filePath": "node/common/package.json",
+        "filePath": "node/common/core/package.json",
         "search": "version",
         "replaceString": "node.common"
     },
     {
         "taskType": "multiTask",
-        "filePath": "node/device/package.json",
+        "filePath": "node/common/transport/amqp/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.amqp-base"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "node/common/transport/http/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.http-base"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "node/common/transport/mqtt/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.mqtt-base"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            }
+        ]
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "node/device/core/readme.md",
+        "search": "(http\\:\\/\\/azure.github.io\\/azure-iot-sdks\\/node\\/api_reference\\/azure-iot-device\\/).*(\\/index.html)",
+        "replaceString": function(versions) {
+            return '$1' + versions.node.device + '$2';
+        }
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "node/device/core/package.json",
         "search": [
             {
                 "taskType": "jsonReplaceTask",
@@ -257,19 +305,139 @@ module.exports = [
             {
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.common;
-                }
+                "replaceString": "node.common"
             }
         ]
     },
     {
-        "taskType": "jsonReplaceTask",
+        "taskType": "multiTask",
         "filePath": "node/device/samples/package.json",
-        "search": "dependencies.azure-iot-device",
-        "replaceString": function(versions) {
-            return '^' + versions.node.device;
-        }
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp",
+                "replaceString": "node.device-amqp"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-http",
+                "replaceString": "node.device-http"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-mqtt",
+                "replaceString": "node.device-mqtt"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "node/device/transport/amqp/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.device-amqp"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-amqp-base",
+                "replaceString": "node.amqp-base"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "node/device/transport/amqp-ws/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.device-amqp-ws"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-amqp-base",
+                "replaceString": "node.amqp-base"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp",
+                "replaceString": "node.device-amqp"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "devDependencies.azure-iot-common",
+                "replaceString": "node.common"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "node/device/transport/http/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.device-http"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-http-base",
+                "replaceString": "node.http-base"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "node/device/transport/mqtt/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.device-mqtt"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-mqtt-base",
+                "replaceString": "node.mqtt-base"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            }
+        ]
     },
     {
         "taskType": "multiTask",
@@ -282,12 +450,26 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-amqp-base",
+                "replaceString": "node.amqp-base"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-http-base",
+                "replaceString": "node.http-base"
+            },
+            {
+                "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.common;
-                }
+                "replaceString": "node.common"
             }
         ]
+    },
+    {
+        "taskType": "jsonReplaceTask",
+        "filePath": "node/service/samples/package.json",
+        "search": "dependencies.azure-iothub",
+        "replaceString": "node.service"
     },
     {
         "taskType": "multiTask",
@@ -301,16 +483,12 @@ module.exports = [
             {
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.common;
-                }
+                "replaceString": "node.common"
             },
             {
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iothub",
-                "replaceString": function(versions) {
-                    return '^' + versions.node.service;
-                }
+                "replaceString": "node.service"
             }
         ]
     }

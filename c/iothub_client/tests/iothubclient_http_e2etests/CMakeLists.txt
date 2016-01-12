@@ -2,7 +2,7 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for iothubclient_http_e2etests
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.11)
 
 if(NOT (${use_amqp} AND ${use_http}))
 	message(FATAL_ERROR "iothubclient_http_e2etests being generated without AMQP and HTTP support")
@@ -34,7 +34,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_http_transport
-			common
+			aziotsharedutil
 			iothub_client_http_transport
 		)
 		linkProton(${theseTestsName}_dll)
@@ -46,7 +46,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_http_transport
-			common
+			aziotsharedutil
 			iothub_client_http_transport
 		)
 		linkProton(${theseTestsName}_exe)	
@@ -58,7 +58,7 @@ else()
 			iothub_test
 			iothub_client
 			iothub_client_http_transport
-			common
+			aziotsharedutil
 			iothub_client_http_transport
 		)
 		target_link_libraries(${theseTestsName}_exe pthread)

@@ -11,15 +11,21 @@ That does not mean that HTTP only works with the _LL APIs.
 Simply changing the using the convenience layer (functions not having _LL)
 and removing calls to _DoWork will yield the same results. */
 
+#ifdef ARDUINO
+#include "AzureIoT.h"
+#else
 #include "serializer.h"
 #include "iothub_client_ll.h"
 #include "iothubtransporthttp.h"
 #include "threadapi.h"
+#endif
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
+/*String containing Hostname, Device Id & Device Key in the format:             */
+/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
 static const char* connectionString = "[device connection string]";
 
 // Define the Model
@@ -27,7 +33,7 @@ BEGIN_NAMESPACE(WeatherStation);
 
 DECLARE_MODEL(ContosoAnemometer,
 WITH_DATA(ascii_char_ptr, DeviceId),
-WITH_DATA(double, WindSpeed),
+WITH_DATA(int, WindSpeed),
 WITH_ACTION(TurnFanOn),
 WITH_ACTION(TurnFanOff),
 WITH_ACTION(SetAirResistance, int, Position)
@@ -113,9 +119,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
         }
         else
         {
+            EXECUTE_COMMAND_RESULT executeCommandResult;
+        
             memcpy(temp, buffer, size);
             temp[size] = '\0';
-            EXECUTE_COMMAND_RESULT executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
+            executeCommandResult = EXECUTE_COMMAND(userContextCallback, temp);
             result =
                 (executeCommandResult == EXECUTE_COMMAND_ERROR) ? IOTHUBMESSAGE_ABANDONED :
                 (executeCommandResult == EXECUTE_COMMAND_SUCCESS) ? IOTHUBMESSAGE_ACCEPTED :
@@ -135,8 +143,9 @@ void simplesample_http_run(void)
     else
     {
         IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
+        int avgWindSpeed = 10;
+
         srand((unsigned int)time(NULL));
-        double avgWindSpeed = 10.0;
 
         if (iotHubClientHandle == NULL)
         {
@@ -144,7 +153,14 @@ void simplesample_http_run(void)
         }
         else
         {
-            unsigned int minimumPollingTime = 9; /*because it can poll "after 9 seconds" polls will happen effectively at ~10 seconds*/
+            // Because it can poll "after 9 seconds" polls will happen 
+            // effectively at ~10 seconds.
+            // Note that for scalabilty, the default value of minimumPollingTime
+            // is 25 minutes. For more information, see:
+            // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
+            unsigned int minimumPollingTime = 9;
+            ContosoAnemometer* myWeather;
+            
             if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"MinimumPollingTime\"\r\n");
@@ -158,7 +174,7 @@ void simplesample_http_run(void)
             }
 #endif // MBED_BUILD_TIMESTAMP
 
-            ContosoAnemometer* myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
+            myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
             if (myWeather == NULL)
             {
                 (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");

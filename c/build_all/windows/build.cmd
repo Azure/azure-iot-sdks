@@ -51,6 +51,7 @@ set build-config=Debug
 set build-platform=Win32
 set CMAKE_run_e2e_tests=OFF
 set CMAKE_run_longhaul_tests=OFF
+set CMAKE_skip_unittests=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -60,6 +61,7 @@ if "%1" equ "--config" goto arg-build-config
 if "%1" equ "--platform" goto arg-build-platform
 if "%1" equ "--run-e2e-tests" goto arg-run-e2e-tests
 if "%1" equ "--run-longhaul-tests" goto arg-longhaul-tests
+if "%1" equ "--skip-unittests" goto arg-skip-unittests
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -84,6 +86,10 @@ goto args-continue
 
 :arg-longhaul-tests
 set CMAKE_run_longhaul_tests=ON
+goto args-continue
+
+:arg-skip-unittests
+set CMAKE_skip_unittests=ON
 goto args-continue
 
 :args-continue
@@ -153,8 +159,8 @@ if not %errorlevel%==0 exit /b %errorlevel%
 call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
  if not %errorlevel%==0 exit /b %errorlevel%
 
-call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
+rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+rem if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
@@ -162,8 +168,8 @@ if not %errorlevel%==0 exit /b %errorlevel%
 call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
-call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
+rem call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
+rem if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
@@ -182,7 +188,7 @@ mkdir %USERPROFILE%\cmake
 rem no error checking
 
 pushd %USERPROFILE%\cmake
-cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% %build-root%
+cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% %build-root% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% %build-root%
 if not %errorlevel%==0 exit /b %errorlevel%
 
 msbuild /m azure_iot_sdks.sln
@@ -206,20 +212,6 @@ goto :eof
 
 :build-a-solution
 call :_run-msbuild "Build" %1 %2 %3
-goto :eof
-
-
-:run-unit-tests
-call :_run-tests %1 "UnitTests"
-goto :eof
-
-
-:run-e2e-tests
-call :_run-tests %1 "e2eTests"
-goto :eof
-
-:run-longhaul-tests
-call :_run-tests %1 "longhaul"
 goto :eof
 
 :usage
@@ -246,25 +238,5 @@ if "%~3" neq "" set build-config=%~3
 if "%~4" neq "" set build-platform=%~4
 
 msbuild /m %build-target% "/p:Configuration=%build-config%;Platform=%build-platform%" %2
-if not %errorlevel%==0 exit /b %errorlevel%
-goto :eof
-
-
-:_run-tests
-rem // discover tests
-set test-dlls-list=
-set test-dlls-path=%build-root%\%~1\build\windows\%build-platform%\%build-config%
-for /f %%i in ('dir /b %test-dlls-path%\*%~2*.dll') do set test-dlls-list="%test-dlls-path%\%%i" !test-dlls-list!
-
-if "%test-dlls-list%" equ "" (
-    echo No unit tests found in %test-dlls-path%
-    exit /b 1
-)
-
-rem // run tests
-echo Test DLLs: %test-dlls-list%
-echo.
-vstest.console.exe %test-dlls-list%
-
 if not %errorlevel%==0 exit /b %errorlevel%
 goto :eof

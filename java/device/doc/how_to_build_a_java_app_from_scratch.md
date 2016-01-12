@@ -38,7 +38,7 @@ Add the following new **dependency** section after the existing one to include t
 <dependency>
   <groupId>com.microsoft.azure.iothub-java-client</groupId>
   <artifactId>iothub-java-client</artifactId>
-  <version>1.0.0-preview.4</version>
+  <version>1.0.0-preview.7</version>
 </dependency>
 ```
 
@@ -221,7 +221,7 @@ To log AMQP frames, set the environment variable PN_TRACE_FRM=1.
 The documentation can be found at:
 
 ```
-http://azure.github.io/azure-iot-sdks/java/api_reference/index.html
+http://azure.github.io/azure-iot-sdks/java/device/api_reference/index.html
 ```
 
 

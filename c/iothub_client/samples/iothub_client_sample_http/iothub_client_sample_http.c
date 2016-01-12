@@ -9,15 +9,21 @@
    Simply changing the using the convenience layer (functions not having _LL)
    and removing calls to _DoWork will yield the same results. */
 
+#ifdef ARDUINO
+#include "AzureIoT.h"
+#else
 #include "iothub_client_ll.h"
 #include "iothub_message.h"
 #include "crt_abstractions.h"
 #include "iothubtransporthttp.h"
+#endif
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
+/*String containing Hostname, Device Id & Device Key in the format:             */
+/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
 static const char* connectionString = "[device connection string]";
 static int callbackCounter;
 
@@ -34,6 +40,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     int* counter = (int*)userContextCallback;
     const char* buffer;
     size_t size;
+	MAP_HANDLE mapProperties;
+
     if (IoTHubMessage_GetByteArray(message, (const unsigned char**)&buffer, &size) != IOTHUB_MESSAGE_OK)
     {
         printf("unable to retrieve the message data\r\n");
@@ -44,7 +52,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     }
 
     // Retrieve properties from the message
-    MAP_HANDLE mapProperties = IoTHubMessage_Properties(message);
+    mapProperties = IoTHubMessage_Properties(message);
     if (mapProperties != NULL)
     {
         const char*const* keys;
@@ -54,8 +62,10 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         {
             if (propertyCount > 0)
             {
+				size_t index;
+
                 printf("Message Properties:\r\n");
-                for (size_t index = 0; index < propertyCount; index++)
+                for (index = 0; index < propertyCount; index++)
                 {
                     printf("\tKey: %s Value: %s\r\n", keys[index], values[index]);
                 }
@@ -87,12 +97,12 @@ void iothub_client_sample_http_run(void)
     IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
 
     EVENT_INSTANCE messages[MESSAGE_COUNT];
+    double avgWindSpeed = 10.0;
+    int receiveContext = 0;
 
     srand((unsigned int)time(NULL));
-    double avgWindSpeed = 10.0;
 
     callbackCounter = 0;
-    int receiveContext = 0;
 
     (void)printf("Starting the IoTHub client sample HTTP...\r\n");
 
@@ -103,12 +113,16 @@ void iothub_client_sample_http_run(void)
     else
     {
         unsigned int timeout = 241000;
+        // Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
+        // Note that for scalabilty, the default value of minimumPollingTime
+        // is 25 minutes. For more information, see:
+        // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
+        unsigned int minimumPollingTime = 9; 
         if (IoTHubClient_LL_SetOption(iotHubClientHandle, "timeout", &timeout) != IOTHUB_CLIENT_OK)
         {
             printf("failure to set option \"timeout\"\r\n");
         }
 
-        unsigned int minimumPollingTime = 9; /*because it can poll "after 9 seconds" polls will happen effectively at ~10 seconds*/
         if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
         {
             printf("failure to set option \"MinimumPollingTime\"\r\n");
@@ -129,10 +143,12 @@ void iothub_client_sample_http_run(void)
         }
         else
         {
+			int i;
+
             (void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
 
             /* Now that we are ready to receive commands, let's send some messages */
-            for (int i = 0; i < MESSAGE_COUNT; i++)
+            for (i = 0; i < MESSAGE_COUNT; i++)
             {
                 sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"myFirstDevice\",\"windSpeed\": %.2f}", avgWindSpeed + (rand() % 4 + 2));
                 if ((messages[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
@@ -141,9 +157,11 @@ void iothub_client_sample_http_run(void)
                 }
                 else
                 {
+					MAP_HANDLE propMap;
+
                     messages[i].messageTrackingId = i;
 
-                    MAP_HANDLE propMap = IoTHubMessage_Properties(messages[i].messageHandle);
+                    propMap = IoTHubMessage_Properties(messages[i].messageHandle);
                     sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
                     if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
                     {

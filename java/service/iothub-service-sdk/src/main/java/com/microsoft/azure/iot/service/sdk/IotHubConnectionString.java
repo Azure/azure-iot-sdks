@@ -53,7 +53,8 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
      */
     public String getUserString()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_001: [The function shall serialize the object properties to a string using the following format: SharedAccessKeyName@sas.root.IotHubName]
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_001: [The function shall serialize the object
+        // properties to a string using the following format: SharedAccessKeyName@sas.root.IotHubName]
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(this.sharedAccessKeyName);
         stringBuilder.append(USER_SEPARATOR);
@@ -70,15 +71,17 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
      * @return The device Url in the following format: "https:hostname/devices/deviceId?api-version=201X-XX-XX"
      * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
      */
-    public URL getUrlDevice(String deviceId) throws MalformedURLException
+    public URL getUrlDevice(String deviceId) throws MalformedURLException, IllegalArgumentException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_002: [The function shall throw IllegalArgumentException if the input string is empty or null]
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_002: [The function shall throw IllegalArgumentException
+        // if the input string is empty or null]
         if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException("device name cannot be empty or null");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_003: [The function shall create a URL object from the given deviceId using the following format: https:hostname/devices/deviceId?api-version=201X-XX-XX]
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_003: [The function shall create a URL object
+        // from the given deviceId using the following format: https:hostname/devices/deviceId?api-version=201X-XX-XX]
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(URL_HTTPS);
         stringBuilder.append(hostName);
@@ -98,15 +101,17 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
      * @return URL string to get the device list from IotHub
      * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
      */
-    public URL getUrlDeviceList(Integer maxCount) throws MalformedURLException
+    public URL getUrlDeviceList(Integer maxCount) throws MalformedURLException, IllegalArgumentException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_004: [The constructor shall throw NullPointerException if the input integer is null]
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_004: [The constructor shall throw NullPointerException
+        // if the input integer is null]
         if ((maxCount == null) || (maxCount < 1))
         {
             throw new IllegalArgumentException("maxCount cannot be null or less then 1");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_005: [The function shall create a URL object from the given integer using the following format: https:hostname/devices/?maxCount=XX&api-version=201X-XX-XX]
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_005: [The function shall create a URL object from
+        // the given integer using the following format: https:hostname/devices/?maxCount=XX&api-version=201X-XX-XX]
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(URL_HTTPS);
         stringBuilder.append(hostName);
@@ -129,7 +134,8 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
      */
     public URL getUrlDeviceStatistics() throws MalformedURLException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_006: [The function shall create a URL object from the object properties using the following format: https:hostname/statistics/devices?api-version=201X-XX-XX]
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_006: [The function shall create a URL object from
+        // the object properties using the following format: https:hostname/statistics/devices?api-version=201X-XX-XX]
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(URL_HTTPS);
         stringBuilder.append(hostName);
@@ -143,6 +149,50 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     }
 
     /**
+     * Create url for processing a bulk import/export job
+     *
+     * @return The import/export job URL in the following format: "https:hostname/jobs/create?api-version=201X-XX-XX"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     */
+    public URL getUrlCreateExportImportJob() throws MalformedURLException
+    {
+        // CODES_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_15_008: [The function shall create a URL object
+        // from the object properties using the following format: https:hostname/jobs/create?api-version=201X-XX-XX.]
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append("jobs");
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append("create");
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
+     *
+     * @param jobId Create url for retrieving a bulk import/export job
+     * @return The import/export job URL in the following format: "https:hostname/jobs/jobId?api-version=201X-XX-XX"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     */
+    public URL getUrlImportExportJob(String jobId) throws MalformedURLException
+    {
+        // CODES_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_15_009: [The function shall create a URL object from
+        // the object properties using the following format: https:hostname/jobs/jobId?api-version=201X-XX-XX.]
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append("jobs");
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(jobId);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
      * Serialize connection string
      *
      * @return Iot Hub connection string
@@ -150,7 +200,8 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     @Override
     public String toString()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_007: [The function shall serialize the object to a string using the following format: HostName=HOSTNAME.b.c.d;SharedAccessKeyName=ACCESSKEYNAME;SharedAccessKey=1234567890abcdefghijklmnopqrstvwxyz=;SharedAccessSignature=]
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_007: [The function shall serialize the object to a
+        // string using the following format: HostName=HOSTNAME.b.c.d;SharedAccessKeyName=ACCESSKEYNAME;SharedAccessKey=1234567890abcdefghijklmnopqrstvwxyz=;SharedAccessSignature=]
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(HOST_NAME_PROPERTY_NAME);
         stringBuilder.append(VALUE_PAIR_SEPARATOR);

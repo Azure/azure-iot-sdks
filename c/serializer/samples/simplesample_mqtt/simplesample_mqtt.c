@@ -16,6 +16,8 @@ and removing calls to _DoWork will yield the same results. */
 #include "iothubtransportmqtt.h"
 #include "threadapi.h"
 
+/*String containing Hostname, Device Id & Device Key in the format:             */
+/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
 static const char* connectionString = "[device connection string]";
 
 // Define the Model
@@ -23,7 +25,7 @@ BEGIN_NAMESPACE(WeatherStation);
 
 DECLARE_MODEL(ContosoAnemometer,
 WITH_DATA(ascii_char_ptr, DeviceId),
-WITH_DATA(double, WindSpeed),
+WITH_DATA(int, WindSpeed),
 WITH_ACTION(TurnFanOn),
 WITH_ACTION(TurnFanOff),
 WITH_ACTION(SetAirResistance, int, Position)
@@ -132,7 +134,7 @@ void simplesample_mqtt_run(void)
     {
         IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol);
         srand((unsigned int)time(NULL));
-        double avgWindSpeed = 10.0;
+        int avgWindSpeed = 10;
 
         if (iotHubClientHandle == NULL)
         {

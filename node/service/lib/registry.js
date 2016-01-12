@@ -3,13 +3,13 @@
 
 'use strict';
 
-var anHourFromNow = require('azure-iot-common').authorization.anHourFromNow;
+var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./registry_http.js');
 var Device = require('./device.js');
 var endpoint = require('azure-iot-common').endpoint;
-var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
+var SharedAccessSignature = require('./shared_access_signature.js');
 
 /**
  * @class           module:azure-iothub.Registry
