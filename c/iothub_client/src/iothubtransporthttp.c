@@ -8,6 +8,7 @@
 #include "gballoc.h"
 
 #include <time.h>
+#include "version.h"
 #include "iothub_client_private.h"
 #include "iothubtransporthttp.h"
 
@@ -167,7 +168,8 @@ static void destroy_eventHTTPrequestHeaders(HTTPTRANSPORT_HANDLE_DATA* handleDat
 "Authorization":" "
 "Content-Type":"application/vnd.microsoft.iothub.json"
 "Accept":"application/json"
-"Connection":"Keep-Alive"]*/
+"Connection":"Keep-Alive"
+"User-Agent":"iothubclient1.0.0-preview.7]*/
 static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_HANDLE_DATA* handleData, const IOTHUBTRANSPORT_CONFIG* config)
 {
     bool result;
@@ -202,7 +204,8 @@ static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_HANDLE_DATA* handleData
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "iothub-to", STRING_c_str(temp)) == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Accept", "application/json") == HTTP_HEADERS_OK) &&
-                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Connection", "Keep-Alive") == HTTP_HEADERS_OK)
+                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Connection", "Keep-Alive") == HTTP_HEADERS_OK) &&
+                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK)
                     ))
                 {
                     result = false;

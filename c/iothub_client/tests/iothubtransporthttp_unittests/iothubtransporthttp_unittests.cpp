@@ -18,6 +18,7 @@
 #define DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName; 
 
 #include "iothubtransporthttp.h"
+#include "version.h"
 #include "iothub_client_private.h"
 
 #include "urlencode.h"
@@ -1257,6 +1258,8 @@ static void setupInitHappyPathUpThroughEventHTTPrequestHeaders(CIoTHubTransportH
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Accept", "application/json"))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Connection", "Keep-Alive"))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX IOTHUB_SDK_VERSION))
         .IgnoreArgument(1);
     if (deallocateCreated == true)
     {
