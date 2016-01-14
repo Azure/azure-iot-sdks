@@ -121,9 +121,10 @@ namespace TraceabilityTool
         private static void GetRequirementsFromDocuments(string rootFolderPath)
         {
             // Generate a list of Word document files under the root folder.
-            List<string> wordDocFileFilter = new List<string>();
-            wordDocFileFilter.Add("*.docm");
-            FileFinder.SetFileFilters(wordDocFileFilter);
+            List<string> reqDocFileFilter = new List<string>();
+            reqDocFileFilter.Add("*.docm");
+            reqDocFileFilter.Add("*.md");
+            FileFinder.SetFileFilters(reqDocFileFilter);
             FileFinder.GetFileList(rootFolderPath, ref requirementDocuments);
 
             // Read requirement identifiers from the Word documents.
@@ -131,7 +132,14 @@ namespace TraceabilityTool
             {
                 try
                 {
-                    ReadWordDocRequirements(requirementDoc, ref reqDocLookup);
+                    if (requirementDoc.EndsWith(".docm" ))
+                    {
+                        ReadWordDocRequirements(requirementDoc, ref reqDocLookup);
+                    }
+                    else if (requirementDoc.EndsWith(".md"))
+                    {
+                        ReadMarkdownRequirements(requirementDoc, ref reqDocLookup);
+                    }
                 }
                 catch (Exception exception)
                 {
@@ -236,9 +244,26 @@ namespace TraceabilityTool
             }
 
             string text = body.InnerText;
-            string pattern = @"SRS_[A-Z_]+_\d{2}_\d{3}";
 
             wordprocessingDocument.Close();
+            string pattern = @"SRS_[A-Z_]+_\d{2}_\d{3}";
+
+            ExtractRequirements(filePath, pattern, text, ref reqLookup);
+        }
+
+        public static void ReadMarkdownRequirements(string filePath, ref Dictionary<string, string> reqLookup)
+        {
+
+            System.IO.StreamReader fileAsStream = new System.IO.StreamReader(filePath);
+            string fileAsString = fileAsStream.ReadToEnd();
+            fileAsStream.Close();
+            string pattern = @"SRS_[A-Z_]+_\d{2}_\d{3}";
+
+            ExtractRequirements(filePath, pattern, fileAsString, ref reqLookup);
+        }
+
+        public static void ExtractRequirements(string filePath, string pattern, string text, ref Dictionary<string, string> reqLookup)
+        {
 
             foreach (Match m in Regex.Matches(text, pattern))
             {
@@ -276,8 +301,8 @@ namespace TraceabilityTool
                     reqLookup.Add(m.Value, filePath);
                 }
             }
-        }
 
+        }
 
         public static void ReadSourceCodeRequirements(string filePath, ref ReqPathMatrix codeReqLookup)
         {
