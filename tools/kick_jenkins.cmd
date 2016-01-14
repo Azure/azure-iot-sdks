@@ -15,14 +15,14 @@ REM Don't rewrite history on 'develop' or 'master' branches
 set __exit=1
 if not "%current_branch%"=="master" if not "%current_branch%"=="develop" set __exit=0
 if %__exit%==1 (
-    echo You cannot call this script from 'develop' or 'master'. Change to a topic branch first.  Aborting...
+    echo Error: You cannot call this script from 'develop' or 'master'. Change to a topic branch first.  Aborting...
     goto :eof
 )
 
 REM find tracking branch
 for /f "usebackq tokens=*" %%i in (`git rev-parse --symbolic-full-name --abbrev-ref @{u}`) do set "tracking_branch=%%i"
 if not defined tracking_branch (
-    echo Branch ^'%current_branch%^' is not tracking a remote branch! Aborting...
+    echo Error: Branch ^'%current_branch%^' is not tracking a remote branch! First try ^'git branch -u ^<remote^>/^<branch^>^' to set tracking info. Aborting...
     goto :eof
 )
 

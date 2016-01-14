@@ -218,6 +218,15 @@ namespace Microsoft.Azure.Devices.Client
             message.CorrelationId = correlationId != null ? correlationId.GetValue(0) as string : null;
             message.SequenceNumber = sequenceNumber != null ? Convert.ToUInt64(sequenceNumber.GetValue(0) as string) : 0;
 
+            // Read custom headers and map them to properties.
+            foreach (string keyName in responseMessage.Headers.AllKeys)
+            {
+                if (keyName.IndexOf(CustomHeaderConstants.HttpAppPropertyPrefix) > -1)
+                {
+                    message.Properties.Add(keyName.Substring(CustomHeaderConstants.HttpAppPropertyPrefix.Length), responseMessage.Headers.GetValues(keyName)[0]);
+                }
+            }
+
             return message;
         }
 
