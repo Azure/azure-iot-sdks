@@ -49,10 +49,31 @@ if %integration-tests%==0 echo -- Linting and running unit tests --
 if %integration-tests%==1 echo -- Linting and running unit + integration tests --
 echo.
 
-call :lint-and-test %node-root%\common
+call :lint-and-test %node-root%\common\core
 if errorlevel 1 goto :eof
 
-call :lint-and-test %node-root%\device
+call :lint-and-test %node-root%\common\transport\amqp
+if errorlevel 1 goto :eof
+
+call :lint-and-test %node-root%\common\transport\http
+if errorlevel 1 goto :eof
+
+call :lint-and-test %node-root%\common\transport\mqtt
+if errorlevel 1 goto :eof
+
+call :lint-and-test %node-root%\device\core
+if errorlevel 1 goto :eof
+
+call :lint-and-test %node-root%\device\transport\amqp
+if errorlevel 1 goto :eof
+
+call :lint-and-test %node-root%\device\transport\amqp-ws
+if errorlevel 1 goto :eof
+
+call :lint-and-test %node-root%\device\transport\http
+if errorlevel 1 goto :eof
+
+call :lint-and-test %node-root%\device\transport\mqtt
 if errorlevel 1 goto :eof
 
 call :lint-and-test %node-root%\service

@@ -8,26 +8,76 @@ set node-root=%~dp0..
 REM // resolve to fully qualified path
 for %%i in ("%node-root%") do set node-root=%%~fi
 
-cd %node-root%
-
-cd common
+cd %node-root%\common\core
 echo.
 echo -- Creating links for %cd% --
 call npm link
 
-cd ..\device
-echo.
-echo -- Creating links for %cd% --
-call npm link azure-iot-common
-call npm link
-
-cd ..\service
+cd %node-root%\common\transport\amqp
 echo.
 echo -- Creating links for %cd% --
 call npm link azure-iot-common
 call npm link
 
-cd ..\..\tools\iothub-explorer
+cd %node-root%\common\transport\http
+echo.
+echo -- Creating links for %cd% --
+call npm link azure-iot-common
+call npm link
+
+cd %node-root%\common\transport\mqtt
+echo.
+echo -- Creating links for %cd% --
+call npm link azure-iot-common
+call npm link
+
+cd %node-root%\device\core
+echo.
+echo -- Creating links for %cd% --
+call npm link azure-iot-common
+call npm link
+
+cd %node-root%\device\transport\amqp
+echo.
+echo -- Creating links for %cd% --
+call npm link azure-iot-amqp-base
+call npm link azure-iot-common
+call npm link azure-iot-device
+call npm link
+
+cd %node-root%\device\transport\amqp-ws
+echo.
+echo -- Creating links for %cd% --
+call npm link azure-iot-amqp-base
+call npm link azure-iot-common
+call npm link azure-iot-device
+call npm link azure-iot-device-amqp
+call npm link
+
+cd %node-root%\device\transport\http
+echo.
+echo -- Creating links for %cd% --
+call npm link azure-iot-http-base
+call npm link azure-iot-common
+call npm link azure-iot-device
+call npm link
+
+cd %node-root%\device\transport\mqtt
+echo.
+echo -- Creating links for %cd% --
+call npm link azure-iot-mqtt-base
+call npm link azure-iot-device
+call npm link
+
+cd %node-root%\service
+echo.
+echo -- Creating links for %cd% --
+call npm link azure-iot-common
+call npm link azure-iot-amqp-base
+call npm link azure-iot-http-base
+call npm link
+
+cd %node-root%\..\tools\iothub-explorer
 echo.
 echo -- Creating links for %cd% --
 call npm link azure-iot-common

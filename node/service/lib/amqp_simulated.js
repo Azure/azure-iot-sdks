@@ -5,7 +5,7 @@
 
 var errors = require('azure-iot-common').errors;
 var EventEmitter = require('events');
-var AmqpReceiver = require('azure-iot-common').AmqpReceiver;
+var AmqpReceiver = require('azure-iot-amqp-base').AmqpReceiver;
 
 function SimulatedAmqp() {
   this._config = {

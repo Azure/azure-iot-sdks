@@ -3,7 +3,7 @@
 
 'use strict';
 
-var Base = require('azure-iot-common').Http;
+var Base = require('azure-iot-http-base').Http;
 
 /*Codes_SRS_NODE_IOTHUB_HTTP_05_001: [The Http constructor shall accept an object with three properties:
 host - (string) the fully-qualified DNS hostname of an IoT hub

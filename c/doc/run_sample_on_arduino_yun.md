@@ -40,10 +40,10 @@ Install dependencies under root/sudo.
 apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre libssl-dev libncurses-dev subversion
 ```
 
-1. Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the machine you are using.
-2. Open a shell and navigate to the folder **c/build_all/arduino** in your local copy of the repository.
-3. Run the `setup.sh` script to install the OpenWRT SDK and prerequisites. By default, the SDK will be installed at **~/openwrt/sdk**
-4. (Optional) Enter 'Y' to build the Azure IoT SDK.
+- Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the machine you are using.
+- Open a shell and navigate to the folder **c/build_all/arduino** in your local copy of the repository.
+- Run the `setup.sh` script to install the OpenWRT SDK and prerequisites. By default, the SDK will be installed at **~/openwrt/sdk**
+- (Optional) Enter 'Y' to build the Azure IoT SDK.
 
 This script builds the **iothub_client** and **serializer** libraries and their associated samples.
 
@@ -52,49 +52,55 @@ Note: you will not be able to run the samples until you configure them with a va
  <a name="build"/>
 ## Build the sample
 
-1. Open the file **c/serializer/samples/simplesample_http/simplesample_http.c** in a text editor.
-2. Locate the following code in the file:
-   ```
-   static const char* connectionString = "[device connection string]";
-   ```
-3. Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
-4. The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
-5. Run the `build.sh` script in the **c/build_all/arduino** directory.   
+- Open the file **c/serializer/samples/simplesample_http/simplesample_http.c** in a text editor.
+- Locate the following code in the file:
+```
+static const char* connectionString = "[device connection string]";
+```
+- Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
+- The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
+- Run the `build.sh` script in the **c/build_all/arduino** directory.   
 
 <a name="deploy"/>
 ## Deploy the sample
 
-1. Open a shell and navigate to the installed OpenWRT SDK folder. By default, it is **~/openwrt/sdk**.
-2. Transfer the package.
+- Open a shell and navigate to the installed OpenWRT SDK folder. By default, it is **~/openwrt/sdk**.
+- Transfer the package.
 
 OpenWRT Yun Image:
 
 ```
-scp bin/ar71xx/packages/azure-iot-sdks_1-1_ar71xx.ipk root@arduino.local:/tmp
+scp ~/openwrt/sdk/build_dir/target-mips_r2_uClibc-0.9.33.2/azure-iot-sdks-1/serializer/samples/simplesample_http/simplesample_http root@arduino.local:/tmp
 ```
 
 LininoIO Yun Image:
 
 ```
-scp bin/ar71xx/packages/azure-iot-sdks_1-1_ar71xx.ipk root@linino.local:/tmp
+scp ~/openwrt/sdk/build_dir/target-mips_r2_uClibc-0.9.33.2/azure-iot-sdks-1/serializer/samples/simplesample_http/simplesample_http root@linino.local:/tmp
 ```
+
+Note that the uClibc version might be different on your setup and you might need to adjust the path accordingly.
+
+## Make sure the certificates are installed
+
+Install the ca-certificates package like below:
+
+```
+wget https://downloads.openwrt.org/snapshots/trunk/ar71xx/generic/packages/base/ca-certificates_20151214_ar71xx.ipk --no-check-certificate
+opkg install ca-certificates_20151214_ar71xx.ipk
+```
+
+You might get an error message at this step(return code 127), but the certificates will be installed.
 
 <a name="run"/>
 ## Run the sample
 
 The following instructions assumes the device is flashed with OpenWRT Yun. If you are using LininoIO, substitute `arduino` with `linino` and use the default password `doghunter`.
 
-1. Open shell and enter `ssh root@arduino.local` Enter the device password. By default it is, `arduino` for OpenWRT Yun Image or `doghunter` for LininoIO.
-2. Install the package.
-
-```
-opkg install /tmp/azure-iot-sdks_1-1_ar71xx.ipk
-```
-
-3. Navigate to /usr/share/azure-iot-sdk/samples
-4. run **./simplesample_http**
-5. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_http** application.
-7. See "Send cloud-to-device messages" in the document [How to use Device Explorer for IoT Hub devices][device-explorer] for instructions on sending messages with the **DeviceExplorer** utility.
+- Open shell and enter `ssh root@arduino.local` Enter the device password. By default it is, `arduino` for OpenWRT Yun Image or `doghunter` for LininoIO.
+- Run the sample **/tmp/simplesample_http**
+- Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_http** application.
+- See "Send cloud-to-device messages" in the document [How to use Device Explorer for IoT Hub devices][device-explorer] for instructions on sending messages with the **DeviceExplorer** utility.
 
 [setup-devbox-linux]: devbox_setup.md
 [device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md

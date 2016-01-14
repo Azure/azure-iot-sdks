@@ -4189,6 +4189,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
+#ifdef USE_FLOATS
         /*Tests_SRS_AGENT_TYPE_SYSTEM_99_041:[ Creates an AGENT_DATA_TYPE containing an EDM_DOUBLE from double]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_DOUBLE_succeeds_1)
         {
@@ -4650,6 +4651,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
             ASSERT_ARE_EQUAL(float, TEST_FLOAT_2, (float)atof(STRING_c_str(global_bufferTemp)));
 
         }
+#endif
 
         /*Tests_SRS_AGENT_TYPE_SYSTEM_99_043:[ Creates an AGENT_DATA_TYPE containing an EDM_INT16 from int16_t]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT16_succeeds)
@@ -12076,6 +12078,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
+#ifdef USE_FLOATS
         /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Positive_Value_Succeeds)
         {
@@ -12333,6 +12336,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
             // cleanup
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
+#endif
 
         /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
         /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */

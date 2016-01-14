@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.11)
 #this is CMakeLists for iothub_client
 
 compileAsC99()
@@ -37,6 +37,7 @@ if(${use_http})
 	set(iothub_client_http_transport_h_files
 		${iothub_client_ll_transport_h_files}
 		./inc/iothubtransporthttp.h
+		./inc/iothub_client_private.h
 	)
 endif()
 

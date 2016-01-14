@@ -164,7 +164,7 @@ utils.pushToRemote = function pushToRemote(remoteName, branchName) {
 utils.getTarballUrl = function getTarballUrl(remoteName, branchName) {
   return execAsync('git config --get remote.' + remoteName + '.url')
     .then(function (stdout) {
-      return stdout.trim().replace(/\.git$/, '/tarball/' + branchName);
+      return stdout.trim().replace(/\.git$/, '') + '/tarball/' + branchName;
     });
 };
 

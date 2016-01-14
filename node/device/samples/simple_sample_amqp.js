@@ -3,29 +3,29 @@
 
 'use strict';
 
-var device = require('azure-iot-device');
+var clientFromConnectionString = require('azure-iot-device-amqp').clientFromConnectionString;
+var Message = require('azure-iot-device').Message;
 
 // String containing Hostname, Device Id & Device Key in the following formats:
 //  "HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
 var connectionString = '[IoT Hub device connection string]';
 
-var client = device.Client.fromConnectionString(connectionString, device.Amqp);
+var client = clientFromConnectionString(connectionString);
 
 // Create a message and send it to the IoT Hub every second
-setInterval(function(){
+setInterval(function () {
   var windSpeed = 10 + (Math.random() * 4); // range: [10, 14]
   var data = JSON.stringify({ deviceId: 'myFirstDevice', windSpeed: windSpeed });
-  var message = new device.Message(data);
+  var message = new Message(data);
   message.properties.add('myproperty', 'myvalue');
-  console.log("Sending message: " + message.getData());
+  console.log('Sending message: ' + message.getData());
   client.sendEvent(message, printResultFor('send'));
 }, 1000);
 
-client.getReceiver(function (err, receiver)
-{
+client.getReceiver(function (err, receiver) {
   receiver.on('message', function (msg) {
     console.log('Id: ' + msg.properties.messageId + ' Body: ' + msg.body);
-    receiver.complete(msg, function() {
+    receiver.complete(msg, function () {
       console.log('completed');
     });
     // receiver.reject(msg, function() {
@@ -35,8 +35,7 @@ client.getReceiver(function (err, receiver)
     //   console.log('abandoned');
     // });
   });
-  receiver.on('errorReceived', function(err)
-  {
+  receiver.on('errorReceived', function (err) {
     console.warn(err);
   });
 });

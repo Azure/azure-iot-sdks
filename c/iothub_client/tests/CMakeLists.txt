@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.11)
 
 #this is CMakeLists for iothub_client tests folder
 
@@ -17,12 +17,16 @@ endif()
 
 if(${use_http})
 	add_subdirectory(iothubtransporthttp_unittests)
-	add_subdirectory(iothubclient_http_e2etests)
+	if(${use_amqp})
+		add_subdirectory(iothubclient_http_e2etests)
+	endif()
 endif()
 
 if(${use_mqtt})
 	add_subdirectory(iothubtransportmqtt_unittests)
-	add_subdirectory(iothubclient_mqtt_e2etests)
+	if(${use_amqp})
+		add_subdirectory(iothubclient_mqtt_e2etests)
+	endif()
 	add_subdirectory(mqttapi_paho_unittests)
 endif()
 

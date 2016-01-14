@@ -38,9 +38,9 @@ _Bool, HubEnabledState
 DECLARE_MODEL(Thermostat,
 
     /* Event data (temperature, external temperature and humidity) */
-	WITH_DATA(double, Temperature),
-	WITH_DATA(double, ExternalTemperature),
-	WITH_DATA(double, Humidity),
+	WITH_DATA(int, Temperature),
+	WITH_DATA(int, ExternalTemperature),
+	WITH_DATA(int, Humidity),
 	WITH_DATA(ascii_char_ptr, DeviceId),
 
 	/* Device Info - This is command metadata + some extra fields */
@@ -51,22 +51,22 @@ DECLARE_MODEL(Thermostat,
     WITH_DATA(ascii_char_ptr_no_quotes, Commands),
 
     /* Commands implemented by the device */
-    WITH_ACTION(SetTemperature, double, temperature),
-	WITH_ACTION(SetHumidity, double, humidity)
+    WITH_ACTION(SetTemperature, int, temperature),
+	WITH_ACTION(SetHumidity, int, humidity)
 );
 
 END_NAMESPACE(Contoso);
 
-EXECUTE_COMMAND_RESULT SetTemperature(Thermostat* thermostat, double temperature)
+EXECUTE_COMMAND_RESULT SetTemperature(Thermostat* thermostat, int temperature)
 {
-    (void)printf("Received temperature %.02fs\r\n", temperature);
+    (void)printf("Received temperature %d\r\n", temperature);
 	thermostat->Temperature = temperature;
     return EXECUTE_COMMAND_SUCCESS;
 }
 
-EXECUTE_COMMAND_RESULT SetHumidity(Thermostat* thermostat, double humidity)
+EXECUTE_COMMAND_RESULT SetHumidity(Thermostat* thermostat, int humidity)
 {
-	(void)printf("Received humidity %.02fs\r\n", humidity);
+	(void)printf("Received humidity %d\r\n", humidity);
 	thermostat->Humidity = humidity;
 	return EXECUTE_COMMAND_SUCCESS;
 }
@@ -223,9 +223,9 @@ void remote_monitoring_run(void)
                         STRING_delete(commandsMetadata);
                     }
 
-					thermostat->Temperature = 50.0;
-					thermostat->ExternalTemperature = 55.0;
-					thermostat->Humidity = 50.0;
+					thermostat->Temperature = 50;
+					thermostat->ExternalTemperature = 55;
+					thermostat->Humidity = 50;
 					thermostat->DeviceId = (char*)deviceId;
 
                     while (1)
@@ -233,7 +233,7 @@ void remote_monitoring_run(void)
                         unsigned char*buffer;
                         size_t bufferSize;
 
-						(void)printf("Sending sensor value Temperature = %02f, Humidity = %02f\r\n", thermostat->Temperature, thermostat->Humidity);
+						(void)printf("Sending sensor value Temperature = %d, Humidity = %d\r\n", thermostat->Temperature, thermostat->Humidity);
 
                         if (SERIALIZE(&buffer, &bufferSize, thermostat->DeviceId, thermostat->Temperature, thermostat->Humidity, thermostat->ExternalTemperature) != IOT_AGENT_OK)
                         {

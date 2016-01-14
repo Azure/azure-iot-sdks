@@ -3,13 +3,14 @@
 
 'use strict';
 
-var device = require('azure-iot-device');
+var clientFromConnectionString = require('azure-iot-device-http').clientFromConnectionString;
+var Message = require('azure-iot-device').Message;
 
 // String containing Hostname, Device Id & Device Key in the following formats:
 //  "HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
 var connectionString = '[IoT Hub device connection string]';
 
-var client = device.Client.fromConnectionString(connectionString);
+var client = clientFromConnectionString(connectionString);
 
 // Create a message and send it to the IoT hub every second
 setInterval(function () {
@@ -18,9 +19,9 @@ setInterval(function () {
     deviceId: 'myFirstDevice',
     windSpeed: windSpeed
   });
-  var message = new device.Message(data);
+  var message = new Message(data);
   message.properties.add('myproperty', 'myvalue');
-  console.log("Sending message: " + message.getData());
+  console.log('Sending message: ' + message.getData());
   client.sendEvent(message, printResultFor('send'));
 }, 1000);
 

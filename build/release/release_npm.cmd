@@ -22,7 +22,7 @@ for /f "tokens=1,2,3" %%i in ('git remote -v') do (
 call npm rm -g prepare-aziot-release
 call npm install -g
 
-prepare-aziot-release %1 %root%/node/common %root%/node/device %root%/node/service %root%/tools/iothub-explorer
+prepare-aziot-release %1 %root%/node/common/core %root%/node/common/transport/amqp %root%/node/common/transport/http %root%/node/common/transport/mqtt %root%/node/device/core %root%/node/device/transport/amqp %root%/node/device/transport/amqp-ws %root%/node/device/transport/http %root%/node/device/transport/mqtt %root%/node/service %root%/tools/iothub-explorer
 
 goto :eof
 
