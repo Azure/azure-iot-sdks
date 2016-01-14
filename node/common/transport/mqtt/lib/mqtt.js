@@ -18,6 +18,7 @@ var mqtt = require('mqtt');
 */
 function Mqtt(config) {
   if ((!config) ||
+    (!config.host) ||
     (!config.deviceId) ||
     (!config.sharedAccessSignature) ||
     (!config.gatewayHostName))
@@ -33,7 +34,7 @@ function Mqtt(config) {
     protocolVersion: 4,
     clean: false,
     clientId: config.deviceId,
-    username: config.deviceId,
+    username: config.host + '/' + config.deviceId,
     password: new Buffer(config.sharedAccessSignature),
     rejectUnauthorized: false,
   };
