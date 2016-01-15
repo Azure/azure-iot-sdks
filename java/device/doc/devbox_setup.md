@@ -114,7 +114,7 @@ You can verify that the environment variables necessary to run **_Maven 3_** hav
 Open a command prompt and use the following commands for the steps above:
 
 ```
-	git clone https://github.com/Azure/azure-iot-sdks.git
+	git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 	cd azure-iot-sdks/java/device
 	mvn install
 ```
