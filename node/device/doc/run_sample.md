@@ -13,7 +13,7 @@ Before you get started, you should:
 
 ## Build and run the sample
 
-- Get the following sample files from https://github.com/Azure/azure-iot-sdks/node/device/samples
+- Get the following sample files from https://github.com/Azure/azure-iot-sdks/tree/master/node/device/samples
     - **package.json**
     - **simple_sample_http.js**
 
