@@ -87,13 +87,13 @@ sudo apt-get install maven
 
 Please verify the following:
 
-- `PATH` environment variable contain the full path to the bin folder containing **_Maven 3_**.
+Ensure the `PATH` environment variable contains the full path to the bin folder containing **_Maven 3_**.
 
 	```
 	which mvn
 	echo $PATH
 	```
-	Ensure that the bin directory shown by the ```which mvn``` command matches one of the directories shown in your $PATH variable.
+Ensure that the bin directory shown by the ```which mvn``` command matches one of the directories shown in your $PATH variable.
 	If it does not:
 	```
 	export PATH=/path/to/mvn/bin:$PATH
@@ -108,15 +108,13 @@ You can verify that the environment variables necessary to run **_Maven 3_** hav
 
 <a name="installiotsource">
 ### Build Azure IoT device SDK for Java from Sources
-
 - Get a copy of the **Azure IoT device SDK** from GitHub. You should fetch a copy of the source from the **master** branch of the GitHub repository: <https://github.com/Azure/azure-iot-sdks>
-
 - When you have obtained a copy of the source, you can build the SDK for Java.
 
 Open a command prompt and use the following commands for the steps above:
 
 ```
-	git clone https://github.com/Azure/azure-iot-sdks.git
+	git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 	cd azure-iot-sdks/java/device
 	mvn install
 ```
