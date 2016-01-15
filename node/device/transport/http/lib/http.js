@@ -6,6 +6,7 @@
 var Base = require('azure-iot-http-base').Http;
 var endpoint = require('azure-iot-common').endpoint;
 var HttpReceiver = require('./http_receiver.js');
+var PackageJson = require('../package.json');
 
 /*Codes_SRS_NODE_DEVICE_HTTP_05_009: [When any Http method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
 err - the standard JavaScript Error object, with the Node.js http.ServerResponse object attached as the property response]*/
@@ -56,6 +57,7 @@ POST <config.host>/devices/<config.deviceId>/messages/events?api-version=<versio
 Authorization: <config.sharedAccessSignature>
 iothub-to: /devices/<config.deviceId>/messages/events
 Host: <config.host>
+User-Agent: <version string>
 
 <message>
 ]*/
@@ -64,7 +66,8 @@ Http.prototype.sendEvent = function (message, done) {
   var path = endpoint.eventPath(config.deviceId);
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature.toString(),
-    'iothub-to': path
+    'iothub-to': path,
+    'User-Agent': 'azure-iot-device/' + PackageJson.version
   };
   for (var i = 0; i < message.properties.count(); i++) {
     var propItem = message.properties.getItem(i);
@@ -127,6 +130,7 @@ Authorization: <config.sharedAccessSignature>
 iothub-to: /devices/<config.deviceId>/messages/events
 Content-Type: application/vnd.microsoft.iothub.json
 Host: <config.host>
+User-Agent: <version string>
 
 {"body":"<Base64 Message1>","properties":{"<key>":"<value>"}},
 {"body":"<Base64 Message1>"}...
@@ -137,7 +141,8 @@ Http.prototype.sendEventBatch = function (messages, done) {
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature.toString(),
     'iothub-to': path,
-    'Content-Type': 'application/vnd.microsoft.iothub.json'
+    'Content-Type': 'application/vnd.microsoft.iothub.json',
+    'User-Agent': 'azure-iot-device/' + PackageJson.version
   };
 
   var request = this._http.buildRequest('POST', path + endpoint.versionQueryString(), httpHeaders, config.host, handleResponse(done));
@@ -167,6 +172,7 @@ Http.prototype.sendEventBatch = function (messages, done) {
 GET <config.host>/devices/<config.deviceId>/messages/devicebound?api-version=<version> HTTP/1.1
 Authorization: <config.sharedAccessSignature>
 iothub-to: /devices/<config.deviceId>/messages/devicebound
+User-Agent: <version string>
 Host: <config.host>
 ]*/
 Http.prototype.receive = function (done) {
@@ -174,7 +180,8 @@ Http.prototype.receive = function (done) {
   var path = endpoint.messagePath(config.deviceId);
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature.toString(),
-    'iothub-to': path
+    'iothub-to': path,
+    'User-Agent': 'azure-iot-device/' + PackageJson.version
   };
   var request = this._http.buildRequest('GET', path + endpoint.versionQueryString(), httpHeaders, config.host, function (err, body, res) {
     if (!err) {
@@ -221,13 +228,15 @@ Http.prototype.sendFeedback = function (action, message, done) {
   var path = endpoint.feedbackPath(config.deviceId, message.lockToken);
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature.toString(),
-    'If-Match': message.lockToken
+    'If-Match': message.lockToken,
+    'User-Agent': 'azure-iot-device/' + PackageJson.version
   };
   
   /*Codes_SRS_NODE_DEVICE_HTTP_05_005: [If the action argument is 'abandon', sendFeedback shall construct an HTTP request using information supplied by the caller, as follows:
   POST <config.host>/devices/<config.deviceId>/messages/devicebound/<lockToken>/abandon?api-version=<version> HTTP/1.1
   Authorization: <config.sharedAccessSignature>
   If-Match: <lockToken>
+  User-Agent: <version string>
   Host: <config.host>
   ]*/
   if (action === 'abandon') {
@@ -238,6 +247,7 @@ Http.prototype.sendFeedback = function (action, message, done) {
   DELETE <config.host>/devices/<config.deviceId>/messages/devicebound/<lockToken>?api-version=<version>&reject HTTP/1.1
   Authorization: <config.sharedAccessSignature>
   If-Match: <lockToken>
+  User-Agent: <version string>
   Host: <config.host>
   ]*/
   else if (action === 'reject') {
@@ -248,6 +258,7 @@ Http.prototype.sendFeedback = function (action, message, done) {
   DELETE <config.host>/devices/<config.deviceId>/messages/devicebound/<lockToken>?api-version=<version> HTTP/1.1
   Authorization: <config.sharedAccessSignature>
   If-Match: <lockToken>
+  User-Agent: <version string>
   Host: <config.host>
   ]*/
   else {

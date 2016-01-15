@@ -6,6 +6,7 @@
 var util = require('util');
 var Base = require('azure-iot-amqp-base').Amqp;
 var Amqp = require('azure-iot-device-amqp').Amqp;
+var PackageJson = require('../package.json');
 
 /** 
  * @class AmqpWs
@@ -24,7 +25,7 @@ function AmqpWs(config) {
          '@' +
          this._config.host + ':443/$iothub/websocket';
       
-  this._amqp = new Base(uri, false);
+  this._amqp = new Base(uri, false, 'azure-iot-device/' + PackageJson.version);
 }
 
 util.inherits(AmqpWs, Amqp);

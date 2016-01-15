@@ -5,6 +5,7 @@
 
 var Base = require('azure-iot-amqp-base').Amqp;
 var endpoint = require('azure-iot-common').endpoint;
+var PackageJson = require('../package.json');
 
 /** 
  * @class Amqp
@@ -26,7 +27,7 @@ function Amqp(config) {
          '@' +
          config.host;
         
-  this._amqp = new Base(uri, true);
+  this._amqp = new Base(uri, true, 'azure-iothub/' + PackageJson.version);
   this._config = config;
 }
 

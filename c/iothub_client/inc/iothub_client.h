@@ -13,6 +13,7 @@
 */
 
 #ifndef IOTHUB_CLIENT_H
+#define IOTHUB_CLIENT_H
 
 #include "iothub_client_ll.h"
 

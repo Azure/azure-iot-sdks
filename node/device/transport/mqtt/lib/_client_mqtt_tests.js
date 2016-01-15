@@ -17,6 +17,7 @@ describe('Mqtt', function () {
     /* Tests_SRS_NODE_DEVICE_HTTP_12_003: [The Mqtt shall create an Mqtt object and store it in a member variable */
     it('stores config and created transport in member', function () {
       var config = {
+        host: "host.name",
         deviceId: "deviceId",
         sharedAccessSignature: "sasToken",
         gatewayHostName: "gatewayHostName"
