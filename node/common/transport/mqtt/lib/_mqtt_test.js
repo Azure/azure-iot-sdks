@@ -24,9 +24,23 @@ describe('Mqtt', function () {
         }, ReferenceError, 'Invalid transport configuration');
       });
     });
+    it('throws if host is falsy', function () {
+      [null, undefined].forEach(function (hostname) {
+        var config = {
+          host: hostname,
+          deviceId: "deviceId",
+          sharedAccessSignature: "sasToken",
+          gatewayHostName: "gatewayHostName"
+        };
+        assert.throws(function () {
+          return new Mqtt(config);
+        }, ReferenceError, 'Invalid transport configuration');
+      });
+    });
     it('throws if deviceId is falsy', function () {
       [null, undefined].forEach(function (deviceId) {
         var config = {
+          host: "host.name",
           deviceId: deviceId,
           sharedAccessSignature: "sasToken",
           gatewayHostName: "gatewayHostName"
@@ -39,6 +53,7 @@ describe('Mqtt', function () {
     it('throws if sasToken is falsy', function () {
       [null, undefined].forEach(function (sasToken) {
         var config = {
+          host: "host.name",
           deviceId: "deviceId",
           sharedAccessSignature: sasToken,
           gatewayHostName: "gatewayHostName"
@@ -51,6 +66,7 @@ describe('Mqtt', function () {
     it('throws if gatewayHostName is falsy', function () {
       [null, undefined].forEach(function (gatewayHostName) {
         var config = {
+          host: 'host.name',
           deviceId: "deviceId",
           sharedAccessSignature: "sasToken",
           gatewayHostName: gatewayHostName
@@ -64,6 +80,7 @@ describe('Mqtt', function () {
     /* Tests_SRS_NODE_HTTP_12_004: [Mqtt shall return an instance itself */
     it('create options structure with config content and return itself', function () {
       var config = {
+        host: "host.name",
         deviceId: "deviceId",
         sharedAccessSignature: "sasToken",
         gatewayHostName: "gatewayHostName"
@@ -72,7 +89,7 @@ describe('Mqtt', function () {
       assert.notEqual(transport, null);
       assert.notEqual(transport, 'undefined');
       assert.equal(transport._options.clientId, config.deviceId);
-      assert.equal(transport._options.username, config.deviceId);
+      assert.equal(transport._options.username, config.host + '/' + config.deviceId);
       assert.equal(transport._options.password, config.sharedAccessSignature);
 
       assert.equal(transport._options.cmd, 'connect');
@@ -87,6 +104,7 @@ describe('Mqtt', function () {
     it('throws if message is falsy', function () {
       [null, undefined].forEach(function (message) {
         var config = {
+          host: "host.name",
           deviceId: "deviceId",
           sharedAccessSignature: "sasToken",
           gatewayHostName: "gatewayHostName"
