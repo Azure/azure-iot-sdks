@@ -26,7 +26,7 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var deviceClient = AmqpDeviceClient.Create(hostName, authMethod);
 
             Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.Connection.HubScopeConnectionString);
         }
 
         [TestMethod]
@@ -37,7 +37,7 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var deviceClient = AmqpDeviceClient.CreateFromConnectionString(connectionString);
 
             Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.Connection.HubScopeConnectionString);
             var iotHubConnectionStringBuilder = IotHubConnectionStringBuilder.Create(connectionString);
         }
 
@@ -50,7 +50,7 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var deviceClient = AmqpDeviceClient.CreateFromConnectionString(connectionString);
 
             Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.Connection.HubScopeConnectionString);
         }
 
         [TestMethod]
@@ -61,7 +61,7 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var deviceClient = AmqpDeviceClient.CreateFromConnectionString(connectionString);
 
             Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.Connection.HubScopeConnectionString);
         }
 
         [TestMethod]
@@ -72,7 +72,7 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var deviceClient = AmqpDeviceClient.CreateFromConnectionString(connectionString);
 
             Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.Connection.HubScopeConnectionString);
         }
 
         [TestMethod]
@@ -83,7 +83,7 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var deviceClient = AmqpDeviceClient.CreateFromConnectionString(connectionString);
 
             Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.Connection.HubScopeConnectionString);
         }
 
         [TestMethod]
@@ -94,7 +94,7 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var deviceClient = AmqpDeviceClient.CreateFromConnectionString(connectionString);
 
             Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.Connection.HubScopeConnectionString);
         }
 
         [TestMethod]
@@ -105,7 +105,7 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var deviceClient = AmqpDeviceClient.CreateFromConnectionString(connectionString);
 
             Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.Connection.HubScopeConnectionString);
         }
 
         [TestMethod]

@@ -153,7 +153,8 @@ namespace Microsoft.Azure.Devices.Client
         protected override Task OnCloseAsync()
         {
             GC.SuppressFinalize(this);
-            return connectionCache.ReleaseConnectionAsync(this.Connection);
+            this.Connection.Release();
+            return TaskHelpers.CompletedTask;
         }
 
         protected async override Task OnSendEventAsync(Message message)
@@ -326,7 +327,7 @@ namespace Microsoft.Azure.Devices.Client
 
         async Task<SendingAmqpLink> CreateEventSendingLinkAsync(TimeSpan timeout)
         {
-            string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/events", HttpUtility.UrlEncode(this.deviceId));
+            string path = string.Format(CultureInfo.InvariantCulture, CommonConstants.DeviceEventPathTemplate, HttpUtility.UrlEncode(this.deviceId));
 
             return await this.IotHubConnection.CreateSendingLinkAsync(path, this.iotHubConnectionString, this.deviceId, timeout);
         }
@@ -344,7 +345,7 @@ namespace Microsoft.Azure.Devices.Client
 
         async Task<ReceivingAmqpLink> CreateDeviceBoundReceivingLinkAsync(TimeSpan timeout)
         {
-            string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/deviceBound", HttpUtility.UrlEncode(this.deviceId));
+            string path = string.Format(CultureInfo.InvariantCulture, CommonConstants.DeviceBoundPathTemplate, HttpUtility.UrlEncode(this.deviceId));
 
             return await this.IotHubConnection.CreateReceivingLink(path, this.iotHubConnectionString, this.deviceId, timeout, DefaultPrefetchCount);
         }
