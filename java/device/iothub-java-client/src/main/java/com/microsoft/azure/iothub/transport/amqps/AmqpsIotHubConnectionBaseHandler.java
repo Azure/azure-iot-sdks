@@ -394,7 +394,7 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
 
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_047: [The function shall return a new CompletableFuture for the sent message.]
         this.currentSentMessageFuture = new CompletableFuture<Integer>();
-        this.send(outgoingMessage);
+        this.send();
         return this.currentSentMessageFuture;
     }
 
@@ -418,7 +418,7 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
         return domain;
     }
 
-    private void send(Message message){
+    private void send(){
         new Thread(() -> {
             if (this.linkFlow) {
                 //Encode the message and copy the contents to the byte buffer

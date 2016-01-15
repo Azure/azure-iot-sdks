@@ -358,44 +358,46 @@ public final class AmqpsIotHubConnection extends BaseHandler {
         if(this.state == ReactorState.CLOSED) {
             throw new IllegalStateException("The AMQPS IotHub Connection is currently closed. Call open() before attempting to send a message.");
         }
-        else if(this.inProgressMessageMap.size() >= this.maxQueueSize*0.9){
-            message.V1.completeExceptionally(new Throwable("Insufficient link credit to send message."));
-        }
-        else {
-            try {
-                //Use the content and ID fields of the input message to have the handler create and send the message
-                CompletableFuture<Integer> deliveryFuture = amqpsHandler.createBinaryMessage((byte[]) message.V2, message.V3);
+        if(message != null) {
+            if (this.inProgressMessageMap.size() >= this.maxQueueSize * 0.9) {
+                message.V1.completeExceptionally(new Throwable("Insufficient link credit to send message."));
+            } else {
+                try {
+                    //Use the content and ID fields of the input message to have the handler create and send the message
+                    CompletableFuture<Integer> deliveryFuture = amqpsHandler.createBinaryMessage((byte[]) message.V2, message.V3);
 
-                //Wait for a period of time before rejecting the message
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(DEFAULT_DELIVERY_WAIT_TIME_SECONDS * 1000);
-                        deliveryFuture.completeExceptionally(new Throwable("Default timeout exceeded before this message was sent."));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }).start();
+                    //Wait for a period of time before rejecting the message
+                    new Thread(() -> {
+                        try {
+                            Thread.sleep(DEFAULT_DELIVERY_WAIT_TIME_SECONDS * 1000);
+                            deliveryFuture.completeExceptionally(new Throwable("Default timeout exceeded before this message was sent."));
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
 
-                //Wait for the deliveryFuture to be completed, providing the delivery hash code.
-                //When this future completes, the message has been SENT
-                Integer deliveryHash = deliveryFuture.get();
-                inProgressMessageMap.put(deliveryHash, message);
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            //The message was unable to be sent, exceptionally complete that future causing the message to be put back on the queue.
-            catch (ExecutionException e) {
-                message.V1.completeExceptionally(e.getCause());
-                this.fail(e.getCause());
-            }
-            //There was some other problem sending, exceptionally complete that future causing the message to be put back on the queue.
-            catch (Exception e) {
-                if (message != null) {
-                    message.V1.completeExceptionally(e);
+                    //Wait for the deliveryFuture to be completed, providing the delivery hash code.
+                    //When this future completes, the message has been SENT
+                    Integer deliveryHash = deliveryFuture.get();
+                    inProgressMessageMap.put(deliveryHash, message);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                this.fail(e);
+                //The message was unable to be sent, exceptionally complete that future causing the message to be put back on the queue.
+                catch (ExecutionException e) {
+                    message.V1.completeExceptionally(e.getCause());
+                    this.fail(e.getCause());
+                }
+                //There was some other problem sending, exceptionally complete that future causing the message to be put back on the queue.
+                catch (Exception e) {
+                    if (message != null) {
+                        message.V1.completeExceptionally(e);
+                    }
+                    this.fail(e);
+                }
             }
+        } else {
+            throw new IOException("Cannot send an unitialized message.");
         }
     }
 
