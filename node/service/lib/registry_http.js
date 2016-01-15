@@ -4,6 +4,7 @@
 'use strict';
 
 var Base = require('azure-iot-http-base').Http;
+var PackageJson = require('../package.json');
 
 /*Codes_SRS_NODE_IOTHUB_HTTP_05_001: [The Http constructor shall accept an object with three properties:
 host - (string) the fully-qualified DNS hostname of an IoT hub
@@ -19,7 +20,8 @@ Http.prototype.createDevice = function (path, deviceInfo, done) {
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
     'iothub-name': config.hubName,
-    'Content-Type': 'application/json; charset=utf-8'
+    'Content-Type': 'application/json; charset=utf-8',
+    'User-Agent': 'azure-iothub/' + PackageJson.version
   };
   /*Codes_SRS_NODE_IOTHUB_HTTP_05_002: [The createDevice method shall construct an HTTP request using information supplied by the caller, as follows:
   PUT <path>?api-version=<version> HTTP/1.1
@@ -57,7 +59,8 @@ Http.prototype.updateDevice = function (path, deviceInfo, done) {
     'Authorization': config.sharedAccessSignature,
     'iothub-name': config.hubName,
     'Content-Type': 'application/json; charset=utf-8',
-    'If-Match': '*'
+    'If-Match': '*',
+    'User-Agent': 'azure-iothub/' + PackageJson.version
   };
   /*Codes_SRS_NODE_IOTHUB_HTTP_05_003: [The updateDevice method shall construct an HTTP request using information supplied by the caller, as follows:
   PUT <path>?api-version=<version> HTTP/1.1
@@ -91,8 +94,9 @@ Http.prototype.updateDevice = function (path, deviceInfo, done) {
 Http.prototype.getDevice = function (path, done) {
   var config = this._config;
   var httpHeaders = {
-      'Authorization': config.sharedAccessSignature,
-      'iothub-name': config.hubName,
+    'Authorization': config.sharedAccessSignature,
+    'iothub-name': config.hubName,
+    'User-Agent': 'azure-iothub/' + PackageJson.version
   };
   /*Codes_SRS_NODE_IOTHUB_HTTP_05_004: [The getDevice method shall construct an HTTP request using information supplied by the caller, as follows:
   GET <path>?api-version=<version> HTTP/1.1
@@ -122,8 +126,9 @@ Http.prototype.getDevice = function (path, done) {
 Http.prototype.listDevices = function (path, done) {
   var config = this._config;
   var httpHeaders = {
-      'Authorization': config.sharedAccessSignature,
-      'iothub-name': config.hubName,
+    'Authorization': config.sharedAccessSignature,
+    'iothub-name': config.hubName,
+    'User-Agent': 'azure-iothub/' + PackageJson.version
   };
   /*Codes_SRS_NODE_IOTHUB_HTTP_05_005: [The listDevices method shall construct an HTTP request using information supplied by the caller, as follows:
   GET <path>?api-version=<version> HTTP/1.1
@@ -153,9 +158,10 @@ Http.prototype.listDevices = function (path, done) {
 Http.prototype.deleteDevice = function (path, done) {
   var config = this._config;
   var httpHeaders = {
-      'Authorization': config.sharedAccessSignature,
-      'iothub-name': config.hubName,
-      'If-Match': '*'
+    'Authorization': config.sharedAccessSignature,
+    'iothub-name': config.hubName,
+    'If-Match': '*',
+    'User-Agent': 'azure-iothub/' + PackageJson.version
   };
   /*Codes_SRS_NODE_IOTHUB_HTTP_05_006: [The deleteDevice method shall construct an HTTP request using information supplied by the caller, as follows:
   DELETE <path>?api-version=<version> HTTP/1.1

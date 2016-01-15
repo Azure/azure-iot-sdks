@@ -17,11 +17,17 @@ var errors = require('azure-iot-common').errors;
 A SASL-Plain URI to be used to connect to the IoT Hub instance
 A Boolean indicating whether the client should automatically settle messages:
 	True if the messages should be settled automatically
-	False if the caller intends to manually settle messages] */
-function Amqp(saslPlainUri, autoSettleMessages) {
+	False if the caller intends to manually settle messages
+    A string containing the version of the SDK used for telemetry purposes] */
+function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
   var autoSettleMode = autoSettleMessages ? amqp10.Constants.receiverSettleMode.autoSettle : amqp10.Constants.receiverSettleMode.settleOnDisposition;
   this._amqp = new amqp10.Client(amqp10.Policy.merge({
     senderLink: {
+      attach: {
+          properties: {
+            'com.microsoft:client-version': sdkVersionString
+          }
+      },
       reattach: {
         retries: 0,
         forever: false
@@ -29,6 +35,9 @@ function Amqp(saslPlainUri, autoSettleMessages) {
     },
     receiverLink: {
       attach: {
+        properties: {
+          'com.microsoft:client-version': sdkVersionString
+        },
         receiverSettleMode: autoSettleMode,
       }
     }
