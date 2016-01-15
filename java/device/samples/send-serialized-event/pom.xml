@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.microsoft.azure.iothub-java-client</groupId>
         <artifactId>samples</artifactId>
-        <version>1.0.0-preview.8</version>
+        <version>1.0.0-preview.9</version>
     </parent>
     <dependencies>
         <dependency>

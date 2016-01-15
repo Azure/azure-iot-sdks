@@ -28,7 +28,7 @@ Azure IoT device SDKs can be used with a broad range of OS platforms and devices
 
 The Azure IoT Service SDKs help you to build applications that interact with your devices and manage device identities in your IoT hub.
 
-- [Azure IoT service SDK for Node.js](node/service/readme.md)
+- [Azure IoT service SDK for Node.js](node/service/README.md)
 - [Azure IoT service SDK for Java](java/service/readme.md)
 
 **Note:** To manage an IoT hub using a .NET application, use the **Microsoft.Azure.Devices** NuGet package.
