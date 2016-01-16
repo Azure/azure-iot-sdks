@@ -1,0 +1,5 @@
+com.microsoft.azure.iot.service.auth
+com.microsoft.azure.iot.service.exceptions
+com.microsoft.azure.iot.service.sdk
+com.microsoft.azure.iot.service.transport.amqps
+com.microsoft.azure.iot.service.transport.http
