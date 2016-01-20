@@ -23,6 +23,14 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
+        "filePath": "build/release/release_mbed_project.cmd",
+        "search": "(MBED\\_HG\\_USER\%\"\ \-m)([ ]+)(\".*\")",
+        "replaceString": function(versions) {
+            return '$1' + '$2' + '"' + versions.c.device + '"';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
         "filePath": "c/iothub_client/inc/version.h",
         "search": "(IOTHUB\\_SDK\\_VERSION)([ ]+)(\".*\")",
         "replaceString": function(versions) {
