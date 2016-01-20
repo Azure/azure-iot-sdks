@@ -622,9 +622,6 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
-
-
-
     public void baseExpectations()
     {
         new NonStrictExpectations() {
@@ -639,7 +636,7 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceKey;
                 IotHubUri.getResourceUri(hostName, deviceId);
                 result = resourceUri;
-                new IotHubSasToken(resourceUri, deviceId, deviceKey, anyLong);
+                new IotHubSasToken((DeviceClientConfig) any);
                 result = mockToken;
             }
         };

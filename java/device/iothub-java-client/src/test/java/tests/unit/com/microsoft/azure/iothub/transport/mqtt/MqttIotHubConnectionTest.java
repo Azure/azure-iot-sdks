@@ -292,7 +292,7 @@ public class MqttIotHubConnectionTest
             {
                 IotHubUri.getResourceUri(iotHubHostName, deviceId);
                 result = resourceUri;
-                new IotHubSasToken(resourceUri, deviceId, deviceKey, anyLong);
+                new IotHubSasToken((DeviceClientConfig) any);
                 result = mockToken;
                 new MqttAsyncClient(gatewayHostName, deviceId, (MqttClientPersistence) any);
                 result = new MqttException(anyInt);
@@ -652,7 +652,7 @@ public class MqttIotHubConnectionTest
             {
                 IotHubUri.getResourceUri(iotHubHostName, deviceId);
                 result = resourceUri;
-                new IotHubSasToken(resourceUri, deviceId, deviceKey, anyLong);
+                new IotHubSasToken((DeviceClientConfig) any);
                 result = mockToken;
                 new MqttAsyncClient(gatewayHostName, deviceId, (MqttClientPersistence) any);
                 result = mockMqttAsyncClient;

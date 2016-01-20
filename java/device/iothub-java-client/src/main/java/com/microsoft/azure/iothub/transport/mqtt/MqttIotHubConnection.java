@@ -106,7 +106,7 @@ public class MqttIotHubConnection implements MqttCallback
             // with an IoT Hub using the provided host name, user name, device ID, and sas token.]
             try
             {
-                IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
+                IotHubSasToken sasToken = new IotHubSasToken(this.config);
 
                 this.asyncClient = new MqttAsyncClient(this.config.getGatewayHostName(), this.config.getDeviceId(), new MemoryPersistence());
                 asyncClient.setCallback(this);
@@ -259,7 +259,7 @@ public class MqttIotHubConnection implements MqttCallback
                 {
                     // Codes_SRS_MQTTIOTHUBCONNECTION_15_17: [The function shall generate a new sas token to be
                     // used for connecting to the mqtt broker.]
-                    IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
+                    IotHubSasToken sasToken = new IotHubSasToken(this.config);
 
                     this.updateConnectionOptions(this.config.getDeviceId(), sasToken.toString());
                     this.connect(this.connectionOptions);
@@ -273,7 +273,7 @@ public class MqttIotHubConnection implements MqttCallback
 
                         // Codes_SRS_MQTTIOTHUBCONNECTION_15_018: [The maximum wait interval
                         // until a reconnect is attempted shall be 60 seconds.]
-                        Thread.sleep(TransportUtils.generateSleepInterval(currentReconnectionAttempt));
+                        Thread.sleep(generateSleepInterval(currentReconnectionAttempt));
                     }
                     catch (InterruptedException exception)
                     {
@@ -330,5 +330,28 @@ public class MqttIotHubConnection implements MqttCallback
         this.connectionOptions.setMqttVersion(mqttVersion);
         this.connectionOptions.setUserName(userName);
         this.connectionOptions.setPassword(userPassword.toCharArray());
+    }
+
+    private static byte[] sleepIntervals = {1, 2, 4, 8, 16, 32, 60};
+    /** Generates a reconnection time with an exponential backoff
+     * and a maximum value of 60 seconds.
+     *
+     * @param currentAttempt the number of attempts
+     * @return the sleep interval until the next attempt.
+     */
+    private byte generateSleepInterval(int currentAttempt)
+    {
+        if (currentAttempt > 7)
+        {
+            return sleepIntervals[6];
+        }
+        else if (currentAttempt > 0)
+        {
+            return sleepIntervals[currentAttempt - 1];
+        }
+        else
+        {
+            return 0;
+        }
     }
 }
