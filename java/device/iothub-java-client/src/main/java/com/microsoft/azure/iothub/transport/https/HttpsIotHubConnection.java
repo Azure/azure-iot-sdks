@@ -64,7 +64,7 @@ public class HttpsIotHubConnection
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2015-08-15-preview'.]
             IotHubEventUri eventUri = new IotHubEventUri(iotHubHostname, deviceId);
             URL eventUrl = new URL("https://" + eventUri.toString());
-            IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
+            IotHubSasToken sasToken = new IotHubSasToken(this.config);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_003: [The function shall send a POST request.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_004: [The function shall set the request body to the message body.]
@@ -115,7 +115,7 @@ public class HttpsIotHubConnection
                     new IotHubMessageUri(iotHubHostname, deviceId);
             URL messageUrl = new URL("https://" + messageUri.toString());
 
-            IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
+            IotHubSasToken sasToken = new IotHubSasToken(this.config);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_014: [The function shall send a GET request.]
             HttpsRequest request =
@@ -238,7 +238,7 @@ public class HttpsIotHubConnection
                             "Invalid message result specified.");
             }
 
-            IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
+            IotHubSasToken sasToken = new IotHubSasToken(this.config);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_033: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
             request.setReadTimeoutMillis(readTimeoutMillis).

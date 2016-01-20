@@ -3,6 +3,10 @@
 
 package com.microsoft.azure.iothub.auth;
 
+import com.microsoft.azure.iothub.AzureHubType;
+import com.microsoft.azure.iothub.DeviceClientConfig;
+import com.microsoft.azure.iothub.net.IotHubUri;
+
 /** Grants device access to an IoT Hub for the specified amount of time. */
 public final class IotHubSasToken
 {
@@ -37,14 +41,14 @@ public final class IotHubSasToken
      * @param expiryTime the time, as a UNIX timestamp, after which the token
      * will become invalid.
      */
-    public IotHubSasToken(String resourceUri, String deviceId, String deviceKey,
-            long expiryTime)
+    public IotHubSasToken(String resourceUri, String deviceId, String deviceKey, long expiryTime)
     {
         // Codes_SRS_IOTHUBSASTOKEN_11_002: [The expiry time shall be the given expiry time, where it is a UNIX timestamp and indicates the time after which the token becomes invalid.]
         this.expiryTime = expiryTime;
 
         // Codes_SRS_IOTHUBSASTOKEN_11_003: [The key name shall be the device ID.]
         this.keyName = deviceId;
+
         // Codes_SRS_IOTHUBSASTOKEN_11_004: [The resource URI shall be the given resource URI.]
         this.resourceUri = resourceUri;
 
@@ -54,6 +58,27 @@ public final class IotHubSasToken
 
         // Codes_SRS_IOTHUBSASTOKEN_08_012: [The skn key value shall be empty if connecting to IoT Hub, or the device Id if connecting to the Event Hub directly]
         this.appendSknValue = true;
+    }
+
+    /**
+     * Constructor. Generates a valid SAS token from the client configuration.
+     *
+     * @param config the DeviceClientConfig
+     *
+     * @return a SAS token that authenticates the device to the IoT Hub.
+     */
+    public IotHubSasToken(DeviceClientConfig config)
+    {
+        this(IotHubUri.getResourceUri(config.getIotHubHostname(), config.getDeviceId()),
+                config.getDeviceId(),
+                config.getDeviceKey(),
+                System.currentTimeMillis() / 1000l + config.getTokenValidSecs() + 1l);
+
+        if (config.targetHubType == AzureHubType.IoTHub) {
+            appendSknValue = false;
+        } else if (config.targetHubType == AzureHubType.EventHub) {
+            appendSknValue = true;
+        }
     }
 
     /**
