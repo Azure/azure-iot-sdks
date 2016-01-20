@@ -18,6 +18,8 @@ namespace TraceabilityTool
         public static string inputDir = "";
         // Directory to place reports into.
         public static string outputDir = "";
+        // directories to exclude
+        public static string[] exclusionDirs = null;
         // Exit program with code 0 if correct parameters were supplied.
         public static int exitCode = 0;
 
@@ -43,6 +45,8 @@ namespace TraceabilityTool
         {
             bool inputDirValid = false;
             bool outputDirValid = false;
+            bool exclusionDirsValid = false;
+            bool buildCheck = false;
             bool optionGUI = false;
 
             for (int i = 0; i < args.Length; i++)
@@ -55,12 +59,14 @@ namespace TraceabilityTool
                         inputDir = args[i + 1];
                 }
 
-                // Find the output directory paramter, which should follow the "-o" parameter
+                // Find the output directory parameter, which should follow the "-o" parameter
                 if (args[i].Equals("-o", StringComparison.OrdinalIgnoreCase) && (i < args.Length - 1))
                 {
                     outputDirValid = Directory.Exists(args[i + 1]);
                     if (outputDirValid)
+                    {
                         outputDir = args[i + 1];
+                    }
                 }
 
                 // The "GUI" option enables GUI mode of operation as opposed to command-line mode.
@@ -70,62 +76,104 @@ namespace TraceabilityTool
                 // The "CSV" option forces reports to be generated in the comma-separated values (CSV) format in addition to plain text reports.
                 if (args[i].Equals("-CSV", StringComparison.OrdinalIgnoreCase))
                     MainForm.outputCSV = true;
-            }
 
-
-            // Command line interface can be enabled as a command line option
-            bool consoleEnabled = false;
-
-            if(!optionGUI)
-            {
-                // Locate the console (cmd process) from which the program was started if it was invoked from command line.
-                IntPtr ptr = GetForegroundWindow();
-                int cmdProcessID;
-                GetWindowThreadProcessId(ptr, out cmdProcessID);
-                Process process = Process.GetProcessById(cmdProcessID);
-                if (process.ProcessName == "cmd")
+                // The "BUILDCHECK" option forces reports to be generated in the comma-separated values (CSV) format in addition to plain text reports.
+                if (args[i].Equals("-BUILDCHECK", StringComparison.OrdinalIgnoreCase))
                 {
-                    // The uppermost window is a cmd process.  The console is already running.
-                    AttachConsole(process.Id);
-                    consoleEnabled = true;
+                    MainForm.buildCheck = true;
+                    buildCheck = true;
+                }
+
+                if (args[i].Equals("-e", StringComparison.OrdinalIgnoreCase) && (i < args.Length - 1))
+                {
+                    string[] dirs = args[i + 1].Split(';');
+                    exclusionDirsValid = true;
+                    foreach (string d in dirs)
+                    {
+                        exclusionDirsValid &= Directory.Exists(d);
+                    }
+                    if (exclusionDirsValid)
+                    {
+                        exclusionDirs = dirs;
+                    }
                 }
             }
 
-
-            if (optionGUI)
+            // parse out incompatible options
+            if ( (buildCheck && (optionGUI || MainForm.outputCSV || outputDirValid)) ||
+                 (!buildCheck && (!outputDirValid && !optionGUI)))
             {
-                // GUI enabled
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new MainForm());
+                Usage();
+                exitCode = 1;
             }
-            else
+
+            if (!optionGUI && !inputDirValid)
             {
-                // Run reports if CLI mode is selected and both directories specified are valid.
-                if (inputDirValid && outputDirValid)
+                Usage();
+                exitCode = 1;
+            }
+
+            if (exitCode == 0)
+            {
+                // Command line interface can be enabled as a command line option
+                bool consoleEnabled = false;
+
+                if (!optionGUI)
                 {
-                    // The minimum required parameters were correctly specified.  Run the reports.
-                    ReportGenerator.GenerateReport(inputDir, outputDir, null);
-                    Console.WriteLine();
-                    Console.WriteLine("Reports have been generated in " + outputDir);
+                    // Locate the console (cmd process) from which the program was started if it was invoked from command line.
+                    IntPtr ptr = GetForegroundWindow();
+                    int cmdProcessID;
+                    GetWindowThreadProcessId(ptr, out cmdProcessID);
+                    Process process = Process.GetProcessById(cmdProcessID);
+                    if (process.ProcessName == "cmd")
+                    {
+                        // The uppermost window is a cmd process.  The console is already running.
+                        AttachConsole(process.Id);
+                        consoleEnabled = true;
+                    }
+                }
+
+                if (optionGUI)
+                {
+                    // GUI enabled
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.Run(new MainForm());
                 }
                 else
                 {
-                    Console.WriteLine("Command line parameters are invalid.");
-                    Console.WriteLine("Valid parameters:");
-                    Console.WriteLine("-i <path> to specify the input/root directory path to search for requirements documents and source code in.");
-                    Console.WriteLine("-o <path> to specify the output directory path to write reports into.");
-                    Console.WriteLine("-gui to use the GUI interface.");
-                    Console.WriteLine("-csv to generate reports in CSV format in addition to default plain text reports.");
-                    Console.WriteLine("Note that both input and output directores must be specified and must be valid in order to run the program in CLI mode.");
-                    exitCode = 1;
+                    // The minimum required parameters were correctly specified.  Run the reports in CLI mode
+                    exitCode = ReportGenerator.GenerateReport(inputDir, outputDir, exclusionDirs, null);
+                    Console.WriteLine();
+                    if (outputDirValid)
+                    {
+                        Console.WriteLine("Reports have been generated in " + outputDir);
+                    }
                 }
+
+                if (consoleEnabled)
+                    FreeConsole();
             }
 
-            if (consoleEnabled)
-                FreeConsole();
 
             System.Environment.Exit(exitCode);
         }
+        public static void Usage()
+        {
+            Console.WriteLine("Command line parameters are invalid.");
+            Console.WriteLine("Valid parameters:");
+            Console.WriteLine("-i <path> to specify the input/root directory path to search for requirements documents and source code in.");
+            Console.WriteLine("-o <path> to specify the output directory path to write reports into.");
+            Console.WriteLine("-e <path[;path...] to specify directories to exclude from reports.");
+            Console.WriteLine("-gui to use the GUI interface.");
+            Console.WriteLine("-csv to generate reports in CSV format in addition to default plain text reports.");
+            Console.WriteLine("-buildcheck to generate reports to the console for build checking.");
+            Console.WriteLine("-buildcheck is incompatible with -o, -gui and -csv");
+            Console.WriteLine("When not running in buildcheck mode, input and output directories are required.");
+
+
+        }
     }
+
+
 }
