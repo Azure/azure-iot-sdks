@@ -39,7 +39,7 @@ public class MqttIotHubConnection implements MqttCallback
     //mqtt connection options
     private static final int keepAliveInterval = 20;
     private static final int mqttVersion = 4;
-    private static final boolean setCleanSession = true;
+    private static final boolean setCleanSession = false;
     private static final int qos = 1;
 
     /**
