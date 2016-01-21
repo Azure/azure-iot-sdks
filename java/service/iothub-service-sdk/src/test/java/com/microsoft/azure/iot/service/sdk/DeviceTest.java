@@ -24,9 +24,9 @@ public class DeviceTest
     public void device_get_all_properties() throws NoSuchAlgorithmException
     {
         // Arrange
-        String id = "xxx-device";
+        String deviceId = "xxx-device";
         // Act
-        Device device = Device.createFromId(id);
+        Device device = Device.createFromId(deviceId, null, null);
         device.getDeviceId();
         device.getGenerationId();
         device.getSymmetricKey();
@@ -50,9 +50,9 @@ public class DeviceTest
     public void createFromId_input_null() throws NoSuchAlgorithmException
     {
         // Arrange
-        String id = null;
+        String deviceId = null;
         // Act
-        Device.createFromId(id);
+        Device.createFromId(deviceId, null, null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
@@ -61,9 +61,9 @@ public class DeviceTest
     public void createFromId_input_empty() throws NoSuchAlgorithmException
     {
         // Arrange
-        String id = "";
+        String deviceId = "";
         // Act
-        Device.createFromId(id);
+        Device.createFromId(deviceId, null, null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_003: [The constructor shall create a new instance of Device using the given deviceId and return with it]
@@ -75,11 +75,11 @@ public class DeviceTest
         new Expectations()
         {
             {
-                new Device(deviceId);
+                new Device(deviceId, null, null);
             }
         };
         // Act
-        Device device = Device.createFromId(deviceId);
+        Device device = Device.createFromId(deviceId, null, null);
         // Assert
         assertNotEquals(device, null);
     }
@@ -92,7 +92,7 @@ public class DeviceTest
         // Arrange
         String deviceId = null;
         // Act
-        Device device = new Device(deviceId);
+        Device device = new Device(deviceId, null, null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_004: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
@@ -103,10 +103,11 @@ public class DeviceTest
         // Arrange
         String deviceId = "";
         // Act
-        Device device = new Device(deviceId);
+        Device device = new Device(deviceId, null, null);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_005: [The constructor shall create a new SymmetricKey instance using AES encryption and store it into a member variable]
+    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_005: [If the input symmetric key is empty, the constructor shall create
+    // a new SymmetricKey instance using AES encryption and store it into a member variable]
     @Test
     public void constructor_create_symmetrickey() throws NoSuchAlgorithmException
     {
@@ -121,9 +122,26 @@ public class DeviceTest
             }
         };
         // Act
-        Device device = new Device(deviceId);
+        Device device = new Device(deviceId, null, null);
         // Assert
         assertNotEquals(device.getSymmetricKey(), null);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_15_007: [The constructor shall store
+    // the input device status and symmetric key into a member variable]
+    @Test
+    public void constructor_sets_status_and_symmetrickey() throws NoSuchAlgorithmException
+    {
+        // Arrange
+        String deviceId = "xxx-device";
+
+        DeviceStatus expectedDeviceStatus = DeviceStatus.Disabled;
+        SymmetricKey expectedSymmetricKey = new SymmetricKey();
+        // Act
+        Device device = new Device(deviceId, expectedDeviceStatus, expectedSymmetricKey);
+        // Assert
+        assertEquals(expectedDeviceStatus, device.getStatus());
+        assertEquals(expectedSymmetricKey, device.getSymmetricKey());
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_006: [The constructor shall initialize all properties to default value]
@@ -132,9 +150,9 @@ public class DeviceTest
     {
         // Arrange
         String utcTimeDefault = "0001-01-01T00:00:00";
-        String jsonString = "xxx-device";
+        String deviceId = "xxx-device";
         // Act
-        Device device = new Device(jsonString);
+        Device device = new Device(deviceId, null, null);
         // Assert
         assertNotEquals(null, device);
         assertNotEquals(device.getSymmetricKey(), null);
@@ -142,7 +160,7 @@ public class DeviceTest
         assertEquals("xxx-device", device.getDeviceId());
         assertEquals("", device.getGenerationId());
         assertEquals("", device.geteTag());
-        assertEquals(DeviceStatus.Disabled, device.getStatus());
+        assertEquals(DeviceStatus.Enabled, device.getStatus());
         assertEquals("", device.getStatusReason());
         assertEquals(utcTimeDefault, device.getStatusUpdatedTime());
         assertEquals(DeviceConnectionState.Disconnected, device.getConnectionState());

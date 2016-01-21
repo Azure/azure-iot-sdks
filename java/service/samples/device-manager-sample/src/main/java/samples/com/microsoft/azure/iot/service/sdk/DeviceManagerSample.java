@@ -47,7 +47,7 @@ public class DeviceManagerSample
     {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
-        Device device = Device.createFromId(SampleUtils.deviceId);
+        Device device = Device.createFromId(SampleUtils.deviceId, null, null);
         try
         {
             device = registryManager.addDevice(device);
@@ -96,7 +96,7 @@ public class DeviceManagerSample
 
         RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
-        Device device = Device.createFromId(SampleUtils.deviceId);
+        Device device = Device.createFromId(SampleUtils.deviceId, null, null);
         device.getSymmetricKey().setPrimaryKey(primaryKey);
         device.getSymmetricKey().setSecondaryKey(secondaryKey);
         try

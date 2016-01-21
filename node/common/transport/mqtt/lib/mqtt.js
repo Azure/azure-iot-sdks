@@ -56,6 +56,14 @@ Mqtt.prototype.connect = function (done) {
   }
 };
 
+Mqtt.prototype.disconnect = function (done) {
+    this.client.removeAllListeners();
+    // The first parameter decides whether the connection should be forcibly closed without waiting for all sent messages to be ACKed.
+    // This should be a transport-specific parameter.
+    /* Codes_SRS_NODE_HTTP_16_001: [The disconnect method shall call the done callback when the connection to the server has been closed.] */
+    this.client.end(false, done);
+};
+
 /* Codes_SRS_NODE_HTTP_12_006: The PUBLISH method shall throw ReferenceError “Invalid message” if the message is falsy */
 /* Codes_SRS_NODE_HTTP_12_007: The PUBLISH method shall call publish on MQTT.JS library with the given message */
 Mqtt.prototype.publish = function (message, done) {

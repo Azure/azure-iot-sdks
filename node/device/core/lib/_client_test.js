@@ -266,6 +266,42 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         assert.equal(firstInstance, secondInstance);
       });
     });
+    
+    describe('#open', function () {
+       var TransportCanOpen = function(config) {
+           this.config = config;
+       };
+       
+       TransportCanOpen.prototype.connect = function(callback) {
+           callback();
+       };
+       
+       /* Tests_SRS_NODE_DEVICE_CLIENT_12_001: [The open function shall call the transport’s connect function, if it exists.] */
+       it('calls connect on the transport if the method exists', function (done) {
+           var client = Client.fromConnectionString(goodConnectionString, TransportCanOpen);
+           client.open(function() {
+               done();
+           });    
+       });
+    });
+    
+    describe('#close', function () {
+       var TransportCanClose = function(config) {
+           this.config = config;
+       };
+       
+       TransportCanClose.prototype.disconnect = function(callback) {
+           callback();
+       };
+       
+       /* Tests_SRS_NODE_DEVICE_CLIENT_16_001: [The close function shall call the transport’s disconnect function if it exists.] */
+       it('calls disconnect on the transport if the method exists', function (done) {
+           var client = Client.fromConnectionString(goodConnectionString, TransportCanClose);
+           client.close(function() {
+               done();
+           });    
+       });
+    });
   });
 }
 

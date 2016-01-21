@@ -8,6 +8,7 @@ package com.microsoft.azure.iothub.transport.amqps;
 import com.microsoft.azure.iothub.DeviceClientConfig;
 import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
+import com.microsoft.azure.iothub.transport.TransportUtils;
 import org.apache.qpid.proton.*;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Event;
@@ -119,7 +120,7 @@ public final class AmqpsIotHubConnection extends BaseHandler {
         String iotHubUser = deviceId + "@sas." + iotHubName;
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_003: [The constructor shall create a new SAS token and copy all input parameters to private member variables.]
-        IotHubSasToken sasToken = AmqpsUtilities.buildToken(this.config);
+        IotHubSasToken sasToken = new IotHubSasToken(this.config);
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_006: [The constructor shall initialize a new private map for messages that are in progress.]
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_007: [The constructor shall initialize new private Futures for the status of the Connection and Reactor.]
@@ -160,7 +161,7 @@ public final class AmqpsIotHubConnection extends BaseHandler {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_011: [If the AMQPS connection is already open, the function shall do nothing.]
         if(this.state != ReactorState.OPEN) {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_008: [The function shall initialize it’s AmqpsIotHubConnectionBaseHandler using the saved host name, user name, device ID and sas token.]
-            IotHubSasToken sasToken = AmqpsUtilities.buildToken(this.config);
+            IotHubSasToken sasToken = new IotHubSasToken(this.config);
             this.amqpsHandler = new AmqpsIotHubConnectionBaseHandler(this.hostName,
                     this.userName, sasToken.toString(), this.deviceID, this);
 

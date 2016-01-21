@@ -5,6 +5,8 @@
 
 var SharedAccessSignature = require('azure-iot-common').SharedAccessSignature;
 
+var goodJobId = "g00dj0b";
+
 function Response(statusCode) {
   this.statusCode = statusCode;
 }
@@ -16,6 +18,7 @@ function createError() {
 }
 
 function SimulatedHttp(config) {
+  this.fakeFailure = false;
   this.handleRequest = function (done, body) {
     var sig = SharedAccessSignature.parse(config.sharedAccessSignature);
 
@@ -63,6 +66,77 @@ SimulatedHttp.prototype.listDevices = function (path, done) {
 SimulatedHttp.prototype.deleteDevice = function (path, done) {
   var device = { deviceId: 'testDevice' };
   this.handleRequest(done, JSON.stringify(device));
+};
+
+SimulatedHttp.prototype.importDevicesFromBlob = function (path, importRequest, done) {
+    importRequest.jobId = goodJobId;
+    
+    done(null, importRequest);
+};
+
+SimulatedHttp.prototype.exportDevicesToBlob = function (path, exportRequest, done) {
+    exportRequest.jobId = goodJobId;
+    
+    done(null, exportRequest);
+};
+
+SimulatedHttp.prototype.listJobs = function (path, done) {
+    if (this.fakeFailure) {
+        var err = new Error();
+        err.message = "simulated listJobs call failed";
+        done(err);
+    } else {
+        var res = { result: "success" };
+        done(null, res);
+    }
+};
+
+SimulatedHttp.prototype.getJob = function (path, done) {
+    var now = new Date();
+    if (path.indexOf(goodJobId) !== -1) {
+        var jobDesc = {
+            jobId: goodJobId,
+            startTimeUtc: now,
+            endTimeUtc: null,
+            type: "export",
+            status: "enqueued",
+            progress: 0,
+            inputBlobContainerUri: "inputBlobContainerUri",
+            outputBlobContainerUri: "outputBlobContainerUri",
+            excludeKeysInExport: null,
+            failureReason: null
+        };
+        
+        done(null, jobDesc);
+    } else {
+        var err = new Error();
+        err.Message = "getJob failed in SimulatedHttp";
+        done(err);
+    }
+};
+
+SimulatedHttp.prototype.cancelJob = function (path, done) {
+    var now = new Date();
+    if (path.indexOf(goodJobId) !== -1) {
+        var jobDesc = {
+            jobId: goodJobId,
+            startTimeUtc: now,
+            endTimeUtc: now,
+            type: "export",
+            status: "cancelled",
+            progress: 0,
+            inputBlobContainerUri: "inputBlobContainerUri",
+            outputBlobContainerUri: "outputBlobContainerUri",
+            excludeKeysInExport: null,
+            failureReason: null
+        };
+        
+        done(null, jobDesc);
+    } else {
+        var err = new Error();
+        err.message = "cancelJob failed in SimulatedHttp";
+        done(err);
+    }
 };
 
 module.exports = SimulatedHttp;

@@ -59,7 +59,7 @@ public class ServiceClientE2ETest
         {
         }
 
-        Device deviceAdded = Device.createFromId(deviceId);
+        Device deviceAdded = Device.createFromId(deviceId, null, null);
         registryManager.addDevice(deviceAdded);
 
         Device deviceGetBefore = registryManager.getDevice(deviceId);

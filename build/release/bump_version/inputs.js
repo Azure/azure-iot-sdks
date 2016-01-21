@@ -23,6 +23,14 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
+        "filePath": "build/release/release_mbed_project.cmd",
+        "search": "(MBED\\_HG\\_USER\%\"\ \-m)([ ]+)(\".*\")",
+        "replaceString": function(versions) {
+            return '$1' + '$2' + '"' + versions.c.device + '"';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
         "filePath": "c/iothub_client/inc/version.h",
         "search": "(IOTHUB\\_SDK\\_VERSION)([ ]+)(\".*\")",
         "replaceString": function(versions) {
@@ -111,7 +119,7 @@ module.exports = [
     },
 
     ///////////////////////////////////////////////////
-    // Java Device SDK POM files
+    // Java Device SDK files
     ///////////////////////////////////////////////////
     {
         "taskType": "xmlReplaceTask",
@@ -165,8 +173,16 @@ module.exports = [
         "search": "//project/parent/version",
         "replaceString": "java.device"
     },
+	{
+		"taskType": "regexReplaceTask",
+		"filePath": "java/device/iothub-java-client/src/main/java/com/microsoft/azure/iothub/transport/TransportUtils.java",
+		"search": "(clientVersion =)([ ]+)(\".*\")",
+		"replaceString": function(versions) {
+			return '$1' + '$2' + '"' + versions.java.device + '"';
+		}
+    },
     ///////////////////////////////////////////////////
-    // Java Service SDK POM files
+    // Java Service SDK files
     ///////////////////////////////////////////////////
     {
         "taskType": "xmlReplaceTask",
@@ -227,6 +243,14 @@ module.exports = [
                 "replaceString": "java.service"
             }
         ]
+    },
+		{
+		"taskType": "regexReplaceTask",
+		"filePath": "java/service/iothub-service-sdk/src/main/java/com/microsoft/azure/iot/service/transport/TransportUtils.java",
+		"search": "(serviceVersion =)([ ]+)(\".*\")",
+		"replaceString": function(versions) {
+			return '$1' + '$2' + '"' + versions.java.service + '"';
+		}
     },
     ///////////////////////////////////////////////////
     // Node SDK package.json files

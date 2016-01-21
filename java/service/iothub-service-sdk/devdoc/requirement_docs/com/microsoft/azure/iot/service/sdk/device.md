@@ -13,11 +13,8 @@ The Device class is the main DTO for the RegistryManager class. It implements st
 ```java
 public class Device
 {
-    public static Device createFromId(String deviceId);
-    public static Device createFromJson(String jsonString);
-    protected Device(String deviceId);
-    protected Device(JsonObject jsonObject);
-    protected String serializeToJson();
+    public static Device createFromId(String deviceId, DeviceStatus status, SymmetricKey symmetricKey)
+    protected Device(String deviceId, DeviceStatus status, SymmetricKey symmetricKey)
 }
 ```
 **SRS_SERVICE_SDK_JAVA_DEVICE_12_001: [** The Device class has the following properties: Id, Etag, Authentication.SymmetricKey, State, StateReason, StateUpdatedTime, ConnectionState, ConnectionStateUpdatedTime, LastActivityTime **]**
@@ -25,7 +22,7 @@ public class Device
 ### createFromId
 
 ```java
-public static Device createFromId(String deviceId) throws IllegalArgumentException, NoSuchAlgorithmException;
+public static Device createFromId(String deviceId, DeviceStatus status, SymmetricKey symmetricKey) throws IllegalArgumentException, NoSuchAlgorithmException;
 ```
 **SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
 
@@ -34,10 +31,12 @@ public static Device createFromId(String deviceId) throws IllegalArgumentExcepti
 ### Device
 
 ```java
-protected Device(String deviceId) throws NoSuchAlgorithmException, IllegalArgumentException;
+protected Device(String deviceId, DeviceStatus status, SymmetricKey symmetricKey) throws NoSuchAlgorithmException, IllegalArgumentException;
 ```
 **SRS_SERVICE_SDK_JAVA_DEVICE_12_004: [** The constructor shall throw IllegalArgumentException if the input string is empty or null **]**
 
-**SRS_SERVICE_SDK_JAVA_DEVICE_12_005: [** The constructor shall create a new SymmetricKey instance using AES encryption and store it into a member variable **]**
+**SRS_SERVICE_SDK_JAVA_DEVICE_12_005: [** If the input symmetric key is empty, the constructor shall create a new SymmetricKey instance using AES encryption and store it into a member variable **]**
+
+**SRS_SERVICE_SDK_JAVA_DEVICE_15_007: [** The constructor shall store the input device status and symmetric key into a member variable **]**
 
 **SRS_SERVICE_SDK_JAVA_DEVICE_12_006: [** The constructor shall initialize all properties to default values **]**
