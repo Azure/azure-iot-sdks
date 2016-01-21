@@ -244,4 +244,144 @@ Registry.prototype.delete = function (deviceId, done) {
   });
 };
 
+/**
+ * @method              module:azure-iothub.Registry#importDevicesFromBlob
+ * @description         Imports devices from a blob in bulk job.
+ * @param {String}      inputBlobContainerUri   The URI to a container with a blob named 'devices.txt' containing a list of devices to import.
+ * @param {String}      outputBlobContainerUri  The URI to a container where a blob will be created with logs of the import process.
+ * @param {Function}    done                    The function to call when the job has been created, with two arguments: an error object if an
+ *                                              an error happened, (null otherwise) and the job status that can be used to track progress of the devices import.
+ */
+Registry.prototype.importDevicesFromBlob = function (inputBlobContainerUri, outputBlobContainerUri, done) {
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_001: [A ReferenceError shall be thrown if importBlobContainerUri is falsy] */   
+    if (!inputBlobContainerUri) throw new ReferenceError('inputBlobContainerUri cannot be falsy');
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_002: [A ReferenceError shall be thrown if exportBlobContainerUri is falsy] */  
+    if (!outputBlobContainerUri) throw new ReferenceError('outputBlobContainerUri cannot be falsy');
+    
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_008: [The importDevicesFromBlob method should create a bulk import job using the transport associated with the Registry instance by giving it the correct URI path and an import request object such as:
+    {
+        'type': 'import',
+        'inputBlobContainerUri': <input container Uri given as parameter>,
+        'outputBlobContainerUri': <output container Uri given as parameter>
+    }] */
+    var path = "/jobs/create" + endpoint.versionQueryString();
+    var importRequest = {
+        'type': 'import',
+        'inputBlobContainerUri': inputBlobContainerUri,
+        'outputBlobContainerUri': outputBlobContainerUri
+    };
+    
+    this._transport.importDevicesFromBlob(path, importRequest, function (err, jobStatus) {
+        /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_003: [The ‘done’ callback shall be called with the job status as a parameter when the import job has been created] */
+        if (err) {
+            done(err);
+        } else {
+            done(null, jobStatus);
+        }
+    });
+};
+
+/**
+ * @method              module:azure-iothub.Registry#exportDevicesToBlob
+ * @description         Export devices to a blob in a bulk job.
+ * @param {String}      outputBlobContainerUri  The URI to a container where a blob will be created with logs of the export process.
+ * @param {Boolean}     excludeKeys             Boolean indicating whether security keys should be excluded from the exported data.   
+ * @param {Function}    done                    The function to call when the job has been created, with two arguments: an error object if an
+ *                                              an error happened, (null otherwise) and the job status that can be used to track progress of the devices export.
+ */
+Registry.prototype.exportDevicesToBlob = function (outputBlobContainerUri, excludeKeys, done) {
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_004: [A ReferenceError shall be thrown if outputBlobContainerUri is falsy] */
+    if (!outputBlobContainerUri) throw new ReferenceError('outputBlobContainerUri cannot be falsy');
+        
+    var path = "/jobs/create" + endpoint.versionQueryString();
+    var exportRequest = {
+        'type': 'export',
+        'outputBlobContainerUri': outputBlobContainerUri,
+        'excludeKeysInExport': excludeKeys
+    };
+    
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_009: [The exportDevicesToBlob method should create a bulk export job using the transport associated with the Registry instance by giving it the correct path URI and export request object such as:
+    {
+        'type': 'export',
+        'outputBlobContainerUri': <output container Uri given as parameter>,
+        'excludeKeysInExport': <excludeKeys Boolean given as parameter>
+    }] */
+    this._transport.exportDevicesToBlob(path, exportRequest, function (err, jobStatus) {
+        /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_005: [The ‘done’ callback shall be called with a null error parameter and the job status as a second parameter when the export job has been created] */
+        if (err) {
+            done(err);
+        } else {
+            done(null, jobStatus);
+        }
+    });
+};
+
+/**
+ * @method              module:azure-iothub.Registry#listJobs
+ * @description         List the last import/export jobs (including the active one, if any).
+ * @param {Function}    done    The function to call with two arguments: an error object if an error happened, 
+ *                              (null otherwise) and the list of past jobs as an argument. 
+ */
+Registry.prototype.listJobs = function (done) {
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_016: [The listJobs method should request a list of active and recent bulk import/export jobs using the transport associated with the Registry instance and give it the correct path URI.] */
+    var path = "/jobs" + endpoint.versionQueryString();
+    this._transport.listJobs(path, function (err, jobsList) {
+        if (err) {
+        /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_011: [The ‘done’ callback shall be called with only an error object if the request fails.] */
+            done(err);
+        } else {
+        /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_010: [The ‘done’ callback shall be called with a null error parameter and list of recent jobs as a second parameter if the request is successful.] */
+            done(null, jobsList);
+        }
+    });
+};
+
+/**
+ * @method              module:azure-iothub.Registry#getJob
+ * @description         Get the status of a bulk import/export job.
+ * @param {String}      jobId   The identifier of the job for which the user wants to get status information.
+ * @param {Function}    done    The function to call with two arguments: an error object if an error happened, 
+ *                              (null otherwise) and the status of the job whose identifier was passed as an argument. 
+ */
+Registry.prototype.getJob = function (jobId, done) {
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_006: [A ReferenceError shall be thrown if jobId is falsy] */
+    if (!jobId) throw new ReferenceError('jobId cannot be falsy');
+    
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_017: [The getJob method should request status information of the bulk import/export job identified by the jobId parameter using the transport associated with the Registry instance and give it the correct path URI.] */
+    var path = "/jobs/" + jobId + endpoint.versionQueryString();
+    this._transport.getJob(path, function (err, jobStatus) {
+        if (err) {
+        /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_015: [The ‘done’ callback shall be called with only an error object if the request fails.]  */
+            done(err);
+        } else {
+        /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_007: [The ‘done’ callback shall be called with a null error parameter and the job status as second parameter if the request is successful.]  */
+            done(null, jobStatus);
+        }
+    });
+};
+
+/**
+ * @method              module:azure-iothub.Registry#cancelJob
+ * @description         Cancel a bulk import/export job.
+ * @param {String}      jobId   The identifier of the job for which the user wants to get status information.
+ * @param {Function}    done    The function to call with two arguments: an error object if an error happened, 
+ *                              (null otherwise) and the (cancelled) status of the job whose identifier was passed as an argument. 
+ */
+Registry.prototype.cancelJob = function (jobId, done) {
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_012: [A ReferenceError shall be thrown if the jobId is falsy] */
+    if (!jobId) throw new ReferenceError('jobId cannot be falsy');
+    
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_018: [The cancelJob method should request cancel the job identified by the jobId parameter using the transport associated with the Registry instance by giving it the correct path URI.] */
+    var path = "/jobs/" + jobId + endpoint.versionQueryString();
+    this._transport.cancelJob(path, function (err) {
+        if (err) {
+        /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_013: [The ‘done’ callback shall be called with only an error object if the request fails.] */
+            done(err);
+        } else {
+        /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_014: [The ‘done’ callback shall be called with no parameters if the request is successful.] */
+            done();
+        }
+    });
+};
+
 module.exports = Registry;
