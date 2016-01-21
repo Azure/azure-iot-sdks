@@ -22,6 +22,13 @@ Mqtt.prototype.connect = function (done) {
   });
 };
 
+/* Codes_SRS_NODE_DEVICE_HTTP_16_001: [The disconnect method should call the disconnect method on MqttTransport.] */
+Mqtt.prototype.disconnect = function (done) {
+    this._mqtt.disconnect(function (err, result) {
+        if (done) done(err, result);
+    });
+};
+
 /* Codes_SRS_NODE_DEVICE_HTTP_12_005: [The sendEvent method shall call the publish method on MqttTransport */
 Mqtt.prototype.sendEvent = function (message) {
   this._mqtt.publish(message);

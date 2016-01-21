@@ -42,6 +42,12 @@ SimulatedMqtt.prototype.connect = function (done) {
   });
 };
 
+SimulatedMqtt.prototype.disconnect = function (done) {
+  this.handleRequest(function (err, response) {
+    done(err, response);
+  });
+};
+
 SimulatedMqtt.prototype.sendEvent = function (message, done) {
   this.handleRequest(function (err, response) {
     done(err, response);

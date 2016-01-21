@@ -191,4 +191,16 @@ Client.prototype.complete = function(message, done) {
   }
 };
 
+/**
+ * The `close` method directs the transport to close the current connection to the IoT Hub instance
+ * 
+ * @param {Function}    done    The callback to be invoked when the connection has been closed.
+ */
+Client.prototype.close = function (done) {
+    /* Codes_SRS_NODE_DEVICE_CLIENT_16_001: [The close function shall call the transport’s disconnect function if it exists.] */
+    if (typeof this._transport.disconnect === 'function') {    
+        this._transport.disconnect(done);
+    }
+};
+
 module.exports = Client;
