@@ -16,18 +16,18 @@
         "service": "1.0.0-preview.9"
     },
     "node": {
-        "common": "1.0.0-preview.10",
-        "amqp-base": "1.0.0-preview.10",
-        "http-base": "1.0.0-preview.10",
-        "mqtt-base": "1.0.0-preview.10",
-        "device": "1.0.0-preview.10",
-        "device-amqp": "1.0.0-preview.10",
-        "device-amqp-ws": "1.0.0-preview.10",
-        "device-http": "1.0.0-preview.10",
-        "device-mqtt": "1.0.0-preview.10",
-        "service": "1.0.0-preview.10"
+        "common": "1.0.0-preview.11",
+        "amqp-base": "1.0.0-preview.11",
+        "http-base": "1.0.0-preview.11",
+        "mqtt-base": "1.0.0-preview.11",
+        "device": "1.0.0-preview.11",
+        "device-amqp": "1.0.0-preview.11",
+        "device-amqp-ws": "1.0.0-preview.11",
+        "device-http": "1.0.0-preview.11",
+        "device-mqtt": "1.0.0-preview.11",
+        "service": "1.0.0-preview.11"
     },
-    "iothub-explorer": "1.0.0-preview.10",
+    "iothub-explorer": "1.0.0-preview.11",
     "device-explorer": "1.0.0-preview.9",
     "github-release": "v1.0.0-preview.9"
 }
