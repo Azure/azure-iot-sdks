@@ -200,6 +200,9 @@ java/**/*dependency-reduced-pom.xml
 csharp/device/NuGet/*.exe
 csharp/device/NuGet/*.nupkg
 csharp/device/.vs/*
+csharp/device/Microsoft.Azure.Devices.Client/project.lock.json
+csharp/device/Microsoft.Azure.Devices.Client.WinRT/project.lock.json
+csharp/device/iothub_csharp_deviceclient.VC.opendb
 service/java/.idea
 service/java/target
 service/java/iot.service.sdk.java.iml

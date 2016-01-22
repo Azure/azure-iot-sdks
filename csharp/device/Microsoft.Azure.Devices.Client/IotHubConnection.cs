@@ -17,6 +17,7 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Amqp.Sasl;
     using Microsoft.Azure.Amqp.Transport;
+    using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
 #endif
 
@@ -34,15 +35,15 @@ namespace Microsoft.Azure.Devices.Client
         readonly AccessRights accessRights;
         readonly FaultTolerantAmqpObject<AmqpSession> faultTolerantSession;
         readonly IOThreadTimer refreshTokenTimer;
-        readonly bool useWebSocketOnly;
+        readonly AmqpTransportSettings amqpTransportSettings;
 
-        public IotHubConnection(IotHubConnectionString connectionString, AccessRights accessRights, bool useWebSocketOnly)
+        public IotHubConnection(IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
         {
             this.connectionString = connectionString;
             this.accessRights = accessRights;
             this.faultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
             this.refreshTokenTimer = new IOThreadTimer(s => ((IotHubConnection)s).OnRefreshToken(), this, false);
-            this.useWebSocketOnly = useWebSocketOnly;
+            this.amqpTransportSettings = amqpTransportSettings;
         }
 
         public IotHubConnectionString ConnectionString
@@ -181,15 +182,20 @@ namespace Microsoft.Azure.Devices.Client
 
         async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout)
         {
-            TimeoutHelper timeoutHelper = new TimeoutHelper(timeout);
+            var timeoutHelper = new TimeoutHelper(timeout);
             this.refreshTokenTimer.Cancel();
 
-            var amqpSettings = this.CreateAmqpSettings();
-            var tlsTransportSettings = this.CreateTlsTransportSettings();
+            AmqpSettings amqpSettings = this.CreateAmqpSettings();
+            TlsTransportSettings tlsTransportSettings = this.CreateTlsTransportSettings();
 
             var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
             TransportBase transport;
-            if (this.useWebSocketOnly)
+
+            if (this.amqpTransportSettings.UseTcpOnly)
+            {
+                transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
+            }
+            else if (this.amqpTransportSettings.UseWebSocketOnly)
             {
                 // Try only Amqp transport over WebSocket
                 transport = await this.CreateClientWebSocketTransport(timeoutHelper.RemainingTime());
@@ -202,7 +208,7 @@ namespace Microsoft.Azure.Devices.Client
                 }
                 catch (Exception e)
                 {
-                    if (Fx.IsFatal(e))
+                    if (e.IsFatal() || e is UnauthorizedException)
                     {
                         throw;
                     }
@@ -219,7 +225,7 @@ namespace Microsoft.Azure.Devices.Client
                 }
             }
 
-            AmqpConnectionSettings amqpConnectionSettings = new AmqpConnectionSettings()
+            var amqpConnectionSettings = new AmqpConnectionSettings()
             {
                 MaxFrameSize = AmqpConstants.DefaultMaxFrameSize,
                 ContainerId = Guid.NewGuid().ToString("N"),

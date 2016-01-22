@@ -7,6 +7,10 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using Microsoft.Azure.Devices.Client.Extensions;
+#if !WINDOWS_UWP
+    using System.Linq;
+    using Microsoft.Azure.Devices.Client.Exceptions;
+#endif
 
     // C# using aliases cannot name an unbound generic type declaration without supplying type arguments
     // Therefore, define a separate alias for each type argument
@@ -25,18 +29,24 @@ namespace Microsoft.Azure.Devices.Client
     {
         /// <summary>
         /// Advanced Message Queuing Protocol transport.
+        /// Try Amqp over TCP first and fallback to Amqp over WebSocket if that fails
         /// </summary>
-        Amqp,
+        Amqp = 0,
 
         /// <summary>
         /// HyperText Transfer Protocol version 1 transport.
         /// </summary>
-        Http1,
+        Http1 = 1,
 
         /// <summary>
-        /// Advanced Message Queuing Protocol transport over WebSocket.
+        /// Advanced Message Queuing Protocol transport over WebSocket only.
         /// </summary>
-        Amqp_WebSocket
+        Amqp_WebSocket = 3,
+
+        /// <summary>
+        /// Advanced Message Queuing Protocol transport over native TCP only
+        /// </summary>
+        Amqp_Tcp = 4
     }
 
     /// <summary>
@@ -46,16 +56,28 @@ namespace Microsoft.Azure.Devices.Client
     {
         const string DeviceId = "DeviceId";
         const string DeviceIdParameterPattern = @"(^\s*?|.*;\s*?)" + DeviceId + @"\s*?=.*";
+        const string OpenAsyncErrorMessage = "OpenAsync must be invoked prior";
+        const RegexOptions RegexOptions = System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase;
 
-        static readonly RegexOptions regexOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
-        static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, regexOptions);
-        readonly DeviceClientHelper impl;
+        static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, RegexOptions);
+        DeviceClientHelper impl;
+#if !WINDOWS_UWP
+        readonly IotHubConnectionString iotHubConnectionString;
+        readonly ITransportSettings[] transportSettings;
+#endif
 
         DeviceClient(DeviceClientHelper impl)
         {
             this.impl = impl;
         }
 
+#if !WINDOWS_UWP
+        DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
+        {
+            this.iotHubConnectionString = iotHubConnectionString;
+            this.transportSettings = transportSettings;
+        }
+#endif
         /// <summary>
         /// Create an Amqp DeviceClient from individual parameters
         /// </summary>
@@ -83,7 +105,7 @@ namespace Microsoft.Azure.Devices.Client
 
             if (authenticationMethod == null)
             {
-                throw new ArgumentNullException("authMethod");
+                throw new ArgumentNullException("authenticationMethod");
             }
 
             var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authenticationMethod);
@@ -138,25 +160,30 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentNullException("connectionString");
             }
 
-            var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
-            if (transportType == TransportType.Amqp || transportType == TransportType.Amqp_WebSocket)
+            switch (transportType)
             {
+                case TransportType.Amqp:
+                case TransportType.Amqp_WebSocket:
+                case TransportType.Amqp_Tcp:
 #if WINDOWS_UWP
-                throw new NotImplementedException();
+                    throw new NotImplementedException("Amqp protocol is not supported");
 #else
-                return new DeviceClient(new AmqpDeviceClient(iotHubConnectionString, (transportType == TransportType.Amqp_WebSocket) ? true : false));
+                    return CreateFromConnectionString(connectionString, new ITransportSettings[] { new AmqpTransportSettings(transportType) });
 #endif
+                case TransportType.Http1:
+#if WINDOWS_UWP
+                    var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
+                    return new DeviceClient(new HttpDeviceClient(iotHubConnectionString));
+#else
+                    return CreateFromConnectionString(connectionString, new ITransportSettings[] { new Http1TransportSettings() });
+#endif
+                default:
+                    throw new InvalidOperationException("Unsupported Transport Type {0}".FormatInvariant(transportType));
             }
-            else if (transportType == TransportType.Http1)
-            {
-                return new DeviceClient(new HttpDeviceClient(iotHubConnectionString));
-            }
-
-            throw new InvalidOperationException("Unsupported Transport Type {0}".FormatInvariant(transportType));
         }
 
         /// <summary>
-        /// Create an DeviceClient from the specified connection string using the specified transport type
+        /// Create DeviceClient from the specified connection string using the specified transport type
         /// </summary>
         /// <param name="connectionString">IoT Hub-Scope Connection string for the IoT hub (without DeviceId)</param>
         /// <param name="deviceId">Id of the device</param>
@@ -181,13 +208,90 @@ namespace Microsoft.Azure.Devices.Client
 
             return CreateFromConnectionString(connectionString + ";" + DeviceId + "=" + deviceId, transportType);
         }
+        
+#if !WINDOWS_UWP
+        /// <summary>
+        /// Create DeviceClient from the specified connection string using a prioritized list of transports
+        /// </summary>
+        /// <param name="connectionString">Connection string for the IoT hub (with DeviceId)</param>
+        /// <param name="transportSettings">Prioritized list of transportSettings</param>
+        /// <returns>DeviceClient</returns>
+        public static DeviceClient CreateFromConnectionString(string connectionString, ITransportSettings[] transportSettings)
+        {
+            if (connectionString == null)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+
+            if (transportSettings == null || transportSettings.Length == 0) 
+            {
+                throw new ArgumentNullException("transportSettings");
+            }
+
+            var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
+
+            if (transportSettings.Length == 1)
+            {
+                switch (transportSettings[0].GetTransportType())
+                {
+                    case TransportType.Amqp:
+                    case TransportType.Amqp_WebSocket:
+                    case TransportType.Amqp_Tcp:
+                        return new DeviceClient(new AmqpDeviceClient(iotHubConnectionString, transportSettings[0] as AmqpTransportSettings));
+                    case TransportType.Http1:
+                        return new DeviceClient(new HttpDeviceClient(iotHubConnectionString, transportSettings[0] as Http1TransportSettings));
+                    default:
+                        throw new InvalidOperationException("Unsupported Transport Setting {0}".FormatInvariant(transportSettings[0]));
+                }
+            }
+
+            // Defer concrete DeviceClient creation to OpenAsync
+            return new DeviceClient(iotHubConnectionString, transportSettings);
+        }
+
+        /// <summary>
+        /// Create DeviceClient from the specified connection string using the prioritized list of transports
+        /// </summary>
+        /// <param name="connectionString">Connection string for the IoT hub (without DeviceId)</param>
+        /// <param name="deviceId">Id of the device</param>
+        /// <param name="transportSettings">Prioritized list of transportTypes</param>
+        /// <returns>DeviceClient</returns>
+        public static DeviceClient CreateFromConnectionString(string connectionString, string deviceId, ITransportSettings[] transportSettings)
+        {
+            if (connectionString == null)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+
+            if (deviceId == null)
+            {
+                throw new ArgumentNullException("deviceId");
+            }
+
+            if (DeviceIdParameterRegex.IsMatch(connectionString))
+            {
+                throw new ArgumentException("connectionString must not contain DeviceId keyvalue parameter");
+            }
+
+            return CreateFromConnectionString(connectionString + ";" + DeviceId + "=" + deviceId, transportSettings);
+        }
+#endif
 
         /// <summary>
         /// Explicitly open the DeviceClient instance.
         /// </summary>
         public AsyncTask OpenAsync()
         {
+#if WINDOWS_UWP
             return impl.OpenAsync().AsTaskOrAsyncOp();
+#else
+            if (this.impl != null)
+            {
+                return this.impl.OpenAsync().AsTaskOrAsyncOp();
+            }
+
+            return this.TryOpenPrioritizedTransports();
+#endif
         }
 
         /// <summary>
@@ -196,7 +300,16 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns></returns>
         public AsyncTask CloseAsync()
         {
-            return impl.CloseAsync().AsTaskOrAsyncOp();
+#if !WINDOWS_UWP
+            if (this.impl != null)
+            {
+#endif
+                return this.impl.CloseAsync().AsTaskOrAsyncOp();
+#if !WINDOWS_UWP
+            }
+
+            return TaskHelpers.CompletedTask;
+#endif
         }
 
         /// <summary>
@@ -205,7 +318,12 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The receive message or null if there was no message until the default timeout</returns>
         public AsyncTaskOfMessage ReceiveAsync()
         {
-            return impl.ReceiveAsync().AsTaskOrAsyncOp();
+            if (this.impl != null)
+            {
+                return this.impl.ReceiveAsync().AsTaskOrAsyncOp();
+            }
+
+            throw new InvalidOperationException(OpenAsyncErrorMessage);
         }
 
         /// <summary>
@@ -213,8 +331,13 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The receive message or null if there was no message until the specified time has elapsed</returns>
         public AsyncTaskOfMessage ReceiveAsync(TimeSpan timeout)
-        {
-            return impl.ReceiveAsync(timeout).AsTaskOrAsyncOp();
+        {           
+            if (this.impl != null)
+            {
+                return this.impl.ReceiveAsync(timeout).AsTaskOrAsyncOp();
+            }
+
+            throw new InvalidOperationException(OpenAsyncErrorMessage);
         }
 
 #if WINDOWS_UWP
@@ -225,8 +348,13 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
         public AsyncTask CompleteAsync(string lockToken)
-        {
-            return impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
+        {          
+            if (this.impl != null)
+            {
+                return this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
+            }
+
+            throw new InvalidOperationException(OpenAsyncErrorMessage);
         }
 
         /// <summary>
@@ -234,8 +362,13 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The previously received message</returns>
         public AsyncTask CompleteAsync(Message message)
-        {
-            return impl.CompleteAsync(message).AsTaskOrAsyncOp();
+        {       
+            if (this.impl != null)
+            {
+                return this.impl.CompleteAsync(message).AsTaskOrAsyncOp();
+            }
+
+            throw new InvalidOperationException(OpenAsyncErrorMessage);
         }
 
 #if WINDOWS_UWP
@@ -246,8 +379,13 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The previously received message</returns>
         public AsyncTask AbandonAsync(string lockToken)
-        {
-            return impl.AbandonAsync(lockToken).AsTaskOrAsyncOp();
+        {        
+            if (this.impl != null)
+            {
+                return this.impl.AbandonAsync(lockToken).AsTaskOrAsyncOp();
+            }
+
+            throw new InvalidOperationException(OpenAsyncErrorMessage);
         }
 
         /// <summary>
@@ -255,8 +393,13 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
         public AsyncTask AbandonAsync(Message message)
-        {
-            return impl.AbandonAsync(message).AsTaskOrAsyncOp();
+        {        
+            if (this.impl != null)
+            {
+                return this.impl.AbandonAsync(message).AsTaskOrAsyncOp();
+            }
+
+            throw new InvalidOperationException(OpenAsyncErrorMessage);
         }
 
 #if WINDOWS_UWP
@@ -267,8 +410,13 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The previously received message</returns>
         public AsyncTask RejectAsync(string lockToken)
-        {
-            return impl.RejectAsync(lockToken).AsTaskOrAsyncOp();
+        {      
+            if (this.impl != null)
+            {
+                return this.impl.RejectAsync(lockToken).AsTaskOrAsyncOp();
+            }
+
+            throw new InvalidOperationException(OpenAsyncErrorMessage);
         }
 
         /// <summary>
@@ -276,8 +424,13 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
         public AsyncTask RejectAsync(Message message)
-        {
-            return impl.RejectAsync(message).AsTaskOrAsyncOp();
+        {     
+            if (this.impl != null)
+            {
+                return this.impl.RejectAsync(message).AsTaskOrAsyncOp();
+            }
+
+            throw new InvalidOperationException(OpenAsyncErrorMessage);
         }
 
         /// <summary>
@@ -285,8 +438,13 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The message containing the event</returns>
         public AsyncTask SendEventAsync(Message message)
-        {
-            return impl.SendEventAsync(message).AsTaskOrAsyncOp();
+        {       
+            if (this.impl != null)
+            {
+                return this.impl.SendEventAsync(message).AsTaskOrAsyncOp();
+            }
+
+            throw new InvalidOperationException(OpenAsyncErrorMessage);
         }
 
         /// <summary>
@@ -294,8 +452,64 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <returns>The task containing the event</returns>
         public AsyncTask SendEventBatchAsync(IEnumerable<Message> messages)
-        {
-            return impl.SendEventBatchAsync(messages).AsTaskOrAsyncOp();
+        {        
+            if (this.impl != null)
+            {
+                return this.impl.SendEventBatchAsync(messages).AsTaskOrAsyncOp();
+            }
+
+            throw new InvalidOperationException(OpenAsyncErrorMessage);
         }
+
+#if !WINDOWS_UWP
+        async AsyncTask TryOpenPrioritizedTransports()
+        {
+            // Concrete Device Client creation was deferred. Use prioritized list of transports.
+            foreach (var transportSetting in this.transportSettings)
+            {
+                DeviceClientHelper helper;
+                try
+                {
+                    switch (transportSetting.GetTransportType())
+                    {
+                        case TransportType.Amqp:
+                        case TransportType.Amqp_WebSocket:
+                        case TransportType.Amqp_Tcp:
+                            helper = new AmqpDeviceClient(this.iotHubConnectionString, transportSetting as AmqpTransportSettings);
+                            break;
+                        case TransportType.Http1:
+                            helper = new HttpDeviceClient(this.iotHubConnectionString, transportSetting as Http1TransportSettings);
+                            break;
+                        default:
+                            throw new InvalidOperationException("Unsupported Transport Setting {0}".FormatInvariant(transportSetting));
+                    }
+
+                    // Try to open a connection with this transport
+                    await helper.OpenAsync();
+                }
+                catch (Exception exception)
+                {
+                    if (exception.IsFatal() || exception is UnauthorizedException)
+                    {
+                        throw;
+                    }
+
+                    // open connection failed. Move to next transport type
+                    continue;
+                }
+
+                // Success - return this transport type
+                this.impl = helper;
+                break;
+            }
+
+            if (this.impl != null)
+            {
+                return;
+            }
+
+            throw new InvalidOperationException("Unsupported Transport Settings {0}".FormatInvariant(this.transportSettings.ToList()));
+        }
+#endif
     }
 }
