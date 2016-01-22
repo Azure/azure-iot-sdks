@@ -50,7 +50,7 @@ apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip
  <a name="build"/>
 ## Build the sample
 
-- Open the file **c/serializer/samples/simplesample_http/simplesample_http.c** in a text editor (nano, for example).
+- Open the file **c/serializer/samples/simplesample_http/simplesample_http.c** in a text editor.
 - Locate the following code in the file:
 ```
 static const char* connectionString = "[device connection string]";
@@ -63,7 +63,7 @@ static const char* connectionString = "[device connection string]";
 ## Deploy the sample
 
 - Open a shell and navigate to the installed OpenWRT SDK folder. By default, it is **~/openwrt/sdk**.
-- Transfer the package.
+- Transfer the sample executable.
 
 OpenWRT Yun Image:
 
@@ -81,7 +81,7 @@ Note that the uClibc version might be different on your setup and you might need
 
 ## Make sure the certificates are installed
 
-Install the ca-certificates package like below:
+On the Arduino Yun device, install the ca-certificates package like below:
 
 ```
 wget https://downloads.openwrt.org/snapshots/trunk/ar71xx/generic/packages/base/ca-certificates_20151214_ar71xx.ipk --no-check-certificate
@@ -93,12 +93,11 @@ You might get an error message at this step(return code 127), but the certificat
 <a name="run"/>
 ## Run the sample
 
-The following instructions assumes the device is flashed with OpenWRT Yun. If you are using LininoIO, substitute `arduino` with `linino` and use the default password `doghunter`.
-
-- Open shell and enter `ssh root@arduino.local` Enter the device password. By default it is, `arduino` for OpenWRT Yun Image or `doghunter` for LininoIO.
 - Run the sample **/tmp/simplesample_http**
 - Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_http** application.
 - See "Send cloud-to-device messages" in the document [How to use Device Explorer for IoT Hub devices][device-explorer] for instructions on sending messages with the **DeviceExplorer** utility.
+
+Note: To send a command to the device from iothub-explorer or DeviceExplorer, the command should be like {"Name":"TurnFanOff", "Parameters":{}}
 
 [setup-devbox-linux]: devbox_setup.md
 [device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
