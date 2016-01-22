@@ -44,10 +44,7 @@ apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip
 - Navigate to the folder **c/build_all/arduino** in your local copy of the repository.
 - Run the `./setup.sh` script to install the OpenWRT SDK and prerequisites. By default, the SDK will be installed at **~/openwrt/sdk**
 - (Optional) Enter 'Y' to build the Azure IoT SDK.
-
-This script builds the **iothub_client** and **serializer** libraries and their associated samples.
-
-Note: you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
+- Ignore any proton build related errors.
 
  <a name="build"/>
 ## Build the sample
@@ -59,7 +56,7 @@ static const char* connectionString = "[device connection string]";
 ```
 - Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
 - The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
-- Run the `build.sh` script in the **c/build_all/arduino** directory.   
+- Run the `./build.sh` script in the **c/build_all/arduino** directory.   
 
 <a name="deploy"/>
 ## Deploy the sample
