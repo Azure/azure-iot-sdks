@@ -25,6 +25,12 @@ function handleResponse(done) {
   };
 }
 
+/**
+ * @class module:azure-iot-device-http.Http
+ * @classdesc       Provide HTTP transport to the device [client]{@link module:azure-iot-device.Client}.
+ * 
+ * @param   {Object}    config  Configuration object derived from the connection string by the client.
+ */
 /*Codes_SRS_NODE_DEVICE_HTTP_05_001: [The Http constructor shall accept an object with three properties:
 host - (string) the fully-qualified DNS hostname of an IoT hub
 deviceId - (string) the name of the IoT hub, which is the first segment of hostname
@@ -35,8 +41,10 @@ function Http(config) {
 }
 
 /**
- * This method sends an event to the IoT Hub as the device indicated in the
- * `config` parameter.
+ * @method          module:azure-iot-device-http.Http#sendEvent
+ * @description     This method sends an event to the IoT Hub as the device indicated in the
+ *                  `config` parameter.
+ * 
  * @param {Message}  message    The [message]{@linkcode module:common/message.Message}
  *                              to be sent.
  * @param {Object}  config      This is a dictionary containing the following keys
@@ -107,8 +115,9 @@ function constructBatchBody(messages) {
 }
 
 /**
- * The `sendEventBatch` method sends a list of event messages to the IoT Hub
- * as the device indicated in the `config` parameter.
+ * @method          module:azure-iot-device-http.Http#sendEventBatch
+ * @description     The `sendEventBatch` method sends a list of event messages to the IoT Hub
+ *                  as the device indicated in the `config` parameter.
  * @param {array<Message>} messages   Array of [Message]{@linkcode module:common/message.Message}
  *                                    objects to be sent as a batch.
  * @param {Object}  config            This is a dictionary containing the
@@ -152,9 +161,11 @@ Http.prototype.sendEventBatch = function (messages, done) {
 };
 
 /**
+ * @method          module:azure-iot-device-http.Http#receive
+ * @description     The receive method queries the IoT Hub (as the device indicated in the
+ *                  `config` parameter) for the next message in the queue.
  * @deprecated getReceiver should be used instead.
- * The receive method queries the IoT Hub (as the device indicated in the
- * `config` parameter) for the next message in the queue.
+ * 
  * @param {Object}  config            This is a dictionary containing the
  *                                    following keys and values:
  *
@@ -198,7 +209,9 @@ Http.prototype.receive = function (done) {
 };
 
 /**
- * This method sends the feedback action to the IoT Hub.
+ * @method          module:azure-iot-device-http.Http#sendFeedback
+ * @description     This method sends the feedback action to the IoT Hub.
+ * @deprecated      Use [abandon, complete, and reject]{@link module:azure-iot-device-http.HttpReceiver.abandon} methods of the [HttpReceiver]{@link module:azure-iot-device-http.HttpReceiver} instead.
  *
  * @param {String}  action    This parameter must be equal to one of the
  *                            following possible values:
@@ -272,7 +285,9 @@ Http.prototype.sendFeedback = function (action, message, done) {
 };
 
 /**
- * This methods gets the unique instance of the receiver that is used to asynchronously retrieve messages from the IoT Hub service.
+ * @method          module:azure-iot-device-http.Http#getReceiver
+ * @description     This methods gets the unique instance of the receiver that is used to asynchronously retrieve messages from the IoT Hub service.
+ * 
  * @param {Function}      done      The callback to be invoked when `getReceiver` completes execution, passing the receiver object as an argument.
  */
 Http.prototype.getReceiver = function getReceiver (done) {

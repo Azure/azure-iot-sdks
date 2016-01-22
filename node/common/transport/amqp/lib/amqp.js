@@ -9,16 +9,22 @@ var AmqpReceiver = require('./amqp_receiver.js');
 var errors = require('azure-iot-common').errors;
 
 /**
- * @class module:azure-iot-common.Amqp
+ * @class module:azure-iot-amqp-base.Amqp
  * @classdesc Basic AMQP functionality used by higher-level IoT Hub libraries.
+ *            Usually you'll want to avoid using this class and instead rely on higher-level implementations 
+ *            of the AMQP transport (see [azure-iot-device-amqp.Amqp]{@link module:azure-iot-device-amqp.Amqp} for example).
+ * 
+ * @param   {String}    saslPlainUri            URL to the IoT Hub instance including SASL-Plain credentials.
+ * @param   {Boolean}   autoSettleMessages      Boolean indicating whether messages should be settled automatically or if the calling code will handle it.
+ * @param   {String}    sdkVersionString        String identifying the SDK used (device or service).
  */
 
 /*Codes_SRS_NODE_COMMON_AMQP_16_001: [The Amqp constructor shall accept two parameters:
-A SASL-Plain URI to be used to connect to the IoT Hub instance
-A Boolean indicating whether the client should automatically settle messages:
-	True if the messages should be settled automatically
-	False if the caller intends to manually settle messages
-    A string containing the version of the SDK used for telemetry purposes] */
+    A SASL-Plain URI to be used to connect to the IoT Hub instance
+    A Boolean indicating whether the client should automatically settle messages:
+        True if the messages should be settled automatically
+        False if the caller intends to manually settle messages
+        A string containing the version of the SDK used for telemetry purposes] */
 function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
   var autoSettleMode = autoSettleMessages ? amqp10.Constants.receiverSettleMode.autoSettle : amqp10.Constants.receiverSettleMode.settleOnDisposition;
   this._amqp = new amqp10.Client(amqp10.Policy.merge({
@@ -57,7 +63,8 @@ function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
 }
 
 /**
- * Establishes a connection with the IoT Hub instance.
+ * @method             module:azure-iot-amqp-base.Amqp#connect
+ * @description        Establishes a connection with the IoT Hub instance.
  * @param {Function}   done   Called when the connection is established of if an error happened.
  */
 Amqp.prototype.connect = function connect(done) {
@@ -84,7 +91,8 @@ Amqp.prototype.connect = function connect(done) {
 };
 
 /**
- * Disconnects the link to the IoT Hub instance.
+ * @method             module:azure-iot-amqp-base.Amqp#disconnect
+ * @description        Disconnects the link to the IoT Hub instance.
  * @param {Function}   done   Called when disconnected of if an error happened.
  */
 Amqp.prototype.disconnect = function disconnect(done) {
@@ -102,7 +110,9 @@ Amqp.prototype.disconnect = function disconnect(done) {
 };
 
 /**
- * Sends a message to the IoT Hub instance.
+ * @method             module:azure-iot-amqp-base.Amqp#send
+ * @description        Sends a message to the IoT Hub instance.
+ * 
  * @param {Message}   message   The message to send.
  * @param {string}    endpoint  The endpoint to use when sending the message.
  * @param {string}    to        The destination of the message.
@@ -154,7 +164,9 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
 };
 
 /**
- * Gets the {@linkcode AmqpReceiver} object that can be used to receive messages from the IoT Hub instance and accept/reject/release them.
+ * @method             module:azure-iot-amqp-base.Amqp#getReceiver
+ * @description        Gets the {@linkcode AmqpReceiver} object that can be used to receive messages from the IoT Hub instance and accept/reject/release them.
+ * 
  * @param {string}    endpoint  Endpoint used for the receiving link.
  * @param {Function}  done      Callback used to return the {@linkcode AmqpReceiver} object.
  */

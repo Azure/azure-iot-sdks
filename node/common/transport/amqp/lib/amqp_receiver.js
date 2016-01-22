@@ -7,13 +7,13 @@ var EventEmitter = require('events');
 var util = require('util');
 
 /**
- * @class AmqpReceiver
- * @classdesc Constructs and {@linkcode AmqpReceiver} object.
+ * @class            module:azure-iot-amqp-base.AmqpReceiver
+ * @classdesc        The `AmqpReceiver` class is used to receive and settle messages.
  * 
- * @param {amqp10.ReceiverLink}   amqpReceiver   The Receiver object that is created by the client using the node-amqp10 library.
+ * @param {Object}   amqpReceiver   The Receiver object that is created by the client using the `node-amqp10` library.
  * 
- * @fires AmqpReceiver#message        Fires the 'message' events when a message is received.
- * @fires AmqpReceiver#errorReceived  Fires the 'errorReceived' events when an error is received.
+ * @fires module:azure-iot-amqp-base.AmqpReceiver#message
+ * @fires module:azure-iot-amqp-base.AmqpReceiver#errorReceived
  */
 /* Codes_SRS_NODE_IOTHUB_AMQPRECEIVER_16_001: [The AmqpReceiver method shall create a new instance of AmqpReceiver.]*/ 
 /* Codes_SRS_NODE_IOTHUB_AMQPRECEIVER_16_002: [The created AmqpReceiver object shall emit a ‘message’ event when a message is received.]*/ 
@@ -43,10 +43,18 @@ function AmqpReceiver(amqpReceiver) {
 util.inherits(AmqpReceiver, EventEmitter);
 
 AmqpReceiver.prototype._onAmqpErrorReceived = function (err) {
+    /**
+     * @event module:azure-iot-amqp-base.AmqpReceiver#errorReceived
+     * @type {Error}
+     */
   this.emit('errorReceived', err);
 };
   
 AmqpReceiver.prototype._onAmqpMessage = function (message) {
+    /**
+     * @event module:azure-iot-amqp-base.AmqpReceiver#message
+     * @type {AmqpMessage}
+     */
   this.emit('message', message);
 };
   
@@ -64,7 +72,8 @@ AmqpReceiver.prototype._removeAmqpReceiverListeners = function () {
 
 
 /**
- * Sends a completion feedback message to the service.
+ * @method          module:azure-iot-amqp-base.AmqpReceiver#complete
+ * @description     Sends a completion feedback message to the service.
  * @param {AmqpMessage}   message  The message that is being settled. 
  */ 
 /* Codes_SRS_NODE_IOTHUB_AMQPRECEIVER_16_006: [If the message object passed as an argument is falsy, a ReferenceError should be thrown]*/ 
@@ -75,7 +84,8 @@ AmqpReceiver.prototype.complete = function (message, done) {
 };
 
 /** 
- * Sends an abandon/release feedback message 
+ * @method          module:azure-iot-amqp-base.AmqpReceiver#abandon
+ * @description     Sends an abandon/release feedback message 
  * @param {AmqpMessage}   message  The message that is being settled.
 */ 
 /* Codes_SRS_NODE_IOTHUB_AMQPRECEIVER_16_008: [If the message object passed as an argument is falsy, a ReferenceError should be thrown]*/ 
@@ -86,7 +96,8 @@ AmqpReceiver.prototype.abandon = function (message, done) {
 };
 
 /** 
- * Sends an reject feedback message 
+ * @method          module:azure-iot-amqp-base.AmqpReceiver#reject
+ * @description     Sends an reject feedback message 
  * @param {AmqpMessage}   message  The message that is being settled.
 */ 
 /* Codes_SRS_NODE_IOTHUB_AMQPRECEIVER_16_010: [If the message object passed as an argument is falsy, a ReferenceError should be thrown]*/ 

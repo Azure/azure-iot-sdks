@@ -5,6 +5,14 @@
 
 var mqtt = require('mqtt');
 
+/**
+ * @class           module:azure-iot-mqtt-base.Mqtt
+ * @classdesc       Base MQTT transport implementation used by higher-level IoT Hub libraries. 
+ *                  You generally want to use these higher-level objects (such as [azure-iot-device-mqtt.Mqtt]{@link module:azure-iot-device-mqtt.Mqtt})
+ *                  rather than this one.
+ * 
+ * @param {Object}  config      The configuration object derived from the connection string.
+ */
 /*
  Codes_SRS_NODE_HTTP_12_001: MqttTransport shall accept the following argument:
     config [
@@ -40,6 +48,13 @@ function Mqtt(config) {
   };
   return this;
 }
+
+/**
+ * @method            module:azure-iot-mqtt-base.Mqtt#connect
+ * @description       Establishes a secure connection to the IoT Hub instance using the MQTT protocol.
+ * 
+ * @param {Function}  done  Callback that shall be called when the connection is established.
+ */
 /* SRS_NODE_HTTP_12_005: The CONNECT method shall call connect on MQTT.JS  library and return a promise with the result */
 Mqtt.prototype.connect = function (done) {
   this.client = mqtt.connect(this._gatewayHostName, this._options);
@@ -56,6 +71,12 @@ Mqtt.prototype.connect = function (done) {
   }
 };
 
+/**
+ * @method            module:azure-iot-mqtt-base.Mqtt#disconnect
+ * @description       Terminates the connection to the IoT Hub instance.
+ * 
+ * @param {Function}  done      Callback that shall be called when the connection is terminated.
+ */
 Mqtt.prototype.disconnect = function (done) {
     this.client.removeAllListeners();
     // The first parameter decides whether the connection should be forcibly closed without waiting for all sent messages to be ACKed.
@@ -64,6 +85,13 @@ Mqtt.prototype.disconnect = function (done) {
     this.client.end(false, done);
 };
 
+/**
+ * @method            module:azure-iot-mqtt-base.Mqtt#publish
+ * @description       Publishes a message to the IoT Hub instance using the MQTT protocol.
+ * 
+ * @param {Object}    message   Message to send to the IoT Hub instance.
+ * @param {Function}  done      Callback that shall be called when the connection is established.
+ */
 /* Codes_SRS_NODE_HTTP_12_006: The PUBLISH method shall throw ReferenceError “Invalid message” if the message is falsy */
 /* Codes_SRS_NODE_HTTP_12_007: The PUBLISH method shall call publish on MQTT.JS library with the given message */
 Mqtt.prototype.publish = function (message, done) {
@@ -84,6 +112,12 @@ Mqtt.prototype.publish = function (message, done) {
   });
 };
 
+/**
+ * @method            module:azure-iot-mqtt-base.Mqtt#subscribe
+ * @description       Subscribes to messages coming from the IoT Hub instance.
+ * 
+ * @param {Function}  done  Callback that shall be called when the subscription is successful or if an error happens.
+ */
 /* Codes_SRS_NODE_HTTP_12_008: The SUBSCRIBE method shall call subscribe on MQTT.JS library with the given message and with the hardcoded topic path */
 Mqtt.prototype.subscribe = function (done) {
   if (done) {
@@ -100,6 +134,12 @@ Mqtt.prototype.subscribe = function (done) {
   });
 };
 
+/**
+ * @method            module:azure-iot-mqtt-base.Mqtt#receive
+ * @description       Receives messages from the IoT Hub instance.
+ * 
+ * @param {Function}  done  Callback that shall be called when a message arrives or if an error happens.
+ */
 /* Codes_SRS_NODE_HTTP_12_010: The RECEIVE method shall implement the MQTT.JS library callback event and calls back to the caller with the given callback */
 Mqtt.prototype.receive = function (done) {
   if (done) {

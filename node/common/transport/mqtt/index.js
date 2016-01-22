@@ -3,6 +3,12 @@
 
 'use strict';
 
+/**
+ * The `azure-iot-mqtt-base` module contains MQTT support code common to the Azure IoT Hub Device and Service SDKs.
+ * 
+ * @module azure-iot-mqtt-base
+ */
+
 module.exports = {
   Mqtt: require('./lib/mqtt.js')
 };

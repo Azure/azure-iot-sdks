@@ -3,6 +3,12 @@
 
 'use strict';
 
+/**
+ * The `azure-iot-common` module contains code common to the Azure IoT Hub Device and Service SDKs.
+ * 
+ * @module azure-iot-common
+ */
+
 module.exports = {
   anHourFromNow: require('./lib/authorization.js').anHourFromNow,
   encodeUriComponentStrict: require('./lib/authorization.js').encodeUriComponentStrict,

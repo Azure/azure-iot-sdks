@@ -3,6 +3,12 @@
 
 'use strict';
 
+/**
+ * @class       module:azure-iot-common.ArgumentError
+ * @classdesc   Error thrown when an argument is invalid.
+ * 
+ * @augments {Error}
+ */
 function ArgumentError(message) {
   this.message = message;
   this.stack = (new Error()).stack;
@@ -13,6 +19,12 @@ ArgumentError.prototype = Object.create(Error.prototype);
 ArgumentError.prototype.constructor = ArgumentError;
 ArgumentError.prototype.name = 'ArgumentError';
 
+/**
+ * @class       module:azure-iot-common.DeviceMaximumQueueDepthExceededError
+ * @classdesc   Error thrown when the message queue for a device is full.
+ * 
+ * @augments {Error}
+ */
 function DeviceMaximumQueueDepthExceededError(message) {
   this.message = message;
   this.stack = (new Error()).stack;
@@ -23,6 +35,12 @@ DeviceMaximumQueueDepthExceededError.prototype = Object.create(Error.prototype);
 DeviceMaximumQueueDepthExceededError.prototype.constructor = DeviceMaximumQueueDepthExceededError;
 DeviceMaximumQueueDepthExceededError.prototype.name = 'DeviceMaximumQueueDepthExceededError';
 
+/**
+ * @class       module:azure-iot-common.DeviceNotFoundError
+ * @classdesc   Error thrown when a device cannot be found in the IoT Hub instance registry.
+ * 
+ * @augments {Error}
+ */
 function DeviceNotFoundError(message) {
   this.message = message;
   this.stack = (new Error()).stack;
@@ -33,6 +51,12 @@ DeviceNotFoundError.prototype = Object.create(Error.prototype);
 DeviceNotFoundError.prototype.constructor = DeviceNotFoundError;
 DeviceNotFoundError.prototype.name = 'DeviceNotFoundError';
 
+/**
+ * @class       module:azure-iot-common.FormatError
+ * @classdesc   Error thrown when a string that is supposed to have a specific formatting is not formatted properly.
+ * 
+ * @augments {Error}
+ */
 function FormatError(message) {
   this.message = message;
   this.stack = (new Error()).stack;
@@ -43,6 +67,12 @@ FormatError.prototype = Object.create(Error.prototype);
 FormatError.prototype.constructor = FormatError;
 FormatError.prototype.name = 'FormatError';
 
+/**
+ * @class       module:azure-iot-common.UnauthorizedError
+ * @classdesc   Error thrown when the connection parameters are wrong and the server refused the connection.
+ * 
+ * @augments {Error}
+ */
 function UnauthorizedError(message) {
   this.message = message;
   this.stack = (new Error()).stack;
