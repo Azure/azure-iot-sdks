@@ -6,19 +6,32 @@
 var Message = require('azure-iot-common').Message;
 
 /**
- * @class module:azure-iot-common.Http
- * @classdesc Basic HTTP request/response functionality used by higher-level IoT Hub libraries.
+ * @class           module:azure-iot-http-base.Http
+ * @classdesc       Basic HTTP request/response functionality used by higher-level IoT Hub libraries.
+ *                  You generally want to use these higher-level objects (such as [azure-iot-device-http.Http]{@link module:azure-iot-device-http.Http}) rather than this one.
  */
 function Http() {
   this._https = require('https');
 }
 
+/**
+ * @method              module:azure-iot-http-base.Http.buildRequest
+ * @description         Builds an HTTP request object using the parameters supplied by the caller.
+ * 
+ * @param {String}      method          The HTTP verb to use (GET, POST, PUT, DELETE...).
+ * @param {String}      path            The section of the URI that should be appended after the hostname.
+ * @param {Object}      httpHeaders     An object containing the headers that should be used for the request.
+ * @param {String}      host            Fully-Qualified Domain Name of the server to which the request should be sent to.
+ * @param {Function}    done            The callback to call when a response or an error is received.
+ * 
+ * @returns An HTTP request object.
+ */
 /*Codes_SRS_NODE_HTTP_05_001: [buildRequest shall accept the following arguments:
-method - an HTTP verb, e.g., 'GET', 'POST', 'DELETE'
-path - the path to the resource, not including the hostname
-httpHeaders - an object whose properties represent the names and values of HTTP headers to include in the request
-host - the fully-qualified DNS hostname of the IoT hub
-done - a callback that will be invoked when a completed response is returned from the server]*/
+    method - an HTTP verb, e.g., 'GET', 'POST', 'DELETE'
+    path - the path to the resource, not including the hostname
+    httpHeaders - an object whose properties represent the names and values of HTTP headers to include in the request
+    host - the fully-qualified DNS hostname of the IoT hub
+    done - a callback that will be invoked when a completed response is returned from the server]*/
 Http.prototype.buildRequest = function (method, path, httpHeaders, host, done) {
   var options = {
     host: host,
@@ -50,6 +63,15 @@ Http.prototype.buildRequest = function (method, path, httpHeaders, host, done) {
   return request;
 };
 
+/**
+ * @method              module:azure-iot-http-base.Http.toMessage
+ * @description         Transforms the body of an HTTP response into a {@link module:azure-iot-common.Message} that can be treated by the client.
+ * 
+ * @param {Object}      response          The HTTP verb to use (GET, POST, PUT, DELETE...).
+ * @param {Object}      body            The section of the URI that should be appended after the hostname.
+ * 
+ * @returns {module:azure-iot-common.Message} A Message object.
+ */
 Http.prototype.toMessage = function toMessage(response, body) {
   var msg;
   /*Codes_SRS_NODE_HTTP_05_006: [If the status code of the HTTP response < 300, toMessage shall create a new azure-iot-common.Message object with data equal to the body of the HTTP response.]*/

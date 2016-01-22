@@ -9,10 +9,14 @@ var Amqp = require('azure-iot-device-amqp').Amqp;
 var PackageJson = require('../package.json');
 
 /** 
- * @class AmqpWs
+ * @class module:azure-iot-device-amqp-ws.AmqpWs
  * @classdesc Constructs an {@linkcode AmqpWs} object that can be used on a device to send 
  *            and receive messages to and from an IoT Hub instance, using the AMQP protocol over secure websockets.
- * @augments Amqp
+ *            This class overloads the constructor of the base {@link module:azure-iot-device-amqp:Amqp} class from the AMQP transport, and inherits all methods from it.
+ * 
+ * @augments module:azure-iot-device-amqp.Amqp
+ * 
+ * @param {Object}  config   Configuration object generated from the connection string by the client.
  */
 function AmqpWs(config) {
   this._config = config;

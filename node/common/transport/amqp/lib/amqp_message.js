@@ -4,14 +4,17 @@
 'use strict';
 
 /**
- * @class AmqpMessage
- * @classdesc Creates a new instance of the {@linkcode AmqpMessage} class.
+ * @class           module:azure-iot-amqp-base.AmqpMessage
+ * @classdesc       AMQP-specific message class used to prepare a [azure-iot-common.Message]{@link module:azure-iot-common.Message}
+ *                  before it's sent over the wire using the AMQP protocol.
  */
 function AmqpMessage() { }
 
 /**
- * Takes a {@linkcode Message} object and creates an AMQP message from it.
- * @param {Message}   message   The {@linkcode Message} object from which to create an AMQP message.
+ * @method          module:azure-iot-amqp-base.AmqpMessage.fromMessage
+ * @description     Takes a azure-iot-common.Message{@link module:azure-iot-common.Message} object and creates an AMQP message from it.
+ * 
+ * @param {module:azure-iot-common.Message}   message   The {@linkcode Message} object from which to create an AMQP message.
  */
 AmqpMessage.fromMessage = function fromMessage(message) {
   if (!message) throw new ReferenceError('message is \'' + message + '\'');

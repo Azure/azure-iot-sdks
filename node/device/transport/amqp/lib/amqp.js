@@ -8,9 +8,10 @@ var endpoint = require('azure-iot-common').endpoint;
 var PackageJson = require('../package.json');
 
 /** 
- * @class Amqp
+ * @class module:azure-iot-device-amqp.Amqp
  * @classdesc Constructs an {@linkcode Amqp} object that can be used on a device to send 
  *            and receive messages to and from an IoT Hub instance, using the AMQP protocol.
+ * 
  */
 /*Codes_SRS_NODE_DEVICE_AMQP_16_001: [The Amqp constructor shall accept a config object with four properties:
 host – (string) the fully-qualified DNS hostname of an IoT Hub
@@ -32,8 +33,10 @@ function Amqp(config) {
 }
 
 /**
- * Establishes a connection with the IoT Hub instance.
+ * @method              module:azure-iot-device-amqp.Amqp#connect
+ * @description         Establishes a connection with the IoT Hub instance.
  * @param {Function}   done   Called when the connection is established of if an error happened.
+ * 
  */
 /*Codes_SRS_NODE_DEVICE_AMQP_16_008: [The done callback method passed in argument shall be called if the connection is established]*/ 
 /*Codes_SRS_NODE_DEVICE_AMQP_16_009: [The done callback method passed in argument shall be called with an error object if the connecion fails]*/ 
@@ -42,7 +45,8 @@ Amqp.prototype.connect = function connect(done) {
 };
 
 /**
- * Disconnects the link to the IoT Hub instance.
+ * @method              module:azure-iot-device-amqp.Amqp#disconnect
+ * @description         Disconnects the link to the IoT Hub instance.
  * @param {Function}   done   Called when disconnected of if an error happened.
  */
 /*Codes_SRS_NODE_DEVICE_AMQP_16_010: [The done callback method passed in argument shall be called when disconnected]*/ 
@@ -52,7 +56,8 @@ Amqp.prototype.disconnect = function disconnect(done) {
 };
 
 /**
- * Sends an event to the IoT Hub.
+ * @method              module:azure-iot-device-amqp.Amqp#sendEvent
+ * @description         Sends an event to the IoT Hub.
  * @param {Message}  message    The [message]{@linkcode module:common/message.Message}
  *                              to be sent.
  * @param {Function} done       The callback to be invoked when `sendEvent`
@@ -67,7 +72,8 @@ Amqp.prototype.sendEvent = function sendEvent(message, done) {
 };
 
 /**
- * Gets the {@linkcode AmqpReceiver} object that can be used to receive messages from the IoT Hub instance and accept/reject/release them.
+ * @method              module:azure-iot-device-amqp.Amqp#getReceiver
+ * @description         Gets the {@linkcode AmqpReceiver} object that can be used to receive messages from the IoT Hub instance and accept/reject/release them.
  * @param {Function}  done      Callback used to return the {@linkcode AmqpReceiver} object.
  */
 /* Codes_SRS_NODE_DEVICE_AMQP_16_006: [If a receiver for this endpoint has already been created, the getReceiver method should call the done() method with the existing instance as an argument.]*/ 

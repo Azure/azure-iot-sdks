@@ -55,9 +55,12 @@ Client.fromConnectionString = function fromConnectionString(value, Transport) {
 };
 
 /**
- * @method            module:azure-iot-device.Client.connect
+ * @method            module:azure-iot-device.Client#open
  * @description       Call the transport layer CONNECT function if the
  *                    transport layer implements it
+ * 
+ * @param {Function} done       The callback to be invoked when `sendEvent`
+ *                              completes execution.
  * @returns calls the given callback
  */
 Client.prototype.open = function (done) {
@@ -77,9 +80,11 @@ response - a transport-specific response object]*/
 
 
 /**
- * The [sendEvent]{@linkcode Client#sendEvent} method sends an event message
- * to the IoT Hub as the device indicated by the connection string passed
- * via the constructor.
+ * @method            module:azure-iot-device.Client#sendEvent
+ * @description       The [sendEvent]{@linkcode Client#sendEvent} method sends an event message
+ *                    to the IoT Hub as the device indicated by the connection string passed
+ *                    via the constructor.
+ * 
  * @param {Message}  message    The [message]{@linkcode module:common/message.Message}
  *                              to be sent.
  * @param {Function} done       The callback to be invoked when `sendEvent`
@@ -92,9 +97,11 @@ Client.prototype.sendEvent = function(message, done) {
 };
 
 /**
- * The [sendEventBatch]{@linkcode Client#sendEventBatch} method sends a list
- * of event messages to the IoT Hub as the device indicated by the connection
- * string passed via the constructor.
+ * @method            module:azure-iot-device.Client#sendEventBatch
+ * @description       The [sendEventBatch]{@linkcode Client#sendEventBatch} method sends a list
+ *                    of event messages to the IoT Hub as the device indicated by the connection
+ *                    string passed via the constructor.
+ * 
  * @param {array<Message>} messages Array of [Message]{@linkcode module:common/message.Message}
  *                                  objects to be sent as a batch.
  * @param {Function}      done      The callback to be invoked when
@@ -106,8 +113,11 @@ Client.prototype.sendEventBatch = function(messages, done) {
 };
 
 /**
- * The receive method queries the IoT Hub (as the device indicated in the
- * constructor argument) for the next message in the queue.
+ * @deprecated        use [getReceiver]{@linkcode Client#getReceiver} instead.
+ * @method            module:azure-iot-device.Client#receive
+ * @description       The receive method queries the IoT Hub (as the device indicated in the
+ *                    constructor argument) for the next message in the queue.
+ * 
  * @param {Function}  done      The callback to be invoked when `receive`
  *                              completes execution.
  */
@@ -121,7 +131,9 @@ Client.prototype.receive = function(done) {
 };
 
 /**
- * The getReceiver method returns the receiver object that is used to get messages and settle them.
+ * @method            module:azure-iot-device.Client#getReceiver
+ * @description       The [getReceiver]{@linkcode Client#getReceiver} method returns the receiver object that is used to get messages and settle them.
+ * 
  * @param {Function} done The callback to be invoked with the receiver object as a parameter.
  */
 Client.prototype.getReceiver = function (done) {
@@ -129,8 +141,11 @@ Client.prototype.getReceiver = function (done) {
 };
 
 /**
- * The `abandon` method directs the IoT Hub to re-enqueue a message
- * message so it may be received again later.
+ * @deprecated        use abandon method of the receiver object instead.
+ * @method            module:azure-iot-device.Client#abandon
+ * @description       The `abandon` method directs the IoT Hub to re-enqueue a message
+ *                    message so it may be received again later.
+ * 
  * @param {Message}   message   The [message]{@linkcode module:common/message.Message}
  *                              to be re-enqueued.
  * @param {Function}  done      The callback to be invoked when `abandon`
@@ -150,8 +165,11 @@ Client.prototype.abandon = function(message, done) {
 };
 
 /**
- * The `reject` method directs the IoT Hub to delete a message
- * from the queue and record that it was rejected.
+ * @deprecated        use reject method of the receiver object instead.
+ * @method            module:azure-iot-device.Client#reject
+ * @description       The `reject` method directs the IoT Hub to delete a message
+ *                    from the queue and record that it was rejected.
+ * 
  * @param {Message}   message   The [message]{@linkcode module:common/message.Message}
  *                              to be deleted.
  * @param {Function}  done      The callback to be invoked when `reject`
@@ -171,8 +189,11 @@ Client.prototype.reject = function(message, done) {
 };
 
 /**
- * The `complete` method directs the IoT Hub to delete a message
- * from the queue and record that it was accepted.
+ * @deprecated        use complete method of the receiver object instead.
+ * @method            module:azure-iot-device.Client#complete
+ * @description       The `complete` method directs the IoT Hub to delete a message
+ *                    from the queue and record that it was accepted.
+ * 
  * @param {Message}   message   The [message]{@linkcode module:common/message.Message}
  *                              to be accepted.
  * @param {Function}  done      The callback to be invoked when `complete`

@@ -6,8 +6,7 @@
 var Properties = require('./properties.js');
 
 /**
- * @class Message
- * @alias module:common/message.Message
+ * @class module:azure-iot-common.Message
  * @classdesc Constructs a {@linkcode Message} object with the given data.
  *            `data` can be a Node [Buffer]{@linkcode https://nodejs.org/api/globals.html#globals_class_buffer}
  *            object or anything that can be used to construct a `Buffer`
@@ -46,7 +45,9 @@ function Message(data) {
 }
 
 /**
- * Returns the data that was passed in to the [constructor]{@link Message}.
+ * @method          module:azure-iot-common.Message#getData
+ * @description     Returns the data that was passed in to the [constructor]{@link Message}.
+ * 
  * @returns {*} The data that was passed to the [constructor]{@link Message}.
  */
 Message.prototype.getData = function() {
@@ -55,9 +56,11 @@ Message.prototype.getData = function() {
 };
 
 /**
- * Returns the data passed to the constructor as a Node
- * [Buffer]{@linkcode https://nodejs.org/api/globals.html#globals_class_buffer}
- * of bytes.
+ * @method          module:azure-iot-common.Message#getBytes
+ * @description     Returns the data passed to the constructor as a Node
+ *                  [Buffer]{@linkcode https://nodejs.org/api/globals.html#globals_class_buffer}
+ *                  of bytes.
+ * 
  * @returns {Buffer}
  */
 Message.prototype.getBytes = function() {
