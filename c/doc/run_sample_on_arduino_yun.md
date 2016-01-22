@@ -44,7 +44,8 @@ apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip
 - Navigate to the folder **c/build_all/arduino** in your local copy of the repository.
 - Run the `./setup.sh` script to install the OpenWRT SDK and prerequisites. By default, the SDK will be installed at **~/openwrt/sdk**
 - (Optional) Enter 'Y' to build the Azure IoT SDK.
-- Ignore any proton build related errors.
+- When prompted to build proton, enter 'N'
+
 
  <a name="build"/>
 ## Build the sample
