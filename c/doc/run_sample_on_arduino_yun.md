@@ -50,7 +50,7 @@ apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip
  <a name="build"/>
 ## Build the sample
 
-- Open the file **c/serializer/samples/simplesample_http/simplesample_http.c** in a text editor.
+- Open the file **c/serializer/samples/simplesample_http/simplesample_http.c** in a text editor (nano, for example).
 - Locate the following code in the file:
 ```
 static const char* connectionString = "[device connection string]";
