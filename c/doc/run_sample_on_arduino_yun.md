@@ -16,7 +16,7 @@ The following document describes the process of connecting an Arduino Yun system
 
   - Computer with a Git client installed so that you can access the azure-iot-sdks code on GitHub.
   - Arduino Yun board.
-  - Debian x86
+  - Ubuntu x86 machine (for cross compiling)
 
 <a name="beforebegin"/>
 ## Before you begin
