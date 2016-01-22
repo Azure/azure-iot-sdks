@@ -46,13 +46,17 @@ You should have the following items ready before beginning the process:
 -   Prepare the Yocto Root file system for your Almach board by following the instructions in the "esom3730_yocto_user_manual.pdf".
 -   Apply the patch file "azure.patch" to yocto source directory in build PC
 -   Add the below line to local.conf ( $YOCTO_INSTALL_PATH/build_esom/conf/local.conf )
+
     ```
     IMAGE_INSTALL_append += "packagegroup-esom-azure"
     ```
+
 -   Run the below command after setting up yocto environment
+
     ```
     bitbake esom3730-console-image
     ```
+
 -   Once the image is built, flash the boot image and rootfs to the SD card as per the User manual.
 -   Connect Almach to your desktop machine using the USB mini cable and open a terminal emulator program such as [Tera Term](https://en.osdn.jp/projects/ttssh2/releases/) on your desktop and switch ON the device. You have to create a new Serial port connection from Setup->Serial Port and set the parameters:  
     * Port number where you have connected the device to PC.
@@ -98,9 +102,11 @@ You can build the azure-iot-sdk and samples directly in Almach or from PC where 
 ## 3.2 Build SDK and sample in PC
 
 -   Download the Microsoft Azure IoT Device SDK for C in the Yocto build PC path
+
     ```
     {$YOCTO_INSTALL_PATH}/poky-fido-13.0.0/meta-esom3730/recipes-connectivity/azure-iot/files/
     ```
+
 -   Edit the following file using any text editor of your choice:
 
     **For AMQP protocol:**
@@ -123,9 +129,11 @@ You can build the azure-iot-sdk and samples directly in Almach or from PC where 
     ```
 -   Create a folder named "cmake" in ***"$HOME"*** of the Root file system in Almach SD card.
 -   After the build process gets completed, copy the generated files from the following folder in build PC, to the "cmake" folder of the above step.
+
     ```
     {$YOCTO_INSTALL_PATH}/build_esom/tmp/work/cortexa8-vfp-neon-poky-linux-gnueabi/azure-iot/1.0-r0/build/
     ```
+
     Once the copy process gets completed, insert the card to Almach.
 -   Open a TeraTerm session, connect it with the device and then power ON the device
 -   After logging in to the command prompt terminal, check the presence of the **cmake** folder in the path ***"$HOME" (/home/root)*** which we have copied from PC.
