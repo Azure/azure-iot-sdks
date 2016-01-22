@@ -14,7 +14,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Win32Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'Win32' ) )">
     <Link>
-      <AdditionalDependencies>$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/paho-mqtt3cs.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/iothub_client_mqtt_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/iothub_client_mqtt_transport.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <UsingTask TaskName="Microsoft_Azure_Mqtt_Transport_Contains" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">
@@ -57,14 +57,7 @@
       <Output TaskParameter="Result" PropertyName="CallingConvention-Microsoft_Azure_Mqtt_Transport" />
     </Microsoft_Azure_Mqtt_Transport_Contains>
   </Target>
-    <Target Name="Microsoft_Azure_Mqtt_Transport_redist_AfterBuild" AfterTargets="AfterBuild" />
+  <Target Name="Microsoft_Azure_Mqtt_Transport_redist_AfterBuild" AfterTargets="AfterBuild" />
   <Target Name="Microsoft_Azure_Mqtt_Transport_redist_AfterBuild_Win32_and_Debug" Label="Win32 and Debug" Condition="'$(Platform.ToLower())' == 'win32' And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="Microsoft_Azure_Mqtt_Transport_redist_AfterBuild">
-	<Copy SourceFiles="$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/paho-mqtt3cs.pdb" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
-	<Copy SourceFiles="$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/paho-mqtt3cs.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
-	<Copy SourceFiles="$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/libeay32.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
-	<Copy SourceFiles="$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/libeay32.pdb" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
-	<Copy SourceFiles="$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/ssleay32.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
-	<Copy SourceFiles="$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/ssleay32.pdb" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
-	</Target>
-  
+  </Target>
 </Project>

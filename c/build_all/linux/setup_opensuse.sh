@@ -85,18 +85,6 @@ install_proton_from_source ()
     sudo bash c/build_all/linux/build_proton.sh --install /usr
 }
 
-install_paho_from_source ()
-{
-    #Skip if already installed
-    code_dir="$HOME/org.eclipse.paho.mqtt.c"
-    if [ -d $code_dir ] && [ -d "$code_dir/build/output" ]
-    then
-        echo "Paho already installed."
-        return 0
-    fi
-
-    sudo bash c/build_all/linux/build_paho.sh --install /usr
-}
 
 if ! repo_exists
 then
@@ -117,5 +105,4 @@ else
 fi
 
 install_proton_from_source
-install_paho_from_source
 pop_dir

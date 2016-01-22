@@ -101,11 +101,7 @@ you obtained in the "Connecting your device to an IoT hub" step above.
   ```
     sudo ./c/build_all/linux/build_proton.sh --install /usr
   ```
-- Build a few libraries upon which the samples depend:
 
-  ```
-    sudo ~/azure-iot-sdks/c/build_all/linux/build_paho.sh
-  ```
 - Finally, build the sample applications:
 
   ```

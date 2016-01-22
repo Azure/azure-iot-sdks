@@ -25,6 +25,7 @@ if(IN_OPENWRT)
 endif()
 
 add_subdirectory(azure-c-shared-utility/c)
+add_subdirectory(azure-umqtt-c)
 
 enable_testing()
 
@@ -68,21 +69,14 @@ function(linkProton whatExecutableIsBuilding)
 	endif()
 endfunction(linkProton)
 
-function(includePaho)
-#function body to be similar to includeProton
-endfunction(includePaho)
+function(includeMqtt)
+	include_directories(${MQTT_INC_FOLDER})
+endfunction(includeMqtt)
 
-function(linkPaho whatExecutableIsBuilding)
-	includePaho()
-	if(WIN32)
-		target_link_libraries(${whatExecutableIsBuilding} "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.lib")
-		file(COPY "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-		file(COPY "$ENV{openssldir}/bin/libeay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-		file(COPY "$ENV{openssldir}/bin/ssleay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-	else()
-		target_link_libraries(${whatExecutableIsBuilding} paho-mqtt3cs)
-	endif()
-endfunction(linkPaho)
+function(linkMqttLibrary whatExecutableIsBuilding)
+	includeMqtt()
+	target_link_libraries(${whatExecutableIsBuilding} umqtt)
+endfunction(linkMqttLibrary)
 
 function(includeHttp)
 #function body to be similar to includeProton
@@ -240,7 +234,6 @@ function(build_test_artifacts whatIsBuilding use_gballoc)
 			windows_unittests_add_exe(${whatIsBuilding} ${ARGN})
 		endif()
 	endif()
-	
 endfunction(build_test_artifacts)
 
 set(SHARED_UTIL_ADAPTER_FOLDER "${CMAKE_CURRENT_LIST_DIR}/azure-c-shared-utility/c/adapters")
