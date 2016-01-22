@@ -29,7 +29,7 @@ process_args ()
           install_root="$2"
         elif [ "$1" == "-s" ] || [ "$1" == "--sdk" ]
         then
-          sdk_rep="$2"
+          sdk_repo="$2"
         else
           usage
         fi
