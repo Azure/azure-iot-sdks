@@ -11,6 +11,8 @@ openwrt_sdk_folder="sdk"
 working_dir=$PWD
 package_dir="package"
 
+MACHINE_TYPE=`uname -m`
+
 usage ()
 {
     echo 'setup_sdk.sh [options]'
@@ -79,11 +81,10 @@ download_sdk()
   if [ "$1" == "-s" ] || [ "$1" == "--sdk" ]
   then
     wget $sdk_repo -O openwrtsdk.tar.bz2
-  elif [$arch == "x86_64"]
+  elif [ ${MACHINE_TYPE} == 'x86_64' ]
   then
     wget $sdk_repo_x64 -O openwrtsdk.tar.bz2
   else
-  then
     wget $sdk_repo_x86 -O openwrtsdk.tar.bz2
   fi
 
