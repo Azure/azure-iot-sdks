@@ -30,7 +30,9 @@ set(common_files
 	
 # Add the paterns of the filenames to be deleted before pushing local update to remote repo.
 set(exclude_files
-		*amqp*.* 
+        *openssl*.*
+        *schannel*.*
+        *amqp*.* 
 		*mqtt*.*
 	)
 
