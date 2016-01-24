@@ -115,7 +115,6 @@ namespace BASEIMPLEMENTATION
 #include "strings.c"
 #include "buffer.c"
 #include "base64.c"
-#include "map.c"
 };
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
