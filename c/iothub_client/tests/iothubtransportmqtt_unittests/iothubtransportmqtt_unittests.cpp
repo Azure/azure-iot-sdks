@@ -1902,7 +1902,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mocks, DList_InsertHeadList(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SendComplete(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_BATCHSTATE_SUCCESS))
             .IgnoreArgument(2);
