@@ -41,8 +41,8 @@ apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip
 ```
 
 - Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the machine you are using.
-- Open a shell and navigate to the folder **c/build_all/arduino** in your local copy of the repository.
-- Run the `setup.sh` script to install the OpenWRT SDK and prerequisites. By default, the SDK will be installed at **~/openwrt/sdk**
+- Navigate to the folder **c/build_all/arduino** in your local copy of the repository.
+- Run the `./setup.sh` script to install the OpenWRT SDK and prerequisites. By default, the SDK will be installed at **~/openwrt/sdk**
 - (Optional) Enter 'Y' to build the Azure IoT SDK.
 
 This script builds the **iothub_client** and **serializer** libraries and their associated samples.

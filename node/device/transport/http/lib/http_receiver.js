@@ -21,12 +21,20 @@ var defaultOptions = {
 };
 
 /**
- * @class HttpReceiver
+ * @class module:azure-iot-device-http.HttpReceiver
  * @classdesc Provides a receiver link that can pull messages from the IoT Hub service and settle them.
  * 
  * @emits message When a message is received
  * @emits errorReceived When there was an error trying to receive messages
  * 
+ */
+/**
+ * @event module:azure-iot-device-http.HttpReceiver#errorReceived
+ * @type {Error}
+ */
+/**
+ * @event module:azure-iot-device-http.HttpReceiver#message
+ * @type {Message}
  */
 function HttpReceiver(config, httpHelper) {
 	EventEmitter.call(this);
@@ -129,9 +137,10 @@ HttpReceiver.prototype._receive = function receive() {
 
 
 /**
- * This method sets the options defining how the receiver object should poll the IoT Hub service to get messages.
- * There is only one instance of the receiver object. If the receiver has already been created, calling setOptions will 
- * change the options of the existing instance and restart it.
+ * @method          module:azure-iot-device-http.HttpReceiver#setOptions
+ * @description     This method sets the options defining how the receiver object should poll the IoT Hub service to get messages.
+ *                  There is only one instance of the receiver object. If the receiver has already been created, calling setOptions will 
+ *                  change the options of the existing instance and restart it.
  * 
  * @param {Object} opts Receiver options formatted as: { interval: (Number), at: (Date), cron: (string), drain: (Boolean) }
  */
@@ -188,21 +197,24 @@ HttpReceiver.prototype.setOptions = function setOptions (opts) {
 };
 
 /**
- * Sends a completion message to the IoT Hub service, effectively removing the message from the queue and flagging it as succesfully delivered.
+ * @method          module:azure-iot-device-http.HttpReceiver#complete
+ * @description     Sends a completion message to the IoT Hub service, effectively removing the message from the queue and flagging it as succesfully delivered.
  */
 HttpReceiver.prototype.complete = function complete(message, done) {
 	this._sendFeedback('complete', message, done);
 };
 
 /**
- * Sends an abandon message to the IoT Hub service. The message remains in the queue and the service will retry delivering it.
+ * @method          module:azure-iot-device-http.HttpReceiver#abandon
+ * @description     Sends an abandon message to the IoT Hub service. The message remains in the queue and the service will retry delivering it.
  */
 HttpReceiver.prototype.abandon = function abandon(message, done) {
 	this._sendFeedback('abandon', message, done);
 };
 
 /**
- * Sends a rejection message to the IoT Hub service, effectively removing the message from the queue and flagging it as rejected.
+ * @method          module:azure-iot-device-http.HttpReceiver#reject
+ * @description     Sends a rejection message to the IoT Hub service, effectively removing the message from the queue and flagging it as rejected.
  */
 HttpReceiver.prototype.reject = function reject(message, done) {
 	this._sendFeedback('reject', message, done);

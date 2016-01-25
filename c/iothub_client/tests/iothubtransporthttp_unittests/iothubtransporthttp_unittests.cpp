@@ -29,7 +29,6 @@
 #include "httpapiex.h"
 #include "httpapiexsas.h"
 #include "base64.h"
-#include "map.h"
 
 #define IOTHUB_ACK "iothub-ack"
 #define IOTHUB_ACK_NONE "none"
@@ -65,7 +64,6 @@ namespace BASEIMPLEMENTATION
     #include "base64.c"
     #include "strings.c"
     #include "buffer.c"
-    #include "map.c"
 };
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;

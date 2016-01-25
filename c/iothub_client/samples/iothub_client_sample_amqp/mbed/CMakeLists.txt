@@ -19,17 +19,19 @@ set(project_files
 	)
 
 set(common_files 
-		${sdk_base_path}/c/common/src/*.c
-		${sdk_base_path}/c/common/src/*.h
-		${sdk_base_path}/c/common/adapters/*mbed.c
-		${sdk_base_path}/c/common/adapters/*mbed.cpp
-		${sdk_base_path}/c/common/adapters/wolfssl_connection.*
+		${sdk_base_path}/c/azure-c-shared-utility/c/src/*.c
+		${sdk_base_path}/c/azure-c-shared-utility/c/src/*.h
+		${sdk_base_path}/c/azure-c-shared-utility/c/adapters/*mbed.c
+		${sdk_base_path}/c/azure-c-shared-utility/c/adapters/*mbed.cpp
+		${sdk_base_path}/c/azure-c-shared-utility/c/adapters/wolfssl_connection.*
 		${sdk_base_path}/c/iothub_client/src/*.c
 		${sdk_base_path}/c/iothub_client/inc/*.h
 	)
 	
 # Add the paterns of the filenames to be deleted before pushing local update to remote repo.
 set(exclude_files
+        *openssl*.*
+        *schannel*.*
 		*http*.* 
 		*mqtt*.* 
 		wolfssl*.*

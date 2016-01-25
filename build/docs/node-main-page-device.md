@@ -5,5 +5,5 @@ The Microsoft Azure IoT Device library for Node.js contain code that facilitates
 Device library
 * Sends event data to an IoT Hub, in batches or individually.
 * Receives messages from an IoT Hub.
-* Uses HTTPS to communicate with IoT Hubs.  AMQPS support is coming soon.
+* Uses HTTPS, AMQPS, AMQP over Secure Websockets or MQTTS to communicate with IoT Hubs.
 

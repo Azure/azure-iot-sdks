@@ -8,9 +8,9 @@ cd %~dp0..\..\node
 if exist out rd /s /q out
 
 rem -----------------------------------------------------------------------------
-rem -- Generate Node.js Device SDK docs
+rem -- Generate Node.js Device SDK docs (including transports)
 rem -----------------------------------------------------------------------------
-call :jsdoc "Microsoft Azure IoT Device SDK for Node.js" "--package device/package.json -c ../build/docs/jsdoc-device.conf.json"
+call :jsdoc "Microsoft Azure IoT Device SDK for Node.js" "--readme device/core/readme.md --package device/core/package.json -c ../build/docs/jsdoc-device.conf.json"
 
 rem -----------------------------------------------------------------------------
 rem -- Generate Node.js Service SDK docs

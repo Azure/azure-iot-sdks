@@ -3,6 +3,12 @@
 
 'use strict';
 
+/**
+ * The `azure-iot-amqp-base` module contains AMQP support code common to the Azure IoT Hub Device and Service SDKs.
+ * 
+ * @module azure-iot-amqp-base
+ */
+
 module.exports = {
   Amqp: require('./lib/amqp.js'),
   AmqpMessage: require('./lib/amqp_message.js'),

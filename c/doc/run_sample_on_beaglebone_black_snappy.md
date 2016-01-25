@@ -227,11 +227,7 @@ To run this tool, you need connection and configuration information for your IoT
 
 		sudo ~/azure-iot-sdks/c/build_all/linux/build_proton.sh --install /usr
 
-- This SDK sample depends on the presences of a few libraries. Run the following command to build them:
-
-		sudo ~/azure-iot-sdks/c/build_all/linux/build_paho.sh
-
-- You can now build the SDK code using the following command, assuming everything went OK on build\_proton.sh and build\_paho.sh
+- You can now build the SDK code using the following command, assuming everything went OK on build\_proton.sh
 
 		~/azure-iot-sdks/c/build_all/linux/build.sh
 
