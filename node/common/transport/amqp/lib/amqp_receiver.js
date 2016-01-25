@@ -5,6 +5,7 @@
 
 var EventEmitter = require('events');
 var util = require('util');
+var Message = require('azure-iot-common').Message;
 
 /**
  * @class            module:azure-iot-amqp-base.AmqpReceiver
@@ -55,7 +56,8 @@ AmqpReceiver.prototype._onAmqpMessage = function (message) {
      * @event module:azure-iot-amqp-base.AmqpReceiver#message
      * @type {AmqpMessage}
      */
-  this.emit('message', message);
+  var msg = new Message(message.body);
+  this.emit('message', msg);
 };
   
 AmqpReceiver.prototype._setupAmqpReceiverListeners = function () {
@@ -80,7 +82,7 @@ AmqpReceiver.prototype._removeAmqpReceiverListeners = function () {
 AmqpReceiver.prototype.complete = function (message, done) {
   if (!message) { throw new ReferenceError('Invalid message object.'); }
   this._amqpReceiver.accept(message);
-  if(done) done();
+  if(done) done(null);
 };
 
 /** 
@@ -92,7 +94,7 @@ AmqpReceiver.prototype.complete = function (message, done) {
 AmqpReceiver.prototype.abandon = function (message, done) {
   if (!message) { throw new ReferenceError('Invalid message object.'); }
   this._amqpReceiver.release(message);
-  if(done) done();
+  if(done) done(null);
 };
 
 /** 
@@ -104,7 +106,7 @@ AmqpReceiver.prototype.abandon = function (message, done) {
 AmqpReceiver.prototype.reject = function (message, done) {
   if (!message) { throw new ReferenceError('Invalid message object.'); }
   this._amqpReceiver.reject(message);
-  if(done) done();
+  if(done) done(null);
 };
 
 module.exports = AmqpReceiver;

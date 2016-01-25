@@ -276,8 +276,9 @@ HttpReceiver.prototype._sendFeedback = function (action, message, done) {
 
   /*Codes_SRS_NODE_DEVICE_HTTP_05_008: [If any Http method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
   var request = this._http.buildRequest(method, path, httpHeaders, config.host, function(err, res, body){
-    if (!err) done (null, res);
-    else {
+    if (!err) {
+        if (done) done (null, res);
+    } else {
       err.response = res;
       err.responseBody = body;
       done(err);

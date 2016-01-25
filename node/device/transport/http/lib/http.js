@@ -295,7 +295,7 @@ Http.prototype.getReceiver = function getReceiver (done) {
     this._receiver = new HttpReceiver(this._config, this._http);
   }
   
-  done(this._receiver);
+  done(null, this._receiver);
 };
 
 module.exports = Http;

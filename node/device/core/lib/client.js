@@ -69,6 +69,9 @@ Client.prototype.open = function (done) {
     this._transport.connect(function () {
       done();
     });
+  } else {
+      // No connect method on the transport.
+      done();
   } 
 };
 
