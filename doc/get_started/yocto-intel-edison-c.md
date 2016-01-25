@@ -18,15 +18,15 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 
 ## Preparing the Intel Edison board
 
-- Ensure the latest OS image has been installed. To do that, follow these instructions on Intel’s official documentation [portal][IntelEdisonGettingStarted].
+- Ensure the latest OS image has been installed. To do that, follow these instructions on Intel's official documentation [portal][IntelEdisonGettingStarted].
 - After following the standard Intel Edison setup instructions, you will need to establish a [serial connection][IntelEdisonSerialConnection] to your device from your machine.
 - Once you have established a serial connection (command line) to your Intel Edison board, you can proceed to install Azure IoT SDK using the below instructions.
-- Make sure you have run the “configure_edison —setup” command to set up your board
+- Make sure you have run the "configure_edison —setup" command to set up your board
 - Make sure your Intel Edison is online via your local Wi-Fi network (should occur during configure_edison setup)
 
 ## Installing Git on your Intel Edison
 
-Git is a widely used distributed version control tool, we will need to install Git on the Intel Edison in order to clone the Azure IoT SDK and build it locally. To do that, we must first add extended packages to Intel Edison which include Git. Intel Edison’s build of [Yocto Linux][yocto] uses the “opkg” manager which doesn’t, by default, include Git support.
+Git is a widely used distributed version control tool, we will need to install Git on the Intel Edison in order to clone the Azure IoT SDK and build it locally. To do that, we must first add extended packages to Intel Edison which include Git. Intel Edison's build of [Yocto Linux][yocto] uses the "opkg" manager which doesn't, by default, include Git support.
 
 - First, on your Intel Edison command line, use vi to add the following to your base-feeds:
 
@@ -42,7 +42,7 @@ Git is a widely used distributed version control tool, we will need to install G
   src/gz core2-32 http://repo.opkg.net/edison/repo/core2-32/
   ```
 
-- Exit by hitting “esc,” “SHIFT+:" and typing “wq” then hitting Enter. If you are unfamiliar with vi editing, read [this][vi].
+- Exit by hitting "esc", "SHIFT+:" and typing "wq" then hitting Enter. If you are unfamiliar with vi editing, read [this][vi].
 
 - Next, update and upgrade your opkg base-feeds on your command line:
 
@@ -65,12 +65,12 @@ You should see the following:
   $ git clone --recursive https://github.com/Azure/azure-iot-suite-sdks.git
   ```
 
-- You may be prompted to add an RSA key to your device, respond with “yes.”
+- You may be prompted to add an RSA key to your device, respond with "yes".
 
 - Alternate Deploy Method
 
   - If for any reason you are unable to clone the Azure IoT SDK directly to Edison, you can clone the repository to your PC / Mac / Linux desktop and then transfer the files over the network to your Intel  Edison using [FileZilla][filezilla] or SCP.
-  - For FileZilla, run “wpa_cli status” on your Intel Edison to find your IP address, then use “sftp://your.ip.address”, use password “root” and your Intel Edison password to establish an SFTP connection via FileZilla. Once you have done that, you can drag and drop files over the network directly.
+  - For FileZilla, run "wpa_cli status" on your Intel Edison to find your IP address, then use "sftp://your.ip.address", use password "root" and your Intel Edison password to establish an SFTP connection via FileZilla. Once you have done that, you can drag and drop files over the network directly.
 
 	![][img2]
 
@@ -80,10 +80,10 @@ We will build a sample application which relies on the SDK.
 We first need to update the credentials in the sample AMPQ app to match those of our Azure IoT Hub application. When we build the Azure IoT SDK, the sample C applications are automatically built by default, we need to include our credentials into the sample app while we build the SDK so that they are ready to function after we build.
 
 - Edit "/c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c" as given below using vi or your favorite text editor:
- - Replace the "IoT Hub connection” aka “connectionString” string placeholder with your info as below (static const char* ….) When you are finished the result should look like the below connection string with your own credentials instead of the placeholders in brackets.
+ - Replace the "IoT Hub connection" aka "connectionString" string placeholder with your info as below (static const char* ….) When you are finished the result should look like the below connection string with your own credentials instead of the placeholders in brackets.
   **IMPORTANT**: Replace items in brackets with your credentials or the sample will not function
  
-            static const char* connectionString = “HostName=[YOUR-HOST-NAME];CredentialScope=Device;DeviceId=[YOUR-DEVICE-ID];SharedAccessKey=[YOUR-ACCESS-KEY";
+            static const char* connectionString = "HostName=[YOUR-HOST-NAME];CredentialScope=Device;DeviceId=[YOUR-DEVICE-ID];SharedAccessKey=[YOUR-ACCESS-KEY";
   
 - Azure IoT SDKs require cmake 3.0 or higher. Follow the steps below to install cmake 3.4
   
@@ -98,12 +98,12 @@ We first need to update the credentials in the sample AMPQ app to match those of
 1. Run following command to build proton libraries
 
               cd azure-iot-sdks/c/build_all/linux   
-              /build_proton.sh`
+              ./build_proton.sh -i /usr
 2.  The above command will fail in some point but we need the part before  
     failure.
 3.  Go to file: <Folder where qpid  proton is, usually your root home
-    folder>\\qpid-proton\*proton-c/bindings/CMakeLists.txt and edit this file
-    removing "python" from "BINDINGS"\*
+    folder>/qpid-proton/proton-c/bindings/CMakeLists.txt and edit this file
+    removing "python" from "BINDINGS".
 4. Edit the Build Proton script using following command:
 
           vi ~/azure-iot-sdks/c/build_all/linux/build_proton.sh
@@ -113,68 +113,41 @@ We first need to update the credentials in the sample AMPQ app to match those of
 6.  In the terminal, enter /c/build\_all/linux and execute the following steps:
     
          $ opkg install util-linux-libuuid-dev $ 
-         ./build_proton.sh
-
-          
-- Update the ldconfig Cache
-  
-  While building the Azure IoT SDK, we needed to first build a dependency called [Qpid Proton][qpidproton]. However, we need to register the resulting library with [ldconfig][ldcconfig] before we can proceed to testing and building our C-language samples. To do that, we need to first locate where the Proton library is located and then copy it into the /lib folder in Yocto.
-
-- Add libqpid-proton.so.2 to shared libs by running the following terminal commands:
-
-               $ find -name 'libqpid-proton.so.2’
-    
-  - Copy the directory you are given by this command to your clipboard
-    
-               $ cp [directory_to_libqpid-proton.so.2] /lib
-    
-  - Replace [directory_to_libqpid-proton.so.2] with the result of the “find” command from the first step
-   
-               $ ldconfig
-    
-  - This will automatically update the cache, its a one line command
-    
-               $ ldconfig -v | grep "libqpid-p*”
-   
-If you completed the operation correctly, you will see "libqpid-proton.so.2” listed
-Now that we have added Qpid Proton to our ldcache, we are able to build the sample C project which relies on Proton:
-
+         ./build_proton.sh -i /usr
+       
 - Edit build.sh script to get rid of the command nproc
    
           vi ./build.sh
     
 - Change line "make --jobs=nproc" to "make --jobs=2"
-- Set necessary environment variables
-    
-        export CFLAGS="-I/home/root/qpid-proton/proton-c/include"
-        export CPPFLAGS="-I/home/root/qpid-proton/proton-c/include"
-        export LDFLAGS="-L/lib/"
 
 - Build the Azure IoT sdk
    
         cd ~/azure-iot-sdks/c/build_all/linux
-        ./build.sh --no-mqtt --no-amqp --no-http
+        ./build.sh --no-mqtt 
     
-- Navigate back to: /c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp/linux and run the following commands
+- Navigate to: ~/cmake/iothub_client/samples/iothub_client_sample_amqp/ and run the following commands
   
-        make -f makefile.linux
         ./iothub_client_sample_amqp
     
 
 The result should be the following:
 
 ```
-# ./iothub_client_sample_amqp
-hub_client/samples/iothub_client_sample_amqp/linux#
 Starting the IoTHub client sample AMQP...
-IoTHubClient_SetNotificationCallback...successful.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendTelemetryAsync accepted data for transmission to IoT Hub.
+Info: IoT Hub SDK for C, version 1.0.0-preview.8
+IoTHubClient_SetMessageCallback...successful.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
 Press any key to exit the application.
-Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[1] received for message tracking id = 1 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[2] received for message tracking id = 2 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[3] received for message tracking id = 3 with result = IOTHUB_CLIENT_CONFIRMATION_OK Confirmation[4] received for message tracking id = 4 with result = IOTHUB_CLIENT_CONFIRMATION_OK
+Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT_CONFIRMATION_OK
+Confirmation[1] received for message tracking id = 1 with result = IOTHUB_CLIENT_CONFIRMATION_OK
+Confirmation[2] received for message tracking id = 2 with result = IOTHUB_CLIENT_CONFIRMATION_OK
+Confirmation[3] received for message tracking id = 3 with result = IOTHUB_CLIENT_CONFIRMATION_OK
+Confirmation[4] received for message tracking id = 4 with result = IOTHUB_CLIENT_CONFIRMATION_OK
 ```
 
 
@@ -189,5 +162,5 @@ Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT
 [img1]: ./media/edison01.png
 [img2]: ./media/edison02.png
 
-[setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[setup-iothub]: ../setup_iothub.md
+[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md
