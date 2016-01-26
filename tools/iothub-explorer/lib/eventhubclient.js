@@ -144,4 +144,12 @@ EventHubClient.prototype.CreateReceiver = function (consumerGroup, partitionId) 
   });
 };
 
+/**
+ * Disconnect
+ */
+EventHubClient.prototype.disconnect = function () {
+	var self = this;
+	self.amqpClient.disconnect();
+};
+
 module.exports = EventHubClient;
