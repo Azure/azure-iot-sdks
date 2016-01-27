@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Task.h>
+#include <ti/sysbios/hal/Seconds.h>
 
 #include <ti/drivers/GPIO.h>
 
@@ -51,15 +52,26 @@
 #include <ti/net/http/sssl.h>
 
 /* USER STEP: update to current date-time */
-#define DAY     15
-#define MONTH   9
-#define YEAR    2015
-#define HOUR    6
-#define MINUTE  21
+#define DAY     6
+#define MONTH   1
+#define YEAR    2016
+#define HOUR    19
+#define MINUTE  0
 #define SECOND  0
 
 /* USER STEP: Flash the CA root certificate using UniFlash tool */
 #define SL_SSL_CA_CERT "/cert/ms.der"
+
+/* TI time apis return seconds since 1900 */
+#ifdef __ti__
+/* Years (70 * 365 * 24 * 60 * 60) +  Leap Years (17 * 1 * 24 * 60 * 60) */
+#define TIMEDIFF   (2208988800)
+#else
+#define TIMEDIFF   (0)
+#endif
+
+#define YEARDIFF  1900
+#define MONTHDIFF 1
 
 /* The following params should be persistant for the lifetime of the app */
 SlSockSecureMethod method;
@@ -69,13 +81,43 @@ char cafile[32] = {0};
 extern void NetWiFi_init();
 
 /*
- *  ======== main ========
+ *  ======== setTime ========
+ */
+static void setTime(void)
+{
+    SlDateTime_t dt;
+    struct tm startTime = {0};
+    time_t ts;
+
+    /* Set system clock on network processor to validate certificate */
+    dt.sl_tm_day  = DAY;
+    dt.sl_tm_mon  = MONTH;
+    dt.sl_tm_year = YEAR;
+    dt.sl_tm_hour = HOUR;
+    dt.sl_tm_min  = MINUTE;
+    dt.sl_tm_sec  = SECOND;
+    sl_DevSet(SL_DEVICE_GENERAL_CONFIGURATION,
+            SL_DEVICE_GENERAL_CONFIGURATION_DATE_TIME,
+            sizeof(SlDateTime_t), (unsigned char *)(&dt));
+
+    /* Set system clock on application microcontroller */
+    startTime.tm_mday = DAY;
+    startTime.tm_mon  = MONTH - MONTHDIFF;
+    startTime.tm_year = YEAR - YEARDIFF;
+    startTime.tm_hour = HOUR;
+    startTime.tm_min  = MINUTE;
+    startTime.tm_sec  = SECOND;
+    ts = mktime(&startTime);
+    Seconds_set(ts - (unsigned int) TIMEDIFF);
+}
+
+/*
+ *  ======== slTask ========
  */
 void slTask(unsigned int arg0, unsigned int arg1)
 {
     Task_Handle taskHandle;
     Task_Params taskParams;
-    SlDateTime_t dt;
 
     /*
      *  Add the UART device to the system.
@@ -112,16 +154,7 @@ void slTask(unsigned int arg0, unsigned int arg1)
     /* Initialize SimpleLink */
     NetWiFi_init();
 
-    /* Set Date to validate certificate */
-    dt.sl_tm_day  = DAY;
-    dt.sl_tm_mon  = MONTH;
-    dt.sl_tm_year = YEAR;
-    dt.sl_tm_hour = HOUR;
-    dt.sl_tm_min  = MINUTE;
-    dt.sl_tm_sec  = SECOND;
-    sl_DevSet(SL_DEVICE_GENERAL_CONFIGURATION,
-              SL_DEVICE_GENERAL_CONFIGURATION_DATE_TIME,
-              sizeof(SlDateTime_t), (unsigned char *)(&dt));
+    setTime();
 
     /* Secure params */
     method.secureMethod = SL_SO_SEC_METHOD_TLSV1_1;
