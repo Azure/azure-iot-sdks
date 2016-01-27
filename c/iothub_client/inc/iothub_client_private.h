@@ -29,7 +29,8 @@ DEFINE_ENUM(IOTHUB_BATCHSTATE_RESULT, IOTHUB_BATCHSTATE_RESULT_VALUES);
 #define MESSAGE_ENDPOINT "/messages/devicebound"
 #define MESSAGE_ENDPOINT_HTTP "/messages/devicebound"
 #define MESSAGE_ENDPOINT_HTTP_ETAG "/messages/devicebound/"
-#define CLIENT_DEVICE_TYPE_PREFIX "iothubclient/"
+#define CLIENT_DEVICE_TYPE_PREFIX "iothubclient"
+#define CLIENT_DEVICE_BACKSLASH "/"
 #define CBS_REPLY_TO "cbs"
 #define CBS_ENDPOINT "/$" CBS_REPLY_TO
 #define API_VERSION "?api-version=2015-08-15-preview"

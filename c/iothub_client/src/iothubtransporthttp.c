@@ -205,7 +205,7 @@ static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_HANDLE_DATA* handleData
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Accept", "application/json") == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Connection", "Keep-Alive") == HTTP_HEADERS_OK) &&
-                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK)
+                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK)
                     ))
                 {
                     result = false;
@@ -820,7 +820,7 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_HANDLE_DATA* handleData, ST
     {
         bool isFirst = true;
         PDLIST_ENTRY actual;
-		bool keepGoing = true; /*keepGoing gets sometimes to false from within the loop*/
+        bool keepGoing = true; /*keepGoing gets sometimes to false from within the loop*/
         /*either all the items enter the list or only some*/
         result = MAKE_PAYLOAD_OK; /*optimistically initializing it*/
         while (keepGoing && ((actual = handleData->waitingToSend->Flink) != handleData->waitingToSend))

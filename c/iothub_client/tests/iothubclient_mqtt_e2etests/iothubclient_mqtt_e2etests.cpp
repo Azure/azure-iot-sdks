@@ -19,6 +19,8 @@
 
 #include "buffer_.h"
 #include "threadapi.h"
+#include "iot_logging.h"
+#include "platform.h"
 
 #if _WIN32
 #include "tlsio_schannel.h"
@@ -66,7 +68,7 @@ typedef struct EXPECTED_RECEIVE_DATA_TAG
 
 BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
-    static XIO_HANDLE CreateXioConnection(const char* hostname, int portNum)
+    static const XIO_HANDLE CreateXioConnection(const char* hostname, int portNum)
     {
 #if _WIN32
         TLSIO_SCHANNEL_CONFIG tls_io_config = { hostname, portNum };
@@ -247,11 +249,13 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        platform_init();
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
         DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        platform_deinit();
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
@@ -275,8 +279,8 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix();
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
-        iotHubConfig.protocolGatewayHostName = IoTHubAccount_GetProtocolGatewayHostName();
         iotHubConfig.protocol = MQTT_Protocol;
+        iotHubConfig.io_transport_provider_callback = CreateXioConnection;
 
         EXPECTED_SEND_DATA* sendData = EventData_Create();
         ASSERT_IS_NOT_NULL(sendData);
@@ -288,6 +292,10 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
             iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
             ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle,"Could not create IoTHubClient.");
 
+            // Turn on Log 
+            bool trace = true;
+            IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
+
             msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData->expectedString, strlen(sendData->expectedString));
             ASSERT_IS_NOT_NULL_WITH_MSG(msgHandle, "Error Creating IoTHubMEssage From Byte Array.");
 
@@ -298,13 +306,11 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
         time_t beginOperation, nowTime;
         beginOperation = time(NULL);
-        while (
-            (
+        while ( (
                 (nowTime = time(NULL)),
                 (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
-                ) &&
-            (!sendData->dataWasRecv) // Condition box
-            )
+                ) && (!sendData->dataWasRecv) // Condition box
+              )
         {
             // Just go on here
         }
@@ -333,7 +339,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
     {
         // arrange
         /*IOTHUB_CLIENT_CONFIG iotHubConfig;
-        IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
+        IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
         EXPECTED_RECEIVE_DATA* notifyData = MessageData_Create();
         ASSERT_IS_NOT_NULL_WITH_MSG(notifyData, "Error creating Notify Data.");
@@ -343,11 +349,15 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix();
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
-        iotHubConfig.protocolGatewayHostName = IoTHubAccount_GetProtocolGatewayHostName();
         iotHubConfig.protocol = MQTT_Protocol;
+        iotHubConfig.io_transport_provider_callback = CreateXioConnection;
 
         iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
         ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Error creating IoTHubClient.");
+
+        // Turn on Log 
+        bool trace = true;
+        IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
 
         IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
         ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
@@ -362,23 +372,20 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
         time_t beginOperation, nowTime;
         beginOperation = time(NULL);
-        while (
-            (
+        while ( (
                 (nowTime = time(NULL)),
                 (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
-                ) &&
-                (!notifyData->wasFound) //condition box
-            )
+                ) && (!notifyData->wasFound) //condition box
+              )
         {
             //just go on;
         }
 
         // assert
         ASSERT_IS_TRUE(notifyData->wasFound); // was found is written by the callback...
-    
+
         // cleanup
         MessageData_Destroy(notifyData);
         IoTHubClient_Destroy(iotHubClientHandle);*/
     }
 END_TEST_SUITE(iothubclient_mqtt_e2etests)
- 

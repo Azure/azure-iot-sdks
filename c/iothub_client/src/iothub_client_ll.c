@@ -38,7 +38,7 @@ static const char PROTOCOL_GATEWAY_HOST[] = "GatewayHostName";
 
 IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    IOTHUB_CLIENT_LL_HANDLE* result = NULL;
+    IOTHUB_CLIENT_LL_HANDLE result = NULL;
 
     /*Codes_SRS_IOTHUBCLIENT_LL_05_001: [IoTHubClient_LL_CreateFromConnectionString shall obtain the version string by a call to IoTHubClient_GetVersionString.]*/
     /*Codes_SRS_IOTHUBCLIENT_LL_05_002: [IoTHubClient_LL_CreateFromConnectionString shall print the version string to standard output.]*/

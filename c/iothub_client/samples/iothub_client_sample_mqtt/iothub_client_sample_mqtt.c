@@ -23,6 +23,7 @@
 /*String containing Hostname, Device Id & Device Key in the format:             */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
 static const char* connectionString = "[device connection string]";
+
 static int callbackCounter;
 static char msgText[1024];
 #define MESSAGE_COUNT 5
@@ -72,7 +73,6 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     MAP_HANDLE mapProperties = IoTHubMessage_Properties(message);
     if (mapProperties != NULL)
     {
-        (void)printf("ERROR: message incorrectly contains properties!\r\n");
         const char*const* keys;
         const char*const* values;
         size_t propertyCount = 0;
@@ -80,7 +80,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         {
             if (propertyCount > 0)
             {
-                (void)printf("Message Properties:\r\n");
+                (void)printf("ERROR: message incorrectly contains properties!\r\n");
                 for (size_t index = 0; index < propertyCount; index++)
                 {
                     (void)printf("\tKey: %s Value: %s\r\n", keys[index], values[index]);
@@ -130,6 +130,9 @@ void iothub_client_sample_mqtt_run(void)
         }
         else
         {
+            bool traceOn = true;
+            IoTHubClient_LL_SetOption(iotHubClientHandle, "logtrace", &traceOn);
+
             /* Setting Message call back, so we can receive Commands. */
             if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
             {
