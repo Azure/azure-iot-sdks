@@ -1,3 +1,5 @@
 remote_monitoring.h
 remote_monitoring.c
+..\..\..\certs\certs.c
+..\..\..\certs\certs.h
 mbed\main.cpp

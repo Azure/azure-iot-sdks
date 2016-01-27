@@ -1,3 +1,5 @@
 iothub_client_sample_amqp.h
 iothub_client_sample_amqp.c
+..\..\..\certs\certs.h
+..\..\..\certs\certs.c
 mbed\main.cpp

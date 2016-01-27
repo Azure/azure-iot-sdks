@@ -25,15 +25,16 @@ import static org.junit.Assert.assertNull;
 /** Unit tests for MqttIotHubConnection. */
 public class MqttIotHubConnectionTest
 {
+    private static String sslPrefix = "ssl://";
+    private static String sslPortSuffix = ":8883";
     final String iotHubHostName = "test.host.name";
     final String hubName = "test.iothub";
-    final String gatewayHostName = "test.gateway.hostname";
     final String deviceId = "test-deviceId";
     final String deviceKey = "test-devicekey?&test";
     final String resourceUri = "test-resource-uri";
     final int qos = 1;
-    final String publishTopic = "devices/test-deviceId/messages/events";
-    final String subscribeTopic = "devices/test-deviceId/messages/devicebound";
+    final String publishTopic = "devices/test-deviceId/messages/events/";
+    final String subscribeTopic = "devices/test-deviceId/messages/devicebound/#";
 
     @Mocked
     protected DeviceClientConfig mockConfig;
@@ -258,7 +259,7 @@ public class MqttIotHubConnectionTest
 
         MqttConnectOptions actualConnectionOptions = Deencapsulation.getField(connection, "connectionOptions");
 
-        assertEquals(deviceId, actualConnectionOptions.getUserName());
+        assertEquals(iotHubHostName + "/" + deviceId, actualConnectionOptions.getUserName());
 
         String expectedSasToken = mockToken.toString();
         String actualUserPassword = new String(actualConnectionOptions.getPassword());
@@ -272,7 +273,7 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                new MqttAsyncClient(gatewayHostName, deviceId, (MqttClientPersistence) any);
+                new MqttAsyncClient(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, (MqttClientPersistence) any);
                 new MqttConnectOptions();
                 mockMqttAsyncClient.connect(actualConnectionOptions);
                 mockMqttAsyncClient.subscribe(subscribeTopic, qos);
@@ -294,7 +295,7 @@ public class MqttIotHubConnectionTest
                 result = resourceUri;
                 new IotHubSasToken((DeviceClientConfig) any);
                 result = mockToken;
-                new MqttAsyncClient(gatewayHostName, deviceId, (MqttClientPersistence) any);
+                new MqttAsyncClient(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, (MqttClientPersistence) any);
                 result = new MqttException(anyInt);
             }
         };
@@ -317,7 +318,7 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                new MqttAsyncClient(gatewayHostName, deviceId, (MqttClientPersistence) any); times = 1;
+                new MqttAsyncClient(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, (MqttClientPersistence) any); times = 1;
             }
         };
     }
@@ -638,7 +639,6 @@ public class MqttIotHubConnectionTest
             {
                 mockConfig.getIotHubHostname(); result = iotHubHostName;
                 mockConfig.getIotHubName(); result = hubName;
-                mockConfig.getGatewayHostName(); result = gatewayHostName;
                 mockConfig.getDeviceId(); result = deviceId;
                 mockConfig.getDeviceKey(); result = deviceKey;
             }
@@ -654,7 +654,7 @@ public class MqttIotHubConnectionTest
                 result = resourceUri;
                 new IotHubSasToken((DeviceClientConfig) any);
                 result = mockToken;
-                new MqttAsyncClient(gatewayHostName, deviceId, (MqttClientPersistence) any);
+                new MqttAsyncClient(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, (MqttClientPersistence) any);
                 result = mockMqttAsyncClient;
                 mockMqttAsyncClient.connect();
                 result = mockMqttToken;

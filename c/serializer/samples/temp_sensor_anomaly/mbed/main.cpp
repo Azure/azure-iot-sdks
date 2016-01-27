@@ -10,6 +10,7 @@
 #include "C12832.h"
 #include "LM75B.h"
 #include "NTPClient.h"
+#include "azureiot_common/platform.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
@@ -244,60 +245,23 @@ static void sendMessage(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsign
     }
 }
 
-int setupRealTime(void)
-{
-	int result;
-
-	(void)printf("setupRealTime begin\r\n");
-	if (EthernetInterface::connect())
-	{
-		(void)printf("Error initializing EthernetInterface.\r\n");
-		result = __LINE__;
-	}
-	else
-	{
-		(void)printf("setupRealTime NTP begin\r\n");
-		NTPClient ntp;
-		if (ntp.setTime("0.pool.ntp.org") != 0)
-		{
-			(void)printf("Failed setting time.\r\n");
-			result = __LINE__;
-		}
-		else
-		{
-			(void)printf("set time correctly!\r\n");
-			result = 0;
-		}
-		(void)printf("setupRealTime NTP end\r\n");
-		EthernetInterface::disconnect();
-	}
-	(void)printf("setupRealTime end\r\n");
-
-	return result;
-}
-
 int main(void)
 {
     pc.baud(115200);
-
-    THREAD_HANDLE ThreadHandle;
-
+	int result;
     (void)printf("Initializing mbed specific things...\r\n");
 
-    (void)printf("doing a one time EthernetInterface::init();\r\n");
-    if (EthernetInterface::init() != 0)
-    {
-         (void)printf("Failed EthernetInterface::init();\r\n");
-         return -1;
-    }
-        
-    (void)printf("done doing a one time EthernetInterface::init();\r\n");
+    /* These are needed in order to initialize the time provider for Proton-C */
+    mbed_log_init();
+    mbedtime_init();
 
-    if (setupRealTime() != 0)
-    {
-         (void)printf("Failed setting up real time clock\r\n");
-         return -1;
-    }
+	if ((result = platform_init()) != 0)
+	{
+		(void)printf("Error initializing the platform: %d\r\n",result);
+		return -1;
+	}
+
+    THREAD_HANDLE ThreadHandle;
 
     /* clear the LED light upon startup */
     red_led = 1;
@@ -447,6 +411,5 @@ int main(void)
         }
         serializer_deinit();
     }
-    
-    EthernetInterface::disconnect();
+	platform_deinit();
 }
