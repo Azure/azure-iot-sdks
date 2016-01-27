@@ -38,7 +38,7 @@ While not strictly required, we recommend that you install the following tools f
 
 - Install [TI-RTOS SDK for SimpleLink](http://downloads.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/tirtos/index.html) 2.14.01.20 or above
 
-- Install [NS package](http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/ns/ns_1_10_00_03.zip). Please note, the NS package is a pre-release version. It's content and the download location are subject to change.
+- Install [NS package](http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/ns/ns_1_10_00_03.zip). Please note that its content and the download location are subject to change.
 
 - Install [TI ARM Compiler](http://software-dl.ti.com/ccs/esd/test/ti_cgt_tms470_5.2.5_windows_installer.exe) 5.2.2 or above
 
