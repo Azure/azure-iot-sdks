@@ -11,6 +11,12 @@ To install the latest (pre-release) version of the *iothub-explorer* tool, run t
 npm install -g iothub-explorer@latest
 ```
 
+You can use the following command to get additional help about all the iothub-explorer commands and their parameters:
+
+```shell
+$ iothub-explorer help
+```
+
 ## Working with the device identity registry
 
 Supply your IoT Hub connection-string once using the **login** command. This means you do not need to supply the connection-string for subsequent commands for the duration of the session (defaults to one hour):
@@ -100,12 +106,4 @@ body:
     deviceGenerationId: 635875186443339004
     deviceId:           myFirstDevice
     enqueuedTimeUtc:    2016-01-26T15:51:03.4197888Z
-```
-
-## Getting help
-
-Use the following command to get more help about all the iothub-explorer commands and their parameters:
-
-```shell
-$ iothub-explorer help
 ```
