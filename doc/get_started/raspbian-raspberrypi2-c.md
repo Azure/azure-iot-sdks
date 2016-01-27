@@ -89,7 +89,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
 -   Download the Azure IoT device SDK to your Raspberry Pi:
 
     ```
-    git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+    git clone --recursive https://github.com/Azure/azure-iot-sdks.git --recursive
     ```
 
 -   Confirm that you now have a copy of the SDK under the directory ./azure-iot-sdks. Then cd to the directory:
@@ -100,7 +100,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
 
 -   Prepare your environment by running. Answer **y** when you are prompted to install the additional components needed to run the samples:
     ```
-    sudo ~/azure-iot-sdks/c/build_all/linux/setup.sh
+    sudo c/build_all/linux/setup.sh
     ```
 
 -   Edit the file ./c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace connection string placeholder with the connection string

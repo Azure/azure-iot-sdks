@@ -5,56 +5,22 @@
 #include "EthernetInterface.h"
 #include "iothub_client_sample_http.h"
 #include "NTPClient.h"
-
-int setupRealTime(void)
-{
-	int result;
-
-	(void)printf("setupRealTime begin\r\n");
-	if (EthernetInterface::connect())
-	{
-		(void)printf("Error initializing EthernetInterface.\r\n");
-		result = __LINE__;
-	}
-	else
-	{
-		(void)printf("setupRealTime NTP begin\r\n");
-		NTPClient ntp;
-		if (ntp.setTime("0.pool.ntp.org") != 0)
-		{
-			(void)printf("Failed setting time.\r\n");
-			result = __LINE__;
-		}
-		else
-		{
-			(void)printf("set time correctly!\r\n");
-			result = 0;
-		}
-		(void)printf("setupRealTime NTP end\r\n");
-		EthernetInterface::disconnect();
-	}
-	(void)printf("setupRealTime end\r\n");
-
-	return result;
-}
+#include "azureiot_common/platform.h"
 
 int main(void)
 {
+	int result;
+
 	(void)printf("Initializing mbed specific things...\r\n");
-
-	if (EthernetInterface::init())
+	
+	if ((result = platform_init()) != 0)
 	{
-		(void)printf("Error initializing EthernetInterface.\r\n");
-		return -1;
-	}
-
-	if (setupRealTime() != 0)
-	{
-		(void)printf("Failed setting up real time clock\r\n");
+		(void)printf("Error initializing the platform: %d\r\n",result);
 		return -1;
 	}
 
 	iothub_client_sample_http_run();
 
+	platform_deinit();
 	return 0;
 }

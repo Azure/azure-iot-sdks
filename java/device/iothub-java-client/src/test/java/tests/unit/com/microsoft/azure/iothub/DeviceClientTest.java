@@ -34,7 +34,6 @@ public class DeviceClientTest
 
     // Tests_SRS_DEVICECLIENT_11_042: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', with keys and values separated by '='.]
     // Tests_SRS_DEVICECLIENT_11_043: [The constructor shall save the IoT Hub hostname as the value of 'HostName' in the connection string.]
-    // Tests_SRS_DEVICECLIENT_15_053: [If no value for 'GatewayHostName' is found in the connection string, the function shall continue setting up the other parameters.]
     @Test
     public void connStringConstructorSavesHostname(
             @Mocked final AmqpsTransport mockTransport)
@@ -50,7 +49,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new DeviceClientConfig(expectedHostname, anyString, anyString, anyString);
+                new DeviceClientConfig(expectedHostname, anyString, anyString);
             }
         };
     }
@@ -71,7 +70,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new DeviceClientConfig(anyString, anyString, expectedDeviceId, anyString);
+                new DeviceClientConfig(anyString, expectedDeviceId, anyString);
             }
         };
     }
@@ -92,7 +91,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new DeviceClientConfig(anyString, anyString, anyString, expectedSharedAccessKey);
+                new DeviceClientConfig(anyString, anyString, expectedSharedAccessKey);
             }
         };
     }
@@ -192,26 +191,6 @@ public class DeviceClientTest
                 "HostName=iothub.device.com;CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId=testdevice;SharedAccessKey=adjkl234j52=;";
 
         new DeviceClient(connString, null);
-    }
-
-    // Tests_SRS_DEVICECLIENT_11_042: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', with keys and values separated by '='.]
-    // Tests_SRS_DEVICECLIENT_15_052: [The constructor shall save the Protocol Gateway hostname as the value of ' GatewayHostName' in the connection string.]
-    @Test
-    public void connStringConstructorSavesGatewayHostname() throws URISyntaxException
-    {
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
-                        + "SharedAccessKey=adjkl234j52=;GatewayHostName=testGatewayHostNAme";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
-        new DeviceClient(connString, protocol);
-
-        final String expectedGatewayHostName = "testGatewayHostNAme";
-        new Verifications()
-        {
-            {
-                new DeviceClientConfig(anyString, expectedGatewayHostName, anyString, anyString);
-            }
-        };
     }
 
     // Tests_SRS_DEVICECLIENT_11_035: [The function shall open the transport to communicate with an IoT Hub.]

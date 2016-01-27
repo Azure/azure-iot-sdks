@@ -27,7 +27,6 @@ public final class DeviceClientConfig
     public static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
 
     protected final String iotHubHostname;
-    protected final String gatewayHostName;
     protected final String iotHubName;
     protected final String deviceId;
     protected final String deviceKey;
@@ -49,26 +48,19 @@ public final class DeviceClientConfig
      * Constructor.
      *
      * @param iotHubHostname the IoT Hub hostname.
-     * @param gatewayHostName the Protocol Gateway hostname.
      * @param deviceId the device ID.
      * @param deviceKey the device key.
      *
-     * @throws URISyntaxException if the IoT Hub hostname or Gateway Host Name do not conform to
-     * RFC 3986.
+     * @throws URISyntaxException if the IoT Hub hostname does not conform to RFC 3986.
      * @throws IllegalArgumentException if the IoT Hub hostname does not contain
      * a valid IoT Hub name as its prefix.
      */
-    public DeviceClientConfig(String iotHubHostname, String gatewayHostName, String deviceId,
+    public DeviceClientConfig(String iotHubHostname, String deviceId,
                               String deviceKey) throws URISyntaxException
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_014: [If the IoT Hub hostname and Protocol Gateway hostname
-        // are not valid URIs, the constructor shall throw a URISyntaxException.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_014: [If the IoT Hub hostname is
+        // not valid URI, the constructor shall throw a URISyntaxException.]
         new URI(iotHubHostname);
-
-        if (gatewayHostName != null)
-        {
-            new URI(gatewayHostName);
-        }
 
         // Codes_SRS_DEVICECLIENTCONFIG_11_015: [If the IoT Hub hostname does not contain a '.', the function shall throw an IllegalArgumentException.]
         int iotHubNameEndIdx = iotHubHostname.indexOf(".");
@@ -84,7 +76,6 @@ public final class DeviceClientConfig
 
         // Codes_SRS_DEVICECLIENTCONFIG_11_001: [The constructor shall save the IoT Hub hostname, device ID, and device key.]
         this.iotHubHostname = iotHubHostname;
-        this.gatewayHostName = gatewayHostName;
         this.iotHubName = iotHubHostname.substring(0, iotHubNameEndIdx);
         this.deviceId = deviceId;
         this.deviceKey = deviceKey;
@@ -114,16 +105,6 @@ public final class DeviceClientConfig
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
         return this.iotHubHostname;
-    }
-
-    /**
-     * Getter for the Protocol Gatway hostname.
-     *
-     * @return the Protocol Gateway hostname.
-     */
-    public String getGatewayHostName()
-    {
-        return this.gatewayHostName;
     }
 
     /**
@@ -223,7 +204,6 @@ public final class DeviceClientConfig
     protected DeviceClientConfig()
     {
         this.iotHubHostname = null;
-        this.gatewayHostName = null;
         this.iotHubName = null;
         this.deviceId = null;
         this.deviceKey = null;
