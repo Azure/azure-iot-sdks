@@ -66,8 +66,6 @@ public final class DeviceClient
     public static final String DEVICE_ID_ATTRIBUTE = "DeviceId=";
     /** The shared access key attribute name in a connection string. */
     public static final String SHARED_ACCESS_KEY_ATTRIBUTE = "SharedAccessKey=";
-    /** The gateway hostname attribute name in a connection string. */
-    public static final String GATEWAY_HOSTNAME_ATTRIBUTE = "GatewayHostName=";
 
     /**
      * The charset used for URL-encoding the device ID in the connection
@@ -113,7 +111,6 @@ public final class DeviceClient
         String hostname = null;
         String deviceId = null;
         String sharedAccessKey = null;
-        String gatewayHostName = null;
         for (String attr : connStringAttrs)
         {
             // Codes_SRS_DEVICECLIENT_11_043: [The constructor shall save the IoT Hub hostname as the value of 'HostName' in the connection string.]
@@ -140,13 +137,9 @@ public final class DeviceClient
             {
                 sharedAccessKey = attr.substring(SHARED_ACCESS_KEY_ATTRIBUTE.length());
             }
-            else if (attr.startsWith(GATEWAY_HOSTNAME_ATTRIBUTE))
-            {
-                gatewayHostName = attr.substring(GATEWAY_HOSTNAME_ATTRIBUTE.length());
-            }
         }
 
-        initIotHubClient(hostname, gatewayHostName, deviceId, sharedAccessKey, protocol);
+        initIotHubClient(hostname, deviceId, sharedAccessKey, protocol);
     }
 
     /**
@@ -282,7 +275,6 @@ public final class DeviceClient
      * Initializes an IoT Hub device client with the given parameters.
      *
      * @param iotHubHostname the IoT Hub hostname.
-     * @param gatewayHostName the Protocol Gateway hostname.
      * @param deviceId the device ID.
      * @param deviceKey the device key.
      * @param protocol the communication protocol used (i.e. HTTPS).
@@ -293,7 +285,7 @@ public final class DeviceClient
      * @throws URISyntaxException if the IoT Hub hostname does not conform to
      * RFC 3986.
      */
-    protected void initIotHubClient(String iotHubHostname, String gatewayHostName, String deviceId,
+    protected void initIotHubClient(String iotHubHostname, String deviceId,
             String deviceKey, IotHubClientProtocol protocol)
             throws URISyntaxException
     {
@@ -324,7 +316,7 @@ public final class DeviceClient
         }
 
         // Codes_SRS_DEVICECLIENT_11_052: [The constructor shall save the IoT Hub hostname, device ID, and device key as configuration parameters.]
-        this.config = new DeviceClientConfig(iotHubHostname, gatewayHostName, deviceId, deviceKey);
+        this.config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
         // Codes_SRS_DEVICECLIENT_11_046: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
         // Codes_SRS_DEVICECLIENT_11_004: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
         switch (protocol)

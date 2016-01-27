@@ -39,8 +39,12 @@ public class MqttIotHubConnection implements MqttCallback
     //mqtt connection options
     private static final int keepAliveInterval = 20;
     private static final int mqttVersion = 4;
-    private static final boolean setCleanSession = false;
+    private static final boolean setCleanSession = true;
     private static final int qos = 1;
+
+    //string constants
+    private static String sslPrefix = "ssl://";
+    private static String sslPortSuffix = ":8883";
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -79,13 +83,13 @@ public class MqttIotHubConnection implements MqttCallback
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_002: [The constructor shall create the publish and subscribe
             // topic for the specified device id.]
-            this.publishTopic = "devices/" + this.config.getDeviceId() + "/messages/events";
-            this.subscribeTopic = "devices/" + this.config.getDeviceId() + "/messages/devicebound";
+            this.publishTopic = "devices/" + this.config.getDeviceId() + "/messages/events/";
+            this.subscribeTopic = "devices/" + this.config.getDeviceId() + "/messages/devicebound/#";
         }
     }
 
     /**
-     * Establishes a connection for the device and IoT Hub/Protocol Gateway given in the client
+     * Establishes a connection for the device and IoT Hub given in the client
      * configuration. If the connection is already open, the function shall do
      * nothing.
      *
@@ -108,10 +112,11 @@ public class MqttIotHubConnection implements MqttCallback
             {
                 IotHubSasToken sasToken = new IotHubSasToken(this.config);
 
-                this.asyncClient = new MqttAsyncClient(this.config.getGatewayHostName(), this.config.getDeviceId(), new MemoryPersistence());
+                this.asyncClient = new MqttAsyncClient(sslPrefix + this.config.getIotHubHostname() + sslPortSuffix,
+                        this.config.getDeviceId(), new MemoryPersistence());
                 asyncClient.setCallback(this);
 
-                this.updateConnectionOptions(this.config.getDeviceId(), sasToken.toString());
+                this.updateConnectionOptions(this.config.getIotHubHostname() + "/" + this.config.getDeviceId(), sasToken.toString());
                 this.connect(connectionOptions);
 
                 this.subscribe();

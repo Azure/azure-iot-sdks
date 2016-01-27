@@ -17,7 +17,7 @@ public final class DeviceClientConfig
     public AzureHubType targetHubType;
 
     public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceKey);
-    public DeviceClientConfig(String iotHubHostname, String gatewayHostName, String deviceId, String deviceKey);
+    public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceKey);
     public String getIotHubName();
     public String getDeviceId();
     public String getDeviceKey();
@@ -39,9 +39,9 @@ public final class DeviceClientConfig
 public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceKey);
 ```
 
-** SRS_DEVICECLIENTCONFIG_11_001: [**The constructor shall save the IoT Hub hostname, Protocol Gateway hostname, device ID, and device key.**] **
+** SRS_DEVICECLIENTCONFIG_11_001: [**The constructor shall save the IoT Hub hostname, device ID, and device key.**] **
 
-** SRS_DEVICECLIENTCONFIG_11_014: [**If the IoT Hub hostname and Protocol Gateway hostname are not valid URIs, the constructor shall throw a URISyntaxException.**] **
+** SRS_DEVICECLIENTCONFIG_11_014: [**If the IoT Hub hostname is not valid URI, the constructor shall throw a URISyntaxException.**] **
 
 ** SRS_DEVICECLIENTCONFIG_11_015: [**If the IoT Hub hostname does not contain a '.', the function shall throw an IllegalArgumentException.**] **
 
