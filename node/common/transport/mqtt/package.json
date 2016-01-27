@@ -6,6 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "azure-iot-common": "1.0.0-preview.11",
+    "debug": "^2.2.0",
     "mqtt": "^1.5.0"
   },
   "devDependencies": {

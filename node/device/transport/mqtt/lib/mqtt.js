@@ -29,8 +29,8 @@ function Mqtt(config) {
  */
 /* Codes_SRS_NODE_DEVICE_HTTP_12_004: [The connect method shall call the connect method on MqttTransport */
 Mqtt.prototype.connect = function (done) {
-  this._mqtt.connect(function () {
-    if (done) done();
+  this._mqtt.connect(function (err, result) {
+    if (done) done(err, result);
   });
 };
 
@@ -53,9 +53,9 @@ Mqtt.prototype.disconnect = function (done) {
  * 
  * @param {Message}     message   Message used for the content of the event sent to the server. 
  */
- /* Codes_SRS_NODE_DEVICE_HTTP_12_005: [The sendEvent method shall call the publish method on MqttTransport */
-Mqtt.prototype.sendEvent = function (message) {
-  this._mqtt.publish(message);
+/* Codes_SRS_NODE_DEVICE_HTTP_12_005: [The sendEvent method shall call the publish method on MqttTransport */
+Mqtt.prototype.sendEvent = function (message, done) {
+  this._mqtt.publish(message, done);
 };
 
 /**

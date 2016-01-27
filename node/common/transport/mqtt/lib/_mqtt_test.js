@@ -6,6 +6,7 @@
 var assert = require('chai').assert;
 
 var Mqtt = require('./mqtt.js');
+var PackageJson = require('../package.json');
 
 describe('Mqtt', function () {
   describe('#constructor', function () {
@@ -13,8 +14,7 @@ describe('Mqtt', function () {
         config [
             host: host address
             deviceID: device name
-            sharedAccessSignature: SAS token  created for IoTHub
-            gatewayHostName: gateway host name]
+            sharedAccessSignature: SAS token  created for IoTHub]
         Tests_SRS_NODE_HTTP_12_002: [Mqtt shall throw ReferenceError “Invalid transport configuration” error if either of the configuration field is falsy
     */
     it('throws if config structure is falsy', function () {
@@ -29,8 +29,7 @@ describe('Mqtt', function () {
         var config = {
           host: hostname,
           deviceId: "deviceId",
-          sharedAccessSignature: "sasToken",
-          gatewayHostName: "gatewayHostName"
+          sharedAccessSignature: "sasToken"
         };
         assert.throws(function () {
           return new Mqtt(config);
@@ -42,8 +41,7 @@ describe('Mqtt', function () {
         var config = {
           host: "host.name",
           deviceId: deviceId,
-          sharedAccessSignature: "sasToken",
-          gatewayHostName: "gatewayHostName"
+          sharedAccessSignature: "sasToken"
         };
         assert.throws(function () {
           return new Mqtt(config);
@@ -55,21 +53,7 @@ describe('Mqtt', function () {
         var config = {
           host: "host.name",
           deviceId: "deviceId",
-          sharedAccessSignature: sasToken,
-          gatewayHostName: "gatewayHostName"
-        };
-        assert.throws(function () {
-          return new Mqtt(config);
-        }, ReferenceError, 'Invalid transport configuration');
-      });
-    });
-    it('throws if gatewayHostName is falsy', function () {
-      [null, undefined].forEach(function (gatewayHostName) {
-        var config = {
-          host: 'host.name',
-          deviceId: "deviceId",
-          sharedAccessSignature: "sasToken",
-          gatewayHostName: gatewayHostName
+          sharedAccessSignature: sasToken
         };
         assert.throws(function () {
           return new Mqtt(config);
@@ -82,20 +66,19 @@ describe('Mqtt', function () {
       var config = {
         host: "host.name",
         deviceId: "deviceId",
-        sharedAccessSignature: "sasToken",
-        gatewayHostName: "gatewayHostName"
+        sharedAccessSignature: "sasToken"
       };
       var transport = new Mqtt(config);
       assert.notEqual(transport, null);
       assert.notEqual(transport, 'undefined');
       assert.equal(transport._options.clientId, config.deviceId);
-      assert.equal(transport._options.username, config.host + '/' + config.deviceId);
+      assert.equal(transport._options.username, config.host + '/' + config.deviceId + '/DeviceClientType=' + encodeURIComponent('azure-iot-device/' + PackageJson.version));
       assert.equal(transport._options.password, config.sharedAccessSignature);
 
       assert.equal(transport._options.cmd, 'connect');
       assert.equal(transport._options.protocolId, 'MQTT');
       assert.equal(transport._options.protocolVersion, '4');
-      assert.equal(transport._options.clean, false);
+      assert.equal(transport._options.clean, true);
       assert.equal(transport._options.rejectUnauthorized, false);
     });
   });
@@ -106,8 +89,7 @@ describe('Mqtt', function () {
         var config = {
           host: "host.name",
           deviceId: "deviceId",
-          sharedAccessSignature: "sasToken",
-          gatewayHostName: "gatewayHostName"
+          sharedAccessSignature: "sasToken"
         };
         var transport = new Mqtt(config);
         assert.throws(function () {
