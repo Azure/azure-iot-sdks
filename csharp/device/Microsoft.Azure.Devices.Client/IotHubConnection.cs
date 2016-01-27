@@ -202,27 +202,7 @@ namespace Microsoft.Azure.Devices.Client
             }
             else
             {
-                try
-                {
-                    transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
-                }
-                catch (Exception e)
-                {
-                    if (e.IsFatal() || e is UnauthorizedException)
-                    {
-                        throw;
-                    }
-
-                    // Amqp transport over TCP failed. Retry Amqp transport over WebSocket
-                    if (timeoutHelper.RemainingTime() != TimeSpan.Zero)
-                    {
-                        transport = await this.CreateClientWebSocketTransport(timeoutHelper.RemainingTime());
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                throw new InvalidOperationException("AmqpTransportSettings must specify WebSocketOnly or TcpOnly");
             }
 
             var amqpConnectionSettings = new AmqpConnectionSettings()

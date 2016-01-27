@@ -14,23 +14,16 @@ namespace Microsoft.Azure.Devices.Client
         {
             switch (transportType)
             {
+                case TransportType.Amqp_WebSocket_Only:
+                case TransportType.Amqp_Tcp_Only:
+                    this.transportType = transportType;
+                    break;
                 case TransportType.Amqp:
-                    this.UseWebSocketOnly = false;
-                    this.UseTcpOnly = false;
-                    break;
-                case TransportType.Amqp_WebSocket:
-                    this.UseWebSocketOnly = true;
-                    this.UseTcpOnly = false;
-                    break;
-                case TransportType.Amqp_Tcp:
-                    this.UseWebSocketOnly = false;
-                    this.UseTcpOnly = true;
-                    break;
+                    throw new ArgumentOutOfRangeException(nameof(transportType), transportType, "Must specify Amqp_WebSocket_Only or Amqp_Tcp_Only");
                 default:
                     throw new ArgumentOutOfRangeException(nameof(transportType), transportType, null);
             }
 
-            this.transportType = transportType;
             this.PrefetchCount = DefaultPrefetchCount;
         }
 
@@ -39,9 +32,15 @@ namespace Microsoft.Azure.Devices.Client
             return this.transportType;
         }
 
-        public bool UseWebSocketOnly { get; }
+        public bool UseWebSocketOnly
+        {
+            get { return this.transportType == TransportType.Amqp_WebSocket_Only; }
+        }
 
-        public bool UseTcpOnly { get; }
+        public bool UseTcpOnly
+        {
+            get { return this.transportType == TransportType.Amqp_Tcp_Only; }
+        }
 
         public uint PrefetchCount { get; set; }
     }

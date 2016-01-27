@@ -53,7 +53,7 @@ namespace Microsoft.Azure.Devices.Client
 
             if (authMethod == null)
             {
-                throw new ArgumentNullException("authMethod");
+                throw new ArgumentNullException("authenticationMethod");
             }
 
             var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authMethod);
