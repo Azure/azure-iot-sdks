@@ -66,8 +66,8 @@ Client.fromConnectionString = function fromConnectionString(value, Transport) {
 Client.prototype.open = function (done) {
   /* Codes_SRS_NODE_DEVICE_CLIENT_12_001: [The open function shall call the transport’s connect function, if it exists.] */
   if (typeof this._transport.connect === 'function') {
-    this._transport.connect(function () {
-      done();
+    this._transport.connect(function (err, res) {
+      done(err, res);
     });
   } 
 };
