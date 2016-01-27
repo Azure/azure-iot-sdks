@@ -12,6 +12,7 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -116,7 +117,10 @@ public class MqttIotHubConnection implements MqttCallback
                         this.config.getDeviceId(), new MemoryPersistence());
                 asyncClient.setCallback(this);
 
-                this.updateConnectionOptions(this.config.getIotHubHostname() + "/" + this.config.getDeviceId(), sasToken.toString());
+                String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion, "UTF-8");
+                String userName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + clientIdentifier;
+
+                this.updateConnectionOptions(userName, sasToken.toString());
                 this.connect(connectionOptions);
 
                 this.subscribe();
