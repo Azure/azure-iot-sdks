@@ -7,7 +7,7 @@
 #endif
 
 #include "testrunnerswitcher.h"
-#include "version.h"
+#include "iothub_client_version.h"
 
 BEGIN_TEST_SUITE(version_unittests)
 

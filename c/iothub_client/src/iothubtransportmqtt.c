@@ -22,7 +22,7 @@
 #include "tlsio_wolfssl.h"
 #include "tlsio_openssl.h"
 
-#include "version.h"
+#include "iothub_client_version.h"
 
 #include <stdarg.h>
 #include <stdio.h>

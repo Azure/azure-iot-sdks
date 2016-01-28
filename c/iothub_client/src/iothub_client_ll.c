@@ -12,7 +12,7 @@
 #include "iothub_client_ll.h"
 #include "iothub_client_private.h"
 #include "doublylinkedlist.h"
-#include "version.h"
+#include "iothub_client_version.h"
 
 #include "iot_logging.h"
 

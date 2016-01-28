@@ -15,7 +15,7 @@ set(iothub_client_ll_transport_c_files
 set(iothub_client_ll_transport_h_files
 ./inc/iothub_message.h
 ./inc/iothub_client_ll.h
-./inc/version.h
+./inc/iothub_client_version.h
 )
 
 set(iothub_client_c_files
@@ -25,7 +25,7 @@ set(iothub_client_c_files
 
 set(iothub_client_h_files
 ./inc/iothub_client.h
-./inc/version.h
+./inc/iothub_client_version.h
 )
 
 if(${use_http})

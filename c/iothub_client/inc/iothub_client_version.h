@@ -5,8 +5,8 @@
 *	@brief Functions for managing the client SDK version.
 */
 
-#ifndef IOTHUB_VERSION_H
-#define IOTHUB_VERSION_H
+#ifndef IOTHUB_CLIENT_VERSION_H
+#define IOTHUB_CLIENT_VERSION_H
 
 #define IOTHUB_SDK_VERSION "1.0.0-preview.9"
 
@@ -28,4 +28,4 @@ extern "C"
 }
 #endif
 
-#endif // IOTHUB_VERSION_H
+#endif // IOTHUB_CLIENT_VERSION_H
