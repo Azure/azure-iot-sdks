@@ -44,7 +44,7 @@ git clone https://github.com/raspberrypi/tools.git
 ```
 Unfortunately, this does not give us all the files that are required to build the project. At this point you will need to copy some files from a running Raspberry Pi to your host machine. Make sure you can access your Raspberry Pi via SSH (you can enable this using [raspi-config](https://www.raspberrypi.org/documentation/configuration/raspi-config.md) and select “9. Advanced Options”. Further instructions are beyond the scope of this document). On your host’s terminal enter
 ```
-cd ~/RPiTools/tools/arm-bcm2708/\\
+cd ~/RPiTools/tools/arm-bcm2708/\
 gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf
 rsync -rl --safe-links pi@&lt;*your Pi identifier*&gt;:/{lib,usr} .
 ```
@@ -56,16 +56,15 @@ This command will copy many more files to your host than you actually need but, 
 
 In order to tell cmake that it is performing a cross compile we need to provide it with a toolchain file. To save us some typing and to make our whole procedure less dependent upon the current user we are going to export a value. Whilst in the same directory as above enter the following command
 ```
-export RPI\_ROOT=$(pwd)
+export RPI_ROOT=$(pwd)
 ```
 You can use *export -p* to verify RPI\_ROOT has been added to the environment.
 
 Now we need to switch to the SDK directory tree. Enter this command
 ```
-cd ~/Source/azure-iot-sdks/c/build\_all/linux
+cd ~/Source/azure-iot-sdks/c/build_all/linux
 ```
 Using the text editor of your choice, create a new file in this directory and call it toolchain-rpi.cmake. Into this file place the following lines
-<!--- Not really python but colorizes the comments -->
 
 ```cmake
 INCLUDE(CMakeForceCompiler)
