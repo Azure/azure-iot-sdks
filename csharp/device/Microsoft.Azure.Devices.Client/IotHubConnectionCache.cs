@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public TimeSpan IdleTimeout { get; set; }
 
-        public IotHubConnection GetConnection(IotHubConnectionString connectionString, bool useWebSocketOnly)
+        public IotHubConnection GetConnection(IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
         {
             if (connectionString.SharedAccessKeyName != null)
             {
@@ -32,14 +32,14 @@ namespace Microsoft.Azure.Devices.Client
                 CachedConnection cachedConnection;
                 do
                 {
-                    cachedConnection = this.connections.GetOrAdd(connectionString, k => new CachedConnection(this, new IotHubConnection(k, this.accessRights, useWebSocketOnly)));
+                    cachedConnection = this.connections.GetOrAdd(connectionString, k => new CachedConnection(this, new IotHubConnection(k, this.accessRights, amqpTransportSettings)));
                 }
                 while (!cachedConnection.TryAddRef());
 
                 return cachedConnection.Connection;
             }
 
-            return new IotHubConnection(connectionString, this.accessRights, useWebSocketOnly);
+            return new IotHubConnection(connectionString, this.accessRights, amqpTransportSettings);
         }
 
         public async Task ReleaseConnectionAsync(IotHubConnection connection)

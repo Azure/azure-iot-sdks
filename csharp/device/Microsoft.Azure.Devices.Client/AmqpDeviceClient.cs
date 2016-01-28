@@ -15,7 +15,6 @@ namespace Microsoft.Azure.Devices.Client
 
     sealed class AmqpDeviceClient : DeviceClientHelper
     {
-        const uint DefaultPrefetchCount = 50;
         static readonly IotHubConnectionCache connectionCache = new IotHubConnectionCache(AccessRights.DeviceConnect);
         readonly string deviceId;
         readonly FaultTolerantAmqpObject<SendingAmqpLink> faultTolerantEventSendingLink;
@@ -23,18 +22,20 @@ namespace Microsoft.Azure.Devices.Client
         readonly IotHubConnection IotHubConnection;
         readonly TimeSpan openTimeout;
         readonly TimeSpan operationTimeout;
+        readonly uint prefetchCount;
 
         int eventsDeliveryTag;
 
-        public AmqpDeviceClient(IotHubConnectionString connectionString, bool useWebSocketOnly)
+        public AmqpDeviceClient(IotHubConnectionString connectionString, AmqpTransportSettings transportSettings)
         {
-            this.IotHubConnection = connectionCache.GetConnection(connectionString, useWebSocketOnly);
+            this.IotHubConnection = connectionCache.GetConnection(connectionString, transportSettings);
             this.deviceId = connectionString.DeviceId;
             this.openTimeout = IotHubConnection.DefaultOpenTimeout;
             this.operationTimeout = IotHubConnection.DefaultOperationTimeout;
             this.DefaultReceiveTimeout = IotHubConnection.DefaultOperationTimeout;
             this.faultTolerantEventSendingLink = new FaultTolerantAmqpObject<SendingAmqpLink>(this.CreateEventSendingLinkAsync, this.IotHubConnection.CloseLink);
             this.faultTolerantDeviceBoundReceivingLink = new FaultTolerantAmqpObject<ReceivingAmqpLink>(this.CreateDeviceBoundReceivingLinkAsync, this.IotHubConnection.CloseLink);
+            this.prefetchCount = transportSettings.PrefetchCount;
         }
 
         /// <summary>
@@ -43,19 +44,19 @@ namespace Microsoft.Azure.Devices.Client
         /// <param name="hostname">The fully-qualified DNS hostname of IoT Hub</param>
         /// <param name="authMethod">The authentication method that is used</param>
         /// <returns>DeviceClient</returns>
-        public static AmqpDeviceClient Create(string hostname, IAuthenticationMethod authMethod)
+        public static AmqpDeviceClient Create(string hostname, IAuthenticationMethod authenticationMethod)
         {
             if (hostname == null)
             {
                 throw new ArgumentNullException("hostname");
             }
 
-            if (authMethod == null)
+            if (authenticationMethod == null)
             {
-                throw new ArgumentNullException("authMethod");
+                throw new ArgumentNullException("authenticationMethod");
             }
 
-            var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authMethod);
+            var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authenticationMethod);
             return CreateFromConnectionString(connectionStringBuilder.ToString());
         }
 
@@ -72,7 +73,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
-            return new AmqpDeviceClient(iotHubConnectionString, false);
+            return new AmqpDeviceClient(iotHubConnectionString, new AmqpTransportSettings(TransportType.Amqp_Tcp_Only));
         }
 
         // This Finalizer gets cancelled when/if the user calls CloseAsync.
@@ -344,7 +345,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/deviceBound", HttpUtility.UrlEncode(this.deviceId));
 
-            return await this.IotHubConnection.CreateReceivingLink(path, timeout, DefaultPrefetchCount);
+            return await this.IotHubConnection.CreateReceivingLink(path, timeout, this.prefetchCount);
         }
     }
 }
