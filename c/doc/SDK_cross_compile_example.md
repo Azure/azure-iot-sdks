@@ -67,11 +67,11 @@ cd ~/Source/azure-iot-sdks/c/build\_all/linux
 Using the text editor of your choice, create a new file in this directory and call it toolchain-rpi.cmake. Into this file place the following lines
 <!--- Not really python but colorizes the comments -->
 
-```python
+```cmake
 INCLUDE(CMakeForceCompiler)
 
 SET(CMAKE_SYSTEM_NAME Linux)     # this one is important
-SET(CMAKE\_SYSTEM\_VERSION 1)    # this one not so much
+SET(CMAKE_SYSTEM_VERSION 1)     # this one not so much
 
 # this is the location of the amd64 toolchain targeting the Raspberry Pi
 SET(CMAKE_C_COMPILER $ENV{RPI_ROOT}/../bin/arm-linux-gnueabihf-gcc)
