@@ -5,5 +5,5 @@
 ..\src\iothub_client.c
 ..\src\iothub_client_ll.c
 ..\src\iothub_message.c
-..\inc\version.h
+..\inc\iothub_client_version.h
 ..\src\version.c

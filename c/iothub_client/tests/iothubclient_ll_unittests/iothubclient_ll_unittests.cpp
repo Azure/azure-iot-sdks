@@ -11,7 +11,7 @@
 #include "micromockcharstararenullterminatedstrings.h"
 
 #include "iothub_client_ll.h"
-#include "version.h"
+#include "iothub_client_version.h"
 
 #include "lock.h"
 #include "doublylinkedlist.h"
