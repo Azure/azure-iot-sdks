@@ -94,7 +94,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         var message = new Message('hello');
         client.sendEvent(message, function (err, res) {
           assert.isNull(err);
-          assert.equal(res.statusCode, 204);
+          assert.equal(res.constructor.name, 'MessageEnqueued');
           done();
         });
       });
@@ -118,7 +118,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         }
         client.sendEventBatch(messages, function (err, res) {
           assert.isNull(err);
-          assert.equal(res.statusCode, 204);
+          assert.equal(res.constructor.name, 'MessageEnqueued');
           done();
         });
       });
