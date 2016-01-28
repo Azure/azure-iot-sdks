@@ -5,5 +5,6 @@ package com.microsoft.azure.iothub.transport;
 
 public class TransportUtils
 {
+    public static String javaDeviceClientIdentifier = "com.microsoft.azure.iothub-java-client/";
     public static String clientVersion = "1.0.0-preview.9";
 }

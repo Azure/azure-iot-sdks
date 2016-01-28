@@ -217,7 +217,7 @@ public class HttpsRequestTest
         final String field1 = "test-field1";
         final String value1 = "test-value1";
         final String userAgent = "User-Agent";
-        final String userAgentValue = " iothub-java-service-client/" + TransportUtils.serviceVersion;
+        final String userAgentValue = TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion;
         new MockUp<HttpConnection>()
         {
             Map<String, String> testHeaderFields = new HashMap<>();
