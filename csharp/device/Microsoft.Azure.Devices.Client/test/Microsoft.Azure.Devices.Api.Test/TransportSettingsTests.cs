@@ -54,7 +54,7 @@ namespace Microsoft.Azure.Devices.Client.Test
         {
             var transportSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 200);
             Assert.IsTrue(transportSetting.GetTransportType() == TransportType.Amqp_Tcp_Only, "Should be TransportType.Amqp_Tcp_Only");
-            Assert.IsTrue(transportSetting.PrefetchCount == 200, "Should be default value of 200");
+            Assert.IsTrue(transportSetting.PrefetchCount == 200, "Should be value of 200");
         }
 
         [TestMethod]

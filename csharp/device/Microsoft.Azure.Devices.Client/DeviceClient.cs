@@ -64,6 +64,8 @@ namespace Microsoft.Azure.Devices.Client
 #if !WINDOWS_UWP
         readonly IotHubConnectionString iotHubConnectionString;
         readonly ITransportSettings[] transportSettings;
+        readonly object thisLock = new object();
+
         volatile TaskCompletionSource<object> openTaskCompletionSource;
         bool openCalled;
 
@@ -71,14 +73,8 @@ namespace Microsoft.Azure.Devices.Client
         {
             this.iotHubConnectionString = iotHubConnectionString;
             this.transportSettings = transportSettings;
-
-            if (ThisLock == null)
-            {
-                ThisLock = new object();
-            }
         }
 
-        static object ThisLock { get; set; }
 #else
         DeviceClient(DeviceClientHelper impl, TransportType transportType)
         {
@@ -272,7 +268,7 @@ namespace Microsoft.Azure.Devices.Client
                         }
                         break;
                     default:
-                        throw new InvalidOperationException("Unsupported Transport Setting {0}".FormatInvariant(transportSetting));
+                        throw new InvalidOperationException("Unsupported Transport Type {0}".FormatInvariant(transportSetting.GetTransportType()));
                 }
             }
 
@@ -605,7 +601,7 @@ namespace Microsoft.Azure.Devices.Client
        
             if (localTcs == null)
             {
-                lock (ThisLock)
+                lock (this.thisLock)
                 {
                     localTcs = this.openTaskCompletionSource;
                     if (localTcs == null)
@@ -621,12 +617,12 @@ namespace Microsoft.Azure.Devices.Client
                 try
                 {
                     await this.TryOpenPrioritizedTransportsAsync();
-                    localTcs.TrySetResult(this.impl);
+                    localTcs.SetResult(this.impl);
                 }
                 catch (Exception e)
                 {
                     localTcs.SetException(e);
-                    lock (ThisLock)
+                    lock (this.thisLock)
                     {
                         // set to null so we retry on next attempt?
                         this.openTaskCompletionSource = null;

@@ -20,7 +20,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public AmqpTransportSettings(TransportType transportType, uint prefetchCount)
         {
-            if (prefetchCount == 0)
+            if (prefetchCount <= 0)
             {
                 throw new ArgumentOutOfRangeException("prefetchCount", "Must be greater than zero");
             }
