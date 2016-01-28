@@ -205,7 +205,9 @@ namespace Microsoft.Azure.Devices.Client
 
             var amqpConnectionSettings = new AmqpConnectionSettings()
             {
-                MaxFrameSize = AmqpConstants.DefaultMaxFrameSize, ContainerId = Guid.NewGuid().ToString("N"), HostName = this.connectionString.AmqpEndpoint.Host
+                MaxFrameSize = AmqpConstants.DefaultMaxFrameSize,
+                ContainerId = Guid.NewGuid().ToString("N"),
+                HostName = this.connectionString.AmqpEndpoint.Host
             };
 
             var amqpConnection = new AmqpConnection(transport, amqpSettings, amqpConnectionSettings);
@@ -225,7 +227,7 @@ namespace Microsoft.Azure.Devices.Client
             return amqpSession;
         }
 
-        private static async Task OpenLinkAsync(AmqpObject link, TimeSpan timeout)
+        static async Task OpenLinkAsync(AmqpObject link, TimeSpan timeout)
         {
             var timeoutHelper = new TimeoutHelper(timeout);
             try
@@ -245,13 +247,13 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        private void CloseConnection(AmqpSession amqpSession)
+        void CloseConnection(AmqpSession amqpSession)
         {
             // Closing the connection also closes any sessions.
             amqpSession.Connection.SafeClose();
         }
 
-        private async Task<ClientWebSocket> CreateClientWebSocket(Uri websocketUri, TimeSpan timeout)
+        async Task<ClientWebSocket> CreateClientWebSocket(Uri websocketUri, TimeSpan timeout)
         {
             var websocket = new ClientWebSocket();
 
@@ -277,15 +279,19 @@ namespace Microsoft.Azure.Devices.Client
             return websocket;
         }
 
-        private async Task<TransportBase> CreateClientWebSocketTransport(TimeSpan timeout)
+        async Task<TransportBase> CreateClientWebSocketTransport(TimeSpan timeout)
         {
             TimeoutHelper timeoutHelper = new TimeoutHelper(timeout);
             Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
             var websocket = await this.CreateClientWebSocket(websocketUri, timeoutHelper.RemainingTime());
-            return new ClientWebSocketTransport(websocket, this.connectionString.IotHubName, null, null);
+            return new ClientWebSocketTransport(
+                websocket, 
+                this.connectionString.IotHubName, 
+                null, 
+                null);
         }
 
-        private AmqpSettings CreateAmqpSettings()
+        AmqpSettings CreateAmqpSettings()
         {
             var amqpSettings = new AmqpSettings();
 
@@ -296,7 +302,7 @@ namespace Microsoft.Azure.Devices.Client
             return amqpSettings;
         }
 
-        private static AmqpLinkSettings SetLinkSettingsCommonProperties(AmqpLinkSettings linkSettings, TimeSpan timeSpan)
+        static AmqpLinkSettings SetLinkSettingsCommonProperties(AmqpLinkSettings linkSettings, TimeSpan timeSpan)
         {
             linkSettings.AddProperty(IotHubAmqpProperty.TimeoutName, timeSpan.TotalMilliseconds);
             linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, Utils.GetClientVersion());
@@ -304,31 +310,39 @@ namespace Microsoft.Azure.Devices.Client
             return linkSettings;
         }
 
-        private TlsTransportSettings CreateTlsTransportSettings()
+        TlsTransportSettings CreateTlsTransportSettings()
         {
             var tcpTransportSettings = new TcpTransportSettings()
             {
-                Host = this.connectionString.HostName, Port = this.connectionString.AmqpEndpoint.Port
+                Host = this.connectionString.HostName,
+                Port = this.connectionString.AmqpEndpoint.Port
             };
 
             var tlsTransportSettings = new TlsTransportSettings(tcpTransportSettings)
             {
-                TargetHost = this.connectionString.HostName, Certificate = null, // TODO: add client cert support
+                TargetHost = this.connectionString.HostName,
+                Certificate = null, // TODO: add client cert support
                 CertificateValidationCallback = this.OnRemoteCertificateValidation
             };
 
             return tlsTransportSettings;
         }
 
-        private async Task SendCbsTokenAsync(AmqpCbsLink cbsLink, TimeSpan timeout)
+        async Task SendCbsTokenAsync(AmqpCbsLink cbsLink, TimeSpan timeout)
         {
             string audience = this.ConnectionString.AmqpEndpoint.AbsoluteUri;
             string resource = this.ConnectionString.AmqpEndpoint.AbsoluteUri;
-            var expiresAtUtc = await cbsLink.SendTokenAsync(this.ConnectionString, this.ConnectionString.AmqpEndpoint, audience, resource, AccessRightsHelper.AccessRightsToStringArray(this.accessRights), timeout);
+            var expiresAtUtc = await cbsLink.SendTokenAsync(
+                this.ConnectionString, 
+                this.ConnectionString.AmqpEndpoint, 
+                audience, 
+                resource, 
+                AccessRightsHelper.AccessRightsToStringArray(this.accessRights), 
+                timeout);
             this.ScheduleTokenRefresh(expiresAtUtc);
         }
 
-        private async void OnRefreshToken()
+        async void OnRefreshToken()
         {
             AmqpSession amqpSession = this.faultTolerantSession.Value;
             if (amqpSession != null && !amqpSession.IsClosing())
@@ -353,7 +367,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        private bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
             {
@@ -391,7 +405,7 @@ namespace Microsoft.Azure.Devices.Client
             return deliveryTag;
         }
 
-        private void ScheduleTokenRefresh(DateTime expiresAtUtc)
+        void ScheduleTokenRefresh(DateTime expiresAtUtc)
         {
             if (expiresAtUtc == DateTime.MaxValue)
             {
