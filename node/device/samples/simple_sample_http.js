@@ -32,7 +32,7 @@ setInterval(function () {
 //  example, to scale to 1 million devices, set the polling
 //  interval to 25 minutes. For further information, see
 //  https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
-client.getReceiver(function(receiver) {
+client.getReceiver(function(err, receiver) {
   // Example of use of the 'interval' option:
   receiver.setOptions({ interval: 1, at: null, cron: null, drain: true });
   
@@ -51,27 +51,10 @@ client.getReceiver(function(receiver) {
   receiver.on('errorReceived', printResultFor('error'));  
 });
 
-// Poll for new messages from IoT Hub every second.
-//  Note: In this sample, the polling interval is set to 1 second
-//  to enable you to see messages as they are sent. To enable an
-//  IoT solution to scale, you should extend this interval. For
-//  example, to scale to 1 million devices, set the polling
-//  interval to 25 minutes. For further information, see
-//  https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
-setInterval(function () {
-  client.receive(function (err, msg, res) {
-    if (err) printResultFor('receive')(err, res);
-    else if (res.statusCode !== 204) {
-      console.log('Received data: ' + msg.getData());
-      client.complete(msg, printResultFor('complete'));
-    }
-  });
-}, 1000);
-
 // Helper function to print results in the console
 function printResultFor(op) {
   return function printResult(err, res) {
     if (err) console.log(op + ' error: ' + err.toString());
-    if (res && (res.statusCode !== 204)) console.log(op + ' status: ' + res.statusCode + ' ' + res.statusMessage);
+    if (res) console.log(op + ' status: ' + res.constructor.name + ' (' + res.transportObj.statusCode + ': ' + res.transportObj.statusMessage + ')');
   };
 }

@@ -7,6 +7,7 @@ var Base = require('azure-iot-http-base').Http;
 var endpoint = require('azure-iot-common').endpoint;
 var HttpReceiver = require('./http_receiver.js');
 var PackageJson = require('../package.json');
+var results = require('azure-iot-common').results;
 
 /*Codes_SRS_NODE_DEVICE_HTTP_05_009: [When any Http method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
 err - the standard JavaScript Error object, with the Node.js http.ServerResponse object attached as the property response]*/
@@ -16,8 +17,9 @@ body - the body of the HTTP response
 response - the Node.js http.ServerResponse object returned by the transport]*/
 function handleResponse(done) {
   return function onResponse(err, body, response) {
-    if (!err) done (null, response);
-    else {
+    if (!err) {
+        done (null, new results.MessageEnqueued(response));
+    } else {
       err.response = response;
       err.responseBody = body;
       done(err);
@@ -161,130 +163,6 @@ Http.prototype.sendEventBatch = function (messages, done) {
 };
 
 /**
- * @method          module:azure-iot-device-http.Http#receive
- * @description     The receive method queries the IoT Hub (as the device indicated in the
- *                  `config` parameter) for the next message in the queue.
- * @deprecated getReceiver should be used instead.
- * 
- * @param {Object}  config            This is a dictionary containing the
- *                                    following keys and values:
- *
- * | Key     | Value                                                   |
- * |---------|---------------------------------------------------------|
- * | host    | The host URL of the Azure IoT Hub                       |
- * | hubName | The name of the Azure IoT Hub                           |
- * | keyName | The identifier of the device that is being connected to |
- * | key     | The shared access key auth                              |
- *
- * @param {Function}      done      The callback to be invoked when
- *                                  `receive` completes execution.
- */
-/*Codes_SRS_NODE_DEVICE_HTTP_05_004: [The receive method shall construct an HTTP request using information supplied by the caller, as follows:
-GET <config.host>/devices/<config.deviceId>/messages/devicebound?api-version=<version> HTTP/1.1
-Authorization: <config.sharedAccessSignature>
-iothub-to: /devices/<config.deviceId>/messages/devicebound
-User-Agent: <version string>
-Host: <config.host>
-]*/
-Http.prototype.receive = function (done) {
-  var config = this._config;
-  var path = endpoint.messagePath(config.deviceId);
-  var httpHeaders = {
-    'Authorization': config.sharedAccessSignature.toString(),
-    'iothub-to': path,
-    'User-Agent': 'azure-iot-device/' + PackageJson.version
-  };
-  var request = this._http.buildRequest('GET', path + endpoint.versionQueryString(), httpHeaders, config.host, function (err, body, res) {
-    if (!err) {
-      var msg = this._http.toMessage(res, body);
-      done(null, msg, res);
-      }
-    else {
-      err.response = res;
-      err.responseBody = body;
-      done(err);
-    }
-  }.bind(this));
-  request.end();
-};
-
-/**
- * @method          module:azure-iot-device-http.Http#sendFeedback
- * @description     This method sends the feedback action to the IoT Hub.
- * @deprecated      Use [abandon, complete, and reject]{@link module:azure-iot-device-http.HttpReceiver.abandon} methods of the [HttpReceiver]{@link module:azure-iot-device-http.HttpReceiver} instead.
- *
- * @param {String}  action    This parameter must be equal to one of the
- *                            following possible values:
- *
- * | Value    | Action                                                                                               |
- * |----------|------------------------------------------------------------------------------------------------------|
- * | abandon  | Directs the IoT Hub to re-enqueue a message so it may be received again later.          |
- * | reject   | Directs the IoT Hub to delete a message from the queue and record that it was rejected. |
- * | complete | Directs the IoT Hub to delete a message from the queue and record that it was accepted. |
- *
- * @param {String}  message   The message for which feedback is being sent.
- * @param {Object}  config    This is a dictionary containing the
- *                            following keys and values:
- *
- * | Key     | Value                                                   |
- * |---------|---------------------------------------------------------|
- * | host    | The host URL of the Azure IoT Hub                       |
- * | hubName | The name of the Azure IoT Hub                           |
- * | keyName | The identifier of the device that is being connected to |
- * | key     | The shared access key auth                              |
- * @param {Function}      done      The callback to be invoked when
- *                                  `sendFeedback` completes execution.
- */
-Http.prototype.sendFeedback = function (action, message, done) {
-  var config = this._config;
-  var method;
-  var path = endpoint.feedbackPath(config.deviceId, message.lockToken);
-  var httpHeaders = {
-    'Authorization': config.sharedAccessSignature.toString(),
-    'If-Match': message.lockToken,
-    'User-Agent': 'azure-iot-device/' + PackageJson.version
-  };
-  
-  /*Codes_SRS_NODE_DEVICE_HTTP_05_005: [If the action argument is 'abandon', sendFeedback shall construct an HTTP request using information supplied by the caller, as follows:
-  POST <config.host>/devices/<config.deviceId>/messages/devicebound/<lockToken>/abandon?api-version=<version> HTTP/1.1
-  Authorization: <config.sharedAccessSignature>
-  If-Match: <lockToken>
-  User-Agent: <version string>
-  Host: <config.host>
-  ]*/
-  if (action === 'abandon') {
-    path += '/abandon' + endpoint.versionQueryString();
-    method = 'POST';
-  }
-  /*Codes_SRS_NODE_DEVICE_HTTP_05_006: [If the action argument is 'reject', sendFeedback shall construct an HTTP request using information supplied by the caller, as follows:
-  DELETE <config.host>/devices/<config.deviceId>/messages/devicebound/<lockToken>?api-version=<version>&reject HTTP/1.1
-  Authorization: <config.sharedAccessSignature>
-  If-Match: <lockToken>
-  User-Agent: <version string>
-  Host: <config.host>
-  ]*/
-  else if (action === 'reject') {
-    path += endpoint.versionQueryString() + '&reject';
-    method = 'DELETE';
-  }
-  /*Codes_SRS_NODE_DEVICE_HTTP_05_007: [If the action argument is 'complete', sendFeedback shall construct an HTTP request using information supplied by the caller, as follows:
-  DELETE <config.host>/devices/<config.deviceId>/messages/devicebound/<lockToken>?api-version=<version> HTTP/1.1
-  Authorization: <config.sharedAccessSignature>
-  If-Match: <lockToken>
-  User-Agent: <version string>
-  Host: <config.host>
-  ]*/
-  else {
-    path += endpoint.versionQueryString();
-    method = 'DELETE';
-  }
-
-  /*Codes_SRS_NODE_DEVICE_HTTP_05_008: [If any Http method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-  var request = this._http.buildRequest(method, path, httpHeaders, config.host, handleResponse(done));
-  request.end();
-};
-
-/**
  * @method          module:azure-iot-device-http.Http#getReceiver
  * @description     This methods gets the unique instance of the receiver that is used to asynchronously retrieve messages from the IoT Hub service.
  * 
@@ -295,7 +173,7 @@ Http.prototype.getReceiver = function getReceiver (done) {
     this._receiver = new HttpReceiver(this._config, this._http);
   }
   
-  done(this._receiver);
+  done(null, this._receiver);
 };
 
 module.exports = Http;

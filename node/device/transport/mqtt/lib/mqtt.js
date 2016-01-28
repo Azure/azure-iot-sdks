@@ -19,6 +19,7 @@ var Base = require('azure-iot-mqtt-base').Mqtt;
 function Mqtt(config) {
   this._config = config;
   this._mqtt = new Base(config);
+  this._receiver = null;
 }
 
 /**
@@ -59,18 +60,14 @@ Mqtt.prototype.sendEvent = function (message, done) {
 };
 
 /**
- * @method              module:azure-iot-device-mqtt.Mqtt#receive
- * @description         Receive events from the server.
+ * @method              module:azure-iot-device-mqtt.Mqtt#getReceiver
+ * @description         Gets a receiver object that is used to receive and settle messages.
  * 
- * @param {Function}    done   callback that shall be called when a message is received. 
+ * @param {Function}    done   callback that shall be called with a receiver object instance. 
  */
-/*
- Codes_SRS_NODE_DEVICE_HTTP_12_006: [The receive method shall subscribe on MqttTransport
- Codes_SRS_NODE_DEVICE_HTTP_12_007: [The receive method shall receive on MqttTransport
-*/
-Mqtt.prototype.receive = function (done) {
-  this._mqtt.subscribe();
-  this._mqtt.receive(done);
+
+Mqtt.prototype.getReceiver = function (done) {
+  this._mqtt.getReceiver(done);
 };
 
 module.exports = Mqtt;

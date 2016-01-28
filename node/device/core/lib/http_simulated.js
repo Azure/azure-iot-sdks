@@ -61,7 +61,7 @@ SimulatedHttp.prototype.receive = function (done) {
 
 SimulatedHttp.prototype.getReceiver = function (done) {
   if(!this._receiver) { this._receiver = new EventEmitter(); }
-  done(this._receiver);
+  done(null, this._receiver);
 };
 
 SimulatedHttp.prototype.sendFeedback = function (feedbackAction, message, done) {

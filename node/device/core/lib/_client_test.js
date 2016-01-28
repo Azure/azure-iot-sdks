@@ -5,7 +5,6 @@
 
 var assert = require('chai').assert;
 
-var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var Client = require('./client.js');
 var Message = require('azure-iot-common').Message;
 var SimulatedHttp = require('./http_simulated.js');
@@ -132,118 +131,6 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         client.sendEventBatch(messages, done);
       });
     });
-
-    describe('#receive', function () {
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_009: [The receive method shall query the IoT Hub for the next message via the transport associated with the Client instance.]*/
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_018: [When receive completes successfully, the callback function (indicated by the done argument) shall be invoked with the following arguments:
-      err - null
-      message - the received Message (for receive), otherwise null
-      response - a transport-specific response object]*/
-      it('queries the service for a message', function (done) {
-        var client = Client.fromConnectionString(goodConnectionString, Transport);
-        client.receive(function (err, msg, res) {
-          assert.isNull(err);
-          assert.isBelow(res.statusCode, 300);
-          assert.instanceOf(msg, Message);
-          done();
-        });
-      });
-
-      badConfigTests('receive messages', badConnectionStrings, Transport, function (client, done) {
-        client.receive(function (err, message, response) {
-          done(err, response);
-        });
-      });
-    });
-
-    describe('#abandon', function () {
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_011: [Otherwise it shall invoke the done callback with ArgumentError.]*/
-      it('fails if message doesn\'t have a lock token', function (done) {
-        var client = Client.fromConnectionString(goodConnectionString, Transport);
-        var message = new Message('hello');
-        client.abandon(message, function (err) {
-          assert.isNotNull(err);
-          assert.instanceOf(err, ArgumentError);
-          done();
-        });
-      });
-      
-      it('fails if the lock token doesn\'t match an outstanding message', function (done) {
-        var client = Client.fromConnectionString(goodConnectionString, Transport);
-        var message = new Message('hello');
-        message.lockToken = 'FFA945D3-9808-4648-8DD7-D250DDE66EA9';
-        client.abandon(message, function (err) {
-          assert.isNotNull(err);
-          assert.equal(err.response.statusCode, 412);
-          done();
-        });
-      });
-
-      badConfigTests('abandon', badConnectionStrings, Transport, function (client, done) {
-        var message = new Message('hello');
-        message.lockToken = '44D56613-DC1A-4DA8-906B-DDCC46090776';
-        client.abandon(message, done);
-      });
-    });
-
-    describe('#reject', function () {
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_013: [Otherwise is shall invoke the done callback with ArgumentError.]*/
-      it('fails if message doesn\'t have a lock token', function (done) {
-        var client = Client.fromConnectionString(goodConnectionString, Transport);
-        var message = new Message('hello');
-        client.reject(message, function (err) {
-          assert.isNotNull(err);
-          assert.instanceOf(err, ArgumentError);
-          done();
-        });
-      });
-
-      it('fails if the lock token doesn\'t match an outstanding message', function (done) {
-        var client = Client.fromConnectionString(goodConnectionString, Transport);
-        var message = new Message('hello');
-        message.lockToken = 'FFA945D3-9808-4648-8DD7-D250DDE66EA9';
-        client.reject(message, function (err) {
-          assert.isNotNull(err);
-          assert.equal(err.response.statusCode, 412);
-          done();
-        });
-      });
-
-      badConfigTests('reject', badConnectionStrings, Transport, function (client, done) {
-        var message = new Message('hello');
-        message.lockToken = '44D56613-DC1A-4DA8-906B-DDCC46090776';
-        client.reject(message, done);
-      });
-    });
-
-    describe('#complete', function () {
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_015: [Otherwise is shall invoke the done callback with ArgumentError.]*/
-      it('fails if message doesn\'t have a lock token', function (done) {
-        var client = Client.fromConnectionString(goodConnectionString, Transport);
-        var message = new Message('hello');
-        client.complete(message, function (err) {
-          assert.isNotNull(err);
-          done();
-        });
-      });
-
-      it('fails if the lock token doesn\'t match an outstanding message', function (done) {
-        var client = Client.fromConnectionString(goodConnectionString, Transport);
-        var message = new Message('hello');
-        message.lockToken = 'FFA945D3-9808-4648-8DD7-D250DDE66EA9';
-        client.complete(message, function (err) {
-          assert.isNotNull(err);
-          assert.equal(err.response.statusCode, 412);
-          done();
-        });
-      });
-
-      badConfigTests('complete', badConnectionStrings, Transport, function (client, done) {
-        var message = new Message('hello');
-        message.lockToken = '44D56613-DC1A-4DA8-906B-DDCC46090776';
-        client.complete(message, done);
-      });
-    });
     
     /*Tests_SRS_NODE_DEVICE_HTTP_16_005: [The getReceiver method shall call the done method passed as argument with the receiver object as a parameter]*/ 
     /*Tests_SRS_NODE_DEVICE_HTTP_16_006: [The getReceiver method shall return the same unique instance if called multiple times in a row]*/ 
@@ -253,12 +140,14 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         var firstInstance = null;
         var secondInstance = null;
         
-        client.getReceiver(function(receiver) {
-          firstInstance = receiver;
+        client.getReceiver(function(err, receiver) {
+            assert.isNull(err);
+            firstInstance = receiver;
         });
         
-        client.getReceiver(function(receiver) {
-          secondInstance = receiver;
+        client.getReceiver(function(err, receiver) {
+            assert.isNull(err);
+            secondInstance = receiver;
         });
         
         assert.isNotNull(firstInstance);

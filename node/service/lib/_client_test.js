@@ -156,7 +156,7 @@ function transportSpecificTests(opts) {
           else {
             testSubject.send(deviceId, createTestMessage(), function (err, state) {
               if (!err) {
-                assert.equal(state.descriptor.toString(), 0x24); // 0x24 == AMQP's 'accepted' disposition frame
+                assert.equal(state.constructor.name, "MessageEnqueued");
               }
               done(err);
             });
@@ -168,7 +168,7 @@ function transportSpecificTests(opts) {
       it('opens if necessary', function (done) {
         testSubject.send(deviceId, createTestMessage(), function (err, state) {
           if (!err) {
-            assert.equal(state.descriptor.toString(), 0x24); // 0x24 == AMQP's 'accepted' disposition frame
+            assert.equal(state.constructor.name, "MessageEnqueued");
           }
           done(err);
         });
@@ -184,7 +184,7 @@ function transportSpecificTests(opts) {
               else {
                 testSubject.send(deviceId, createTestMessage(), function (err, state) {
                   if (!err) {
-                    assert.equal(state.descriptor.toString(), 0x24); // 0x24 == AMQP's 'accepted' disposition frame
+                    assert.equal(state.constructor.name, "MessageEnqueued");
                   }
                   done(err);
                 });
@@ -199,7 +199,7 @@ function transportSpecificTests(opts) {
         var message = 'msg';
         testSubject.send(deviceId, message, function (err, state) {
           if (!err) {
-            assert.equal(state.descriptor.toString(), 0x24); // 0x24 == AMQP's 'accepted' disposition frame
+            assert.equal(state.constructor.name, "MessageEnqueued");
           }
           done(err);
         });

@@ -12,9 +12,9 @@ var Mqtt = require('./mqtt.js');
 
 describe('Mqtt', function () {
   describe('#constructor', function () {
-    /* Tests_SRS_NODE_DEVICE_HTTP_12_001: [The Mqtt shall accept the transport configuration structure */
-    /* Tests_SRS_NODE_DEVICE_HTTP_12_002: [The Mqtt shall store the configuration structure in a member variable */
-    /* Tests_SRS_NODE_DEVICE_HTTP_12_003: [The Mqtt shall create an Mqtt object and store it in a member variable */
+    /* Tests_SRS_NODE_DEVICE_MQTT_12_001: [The Mqtt shall accept the transport configuration structure */
+    /* Tests_SRS_NODE_DEVICE_MQTT_12_002: [The Mqtt shall store the configuration structure in a member variable */
+    /* Tests_SRS_NODE_DEVICE_MQTT_12_003: [The Mqtt shall create an Mqtt object and store it in a member variable */
     it('stores config and created transport in member', function () {
       var config = {
         host: "host.name",
@@ -94,26 +94,22 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
       });
 
     });
-
-    describe('#receive', function () {
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_009: [The receive method shall query the IoT Hub for the next message via the transport associated with the Client instance.]*/
-      /*Tests_SRS_NODE_DEVICE_CLIENT_05_018: [When receive completes successfully, the callback function (indicated by the done argument) shall be invoked with the following arguments:
-       err - null
-       message - the received Message (for receive), otherwise null
-       response - a transport-specific response object]*/
-      it('queries the service for a message', function (done) {
+    
+    /*Tests_SRS_NODE_DEVICE_MQTT_16_002: [If a receiver for this endpoint has already been created, the getReceiver method should call the done() method with the existing instance as an argument.] */
+    /*Tests_SRS_NODE_DEVICE_MQTT_16_003: [If a receiver for this endpoint doesn’t exist, the getReceiver method should create a new MqttReceiver object and then call the done() method with the object that was just created as an argument.] */  
+    describe('#getReceiver', function() {
+      it('returns the same receiver instance if called multiple times', function(done) {
+        this.timeout(15000);
         var client = Client.fromConnectionString(goodConnectionString, Transport);
-        client.receive(function (err, msg, res) {
-          assert.isNull(err);
-          assert.equal(res, 'OK');
-          assert.instanceOf(msg, Message);
-          done();
-        });
-      });
-
-      badConfigTests('receive messages', badConnectionStrings, Transport, function (client, done) {
-        client.receive(function (err, message, response) {
-          done(err, response);
+        
+        client.getReceiver(function(err1, receiver1) {
+          client.getReceiver(function(err2, receiver2) {
+            assert.isNotNull(receiver1);
+            assert.isNotNull(receiver2);
+            assert.equal(receiver1, receiver2);
+            
+            done();
+          });
         });
       });
     });
