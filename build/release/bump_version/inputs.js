@@ -465,6 +465,42 @@ module.exports = [
     },
     {
         "taskType": "multiTask",
+        "filePath": "node/e2etests/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp",
+                "replaceString": "node.device-amqp"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-http",
+                "replaceString": "node.device-http"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iothub",
+                "replaceString": "node.service"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
         "filePath": "node/service/package.json",
         "search": [
             {

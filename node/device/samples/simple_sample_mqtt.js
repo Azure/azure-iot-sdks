@@ -6,8 +6,7 @@
 var clientFromConnectionString = require('azure-iot-device-mqtt').clientFromConnectionString;
 var Message = require('azure-iot-device').Message;
 
-// String containing hostname, gateway host name, device ID, device key in the following format:
-//  "HostName=<iothub_hostname>;GatewayHostName=<gateway_hostname>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
+// String containing hostname, device ID, device key in the following format:
 var connectionString = '[IoT Hub device connection string]';
 
 var client = clientFromConnectionString(connectionString);
@@ -23,16 +22,16 @@ client.open(function () {
     var message = new Message(data);
     message.properties.add('myproperty', 'myvalue');
     console.log('Sending message: ' + message.getData());
-    client.sendEvent(message);
-  }, 1000);
+    client.sendEvent(message, function (err, result){
+        console.log('Message sent: ' + result.constructor.name + '(' + JSON.stringify(result.transportObj) + ')');
+    });
+  }, 2000);
   
   // Monitor messages from IoT Hub and print them in the console.
-  client.receive(function (err, msg) {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log('Received data: ' + msg.toString());
-    }
+  client.getReceiver(function(err, receiver){
+      receiver.on('message', function(msg){
+          console.log('Message received: ' + msg.data);
+      });
   });
 });
 

@@ -1,0 +1,46 @@
+{
+  "name": "azure-iot-e2etests",
+  "description": "Azure IoT end-to-end tests",
+  "author": "Microsoft Corporation",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "main": "e2etests.js",
+  "dependencies": {
+    "azure-iot-common": "^1.0.0-preview.11",
+    "azure-iot-device": "^1.0.0-preview.11",
+    "azure-iot-device-amqp": "^1.0.0-preview.11",
+    "azure-iot-device-http": "^1.0.0-preview.11",
+    "azure-iothub": "^1.0.0-preview.11",
+    "debug": "^2.2.0",
+    "uuid": "^2.0.1"
+  },
+  "devDependencies": {
+    "chai": "^3.3.0",
+    "jshint": "^2.8.0",
+    "mocha": "^2.3.3"
+  },
+  "scripts": {
+    "lint": "jshint --show-non-errors .",
+    "e2etests": "mocha --reporter spec lib/_*_test.js",
+    "test": "npm -s run lint && npm -s run e2etests"
+  },
+  "engines": {
+    "node": "^0.12 || ^4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Azure/azure-iot-sdks.git"
+  },
+  "keywords": [
+    "azure",
+    "iot",
+    "iothub",
+    "e2e",
+    "tests"
+  ],
+  "bugs": {
+    "url": "https://github.com/Azure/azure-iot-sdks/issues"
+  },
+  "homepage": "https://github.com/Azure/azure-iot-sdks#readme"
+}
