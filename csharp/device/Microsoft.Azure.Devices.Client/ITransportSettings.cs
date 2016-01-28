@@ -3,6 +3,9 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
+    /// <summary>
+    /// Interface used to define various transport-specific settings for DeviceClient
+    /// </summary>
     public interface ITransportSettings
     {
         TransportType GetTransportType();

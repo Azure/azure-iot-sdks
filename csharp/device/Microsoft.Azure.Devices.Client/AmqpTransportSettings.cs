@@ -5,13 +5,26 @@ namespace Microsoft.Azure.Devices.Client
 {
     using System;
 
+    /// <summary>
+    /// contains Amqp transport-specific settings for DeviceClient
+    /// </summary>
     public sealed class AmqpTransportSettings : ITransportSettings
     {
         const uint DefaultPrefetchCount = 50;
         readonly TransportType transportType;
 
         public AmqpTransportSettings(TransportType transportType)
+            : this(transportType, DefaultPrefetchCount)
         {
+        }
+
+        public AmqpTransportSettings(TransportType transportType, uint prefetchCount)
+        {
+            if (prefetchCount == 0)
+            {
+                throw new ArgumentOutOfRangeException("prefetchCount", "Must be greater than zero");
+            }
+
             switch (transportType)
             {
                 case TransportType.Amqp_WebSocket_Only:
@@ -24,22 +37,12 @@ namespace Microsoft.Azure.Devices.Client
                     throw new ArgumentOutOfRangeException(nameof(transportType), transportType, null);
             }
 
-            this.PrefetchCount = DefaultPrefetchCount;
+            this.PrefetchCount = prefetchCount;
         }
 
         public TransportType GetTransportType()
         {
             return this.transportType;
-        }
-
-        public bool UseWebSocketOnly
-        {
-            get { return this.transportType == TransportType.Amqp_WebSocket_Only; }
-        }
-
-        public bool UseTcpOnly
-        {
-            get { return this.transportType == TransportType.Amqp_Tcp_Only; }
         }
 
         public uint PrefetchCount { get; set; }

@@ -44,19 +44,19 @@ namespace Microsoft.Azure.Devices.Client
         /// <param name="hostname">The fully-qualified DNS hostname of IoT Hub</param>
         /// <param name="authMethod">The authentication method that is used</param>
         /// <returns>DeviceClient</returns>
-        public static AmqpDeviceClient Create(string hostname, IAuthenticationMethod authMethod)
+        public static AmqpDeviceClient Create(string hostname, IAuthenticationMethod authenticationMethod)
         {
             if (hostname == null)
             {
                 throw new ArgumentNullException("hostname");
             }
 
-            if (authMethod == null)
+            if (authenticationMethod == null)
             {
                 throw new ArgumentNullException("authenticationMethod");
             }
 
-            var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authMethod);
+            var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authenticationMethod);
             return CreateFromConnectionString(connectionStringBuilder.ToString());
         }
 
@@ -73,7 +73,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
-            return new AmqpDeviceClient(iotHubConnectionString, new AmqpTransportSettings(TransportType.Amqp));
+            return new AmqpDeviceClient(iotHubConnectionString, new AmqpTransportSettings(TransportType.Amqp_Tcp_Only));
         }
 
         // This Finalizer gets cancelled when/if the user calls CloseAsync.

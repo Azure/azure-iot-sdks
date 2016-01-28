@@ -191,25 +191,21 @@ namespace Microsoft.Azure.Devices.Client
             var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
             TransportBase transport;
 
-            if (this.amqpTransportSettings.UseTcpOnly)
+            switch (this.amqpTransportSettings.GetTransportType())
             {
-                transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
-            }
-            else if (this.amqpTransportSettings.UseWebSocketOnly)
-            {
-                // Try only Amqp transport over WebSocket
-                transport = await this.CreateClientWebSocketTransport(timeoutHelper.RemainingTime());
-            }
-            else
-            {
-                throw new InvalidOperationException("AmqpTransportSettings must specify WebSocketOnly or TcpOnly");
+                case TransportType.Amqp_WebSocket_Only:
+                    transport = await this.CreateClientWebSocketTransport(timeoutHelper.RemainingTime());
+                    break;
+                case TransportType.Amqp_Tcp_Only:
+                    transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
+                    break;
+                default:
+                    throw new InvalidOperationException("AmqpTransportSettings must specify WebSocketOnly or TcpOnly");
             }
 
             var amqpConnectionSettings = new AmqpConnectionSettings()
             {
-                MaxFrameSize = AmqpConstants.DefaultMaxFrameSize,
-                ContainerId = Guid.NewGuid().ToString("N"),
-                HostName = this.connectionString.AmqpEndpoint.Host
+                MaxFrameSize = AmqpConstants.DefaultMaxFrameSize, ContainerId = Guid.NewGuid().ToString("N"), HostName = this.connectionString.AmqpEndpoint.Host
             };
 
             var amqpConnection = new AmqpConnection(transport, amqpSettings, amqpConnectionSettings);
@@ -229,7 +225,7 @@ namespace Microsoft.Azure.Devices.Client
             return amqpSession;
         }
 
-        static async Task OpenLinkAsync(AmqpObject link, TimeSpan timeout)
+        private static async Task OpenLinkAsync(AmqpObject link, TimeSpan timeout)
         {
             var timeoutHelper = new TimeoutHelper(timeout);
             try
@@ -249,13 +245,13 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        void CloseConnection(AmqpSession amqpSession)
+        private void CloseConnection(AmqpSession amqpSession)
         {
             // Closing the connection also closes any sessions.
             amqpSession.Connection.SafeClose();
         }
 
-        async Task<ClientWebSocket> CreateClientWebSocket(Uri websocketUri, TimeSpan timeout)
+        private async Task<ClientWebSocket> CreateClientWebSocket(Uri websocketUri, TimeSpan timeout)
         {
             var websocket = new ClientWebSocket();
 
@@ -281,21 +277,17 @@ namespace Microsoft.Azure.Devices.Client
             return websocket;
         }
 
-        async Task<TransportBase> CreateClientWebSocketTransport(TimeSpan timeout)
+        private async Task<TransportBase> CreateClientWebSocketTransport(TimeSpan timeout)
         {
             TimeoutHelper timeoutHelper = new TimeoutHelper(timeout);
             Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
             var websocket = await this.CreateClientWebSocket(websocketUri, timeoutHelper.RemainingTime());
-            return new ClientWebSocketTransport(
-                websocket,
-                this.connectionString.IotHubName,
-                null,
-                null);
+            return new ClientWebSocketTransport(websocket, this.connectionString.IotHubName, null, null);
         }
 
-        AmqpSettings CreateAmqpSettings()
+        private AmqpSettings CreateAmqpSettings()
         {
-            var amqpSettings = new AmqpSettings();          
+            var amqpSettings = new AmqpSettings();
 
             var amqpTransportProvider = new AmqpTransportProvider();
             amqpTransportProvider.Versions.Add(AmqpVersion_1_0_0);
@@ -304,7 +296,7 @@ namespace Microsoft.Azure.Devices.Client
             return amqpSettings;
         }
 
-        static AmqpLinkSettings SetLinkSettingsCommonProperties(AmqpLinkSettings linkSettings, TimeSpan timeSpan)
+        private static AmqpLinkSettings SetLinkSettingsCommonProperties(AmqpLinkSettings linkSettings, TimeSpan timeSpan)
         {
             linkSettings.AddProperty(IotHubAmqpProperty.TimeoutName, timeSpan.TotalMilliseconds);
             linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, Utils.GetClientVersion());
@@ -312,39 +304,31 @@ namespace Microsoft.Azure.Devices.Client
             return linkSettings;
         }
 
-        TlsTransportSettings CreateTlsTransportSettings()
+        private TlsTransportSettings CreateTlsTransportSettings()
         {
             var tcpTransportSettings = new TcpTransportSettings()
             {
-                Host = this.connectionString.HostName,
-                Port = this.connectionString.AmqpEndpoint.Port
+                Host = this.connectionString.HostName, Port = this.connectionString.AmqpEndpoint.Port
             };
 
             var tlsTransportSettings = new TlsTransportSettings(tcpTransportSettings)
             {
-                TargetHost = this.connectionString.HostName,
-                Certificate = null, // TODO: add client cert support
+                TargetHost = this.connectionString.HostName, Certificate = null, // TODO: add client cert support
                 CertificateValidationCallback = this.OnRemoteCertificateValidation
             };
 
             return tlsTransportSettings;
         }
 
-        async Task SendCbsTokenAsync(AmqpCbsLink cbsLink, TimeSpan timeout)
+        private async Task SendCbsTokenAsync(AmqpCbsLink cbsLink, TimeSpan timeout)
         {
             string audience = this.ConnectionString.AmqpEndpoint.AbsoluteUri;
             string resource = this.ConnectionString.AmqpEndpoint.AbsoluteUri;
-            var expiresAtUtc = await cbsLink.SendTokenAsync(
-                this.ConnectionString,
-                this.ConnectionString.AmqpEndpoint,
-                audience,
-                resource,
-                AccessRightsHelper.AccessRightsToStringArray(this.accessRights),
-                timeout);
+            var expiresAtUtc = await cbsLink.SendTokenAsync(this.ConnectionString, this.ConnectionString.AmqpEndpoint, audience, resource, AccessRightsHelper.AccessRightsToStringArray(this.accessRights), timeout);
             this.ScheduleTokenRefresh(expiresAtUtc);
         }
 
-        async void OnRefreshToken()
+        private async void OnRefreshToken()
         {
             AmqpSession amqpSession = this.faultTolerantSession.Value;
             if (amqpSession != null && !amqpSession.IsClosing())
@@ -369,7 +353,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        private bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
             {
@@ -382,7 +366,6 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             return false;
-
         }
 
         public static ArraySegment<byte> GetNextDeliveryTag(ref int deliveryTag)
@@ -408,7 +391,7 @@ namespace Microsoft.Azure.Devices.Client
             return deliveryTag;
         }
 
-        void ScheduleTokenRefresh(DateTime expiresAtUtc)
+        private void ScheduleTokenRefresh(DateTime expiresAtUtc)
         {
             if (expiresAtUtc == DateTime.MaxValue)
             {

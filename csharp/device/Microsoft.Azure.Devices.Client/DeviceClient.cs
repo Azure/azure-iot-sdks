@@ -71,11 +71,14 @@ namespace Microsoft.Azure.Devices.Client
         {
             this.iotHubConnectionString = iotHubConnectionString;
             this.transportSettings = transportSettings;
-            this.ThisLock = new object();
-            this.openTaskCompletionSource = new TaskCompletionSource<object>(this);
+
+            if (ThisLock == null)
+            {
+                ThisLock = new object();
+            }
         }
 
-        object ThisLock { get; }
+        static object ThisLock { get; set; }
 #else
         DeviceClient(DeviceClientHelper impl, TransportType transportType)
         {
@@ -230,7 +233,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Create DeviceClient from the specified connection string using a prioritized list of transports
         /// </summary>
         /// <param name="connectionString">Connection string for the IoT hub (with DeviceId)</param>
-        /// <param name="transportSettings">Prioritized list of transportSettings</param>
+        /// <param name="transportSettings">Prioritized list of transports</param>
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString, ITransportSettings[] transportSettings)
         {
@@ -246,7 +249,7 @@ namespace Microsoft.Azure.Devices.Client
 
             if (transportSettings.Length == 0)
             {
-                throw new ArgumentOutOfRangeException("connectionString", "Must specify atleast one TransportSetting instance");
+                throw new ArgumentOutOfRangeException("connectionString", "Must specify at least one TransportSettings instance");
             }
 
             var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
@@ -257,20 +260,17 @@ namespace Microsoft.Azure.Devices.Client
                 {
                     case TransportType.Amqp_WebSocket_Only:
                     case TransportType.Amqp_Tcp_Only:
-                        var amqpTransportSetting = transportSetting as AmqpTransportSettings;
-                        if (amqpTransportSetting == null)
+                        if (!(transportSetting is AmqpTransportSettings))
                         {
                             throw new InvalidOperationException("Unknown implementation of ITransportSettings type");
                         }
                         break;
                     case TransportType.Http1:
-                        var httpTransportSetting = transportSetting as Http1TransportSettings;
-                        if (httpTransportSetting == null)
+                        if (!(transportSetting is Http1TransportSettings))
                         {
                             throw new InvalidOperationException("Unknown implementation of ITransportSettings type");
                         }
                         break;
-                    case TransportType.Amqp:
                     default:
                         throw new InvalidOperationException("Unsupported Transport Setting {0}".FormatInvariant(transportSetting));
                 }
@@ -316,11 +316,6 @@ namespace Microsoft.Azure.Devices.Client
 #if WINDOWS_UWP
             return impl.OpenAsync().AsTaskOrAsyncOp();
 #else
-            if (this.impl != null)
-            {
-                return this.impl.OpenAsync().AsTaskOrAsyncOp();
-            }
-
             return this.EnsureOpenedAsync();
 #endif
         }
@@ -354,7 +349,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 return AsyncTask.Run(async () =>
                 {
-                    await this.OpenAsync();
+                    await this.EnsureOpenedAsync();
 
                     return await this.impl.ReceiveAsync();
                 });
@@ -379,7 +374,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 return AsyncTask.Run(async () =>
                 {
-                    await this.OpenAsync();
+                    await this.EnsureOpenedAsync();
 
                     return await this.impl.ReceiveAsync(timeout);
                 });
@@ -387,7 +382,7 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
-                return this.impl.ReceiveAsync().AsTaskOrAsyncOp();
+                return this.impl.ReceiveAsync(timeout).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
 #endif
@@ -407,7 +402,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 return AsyncTask.Run(async () =>
                 {
-                    await this.OpenAsync();
+                    await this.EnsureOpenedAsync();
 
                     await this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
                 });
@@ -432,7 +427,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 return AsyncTask.Run(async () =>
                 {
-                    await this.OpenAsync();
+                    await this.EnsureOpenedAsync();
 
                     await this.impl.CompleteAsync(message).AsTaskOrAsyncOp();
                 });
@@ -460,7 +455,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 return AsyncTask.Run(async () =>
                 {
-                    await this.OpenAsync();
+                    await this.EnsureOpenedAsync();
 
                     await this.impl.AbandonAsync(lockToken).AsTaskOrAsyncOp();
                 });
@@ -485,7 +480,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 return AsyncTask.Run(async () =>
                 {
-                    await this.OpenAsync();
+                    await this.EnsureOpenedAsync();
 
                     await this.impl.AbandonAsync(message).AsTaskOrAsyncOp();
                 });
@@ -513,7 +508,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 return AsyncTask.Run(async () =>
                 {
-                    await this.OpenAsync();
+                    await this.EnsureOpenedAsync();
 
                     await this.impl.RejectAsync(lockToken).AsTaskOrAsyncOp();
                 });
@@ -538,7 +533,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 return AsyncTask.Run(async () =>
                 {
-                    await this.OpenAsync();
+                    await this.EnsureOpenedAsync();
 
                     await this.impl.RejectAsync(message).AsTaskOrAsyncOp();
                 });
@@ -563,7 +558,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 return AsyncTask.Run(async () =>
                 {
-                    await this.OpenAsync();
+                    await this.EnsureOpenedAsync();
 
                     await this.impl.SendEventAsync(message);
                 });
@@ -588,7 +583,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 return AsyncTask.Run(async () =>
                 {
-                    await this.OpenAsync();
+                    await this.EnsureOpenedAsync();
 
                     await this.impl.SendEventBatchAsync(messages).AsTaskOrAsyncOp();
                 });
@@ -603,68 +598,43 @@ namespace Microsoft.Azure.Devices.Client
         }
 
 #if !WINDOWS_UWP
-        Task EnsureOpenedAsync()
+        async Task EnsureOpenedAsync()
         {
-            bool needOpen = false;
-            Task openTask;
-            if (this.openTaskCompletionSource != null)
+            bool executeOpen = false;
+            var localTcs = this.openTaskCompletionSource;
+       
+            if (localTcs == null)
             {
-                lock (this.ThisLock)
+                lock (ThisLock)
                 {
-                    if (this.openCalled)
+                    localTcs = this.openTaskCompletionSource;
+                    if (localTcs == null)
                     {
-                        if (this.openTaskCompletionSource == null)
-                        {
-                            // openTaskCompletionSource being null means open has finished completely
-                            openTask = TaskHelpers.CompletedTask;
-                        }
-                        else
-                        {
-                            openTask = this.openTaskCompletionSource.Task;
-                        }
-                    }
-                    else
-                    {
-                        // It's this call's job to kick off the open.
-                        this.openCalled = true;
-                        openTask = this.openTaskCompletionSource.Task;
-                        needOpen = true;
+                        localTcs = this.openTaskCompletionSource = new TaskCompletionSource<object>();
+                        executeOpen = true;
                     }
                 }
             }
-            else
-            {
-                // Open has already fully completed.
-                openTask = TaskHelpers.CompletedTask;
-            }
 
-            if (needOpen)
+            if (executeOpen)
             {
-                this.TryOpenPrioritizedTransportsAsync().ContinueWith(
-                    t =>
+                try
+                {
+                    await this.TryOpenPrioritizedTransportsAsync();
+                    localTcs.TrySetResult(this.impl);
+                }
+                catch (Exception e)
+                {
+                    localTcs.SetException(e);
+                    lock (ThisLock)
                     {
-                        var localOpenTaskCompletionSource = this.openTaskCompletionSource;
-                        lock (this.ThisLock)
-                        {
-                            if (!t.IsFaulted && !t.IsCanceled)
-                            {
-                                // This lets future calls avoid the Open logic all together.
-                                this.openTaskCompletionSource = null;
-                            }
-                            else
-                            {
-                                // OpenAsync was cancelled or threw an exception, next time retry.
-                                this.openCalled = false;
-                                this.openTaskCompletionSource = new TaskCompletionSource<object>(this);
-                            }
-                        }
-
-                        // This completes anyone waiting for open to finish
-                        TaskHelpers.MarshalTaskResults(t, localOpenTaskCompletionSource);
-                    });
+                        // set to null so we retry on next attempt?
+                        this.openTaskCompletionSource = null;
+                    }
+                }
             }
 
-            return openTask;
+            await localTcs.Task;
         }
 
         async AsyncTask TryOpenPrioritizedTransportsAsync()
@@ -685,7 +655,6 @@ namespace Microsoft.Azure.Devices.Client
                         case TransportType.Http1:
                             helper = new HttpDeviceClient(this.iotHubConnectionString, transportSetting as Http1TransportSettings);
                             break;
-                        case TransportType.Amqp:
                         default:
                             throw new InvalidOperationException("Unsupported Transport Setting {0}".FormatInvariant(transportSetting));
                     }
@@ -713,12 +682,7 @@ namespace Microsoft.Azure.Devices.Client
                 return;
             }
 
-            if (lastException != null)
-            {
-                throw lastException;
-            }
-
-            throw new InvalidOperationException("Unsupported Transport Settings {0}".FormatInvariant(this.transportSettings.ToList()));
+            throw lastException;
         }
 #endif
     }
