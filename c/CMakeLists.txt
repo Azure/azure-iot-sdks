@@ -6,6 +6,7 @@ project(azure_iot_sdks)
 
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
+option(use_uamqp "set use_uamqp to ON if uamqp is to be used, set to OFF to not use uamqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
 option(use_mqtt "set use_mqtt to ON if mqtt is to be used, set to OFF to not use mqtt" ON)
 option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF) [if possible, they are always build]" OFF)
@@ -25,6 +26,7 @@ if(IN_OPENWRT)
 endif()
 
 add_subdirectory(azure-c-shared-utility/c)
+add_subdirectory(azure-uamqp-c)
 add_subdirectory(azure-umqtt-c)
 
 enable_testing()
@@ -68,6 +70,27 @@ function(linkProton whatExecutableIsBuilding)
 		target_link_libraries(${whatExecutableIsBuilding} ${PROTON_LIB})
 	endif()
 endfunction(linkProton)
+
+function(linkUAMQP whatExecutableIsBuilding)
+	include_directories(${UAMQP_INC_FOLDER})
+	
+	if(WIN32)
+		#windows needs this define
+		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+		add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+
+		target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ws2_32 secur32)
+
+		if(${use_openssl})
+			target_link_libraries(${whatExecutableIsBuilding} $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
+		
+			file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+			file(COPY $ENV{OpenSSLDir}/bin/ssleay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+		endif()
+	else()
+		target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ssl crypto)
+	endif()
+endfunction(linkUAMQP)
 
 function(includeMqtt)
 	include_directories(${MQTT_INC_FOLDER})

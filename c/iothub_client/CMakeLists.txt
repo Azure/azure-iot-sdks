@@ -53,6 +53,18 @@ if(${use_amqp})
 	)
 endif()
 
+if(${use_uamqp})
+	set(iothub_client_uamqp_transport_c_files
+		${iothub_client_ll_transport_c_files}
+		./src/iothubtransportuamqp.c
+	)
+
+	set(iothub_client_uamqp_transport_h_files
+		${iothub_client_ll_transport_h_files}
+		./inc/iothubtransportuamqp.h
+	)
+endif()
+
 if(${use_mqtt})
 	set(iothub_client_mqtt_transport_c_files
 		${iothub_client_ll_transport_c_files}
@@ -81,9 +93,21 @@ if(${use_mqtt})
 	set(IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_mqtt_transport lib" FORCE)
 endif()
 
+if(${use_uamqp})
+	set(IOTHUB_CLIENT_UAMQP_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_amqp_transport lib" FORCE)
+endif()
+
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 include_directories(${SHARED_UTIL_INC_FOLDER})
+
+include_directories(${IOTHUB_CLIENT_INC_FOLDER})
+
+IF(WIN32)
+	#windows needs this define
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+ENDIF(WIN32)
 
 if(${use_http})
 	include_directories(${IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER})
@@ -104,6 +128,15 @@ if(${use_amqp})
 		${iothub_client_amqp_transport_h_files}
 	)
 	linkSharedUtil(iothub_client_amqp_transport)
+endif()
+
+if(${use_uamqp})
+	include_directories(${IOTHUB_CLIENT_UAMQP_TRANSPORT_INC_FOLDER} ${UAMQP_INC_FOLDER})
+	add_library(iothub_client_uamqp_transport 
+		${iothub_client_uamqp_transport_c_files} 
+		${iothub_client_uamqp_transport_h_files}
+	)
+	linkSharedUtil(iothub_client_uamqp_transport)
 endif()
 
 if(${use_mqtt})
