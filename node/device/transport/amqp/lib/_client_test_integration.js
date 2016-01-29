@@ -73,7 +73,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
       /*Tests_SRS_NODE_DEVICE_AMQP_16_003: [The sendEvent method shall call the done() callback with no arguments when the message has been successfully sent.] */ 
       /*Tests_SRS_NODE_DEVICE_AMQP_16_004: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message). ] */
       it('sends the event', function (done) {
-        this.timeout(15000);
+        this.timeout(30000);
         var client = Client.fromConnectionString(goodConnectionString, Transport);
         var message = new Message('hello');
         client.sendEvent(message, function (err, res) {
@@ -93,7 +93,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
     /*Tests_SRS_NODE_DEVICE_AMQP_16_007: [If a receiver for this endpoint doesn’t exist, the getReceiver method should create a new AmqpReceiver object and then call the done() method with the object that was just created as an argument.]*/ 
     describe('#getReceiver', function() {
       it('returns the same receiver instance if called multiple times', function(done) {
-        this.timeout(15000);
+        this.timeout(30000);
         var client = Client.fromConnectionString(goodConnectionString, Transport);
         
         client.getReceiver(function(err1, receiver1) {
