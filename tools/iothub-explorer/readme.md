@@ -5,6 +5,8 @@ A sample CLI tool to manage device clients using the Azure IoT Hub service SDK. 
 
 ## Installing iothub-explorer
 
+> Note: This tool requires Node.js version 4.x or higher for all features to work.
+
 To install the latest (pre-release) version of the *iothub-explorer* tool, run the following command in your command-line environment:
 
 ```
