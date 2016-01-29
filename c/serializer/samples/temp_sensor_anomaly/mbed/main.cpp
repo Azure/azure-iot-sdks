@@ -251,10 +251,6 @@ int main(void)
 	int result;
     (void)printf("Initializing mbed specific things...\r\n");
 
-    /* These are needed in order to initialize the time provider for Proton-C */
-    mbed_log_init();
-    mbedtime_init();
-
 	if ((result = platform_init()) != 0)
 	{
 		(void)printf("Error initializing the platform: %d\r\n",result);
