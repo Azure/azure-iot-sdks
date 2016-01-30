@@ -7,6 +7,7 @@ package com.microsoft.azure.iot.service.transport.amqps;
 
 import mockit.Expectations;
 import mockit.Mocked;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
@@ -27,8 +28,12 @@ import org.apache.qpid.proton.reactor.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
+import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -169,7 +174,7 @@ public class AmqpSendHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_007: [The function shall create a data Section (Proton) object from the Binary]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_008: [The function shall set the Message body to the created data section]
     @Test
-    public void createBinaryMessage_creates_Message_and_sets_To()
+    public void createProtonMessage_creates_Message_and_sets_Properties() throws UnsupportedEncodingException
     {
         // Arrange
         String hostName = "aaa";
@@ -179,21 +184,41 @@ public class AmqpSendHandlerTest
         String content = "abcdefghijklmnopqrst";
         String toProperty = "/devices/deviceId/messages/devicebound";
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
+        com.microsoft.azure.iot.service.sdk.Message iotMessage = new com.microsoft.azure.iot.service.sdk.Message(content);
+        Map<String, String> userDefinedProperties = new HashMap<>(5);
+        userDefinedProperties.put("key1", "value1");
+        userDefinedProperties.put("key2", "value2");
+        userDefinedProperties.put("key3", "value3");
+        userDefinedProperties.put("key4", "value4");
+        userDefinedProperties.put("key5", "value5");
+        iotMessage.setProperties(userDefinedProperties);
         // Assert
         new Expectations()
         {
             {
                 message = Proton.message();
-                properties = new Properties();
+                new Properties();
+                result = properties;
                 properties.setTo(toProperty);
                 message.setProperties(properties);
                 binary = new Binary(content.getBytes());
                 section = new Data(binary);
+                message.setApplicationProperties((ApplicationProperties) any);
                 message.setBody(section);
             }
         };
         // Act
-        amqpSendHandler.createBinaryMessage(deviceId, content);
+        amqpSendHandler.createProtonMessage(deviceId, iotMessage);
+
+        new Verifications()
+        {
+            {
+                properties.setTo(toProperty);
+                properties.setMessageId(any);
+                properties.setAbsoluteExpiryTime((Date) any);
+                properties.setCorrelationId(any);
+            }
+        };
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
@@ -286,7 +311,7 @@ public class AmqpSendHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_020: [The event handler shall send the encoded bytes]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [The event handler shall close the Sender, Session and Connection]
     @Test
-    public void onLinkFlow_call_flow_ok()
+    public void onLinkFlow_call_flow_ok() throws UnsupportedEncodingException
     {
         // Arrange
         String hostName = "aaa";
@@ -295,10 +320,11 @@ public class AmqpSendHandlerTest
         String hostAddr = hostName + ":5671";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
+        com.microsoft.azure.iot.service.sdk.Message iotMessage = new com.microsoft.azure.iot.service.sdk.Message(content);
         String endpoint = "/messages/devicebound";
         createProtonObjects();
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken);
-        amqpSendHandler.createBinaryMessage(deviceId, content);
+        amqpSendHandler.createProtonMessage(deviceId, iotMessage);
         // Assert
         new Expectations()
         {
@@ -323,7 +349,7 @@ public class AmqpSendHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_020: [The event handler shall send the encoded bytes]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [The event handler shall close the Sender, Session and Connection]
     @Test
-    public void onLinkFlowBufferOverflow_call_flow_ok()
+    public void onLinkFlowBufferOverflow_call_flow_ok() throws UnsupportedEncodingException
     {
         // Arrange
         String hostName = "aaa";
@@ -332,6 +358,7 @@ public class AmqpSendHandlerTest
         String hostAddr = hostName + ":5671";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
+        com.microsoft.azure.iot.service.sdk.Message iotMessage = new com.microsoft.azure.iot.service.sdk.Message(content);
         String endpoint = "/messages/devicebound";
         exceptionCount = 0;
         createProtonObjects();
@@ -340,7 +367,7 @@ public class AmqpSendHandlerTest
         new Expectations()
         {
             {
-                amqpSendHandler.message = messageWithException;
+                amqpSendHandler.protonMessage = messageWithException;
                 link = event.getLink();
                 link.getCredit();
             }

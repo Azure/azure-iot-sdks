@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.iot.service.transport.amqps;
 
+import com.microsoft.azure.iot.service.sdk.Message;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
@@ -168,9 +169,9 @@ public class AmqpSendTest
         assertNull(amqpSend.amqpSendHandler);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_006: [The event handler shall create a binary message with the given content]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_006: [The event handler shall create a Proton message with the given content]
     @Test
-    public void send_creates_BinaryMessage() throws Exception
+    public void send_creates_ProtonMessage() throws Exception
     {
         // Arrange
         String hostName = "aaa";
@@ -178,17 +179,18 @@ public class AmqpSendTest
         String sasToken = "ccc";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
+        Message message = new Message(content);
         AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken);
         amqpSend.open();
         // Assert
         new Expectations()
         {
             {
-                amqpSend.amqpSendHandler.createBinaryMessage(deviceId, content);
+                amqpSend.amqpSendHandler.createProtonMessage(deviceId, message);
             }
         };
         // Act
-        amqpSend.send(deviceId, content);
+        amqpSend.send(deviceId, message);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_007: [The event handler shall initialize the Proton reactor object]
@@ -202,6 +204,7 @@ public class AmqpSendTest
         String sasToken = "ccc";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
+        Message message = new Message(content);
         AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken);
         amqpSend.open();
         // Assert
@@ -213,7 +216,7 @@ public class AmqpSendTest
             }
         };
         // Act
-        amqpSend.send(deviceId, content);
+        amqpSend.send(deviceId, message);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_009: [The event handler shall throw IOException if the send handler object is not initialized]
@@ -227,8 +230,9 @@ public class AmqpSendTest
         String sasToken = "ccc";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
+        Message message = new Message(content);
         AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken);
         // Act
-        amqpSend.send(deviceId, content);
+        amqpSend.send(deviceId, message);
     }
 }

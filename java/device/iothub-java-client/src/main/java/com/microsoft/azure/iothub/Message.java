@@ -19,11 +19,12 @@ public class Message
     // ----- Data Fields -----
 
     /**
-     * Id of this Message instance (auto-generated).
-     * Format: A case-sensitive string ( up to 128 char long) of ASCII 7-bit alphanumeric chars
+     * [Required for two way requests] Used to correlate two-way communication.
+     * Format: A case-sensitive string (up to 128 char long) of ASCII 7-bit alphanumeric chars
      * plus {'-', ':', '/', '\', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     * Non-alphanumeric characters are from URN RFC.
      */
-    public String messageId;
+    private String messageId;
 
     /// <summary>
     /// Destination of the message
@@ -43,7 +44,7 @@ public class Message
     /// <summary>
     /// Used in message responses and feedback
     /// </summary>
-    public String correlationId;
+    private String correlationId;
 
     /// <summary>
     /// [Required in feedback messages] Used to specify the entity creating the message.
@@ -279,17 +280,55 @@ public class Message
      * @param length Length of the string to be generated.
      * @return A string containing valid ID chars.
      */
-    private String generateId(int length) {
+    private String generateId(int length)
+    {
         String validCharacters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-:.+%_#*?!(),=@;$'";
 
         char[] charSequence = new char[length];
 
         Random random = new Random();
 
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++)
+        {
             charSequence[i] = validCharacters.charAt(random.nextInt(validCharacters.length()));
         }
 
         return new String(charSequence);
+    }
+
+    /**
+     * Getter for the messageId property
+     * @return The property value
+     */
+    public String getMessageId()
+    {
+        return messageId;
+    }
+
+    /**
+     * Setter for the messageId property
+     * @param messageId The string containing the property value
+     */
+    public void setMessageId(String messageId)
+    {
+        this.messageId = messageId;
+    }
+
+    /**
+     * Getter for the correlationId property
+     * @return The property value
+     */
+    public String getCorrelationId()
+    {
+        return correlationId;
+    }
+
+    /**
+     * Setter for the expiryTimeUtc property
+     * @param correlationId The string containing the property value
+     */
+    public void setCorrelationId(String correlationId)
+    {
+        this.correlationId = correlationId;
     }
 }

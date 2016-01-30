@@ -209,12 +209,12 @@ public class ServiceClientTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String deviceId = "XXX";
-        String message = "HELLO";
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        String content = "HELLO";
+        com.microsoft.azure.iot.service.sdk.Message iotMessage = new com.microsoft.azure.iot.service.sdk.Message(content);
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString);
         Deencapsulation.setField(serviceClient, "amqpMessageSender", null);
         // Act
-        serviceClient.send(deviceId, message);
+        serviceClient.send(deviceId, iotMessage);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_013: [The function shall call send() on the member AMQP sender object with the given parameters]
@@ -230,17 +230,18 @@ public class ServiceClientTest
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
         String deviceId = "XXX";
-        String message = "HELLO";
+        String content = "HELLO";
+        com.microsoft.azure.iot.service.sdk.Message iotMessage = new com.microsoft.azure.iot.service.sdk.Message(content);
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString);
         // Assert
         new Expectations()
         {
             {
-                amqpSend.send(deviceId, message);
+                amqpSend.send(deviceId, iotMessage);
             }
         };
         // Act
-        serviceClient.send(deviceId, message);
+        serviceClient.send(deviceId, iotMessage);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_014: [The function shall create an async wrapper around the open() function call, handle the return value or delegate exception]
@@ -342,7 +343,6 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString);
         // Act
         CompletableFuture<Void> completableFuture = serviceClient.closeAsync();
@@ -361,19 +361,19 @@ public class ServiceClientTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String deviceId = "XXX";
-        String message = "HELLO";
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        String content = "HELLO";
+        com.microsoft.azure.iot.service.sdk.Message iotMessage = new com.microsoft.azure.iot.service.sdk.Message(content);
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString);
         // Assert
         new Expectations()
         {
             {
-                amqpSend.send(deviceId, message);
-                serviceClient.send(deviceId, message);
+                amqpSend.send(deviceId, iotMessage);
+                serviceClient.send(deviceId, iotMessage);
             }
         };
         // Act
-        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, message);
+        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, iotMessage);
         completableFuture.get();
     }
 
@@ -398,11 +398,11 @@ public class ServiceClientTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String deviceId = "XXX";
-        String message = "HELLO";
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        String content = "HELLO";
+        com.microsoft.azure.iot.service.sdk.Message iotMessage = new com.microsoft.azure.iot.service.sdk.Message(content);
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString);
         // Act
-        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, message);
+        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, iotMessage);
         completableFuture.get();
     }
 

@@ -15,6 +15,7 @@ import org.apache.qpid.proton.message.impl.MessageImpl;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 public class AmqpsUtilities {
 
@@ -27,7 +28,8 @@ public class AmqpsUtilities {
      */
     protected static Message protonMessageToMessage(MessageImpl protonMsg){
         Message msg = null;
-        if(protonMsg != null) {
+        if(protonMsg != null)
+        {
             Data d = (Data) protonMsg.getBody();
             Binary b = d.getValue();
             byte[] msgBody = new byte[b.getLength()];
@@ -36,30 +38,49 @@ public class AmqpsUtilities {
             msg = new Message(msgBody);
 
             Properties properties = protonMsg.getProperties();
-
             //Call all of the getters for the Proton message Properties and set those properties
             //in the IoT Hub message properties if they exist.
-            for (Method m : properties.getClass().getMethods()) {
-                if (m.getName().startsWith("get")) {
-                    try {
+            for (Method m : properties.getClass().getMethods())
+            {
+                if (m.getName().startsWith("get"))
+                {
+                    try
+                    {
                         String propertyName = Character.toLowerCase(m.getName().charAt(3)) + m.getName().substring(4);
                         Object value = m.invoke(properties);
-                        if (value != null && !propertyName.equals("class")) {
+                        if (value != null && !propertyName.equals("class"))
+                        {
                             String val = value.toString();
 
-                            if (MessageProperty.isValidAppProperty(propertyName, val)) {
+                            if (MessageProperty.isValidAppProperty(propertyName, val))
+                            {
                                 msg.setProperty(propertyName, val);
                             }
                         }
-                    } catch (IllegalAccessException e) {
+                    }
+                    catch (IllegalAccessException e)
+                    {
                         System.err.println("Attempted to access private or protected member of class during message conversion.");
-                    } catch (InvocationTargetException e) {
+                    }
+                    catch (InvocationTargetException e)
+                    {
                         System.err.println("Exception thrown while attempting to get member variable. See: " + e.getMessage());
                     }
                 }
             }
+
+            // Setting the user properties
+            Map<String, String> applicationProperties = protonMsg.getApplicationProperties().getValue();
+            for(Map.Entry<String, String> entry : applicationProperties.entrySet())
+            {
+                String propertyKey = entry.getKey();
+                if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
+                {
+                    msg.setProperty(entry.getKey(), entry.getValue());
+                }
+            }
         }
+
         return msg;
     }
-
 }

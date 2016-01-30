@@ -205,7 +205,7 @@ public final class AmqpsTransport implements IotHubTransport
                     IotHubStatusCode status = IotHubStatusCode.ERROR;
 
                     try {
-                        CompletableFuture<Boolean> futureStatus = connection.scheduleSend(packet.getMessage().getBytes(), packet.getMessage().messageId);
+                        CompletableFuture<Boolean> futureStatus = connection.scheduleSend(packet.getMessage().getBytes(), packet.getMessage().getMessageId());
                         Boolean result = futureStatus.get();
                         if(result.booleanValue()){
                             status = IotHubStatusCode.OK_EMPTY;
