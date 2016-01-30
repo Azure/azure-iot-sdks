@@ -16,25 +16,15 @@ set(project_files
 		${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/../*.c 
 		${CMAKE_CURRENT_SOURCE_DIR}/../*.h
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs/certs.h
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs/certs.c
 	)
 
 set(common_files 
-		${sdk_base_path}/c/azure-c-shared-utility/c/src/*.c
-		${sdk_base_path}/c/azure-c-shared-utility/c/src/*.h
-		${sdk_base_path}/c/azure-c-shared-utility/c/adapters/*mbed.c
-		${sdk_base_path}/c/azure-c-shared-utility/c/adapters/*mbed.cpp
-		${sdk_base_path}/c/azure-c-shared-utility/c/adapters/wolfssl_connection.*
-		${sdk_base_path}/c/iothub_client/src/*.c
-		${sdk_base_path}/c/iothub_client/inc/*.h
 	)
 	
 # Add the paterns of the filenames to be deleted before pushing local update to remote repo.
 set(exclude_files
-        *openssl*.*
-        *schannel*.*
-		*http*.* 
-		*mqtt*.* 
-		wolfssl*.*
 	)
 
 ### Include CMAKE library for MBED.
