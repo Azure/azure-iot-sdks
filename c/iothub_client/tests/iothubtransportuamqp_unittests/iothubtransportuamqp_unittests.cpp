@@ -2122,7 +2122,7 @@ TEST_FUNCTION(uAMQP_DoWork_SASToken_create_fails)
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
-	ASSERT_ARE_EQUAL(int, expected_expiry_time, test_latest_SASToken_expiry_time)
+	ASSERT_ARE_EQUAL(int, expected_expiry_time, test_latest_SASToken_expiry_time);
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
