@@ -133,7 +133,7 @@ std::ostream& operator<<(std::ostream& left, const BINARY_DATA bindata)
 #define TEST_PROT_GW_HOSTNAME NULL
 
 #define TEST_IOT_HUB_PORT 5671
-#define TEST_INCOMING_WINDOW_SIZE UINT_MAX
+#define TEST_INCOMING_WINDOW_SIZE SIZE_MAX
 #define TEST_OUTGOING_WINDOW_SIZE 100
 #define TEST_MESSAGE_RECEIVER_LINK_NAME "receiver-link"
 #define TEST_MESSAGE_RECEIVER_TARGET_ADDRESS "ingress-rx"
