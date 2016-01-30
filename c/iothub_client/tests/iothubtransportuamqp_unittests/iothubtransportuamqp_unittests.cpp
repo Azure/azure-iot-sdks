@@ -513,6 +513,12 @@ public:
 	MOCK_STATIC_METHOD_1(, void, message_destroy, MESSAGE_HANDLE, message)
 	MOCK_VOID_METHOD_END()
 
+	MOCK_STATIC_METHOD_3(, int, message_get_body_amqp_data, MESSAGE_HANDLE, message, size_t, index, BINARY_DATA*, binary_data)
+	MOCK_METHOD_END(int, 0)
+
+	MOCK_STATIC_METHOD_2(, int, message_get_body_type, MESSAGE_HANDLE, message, MESSAGE_BODY_TYPE*, body_type)
+	MOCK_METHOD_END(int, 0)
+
 	// message_receiver.h
 	MOCK_STATIC_METHOD_3(, MESSAGE_RECEIVER_HANDLE, messagereceiver_create, LINK_HANDLE, link, ON_MESSAGE_RECEIVER_STATE_CHANGED, on_message_receiver_state_changed, void*, context)
 	MOCK_METHOD_END(MESSAGE_RECEIVER_HANDLE, 0)
@@ -757,6 +763,8 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportuAMQPMocks, , void, link_destroy, L
 
 // message.h
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportuAMQPMocks, , int, message_add_body_amqp_data, MESSAGE_HANDLE, message, BINARY_DATA, binary_data);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportuAMQPMocks, , int, message_get_body_amqp_data, MESSAGE_HANDLE, message, size_t, index, BINARY_DATA*, binary_data);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportuAMQPMocks, , int, message_get_body_type, MESSAGE_HANDLE, message, MESSAGE_BODY_TYPE*, body_type);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportuAMQPMocks, , void, message_destroy, MESSAGE_HANDLE, message);
 
 // message_receiver.h

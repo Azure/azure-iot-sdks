@@ -7,6 +7,5 @@ int main(void)
 {
     size_t failedTestCount = 0;
     RUN_TEST_SUITE(iothubtransportuamqp_unittests, failedTestCount);
-	getchar();
     return failedTestCount;
 }
