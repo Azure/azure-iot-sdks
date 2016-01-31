@@ -630,8 +630,11 @@ extern TRANSPORT_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG*
     }
     else
     {
-        g_msgTickCounter = tickcounter_create();
         result = InitializeTransportHandleData(config->upperConfig, config->waitingToSend);
+        if (result != NULL)
+        {
+            g_msgTickCounter = tickcounter_create();
+        }
     }
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_009: [If any error is encountered then IoTHubTransportMqtt_Create shall return NULL.] */
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_011: [On Success IoTHubTransportMqtt_Create shall return a non-NULL value.] */
