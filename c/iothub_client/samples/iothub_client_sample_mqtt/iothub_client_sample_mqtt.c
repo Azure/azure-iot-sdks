@@ -27,6 +27,7 @@ static const char* connectionString = "[device connection string]";
 static int callbackCounter;
 static char msgText[1024];
 #define MESSAGE_COUNT 5
+static bool continueRunning;
 
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
@@ -67,6 +68,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     else
     {
         (void)printf("Received Message [%d] with Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
+        // If we receive the work 'quit' then we stop running
+        if (memcmp(buffer, "quit", size) == 0)
+        {
+            continueRunning = false;
+        }
     }
 
     // Retrieve properties from the message
@@ -110,6 +116,7 @@ void iothub_client_sample_mqtt_run(void)
 
     EVENT_INSTANCE messages[MESSAGE_COUNT];
 
+    continueRunning = true;
     srand((unsigned int)time(NULL));
     double avgWindSpeed = 10.0;
     
@@ -168,12 +175,11 @@ void iothub_client_sample_mqtt_run(void)
             }
 
             /* Wait for Commands. */
-            while (1)
+            while (continueRunning)
             {
                 IoTHubClient_LL_DoWork(iotHubClientHandle);
                 ThreadAPI_Sleep(1);
             }
-
             IoTHubClient_LL_Destroy(iotHubClientHandle);
         }
         platform_deinit();
