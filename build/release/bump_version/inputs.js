@@ -31,7 +31,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "c/iothub_client/inc/version.h",
+        "filePath": "c/iothub_client/inc/iothub_client_version.h",
         "search": "(IOTHUB\\_SDK\\_VERSION)([ ]+)(\".*\")",
         "replaceString": function(versions) {
             return '$1' + '$2' + '"' + versions.c.device + '"';
@@ -460,6 +460,42 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device",
                 "replaceString": "node.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "node/e2etests/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp",
+                "replaceString": "node.device-amqp"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-http",
+                "replaceString": "node.device-http"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iothub",
+                "replaceString": "node.service"
             }
         ]
     },

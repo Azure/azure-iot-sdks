@@ -10,5 +10,6 @@
  */
 
 module.exports = {
-  Mqtt: require('./lib/mqtt.js')
+  Mqtt: require('./lib/mqtt.js'),
+  MqttReceiver: require('./lib/mqtt_receiver.js')
 };

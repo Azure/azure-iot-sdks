@@ -5,6 +5,8 @@
 
 var EventEmitter = require('events');
 var util = require('util');
+var Message = require('azure-iot-common').Message;
+var results = require('azure-iot-common').results;
 
 /**
  * @class            module:azure-iot-amqp-base.AmqpReceiver
@@ -24,20 +26,22 @@ function AmqpReceiver(amqpReceiver) {
   EventEmitter.call(this);
   this._amqpReceiver = amqpReceiver;
   this._listenersInitialized = false;
-
-  this.on('newListener', function () {
-    // lazy-init AMQP event listeners
-    if (!this._listenersInitialized) {
-      this._setupAmqpReceiverListeners();
-    }
-  }.bind(this));
+  
+  var self = this;
 
   this.on('removeListener', function () {
     // stop listening for AMQP events if our consumers stop listening for our events
-    if (this._listenersInitialized) {
-      this._removeAmqpReceiverListeners();
+    if (self._listenersInitialized && self.listenerCount('message') === 0) {
+      self._removeAmqpReceiverListeners();
     }
-  }.bind(this));
+  });
+  
+  this.on('newListener', function () {
+    // lazy-init AMQP event listeners
+    if (!self._listenersInitialized) {
+      self._setupAmqpReceiverListeners();
+    }
+  });
 }
 
 util.inherits(AmqpReceiver, EventEmitter);
@@ -50,12 +54,30 @@ AmqpReceiver.prototype._onAmqpErrorReceived = function (err) {
   this.emit('errorReceived', err);
 };
   
-AmqpReceiver.prototype._onAmqpMessage = function (message) {
+AmqpReceiver.prototype._onAmqpMessage = function (amqpMessage) {
     /**
      * @event module:azure-iot-amqp-base.AmqpReceiver#message
-     * @type {AmqpMessage}
+     * @type {Message}
      */
-  this.emit('message', message);
+    var msg = new Message();
+
+    if (amqpMessage.properties.to) {
+        msg.to = amqpMessage.properties.to;
+    }
+    
+    if (amqpMessage.properties.absoluteExpiryTime) {
+        msg.expiryTimeUtc = amqpMessage.properties.absoluteExpiryTime;
+    }
+
+    if (amqpMessage.properties.messageId) {
+        msg.messageId = amqpMessage.properties.messageId;
+    }
+
+    if (amqpMessage.body) {
+        msg.data = amqpMessage.body;
+    }
+    
+    this.emit('message', msg);
 };
   
 AmqpReceiver.prototype._setupAmqpReceiverListeners = function () {
@@ -80,7 +102,7 @@ AmqpReceiver.prototype._removeAmqpReceiverListeners = function () {
 AmqpReceiver.prototype.complete = function (message, done) {
   if (!message) { throw new ReferenceError('Invalid message object.'); }
   this._amqpReceiver.accept(message);
-  if(done) done();
+  if(done) done(null, new results.MessageCompleted());
 };
 
 /** 
@@ -92,7 +114,7 @@ AmqpReceiver.prototype.complete = function (message, done) {
 AmqpReceiver.prototype.abandon = function (message, done) {
   if (!message) { throw new ReferenceError('Invalid message object.'); }
   this._amqpReceiver.release(message);
-  if(done) done();
+  if(done) done(null, new results.MessageAbandoned());
 };
 
 /** 
@@ -104,7 +126,7 @@ AmqpReceiver.prototype.abandon = function (message, done) {
 AmqpReceiver.prototype.reject = function (message, done) {
   if (!message) { throw new ReferenceError('Invalid message object.'); }
   this._amqpReceiver.reject(message);
-  if(done) done();
+  if(done) done(null, new results.MessageRejected());
 };
 
 module.exports = AmqpReceiver;

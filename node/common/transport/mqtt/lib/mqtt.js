@@ -4,8 +4,10 @@
 'use strict';
 
 var mqtt = require('mqtt');
+var MqttReceiver = require('./mqtt_receiver.js');
 var debug = require('debug')('mqtt-common');
 var PackageJson = require('../package.json');
+var results = require('azure-iot-common').results;
 
 /**
  * @class           module:azure-iot-mqtt-base.Mqtt
@@ -33,6 +35,7 @@ function Mqtt(config) {
     (!config.sharedAccessSignature))
     throw new ReferenceError('Invalid transport configuration');
 
+  this._receiver = null;
   this._hostName = 'mqtts://' + config.host;
   this._topic_publish = "devices/" + config.deviceId + "/messages/events/";
   this._topic_subscribe = "devices/" + config.deviceId + "/messages/devicebound/#";
@@ -50,7 +53,6 @@ function Mqtt(config) {
     password: new Buffer(config.sharedAccessSignature),
     rejectUnauthorized: false
   };
-  
   debug('username: ' + this._options.username);
   debug('hostname: ' + this._hostName);
   return this;
@@ -72,20 +74,23 @@ Mqtt.prototype.connect = function (done) {
     this.client.on('error', errCallback);
 
     this.client.on('close', function(){
-       debug('MQTT: Device connection to the server has been closed'); 
-    });
+       debug('Device connection to the server has been closed');
+       this._receiver = null; 
+    }.bind(this));
     
     this.client.on('offline', function(){
-       debug('MQTT: Device is offline'); 
-    });
+       debug('Device is offline'); 
+    }.bind(this));
     
     this.client.on('reconnect', function(){
-       debug('MQTT: Device is trying to reconnect'); 
-    });
+       debug('Device is trying to reconnect'); 
+    }.bind(this));
     
     this.client.on('connect', function (connack) {
-      this.client.removeListener('error', errCallback);
-      done(null, connack);
+        debug('Device is connected');
+        debug('CONNACK: ' + JSON.stringify(connack));
+        this.client.removeListener('error', errCallback);
+        done(null, connack);
     }.bind(this));
   }
 };
@@ -127,52 +132,26 @@ Mqtt.prototype.publish = function (message, done) {
   this.client.publish(this._topic_publish, message.data.toString(), { qos : 1, retain: false }, function (err, puback) {
     if (done) {
       this.client.removeListener('error', errCallback);
-      done(err, puback);
+      debug('PUBACK: ' + JSON.stringify(puback));
+      done(err, new results.MessageEnqueued(puback));
     }
   }.bind(this));
 };
 
 /**
- * @method            module:azure-iot-mqtt-base.Mqtt#subscribe
- * @description       Subscribes to messages coming from the IoT Hub instance.
+ * @method              module:azure-iot-device-mqtt.Mqtt#getReceiver
+ * @description         Gets a receiver object that is used to receive and settle messages.
  * 
- * @param {Function}  done  Callback that shall be called when the subscription is successful or if an error happens.
+ * @param {Function}    done   callback that shall be called with a receiver object instance. 
  */
-/* Codes_SRS_NODE_HTTP_12_008: The SUBSCRIBE method shall call subscribe on MQTT.JS library with the given message and with the hardcoded topic path */
-Mqtt.prototype.subscribe = function (done) {
-  if (done) {
-    var errCallback = function (error) {
-      done(error);
-    };
-    this.client.on('error', errCallback);
+/*Codes_SRS_NODE_DEVICE_MQTT_16_002: [If a receiver for this endpoint has already been created, the getReceiver method should call the done() method with the existing instance as an argument.] */
+/*Codes_SRS_NODE_DEVICE_MQTT_16_003: [If a receiver for this endpoint doesn’t exist, the getReceiver method should create a new MqttReceiver object and then call the done() method with the object that was just created as an argument.] */
+Mqtt.prototype.getReceiver = function (done) {
+  if (!this._receiver) {
+      this._receiver = new MqttReceiver(this.client, this._topic_subscribe);
   }
-  this.client.subscribe(this._topic_subscribe, { qos: 1 }, function (err, res) {
-    if (done) {
-      this.client.removeListener('error', errCallback);
-      done(err, res);
-    }
-  }.bind(this));
-};
-
-/**
- * @method            module:azure-iot-mqtt-base.Mqtt#receive
- * @description       Receives messages from the IoT Hub instance.
- * 
- * @param {Function}  done  Callback that shall be called when a message arrives or if an error happens.
- */
-/* Codes_SRS_NODE_HTTP_12_010: The RECEIVE method shall implement the MQTT.JS library callback event and calls back to the caller with the given callback */
-Mqtt.prototype.receive = function (done) {
-  if (done) {
-    var errCallback = function (error) {
-      done(error);
-    };
-    this.client.on('error', errCallback);
-  }
-  this.client.on('message', function (topic, msg) {
-    this.client.removeListener('error', errCallback);
-    debug('message! ' + topic + ' ' + msg);
-    if (done) done(topic, msg);
-  }.bind(this));
+  
+  done(null, this._receiver);
 };
 
 module.exports = Mqtt;

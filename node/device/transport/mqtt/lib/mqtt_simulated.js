@@ -3,7 +3,6 @@
 
 'use strict';
 
-var Message = require('azure-iot-device').Message;
 var SharedAccessSignature = require('azure-iot-device').SharedAccessSignature;
 
 function makeError(errorMessage) {
@@ -12,6 +11,7 @@ function makeError(errorMessage) {
 }
 
 function SimulatedMqtt(config) {
+  this.receiver = 'receiver';
   this.handleRequest = function (done) {
     var sig = SharedAccessSignature.parse(config.sharedAccessSignature);
 
@@ -54,10 +54,8 @@ SimulatedMqtt.prototype.sendEvent = function (message, done) {
   });
 };
 
-SimulatedMqtt.prototype.receive = function (done) {
-  this.handleRequest(function (err, response) {
-    done(err, err ? null : new Message(''), response);
-  });
+SimulatedMqtt.prototype.getReceiver = function (done) {
+  done(null, this.receiver);
 };
 
 module.exports = SimulatedMqtt;

@@ -15,13 +15,13 @@ echo ********** INSTALLING CC3200 SDK **********
 if not exist "%install-root%\CC3200SDK_1.1.0" start /wait %installers-path%\CC3200SDK-1.1.0-windows-installer.exe --mode unattended --prefix %install-root%\CC3200SDK_1.1.0
 
 echo ********** INSTALLING Tirtos Simplelink **********
-start /wait %installers-path%\tirtos_simplelink_setupwin32_2_14_01_20.exe --mode unattended --prefix %install-root%
+if not exist "%install-root%\tirtos_simplelink_2_14_01_20" start /wait %installers-path%\tirtos_simplelink_setupwin32_2_14_01_20.exe --mode unattended --prefix %install-root%
 
 echo ********** EXTRACTING ns **********
 if not exist "%install-root%\ns_1_10_00_00_eng" powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('%installers-path%\ns_1_10_00_00_eng.zip', '%install-root%'); }"
 
 echo ********** INSTALLING TI ARM Compiler **********
-start /wait %installers-path%\ti_cgt_tms470_5.2.5_windows_installer.exe --mode unattended --prefix %install-root%
+if not exist "%install-root%\ti-cgt-arm_5.2.5" start /wait %installers-path%\ti_cgt_tms470_5.2.5_windows_installer.exe --mode unattended --prefix %install-root%
 
 set build-root=%~dp0..
 rem // resolve to fully qualified path

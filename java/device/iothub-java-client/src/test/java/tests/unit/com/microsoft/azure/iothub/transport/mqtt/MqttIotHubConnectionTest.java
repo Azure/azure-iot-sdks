@@ -8,6 +8,7 @@ import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.net.IotHubUri;
+import com.microsoft.azure.iothub.transport.TransportUtils;
 import com.microsoft.azure.iothub.transport.mqtt.MqttIotHubConnection;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -17,6 +18,7 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Queue;
 
 import static org.junit.Assert.assertEquals;
@@ -259,7 +261,8 @@ public class MqttIotHubConnectionTest
 
         MqttConnectOptions actualConnectionOptions = Deencapsulation.getField(connection, "connectionOptions");
 
-        assertEquals(iotHubHostName + "/" + deviceId, actualConnectionOptions.getUserName());
+        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion, "UTF-8");
+        assertEquals(iotHubHostName + "/" + deviceId + "/" + clientIdentifier, actualConnectionOptions.getUserName());
 
         String expectedSasToken = mockToken.toString();
         String actualUserPassword = new String(actualConnectionOptions.getPassword());

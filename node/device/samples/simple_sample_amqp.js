@@ -24,16 +24,9 @@ setInterval(function () {
 
 client.getReceiver(function (err, receiver) {
   receiver.on('message', function (msg) {
-    console.log('Id: ' + msg.properties.messageId + ' Body: ' + msg.body);
-    receiver.complete(msg, function () {
-      console.log('completed');
-    });
-    // receiver.reject(msg, function() {
-    //   console.log('rejected');
-    // });
-    // receiver.abandon(msg, function() {
-    //   console.log('abandoned');
-    // });
+    console.log('Id: ' + msg.messageId + ' Body: ' + msg.data);
+    receiver.complete(msg, printResultFor('completed'));
+    // reject and abandon follow the same pattern.
   });
   receiver.on('errorReceived', function (err) {
     console.warn(err);
@@ -44,6 +37,6 @@ client.getReceiver(function (err, receiver) {
 function printResultFor(op) {
   return function printResult(err, res) {
     if (err) console.log(op + ' error: ' + err.toString());
-    if (res) console.log(op + ' status: ' + res);
+    if (res) console.log(op + ' status: ' + res.constructor.name);
   };
 }

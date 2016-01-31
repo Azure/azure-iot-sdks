@@ -23,3 +23,7 @@ endif()
 if(${use_mqtt})
 	add_sample_directory(iothub_client_sample_mqtt)
 endif()
+
+if(${use_uamqp})
+	add_sample_directory(iothub_client_sample_uamqp)
+endif()

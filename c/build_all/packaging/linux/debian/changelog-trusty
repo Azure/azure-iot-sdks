@@ -1,0 +1,11 @@
+azure-iot-sdk-c (0.1.0-4) trusty; urgency=low
+
+  * Initial release
+
+  * Update the dependencies for dev packages (#4812242)
+
+  * Change location of the headers for the sdk (#4576392)
+
+  * Update to use umqtt and uamqp (#5069009)
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 2 Jan 2016 17:24:51 +0000

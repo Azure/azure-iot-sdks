@@ -169,7 +169,7 @@ public final class AmqpsIotHubConnection extends BaseHandler {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_012: [If the AmqpsIotHubConnectionBaseHandler becomes invalidated before the Reactor (Proton) starts, the function shall throw an IOException.]
             this.startReactorAsync();
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_010: [Once the Reactor (Proton) is ready, the function shall set it's state to OPEN.]
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_010: [Once the Reactor (Proton) is ready, the function shall set its state to OPEN.]
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_031: [ The function shall get the link credit from it's AmqpsIotHubConnectionBaseHandler and set the private maxQueueSize member variable. ]
 			// Codes_SRS_AMQPSIOTHUBCONNECTION_14_032: [ The function shall successfully complete it’s CompletableFuture status member variable. ]
 			try {

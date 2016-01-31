@@ -29,4 +29,8 @@ if(${use_mqtt})
 	endif()
 endif()
 
+if(${use_uamqp})
+	add_subdirectory(iothubtransportuamqp_unittests)
+endif()
+
 add_subdirectory(version_unittests)

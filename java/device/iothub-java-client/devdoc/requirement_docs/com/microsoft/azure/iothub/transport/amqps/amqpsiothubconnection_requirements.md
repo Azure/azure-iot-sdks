@@ -53,13 +53,13 @@ public void open() throws IOException, InterruptedException, ExecutionException
 
 **SRS_AMQPSIOTHUBCONNECTION_14_009: [**The function shall open the Amqps connection and trigger the Reactor (Proton) to begin running.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_010: [**Once the Reactor (Proton) is ready, the function shall set it's state to OPEN.**]**
+**SRS_AMQPSIOTHUBCONNECTION_14_010: [**Once the Reactor (Proton) is ready, the function shall set its state to OPEN.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_14_011: [**If the AMQPS connection is already open, the function shall do nothing.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_14_012: [**If the AmqpsIotHubConnectionBaseHandler becomes invalidated before the Reactor (Proton) starts, the function shall throw an IOException.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_031: [** The function shall get the link credit from it's AmqpsIotHubConnectionBaseHandler and set the private maxQueueSize member variable. **]**
+**SRS_AMQPSIOTHUBCONNECTION_14_031: [** The function shall get the link credit from its AmqpsIotHubConnectionBaseHandler and set the private maxQueueSize member variable. **]**
 
 **SRS_AMQPSIOTHUBCONNECTION_14_032: [** The function shall successfully complete it’s CompletableFuture status member variable. **]**
 
