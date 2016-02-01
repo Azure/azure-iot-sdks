@@ -11,7 +11,8 @@
   "devDependencies": {
     "chai": "^3.3.0",
     "jshint": "^2.8.0",
-    "mocha": "^2.3.3"
+    "mocha": "^2.3.3",
+    "sinon": "^1.17.3"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",

@@ -5,8 +5,9 @@
   "author": "Microsoft Corporation",
   "license": "MIT",
   "dependencies": {
-    "azure-iot-mqtt-base": "1.0.0-preview.11",
-    "azure-iot-device": "1.0.0-preview.11"
+    "azure-iot-common": "^1.0.0-preview.11",
+    "azure-iot-device": "1.0.0-preview.11",
+    "azure-iot-mqtt-base": "1.0.0-preview.11"
   },
   "devDependencies": {
     "chai": "^3.3.0",

@@ -19,19 +19,23 @@ var PackageJson = require('../package.json');
  * @param {Object}  config   Configuration object generated from the connection string by the client.
  */
 function AmqpWs(config) {
-  this._config = config;
-  var uri = 'wss://';
-  uri += encodeURIComponent(this._config.deviceId) +
-         '@sas.' +
-         this._config.hubName +
-         ':' +
-         encodeURIComponent(this._config.sharedAccessSignature) +
-         '@' +
-         this._config.host + ':443/$iothub/websocket';
-      
-  this._amqp = new Base(uri, false, 'azure-iot-device/' + PackageJson.version);
+    this._config = config;
+    this._initialize();
 }
 
 util.inherits(AmqpWs, Amqp);
+
+AmqpWs.prototype._initialize = function () {
+    var uri = 'wss://';
+    uri += encodeURIComponent(this._config.deviceId) +
+           '@sas.' +
+           this._config.hubName +
+           ':' +
+           encodeURIComponent(this._config.sharedAccessSignature) +
+           '@' +
+           this._config.host + ':443/$iothub/websocket';
+        
+    this._amqp = new Base(uri, false, 'azure-iot-device/' + PackageJson.version);
+};
 
 module.exports = AmqpWs;

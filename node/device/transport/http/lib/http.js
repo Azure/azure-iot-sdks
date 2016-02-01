@@ -176,4 +176,74 @@ Http.prototype.getReceiver = function getReceiver (done) {
   done(null, this._receiver);
 };
 
+/**
+ * @method          module:azure-iot-device-http.Http#setOptions
+ * @description     This methods sets the HTTP specific options of the transport.
+ * 
+ * @param {Function}      done      The callback to be invoked when `setOptions` completes.
+ */
+/*Codes_SRS_NODE_DEVICE_HTTP_16_004: [The ‘setOptions’ method shall call the setOptions method of the HTTP Receiver with the options parameter.]*/ 
+/*Codes_SRS_NODE_DEVICE_HTTP_16_005: [The ‘setOptions’ method shall call the ‘done’ callback when finished.]*/
+Http.prototype.setOptions = function (options, done) {
+    this._receiver.setOptions(options);
+    done(null, new results.TransportConfigured());
+};
+
+/**
+ * @method              module:azure-iot-device-http.Http#complete
+ * @description         Settles the message as complete and calls the done callback with the result.
+ * 
+ * @param {Message}     message     The message to settle as complete.
+ * @param {Function}    done        The callback that shall be called with the error or result object.
+ */
+/*Codes_SRS_NODE_DEVICE_HTTP_16_002: [The ‘complete’ method shall call the ‘complete’ method of the receiver object and pass it the message and the callback given as parameters.] */
+Http.prototype.complete = function (message, done) {
+    this.getReceiver(function (err, receiver){
+        receiver.complete(message, done);
+    });
+};
+
+/**
+ * @method              module:azure-iot-device-http.Http#reject
+ * @description         Settles the message as rejected and calls the done callback with the result.
+ * 
+ * @param {Message}     message     The message to settle as rejected.
+ * @param {Function}    done        The callback that shall be called with the error or result object.
+ */
+/*Codes_SRS_NODE_DEVICE_HTTP_16_003: [The ‘reject’ method shall call the ‘reject’ method of the receiver object and pass it the message and the callback given as parameters.] */
+Http.prototype.reject = function (message, done) {
+    this.getReceiver(function (err, receiver){
+        receiver.reject(message, done);
+    });
+};
+
+/**
+ * @method              module:azure-iot-device-http.Http#abandon
+ * @description         Settles the message as abandoned and calls the done callback with the result.
+ * 
+ * @param {Message}     message     The message to settle as abandoned.
+ * @param {Function}    done        The callback that shall be called with the error or result object.
+ */
+/*Codes_SRS_NODE_DEVICE_HTTP_16_001: [The ‘abandon’ method shall call the ‘abandon’ method of the receiver object and pass it the message and the callback given as parameters.] */
+Http.prototype.abandon = function (message, done) {
+    this.getReceiver(function (err, receiver){
+        receiver.abandon(message, done);
+    });
+};
+
+/**
+ * @method          module:azure-iot-device-http.Http#updateSharedAccessSignature
+ * @description     This methods sets the SAS token used to authenticate with the IoT Hub service.
+ * 
+ * @param {String}        sharedAccessSignature  The new SAS token.
+ * @param {Function}      done      The callback to be invoked when `updateSharedAccessSignature` completes.
+ */
+Http.prototype.updateSharedAccessSignature = function (sharedAccessSignature, done) {
+    /*Codes_SRS_NODE_DEVICE_HTTP_16_006: [The updateSharedAccessSignature method shall save the new shared access signature given as a parameter to its configuration.] */
+    this._config.sharedAccessSignature = sharedAccessSignature;
+    this._receiver.setSharedAccessSignature(sharedAccessSignature);
+    /*Codes_SRS_NODE_DEVICE_HTTP_16_007: [The updateSharedAccessSignature method shall call the `done` callback with a null error object and a SharedAccessSignatureUpdated object as a result, indicating that the client does not need to reestablish the transport connection.] */
+    done(null, new results.SharedAccessSignatureUpdated(false));
+};
+
 module.exports = Http;
