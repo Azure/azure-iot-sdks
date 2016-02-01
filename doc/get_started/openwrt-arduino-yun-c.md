@@ -1,10 +1,10 @@
 ---
-platform: openwrt
-device: arduino-yun
+platform: linux
+device: Arduino Yun
 language: c
 ---
 
-Run a simple C sample on Arduino Yun device running OpenWRT Yun
+Run a simple C sample on Arduino Yun device
 ===
 ---
 
@@ -12,14 +12,15 @@ Run a simple C sample on Arduino Yun device running OpenWRT Yun
 
 -   [Introduction](#Introduction)
 -   [Step 1: Prerequisites](#Step-1-Prerequisites)
--   [Step 2: Build and Run the Sample](#Step-2-Build)
+-   [Step 2: Prepare your Device](#Step-2-PrepareDevice)
+-   [Step 3: Build and Run the Sample](#Step-3-Build)
 
 <a name="Introduction"></a>
 # Introduction
 
 **About this document**
 
-This document describes how to connect Arduino Yun device running OpenWRT Yun with Azure IoT SDK. This multi-step process includes:
+The following document describes the process of connecting an Arduino Yun system to Azure IoT Hub.This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -28,102 +29,98 @@ This document describes how to connect Arduino Yun device running OpenWRT Yun wi
 # Step 1: Prerequisites
 
 You should have the following items ready before beginning the process:
-
--   Computer with Git client installed and access to the
-    [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub
-    public repository.
--   Arduino Yun device to certify.
--   Debian x86 OS.
+-   Computer with a Git client installed so that you can access the azure-iot-sdks code on GitHub.
+  - Arduino Yun board.
+  - Ubuntu x86 machine (for cross compiling)
 -   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
 -   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-#### Create a device on IoT Hub
+
+### Create a device on IoT Hub
 -   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-#### Write down device credentials
+
+### Write down device credentials
 -   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
 
-<a name="Step-2-Build"></a>
-# Step 2: Build and Run the sample
+  > Note: You can skip this step if you just want to build the sample application without running it.
 
-<a name="Step-2-1-Load"></a>
-## 2.1 Build SDK and sample
+<a name="Step-2-PrepareDevice"></a>
+# Step 2: Prepare your Device
+-  Connect the Arduino Yun using the mini-USB cable.
+-  If you need to setup your Arduino Yun device, please refer the getting started instructions [here](<https://www.arduino.cc/en/Guide/ArduinoYun>) .
 
-### Build Azure IoT SDK
+<a name="Step-3-Build"></a>
+# Step 3: Build and Run the sample
 
--   Open a PuTTY session and connect to the device.
+## Setup the development environment
 
--   Install the prerequisite packages for the Microsoft Azure IoT Device SDK for C by issuing the following commands from the command line on your board:
+This section shows you how to set up a development environment for the Azure IoT device SDK for C on Arduino Yun.
 
-        sudo apt-get update
+Install dependencies under root/sudo. 
 
-        apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre libssl-dev libncurses-dev subversion gawk
+``` 
+apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre libssl-dev libncurses-dev subversion gawk
+```
 
--   Download the Microsoft Azure IoT Device SDK for C to the board by issuing the following command on the board::
+- Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the machine you are using.
+- Navigate to the folder **c/build_all/arduino** in your local copy of the repository.
+- Run the `./setup.sh` script to install the OpenWRT SDK and prerequisites. By default, the SDK will be installed at **~/openwrt/sdk**
+- (Optional) Enter 'Y' to build the Azure IoT SDK.
+- When prompted to build proton, enter 'N'
 
-        git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+ <a name="build"/>
+## Build the sample
 
--  Open a shell and navigate to the folder **c/build_all/arduino** in your local copy of the repository.
+- Open the file **c/serializer/samples/simplesample_http/simplesample_http.c** in a text editor (for example nano)
+- Locate the following code in the file:
+```
+static const char* connectionString = "[device connection string]";
+```
+- Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
+- The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
+- Run the `./build.sh` script in the **c/build_all/arduino** directory.   
 
--  Run the `setup.sh` script to install the OpenWRT SDK and prerequisites. By default, the SDK will be installed at **~/openwrt/sdk**
+<a name="deploy"/>
+## Deploy the sample
 
--  (Optional) Enter 'Y' to build the Azure IoT SDK.
+- Open a shell and navigate to the installed OpenWRT SDK folder. By default, it is **~/openwrt/sdk**.
+- Transfer the sample executable.
 
-    This script builds the **iothub_client** and **serializer** libraries and their associated samples.
+OpenWRT Yun Image:
 
-    ***Note:*** *You will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).*
+```
+scp ~/openwrt/sdk/build_dir/target-mips_r2_uClibc-0.9.33.2/azure-iot-sdks-1/serializer/samples/simplesample_http/simplesample_http root@arduino.local:/tmp
+```
 
-### Build the Sample
+LininoIO Yun Image:
 
--   Open the file **c/serializer/samples/simplesample_http/simplesample_http.c** in a text editor.
+```
+scp ~/openwrt/sdk/build_dir/target-mips_r2_uClibc-0.9.33.2/azure-iot-sdks-1/serializer/samples/simplesample_http/simplesample_http root@linino.local:/tmp
+```
 
--   Find the following place holder for IoT device connection string:
+***Note: The uClibc version might be different on your setup and you might need to adjust the path accordingly.***
 
-        static const char* connectionString = "[device connection string]";
+## Make sure the certificates are installed
 
--   Replace the above placeholder with device connection string you obtained in [Step 1](#Step-1-Prerequisites) and save the changes.
+On the Arduino Yun device, install the ca-certificates package like below:
 
--   Run the `build.sh` script in the **c/build_all/arduino** directory.   
+```
+wget https://downloads.openwrt.org/snapshots/trunk/ar71xx/generic/packages/base/ca-certificates_20151214_ar71xx.ipk --no-check-certificate
+opkg install ca-certificates_20151214_ar71xx.ipk
+```
 
-### Deploy the sample
+You might get an error message at this step(return code 127), but the certificates will be installed.
 
--   Open a shell and navigate to the installed OpenWRT SDK folder.
+<a name="run"/>
+## Run the sample
 
-    By default, it is **~/openwrt/sdk**.
+- Run the sample **/tmp/simplesample_http**
+- Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_http** application.
+- See "Send cloud-to-device messages" in the document [How to use Device Explorer for IoT Hub devices][device-explorer] for instructions on sending messages with the **DeviceExplorer** utility.
 
--   Transfer the package.
+***Note: To send a command to the device from iothub-explorer or DeviceExplorer, the command should be like {"Name":"TurnFanOff", "Parameters":{}}***
 
-    OpenWRT Yun Image:
+[setup-devbox-linux]: devbox_setup.md
+[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[setup-iothub]: ../../doc/setup_iothub.md
+[provision-device]: ./provision_device.md
 
-        scp bin/ar71xx/packages/azure-iot-sdks_1-1_ar71xx.ipk root@arduino.local:/tmp
-
-    LininoIO Yun Image:
-
-        scp bin/ar71xx/packages/azure-iot-sdks_1-1_ar71xx.ipk root@linino.local:/tmp
-
-## 2.2 Send Device Events to IoT Hub:
-
-***Note:*** *The following instructions assumes the device is flashed with OpenWRT Yun.*
-
-*If you are using LininoIO, substitute `arduino` with `linino` and use the default password `doghunter`.*
-
--   Open shell and enter `ssh root@arduino.local`
-
-    Enter the device password. By default it is, `arduino` for OpenWRT Yun Image or `doghunter` for LininoIO.
-
--   Install the package
-
-        opkg install /tmp/azure-iot-sdks_1-1_ar71xx.ipk
-
--   Run the sample by issuing following command:
-
-         cd /usr/share/azure-iot-sdk/samples
-         ./simplesample_http
-
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to see the data your device is sending.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool](https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
-
-## 2.3 Receive messages from IoT Hub
-
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) for instructions on sending messages to device.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool](https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)

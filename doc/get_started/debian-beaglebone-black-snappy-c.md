@@ -169,25 +169,6 @@ You should have the following items ready before beginning the process:
 - Connect an Ethernet cable to your board. Ping a website, e.g., bing.com, to verify connectivity.
 	- If ping doesn't work, reboot your board, log in again using PuTTY, and run the command **ifconfig**. You should see the **eth0**, **lo**, and **usb0** interfaces.
 
-<a name="Build-and-run-the-Device-Explorer-tool"/>
-## Build and run the Device Explorer tool
-
-You can use the Device Explorer sample application on your Windows desktop machine to create and register a device ID and symmetric key for your device. The Device Explorer interfaces with Azure IoT Hubs, and has some basic capabilities such as:
-
-- **Device management**: creates device IDs and obtains a list of registered devices on your IoT Hub.
-- **Monitors and consumes data** sent by your devices to your IoT Hub.
-- **Sends messages** to your devices.
-
-To run this tool, you need connection and configuration information for your IoT Hub and the Event Hub it is associated with.
-
-- Clone or download a copy of the [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub repository on your Windows desktop machine.
-- In Visual Studio, open the DeviceExplorer.sln solution in the tools\\DeviceExplorer folder in your local copy of the repository, then build and run it.
-- Paste the two connection strings for your IoT Hub and Event Hub, and then click **Update**.
-- Click the **Management** tab, then create a device ID for your device and register your device with your IoT Hub:
-	1. Click **List** to call the device hub and retrieve a list of devices. If this is your first time, then you shouldn't retrieve anything!
-	2. Click **Create** to create a device ID and key.
-	3. Save this information in Notepad (or just keep the sample running). You will need this when you configure your device.
-
 <a name="Step-3-Build"></a>
 # Step 3: Build and Run the sample
 

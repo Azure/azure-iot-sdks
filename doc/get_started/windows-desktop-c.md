@@ -4,7 +4,7 @@ device: desktop
 language: c
 ---
 
-Run a simple C sample on on Windows
+Run a simple C sample on Windows
 ===
 ---
 

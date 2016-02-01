@@ -1,3 +1,9 @@
+---
+platform: debian, fedora, Linux, opensuse, raspbian, Ubuntu, windows, yocto 
+device: any
+language: java
+---
+
 Run a simple Java sample on device
 ===
 ---
