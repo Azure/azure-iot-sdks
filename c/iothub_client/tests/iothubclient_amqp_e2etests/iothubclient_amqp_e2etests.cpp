@@ -238,7 +238,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
     TEST_FUNCTION(IoTHub_AMQP_SendEvent_E2ETests)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         IOTHUB_MESSAGE_HANDLE msgHandle;
 
@@ -247,6 +247,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = AMQP_Protocol;
+        iotHubConfig.io_transport_provider_callback = NULL;
 
         EXPECTED_SEND_DATA* sendData = EventData_Create();
         ASSERT_IS_NOT_NULL(sendData);
@@ -302,7 +303,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
     TEST_FUNCTION(IoTHub_AMQP_RecvMessage_E2ETest)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
         EXPECTED_RECEIVE_DATA* notifyData = MessageData_Create();
@@ -314,6 +315,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = AMQP_Protocol;
+        iotHubConfig.io_transport_provider_callback = NULL;
 
         IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(), IoTHubAccount_GetIoTHubConnString(), IoTHubAccount_GetDeviceId(), IoTHubAccount_GetDeviceKey(), IoTHubAccount_GetEventhubListenName(), IoTHubAccount_GetEventhubAccessKey(), IoTHubAccount_GetSharedAccessSignature(), IoTHubAccount_GetEventhubConsumerGroup());
         ASSERT_IS_NOT_NULL(iotHubTestHandle);
@@ -353,7 +355,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
     TEST_FUNCTION(IoTHub_AMQP_null_RecvMessage_E2ETest)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
         EXPECTED_RECEIVE_DATA* notifyData = NullMessageData_Create();
@@ -365,6 +367,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = AMQP_Protocol;
+        iotHubConfig.io_transport_provider_callback = NULL;
 
         IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(), IoTHubAccount_GetIoTHubConnString(), IoTHubAccount_GetDeviceId(), IoTHubAccount_GetDeviceKey(), IoTHubAccount_GetEventhubListenName(), IoTHubAccount_GetEventhubAccessKey(), IoTHubAccount_GetSharedAccessSignature(), IoTHubAccount_GetEventhubConsumerGroup());
         ASSERT_IS_NOT_NULL(iotHubTestHandle);

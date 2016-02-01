@@ -2,14 +2,15 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for iothubtransportamqp_unittests
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8)
 
 if(NOT ${use_amqp})
-	message(FATAL_ERROR "iothubtransportamqp_unittests being generated without amqp support")
+	message(FATAL_ERROR "iothubtransportamqp_unittests being generated without AMQP support")
 endif()
 
 compileAsC99()
 set(theseTestsName iothubtransportamqp_unittests)
+
 set(${theseTestsName}_cpp_files
 ${theseTestsName}.cpp
 )

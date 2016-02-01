@@ -106,7 +106,7 @@ This document has demonstrated how to cross compile the Azure IoT SDK on a 64-bi
 
 ## Limitations
 
-Currently this procedure does not support cross compiling the AMQP and MQTT transports. In order to do that one would first need to cross compile the Proton library for AMQP and the Paho library for MQTT. This may be addressed at a later time.
+Currently this procedure does not support cross compiling the AMQP and MQTT transports. In order to do that one would first need to cross compile the Proton library for AMQP. This may be addressed at a later time.
 
 ## References
 

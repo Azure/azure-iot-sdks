@@ -16,14 +16,10 @@ if(${use_http})
 	add_sample_directory(iothub_client_sample_http)
 endif()
 
-if(${use_amqp})
-	add_sample_directory(iothub_client_sample_amqp)
-endif()
-
 if(${use_mqtt})
 	add_sample_directory(iothub_client_sample_mqtt)
 endif()
 
-if(${use_uamqp})
-	add_sample_directory(iothub_client_sample_uamqp)
+if(${use_amqp})
+	add_sample_directory(iothub_client_sample_amqp)
 endif()

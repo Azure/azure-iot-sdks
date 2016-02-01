@@ -4,8 +4,8 @@
 #this is CMakeLists.txt for iothubclient_http_e2etests
 cmake_minimum_required(VERSION 2.8.11)
 
-if(NOT (${use_amqp} AND ${use_http}))
-	message(FATAL_ERROR "iothubclient_http_e2etests being generated without AMQP and HTTP support")
+if(NOT ${use_http})
+	message(FATAL_ERROR "iothubclient_http_e2etests being generated without HTTP support")
 endif()
 
 compileAsC99()
@@ -24,9 +24,6 @@ set(${theseTestsName}_h_files
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 
 build_test_artifacts(${theseTestsName} ON)
-
-
-
 
 if(WIN32)
 	if(TARGET ${theseTestsName}_dll)

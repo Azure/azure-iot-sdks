@@ -341,7 +341,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
     TEST_FUNCTION(IoTClient_AMQP_AmqpMacroRecv_E2ETests)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
         // act
@@ -350,6 +350,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = AMQP_Protocol;
+        iotHubConfig.io_transport_provider_callback = NULL;
 
         //step 1: data is retrieved by device using AMQP
         time_t beginOperation, nowTime;
@@ -400,7 +401,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
     TEST_FUNCTION(IoTClient_AMQP_MacroSend_E2ETests)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         deviceModel* devModel;
         time_t beginOperation, nowTime;
@@ -410,6 +411,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = AMQP_Protocol;
+        iotHubConfig.io_transport_provider_callback = NULL;
 
         // step 1: prepare data
         time_t t = time(NULL);
@@ -491,7 +493,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
 
     TEST_FUNCTION(IoTClient_Http_MacroRecv_E2ETests)
     {
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
         deviceModel* devModel;
 
@@ -500,6 +502,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = HTTP_Protocol;
+        iotHubConfig.io_transport_provider_callback = NULL;
 
         //step 1: data is created
         g_recvMacroData = RecvMacroTestData_Create();
@@ -564,7 +567,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
     {
 
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
         deviceModel* devModel;
         time_t beginOperation, nowTime;
@@ -574,6 +577,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = HTTP_Protocol;
+        iotHubConfig.io_transport_provider_callback = NULL;
 
         // step 1: prepare data
         time_t t = time(NULL);

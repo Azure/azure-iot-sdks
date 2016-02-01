@@ -102,7 +102,7 @@ rem ----------------------------------------------------------------------------
 rem -- restore packages for solutions
 rem -----------------------------------------------------------------------------
 
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+rem call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
 call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
 call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
 
@@ -118,20 +118,20 @@ rem ----------------------------------------------------------------------------
 
 if %build-clean%==1 (
 	
-    call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-    call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
+    rem call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+    rem call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+    rem if not %errorlevel%==0 exit /b %errorlevel%
 
     call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
     call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
 
-    call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-    call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
+    rem call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+    rem call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+    rem if not %errorlevel%==0 exit /b %errorlevel%
     
     call :clean-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-    rem if not %errorlevel%==0 exit /b %errorlevel%
+    if not %errorlevel%==0 exit /b %errorlevel%
     
     call :clean-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
@@ -144,7 +144,6 @@ if %build-clean%==1 (
 	
 	call :clean-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
-
 )
 
 
@@ -153,11 +152,11 @@ rem ----------------------------------------------------------------------------
 rem -- build solutions
 rem -----------------------------------------------------------------------------
 
-call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
+rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+rem if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
- if not %errorlevel%==0 exit /b %errorlevel%
+if not %errorlevel%==0 exit /b %errorlevel%
 
 rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
 rem if not %errorlevel%==0 exit /b %errorlevel%
