@@ -70,23 +70,6 @@ typedef struct EXPECTED_RECEIVE_DATA_TAG
 
 BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
-    static const XIO_HANDLE CreateXioConnection(const char* hostname, int portNum)
-    {
-#if _WIN32
-        TLSIO_CONFIG tls_io_config = { hostname, portNum };
-        const IO_INTERFACE_DESCRIPTION* tlsio_interface = tlsio_schannel_get_interface_description();
-#else
-#ifdef MBED_BUILD_TIMESTAMP
-        TLSIO_CONFIG tls_io_config = { hostname, portNum };
-        const IO_INTERFACE_DESCRIPTION* tlsio_interface = tlsio_wolfssl_get_interface_description();
-#else
-        TLSIO_CONFIG tls_io_config = { hostname, portNum };
-        const IO_INTERFACE_DESCRIPTION* tlsio_interface = tlsio_openssl_get_interface_description();
-#endif
-#endif
-        return xio_create(tlsio_interface, &tls_io_config, NULL);
-    }
-
     static int IoTHubCallback(void* context, const char* data, size_t size)
     {
         size;
@@ -273,7 +256,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
     TEST_FUNCTION(IoTHub_MQTT_SendEvent_E2ETests)
     {
         // arrange
-        /*IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig;
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         IOTHUB_MESSAGE_HANDLE msgHandle;
 
@@ -282,7 +265,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = MQTT_Protocol;
-        iotHubConfig.io_transport_provider_callback = CreateXioConnection;
+        iotHubConfig.io_transport_provider_callback = NULL;
 
         EXPECTED_SEND_DATA* sendData = EventData_Create();
         ASSERT_IS_NOT_NULL(sendData);
@@ -334,13 +317,13 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
         // cleanup
         IoTHubMessage_Destroy(msgHandle);
-        EventData_Destroy(sendData);*/
+        EventData_Destroy(sendData);
     }
 
     TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest)
     {
         // arrange
-        /*IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig;
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
         EXPECTED_RECEIVE_DATA* notifyData = MessageData_Create();
@@ -352,7 +335,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = MQTT_Protocol;
-        iotHubConfig.io_transport_provider_callback = CreateXioConnection;
+        iotHubConfig.io_transport_provider_callback = NULL;
 
         iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
         ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Error creating IoTHubClient.");
@@ -388,6 +371,6 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
         // cleanup
         MessageData_Destroy(notifyData);
-        IoTHubClient_Destroy(iotHubClientHandle);*/
+        IoTHubClient_Destroy(iotHubClientHandle);
     }
 END_TEST_SUITE(iothubclient_mqtt_e2etests)

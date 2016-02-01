@@ -253,7 +253,7 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
     TEST_FUNCTION(IoTHub_HTTP_SendEvent_E2ETests)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         IOTHUB_MESSAGE_HANDLE msgHandle;
 
@@ -319,7 +319,7 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
     {
         IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_nCalls = 0;
 
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName();
         iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix();
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
@@ -366,7 +366,7 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
     {
         IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_with_properties_nCalls = 0;
 
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName();
         iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix();
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
@@ -418,7 +418,7 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
     TEST_FUNCTION(IoTHub_HTTP_RecvMessage_E2ETest)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
         EXPECTED_RECEIVE_DATA* notifyData = MessageData_Create();
