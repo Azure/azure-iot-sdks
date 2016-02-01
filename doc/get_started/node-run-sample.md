@@ -1,3 +1,9 @@
+---
+platform: debian, fedora, Linux, opensuse, raspbian, Ubuntu, windows, yocto 
+device: any
+language: javascript
+---
+
 Run a simple Node.js sample on device
 ===
 ---
