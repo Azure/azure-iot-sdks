@@ -2963,6 +2963,115 @@ TEST_FUNCTION(uAMQP_DoWork_succeeds)
 	transport_interface->IoTHubTransport_Destroy(transport);
 }
 
+// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_041: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] 
+// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_042: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.]
+TEST_FUNCTION(uAMQP_GetSendStatus_idle_succeeds)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+	test_TLS_io_transport = TEST_TLS_IO_PROVIDER;
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	IOTHUB_CLIENT_STATUS iotHubClientStatus;
+
+	mocks.ResetAllCalls();
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(1);
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(1);
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_GetSendStatus(transport, &iotHubClientStatus);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_IDLE, "IoTHubTransport_GetSendStatus returned unexpected status.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_041: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.]  
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_043: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] 
+TEST_FUNCTION(uAMQP_GetSendStatus_inProgress_not_empty_succeeds)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+	test_TLS_io_transport = TEST_TLS_IO_PROVIDER;
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	IOTHUB_CLIENT_STATUS iotHubClientStatus;
+
+	mocks.ResetAllCalls();
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(1);
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(0);
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_GetSendStatus(transport, &iotHubClientStatus);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_BUSY, "IoTHubTransport_GetSendStatus returned unexpected status.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_041: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.]  
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_043: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] 
+TEST_FUNCTION(uAMQP_GetSendStatus_waitingToSend_not_empty_succeeds)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+	test_TLS_io_transport = TEST_TLS_IO_PROVIDER;
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	IOTHUB_CLIENT_STATUS iotHubClientStatus;
+
+	mocks.ResetAllCalls();
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(0);
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_GetSendStatus(transport, &iotHubClientStatus);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_BUSY, "IoTHubTransport_GetSendStatus returned unexpected status.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
 
 // Tests_SRS_IOTHUBTRANSPORTUAMQP_09_037: [IoTHubTransportuAMQP_Subscribe shall fail if the transport handle parameter received is NULL.]
 TEST_FUNCTION(uAMQP_Subscribe_NULL_transport_fails)

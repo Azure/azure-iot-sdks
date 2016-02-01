@@ -1212,10 +1212,11 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_GetSendStatus(TRANSPORT_HANDLE 
 {
     IOTHUB_CLIENT_RESULT result;
 
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_041: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.]
     if (handle == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("Invalid handle to IoTHubClient AMQP transport instance.\r\n");
+        LogError("Invalid handle to IoTHubClient uAMQP transport instance.\r\n");
     }
     else if (iotHubClientStatus == NULL)
     {
@@ -1224,11 +1225,20 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_GetSendStatus(TRANSPORT_HANDLE 
     }
     else
     {
-		LogError("IoTHubClient uAMQP transport GetSendStatus is NOT IMPLEMENTED YET.\r\n");
+		UAMQP_TRANSPORT_INSTANCE* transport_state = (UAMQP_TRANSPORT_INSTANCE*)handle;
 
-		UAMQP_TRANSPORT_INSTANCE* transportState = (UAMQP_TRANSPORT_INSTANCE*)handle;
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_043: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.]
+		if (!DList_IsListEmpty(transport_state->waitingToSend) || !DList_IsListEmpty(&(transport_state->inProgress)))
+		{
+			*iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_042: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.] 
+		else
+		{
+			*iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
+		}
 
-        result = IOTHUB_CLIENT_ERROR;
+		result = IOTHUB_CLIENT_OK;
     }
 
     return result;
