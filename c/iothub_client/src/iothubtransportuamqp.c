@@ -218,8 +218,8 @@ static void rollEventsBackToWaitList(UAMQP_TRANSPORT_INSTANCE* transport_state)
 	while (entry != NULL && entry != &transport_state->inProgress)
 	{
 		EVENT_TRACKER* event_tracker = containingRecord(entry, EVENT_TRACKER, entry);
-		rollEventBackToWaitList(event_tracker, transport_state);
 		entry = entry->Blink;
+		rollEventBackToWaitList(event_tracker, transport_state);
 	}
 	
 	DList_InitializeListHead(&transport_state->inProgress);
@@ -528,8 +528,7 @@ static int verifyAuthenticationTimeout(UAMQP_TRANSPORT_INSTANCE* transport_state
 {
 	int result = RESULT_OK;
 
-	if (transport_state->cbs_state == CBS_STATE_AUTH_IN_PROGRESS &&
-		(getSecondsSinceEpoch() - transport_state->current_sas_token_create_time) * 1000 >= transport_state->cbs_request_timeout)
+	if ((getSecondsSinceEpoch() - transport_state->current_sas_token_create_time) * 1000 >= transport_state->cbs_request_timeout)
 	{
 		result = RESULT_TIMEOUT;
 	}
@@ -1117,7 +1116,8 @@ static void IoTHubTransportuAMQP_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_L
 			trigger_connection_retry = true;
 		}
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_084: [IoTHubTransportuAMQP_DoWork shall wait for ‘cbs_request_timeout’ milliseconds for the cbs_put_token() to complete before failing due to timeout]
-		else if (verifyAuthenticationTimeout(transport_state) == RESULT_TIMEOUT)
+		else if (transport_state->cbs_state == CBS_STATE_AUTH_IN_PROGRESS &&  
+				verifyAuthenticationTimeout(transport_state) == RESULT_TIMEOUT)
 		{
 			LogError("uAMQP transport authentication timed out.\r\n");
 			trigger_connection_retry = true;
