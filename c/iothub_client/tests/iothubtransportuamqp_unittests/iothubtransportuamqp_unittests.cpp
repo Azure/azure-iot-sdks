@@ -952,40 +952,6 @@ void setExpectedCleanupCallsForTransportCreateUpTo(CIoTHubTransportuAMQPMocks& m
 	}
 }
 
-void setExpectedCallsForTransportDestroy(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, bool isConnectionInitialized, bool destroyIOtransport, size_t numberOfEventsInProgress)
-{
-	if (isConnectionInitialized)
-	{
-		EXPECTED_CALL(mocks, messagesender_destroy(0));
-		EXPECTED_CALL(mocks, messagereceiver_destroy(0));
-		EXPECTED_CALL(mocks, cbs_destroy(0));
-		EXPECTED_CALL(mocks, session_destroy(0));
-		EXPECTED_CALL(mocks, connection_destroy(0));
-		EXPECTED_CALL(mocks, xio_destroy(0));
-		EXPECTED_CALL(mocks, saslmechanism_destroy(0));
-	}
-
-	if (destroyIOtransport)
-	{
-		EXPECTED_CALL(mocks, xio_destroy(0));
-	}
-	
-	EXPECTED_CALL(mocks, STRING_delete(0));
-	EXPECTED_CALL(mocks, STRING_delete(0));
-	EXPECTED_CALL(mocks, STRING_delete(0));
-	EXPECTED_CALL(mocks, STRING_delete(0));
-	EXPECTED_CALL(mocks, STRING_delete(0));
-	
-	while (numberOfEventsInProgress-- > 0)
-	{
-		EXPECTED_CALL(mocks, DList_RemoveEntryList(0));
-		EXPECTED_CALL(mocks, DList_InitializeListHead(0));
-		EXPECTED_CALL(mocks, DList_InsertTailList(0, 0));
-	}
-
-	EXPECTED_CALL(mocks, DList_InitializeListHead(0));
-}
-
 void setExpectedCallsForSASTokenExpiryCheck(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
 {
 	STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
@@ -1095,7 +1061,42 @@ void setExpectedCallsForHandleEventSendTimeout(CIoTHubTransportuAMQPMocks& mocks
 
 void setExpectedCallsForRollEventsBackToWaitList(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
 {
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL));
+}
+
+void setExpectedCallsForTransportDestroy(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, bool isConnectionInitialized, bool destroyIOtransport, size_t numberOfEventsInProgress)
+{
+	if (isConnectionInitialized)
+	{
+		EXPECTED_CALL(mocks, messagesender_destroy(0));
+		EXPECTED_CALL(mocks, messagereceiver_destroy(0));
+		EXPECTED_CALL(mocks, cbs_destroy(0));
+		EXPECTED_CALL(mocks, session_destroy(0));
+		EXPECTED_CALL(mocks, connection_destroy(0));
+		EXPECTED_CALL(mocks, xio_destroy(0));
+		EXPECTED_CALL(mocks, saslmechanism_destroy(0));
+	}
+
+	if (destroyIOtransport)
+	{
+		EXPECTED_CALL(mocks, xio_destroy(0));
+	}
+
+	EXPECTED_CALL(mocks, STRING_delete(0));
+	EXPECTED_CALL(mocks, STRING_delete(0));
+	EXPECTED_CALL(mocks, STRING_delete(0));
+	EXPECTED_CALL(mocks, STRING_delete(0));
+	EXPECTED_CALL(mocks, STRING_delete(0));
+
+	while (numberOfEventsInProgress-- > 0)
+	{
+		EXPECTED_CALL(mocks, DList_RemoveEntryList(0));
+		EXPECTED_CALL(mocks, DList_InitializeListHead(0));
+		EXPECTED_CALL(mocks, DList_InsertTailList(0, 0));
+	}
+
+	setExpectedCallsForRollEventsBackToWaitList(mocks, config);
+
+	EXPECTED_CALL(mocks, gballoc_free(NULL));
 }
 
 void setExpectedCallsForTransportDoWorkUpTo(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, int maximumStepToSet, int messageReceiverCreation)
