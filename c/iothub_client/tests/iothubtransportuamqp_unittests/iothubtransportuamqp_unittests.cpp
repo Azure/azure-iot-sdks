@@ -1203,7 +1203,7 @@ void test_IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK(IOTHUB_CLIENT_CONFIRMATION_R
 
 	if (userContextCallback != NULL)
 	{
-		test_sum_of_event_confirmation_callback_contexts += (int)userContextCallback;
+		test_sum_of_event_confirmation_callback_contexts += *((int*)userContextCallback);
 	}
 }
 
