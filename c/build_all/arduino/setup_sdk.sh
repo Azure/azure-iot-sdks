@@ -3,11 +3,15 @@
 set -e
 
 sdk_repo="http://download.linino.org/linino-utils/OpenWrt-SDK-ar71xx-for-linux-x86_64-gcc-4.6-linaro_uClibc-0.9.33.2-32bit.tar.bz2"
+sdk_repo_x86="http://download.linino.org/linino-utils/OpenWrt-SDK-ar71xx-for-linux-x86_64-gcc-4.6-linaro_uClibc-0.9.33.2-32bit.tar.bz2"
+sdk_repo_x64="http://download.linino.org/linino-utils/OpenWrt-SDK-ar71xx-for-linux-x86_64-gcc-4.6-linaro_uClibc-0.9.33.2-64bit.tar.bz2"
 install_root="$HOME"
 openwrt_folder="openwrt"
 openwrt_sdk_folder="sdk"
 working_dir=$PWD
 package_dir="package"
+
+MACHINE_TYPE=`uname -m`
 
 usage ()
 {
@@ -29,7 +33,7 @@ process_args ()
           install_root="$2"
         elif [ "$1" == "-s" ] || [ "$1" == "--sdk" ]
         then
-          sdk_rep="$2"
+          sdk_repo="$2"
         else
           usage
         fi
@@ -74,7 +78,15 @@ download_sdk()
     rm -r -f $openwrt_sdk_folder
   fi
 
-  wget $sdk_repo -O openwrtsdk.tar.bz2
+  if [ "$1" == "-s" ] || [ "$1" == "--sdk" ]
+  then
+    wget $sdk_repo -O openwrtsdk.tar.bz2
+  elif [ ${MACHINE_TYPE} == 'x86_64' ]
+  then
+    wget $sdk_repo_x64 -O openwrtsdk.tar.bz2
+  else
+    wget $sdk_repo_x86 -O openwrtsdk.tar.bz2
+  fi
 
   tar xvf openwrtsdk.tar.bz2
 
