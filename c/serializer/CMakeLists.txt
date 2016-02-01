@@ -7,7 +7,8 @@ cmake_minimum_required(VERSION 2.8.11)
 option(use_floats "if use_floats is used, serializer will use floats in its typesystem" ON)
 
 if(${use_floats})
-	add_definitions(-DUSE_FLOATS)
+else()
+	add_definitions(-DNO_FLOATS)
 endif()
 
 compileAsC99()
