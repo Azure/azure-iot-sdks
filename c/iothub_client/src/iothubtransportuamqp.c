@@ -87,6 +87,8 @@ typedef struct UAMQP_TRANSPORT_STATE_TAG
 	size_t connection_timeout;
 	// A callback passed by the app layer to provide the I/O transport instance (e.g., TLS, WebSockets, etc).
 	IO_TRANSPORT_PROVIDER_CALLBACK io_transport_provider_callback;
+	// Saved reference to the IoTHub LL Client.
+	IOTHUB_CLIENT_LL_HANDLE iothub_client_handle;
 	
 	// Instance obtained using io_transport_provider_callback.
 	XIO_HANDLE tls_io;
@@ -127,6 +129,7 @@ typedef struct UAMQP_TRANSPORT_STATE_TAG
 // This structure is used to track an event being sent and the time it was sent.
 typedef struct EVENT_TRACKER_TAG
 {
+	IOTHUB_CLIENT_LL_HANDLE iothub_client_handle;
 	IOTHUB_MESSAGE_LIST* message;
 	time_t time_sent;
 	DLIST_ENTRY entry;
@@ -164,6 +167,7 @@ static EVENT_TRACKER* trackEvent(IOTHUB_MESSAGE_LIST* message, UAMQP_TRANSPORT_I
 
 	if ((event_tracker = (EVENT_TRACKER*)malloc(sizeof(EVENT_TRACKER))) != NULL)
 	{
+		event_tracker->iothub_client_handle = transport_state->iothub_client_handle;
 		event_tracker->message = message;
 		event_tracker->time_sent = get_time(NULL);
 		DList_InitializeListHead(&event_tracker->entry);
@@ -234,24 +238,21 @@ void on_message_send_complete(const void* context, MESSAGE_SEND_RESULT send_resu
 	{
 		EVENT_TRACKER* event_tracker = (EVENT_TRACKER*)context;
 
-		IOTHUB_CLIENT_CONFIRMATION_RESULT iot_hub_send_result;
+		IOTHUB_BATCHSTATE_RESULT iot_hub_send_result;
 
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_142: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_CLIENT_CONFIRMATION_OK if the result received is MESSAGE_SEND_OK] 
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_142: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_BATCHSTATE_SUCCESS if the result received is MESSAGE_SEND_OK] 
 		if (send_result == MESSAGE_SEND_OK)
 		{
-			iot_hub_send_result = IOTHUB_CLIENT_CONFIRMATION_OK;
+			iot_hub_send_result = IOTHUB_BATCHSTATE_SUCCESS;
 		}
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_143: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_CLIENT_CONFIRMATION_ERROR if the result received is MESSAGE_SEND_ERROR]
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_143: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_BATCHSTATE_FAILED if the result received is MESSAGE_SEND_ERROR]
 		else if (send_result == MESSAGE_SEND_ERROR)
 		{
-			iot_hub_send_result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
+			iot_hub_send_result = IOTHUB_BATCHSTATE_FAILED;
 		}
 
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_102: [The callback ‘on_message_send_complete’ shall invoke the upper layer callback for message received if provided] 
-		if (event_tracker->message->callback != NULL)
-		{
-			event_tracker->message->callback(iot_hub_send_result, event_tracker->message->context);
-		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_102: [The callback ‘on_message_send_complete’ shall invoke the upper layer IoTHubClient_LL_SendComplete() passing the client handle, message received and batch state result] 
+		IoTHubClient_LL_SendComplete(event_tracker->iothub_client_handle, &event_tracker->message->entry, iot_hub_send_result);
 
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_100: [The callback ‘on_message_send_complete’ shall remove the target message from the in-progress list after the upper layer callback] 
 		if (isEventInInProgressList(event_tracker))
@@ -943,6 +944,7 @@ static TRANSPORT_HANDLE IoTHubTransportuAMQP_Create(const IOTHUBTRANSPORT_CONFIG
 			transport_state->connection = NULL;
 			transport_state->connection_state = AMQP_MANAGEMENT_STATE_IDLE;
 			transport_state->connection_establish_time = 0;
+			transport_state->iothub_client_handle = NULL;
 			transport_state->receive_messages = false;
 			transport_state->message_receiver = NULL;
 			transport_state->message_sender = NULL;
@@ -1098,6 +1100,9 @@ static void IoTHubTransportuAMQP_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_L
 	{
 		bool trigger_connection_retry = false;
 		UAMQP_TRANSPORT_INSTANCE* transport_state = (UAMQP_TRANSPORT_INSTANCE*)handle;
+
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_147: [IoTHubTransportuAMQP_DoWork shall save a reference to the client handle in transport_state->iothub_client_handle]
+		transport_state->iothub_client_handle = iotHubClientHandle;
 
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_055: [If the transport handle has a NULL connection, IoTHubTransportuAMQP_DoWork shall instantiate and initialize the uAMQP components and establish the connection] 
 		if (transport_state->connection == NULL &&
