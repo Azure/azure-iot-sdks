@@ -35,12 +35,12 @@ public class MqttIotHubConnection implements MqttCallback
     private String publishTopic;
     private String subscribeTopic;
     private MqttConnectOptions connectionOptions = new MqttConnectOptions();
-
+    private String iotHubUserName;
 
     //mqtt connection options
     private static final int keepAliveInterval = 20;
     private static final int mqttVersion = 4;
-    private static final boolean setCleanSession = true;
+    private static final boolean setCleanSession = false;
     private static final int qos = 1;
 
     //string constants
@@ -118,9 +118,9 @@ public class MqttIotHubConnection implements MqttCallback
                 asyncClient.setCallback(this);
 
                 String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion, "UTF-8");
-                String userName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + clientIdentifier;
+                this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + clientIdentifier;
 
-                this.updateConnectionOptions(userName, sasToken.toString());
+                this.updateConnectionOptions(this.iotHubUserName, sasToken.toString());
                 this.connect(connectionOptions);
 
                 this.subscribe();
@@ -258,23 +258,23 @@ public class MqttIotHubConnection implements MqttCallback
     {
         synchronized (MQTT_CONNECTION_LOCK)
         {
+            // The connection was closed by calling the close() method, meaning we don't want to re-establish it.
+            if (this.asyncClient == null)
+            {
+                return;
+            }
+
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_016: [The function shall attempt to reconnect to the IoTHub
             // in a loop with an exponential backoff until it succeeds]
+            this.state = ConnectionState.CLOSED;
             int currentReconnectionAttempt = 0;
-            boolean connected = false;
-            while (!connected)
+            while (this.state == ConnectionState.CLOSED)
             {
                 try
                 {
-                    // Codes_SRS_MQTTIOTHUBCONNECTION_15_17: [The function shall generate a new sas token to be
-                    // used for connecting to the mqtt broker.]
-                    IotHubSasToken sasToken = new IotHubSasToken(this.config);
-
-                    this.updateConnectionOptions(this.config.getDeviceId(), sasToken.toString());
-                    this.connect(this.connectionOptions);
-                    connected = true;
+                    this.open();
                 }
-                catch (MqttException connectionException)
+                catch (IOException e)
                 {
                     try
                     {
@@ -282,7 +282,7 @@ public class MqttIotHubConnection implements MqttCallback
 
                         // Codes_SRS_MQTTIOTHUBCONNECTION_15_018: [The maximum wait interval
                         // until a reconnect is attempted shall be 60 seconds.]
-                        Thread.sleep(generateSleepInterval(currentReconnectionAttempt));
+                        Thread.sleep(generateSleepInterval(currentReconnectionAttempt) * 1000);
                     }
                     catch (InterruptedException exception)
                     {

@@ -71,6 +71,8 @@ void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE
 **SRS_IOTHUB_MQTT_TRANSPORT_07_028: [**IoTHubTransportMqtt_DoWork shall retrieve the payload message from the messageHandle parameter.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_029: [**IoTHubTransportMqtt_DoWork shall create a MQTT_MESSAGE_HANDLE and pass this to a call to  mqtt_client_publish.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_030: [**IoTHubTransportMqtt_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_033: [**IoTHubTransportMqtt_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_034: [**If IoTHubTransportMqtt_DoWork has previously resent the message two times then it shall fail the message**]**  
 
 ##IoTHubTransportMqtt_GetSendStatus
 ```

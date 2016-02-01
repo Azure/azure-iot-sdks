@@ -16,7 +16,7 @@ The following document describes the process of connecting an Arduino Yun system
 
   - Computer with a Git client installed so that you can access the azure-iot-sdks code on GitHub.
   - Arduino Yun board.
-  - Debian x86
+  - Ubuntu x86 machine (for cross compiling)
 
 <a name="beforebegin"/>
 ## Before you begin
@@ -44,28 +44,26 @@ apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip
 - Navigate to the folder **c/build_all/arduino** in your local copy of the repository.
 - Run the `./setup.sh` script to install the OpenWRT SDK and prerequisites. By default, the SDK will be installed at **~/openwrt/sdk**
 - (Optional) Enter 'Y' to build the Azure IoT SDK.
+- When prompted to build proton, enter 'N'
 
-This script builds the **iothub_client** and **serializer** libraries and their associated samples.
-
-Note: you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
 
  <a name="build"/>
 ## Build the sample
 
-- Open the file **c/serializer/samples/simplesample_http/simplesample_http.c** in a text editor.
+- Open the file **c/serializer/samples/simplesample_http/simplesample_http.c** in a text editor (for example nano)
 - Locate the following code in the file:
 ```
 static const char* connectionString = "[device connection string]";
 ```
 - Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
 - The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
-- Run the `build.sh` script in the **c/build_all/arduino** directory.   
+- Run the `./build.sh` script in the **c/build_all/arduino** directory.   
 
 <a name="deploy"/>
 ## Deploy the sample
 
 - Open a shell and navigate to the installed OpenWRT SDK folder. By default, it is **~/openwrt/sdk**.
-- Transfer the package.
+- Transfer the sample executable.
 
 OpenWRT Yun Image:
 
@@ -83,7 +81,7 @@ Note that the uClibc version might be different on your setup and you might need
 
 ## Make sure the certificates are installed
 
-Install the ca-certificates package like below:
+On the Arduino Yun device, install the ca-certificates package like below:
 
 ```
 wget https://downloads.openwrt.org/snapshots/trunk/ar71xx/generic/packages/base/ca-certificates_20151214_ar71xx.ipk --no-check-certificate
@@ -95,12 +93,11 @@ You might get an error message at this step(return code 127), but the certificat
 <a name="run"/>
 ## Run the sample
 
-The following instructions assumes the device is flashed with OpenWRT Yun. If you are using LininoIO, substitute `arduino` with `linino` and use the default password `doghunter`.
-
-- Open shell and enter `ssh root@arduino.local` Enter the device password. By default it is, `arduino` for OpenWRT Yun Image or `doghunter` for LininoIO.
 - Run the sample **/tmp/simplesample_http**
 - Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_http** application.
 - See "Send cloud-to-device messages" in the document [How to use Device Explorer for IoT Hub devices][device-explorer] for instructions on sending messages with the **DeviceExplorer** utility.
+
+Note: To send a command to the device from iothub-explorer or DeviceExplorer, the command should be like {"Name":"TurnFanOff", "Parameters":{}}
 
 [setup-devbox-linux]: devbox_setup.md
 [device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md

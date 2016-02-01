@@ -111,7 +111,7 @@ public class ServiceClient
      * @param message The message for the device
      * @throws IOException This exception is thrown if the AmqpSender object is not initialized
      */
-    public void send(String deviceId, String message) throws IOException, IOException
+    public void send(String deviceId, Message message) throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_012: [The function shall throw IOException if the member AMQP sender object has not been initialized]
         if (this.amqpMessageSender == null)
@@ -173,7 +173,7 @@ public class ServiceClient
      * @param message The message for the device
      * @return The future object for the requested operation
      */
-    public CompletableFuture<Void> sendAsync(String deviceId, String message)
+    public CompletableFuture<Void> sendAsync(String deviceId, Message message)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_016: [The function shall create an async wrapper around the send() function call]
         final CompletableFuture<Void> future = new CompletableFuture<>();

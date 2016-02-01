@@ -21,8 +21,8 @@ public class Message
 {
     /**
     * [Required for two way requests] Used to correlate two-way communication.
-    * Format: A case-sensitive string ( up to 128 char long) of ASCII 7-bit alphanumeric chars
-    * + {'-', ':', '/', '\', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+    * Format: A case-sensitive string (up to 128 char long) of ASCII 7-bit alphanumeric chars
+    * plus {'-', ':', '/', '\', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
     * Non-alphanumeric characters are from URN RFC.
     **/
     private String messageId;
@@ -60,6 +60,11 @@ public class Message
     public Date getExpiryTimeUtc()
     {
         return expiryTimeUtc;
+    }
+
+    public void setExpiryTimeUtc(Date expiryTimeUtc)
+    {
+        this.expiryTimeUtc = expiryTimeUtc;
     }
 
     /**
@@ -199,7 +204,7 @@ public class Message
      */
     public Message(String string) throws UnsupportedEncodingException
     {
-        this.body = Base64.decodeBase64(string.getBytes("UTF-8"));
+        this.body = string.getBytes(StandardCharsets.UTF_8);
     }
 
     /**
@@ -220,5 +225,15 @@ public class Message
     public byte[] getBytes()
     {
         return this.body;
+    }
+
+    public Map<String, String> getProperties()
+    {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties)
+    {
+        this.properties = properties;
     }
 }
