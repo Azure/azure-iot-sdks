@@ -172,6 +172,11 @@ std::ostream& operator<<(std::ostream& left, const BINARY_DATA bindata)
 #define TEST_BINARY_BUFFER (const unsigned char*)0x210
 #define TEST_BINARY_BUFFER_SIZE 56
 #define TEST_EVENT_MESSAGE_HANDLE (MESSAGE_HANDLE)0x220
+#define TEST_OPTION_SASTOKEN_LIFETIME "sas_token_lifetime"
+#define TEST_OPTION_SASTOKEN_REFRESH_TIME "sas_token_refresh_time"
+#define TEST_OPTION_CBS_REQUEST_TIMEOUT "cbs_request_timeout"
+#define TEST_OPTION_MESSAGE_SEND_TIMEOUT "message_send_timeout"
+
 
 time_t test_current_time;
 XIO_HANDLE test_TLS_io_transport = NULL;
@@ -3120,6 +3125,115 @@ TEST_FUNCTION(uAMQP_Unsubscribe_NULL_transport_fails)
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_044: [If handle parameter is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
+TEST_FUNCTION(uAMQP_SetOption_NULL_transport_fails)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(NULL, TEST_OPTION_SASTOKEN_LIFETIME, TEST_RANDOM_CHAR_SEQ);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_045: [If parameter optionName is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] 
+TEST_FUNCTION(uAMQP_SetOption_NULL_option_fails)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(transport, NULL, TEST_RANDOM_CHAR_SEQ);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_046: [If parameter value is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
+TEST_FUNCTION(uAMQP_SetOption_NULL_value_fails)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(transport, TEST_OPTION_SASTOKEN_LIFETIME, NULL);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_047: [If optionName is not an option supported then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
+TEST_FUNCTION(uAMQP_SetOption_invalid_option_fails)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(transport, "some_invalid_option", TEST_RANDOM_CHAR_SEQ);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);

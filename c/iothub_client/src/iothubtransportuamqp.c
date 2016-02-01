@@ -1246,10 +1246,11 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_GetSendStatus(TRANSPORT_HANDLE 
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_SetOption(TRANSPORT_HANDLE handle, const char* option, const void* value)
 {
-	LogError("IoTHubClient uAMQP transport SetOption is NOT IMPLEMENTED YET.\r\n");
-
 	IOTHUB_CLIENT_RESULT result;
 
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_044: [If handle parameter is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_045: [If parameter optionName is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] 
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_046: [If parameter value is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
 	if (
 		(handle == NULL) ||
 		(option == NULL) ||
@@ -1257,19 +1258,46 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_SetOption(TRANSPORT_HANDLE hand
 		)
 	{
 		result = IOTHUB_CLIENT_INVALID_ARG;
-		LogError("invalid parameter (NULL) passed to clientTransportuAMQP_SetOption\r\n");
+		LogError("Invalid parameter (NULL) passed to uAMQP transport SetOption()\r\n");
 	}
 	else
 	{
+		UAMQP_TRANSPORT_INSTANCE* transport_state = (UAMQP_TRANSPORT_INSTANCE*)handle;
+
 		if (strcmp("TrustedCerts", option) == 0)
 		{
-			UAMQP_TRANSPORT_INSTANCE* transportState = (UAMQP_TRANSPORT_INSTANCE*)handle;
-
 			result = IOTHUB_CLIENT_ERROR;
+			LogError("Invalid option (TrustedCerts) passed to uAMQP transport SetOption() (not implemented)\r\n");
 		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_048: [IoTHubTransportuAMQP_SetOption shall save and apply the value if the option name is "sas_token_lifetime", returning IOTHUB_CLIENT_OK] 
+		else if (strcmp("sas_token_lifetime", option) == 0)
+		{
+			transport_state->sas_token_lifetime = (size_t)value;
+			result = IOTHUB_CLIENT_OK;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_049: [IoTHubTransportuAMQP_SetOption shall save and apply the value if the option name is "sas_token_refresh_time", returning IOTHUB_CLIENT_OK] 
+		else if (strcmp("sas_token_refresh_time", option) == 0)
+		{
+			transport_state->sas_token_refresh_time = (size_t)value;
+			result = IOTHUB_CLIENT_OK;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_148: [IoTHubTransportuAMQP_SetOption shall save and apply the value if the option name is "cbs_request_timeout", returning IOTHUB_CLIENT_OK] 
+		else if (strcmp("cbs_request_timeout", option) == 0)
+		{
+			transport_state->cbs_request_timeout = (size_t)value;
+			result = IOTHUB_CLIENT_OK;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_149: [IoTHubTransportuAMQP_SetOption shall save and apply the value if the option name is "message_send_timeout", returning IOTHUB_CLIENT_OK]
+		else if (strcmp("message_send_timeout", option) == 0)
+		{
+			transport_state->message_send_timeout = (size_t)value;
+			result = IOTHUB_CLIENT_OK;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_047: [If optionName is not an option supported then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] 
 		else
 		{
 			result = IOTHUB_CLIENT_INVALID_ARG;
+			LogError("Invalid option (%s) passed to uAMQP transport SetOption()\r\n", option);
 		}
 	}
 
