@@ -9,7 +9,8 @@
 #include "iothub_message.h"
 #include "threadapi.h"
 #include "crt_abstractions.h"
-#include "iothubtransportuamqp.h"
+#include "iothubtransportuamqp_wstls.h"
+
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
@@ -120,7 +121,7 @@ void iothub_client_sample_uamqp_run(void)
 	{
 		(void)printf("ERROR: failed initializing the platform.\r\n");
 	}
-    else if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, uAMQP_Protocol)) == NULL)
+    else if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, uAMQP_Protocol_over_WebSocketsTls)) == NULL)
     {
         (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
     }

@@ -65,6 +65,8 @@ typedef struct UAMQP_TRANSPORT_STATE_TAG
 	STRING_HANDLE iotHubHostFqdn;
 	// AMQP port of the IoT Hub.
 	int iotHubPort;
+	// Certificates to be used by the TLS I/O.
+	char* trusted_certificates;
 	// Key associated to the device to be used.
 	STRING_HANDLE deviceKey;
 	// Address to which the transport will connect to and send events.
@@ -235,19 +237,22 @@ void on_message_send_complete(const void* context, MESSAGE_SEND_RESULT send_resu
 
 		IOTHUB_BATCHSTATE_RESULT iot_hub_send_result;
 
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_142: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_BATCHSTATE_SUCCESS if the result received is MESSAGE_SEND_OK] 
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_142: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_CLIENT_CONFIRMATION_OK if the result received is MESSAGE_SEND_OK] 
 		if (send_result == MESSAGE_SEND_OK)
 		{
-			iot_hub_send_result = IOTHUB_BATCHSTATE_SUCCESS;
+			iot_hub_send_result = IOTHUB_CLIENT_CONFIRMATION_OK;
 		}
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_143: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_BATCHSTATE_FAILED if the result received is MESSAGE_SEND_ERROR]
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_143: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_CLIENT_CONFIRMATION_ERROR if the result received is MESSAGE_SEND_ERROR]
 		else if (send_result == MESSAGE_SEND_ERROR)
 		{
-			iot_hub_send_result = IOTHUB_BATCHSTATE_FAILED;
+			iot_hub_send_result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
 		}
 
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_102: [The callback ‘on_message_send_complete’ shall invoke the upper layer IoTHubClient_LL_SendComplete() passing the client handle, message received and batch state result] 
-		IoTHubClient_LL_SendComplete(event_tracker->iothub_client_handle, &event_tracker->message->entry, iot_hub_send_result);
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_102: [The callback ‘on_message_send_complete’ shall invoke the upper layer callback for message received if provided] 
+		if (event_tracker->message->callback != NULL)
+		{
+			event_tracker->message->callback(iot_hub_send_result, event_tracker->message->context);
+		}
 
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_100: [The callback ‘on_message_send_complete’ shall remove the target message from the in-progress list after the upper layer callback] 
 		if (isEventInInProgressList(event_tracker))
@@ -328,7 +333,7 @@ AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
 	return result;
 }
 
-XIO_HANDLE default_io_transport_provider(const char* fqdn, int port)
+XIO_HANDLE default_io_transport_provider(const char* fqdn, int port, const char* certificates)
 {
 	const IO_INTERFACE_DESCRIPTION* io_interface_description;
 
@@ -412,7 +417,7 @@ static int establishConnection(UAMQP_TRANSPORT_INSTANCE* transport_state)
 
 	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_110: [IoTHubTransportuAMQP_DoWork shall create the TLS IO using transport_state->io_transport_provider callback function] 
 	if (transport_state->tls_io == NULL &&
-		(transport_state->tls_io = transport_state->io_transport_provider_callback(STRING_c_str(transport_state->iotHubHostFqdn), transport_state->iotHubPort)) == NULL)
+		(transport_state->tls_io = transport_state->io_transport_provider_callback(STRING_c_str(transport_state->iotHubHostFqdn), transport_state->iotHubPort, transport_state->trusted_certificates)) == NULL)
 	{
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_136: [If transport_state->io_transport_provider_callback fails, IoTHubTransportuAMQP_DoWork shall fail and return immediately]
 		result = RESULT_FAILURE;
@@ -912,6 +917,7 @@ static TRANSPORT_HANDLE IoTHubTransportuAMQP_Create(const IOTHUBTRANSPORT_CONFIG
 		{
 			transport_state->iotHubHostFqdn = NULL;
 			transport_state->iotHubPort = DEFAULT_IOTHUB_AMQP_PORT;
+			transport_state->trusted_certificates = NULL;
 			transport_state->deviceKey = NULL;
 			transport_state->devicesPath = NULL;
 			transport_state->messageReceiveAddress = NULL;
@@ -1248,10 +1254,10 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_SetOption(TRANSPORT_HANDLE hand
 	{
 		UAMQP_TRANSPORT_INSTANCE* transport_state = (UAMQP_TRANSPORT_INSTANCE*)handle;
 
-		if (strcmp("trusted_certs", option) == 0)
+		if (strcmp("trusted_certificates", option) == 0)
 		{
-			result = IOTHUB_CLIENT_ERROR;
-			LogError("Invalid option (trusted_certs) passed to uAMQP transport SetOption() (not implemented)\r\n");
+			transport_state->trusted_certificates = (char*)value;
+			result = IOTHUB_CLIENT_OK;
 		}
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_048: [IoTHubTransportuAMQP_SetOption shall save and apply the value if the option name is "sas_token_lifetime", returning IOTHUB_CLIENT_OK] 
 		else if (strcmp("sas_token_lifetime", option) == 0)

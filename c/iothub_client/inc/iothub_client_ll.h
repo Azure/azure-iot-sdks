@@ -87,7 +87,7 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
 typedef void(*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
 typedef IOTHUBMESSAGE_DISPOSITION_RESULT (*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
 typedef const void*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
-typedef const XIO_HANDLE (*IO_TRANSPORT_PROVIDER_CALLBACK)(const char* fqdn, int port);
+typedef const XIO_HANDLE (*IO_TRANSPORT_PROVIDER_CALLBACK)(const char* fqdn, int port, const char* certificates);
 
 /** @brief	This struct captures IoTHub client configuration. */
 typedef struct IOTHUB_CLIENT_CONFIG_TAG

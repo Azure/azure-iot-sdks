@@ -54,15 +54,27 @@ if(${use_amqp})
 endif()
 
 if(${use_uamqp})
-	set(iothub_client_uamqp_transport_c_files
-		${iothub_client_ll_transport_c_files}
-		./src/iothubtransportuamqp.c
-	)
-
-	set(iothub_client_uamqp_transport_h_files
-		${iothub_client_ll_transport_h_files}
-		./inc/iothubtransportuamqp.h
-	)
+	if (${use_wsio})
+		set(iothub_client_uamqp_transport_c_files
+			${iothub_client_ll_transport_c_files}
+			./src/iothubtransportuamqp_wstls.c
+		)
+		
+		set(iothub_client_uamqp_transport_h_files
+			${iothub_client_ll_transport_h_files}
+			./inc/iothubtransportuamqp_wstls.h
+		)
+	else()
+		set(iothub_client_uamqp_transport_c_files
+			${iothub_client_ll_transport_c_files}
+			./src/iothubtransportuamqp.c
+		)
+		
+		set(iothub_client_uamqp_transport_h_files
+			${iothub_client_ll_transport_h_files}
+			./inc/iothubtransportuamqp.h
+		)
+	endif()
 endif()
 
 if(${use_mqtt})
