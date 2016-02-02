@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Text;           // Used for StringBuilder class
-using System.IO;             // Used for SteamWriter class.
+using System.IO;             // Used for TextWriter and StreamWriter class.
 using System;                // Used for Exception class.
 using System.Windows.Forms;  // Used for MessageBox class
 
@@ -205,7 +205,7 @@ namespace TraceabilityTool
         {
             try
             {
-                StreamWriter outfile = new StreamWriter(outputFile);
+                TextWriter outfile = new StreamWriter(outputFile);
                 {
                     outfile.Write(str);
                     outfile.Close();

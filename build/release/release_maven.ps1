@@ -39,10 +39,10 @@ function Is-Null
 
 function Release-Client
 {
-	param([string]$clientLocation)
+	param([string]$clientLocation, [string]$groupId, [string]$artifactId)
 	$clientDirectoryName = (split-path $clientLocation -leaf)
 	$jarsCopyLocation = (join-path (join-path $mavenArtifactsDir "$clientDirectoryName") "UnsignedJars")
-	
+
 	# Copy directory to temporary locatation
 	if(Test-Path -Path "$copyLocation\$clientDirectoryName"){
 		echo "Cleaning directory first"
@@ -50,46 +50,43 @@ function Release-Client
 	}
 	echo "Copy java client directory..."
 	Copy-Item $clientLocation $copyLocation -recurse
-	
+
 	$temporaryClient = (join-path $copyLocation $clientDirectoryName)
-	
+
 	# Copy license and third party notice files
 	$resourcesCopyLocation = "$temporaryClient\src\main\resources"
 	if(!(Test-Path -Path $resourcesCopyLocation)){
 		New-Item -ItemType directory -Path $resourcesCopyLocation
 	}
-	
+
 	echo "Copying license and third party notice files"
 	Copy-Item -Force "$cleanClassFilesLocation\LICENSE.txt" $resourcesCopyLocation
 	Copy-Item -Force "$cleanClassFilesLocation\thirdpartynotice.txt" $resourcesCopyLocation
-	
+
 	# Modify pom file
 	echo "Modifying pom"
 	$xmlPath = $temporaryClient + "\pom.xml"
 	$xmlStr = Get-Content $xmlPath
 	[xml]$xml = $xmlStr
 	$hasParent = Is-Null $xml.project.SelectSingleNode('parent')
-	
+
 	# Save attributes we will need
 	if($hasParent){
-		$groupId = $xml.project.parent.groupId
 		$version = $xml.project.parent.version
 	} else {
-		$groupId = $xml.project.groupId
 		$version = $xml.project.version
 	}
-	$artifactId = $xml.project.artifactId
 	$name = $xml.project.name
 	$pom_description = $xml.project.description
 	$dependencies = $xml.SelectNodes('/project/dependencies/dependency')
-	
+
 	# Remove "parent" node and "repositories" node
 	echo "Removing Parent and Repositories nodes"
     if($hasParent){
         $parentNode = $xml.project.SelectSingleNode('parent')
         $xml.project.RemoveChild($parentNode) | Out-Null
     }
-	
+
 	# Iterate over entire POM inserting nodes in appropriate places
 	$nodes = $xml.project.ChildNodes
 	$nodes | % {
@@ -137,10 +134,16 @@ function Release-Client
 			$xml.project.InsertAfter($element, $_) | Out-Null
 		}
 	}
-	
+
+	#forcible add group id and artifact id
+	$groupIdNode = $xml.project.SelectSingleNode('groupId')
+	$artifactIdNode = $xml.project.SelectSingleNode('artifactId')
+	$groupIdNode.InnerText = $groupId
+	$artifactIdNode.InnerText = $artifactId
+
 	$plugin_groupId = $xml.CreateElement('groupId')
 	$plugin_groupId.InnerText = $maven_plugin_groupId
-	
+
 	# Add the compiler plugin as the first plugin
 	$element = $xml.CreateElement('plugin')
 	$plugin_artifactId = $xml.CreateElement('artifactId')
@@ -157,7 +160,7 @@ function Release-Client
 	$element.AppendChild($plugin_artifactId) | Out-Null
 	$element.AppendChild($plugin_version) | Out-Null
 	$element.AppendChild($plugin_config) | Out-Null
-	
+
 	$xml.project.build.plugins.PrependChild($element) | Out-Null
 
 	$plugin_executions = $xml.CreateElement('executions')
@@ -171,16 +174,16 @@ function Release-Client
 	$plugin_execution.AppendChild($plugin_phase) | Out-Null
 	$plugin_execution.AppendChild($plugin_goals) | Out-Null
 	$plugin_executions.AppendChild($plugin_execution) | Out-Null
-	
+
 	$sources = $xml.CreateElement('plugin')
 	$plugin_artifactId = $xml.CreateElement('artifactId')
 	$plugin_artifactId.InnerText = $maven_source_plugin_artifactId
 	$sources.AppendChild($plugin_groupId.Clone()) | Out-Null
 	$sources.AppendChild($plugin_artifactId.Clone()) | Out-Null
 	$sources.AppendChild($plugin_executions.Clone()) | Out-Null
-	
+
 	$xml.project.build.plugins.AppendChild($sources) | Out-Null
-	
+
 	$javadoc = $xml.CreateElement('plugin')
 	$plugin_artifactId = $xml.CreateElement('artifactId')
 	$plugin_artifactId.InnerText = $maven_javadoc_plugin_artifactId
@@ -190,22 +193,22 @@ function Release-Client
 	$javadoc.AppendChild($plugin_artifactId.Clone()) | Out-Null
 	$javadoc.AppendChild($plugin_version.Clone()) | Out-Null
 	$javadoc.AppendChild($plugin_executions.Clone()) | Out-Null
-	
+
 	$xml.project.build.plugins.AppendChild($javadoc) | Out-Null
-	
+
 	$xml.Save($xmlPath)
 
 	# Attempt to build
 	Set-Location $temporaryClient
 	$cmd = "mvn clean install -DskipTests"
 	iex $cmd
-	
+
 	if($LastExitCode -ne 0){
 		Write-Host "Error building $clientDirectoryName. Exiting..." -f red;
 		Set-Location $currentLocation
 		exit $LastExitCode
 	}
-	
+
 	# Copy jars to main Maven directory
 	if(!(Test-Path -Path $jarsCopyLocation)){
 		New-Item -ItemType directory -Path $jarsCopyLocation
@@ -219,7 +222,7 @@ function Release-Client
 	# Modify publishing pom file and copy
 	# Copy parent pom first and then make changes
 	Copy-Item -Force "$cleanClassFilesLocation\parent.pom" (join-path (split-path $jarsCopyLocation) "$artifactId-$version.pom")
-	
+
 	$xmlPath = (join-path (split-path $jarsCopyLocation) "$artifactId-$version.pom")
 	$xmlStr = Get-Content $xmlPath
 	[xml]$xml = $xmlStr
@@ -230,7 +233,7 @@ function Release-Client
         $node = $xml.ImportNode($_, $TRUE)
 		$dependenciesNode.AppendChild($node) | Out-Null
 	}
-	
+
 	$xml.project.SelectSingleNode('groupId').InnerText = $groupId
 	$xml.project.SelectSingleNode('artifactId').InnerText = $artifactId
 	$xml.project.SelectSingleNode('version').InnerText = $version
@@ -244,8 +247,8 @@ if(!(Test-Path -Path $copyLocation)){
 	New-Item -ItemType directory -Path $copyLocation
 }
 
-Release-Client $javaDeviceClientLocation
-Release-Client $javaServiceClientLocation
+Release-Client $javaDeviceClientLocation "com.microsoft.azure.iothub-java-client" "iothub-java-device-client"
+Release-Client $javaServiceClientLocation "com.microsoft.azure.iothub-java-client" "iothub-java-service-client"
 
 Set-Location $currentLocation
 

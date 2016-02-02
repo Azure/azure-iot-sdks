@@ -61,79 +61,7 @@ nuget pack Microsoft.Azure.IoTHub.HttpTransport.nuspec
 nuget pack Microsoft.Azure.IoTHub.AmqpTransport.nuspec
 nuget pack Microsoft.Azure.IoTHub.IoTHubClient.nuspec
 
-rem because nuget cannot access absolute files given by environment variables
-mkdir paho_outputs
-cd paho_outputs
-mkdir Win32
-mkdir x64
-mkdir include
-cd Win32
-mkdir Release
-mkdir Debug
-cd ..
-cd x64
-mkdir Release
-mkdir Debug
-cd ..
-cd ..
-
-rem -- Copy Win32 Paho Files.
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.lib" paho_outputs\Win32\Debug
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.pdb" paho_outputs\Win32\Debug
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\Debug\paho-mqtt3cs.dll" paho_outputs\Win32\Debug
-
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\build\output\paho-mqtt3cs.lib" paho_outputs\Win32\Release
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\build\output\paho-mqtt3cs.dll" paho_outputs\Win32\Release
-
-rem -- Copy 64 bits Paho Files.
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\x64\Debug\paho-mqtt3cs.lib" paho_outputs\x64\Debug
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\x64\Debug\paho-mqtt3cs.pdb" paho_outputs\x64\Debug
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\x64\Debug\paho-mqtt3cs.dll" paho_outputs\x64\Debug
-
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\x64\Release\paho-mqtt3cs.lib" paho_outputs\x64\Release
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\Windows Build\paho-mqtt3cs\x64\Release\paho-mqtt3cs.dll" paho_outputs\x64\Release
-
-rem -- Copy Header Files
-copy "%PAHO_PATH%\org.eclipse.paho.mqtt.c\src\*.h" paho_outputs\include
-
-
-mkdir openssl_outputs
-cd openssl_outputs
-mkdir Win32
-cd Win32
-mkdir Debug
-cd ..
-mkdir x64
-cd x64
-mkdir Debug
-cd ..
-cd ..
-
-copy "%OpenSSLDir%\out32dllForNuget\libeay32.dll" openssl_outputs\Win32\Debug
-copy "%OpenSSLDir%\out32dllForNuget\libeay32.lib" openssl_outputs\Win32\Debug
-copy "%OpenSSLDir%\out32dllForNuget\libeay32.exp" openssl_outputs\Win32\Debug
-copy "%OpenSSLDir%\out32dllForNuget\libeay32.pdb" openssl_outputs\Win32\Debug
-copy "%OpenSSLDir%\out32dllForNuget\ssleay32.dll" openssl_outputs\Win32\Debug
-copy "%OpenSSLDir%\out32dllForNuget\ssleay32.lib" openssl_outputs\Win32\Debug
-copy "%OpenSSLDir%\out32dllForNuget\ssleay32.exp" openssl_outputs\Win32\Debug
-copy "%OpenSSLDir%\out32dllForNuget\ssleay32.pdb" openssl_outputs\Win32\Debug
-
-copy "%OpenSSLDir%\out64dll\libeay32.dll" openssl_outputs\x64\Debug
-copy "%OpenSSLDir%\out64dll\libeay32.lib" openssl_outputs\x64\Debug
-copy "%OpenSSLDir%\out64dll\libeay32.exp" openssl_outputs\x64\Debug
-copy "%OpenSSLDir%\out64dll\libeay32.pdb" openssl_outputs\x64\Debug
-copy "%OpenSSLDir%\out64dll\ssleay32.dll" openssl_outputs\x64\Debug
-copy "%OpenSSLDir%\out64dll\ssleay32.lib" openssl_outputs\x64\Debug
-copy "%OpenSSLDir%\out64dll\ssleay32.exp" openssl_outputs\x64\Debug
-copy "%OpenSSLDir%\out64dll\ssleay32.pdb" openssl_outputs\x64\Debug
-
-nuget pack Eclipse.Paho-C.paho-mqtt3cs.nuspec
-
-
 nuget pack Microsoft.Azure.IoTHub.MqttTransport.nuspec
-
-rmdir paho_outputs /S /Q
-rmdir openssl_outputs /S /Q
 
 nuget pack Microsoft.Azure.IoTHub.Serializer.nuspec
 

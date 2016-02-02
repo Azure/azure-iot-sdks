@@ -79,8 +79,8 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.2\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.ServiceModel" />
@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AmqpClientHelper.cs" />
+    <Compile Include="AmqpTransportSettings.cs" />
     <Compile Include="Common\ActionItem.cs" />
     <Compile Include="Common\Amqp\ClientWebSocketTransport.cs" />
     <Compile Include="Common\Amqp\WebSocketConstants.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="Common\HashCode.cs" />
     <Compile Include="HttpClientHelper.cs" />
     <Compile Include="HttpDeviceClient.cs" />
+    <Compile Include="Http1TransportSettings.cs" />
     <Compile Include="IAuthenticationMethod.cs" />
     <Compile Include="AuthenticationMethodFactory.cs" />
     <Compile Include="IAuthorizationHeaderProvider.cs" />
@@ -201,6 +203,7 @@
     <Compile Include="Common\Ticks.cs" />
     <Compile Include="Common\TimeoutHelper.cs" />
     <Compile Include="DotNetHelpers.cs" />
+    <Compile Include="ITransportSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="35MSSharedLib1024.snk" />

@@ -12,6 +12,7 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -34,13 +35,17 @@ public class MqttIotHubConnection implements MqttCallback
     private String publishTopic;
     private String subscribeTopic;
     private MqttConnectOptions connectionOptions = new MqttConnectOptions();
-
+    private String iotHubUserName;
 
     //mqtt connection options
     private static final int keepAliveInterval = 20;
     private static final int mqttVersion = 4;
-    private static final boolean setCleanSession = true;
+    private static final boolean setCleanSession = false;
     private static final int qos = 1;
+
+    //string constants
+    private static String sslPrefix = "ssl://";
+    private static String sslPortSuffix = ":8883";
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -79,13 +84,13 @@ public class MqttIotHubConnection implements MqttCallback
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_002: [The constructor shall create the publish and subscribe
             // topic for the specified device id.]
-            this.publishTopic = "devices/" + this.config.getDeviceId() + "/messages/events";
-            this.subscribeTopic = "devices/" + this.config.getDeviceId() + "/messages/devicebound";
+            this.publishTopic = "devices/" + this.config.getDeviceId() + "/messages/events/";
+            this.subscribeTopic = "devices/" + this.config.getDeviceId() + "/messages/devicebound/#";
         }
     }
 
     /**
-     * Establishes a connection for the device and IoT Hub/Protocol Gateway given in the client
+     * Establishes a connection for the device and IoT Hub given in the client
      * configuration. If the connection is already open, the function shall do
      * nothing.
      *
@@ -106,12 +111,16 @@ public class MqttIotHubConnection implements MqttCallback
             // with an IoT Hub using the provided host name, user name, device ID, and sas token.]
             try
             {
-                IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
+                IotHubSasToken sasToken = new IotHubSasToken(this.config);
 
-                this.asyncClient = new MqttAsyncClient(this.config.getGatewayHostName(), this.config.getDeviceId(), new MemoryPersistence());
+                this.asyncClient = new MqttAsyncClient(sslPrefix + this.config.getIotHubHostname() + sslPortSuffix,
+                        this.config.getDeviceId(), new MemoryPersistence());
                 asyncClient.setCallback(this);
 
-                this.updateConnectionOptions(this.config.getDeviceId(), sasToken.toString());
+                String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion, "UTF-8");
+                this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + clientIdentifier;
+
+                this.updateConnectionOptions(this.iotHubUserName, sasToken.toString());
                 this.connect(connectionOptions);
 
                 this.subscribe();
@@ -249,23 +258,23 @@ public class MqttIotHubConnection implements MqttCallback
     {
         synchronized (MQTT_CONNECTION_LOCK)
         {
+            // The connection was closed by calling the close() method, meaning we don't want to re-establish it.
+            if (this.asyncClient == null)
+            {
+                return;
+            }
+
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_016: [The function shall attempt to reconnect to the IoTHub
             // in a loop with an exponential backoff until it succeeds]
+            this.state = ConnectionState.CLOSED;
             int currentReconnectionAttempt = 0;
-            boolean connected = false;
-            while (!connected)
+            while (this.state == ConnectionState.CLOSED)
             {
                 try
                 {
-                    // Codes_SRS_MQTTIOTHUBCONNECTION_15_17: [The function shall generate a new sas token to be
-                    // used for connecting to the mqtt broker.]
-                    IotHubSasToken sasToken = TransportUtils.buildToken(this.config);
-
-                    this.updateConnectionOptions(this.config.getDeviceId(), sasToken.toString());
-                    this.connect(this.connectionOptions);
-                    connected = true;
+                    this.open();
                 }
-                catch (MqttException connectionException)
+                catch (IOException e)
                 {
                     try
                     {
@@ -273,7 +282,7 @@ public class MqttIotHubConnection implements MqttCallback
 
                         // Codes_SRS_MQTTIOTHUBCONNECTION_15_018: [The maximum wait interval
                         // until a reconnect is attempted shall be 60 seconds.]
-                        Thread.sleep(TransportUtils.generateSleepInterval(currentReconnectionAttempt));
+                        Thread.sleep(generateSleepInterval(currentReconnectionAttempt) * 1000);
                     }
                     catch (InterruptedException exception)
                     {
@@ -330,5 +339,28 @@ public class MqttIotHubConnection implements MqttCallback
         this.connectionOptions.setMqttVersion(mqttVersion);
         this.connectionOptions.setUserName(userName);
         this.connectionOptions.setPassword(userPassword.toCharArray());
+    }
+
+    private static byte[] sleepIntervals = {1, 2, 4, 8, 16, 32, 60};
+    /** Generates a reconnection time with an exponential backoff
+     * and a maximum value of 60 seconds.
+     *
+     * @param currentAttempt the number of attempts
+     * @return the sleep interval until the next attempt.
+     */
+    private byte generateSleepInterval(int currentAttempt)
+    {
+        if (currentAttempt > 7)
+        {
+            return sleepIntervals[6];
+        }
+        else if (currentAttempt > 0)
+        {
+            return sleepIntervals[currentAttempt - 1];
+        }
+        else
+        {
+            return 0;
+        }
     }
 }

@@ -492,7 +492,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
     TEST_FUNCTION(IoTClient_Http_MacroRecv_E2ETests)
     {
         IOTHUB_CLIENT_CONFIG iotHubConfig;
-        IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+        IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
         deviceModel* devModel;
 
         iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName();
@@ -565,7 +565,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
 
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig;
-        IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+        IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
         deviceModel* devModel;
         time_t beginOperation, nowTime;
 

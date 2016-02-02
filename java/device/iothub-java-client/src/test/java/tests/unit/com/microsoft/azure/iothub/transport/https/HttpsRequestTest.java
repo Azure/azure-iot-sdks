@@ -6,6 +6,7 @@ package tests.unit.com.microsoft.azure.iothub.transport.https;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
+import com.microsoft.azure.iothub.transport.TransportUtils;
 import com.microsoft.azure.iothub.transport.https.HttpsConnection;
 import com.microsoft.azure.iothub.transport.https.HttpsRequest;
 import mockit.*;
@@ -208,6 +209,8 @@ public class HttpsRequestTest
         final String value0 = "test-value0";
         final String field1 = "test-field1";
         final String value1 = "test-value1";
+        final String userAgent = "User-Agent";
+        final String userAgentValue = TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion;
         new MockUp<HttpsConnection>()
         {
             Map<String, String> testHeaderFields = new HashMap<>();
@@ -220,9 +223,10 @@ public class HttpsRequestTest
             @Mock
             public void connect() throws IOException
             {
-                assertThat(testHeaderFields.size(), is(2));
+                assertThat(testHeaderFields.size(), is(3));
                 assertThat(testHeaderFields.get(field0), is(value0));
                 assertThat(testHeaderFields.get(field1), is(value1));
+                assertThat(testHeaderFields.get(userAgent), is(userAgentValue));
             }
 
             @Mock
@@ -277,8 +281,7 @@ public class HttpsRequestTest
             }
         };
 
-        HttpsRequest request =
-                new HttpsRequest(mockUrl, expectedMethod, body);
+        HttpsRequest request = new HttpsRequest(mockUrl, expectedMethod, body);
         request.setHeaderField(field0, value0);
         request.setHeaderField(field1, value1);
         request.send();

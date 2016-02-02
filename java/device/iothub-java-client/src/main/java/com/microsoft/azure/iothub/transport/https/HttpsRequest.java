@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.iothub.transport.https;
 
+import com.microsoft.azure.iothub.transport.TransportUtils;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -37,6 +39,7 @@ public class HttpsRequest
         // Codes_SRS_HTTPSREQUEST_11_001: [The function shall open a connection with the given URL as the endpoint.]
         // Codes_SRS_HTTPSREQUEST_11_004: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
         this.connection = new HttpsConnection(url, method);
+        this.connection.setRequestHeader("User-Agent", TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion);
         // Codes_SRS_HTTPSREQUEST_11_002: [The function shall write the body to the connection.]
         this.connection.writeOutput(body);
     }

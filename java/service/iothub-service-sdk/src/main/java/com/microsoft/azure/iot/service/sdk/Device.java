@@ -23,60 +23,69 @@ public class Device
 
     /**
      * Static create function
-     * Creates device object using the given name
-     * and initializing with default values
+     * Creates device object using the given name.
+     * If input device status and symmetric key are null then they will be auto generated.
      *
      * @param deviceId - String containing the device name
+     * @param deviceId - Device status. If parameter is null, then the status will be set to Enabled.
+     * @param symmetricKey - Device key. If parameter is null, then the key will be auto generated.
      * @return Device object
      * @throws IllegalArgumentException This exception is thrown if {@code deviceId} is {@code null} or empty.
      * @throws NoSuchAlgorithmException This exception is thrown if the encryption method is not supported by the keyGenerator
      */
-    public static Device createFromId(String deviceId) throws IllegalArgumentException, NoSuchAlgorithmException
+    public static Device createFromId(String deviceId, DeviceStatus status, SymmetricKey symmetricKey)
+            throws IllegalArgumentException, NoSuchAlgorithmException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [The function shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException(deviceId);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_003: [The function shall create a new instance of Device using the given deviceId and return with it]
-        Device device = new Device(deviceId);
-        return device;
-    }
 
-    /**
-     * Create a device with an empty device name.
-     */
-    public Device()
-    {
+        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_003: [The function shall create a new instance
+        // of Device using the given deviceId and return it]
+        Device device = new Device(deviceId, status, symmetricKey);
+        return device;
     }
 
     /**
      * Create an Device instance using the given device name
      *
      * @param deviceId Name of the device (used as device id)
+     * @param deviceId - Device status. If parameter is null, then the status will be set to Enabled.
+     * @param symmetricKey - Device key. If parameter is null, then the key will be auto generated.
      * @throws NoSuchAlgorithmException This exception is thrown if the encryption method is not supported by the keyGenerator
      */
-    protected Device(String deviceId) throws NoSuchAlgorithmException, IllegalArgumentException
+    protected Device(String deviceId, DeviceStatus status, SymmetricKey symmetricKey)
+            throws NoSuchAlgorithmException, IllegalArgumentException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_004: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
+        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_004: [The constructor shall throw IllegalArgumentException
+        // if the input string is empty or null]
         if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException();
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_005: [The constructor shall create a new SymmetricKey instance and store it into a member variable]
+        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_15_007: [The constructor shall store
+        // the input device status and symmetric key into a member variable]
+        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_005: [If the input symmetric key is empty, the constructor shall create
+        // a new SymmetricKey instance using AES encryption and store it into a member variable]
         KeyGenerator keyGenerator = KeyGenerator.getInstance(encryptionMethod);
-        SymmetricKey symmetricKey = new SymmetricKey();
-        Base64.Encoder encoder = Base64.getEncoder();
-        symmetricKey.setPrimaryKey(encoder.encodeToString(keyGenerator.generateKey().getEncoded()));
-        symmetricKey.setSecondaryKey(encoder.encodeToString(keyGenerator.generateKey().getEncoded()));
+        if (symmetricKey == null)
+        {
+            symmetricKey = new SymmetricKey();
+            Base64.Encoder encoder = Base64.getEncoder();
+            symmetricKey.setPrimaryKey(encoder.encodeToString(keyGenerator.generateKey().getEncoded()));
+            symmetricKey.setSecondaryKey(encoder.encodeToString(keyGenerator.generateKey().getEncoded()));
+        }
         this.symmetricKey = symmetricKey;
 
         // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_006: [The constructor shall initialize all properties to default values]
         this.deviceId = deviceId;
         this.generationId = "";
         this.eTag = "";
-        this.status = DeviceStatus.Disabled;
+
+        this.status = status != null ? status : DeviceStatus.Enabled;
         this.statusReason = "";
         this.statusUpdatedTime = utcTimeDefault;
         this.connectionState = DeviceConnectionState.Disconnected;
@@ -86,7 +95,9 @@ public class Device
         this.setForceUpdate(false);
     }
 
-    // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_001: [The Device class has the following properties: Id, Etag, Authentication.SymmetricKey, State, StateReason, StateUpdatedTime, ConnectionState, ConnectionStateUpdatedTime, LastActivityTime]
+    // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_001: [The Device class has the following properties: Id, Etag,
+    // Authentication.SymmetricKey, State, StateReason, StateUpdatedTime,
+    // ConnectionState, ConnectionStateUpdatedTime, LastActivityTime]
 
     /**
      * Device name
@@ -136,6 +147,16 @@ public class Device
     public SymmetricKey getSymmetricKey()
     {
         return symmetricKey;
+    }
+
+    /**
+     * Setter for SymmetricKey object
+     *
+     * @param symmetricKey
+     */
+    public void setSymmetricKey(SymmetricKey symmetricKey)
+    {
+        this.symmetricKey = symmetricKey;
     }
 
     /**
@@ -189,6 +210,16 @@ public class Device
     public DeviceStatus getStatus()
     {
         return status;
+    }
+
+    /**
+     * Setter for DeviceStatus object
+     *
+     * @param status
+     */
+    public void setStatus(DeviceStatus status)
+    {
+        this.status = status;
     }
 
     /**

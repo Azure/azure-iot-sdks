@@ -7,10 +7,15 @@ package samples.com.microsoft.azure.iot.service.sdk;
 
 import com.microsoft.azure.iot.service.sdk.FeedbackBatch;
 import com.microsoft.azure.iot.service.sdk.FeedbackReceiver;
+import com.microsoft.azure.iot.service.sdk.Message;
 import com.microsoft.azure.iot.service.sdk.ServiceClient;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -23,7 +28,7 @@ public class ServiceClientSample
 {
     private static final String connectionString = "[Connection string goes here]";
     private static final String deviceId = "[Device name goes here]";
-
+    
     private static ServiceClient serviceClient = null;
     private static FeedbackReceiver feedbackReceiver = null;
 
@@ -43,7 +48,25 @@ public class ServiceClientSample
 
         System.out.println("********* Sending message to device...");
 
-        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, commandMessage);
+        Message messageToSend = new Message(commandMessage);
+
+        // Setting standard properties
+        messageToSend.setMessageId(java.util.UUID.randomUUID().toString());
+        Date now = new Date();
+        messageToSend.setExpiryTimeUtc(new Date(now.getTime() + 60 * 1000));
+        messageToSend.setCorrelationId(java.util.UUID.randomUUID().toString());
+        messageToSend.setUserId(java.util.UUID.randomUUID().toString());
+
+        // Setting user properties
+        Map<String, String> propertiesToSend = new HashMap<String, String>();
+        propertiesToSend.put("mycustomKey1", "mycustomValue1");
+        propertiesToSend.put("mycustomKey2", "mycustomValue2");
+        propertiesToSend.put("mycustomKey3", "mycustomValue3");
+        propertiesToSend.put("mycustomKey4", "mycustomValue4");
+        propertiesToSend.put("mycustomKey5", "mycustomValue5");
+        messageToSend.setProperties(propertiesToSend);
+
+        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, messageToSend);
         completableFuture.get();
 
         System.out.println("********* Waiting for feedback...");

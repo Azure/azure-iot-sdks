@@ -53,12 +53,15 @@ public void open() throws IOException, InterruptedException, ExecutionException
 
 **SRS_AMQPSIOTHUBCONNECTION_14_009: [**The function shall open the Amqps connection and trigger the Reactor (Proton) to begin running.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_010: [**Once the Reactor (Proton) is ready, the function shall allow sending.**]**
+**SRS_AMQPSIOTHUBCONNECTION_14_010: [**Once the Reactor (Proton) is ready, the function shall set its state to OPEN.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_14_011: [**If the AMQPS connection is already open, the function shall do nothing.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_14_012: [**If the AmqpsIotHubConnectionBaseHandler becomes invalidated before the Reactor (Proton) starts, the function shall throw an IOException.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_14_031: [** The function shall get the link credit from its AmqpsIotHubConnectionBaseHandler and set the private maxQueueSize member variable. **]**
+
+**SRS_AMQPSIOTHUBCONNECTION_14_032: [** The function shall successfully complete it’s CompletableFuture status member variable. **]**
 
 ### close
 
@@ -74,6 +77,9 @@ public synchronized void close()
 
 **SRS_AMQPSIOTHUBCONNECTION_14_016: [**If the AMQPS connection is already closed, the function shall do nothing.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_14_033: [**The function shall close the AmqpsIotHubConnectionBaseHandler.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_14_034: [**The function shall exceptionally complete all remaining messages that are currently in progress and clear the queue.**]**
 
 ### consumeMessage
 
@@ -115,9 +121,9 @@ public CompletableFuture<Boolean> scheduleSend(byte[] content[, Object messageId
 
 **SRS_AMQPSIOTHUBCONNECTION_14_026: [**The function shall create a new CompletableFuture for the message acknowledgement.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_027: [**The function shall add a new Tuple containing the CompletableFuture, message content, and message ID to the message queue.**]**
+**SRS_AMQPSIOTHUBCONNECTION_14_027: [**The function shall create a new Tuple containing the CompletableFuture, message content, and message ID.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_028: [**The function shall acquire a lock and attempt to send a message on the queue.**]**
+**SRS_AMQPSIOTHUBCONNECTION_14_028: [**The function shall acquire a lock and attempt to send the message.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_14_029: [**If the AMQPS Connection is closed, the function shall throw an IllegalStateException.**]**
 

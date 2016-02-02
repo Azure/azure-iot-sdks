@@ -419,7 +419,7 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
     {
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig;
-        IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
+        IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
         EXPECTED_RECEIVE_DATA* notifyData = MessageData_Create();
         ASSERT_IS_NOT_NULL(notifyData);

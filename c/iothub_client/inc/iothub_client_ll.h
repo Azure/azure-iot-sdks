@@ -29,6 +29,8 @@
 
 #include "iothub_message.h"
 
+#include "xio.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -81,34 +83,38 @@ DEFINE_ENUM(TRANSPORT_TYPE, TRANSPORT_TYPE_VALUES);
 */
 DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 
-typedef void* IOTHUB_CLIENT_LL_HANDLE;
+typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
 typedef void(*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
 typedef IOTHUBMESSAGE_DISPOSITION_RESULT (*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
 typedef const void*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
+typedef const XIO_HANDLE (*IO_TRANSPORT_PROVIDER_CALLBACK)(const char* fqdn, int port);
 
 /** @brief	This struct captures IoTHub client configuration. */
 typedef struct IOTHUB_CLIENT_CONFIG_TAG
 {
-	/** @brief A function pointer that is passed into the @c IoTHubClientCreate.
-	*	A function definition for AMQP, @c DeviceClientProvideAmqpResources,
-	*	is defined in the include @c iothubtransportamqp.h.  A function
-	*	definition for HTTP, @c DeviceClientProvideHttpResources, is defined
-	*	in the include @c iothubtransporthttp.h */
+    /** @brief A function pointer that is passed into the @c IoTHubClientCreate.
+    *	A function definition for AMQP, @c DeviceClientProvideAmqpResources,
+    *	is defined in the include @c iothubtransportamqp.h.  A function
+    *	definition for HTTP, @c DeviceClientProvideHttpResources, is defined
+    *	in the include @c iothubtransporthttp.h */
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
 
     /** @brief	A string that identifies the device. */
     const char* deviceId;
     
-	/** @brief	The device key used to authenticate the device. */
+    /** @brief	The device key used to authenticate the device. */
     const char* deviceKey;
 
     /** @brief	The IoT Hub name to which the device is connecting. */
     const char* iotHubName;
     
-	/** @brief	IoT Hub suffix goes here, e.g., private.azure-devices-int.net. */
+    /** @brief	IoT Hub suffix goes here, e.g., private.azure-devices-int.net. */
     const char* iotHubSuffix;
 
     const char* protocolGatewayHostName;
+
+    /** @brief  A callback function to provide the IO transport instance, e.g. SChannel, OpenSSL or WebSockets. */
+    IO_TRANSPORT_PROVIDER_CALLBACK io_transport_provider_callback;
 } IOTHUB_CLIENT_CONFIG;
 
 /**

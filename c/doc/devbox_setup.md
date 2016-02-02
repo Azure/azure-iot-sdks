@@ -64,9 +64,9 @@ You do *not* need to build the libraries in order to run the sample applications
 
 The following instructions outline how you can build the libraries in Windows:
 
-1. Create the folders **C:\\Proton**, **C:\\OpenSSL**, and **C:\\Paho** on your development machine in which to download the dependencies.
+1. Create the folders **C:\\Proton** and **C:\\OpenSSL** on your development machine in which to download the dependencies.
 
-2. Create the environment variables **PROTON\_PATH=C:\\Proton**,  **OpenSSLDir=C:\\OpenSSL**, and **PAHO\_PATH=C:\\Paho**..
+2. Create the environment variables **PROTON\_PATH=C:\\Proton** and **OpenSSLDir=C:\\OpenSSL**..
 
 3. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path, type "cmake -version" to verify).
 
@@ -80,9 +80,7 @@ The following instructions outline how you can build the libraries in Windows:
 
 7. Run the script **build\_proton.cmd** in the **c\\build_all\\windows** directory to build the proton libraries.
 
-8. Run the script **build\_paho.cmd** in the **c\\build_all\\windows** directory.
-
-9. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
+8. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
 
 > Note: In order to test MQTT End2End you must also deploy an [Azure IoT Protocol Gateway](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md).
 

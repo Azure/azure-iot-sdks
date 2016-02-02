@@ -6,7 +6,6 @@ using System.Linq;                            // Used for Cast<OpenXmlElement>
 using System.Text.RegularExpressions;         // Used for Regex class.
 using DocumentFormat.OpenXml.Wordprocessing;  // Used for Body class.
 using DocumentFormat.OpenXml.Packaging;       // Used for WordprocessingDocument class.
-using System.Collections;                     // Used for ICollection class.
 using DocumentFormat.OpenXml;                 // Used for OpenXmlElement class
 using System.Windows.Forms;                   // Used for MessageBox class
 using System;                                 // Used for Exception and Console classes
@@ -24,6 +23,8 @@ namespace TraceabilityTool
 
         // A list of requirement IDs and corresponding document file paths
         public static Dictionary<string, string> reqDocLookup = new Dictionary<string, string>();
+        // A count of requirements per document.
+        public static Dictionary<string, int> reqDocCount = new Dictionary<string, int>();
         // A list of requirement IDs and corresponding source code file paths
         public static ReqPathMatrix reqCodeLookup = new ReqPathMatrix();
         // A list of requirement IDs found in requirements documents and corresponding source code file paths (only contains traceable requirements).
@@ -33,10 +34,10 @@ namespace TraceabilityTool
 
         // Requirements that were found in the source code files, but were not found in the requirement documents.
         public static InvalidReqDictionary invalidRequirements = new InvalidReqDictionary();
-        // Requirements that were found in word documents, but couldn't be found in the code.
+        // Requirements that were found in documents, but couldn't be found in the code.
         public static Dictionary<string, string> missingCodeCoverage = new Dictionary<string, string>();
         public static int missingCodeCoverageKeyWidth = 0;
-        // Requirements that were found in word documents, but couldn't be found in the tests.
+        // Requirements that were found in documents, but couldn't be found in the tests.
         public static Dictionary<string, string> missingTestCoverage = new Dictionary<string, string>();
         public static int missingTestCoverageKeyWidth = 0;
         // Duplicate requirement IDs found in requirements documents.
@@ -46,11 +47,12 @@ namespace TraceabilityTool
         public static bool useGUI = true;
 
 
-        public static void GenerateReport(string rootFolderPath, string outputFolderPath, MainForm mainForm)
+        public static int GenerateReport(string rootFolderPath, string outputFolderPath, string[] exclusionDirs, MainForm mainForm)
         {
             // Clear the lists/dictionaries of files and requirement IDs in case we need to generate the reports again.
             requirementDocuments.Clear();
             reqCodeLookup.Clear();
+            reqDocCount.Clear();
             sourceCodeFiles.Clear();
             repeatingRequirements.Clear();
             invalidRequirements.Clear();
@@ -60,12 +62,17 @@ namespace TraceabilityTool
             missingCodeCoverage.Clear();
             missingTestCoverage.Clear();
 
+            int result = 0;
+
             // disable GUI elements if the program was called from command line interface.
             if (mainForm == null)
                 useGUI = false;
 
+            // output dir is an empty string if not valid.
+            bool useOutputDir = (outputFolderPath.Length != 0);
+        
             // Read requirement identifiers and file paths from word documents and source code files.
-            GetRequirementsFromDocuments(rootFolderPath);
+            GetRequirementsFromDocuments(rootFolderPath, exclusionDirs);
 
             // Update status on the progress bar
             if (mainForm != null)
@@ -73,7 +80,7 @@ namespace TraceabilityTool
                 mainForm.UpdateStatus(25);
             }
 
-            GetRequirementsFromSource(rootFolderPath);
+            GetRequirementsFromSource(rootFolderPath, exclusionDirs);
 
             // Update status on the progress bar
             if (mainForm != null)
@@ -92,7 +99,7 @@ namespace TraceabilityTool
             FindUncoveredRequirements();
 
             // Write all reports to plain text files
-            if (MainForm.outputText)
+            if (MainForm.outputText && useOutputDir)
             {
                 ReportWriter.WriteTraceabilityReport(outputFolderPath);
                 ReportWriter.WriteInvalidReqReport(outputFolderPath);
@@ -103,11 +110,16 @@ namespace TraceabilityTool
             }
 
             // Write all reports to CSV files
-            if (MainForm.outputCSV)
+            if (MainForm.outputCSV && useOutputDir)
             {
                 CSVReportWriter.WriteTraceabilityReport(outputFolderPath);
                 CSVReportWriter.WriteMissingReqReport(outputFolderPath);
                 CSVReportWriter.WriteRepeatingReqReport(outputFolderPath);
+            }
+
+            if (MainForm.buildCheck)
+            {
+                result = ConsoleReportWriter.WriteMissingReqReport();
             }
 
             // Update status on the progress bar
@@ -115,23 +127,33 @@ namespace TraceabilityTool
             {
                 mainForm.UpdateStatus(100);
             }
+
+            return result;
         }
 
 
-        private static void GetRequirementsFromDocuments(string rootFolderPath)
+        private static void GetRequirementsFromDocuments(string rootFolderPath, string[] exclusionDirs)
         {
             // Generate a list of Word document files under the root folder.
-            List<string> wordDocFileFilter = new List<string>();
-            wordDocFileFilter.Add("*.docm");
-            FileFinder.SetFileFilters(wordDocFileFilter);
-            FileFinder.GetFileList(rootFolderPath, ref requirementDocuments);
+            List<string> reqDocFileFilter = new List<string>();
+            reqDocFileFilter.Add("*.docm");
+            reqDocFileFilter.Add("*.md");
+            FileFinder.SetFileFilters(reqDocFileFilter);
+            FileFinder.GetFileList(rootFolderPath, exclusionDirs, ref requirementDocuments);
 
             // Read requirement identifiers from the Word documents.
             foreach (string requirementDoc in requirementDocuments)
             {
                 try
                 {
-                    ReadWordDocRequirements(requirementDoc, ref reqDocLookup);
+                    if (requirementDoc.EndsWith(".docm" ))
+                    {
+                        ReadWordDocRequirements(requirementDoc, ref reqDocLookup);
+                    }
+                    else if (requirementDoc.EndsWith(".md"))
+                    {
+                        ReadMarkdownRequirements(requirementDoc, ref reqDocLookup);
+                    }
                 }
                 catch (Exception exception)
                 {
@@ -147,7 +169,7 @@ namespace TraceabilityTool
         }
 
 
-        private static void GetRequirementsFromSource(string rootFolderPath)
+        private static void GetRequirementsFromSource(string rootFolderPath, string[] exclusionDirs)
         {
             // Generate a list of source code files under the root folder.
             List<string> sourceCodeFilterList = new List<string>();
@@ -155,7 +177,7 @@ namespace TraceabilityTool
             sourceCodeFilterList.Add("*.cpp");
             sourceCodeFilterList.Add("*.h");
             FileFinder.SetFileFilters(sourceCodeFilterList);
-            FileFinder.GetFileList(rootFolderPath, ref sourceCodeFiles);
+            FileFinder.GetFileList(rootFolderPath, exclusionDirs, ref sourceCodeFiles);
 
             // Read requirement identifiers from the source code files.
             foreach (string sourceFile in sourceCodeFiles)
@@ -236,12 +258,30 @@ namespace TraceabilityTool
             }
 
             string text = body.InnerText;
-            string pattern = @"SRS_[A-Z_]+_\d{2}_\d{3}";
 
             wordprocessingDocument.Close();
+            string pattern = @"SRS_[A-Z_]+_\d{2}_\d{3}";
 
+            ExtractRequirements(filePath, pattern, text, ref reqLookup);
+        }
+
+        public static void ReadMarkdownRequirements(string filePath, ref Dictionary<string, string> reqLookup)
+        {
+
+            System.IO.StreamReader fileAsStream = new System.IO.StreamReader(filePath);
+            string fileAsString = fileAsStream.ReadToEnd();
+            fileAsStream.Close();
+            string pattern = @"SRS_[A-Z_]+_\d{2}_\d{3}";
+
+            ExtractRequirements(filePath, pattern, fileAsString, ref reqLookup);
+        }
+
+        public static void ExtractRequirements(string filePath, string pattern, string text, ref Dictionary<string, string> reqLookup)
+        {
+            int count = 0;
             foreach (Match m in Regex.Matches(text, pattern))
             {
+                count++;
                 // Add each requirement from Word documents to the lookup dictionary
                 // unless this requirement already exists.
                 if (reqLookup.ContainsKey(m.Value))
@@ -276,8 +316,12 @@ namespace TraceabilityTool
                     reqLookup.Add(m.Value, filePath);
                 }
             }
-        }
+            if (count > 0)
+            {
+                reqDocCount.Add(filePath, count);
+            }
 
+        }
 
         public static void ReadSourceCodeRequirements(string filePath, ref ReqPathMatrix codeReqLookup)
         {

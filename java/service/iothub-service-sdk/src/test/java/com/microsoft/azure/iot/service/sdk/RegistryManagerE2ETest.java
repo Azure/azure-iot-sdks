@@ -73,7 +73,7 @@ public class RegistryManagerE2ETest
         // Act
 
         // Create
-        Device deviceAdded = Device.createFromId(deviceId);
+        Device deviceAdded = Device.createFromId(deviceId, null, null);
         registryManager.addDevice(deviceAdded);
 
         // Read

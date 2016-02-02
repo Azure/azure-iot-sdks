@@ -12,7 +12,7 @@
 #include "iothub_client_ll.h"
 #include "iothub_client_private.h"
 #include "doublylinkedlist.h"
-#include "version.h"
+#include "iothub_client_version.h"
 
 #include "iot_logging.h"
 
@@ -38,7 +38,7 @@ static const char PROTOCOL_GATEWAY_HOST[] = "GatewayHostName";
 
 IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    IOTHUB_CLIENT_LL_HANDLE* result = NULL;
+    IOTHUB_CLIENT_LL_HANDLE result = NULL;
 
     /*Codes_SRS_IOTHUBCLIENT_LL_05_001: [IoTHubClient_LL_CreateFromConnectionString shall obtain the version string by a call to IoTHubClient_GetVersionString.]*/
     /*Codes_SRS_IOTHUBCLIENT_LL_05_002: [IoTHubClient_LL_CreateFromConnectionString shall print the version string to standard output.]*/
@@ -81,8 +81,9 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
             config->iotHubSuffix = NULL;
             config->deviceId = NULL;
             config->deviceKey = NULL;
-			/* Codes_SRS_IOTHUBCLIENT_LL_04_002: [If it does not, it shall pass the protocolGatewayHostName NULL.] */
-			config->protocolGatewayHostName = NULL;
+            /* Codes_SRS_IOTHUBCLIENT_LL_04_002: [If it does not, it shall pass the protocolGatewayHostName NULL.] */
+            config->protocolGatewayHostName = NULL;
+            config->io_transport_provider_callback = NULL;
 
             if ((connString = STRING_construct(connectionString)) == NULL)
             {
@@ -125,7 +126,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                         {
                             /* SRS_IOTHUBCLIENT_LL_12_010: [IoTHubClient_LL_CreateFromConnectionString shall fill up the IOTHUB_CLIENT_CONFIG structure using the following mapping: iotHubName = Name, iotHubSuffix = Suffix, deviceId = DeviceId, deviceKey = SharedAccessKey] */
                             const char* s_token = STRING_c_str(tokenString);
-							if (strcmp(s_token, HOSTNAME_TOKEN) == 0)
+                            if (strcmp(s_token, HOSTNAME_TOKEN) == 0)
                             {
                                 /* SRS_IOTHUBCLIENT_LL_12_009: [IoTHubClient_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator] */
                                 STRING_TOKENIZER_HANDLE tokenizer2 = NULL;
@@ -176,7 +177,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                     config->deviceKey = STRING_c_str(deviceKeyString);
                                 }
                             }
-							/* Codes_SRS_IOTHUBCLIENT_LL_04_001: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of key/value pair GatewayHostName. If it does exist it shall pass the value to IoTHubClient_LL_Create API.] */
+                            /* Codes_SRS_IOTHUBCLIENT_LL_04_001: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of key/value pair GatewayHostName. If it does exist it shall pass the value to IoTHubClient_LL_Create API.] */
                             else if (strcmp(s_token, PROTOCOL_GATEWAY_HOST) == 0)
                             {
                                 protocolGateway = STRING_clone(valueString);

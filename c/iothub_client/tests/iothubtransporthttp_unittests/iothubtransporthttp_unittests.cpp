@@ -18,7 +18,7 @@
 #define DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName; 
 
 #include "iothubtransporthttp.h"
-#include "version.h"
+#include "iothub_client_version.h"
 #include "iothub_client_private.h"
 
 #include "urlencode.h"
@@ -29,7 +29,6 @@
 #include "httpapiex.h"
 #include "httpapiexsas.h"
 #include "base64.h"
-#include "map.h"
 
 #define IOTHUB_ACK "iothub-ack"
 #define IOTHUB_ACK_NONE "none"
@@ -65,7 +64,6 @@ namespace BASEIMPLEMENTATION
     #include "base64.c"
     #include "strings.c"
     #include "buffer.c"
-    #include "map.c"
 };
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
@@ -1259,7 +1257,7 @@ static void setupInitHappyPathUpThroughEventHTTPrequestHeaders(CIoTHubTransportH
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Connection", "Keep-Alive"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX IOTHUB_SDK_VERSION))
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
         .IgnoreArgument(1);
     if (deallocateCreated == true)
     {

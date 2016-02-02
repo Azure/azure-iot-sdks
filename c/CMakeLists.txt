@@ -6,6 +6,7 @@ project(azure_iot_sdks)
 
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
+option(use_uamqp "set use_uamqp to ON if uamqp is to be used, set to OFF to not use uamqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
 option(use_mqtt "set use_mqtt to ON if mqtt is to be used, set to OFF to not use mqtt" ON)
 option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF) [if possible, they are always build]" OFF)
@@ -25,6 +26,8 @@ if(IN_OPENWRT)
 endif()
 
 add_subdirectory(azure-c-shared-utility/c)
+add_subdirectory(azure-uamqp-c)
+add_subdirectory(azure-umqtt-c)
 
 enable_testing()
 
@@ -48,8 +51,8 @@ endif()
 function(includeProton)
 	if(WIN32)
 		include_directories($ENV{proton_path}/qpid-proton/proton-c/include)
-	elseif( NOT "${PRONTON_C_INCLUDES}" STREQUAL "" )
-		include_directories(${PRONTON_C_INCLUDES})
+	elseif( NOT "${PROTON_C_INCLUDES}" STREQUAL "" )
+		include_directories(${PROTON_C_INCLUDES})
 	endif()
 endfunction(includeProton)
 
@@ -68,21 +71,35 @@ function(linkProton whatExecutableIsBuilding)
 	endif()
 endfunction(linkProton)
 
-function(includePaho)
-#function body to be similar to includeProton
-endfunction(includePaho)
-
-function(linkPaho whatExecutableIsBuilding)
-	includePaho()
+function(linkUAMQP whatExecutableIsBuilding)
+	include_directories(${UAMQP_INC_FOLDER})
+	
 	if(WIN32)
-		target_link_libraries(${whatExecutableIsBuilding} "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.lib")
-		file(COPY "$ENV{paho_path}/org.eclipse.paho.mqtt.c/Windows Build/paho-mqtt3cs/Debug/paho-mqtt3cs.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-		file(COPY "$ENV{openssldir}/bin/libeay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-		file(COPY "$ENV{openssldir}/bin/ssleay32.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+		#windows needs this define
+		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+		add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+
+		target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ws2_32 secur32)
+
+		if(${use_openssl})
+			target_link_libraries(${whatExecutableIsBuilding} $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
+		
+			file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+			file(COPY $ENV{OpenSSLDir}/bin/ssleay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+		endif()
 	else()
-		target_link_libraries(${whatExecutableIsBuilding} paho-mqtt3cs)
+		target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ssl crypto)
 	endif()
-endfunction(linkPaho)
+endfunction(linkUAMQP)
+
+function(includeMqtt)
+	include_directories(${MQTT_INC_FOLDER})
+endfunction(includeMqtt)
+
+function(linkMqttLibrary whatExecutableIsBuilding)
+	includeMqtt()
+	target_link_libraries(${whatExecutableIsBuilding} umqtt)
+endfunction(linkMqttLibrary)
 
 function(includeHttp)
 #function body to be similar to includeProton
@@ -240,7 +257,6 @@ function(build_test_artifacts whatIsBuilding use_gballoc)
 			windows_unittests_add_exe(${whatIsBuilding} ${ARGN})
 		endif()
 	endif()
-	
 endfunction(build_test_artifacts)
 
 set(SHARED_UTIL_ADAPTER_FOLDER "${CMAKE_CURRENT_LIST_DIR}/azure-c-shared-utility/c/adapters")

@@ -4,6 +4,7 @@
 'use strict';
 
 var errors = require('azure-iot-common').errors;
+var results = require('azure-iot-common').results;
 var EventEmitter = require('events');
 var AmqpReceiver = require('azure-iot-amqp-base').AmqpReceiver;
 
@@ -29,7 +30,7 @@ SimulatedAmqp.prototype.send = function send(deviceId, message, done) {
       done(new errors.DeviceNotFoundError());
     }
     else {
-      done(null, { descriptor: 0x24 });
+      done(null, new results.MessageEnqueued());
       if (message.ack === 'full') {
         this._receiver.emit('message', {
           body: [{

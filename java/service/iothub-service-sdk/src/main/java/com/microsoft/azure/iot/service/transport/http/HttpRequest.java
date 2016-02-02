@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.iot.service.transport.http;
 
+import com.microsoft.azure.iot.service.transport.TransportUtils;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -34,6 +36,7 @@ public class HttpRequest
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_003: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_004: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
         this.connection = new HttpConnection(url, method);
+        this.connection.setRequestHeader("User-Agent", TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_002: [The function shall write the body to the connection.]
         this.connection.writeOutput(body);
     }

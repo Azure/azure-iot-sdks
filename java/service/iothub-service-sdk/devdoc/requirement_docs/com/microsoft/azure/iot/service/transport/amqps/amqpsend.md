@@ -54,7 +54,7 @@ public void close();
 ```java
 public void send(String deviceId, String content);
 ```
-**SRS_SERVICE_SDK_JAVA_AMQPSEND_12_006: [** The function shall create a binary message with the given content **]**
+**SRS_SERVICE_SDK_JAVA_AMQPSEND_12_006: [** The function shall create a Proton message with the given content **]**
 
 **SRS_SERVICE_SDK_JAVA_AMQPSEND_12_007: [** The function shall initialize the Proton reactor object **]**
 

@@ -16,6 +16,7 @@ namespace TraceabilityTool
 
         public static bool outputCSV = false;
         public static bool outputText = true;
+        public static bool buildCheck = false;
 
         public MainForm()
         {
@@ -122,7 +123,7 @@ namespace TraceabilityTool
 
         private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            ReportGenerator.GenerateReport(txtRootPath.Text, txtOutputPath.Text, this);
+            ReportGenerator.GenerateReport(txtRootPath.Text, txtOutputPath.Text, null, this);
         }
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

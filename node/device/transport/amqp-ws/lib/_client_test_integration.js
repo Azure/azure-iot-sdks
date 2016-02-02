@@ -24,6 +24,6 @@ var badConnStrings = [
 ];
 
 describe('Over AMQP/WS', function () {
-  this.timeout(15000);
+  this.timeout(30000);
   runTests(AmqpWs, connectionString, badConnStrings);
 });
