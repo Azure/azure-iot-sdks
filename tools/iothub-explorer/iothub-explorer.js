@@ -228,46 +228,59 @@ else if (command === 'send') {
   }
 
   var client = connString ? Client.fromConnectionString(connString) : Client.fromSharedAccessSignature(sas.toString());
-  client.send(deviceId, message, function (err) {
-    if (err) serviceError(err);
-    else {
-      if (!parsed.raw) {
-        var id = '';
-        if (parsed.ack && parsed.ack !== 'none') {
-          id = ' (id: ' + message.messageId + ')';
-        }
-        console.log(colorsTmpl('\n{green}Message sent{/green}' + id));
+  client.open(function (err){
+      if (err) {
+        inputError('Could not open the connection to the service: ' + err.message);
+      } else {
+        client.send(deviceId, message, function (err) {
+          if (err) serviceError(err);
+          else {
+            if (!parsed.raw) {
+              var id = '';
+              if (parsed.ack && parsed.ack !== 'none') {
+                id = ' (id: ' + message.messageId + ')';
+              }
+              console.log(colorsTmpl('\n{green}Message sent{/green}' + id));
+            }
+            client.close();
+          }
+        });
       }
-      client.close();
-    }
   });
+  
 }
 else if (command === 'receive') {
   var client = connString ? Client.fromConnectionString(connString) : Client.fromSharedAccessSignature(sas.toString());
-  client.getFeedbackReceiver(function (err, receiver) {
-    var messageCount = parsed.messages || 0;
-    var forever = !parsed.messages;
-
-    if (err) serviceError(err);
-    if (!parsed.raw) {
-      console.log(colorsTmpl('\n{yellow}Waiting for feedback...{/yellow} (Ctrl-C to quit)'));
+  client.open(function (err){
+    if (err) {
+      inputError('Could not open the connection to the service: ' + err.message);
+    } else {
+      client.getFeedbackReceiver(function (err, receiver) {
+        var messageCount = parsed.messages || 0;
+        var forever = !parsed.messages;
+      
+        if (err) serviceError(err);
+        if (!parsed.raw) {
+          console.log(colorsTmpl('\n{yellow}Waiting for feedback...{/yellow} (Ctrl-C to quit)'));
+        }
+      
+        receiver.on('errorReceived', function (err) { serviceError(err); });
+        receiver.on('message', function (feedbackRecords) {
+          var output = {
+            'iothub-enqueuedtime': feedbackRecords.data[0].enqueuedTimeUtc,
+            body: feedbackRecords.data[0].description
+          };
+      
+          var rendered = parsed.raw ?
+            JSON.stringify(output) :
+            '\nFeedback message\n' + prettyjson.render(output);
+          
+          console.log(rendered);
+      
+          if (!forever && --messageCount === 0) process.exit(0);
+        });
+      });
     }
-
-    receiver.on('errorReceived', function (err) { serviceError(err); });
-    receiver.on('message', function (feedbackRecords) {
-      var output = {
-        'iothub-enqueuedtime': feedbackRecords.annotations.value['iothub-enqueuedtime'],
-        body: feedbackRecords.body
-      };
-
-      var rendered = parsed.raw ?
-        JSON.stringify(output) :
-        '\nFeedback message\n' + prettyjson.render(output);
-
-      console.log(rendered);
-
-      if (!forever && --messageCount === 0) process.exit(0);
-    });
   });
 }
 else {

@@ -42,9 +42,9 @@ function MqttReceiver (mqttClient, topic_subscribe) {
         }
     });
     
-    this.on('newListener', function () {
+    this.on('newListener', function (eventName) {
         // lazy-init AMQP event listeners
-        if (!self._listenersInitialized) {
+        if (!self._listenersInitialized && eventName === 'message') {
             debug('Now listening for messages');
             self._setupListeners();
         }

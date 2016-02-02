@@ -78,7 +78,7 @@ describe('Mqtt', function () {
       assert.equal(transport._options.cmd, 'connect');
       assert.equal(transport._options.protocolId, 'MQTT');
       assert.equal(transport._options.protocolVersion, '4');
-      assert.equal(transport._options.clean, true);
+      assert.equal(transport._options.clean, false);
       assert.equal(transport._options.rejectUnauthorized, false);
     });
   });

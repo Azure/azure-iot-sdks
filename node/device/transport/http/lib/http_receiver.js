@@ -236,6 +236,14 @@ HttpReceiver.prototype.setOptions = function (opts) {
 };
 
 /**
+ * @method          module:azure-iot-device-http.HttpReceiver#setSharedAccessSignature
+ * @description     Sets the SAS Token used for authentication with the IoT Hub service when receiving messages.
+ */
+HttpReceiver.prototype.setSharedAccessSignature = function (sharedAccessSignature) {
+    this._config.sharedAccessSignature = sharedAccessSignature;
+};
+
+/**
  * @method          module:azure-iot-device-http.HttpReceiver#complete
  * @description     Sends a completion message to the IoT Hub service, effectively removing the message from the queue and flagging it as succesfully delivered.
  */
