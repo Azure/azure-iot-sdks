@@ -39,7 +39,7 @@ function Is-Null
 
 function Release-Client
 {
-	param([string]$clientLocation)
+	param([string]$clientLocation, [string]$groupId, [string]$artifactId)
 	$clientDirectoryName = (split-path $clientLocation -leaf)
 	$jarsCopyLocation = (join-path (join-path $mavenArtifactsDir "$clientDirectoryName") "UnsignedJars")
 	
@@ -72,13 +72,13 @@ function Release-Client
 	
 	# Save attributes we will need
 	if($hasParent){
-		$groupId = $xml.project.parent.groupId
+		#$groupId = $xml.project.parent.groupId
 		$version = $xml.project.parent.version
 	} else {
-		$groupId = $xml.project.groupId
+		#$groupId = $xml.project.groupId
 		$version = $xml.project.version
 	}
-	$artifactId = $xml.project.artifactId
+	#$artifactId = $xml.project.artifactId
 	$name = $xml.project.name
 	$pom_description = $xml.project.description
 	$dependencies = $xml.SelectNodes('/project/dependencies/dependency')
@@ -137,6 +137,12 @@ function Release-Client
 			$xml.project.InsertAfter($element, $_) | Out-Null
 		}
 	}
+	
+	#forcible add group id and artifact id
+	$groupIdNode = $xml.project.SelectSingleNode('groupId')
+	$artifactIdNode = $xml.project.SelectSingleNode('artifactId')
+	$groupIdNode.InnerText = $groupId
+	$artifactIdNode.InnerText = $artifactId
 	
 	$plugin_groupId = $xml.CreateElement('groupId')
 	$plugin_groupId.InnerText = $maven_plugin_groupId
@@ -244,12 +250,12 @@ if(!(Test-Path -Path $copyLocation)){
 	New-Item -ItemType directory -Path $copyLocation
 }
 
-Release-Client $javaDeviceClientLocation
-Release-Client $javaServiceClientLocation
+Release-Client $javaDeviceClientLocation "com.microsoft.azure.iothub-java-client" "iothub-java-device-client"
+Release-Client $javaServiceClientLocation "com.microsoft.azure.iothub-java-client" "iothub-java-service-client"
 
 Set-Location $currentLocation
 
-Remove-Item -Recurse -Force "$copyLocation"
+#Remove-Item -Recurse -Force "$copyLocation"
 
 # Point to location of jars
 Write-Host "If successful, jars located here: $mavenArtifactsDir\<project_name>\UnsignedJars\. " -f green;
