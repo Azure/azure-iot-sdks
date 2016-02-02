@@ -47,11 +47,12 @@ function Mqtt(config) {
     cmd: 'connect',
     protocolId: 'MQTT',
     protocolVersion: 4,
-    clean: true,
+    clean: false,
     clientId: config.deviceId,
     username: config.host + '/' + config.deviceId + '/DeviceClientType=' + versionString,
     password: new Buffer(config.sharedAccessSignature),
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
+    reconnectPeriod: 0  // Client will handle reconnection at the higher level.
   };
   debug('username: ' + this._options.username);
   debug('hostname: ' + this._hostName);

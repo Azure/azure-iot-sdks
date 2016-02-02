@@ -30,7 +30,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
         
         it('Service sends 1 C2D message and it is re-sent until the device completes it', function(done)
         {
-            this.timeout(15000);
+            this.timeout(30000);
             var guid = uuid.v4();
             var closeConnectionsAndTerminateTest = function () {
                serviceClient.close(function () {
@@ -45,27 +45,25 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
             
             var abandonnedOnce = false;
             deviceClient.open(function (openErr, openRes) {
-                deviceClient.getReceiver(function (err, receiver) {
-                    assert.isNull(err);
-                    receiver.on('errorReceived', function (err) {
-                       assert.Fail('Device received an error: ' + err.message); 
-                    });
-                    receiver.on('message', function (msg) {
-                        debug('Received a message with guid: ' + msg.data);
-                        if (msg.data === guid) {
-                            if(!abandonnedOnce) {
-                                debug('Abandon the message with guid ' + msg.data);
-                                abandonnedOnce = true;
-                                receiver.abandon(msg);
-                            } else {
-                                debug('Complete the message with guid ' + msg.data);                            
-                                receiver.complete(msg, function (err, res){
-                                    assert.isNull(err);
-                                    closeConnectionsAndTerminateTest();
-                                });
-                            }
+                deviceClient.on('message', function (msg){
+                    debug('Received a message with guid: ' + msg.data);
+                    if (msg.data === guid) {
+                        if(!abandonnedOnce) {
+                            debug('Abandon the message with guid ' + msg.data);
+                            abandonnedOnce = true;
+                            deviceClient.abandon(msg, function (err, result){
+                                assert.isNull(err);
+                                assert.equal(result.constructor.name, 'MessageAbandoned');
+                            });
+                        } else {
+                            debug('Complete the message with guid ' + msg.data);                            
+                            deviceClient.complete(msg, function (err, res){
+                                assert.isNull(err);
+                                assert.equal(res.constructor.name, 'MessageCompleted');
+                                closeConnectionsAndTerminateTest();
+                            });
                         }
-                    });
+                    }
                 });
             });
             
@@ -79,7 +77,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
         
         it.skip('Service sends 1 C2D message and it is re-sent until the device rejects it', function(done)
         {
-            this.timeout(15000);
+            this.timeout(30000);
             var guid = uuid.v4();
             var closeConnectionsAndTerminateTest = function () {
                serviceClient.close(function () {
@@ -94,30 +92,31 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
             
             var abandonnedOnce = false;
             deviceClient.open(function (openErr, openRes) {
-                deviceClient.getReceiver(function (err, receiver) {
-                    assert.isNull(err);
-                    receiver.on('errorReceived', function (err) {
-                       assert.Fail('Device received an error: ' + err.message); 
-                    });
-                    receiver.on('message', function (msg) {
-                        debug('Received a message with guid: ' + msg.data);
-                        if (msg.data === guid) {
-                            if(!abandonnedOnce) {
-                                debug('Abandon the message with guid ' + msg.data);
-                                abandonnedOnce = true;
-                                receiver.abandon(msg);
-                            } else {
-                                debug('Rejects the message with guid ' + msg.data);                            
-                                receiver.reject(msg, function (err, res) {
-                                    assert.isNull(err);
-                                    closeConnectionsAndTerminateTest();
-                                });
-                            }
+                deviceClient.on('message', function (msg) {
+                    debug('Received a message with guid: ' + msg.data);
+                    if (msg.data === guid) {
+                        if(!abandonnedOnce) {
+                            debug('Abandon the message with guid ' + msg.data);
+                            abandonnedOnce = true;
+                            deviceClient.abandon(msg, function (err, result){
+                                assert.isNull(err);
+                                assert.equal(result.constructor.name, 'MessageAbandoned');
+                            });
                         } else {
-                            debug('not the message I\'m looking for, abandoning it (' + msg.data + ')');
-                            receiver.abandon(msg);
+                            debug('Rejects the message with guid ' + msg.data);                            
+                            deviceClient.reject(msg, function (err, res) {
+                                assert.isNull(err);
+                                assert.equal(res.constructor.name, 'MessageRejected');
+                                closeConnectionsAndTerminateTest();
+                            });
                         }
-                    });
+                    } else {
+                        debug('not the message I\'m looking for, abandoning it (' + msg.data + ')');
+                        deviceClient.abandon(msg, function (err, result){
+                            assert.isNull(err);
+                            assert.equal(result.constructor.name, 'MessageAbandoned');
+                        });
+                    }
                 });
             });
             
@@ -129,8 +128,8 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
             });
         });
         
-        it('Service sends 5 C2D messages and they are received by the device', function (done) {
-            this.timeout(15000);
+        it.skip('Service sends 5 C2D messages and they are received by the device', function (done) {
+            this.timeout(30000);
             var deviceMessageCounter = 0;
             
             var closeConnectionsAndTerminateTest = function () {
@@ -145,20 +144,17 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
             };
             
             deviceClient.open(function (openErr, openRes) {
-                deviceClient.getReceiver(function (err, receiver) {
-                    assert.isNull(err);
-                    receiver.on('errorReceived', function (err) {
-                       assert.Fail('Device received an error: ' + err.message); 
+                deviceClient.on('message', function (msg) {
+                    deviceMessageCounter++;
+                    debug('Received ' + deviceMessageCounter + ' message(s)');
+                    deviceClient.complete(msg, function (err, result){
+                        assert.isNull(err);
+                        assert.equal(result.constructor.name, 'MessageCompleted');
                     });
-                    receiver.on('message', function (msg) {
-                        deviceMessageCounter++;
-                        debug('Received ' + deviceMessageCounter + ' message(s)');
-                        receiver.complete(msg);
-                        
-                        if(deviceMessageCounter === 5) {
-                            closeConnectionsAndTerminateTest();
-                        }
-                    });
+                    
+                    if(deviceMessageCounter === 5) {
+                        closeConnectionsAndTerminateTest();
+                    }
                 });
             });
             

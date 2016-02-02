@@ -7,7 +7,8 @@
   "dependencies": {
     "amqp10": "^2.2.1",
     "amqp10-transport-ws": "^0.0.2",
-    "azure-iot-common": "1.0.0-preview.11"
+    "azure-iot-common": "1.0.0-preview.11",
+    "debug": "^2.2.0"
   },
   "devDependencies": {
     "chai": "^3.3.0",

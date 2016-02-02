@@ -4,6 +4,10 @@
 'use strict';
 
 var Base = require('azure-iot-mqtt-base').Mqtt;
+var results = require('azure-iot-common').results;
+var errors = require('azure-iot-common').errors;
+var EventEmitter = require('events');
+var util = require('util');
 
 /**
  * @class        module:azure-iot-device-mqtt.Mqtt
@@ -17,10 +21,12 @@ var Base = require('azure-iot-mqtt-base').Mqtt;
  Codes_SRS_NODE_DEVICE_HTTP_12_003: [The Mqtt  shall create an MqttTransport object and store it in a member variable
 */
 function Mqtt(config) {
-  this._config = config;
-  this._mqtt = new Base(config);
-  this._receiver = null;
+    EventEmitter.call(this);
+    this._config = config;
+    this._mqtt = new Base(config);
 }
+
+util.inherits(Mqtt, EventEmitter);
 
 /**
  * @method              module:azure-iot-device-mqtt.Mqtt#connect
@@ -31,8 +37,15 @@ function Mqtt(config) {
 /* Codes_SRS_NODE_DEVICE_HTTP_12_004: [The connect method shall call the connect method on MqttTransport */
 Mqtt.prototype.connect = function (done) {
   this._mqtt.connect(function (err, result) {
-    if (done) done(err, result);
-  });
+      if (err) {
+          if(done) done(err);
+      } else {
+          this._mqtt.client.on('disconnect', function (err){
+              this.emit('disconnect', new results.Disconnected(err));
+          }.bind(this));
+          if(done) done(null, result);
+      }
+  }.bind(this));
 };
 
 /**
@@ -68,6 +81,63 @@ Mqtt.prototype.sendEvent = function (message, done) {
 
 Mqtt.prototype.getReceiver = function (done) {
   this._mqtt.getReceiver(done);
+};
+
+/**
+ * @method              module:azure-iot-device-mqtt.Mqtt#complete
+ * @description         Settles the message as complete and calls the done callback with the result.
+ * 
+ * @param {Message}     message     The message to settle as complete.
+ * @param {Function}    done        The callback that shall be called with the error or result object.
+ */
+/*Codes_SRS_NODE_DEVICE_MQTT_16_005: [The ‘complete’ method shall call the callback given as argument immediately since all messages are automatically completed.]*/
+Mqtt.prototype.complete = function (message, done) {
+    done(null, new results.MessageCompleted());
+};
+
+/**
+ * @method              module:azure-iot-device-mqtt.Mqtt#reject
+ * @description         Settles the message as rejected and calls the done callback with the result.
+ * 
+ * @throws {Error}      The MQTT transport does not support rejecting messages.
+ */
+/*Codes_SRS_NODE_DEVICE_MQTT_16_006: [The ‘reject’ method shall throw because MQTT doesn’t support rejecting messages.] */
+Mqtt.prototype.reject = function () {
+    throw new errors.NotImplementedError('the MQTT transport does not support rejecting messages.');
+};
+
+/**
+ * @method              module:azure-iot-device-mqtt.Mqtt#abandon
+ * @description         Settles the message as abandoned and calls the done callback with the result.
+ * 
+ * @throws {Error}      The MQTT transport does not support rejecting messages.
+ */
+/*Codes_SRS_NODE_DEVICE_MQTT_16_004: [The ‘abandon’ method shall throw because MQTT doesn’t support abandoning messages.] */
+Mqtt.prototype.abandon = function () {
+    throw new errors.NotImplementedError('The MQTT transport does not support abandoning messages.');
+};
+
+/**
+ * @method          module:azure-iot-device-mqtt.Mqtt#updateSharedAccessSignature
+ * @description     This methods sets the SAS token used to authenticate with the IoT Hub service.
+ * 
+ * @param {String}        sharedAccessSignature  The new SAS token.
+ * @param {Function}      done      The callback to be invoked when `updateSharedAccessSignature` completes.
+ */
+Mqtt.prototype.updateSharedAccessSignature = function (sharedAccessSignature, done) {
+    /*Codes_SRS_NODE_DEVICE_MQTT_16_008: [The updateSharedAccessSignature method shall disconnect the current connection operating with the deprecated token, and re-iniialize the transport object with the new connection parameters.]*/ 
+    this._mqtt.disconnect(function (err){
+        if (err) {
+            /*Codes_SRS_NODE_DEVICE_MQTT_16_009: [The updateSharedAccessSignature method shall call the `done` method with an Error object if updating the configuration or re-initializing the transport object.]*/
+            if (done) done(err);
+        } else {
+            /*Codes_SRS_NODE_DEVICE_MQTT_16_007: [The updateSharedAccessSignature method shall save the new shared access signature given as a parameter to its configuration.]*/ 
+            this._config.sharedAccessSignature = sharedAccessSignature;
+            this._mqtt = new Base(this._config);
+            /*Codes_SRS_NODE_DEVICE_MQTT_16_010: [The updateSharedAccessSignature method shall call the `done` callback with a null error object and a SharedAccessSignatureUpdated object as a result, indicating hat the client needs to reestablish the transport connection when ready.]*/ 
+            done(null, new results.SharedAccessSignatureUpdated(true));
+        }
+    }.bind(this));
 };
 
 module.exports = Mqtt;

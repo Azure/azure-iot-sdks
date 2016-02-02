@@ -17,9 +17,9 @@
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",
-    "unittest-min": "mocha --reporter dot lib/_*_test.js",
+    "unittest-min": "echo \"No tests\"",
     "alltest-min": "mocha --reporter dot lib/_*_test*.js",
-    "unittest": "mocha --reporter spec lib/_*_test.js",
+    "unittest": "echo \"No tests\"",
     "alltest": "mocha --reporter spec lib/_*_test*.js",
     "ci": "npm -s run lint && npm -s run alltest-min",
     "test": "npm -s run lint && npm -s run unittest"
