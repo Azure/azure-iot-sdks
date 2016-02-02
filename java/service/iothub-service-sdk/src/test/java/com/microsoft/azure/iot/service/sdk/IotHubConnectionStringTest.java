@@ -142,7 +142,7 @@ public class IotHubConnectionStringTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
-        String expected = "https://HOSTNAME.b.c.d/devices/?maxCount=10&api-version=2015-08-15-preview";
+        String expected = "https://HOSTNAME.b.c.d/devices/?top=10&api-version=2015-08-15-preview";
         // Act
         String actual = iotHubConnectionString.getUrlDeviceList(maxCount).toString();
         // Assert

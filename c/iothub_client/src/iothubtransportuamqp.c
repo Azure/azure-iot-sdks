@@ -89,6 +89,8 @@ typedef struct UAMQP_TRANSPORT_STATE_TAG
 	size_t connection_timeout;
 	// A callback passed by the app layer to provide the I/O transport instance (e.g., TLS, WebSockets, etc).
 	IO_TRANSPORT_PROVIDER_CALLBACK io_transport_provider_callback;
+	// Saved reference to the IoTHub LL Client.
+	IOTHUB_CLIENT_LL_HANDLE iothub_client_handle;
 	
 	// Instance obtained using io_transport_provider_callback.
 	XIO_HANDLE tls_io;
@@ -129,6 +131,7 @@ typedef struct UAMQP_TRANSPORT_STATE_TAG
 // This structure is used to track an event being sent and the time it was sent.
 typedef struct EVENT_TRACKER_TAG
 {
+	IOTHUB_CLIENT_LL_HANDLE iothub_client_handle;
 	IOTHUB_MESSAGE_LIST* message;
 	time_t time_sent;
 	DLIST_ENTRY entry;
@@ -166,6 +169,7 @@ static EVENT_TRACKER* trackEvent(IOTHUB_MESSAGE_LIST* message, UAMQP_TRANSPORT_I
 
 	if ((event_tracker = (EVENT_TRACKER*)malloc(sizeof(EVENT_TRACKER))) != NULL)
 	{
+		event_tracker->iothub_client_handle = transport_state->iothub_client_handle;
 		event_tracker->message = message;
 		event_tracker->time_sent = get_time(NULL);
 		DList_InitializeListHead(&event_tracker->entry);
@@ -217,43 +221,35 @@ static void rollEventsBackToWaitList(UAMQP_TRANSPORT_INSTANCE* transport_state)
 {
 	PDLIST_ENTRY entry = transport_state->inProgress.Blink;
 
-	while (entry != NULL && entry != &transport_state->inProgress)
+	while (entry != &transport_state->inProgress)
 	{
 		EVENT_TRACKER* event_tracker = containingRecord(entry, EVENT_TRACKER, entry);
-		rollEventBackToWaitList(event_tracker, transport_state);
 		entry = entry->Blink;
+		rollEventBackToWaitList(event_tracker, transport_state);
 	}
-	
-	DList_InitializeListHead(&transport_state->inProgress);
 }
 
 void on_message_send_complete(const void* context, MESSAGE_SEND_RESULT send_result)
 {
-	(void)send_result;
-	(void)context;
-
 	if (context != NULL)
 	{
 		EVENT_TRACKER* event_tracker = (EVENT_TRACKER*)context;
 
-		IOTHUB_CLIENT_CONFIRMATION_RESULT iot_hub_send_result;
+		IOTHUB_BATCHSTATE_RESULT iot_hub_send_result;
 
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_142: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_CLIENT_CONFIRMATION_OK if the result received is MESSAGE_SEND_OK] 
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_142: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_BATCHSTATE_SUCCESS if the result received is MESSAGE_SEND_OK] 
 		if (send_result == MESSAGE_SEND_OK)
 		{
-			iot_hub_send_result = IOTHUB_CLIENT_CONFIRMATION_OK;
+			iot_hub_send_result = IOTHUB_BATCHSTATE_SUCCESS;
 		}
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_143: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_CLIENT_CONFIRMATION_ERROR if the result received is MESSAGE_SEND_ERROR]
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_143: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_BATCHSTATE_FAILED if the result received is MESSAGE_SEND_ERROR]
 		else if (send_result == MESSAGE_SEND_ERROR)
 		{
-			iot_hub_send_result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
+			iot_hub_send_result = IOTHUB_BATCHSTATE_FAILED;
 		}
 
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_102: [The callback ‘on_message_send_complete’ shall invoke the upper layer callback for message received if provided] 
-		if (event_tracker->message->callback != NULL)
-		{
-			event_tracker->message->callback(iot_hub_send_result, event_tracker->message->context);
-		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_102: [The callback ‘on_message_send_complete’ shall invoke the upper layer IoTHubClient_LL_SendComplete() passing the client handle, message received and batch state result] 
+		IoTHubClient_LL_SendComplete(event_tracker->iothub_client_handle, &event_tracker->message->entry, iot_hub_send_result);
 
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_100: [The callback ‘on_message_send_complete’ shall remove the target message from the in-progress list after the upper layer callback] 
 		if (isEventInInProgressList(event_tracker))
@@ -414,19 +410,21 @@ static void on_amqp_management_state_changed(void* context, AMQP_MANAGEMENT_STAT
 
 static int establishConnection(UAMQP_TRANSPORT_INSTANCE* transport_state)
 {
-	int result = RESULT_FAILURE;
+	int result;
 
 	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_110: [IoTHubTransportuAMQP_DoWork shall create the TLS IO using transport_state->io_transport_provider callback function] 
 	if (transport_state->tls_io == NULL &&
 		(transport_state->tls_io = transport_state->io_transport_provider_callback(STRING_c_str(transport_state->iotHubHostFqdn), transport_state->iotHubPort)) == NULL)
 	{
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_136: [If transport_state->io_transport_provider_callback fails, IoTHubTransportuAMQP_DoWork shall fail and return immediately]
+		result = RESULT_FAILURE;
 		LogError("Failed to obtain a I/O transport layer from io_transport_provider_callback.\r\n");
 	}
 	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_056: [IoTHubTransportuAMQP_DoWork shall create the SASL mechanism using uAMQP’s saslmechanism_create() API] 
 	else if ((transport_state->sasl_mechanism = saslmechanism_create(saslmssbcbs_get_interface(), NULL)) == NULL)
 	{
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_057: [If saslmechanism_create() fails, IoTHubTransportuAMQP_DoWork shall fail and return immediately]
+		result = RESULT_FAILURE;
 		LogError("Failed to create a SASL mechanism.\r\n");
 	}
 	else
@@ -436,18 +434,21 @@ static int establishConnection(UAMQP_TRANSPORT_INSTANCE* transport_state)
 		if ((transport_state->sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_client_config, NULL)) == NULL)
 		{
 			// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_061: [If xio_create() fails creating the SASL I/O layer, IoTHubTransportuAMQP_DoWork shall fail and return immediately] 
+			result = RESULT_FAILURE;
 			LogError("Failed to create a SASL I/O layer.\r\n");
 		}
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_062: [IoTHubTransportuAMQP_DoWork shall create the connection with the IoT service using connection_create() uAMQP API, passing the SASL I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks)] 
 		else if ((transport_state->connection = connection_create(transport_state->sasl_io, STRING_c_str(transport_state->iotHubHostFqdn), DEFAULT_CONTAINER_ID, NULL, NULL)) == NULL)
 		{
 			// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_063: [If connection_create() fails, IoTHubTransportuAMQP_DoWork shall fail and return immediately.] 
+			result = RESULT_FAILURE;
 			LogError("Failed to create the uAMQP connection.\r\n");
 		}
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_137: [IoTHubTransportuAMQP_DoWork shall create the AMQP session session_create() uAMQP API, passing the connection instance as parameter]
 		else if ((transport_state->session = session_create(transport_state->connection, NULL, NULL)) == NULL)
 		{
 			// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_138 : [If session_create() fails, IoTHubTransportuAMQP_DoWork shall fail and return immediately]
+			result = RESULT_FAILURE;
 			LogError("Failed to create the uAMQP session.\r\n");
 		}
 		else
@@ -468,12 +469,14 @@ static int establishConnection(UAMQP_TRANSPORT_INSTANCE* transport_state)
 			if ((transport_state->cbs = cbs_create(transport_state->session, on_amqp_management_state_changed, NULL)) == NULL)
 			{
 				// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_067: [If cbs_create() fails, IoTHubTransportuAMQP_DoWork shall fail and return immediately] 
+				result = RESULT_FAILURE;
 				LogError("Failed to create the CBS connection.\r\n");
 			}
 			// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_139: [IoTHubTransportuAMQP_DoWork shall open the CBS connection using the cbs_open() uAMQP API] 
 			else if ((cbs_open(transport_state->cbs)) != 0)
 			{
 				// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_140: [If cbs_open() fails, IoTHubTransportuAMQP_DoWork shall fail and return immediately]
+				result = RESULT_FAILURE;
 				LogError("Failed to open the connection with CBS.\r\n");
 			}
 			else
@@ -528,15 +531,7 @@ static int startAuthentication(UAMQP_TRANSPORT_INSTANCE* transport_state)
 
 static int verifyAuthenticationTimeout(UAMQP_TRANSPORT_INSTANCE* transport_state)
 {
-	int result = RESULT_OK;
-
-	if (transport_state->cbs_state == CBS_STATE_AUTH_IN_PROGRESS &&
-		(getSecondsSinceEpoch() - transport_state->current_sas_token_create_time) * 1000 >= transport_state->cbs_request_timeout)
-	{
-		result = RESULT_TIMEOUT;
-	}
-
-	return result;
+	return ((getSecondsSinceEpoch() - transport_state->current_sas_token_create_time) * 1000 >= transport_state->cbs_request_timeout) ? RESULT_TIMEOUT : RESULT_OK;
 }
 
 static void handleEventSendTimeouts(UAMQP_TRANSPORT_INSTANCE* transport_state)
@@ -549,8 +544,7 @@ static void handleEventSendTimeouts(UAMQP_TRANSPORT_INSTANCE* transport_state)
 		EVENT_TRACKER* event_tracker = containingRecord(entry, EVENT_TRACKER, entry);
 
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_085: [IoTHubTransportuAMQP_DoWork shall attempt to send all the queued messages for up to ‘message_send_timeout’ milliseconds] 
-		if (event_tracker != NULL &&
-			difftime(current_time, event_tracker->time_sent) * 1000 >= transport_state->message_send_timeout)
+		if (difftime(current_time, event_tracker->time_sent) * 1000 >= transport_state->message_send_timeout)
 		{
 			// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_120: [If a ‘message_send_timeout’ occurs the timed out events removed from the inProgress and the upper layer notified of the send error] 
 			on_message_send_complete(event_tracker, MESSAGE_SEND_ERROR);
@@ -738,7 +732,6 @@ static int sendPendingEvents(UAMQP_TRANSPORT_INSTANCE* transport_state)
 {
 	int result = RESULT_OK;
 	IOTHUB_MESSAGE_LIST* message = NULL;
-	size_t events_sent_count = 0;
 
 	while ((message = getNextEventToSend(transport_state)) != NULL)
 	{
@@ -821,25 +814,20 @@ static int sendPendingEvents(UAMQP_TRANSPORT_INSTANCE* transport_state)
 			{
 				// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_088: [If IoTHubMessage_GetByteArray() fails, IoTHubTransportuAMQP_DoWork shall remove the event from the in-progress list and invoke the upper layer callback reporting the error] 
 				// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_091: [If IoTHubMessage_GetString() fails, IoTHubTransportuAMQP_DoWork shall remove the event from the in-progress list and invoke the upper layer callback reporting the error] 
-				// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_094: [If message_create() fails on the first event of inProgress, IoTHubTransportuAMQP_DoWork shall notify the failure, delete that event and continue processing the next events on waitingToSend list]
-				// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_096: [If message_add_body_amqp_data() fails on the first event of inProgress, IoTHubTransportuAMQP_DoWork shall notify the failure, delete that event and continue processing the next events on waitingToSend list] 
-				// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_098: [If messagesender_send() fails on the first event of inProgress, IoTHubTransportuAMQP_DoWork shall notify the failure, delete that event and continue processing the next events on waitingToSend list] 
-				if (is_message_error || events_sent_count == 0)
+				if (is_message_error)
 				{
 					on_message_send_complete(event_tracker, MESSAGE_SEND_ERROR);
 				}
 				else
 				{
-					// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_111: [If message_create() fails NOT on the first event of inProgress, IoTHubTransportuAMQP_DoWork notify the failure, delete that event and return] 
-					// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_112: [If message_add_body_amqp_data() fails NOT on the first event of inProgress, IoTHubTransportuAMQP_DoWork notify the failure, delete that event and return]
-					// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_113: [If messagesender_send() fails NOT on the first event of inProgress, IoTHubTransportuAMQP_DoWork notify the failure, delete that event and return] 
+					// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_111: [If message_create() fails, IoTHubTransportuAMQP_DoWork notify the failure, roll back the event to waitToSent list and return]
+					// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_112: [If message_add_body_amqp_data() fails, IoTHubTransportuAMQP_DoWork notify the failure, roll back the event to waitToSent list and return]
+					// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_113: [If messagesender_send() fails, IoTHubTransportuAMQP_DoWork notify the failure, roll back the event to waitToSent list and return]
 					rollEventBackToWaitList(event_tracker, transport_state);
 					break;
 				}
 			}
 		}
-
-		events_sent_count++;
 	}
 
 	return result;
@@ -847,14 +835,7 @@ static int sendPendingEvents(UAMQP_TRANSPORT_INSTANCE* transport_state)
 
 static bool isSasTokenRefreshRequired(UAMQP_TRANSPORT_INSTANCE* transport_state)
 {
-	bool result = false;
-
-	if ((getSecondsSinceEpoch() - transport_state->current_sas_token_create_time) >= (transport_state->sas_token_refresh_time / 1000))
-	{
-		result = true;
-	}
-
-	return result;
+	return ((getSecondsSinceEpoch() - transport_state->current_sas_token_create_time) >= (transport_state->sas_token_refresh_time / 1000)) ? true : false;
 }
 
 static void prepareForConnectionRetry(UAMQP_TRANSPORT_INSTANCE* transport_state)
@@ -946,6 +927,7 @@ static TRANSPORT_HANDLE IoTHubTransportuAMQP_Create(const IOTHUBTRANSPORT_CONFIG
 			transport_state->connection = NULL;
 			transport_state->connection_state = AMQP_MANAGEMENT_STATE_IDLE;
 			transport_state->connection_establish_time = 0;
+			transport_state->iothub_client_handle = NULL;
 			transport_state->receive_messages = false;
 			transport_state->message_receiver = NULL;
 			transport_state->message_sender = NULL;
@@ -1082,6 +1064,9 @@ static void IoTHubTransportuAMQP_Destroy(TRANSPORT_HANDLE handle)
 
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_036 : [IoTHubTransportuAMQP_Destroy shall return the remaining items in inProgress to waitingToSend list.]
 		rollEventsBackToWaitList(transport_state);
+
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_150: [IoTHubTransportuAMQP_Destroy shall destroy the transport instance]
+		free(transport_state);
 	}
 }
 
@@ -1102,6 +1087,9 @@ static void IoTHubTransportuAMQP_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_L
 		bool trigger_connection_retry = false;
 		UAMQP_TRANSPORT_INSTANCE* transport_state = (UAMQP_TRANSPORT_INSTANCE*)handle;
 
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_147: [IoTHubTransportuAMQP_DoWork shall save a reference to the client handle in transport_state->iothub_client_handle]
+		transport_state->iothub_client_handle = iotHubClientHandle;
+
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_055: [If the transport handle has a NULL connection, IoTHubTransportuAMQP_DoWork shall instantiate and initialize the uAMQP components and establish the connection] 
 		if (transport_state->connection == NULL &&
 			establishConnection(transport_state) != RESULT_OK)
@@ -1119,7 +1107,8 @@ static void IoTHubTransportuAMQP_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_L
 			trigger_connection_retry = true;
 		}
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_084: [IoTHubTransportuAMQP_DoWork shall wait for ‘cbs_request_timeout’ milliseconds for the cbs_put_token() to complete before failing due to timeout]
-		else if (verifyAuthenticationTimeout(transport_state) == RESULT_TIMEOUT)
+		else if (transport_state->cbs_state == CBS_STATE_AUTH_IN_PROGRESS &&  
+				verifyAuthenticationTimeout(transport_state) == RESULT_TIMEOUT)
 		{
 			LogError("uAMQP transport authentication timed out.\r\n");
 			trigger_connection_retry = true;
@@ -1209,10 +1198,11 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_GetSendStatus(TRANSPORT_HANDLE 
 {
     IOTHUB_CLIENT_RESULT result;
 
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_041: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.]
     if (handle == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("Invalid handle to IoTHubClient AMQP transport instance.\r\n");
+        LogError("Invalid handle to IoTHubClient uAMQP transport instance.\r\n");
     }
     else if (iotHubClientStatus == NULL)
     {
@@ -1221,11 +1211,20 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_GetSendStatus(TRANSPORT_HANDLE 
     }
     else
     {
-		LogError("IoTHubClient uAMQP transport GetSendStatus is NOT IMPLEMENTED YET.\r\n");
+		UAMQP_TRANSPORT_INSTANCE* transport_state = (UAMQP_TRANSPORT_INSTANCE*)handle;
 
-		UAMQP_TRANSPORT_INSTANCE* transportState = (UAMQP_TRANSPORT_INSTANCE*)handle;
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_043: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.]
+		if (!DList_IsListEmpty(transport_state->waitingToSend) || !DList_IsListEmpty(&(transport_state->inProgress)))
+		{
+			*iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_042: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.] 
+		else
+		{
+			*iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
+		}
 
-        result = IOTHUB_CLIENT_ERROR;
+		result = IOTHUB_CLIENT_OK;
     }
 
     return result;
@@ -1233,10 +1232,11 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_GetSendStatus(TRANSPORT_HANDLE 
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_SetOption(TRANSPORT_HANDLE handle, const char* option, const void* value)
 {
-	LogError("IoTHubClient uAMQP transport SetOption is NOT IMPLEMENTED YET.\r\n");
-
 	IOTHUB_CLIENT_RESULT result;
 
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_044: [If handle parameter is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_045: [If parameter optionName is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] 
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_046: [If parameter value is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
 	if (
 		(handle == NULL) ||
 		(option == NULL) ||
@@ -1244,19 +1244,46 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportuAMQP_SetOption(TRANSPORT_HANDLE hand
 		)
 	{
 		result = IOTHUB_CLIENT_INVALID_ARG;
-		LogError("invalid parameter (NULL) passed to clientTransportuAMQP_SetOption\r\n");
+		LogError("Invalid parameter (NULL) passed to uAMQP transport SetOption()\r\n");
 	}
 	else
 	{
-		if (strcmp("TrustedCerts", option) == 0)
-		{
-			UAMQP_TRANSPORT_INSTANCE* transportState = (UAMQP_TRANSPORT_INSTANCE*)handle;
+		UAMQP_TRANSPORT_INSTANCE* transport_state = (UAMQP_TRANSPORT_INSTANCE*)handle;
 
+		if (strcmp("trusted_certs", option) == 0)
+		{
 			result = IOTHUB_CLIENT_ERROR;
+			LogError("Invalid option (trusted_certs) passed to uAMQP transport SetOption() (not implemented)\r\n");
 		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_048: [IoTHubTransportuAMQP_SetOption shall save and apply the value if the option name is "sas_token_lifetime", returning IOTHUB_CLIENT_OK] 
+		else if (strcmp("sas_token_lifetime", option) == 0)
+		{
+			transport_state->sas_token_lifetime = *((size_t*)value);
+			result = IOTHUB_CLIENT_OK;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_049: [IoTHubTransportuAMQP_SetOption shall save and apply the value if the option name is "sas_token_refresh_time", returning IOTHUB_CLIENT_OK] 
+		else if (strcmp("sas_token_refresh_time", option) == 0)
+		{
+			transport_state->sas_token_refresh_time = *((size_t*)value);
+			result = IOTHUB_CLIENT_OK;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_148: [IoTHubTransportuAMQP_SetOption shall save and apply the value if the option name is "cbs_request_timeout", returning IOTHUB_CLIENT_OK] 
+		else if (strcmp("cbs_request_timeout", option) == 0)
+		{
+			transport_state->cbs_request_timeout = *((size_t*)value);
+			result = IOTHUB_CLIENT_OK;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_149: [IoTHubTransportuAMQP_SetOption shall save and apply the value if the option name is "message_send_timeout", returning IOTHUB_CLIENT_OK]
+		else if (strcmp("message_send_timeout", option) == 0)
+		{
+			transport_state->message_send_timeout = *((size_t*)value);
+			result = IOTHUB_CLIENT_OK;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_047: [If optionName is not an option supported then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] 
 		else
 		{
 			result = IOTHUB_CLIENT_INVALID_ARG;
+			LogError("Invalid option (%s) passed to uAMQP transport SetOption()\r\n", option);
 		}
 	}
 

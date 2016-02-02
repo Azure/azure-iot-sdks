@@ -26,6 +26,7 @@ static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 #include "tlsio_openssl.h"
 #include "platform.h"
 #include "xio.h"
+#include "macro_utils.h"
 
 #include "iothubtransportuamqp.h"
 #include "iothub_client_private.h"
@@ -89,6 +90,7 @@ namespace BASEIMPLEMENTATION
 #include "doublylinkedlist.c"
 #include "buffer.c"
 #include "strings.c"
+#include "../adapters/agenttime.c"
 };
 
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -164,14 +166,28 @@ std::ostream& operator<<(std::ostream& left, const BINARY_DATA bindata)
 #define TEST_MESSAGERECEIVER_LINK (LINK_HANDLE)0x166
 #define TEST_MESSAGE_SENDER (MESSAGE_SENDER_HANDLE)0x180
 #define TEST_MESSAGE_RECEIVER (MESSAGE_RECEIVER_HANDLE)0x190
+#define TEST_MESSAGE_HANDLE (IOTHUB_MESSAGE_HANDLE)0x200
+#define TEST_RANDOM_CHAR_SEQ "This is a random char sequence"
+#define TEST_RANDOM_CHAR_SEQ_SIZE 30
+#define TEST_BINARY_BUFFER (const unsigned char*)0x210
+#define TEST_BINARY_BUFFER_SIZE 56
+#define TEST_EVENT_MESSAGE_HANDLE (MESSAGE_HANDLE)0x220
+#define TEST_OPTION_SASTOKEN_LIFETIME "sas_token_lifetime"
+#define TEST_OPTION_SASTOKEN_REFRESH_TIME "sas_token_refresh_time"
+#define TEST_OPTION_CBS_REQUEST_TIMEOUT "cbs_request_timeout"
+#define TEST_OPTION_MESSAGE_SEND_TIMEOUT "message_send_timeout"
 
 
+time_t test_current_time;
 XIO_HANDLE test_TLS_io_transport = NULL;
 char* test_latest_getIOTransport_fqdn = NULL;
 int test_latest_getIOTransport_port = 0;
 size_t test_latest_SASToken_expiry_time = 0;
 ON_CBS_OPERATION_COMPLETE test_latest_cbs_put_token_callback;
 void* test_latest_cbs_put_token_context;
+int test_number_of_event_confirmation_callbacks_invoked;
+int test_sum_of_event_confirmation_callback_contexts;
+BINARY_DATA test_binary_data;
 
 bool fail_malloc = false;
 bool fail_STRING_new = false;
@@ -213,9 +229,9 @@ public:
 	MOCK_VOID_METHOD_END()
 
 	MOCK_STATIC_METHOD_3(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_GetByteArray, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const unsigned char**, buffer, size_t*, size)
-		IOTHUB_MESSAGE_RESULT result2;
-	
-			result2 = IOTHUB_MESSAGE_OK;
+		*buffer = TEST_BINARY_BUFFER;
+		*size = TEST_BINARY_BUFFER_SIZE;
+		IOTHUB_MESSAGE_RESULT result2 = IOTHUB_MESSAGE_OK;
 	MOCK_METHOD_END(IOTHUB_MESSAGE_RESULT, result2)
 
 	MOCK_STATIC_METHOD_1(, const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, handle)
@@ -226,7 +242,7 @@ public:
 		}
 		else
 		{
-			result2 = NULL;
+			result2 = TEST_RANDOM_CHAR_SEQ;
 		}
 	MOCK_METHOD_END(const char*, result2)
 
@@ -847,7 +863,6 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportuAMQPMocks, , void, session_destroy
 #define STEP_DOWORK_MESSAGERECEIVER 11
 #define STEP_DOWORK_MESSAGESENDER 12
 
-
 #define DOWORK_MESSAGERECEIVER_NONE 0
 #define DOWORK_MESSAGERECEIVER_CREATE 1
 #define DOWORK_MESSAGERECEIVER_DESTROY 2
@@ -937,40 +952,6 @@ void setExpectedCleanupCallsForTransportCreateUpTo(CIoTHubTransportuAMQPMocks& m
 	}
 }
 
-void setExpectedCallsForTransportDestroy(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, bool isConnectionInitialized, bool destroyIOtransport, size_t numberOfEventsInProgress)
-{
-	if (isConnectionInitialized)
-	{
-		EXPECTED_CALL(mocks, messagesender_destroy(0));
-		EXPECTED_CALL(mocks, messagereceiver_destroy(0));
-		EXPECTED_CALL(mocks, cbs_destroy(0));
-		EXPECTED_CALL(mocks, session_destroy(0));
-		EXPECTED_CALL(mocks, connection_destroy(0));
-		EXPECTED_CALL(mocks, xio_destroy(0));
-		EXPECTED_CALL(mocks, saslmechanism_destroy(0));
-	}
-
-	if (destroyIOtransport)
-	{
-		EXPECTED_CALL(mocks, xio_destroy(0));
-	}
-	
-	EXPECTED_CALL(mocks, STRING_delete(0));
-	EXPECTED_CALL(mocks, STRING_delete(0));
-	EXPECTED_CALL(mocks, STRING_delete(0));
-	EXPECTED_CALL(mocks, STRING_delete(0));
-	EXPECTED_CALL(mocks, STRING_delete(0));
-	
-	while (numberOfEventsInProgress-- > 0)
-	{
-		EXPECTED_CALL(mocks, DList_RemoveEntryList(0));
-		EXPECTED_CALL(mocks, DList_InitializeListHead(0));
-		EXPECTED_CALL(mocks, DList_InsertTailList(0, 0));
-	}
-
-	EXPECTED_CALL(mocks, DList_InitializeListHead(0));
-}
-
 void setExpectedCallsForSASTokenExpiryCheck(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
 {
 	STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
@@ -991,6 +972,83 @@ void setExpectedCallsForCbsAuthTimeoutCheck(CIoTHubTransportuAMQPMocks& mocks, I
 	STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
 }
 
+void setExpectedCallsForCreateMessageReceiver(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+{
+	EXPECTED_CALL(mocks, STRING_c_str(NULL));
+	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn(TEST_MESSAGERECEIVER_SOURCE);
+	EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn(TEST_MESSAGERECEIVER_TARGET);
+	EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGERECEIVER_LINK);
+	STRICT_EXPECTED_CALL(mocks, link_set_rcv_settle_mode(NULL, receiver_settle_mode_first)).IgnoreArgument(1);
+	EXPECTED_CALL(mocks, link_set_max_message_size(NULL, TEST_MESSAGE_RECEIVER_MAX_LINK_SIZE)).IgnoreArgument(1);
+	EXPECTED_CALL(mocks, messagereceiver_create(NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_RECEIVER);
+	EXPECTED_CALL(mocks, messagereceiver_open(NULL, NULL, NULL));
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_SOURCE));
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
+}
+
+void setExpectedCallsForDestroyMessageReceiver(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+{
+	STRICT_EXPECTED_CALL(mocks, messagereceiver_close(TEST_MESSAGE_RECEIVER));
+	STRICT_EXPECTED_CALL(mocks, messagereceiver_destroy(TEST_MESSAGE_RECEIVER));
+	STRICT_EXPECTED_CALL(mocks, link_destroy(TEST_MESSAGERECEIVER_LINK));
+}
+
+void setExpectedCallsForCreateEventSender(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+{
+	STRICT_EXPECTED_CALL(mocks, messaging_create_source(TEST_MESSAGE_SENDER_SOURCE_ADDRESS)).SetReturn(TEST_MESSAGESENDER_SOURCE);
+	EXPECTED_CALL(mocks, STRING_c_str(NULL));
+	EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn(TEST_MESSAGESENDER_TARGET);
+	EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGESENDER_LINK);
+	STRICT_EXPECTED_CALL(mocks, link_set_max_message_size(NULL, TEST_MESSAGE_SENDER_MAX_LINK_SIZE)).IgnoreArgument(1);
+	EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_SENDER);
+	EXPECTED_CALL(mocks, messagesender_open(TEST_MESSAGE_SENDER));
+	EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
+	EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
+}
+
+void setExpectedCallsForDestroyEventSender(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+{
+	STRICT_EXPECTED_CALL(mocks, messagesender_destroy(TEST_MESSAGE_SENDER));
+	STRICT_EXPECTED_CALL(mocks, link_destroy(TEST_MESSAGESENDER_LINK));
+}
+
+void setExpectedCallsForSendPendingEvents_SingleEvent(CIoTHubTransportuAMQPMocks& mocks, IOTHUBMESSAGE_CONTENT_TYPE message_type, time_t current_time)
+{
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_MESSAGE_HANDLE)).SetReturn(message_type);
+
+	EXPECTED_CALL(mocks, gballoc_malloc(NULL));
+
+	STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
+	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL));
+	EXPECTED_CALL(mocks, DList_RemoveEntryList(NULL));
+	EXPECTED_CALL(mocks, DList_InsertTailList(NULL, NULL));
+
+	if (message_type == IOTHUBMESSAGE_BYTEARRAY)
+	{
+		EXPECTED_CALL(mocks, IoTHubMessage_GetByteArray(NULL, NULL, NULL));
+	}
+	else if (message_type == IOTHUBMESSAGE_STRING)
+	{
+		EXPECTED_CALL(mocks, IoTHubMessage_GetString(NULL));
+	}
+
+	EXPECTED_CALL(mocks, message_create()).SetReturn(TEST_EVENT_MESSAGE_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_add_body_amqp_data(NULL, test_binary_data)).IgnoreArgument(1);
+	EXPECTED_CALL(mocks, messagesender_send(NULL, NULL, NULL, NULL));
+	STRICT_EXPECTED_CALL(mocks, message_destroy(TEST_EVENT_MESSAGE_HANDLE));
+}
+
+void setExpectedCallsForSendPendingEvents(CIoTHubTransportuAMQPMocks& mocks, IOTHUBMESSAGE_CONTENT_TYPE message_type, time_t current_time, int numberOfEvents)
+{
+	while (numberOfEvents-- > 0)
+	{
+		setExpectedCallsForSendPendingEvents_SingleEvent(mocks, message_type, current_time);
+	}
+
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(1);
+}
+
 void setExpectedCallsForConnectionDoWork(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
 {
 	EXPECTED_CALL(mocks, connection_dowork(NULL));
@@ -998,7 +1056,47 @@ void setExpectedCallsForConnectionDoWork(CIoTHubTransportuAMQPMocks& mocks, IOTH
 
 void setExpectedCallsForHandleEventSendTimeout(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
 {
-	EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
+	STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
+}
+
+void setExpectedCallsForRollEventsBackToWaitList(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+{
+}
+
+void setExpectedCallsForTransportDestroy(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, bool isConnectionInitialized, bool destroyIOtransport, size_t numberOfEventsInProgress)
+{
+	if (isConnectionInitialized)
+	{
+		EXPECTED_CALL(mocks, messagesender_destroy(0));
+		EXPECTED_CALL(mocks, messagereceiver_destroy(0));
+		EXPECTED_CALL(mocks, cbs_destroy(0));
+		EXPECTED_CALL(mocks, session_destroy(0));
+		EXPECTED_CALL(mocks, connection_destroy(0));
+		EXPECTED_CALL(mocks, xio_destroy(0));
+		EXPECTED_CALL(mocks, saslmechanism_destroy(0));
+	}
+
+	if (destroyIOtransport)
+	{
+		EXPECTED_CALL(mocks, xio_destroy(0));
+	}
+
+	EXPECTED_CALL(mocks, STRING_delete(0));
+	EXPECTED_CALL(mocks, STRING_delete(0));
+	EXPECTED_CALL(mocks, STRING_delete(0));
+	EXPECTED_CALL(mocks, STRING_delete(0));
+	EXPECTED_CALL(mocks, STRING_delete(0));
+
+	while (numberOfEventsInProgress-- > 0)
+	{
+		EXPECTED_CALL(mocks, DList_RemoveEntryList(0));
+		EXPECTED_CALL(mocks, DList_InitializeListHead(0));
+		EXPECTED_CALL(mocks, DList_InsertTailList(0, 0));
+	}
+
+	setExpectedCallsForRollEventsBackToWaitList(mocks, config);
+
+	EXPECTED_CALL(mocks, gballoc_free(NULL));
 }
 
 void setExpectedCallsForTransportDoWorkUpTo(CIoTHubTransportuAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, int maximumStepToSet, int messageReceiverCreation)
@@ -1057,35 +1155,16 @@ void setExpectedCallsForTransportDoWorkUpTo(CIoTHubTransportuAMQPMocks& mocks, I
 		{
 			if (messageReceiverCreation == DOWORK_MESSAGERECEIVER_CREATE)
 			{
-				EXPECTED_CALL(mocks, STRING_c_str(NULL));
-				EXPECTED_CALL(mocks, messaging_create_source(NULL));
-				EXPECTED_CALL(mocks, messaging_create_target(NULL));
-				EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL));
-				EXPECTED_CALL(mocks, link_set_rcv_settle_mode(NULL, NULL));
-				EXPECTED_CALL(mocks, link_set_max_message_size(NULL, 0));
-				EXPECTED_CALL(mocks, messagereceiver_create(NULL, NULL, NULL));
-				EXPECTED_CALL(mocks, messagereceiver_open(NULL, NULL, NULL));
-				EXPECTED_CALL(mocks, amqpvalue_destroy(NULL));
-				EXPECTED_CALL(mocks, amqpvalue_destroy(NULL));
+				setExpectedCallsForCreateMessageReceiver(mocks, config);
 			}
 			else if (messageReceiverCreation == DOWORK_MESSAGERECEIVER_DESTROY)
 			{
-				EXPECTED_CALL(mocks, messagereceiver_close(NULL));
-				EXPECTED_CALL(mocks, messagereceiver_destroy(NULL));
-				EXPECTED_CALL(mocks, link_destroy(NULL));
+				setExpectedCallsForDestroyMessageReceiver(mocks, config);
 			}
 		}
 		else if (step == STEP_DOWORK_MESSAGESENDER)
 		{
-			EXPECTED_CALL(mocks, messaging_create_source(NULL));
-			EXPECTED_CALL(mocks, STRING_c_str(NULL));
-			EXPECTED_CALL(mocks, messaging_create_target(NULL));
-			EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL));
-			EXPECTED_CALL(mocks, link_set_max_message_size(NULL, 0));
-			EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL));
-			EXPECTED_CALL(mocks, messagesender_open(NULL));
-			EXPECTED_CALL(mocks, amqpvalue_destroy(NULL));
-			EXPECTED_CALL(mocks, amqpvalue_destroy(NULL));
+			setExpectedCallsForCreateEventSender(mocks, config);
 		}
 	}
 }
@@ -1114,6 +1193,41 @@ void setExpectedCallsForConnectionDestroyUpTo(CIoTHubTransportuAMQPMocks& mocks,
 		else if (step == STEP_DOWORK_CREATE_SASLMECHANISM)
 		{
 			EXPECTED_CALL(mocks, saslmechanism_destroy(NULL));
+		}
+	}
+}
+
+void test_IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
+{
+	test_number_of_event_confirmation_callbacks_invoked++;
+
+	if (userContextCallback != NULL)
+	{
+		test_sum_of_event_confirmation_callback_contexts += *((int*)userContextCallback);
+	}
+}
+
+void addTestEvents(PDLIST_ENTRY waitingToSend, int numberOfEvents, bool setCallback)
+{
+	while (numberOfEvents-- > 0)
+	{
+		IOTHUB_MESSAGE_LIST* iml = (IOTHUB_MESSAGE_LIST*)malloc(sizeof(IOTHUB_MESSAGE_LIST));
+
+		if (iml == NULL)
+		{
+			LogError("Test failure: addTestEvents() failed allocating IOTHUB_MESSAGE_LIST (%i).\r\n", numberOfEvents);
+		}
+		else
+		{
+			iml->messageHandle = TEST_MESSAGE_HANDLE;
+
+			if (setCallback)
+			{
+				iml->context = (void*)numberOfEvents;
+				iml->callback = test_IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK;
+			}
+
+			DList_InsertTailList(waitingToSend, &(iml->entry));
 		}
 	}
 }
@@ -1179,6 +1293,12 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
 	test_STRING_HANDLE_EMPTY = BASEIMPLEMENTATION::STRING_new();
 	ASSERT_IS_NOT_NULL(test_STRING_HANDLE_EMPTY);
+
+	test_current_time = BASEIMPLEMENTATION::get_time(NULL);
+
+	test_binary_data.bytes = (const unsigned char*)TEST_RANDOM_CHAR_SEQ;
+	test_binary_data.length = TEST_RANDOM_CHAR_SEQ_SIZE;
+
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -1853,8 +1973,8 @@ TEST_FUNCTION(uAMQP_DoWork_TLS_IO_provider_fails)
 
 	mocks.ResetAllCalls();
 	EXPECTED_CALL(mocks, STRING_c_str(NULL));
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, test_current_time);
 	test_TLS_io_transport = (XIO_HANDLE)NULL;
 
 	// act
@@ -1892,8 +2012,8 @@ TEST_FUNCTION(uAMQP_DoWork_saslmechanism_create_fails)
 	setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_GET_TLS_IO, DOWORK_MESSAGERECEIVER_NONE);
 	STRICT_EXPECTED_CALL(mocks, saslmssbcbs_get_interface());
 	EXPECTED_CALL(mocks, saslmechanism_create(NULL, NULL)).SetReturn((SASL_MECHANISM_HANDLE)NULL);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, test_current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -1928,8 +2048,8 @@ TEST_FUNCTION(uAMQP_DoWork_saslio_create_fails)
 	setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_SASLIO_GET_INTERFACE, DOWORK_MESSAGERECEIVER_NONE);
 	EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL)).SetReturn((XIO_HANDLE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_SASLMECHANISM);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, test_current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -1965,8 +2085,8 @@ TEST_FUNCTION(uAMQP_DoWork_connection_create_fails)
 	EXPECTED_CALL(mocks, STRING_c_str(NULL));
 	EXPECTED_CALL(mocks, connection_create(NULL, NULL, NULL, NULL, NULL)).SetReturn((CONNECTION_HANDLE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_SASLIO);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, test_current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2002,8 +2122,8 @@ TEST_FUNCTION(uAMQP_DoWork_session_create_fails)
 	EXPECTED_CALL(mocks, session_create(NULL, NULL, NULL)).SetReturn((SESSION_HANDLE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CONNECTION);
 
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, test_current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2041,8 +2161,8 @@ TEST_FUNCTION(uAMQP_DoWork_cbs_create_fails)
 	EXPECTED_CALL(mocks, cbs_create(NULL, NULL, NULL)).SetReturn((CBS_HANDLE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_SESSION);
 
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, test_current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2077,8 +2197,8 @@ TEST_FUNCTION(uAMQP_DoWork_cbs_open_fails)
 	setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS, DOWORK_MESSAGERECEIVER_NONE);
 	EXPECTED_CALL(mocks, cbs_open(NULL)).SetReturn(1);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, test_current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2090,6 +2210,7 @@ TEST_FUNCTION(uAMQP_DoWork_cbs_open_fails)
 	transport_interface->IoTHubTransport_Destroy(transport);
 }
 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_020: [IoTHubTransportuAMQP_Create shall set parameter transport_state->sas_token_lifetime with the default value of 3600000 (milliseconds).] 
 // Tests_SRS_IOTHUBTRANSPORTUAMQP_09_081: [IoTHubTransportuAMQP_DoWork shall put a new SAS token if the one has not been out already, or if the previous one failed to be put due to timeout of cbs_put_token().] 
 // Tests_SRS_IOTHUBTRANSPORTUAMQP_09_083: [Each new SAS token created by the transport shall be valid for up to ‘sas_token_lifetime’ milliseconds from the time of creation] 
 TEST_FUNCTION(uAMQP_DoWork_SASToken_create_fails)
@@ -2114,8 +2235,8 @@ TEST_FUNCTION(uAMQP_DoWork_SASToken_create_fails)
 	STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
 	EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0)).SetReturn((STRING_HANDLE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2156,8 +2277,8 @@ TEST_FUNCTION(uAMQP_DoWork_cbs_put_token_fails)
 	EXPECTED_CALL(mocks, STRING_delete(NULL));
 
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2192,8 +2313,8 @@ TEST_FUNCTION(uAMQP_DoWork_CBS_auth_timeout_fails)
 	setExpectedCallsForCbsAuthentication(mocks, &config, current_time);
 	EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(expiration_time);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2233,8 +2354,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagesender_create_source_fails)
 	setExpectedCallsForSASTokenExpiryCheck(mocks, &config, current_time);
 	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2279,8 +2400,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagesender_create_target_fails)
 	EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn((AMQP_VALUE)NULL);
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2327,8 +2448,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagesender_create_link_fails)
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2378,8 +2499,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagesender_create_fails)
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2429,8 +2550,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagesender_open_fails)
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2477,8 +2598,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagereceiver_source_create_fails)
 	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
 	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2526,8 +2647,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagereceiver_target_create_fails)
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_SOURCE));
 	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2577,8 +2698,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagereceiver_link_create_fails)
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
 	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2629,8 +2750,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagereceiver_settle_mode_fails)
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
 	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 												 // act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2684,8 +2805,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagereceiver_create_fails)
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
 	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2739,8 +2860,8 @@ TEST_FUNCTION(uAMQP_DoWork_messagereceiver_open_fails)
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
 	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2756,6 +2877,7 @@ TEST_FUNCTION(uAMQP_DoWork_messagereceiver_open_fails)
 
 // Tests_SRS_IOTHUBTRANSPORTUAMQP_09_055: [If the transport handle has a NULL connection, IoTHubTransportuAMQP_DoWork shall instantiate and initialize the uAMQP components and establish the connection] 
 // Tests_SRS_IOTHUBTRANSPORTUAMQP_09_082: [IoTHubTransportuAMQP_DoWork shall refresh the SAS token if the current token has been used for more than ‘sas_token_refresh_time’ milliseconds]
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_128: [IoTHubTransportuAMQP_Create shall set parameter transport_state->sas_token_refresh_time with the default value of sas_token_lifetime/2 (milliseconds).] 
 TEST_FUNCTION(uAMQP_DoWork_expired_SASToken_fails)
 {
 	// arrange
@@ -2786,8 +2908,8 @@ TEST_FUNCTION(uAMQP_DoWork_expired_SASToken_fails)
 	EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
 	EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0)).SetReturn((STRING_HANDLE)NULL);
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
 
 	// act
 	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2801,9 +2923,55 @@ TEST_FUNCTION(uAMQP_DoWork_expired_SASToken_fails)
 	transport_interface->IoTHubTransport_Destroy(transport);
 }
 
-
 // Tests_SRS_IOTHUBTRANSPORTUAMQP_09_086: [IoTHubTransportuAMQP_DoWork shall move queued events to an “in-progress” list right before processing them for sending]
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_089: [If the event contains a message of type IOTHUBMESSAGE_STRING, IoTHubTransportuAMQP_DoWork shall obtain its char* representation using IoTHubMessage_GetString()]
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_090: [If the event contains a message of type IOTHUBMESSAGE_STRING, IoTHubTransportuAMQP_DoWork shall obtain the size of its char* representation using strlen()] 
 TEST_FUNCTION(uAMQP_DoWork_succeeds)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+	test_TLS_io_transport = TEST_TLS_IO_PROVIDER;
+	time_t current_time = time(NULL);
+	
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	addTestEvents(config.waitingToSend, 2, true);
+
+	mocks.ResetAllCalls();
+	setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_OPEN_CBS, DOWORK_MESSAGERECEIVER_NONE);
+	setExpectedCallsForCbsAuthentication(mocks, &config, current_time);
+	setExpectedCallsForCbsAuthTimeoutCheck(mocks, &config, current_time);
+	setExpectedCallsForConnectionDoWork(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
+	setExpectedCallsForSASTokenExpiryCheck(mocks, &config, current_time);
+	setExpectedCallsForCreateEventSender(mocks, &config);
+	setExpectedCallsForSendPendingEvents(mocks, IOTHUBMESSAGE_STRING, current_time, 2);
+	setExpectedCallsForConnectionDoWork(mocks, &config);
+	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
+
+	// act
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+	test_latest_cbs_put_token_callback(test_latest_cbs_put_token_context, CBS_OPERATION_RESULT_OK, 0, NULL);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_041: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] 
+// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_042: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.]
+TEST_FUNCTION(uAMQP_GetSendStatus_idle_succeeds)
 {
 	// arrange
 	CIoTHubTransportuAMQPMocks mocks;
@@ -2819,43 +2987,97 @@ TEST_FUNCTION(uAMQP_DoWork_succeeds)
 	time_t current_time = time(NULL);
 
 	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
-	int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
-	ASSERT_ARE_EQUAL(int, subscribe_result, 0);
+
+	IOTHUB_CLIENT_STATUS iotHubClientStatus;
 
 	mocks.ResetAllCalls();
-	setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_OPEN_CBS, DOWORK_MESSAGERECEIVER_NONE);
-	setExpectedCallsForCbsAuthentication(mocks, &config, current_time);
-	setExpectedCallsForCbsAuthTimeoutCheck(mocks, &config, current_time);
-	setExpectedCallsForConnectionDoWork(mocks, &config);
-	setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
-	setExpectedCallsForSASTokenExpiryCheck(mocks, &config, current_time);
-	EXPECTED_CALL(mocks, STRING_c_str(NULL));
-	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn(TEST_MESSAGERECEIVER_SOURCE);
-	EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn(TEST_MESSAGERECEIVER_TARGET);
-	EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGERECEIVER_LINK);
-	STRICT_EXPECTED_CALL(mocks, link_set_rcv_settle_mode(TEST_MESSAGERECEIVER_LINK, receiver_settle_mode_first));
-	EXPECTED_CALL(mocks, link_set_max_message_size(NULL, NULL));
-	EXPECTED_CALL(mocks, messagereceiver_create(NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_RECEIVER);
-	EXPECTED_CALL(mocks, messagereceiver_open(TEST_MESSAGE_RECEIVER, NULL, NULL)).SetReturn(1);
-	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_SOURCE));
-	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
-	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
-	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
-	EXPECTED_CALL(mocks, DList_InitializeListHead(NULL)); // from rollEventsBackToWaitList()
-	STRICT_EXPECTED_CALL(mocks, get_time(NULL)); // from handleEventSendTimeouts()
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(1);
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(1);
 
-												 // act
-	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
-	test_latest_cbs_put_token_callback(test_latest_cbs_put_token_context, CBS_OPERATION_RESULT_OK, 0, NULL);
-	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_GetSendStatus(transport, &iotHubClientStatus);
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_IDLE, "IoTHubTransport_GetSendStatus returned unexpected status.");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
 }
 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_041: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.]  
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_043: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] 
+TEST_FUNCTION(uAMQP_GetSendStatus_inProgress_not_empty_succeeds)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+	test_TLS_io_transport = TEST_TLS_IO_PROVIDER;
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	IOTHUB_CLIENT_STATUS iotHubClientStatus;
+
+	mocks.ResetAllCalls();
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(1);
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(0);
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_GetSendStatus(transport, &iotHubClientStatus);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_BUSY, "IoTHubTransport_GetSendStatus returned unexpected status.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_041: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.]  
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_043: [IoTHubTransportuAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] 
+TEST_FUNCTION(uAMQP_GetSendStatus_waitingToSend_not_empty_succeeds)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+	test_TLS_io_transport = TEST_TLS_IO_PROVIDER;
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	IOTHUB_CLIENT_STATUS iotHubClientStatus;
+
+	mocks.ResetAllCalls();
+	EXPECTED_CALL(mocks, DList_IsListEmpty(NULL)).SetReturn(0);
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_GetSendStatus(transport, &iotHubClientStatus);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_BUSY, "IoTHubTransport_GetSendStatus returned unexpected status.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
 
 // Tests_SRS_IOTHUBTRANSPORTUAMQP_09_037: [IoTHubTransportuAMQP_Subscribe shall fail if the transport handle parameter received is NULL.]
 TEST_FUNCTION(uAMQP_Subscribe_NULL_transport_fails)
@@ -2904,6 +3126,115 @@ TEST_FUNCTION(uAMQP_Unsubscribe_NULL_transport_fails)
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_044: [If handle parameter is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
+TEST_FUNCTION(uAMQP_SetOption_NULL_transport_fails)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(NULL, TEST_OPTION_SASTOKEN_LIFETIME, TEST_RANDOM_CHAR_SEQ);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_045: [If parameter optionName is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] 
+TEST_FUNCTION(uAMQP_SetOption_NULL_option_fails)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(transport, NULL, TEST_RANDOM_CHAR_SEQ);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_046: [If parameter value is NULL then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
+TEST_FUNCTION(uAMQP_SetOption_NULL_value_fails)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(transport, TEST_OPTION_SASTOKEN_LIFETIME, NULL);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_09_047: [If optionName is not an option supported then IoTHubTransportuAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
+TEST_FUNCTION(uAMQP_SetOption_invalid_option_fails)
+{
+	// arrange
+	CIoTHubTransportuAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)uAMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME, (IO_TRANSPORT_PROVIDER_CALLBACK)getIOTransport };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(transport, "some_invalid_option", TEST_RANDOM_CHAR_SEQ);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
