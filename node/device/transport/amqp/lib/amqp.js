@@ -3,9 +3,12 @@
 
 'use strict';
 
+var EventEmitter = require('events');
+var util = require('util');
 var Base = require('azure-iot-amqp-base').Amqp;
 var endpoint = require('azure-iot-common').endpoint;
 var PackageJson = require('../package.json');
+var results = require('azure-iot-common').results;
 
 /** 
  * @class module:azure-iot-device-amqp.Amqp
@@ -19,18 +22,28 @@ hubName - (string) the name of the IoT Hub instance (without suffix such as .azu
 deviceId – (string) the identifier of a device registered with the IoT Hub
 sharedAccessSignature – (string) the shared access signature associated with the device registration.] */
 function Amqp(config) {
-  this._config = config;
-  var uri = 'amqps://';
-  uri += encodeURIComponent(this._config.deviceId) +
-         '@sas.' +
-         this._config.hubName +
-         ':' +
-         encodeURIComponent(this._config.sharedAccessSignature) +
-         '@' +
-         this._config.host;
-      
-  this._amqp = new Base(uri, false, 'azure-iot-device/' + PackageJson.version);
+    EventEmitter.call(this);
+    this._config = config;
+    this._initialize();
 }
+
+util.inherits(Amqp, EventEmitter);
+
+Amqp.prototype._initialize = function () {
+    var uri = 'amqps://';
+    uri += encodeURIComponent(this._config.deviceId) +
+           '@sas.' +
+           this._config.hubName +
+           ':' +
+           encodeURIComponent(this._config.sharedAccessSignature) +
+           '@' +
+           this._config.host;
+           
+    this._amqp = new Base(uri, false, 'azure-iot-device/' + PackageJson.version);
+    this._amqp.setDisconnectHandler(function(err) {
+       this.emit('disconnect', new results.Disconnected(err)); 
+    }.bind(this));
+};
 
 /**
  * @method              module:azure-iot-device-amqp.Amqp#connect
@@ -64,7 +77,7 @@ Amqp.prototype.disconnect = function disconnect(done) {
  *                              completes execution.
  */
 /* Codes_SRS_NODE_DEVICE_AMQP_16_002: [The sendEvent method shall construct an AMQP request using the message passed in argument as the body of the message.] */ 
-/* Codes_SRS_NODE_DEVICE_AMQP_16_003: [The sendEvent method shall call the done() callback with no arguments when the message has been successfully sent.] */ 
+/* Codes_SRS_NODE_DEVICE_AMQP_16_003: [The sendEvent method shall call the done() callback with a null error object and a MessageEnqueued result object when the message has been successfully sent.] */ 
 /* Codes_SRS_NODE_DEVICE_AMQP_16_004: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message). ] */  
 Amqp.prototype.sendEvent = function sendEvent(message, done) {
   var eventEndpoint = endpoint.eventPath(this._config.deviceId);
@@ -83,6 +96,70 @@ Amqp.prototype.getReceiver = function getMessageReceiver(done) {
   this._amqp.getReceiver(messageEndpoint, done);
 };
 
+/**
+ * @method              module:azure-iot-device-amqp.Amqp#complete
+ * @description         Settles the message as complete and calls the done callback with the result.
+ * 
+ * @param {Message}     message     The message to settle as complete.
+ * @param {Function}    done        The callback that shall be called with the error or result object.
+ */
+/*Codes_SRS_NODE_DEVICE_AMQP_16_013: [The ‘complete’ method shall call the ‘complete’ method of the receiver object and pass it the message and the callback given as parameters.] */
+Amqp.prototype.complete = function (message, done) {
+    this.getReceiver(function (err, receiver){
+        receiver.complete(message, done);
+    });
+};
+
+/**
+ * @method              module:azure-iot-device-amqp.Amqp#reject
+ * @description         Settles the message as rejected and calls the done callback with the result.
+ * 
+ * @param {Message}     message     The message to settle as rejected.
+ * @param {Function}    done        The callback that shall be called with the error or result object.
+ */
+/*Codes_SRS_NODE_DEVICE_AMQP_16_014: [The ‘reject’ method shall call the ‘reject’ method of the receiver object and pass it the message and the callback given as parameters.] */
+Amqp.prototype.reject = function (message, done) {
+    this.getReceiver(function (err, receiver){
+        receiver.reject(message, done);
+    });
+};
+
+/**
+ * @method              module:azure-iot-device-amqp.Amqp#abandon
+ * @description         Settles the message as abandoned and calls the done callback with the result.
+ * 
+ * @param {Message}     message     The message to settle as abandoned.
+ * @param {Function}    done        The callback that shall be called with the error or result object.
+ */
+/*Codes_SRS_NODE_DEVICE_AMQP_16_012: [The ‘abandon’ method shall call the ‘abandon’ method of the receiver object and pass it the message and the callback given as parameters.] */
+Amqp.prototype.abandon = function (message, done) {
+    this.getReceiver(function (err, receiver){
+        receiver.abandon(message, done);
+    });
+};
+
+/**
+ * @method          module:azure-iot-device-amqp.Amqp#updateSharedAccessSignature
+ * @description     This methods sets the SAS token used to authenticate with the IoT Hub service.
+ * 
+ * @param {String}        sharedAccessSignature  The new SAS token.
+ * @param {Function}      done      The callback to be invoked when `updateSharedAccessSignature` completes.
+ */
+Amqp.prototype.updateSharedAccessSignature = function (sharedAccessSignature, done){
+    this._amqp.disconnect(function (err){
+        if (err) {
+            /*Codes_SRS_NODE_DEVICE_AMQP_16_017: [The updateSharedAccessSignature method shall call the `done` method with an Error object if updating the configuration or re-initializing the transport object.] */
+            if (done) done(err);
+        } else {
+            /*Codes_SRS_NODE_DEVICE_AMQP_16_015: [The updateSharedAccessSignature method shall save the new shared access signature given as a parameter to its configuration.] */
+            this._config.sharedAccessSignature = sharedAccessSignature;
+            /*Codes_SRS_NODE_DEVICE_AMQP_16_016: [The updateSharedAccessSignature method shall disconnect the current connection operating with the deprecated token, and re-initialize the transport object with the new connection parameters.] */
+            this._initialize();
+            /*Codes_SRS_NODE_DEVICE_AMQP_16_018: [The updateSharedAccessSignature method shall call the `done` callback with a null error object and a SharedAccessSignatureUpdated object as a result, indicating that the client needs to reestablish the transport connection when ready.] */
+            done(null, new results.SharedAccessSignatureUpdated(true));
+        }
+    }.bind(this));
+};
 
 /**
  * The `sendEventBatch` method sends a list of event messages to the IoT Hub.

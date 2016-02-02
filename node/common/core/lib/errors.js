@@ -83,10 +83,32 @@ UnauthorizedError.prototype = Object.create(Error.prototype);
 UnauthorizedError.prototype.constructor = UnauthorizedError;
 UnauthorizedError.prototype.name = 'UnauthorizedError';
 
+function NotImplementedError(message) {
+    this.message = message;
+    this.stack = (new Error()).stack;
+    Error.call(this, message);
+}
+
+NotImplementedError.prototype = Object.create(Error.prototype);
+NotImplementedError.prototype.constructor = NotImplementedError;
+NotImplementedError.prototype.name = 'NotImplementedError';
+
+function NotConnectedError(message) {
+    this.message = message;
+    this.stack = (new Error()).stack;
+    Error.call(this, message);
+}
+
+NotConnectedError.prototype = Object.create(Error.prototype);
+NotConnectedError.prototype.constructor = NotConnectedError;
+NotConnectedError.prototype.name = 'NotConnectedError';
+
 module.exports = {
   ArgumentError: ArgumentError,
   DeviceMaximumQueueDepthExceededError: DeviceMaximumQueueDepthExceededError,
   DeviceNotFoundError: DeviceNotFoundError,
   FormatError: FormatError,
-  UnauthorizedError: UnauthorizedError
+  UnauthorizedError: UnauthorizedError,
+  NotImplementedError: NotImplementedError,
+  NotConnectedError: NotConnectedError
 };

@@ -75,39 +75,22 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
       it('sends the event', function (done) {
         this.timeout(30000);
         var client = Client.fromConnectionString(goodConnectionString, Transport);
-        var message = new Message('hello');
-        client.sendEvent(message, function (err, res) {
-          assert.isNull(err);
-          assert.isNotNull(res);
-          done();
+        client.open(function (err, res){
+            assert.isNull(err);
+            assert.equal(res.constructor.name, 'Connected', 'Type of the result object of the client.open method is wrong');
+            var message = new Message('hello');
+            client.sendEvent(message, function (err, res) {
+              assert.isNull(err);
+              assert.equal(res.constructor.name, 'MessageEnqueued', 'Type of the result object of the client.sendEvent method is wrong');
+              done();
+            });
         });
       });
 
       badConfigTests('send an event', badConnectionStrings, Transport, function (client, done) {
         client.sendEvent(new Message(''), done);
       });
-
     });
-	
-    /*Tests_SRS_NODE_DEVICE_AMQP_16_006: [If a receiver for this endpoint has already been created, the getReceiver method should call the done() method with the existing instance as an argument.]*/ 
-    /*Tests_SRS_NODE_DEVICE_AMQP_16_007: [If a receiver for this endpoint doesn’t exist, the getReceiver method should create a new AmqpReceiver object and then call the done() method with the object that was just created as an argument.]*/ 
-    describe('#getReceiver', function() {
-      it('returns the same receiver instance if called multiple times', function(done) {
-        this.timeout(30000);
-        var client = Client.fromConnectionString(goodConnectionString, Transport);
-        
-        client.getReceiver(function(err1, receiver1) {
-          client.getReceiver(function(err2, receiver2) {
-            assert.isNotNull(receiver1);
-            assert.isNotNull(receiver2);
-            assert.equal(receiver1, receiver2);
-            
-            done();
-          });
-        });
-      });
-    });
-    
   });
 }
 

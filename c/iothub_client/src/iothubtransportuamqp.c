@@ -27,6 +27,8 @@
 #include "tlsio_wolfssl.h"
 #include "urlencode.h"
 
+#include "tlsio.h"
+
 #include "iothub_client_ll.h"
 #include "iothub_client_private.h"
 #include "iothubtransportuamqp.h"
@@ -339,15 +341,15 @@ XIO_HANDLE default_io_transport_provider(const char* fqdn, int port, const char*
 
 #ifdef _WIN32
     // Codes_SRS_IOTHUBTRANSPORTUAMQP_09_126: [default_io_transport_provider shall create and return a XIO_HANDLE instance for TLS transport using SChannel if the current platform is WINDOWS] 
-    TLSIO_SCHANNEL_CONFIG tls_io_config = { fqdn, port };
+    TLSIO_CONFIG tls_io_config = { fqdn, port };
     io_interface_description = tlsio_schannel_get_interface_description();
 #else
 #ifdef MBED_BUILD_TIMESTAMP
-    TLSIO_WOLFSSL_CONFIG tls_io_config = { fqdn, port };
+    TLSIO_CONFIG tls_io_config = { fqdn, port };
     io_interface_description = tlsio_wolfssl_get_interface_description();
 #else
     // Codes_SRS_IOTHUBTRANSPORTUAMQP_09_127: [default_io_transport_provider shall create and return a XIO_HANDLE instance for TLS transport using OpenSSL if the current platform is not WINDOWS]
-    TLSIO_OPENSSL_CONFIG tls_io_config = { fqdn, port };
+    TLSIO_CONFIG tls_io_config = { fqdn, port };
     io_interface_description = tlsio_openssl_get_interface_description();
 #endif
 #endif
