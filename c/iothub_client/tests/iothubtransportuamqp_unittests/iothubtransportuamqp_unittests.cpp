@@ -1125,6 +1125,7 @@ void setExpectedCallsForTransportDestroy(CIoTHubTransportuAMQPMocks& mocks, IOTH
 	EXPECTED_CALL(mocks, STRING_delete(0));
 	EXPECTED_CALL(mocks, STRING_delete(0));
 	EXPECTED_CALL(mocks, STRING_delete(0));
+    EXPECTED_CALL(mocks, STRING_delete(0));
 
 	while (numberOfEventsInProgress-- > 0)
 	{
