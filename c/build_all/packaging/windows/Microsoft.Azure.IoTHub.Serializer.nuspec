@@ -1,7 +1,7 @@
 <?xml version="1.0"?><package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Microsoft.Azure.IoTHub.Serializer</id>
-    <version>1.0.0-preview-011</version>
+    <version>1.0.0</version>
     <title>Microsoft Azure IoTHub Serializer</title>
     <authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
@@ -15,14 +15,13 @@
     <copyright>Copyright 2015</copyright>
     <tags>Microsoft Azure IoT Native x86 x64 native package</tags>
     <dependencies>
-	  	  <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.0-preview-003"/>
+          <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.0"/>
     </dependencies>
   </metadata>
     <files>
     <!-- these are files for x86 plaform -->
     <file src="..\..\..\..\build_output\c\win32\debug\serializer.lib" target="build\native\Win32\Debug"/>
     <file src="..\..\..\..\build_output\c\win32\debug\serializer.pdb" target="build\native\Win32\Debug"/>
-      
     <file src="..\..\..\..\build_output\c\win32\release\serializer.lib" target="build\native\Win32\Release"/>
       
     <!-- these are files for x64 plaform -->
