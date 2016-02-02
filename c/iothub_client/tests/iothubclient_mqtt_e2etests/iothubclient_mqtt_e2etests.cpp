@@ -32,6 +32,8 @@
 #endif
 #endif
 
+#include "tlsio.h"
+
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 static bool g_callbackRecv = false;
 
@@ -71,14 +73,14 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
     static const XIO_HANDLE CreateXioConnection(const char* hostname, int portNum)
     {
 #if _WIN32
-        TLSIO_SCHANNEL_CONFIG tls_io_config = { hostname, portNum };
+        TLSIO_CONFIG tls_io_config = { hostname, portNum };
         const IO_INTERFACE_DESCRIPTION* tlsio_interface = tlsio_schannel_get_interface_description();
 #else
 #ifdef MBED_BUILD_TIMESTAMP
-        TLSIO_WOLFSSL_CONFIG tls_io_config = { hostname, portNum };
+        TLSIO_CONFIG tls_io_config = { hostname, portNum };
         const IO_INTERFACE_DESCRIPTION* tlsio_interface = tlsio_wolfssl_get_interface_description();
 #else
-        TLSIO_OPENSSL_CONFIG tls_io_config = { hostname, portNum };
+        TLSIO_CONFIG tls_io_config = { hostname, portNum };
         const IO_INTERFACE_DESCRIPTION* tlsio_interface = tlsio_openssl_get_interface_description();
 #endif
 #endif

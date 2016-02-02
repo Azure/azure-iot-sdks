@@ -22,6 +22,7 @@
 #include "tlsio_schannel.h"
 #include "tlsio_wolfssl.h"
 #include "tlsio_openssl.h"
+#include "tlsio.h"
 
 #include "iothub_client_version.h"
 
@@ -249,14 +250,14 @@ const XIO_HANDLE defaultIoTransportProvider(const char* fqdn, int port)
     const IO_INTERFACE_DESCRIPTION* io_interface_description;
 
 #ifdef _WIN32
-    TLSIO_SCHANNEL_CONFIG tls_io_config = { fqdn, port };
+    TLSIO_CONFIG tls_io_config = { fqdn, port };
     io_interface_description = tlsio_schannel_get_interface_description();
 #else
     #ifdef MBED_BUILD_TIMESTAMP
-        TLSIO_WOLFSSL_CONFIG tls_io_config = { fqdn, port };
+        TLSIO_CONFIG tls_io_config = { fqdn, port };
         io_interface_description = tlsio_wolfssl_get_interface_description();
     #else
-        TLSIO_OPENSSL_CONFIG tls_io_config = { fqdn, port };
+        TLSIO_CONFIG tls_io_config = { fqdn, port };
         io_interface_description = tlsio_openssl_get_interface_description();
     #endif
 #endif
