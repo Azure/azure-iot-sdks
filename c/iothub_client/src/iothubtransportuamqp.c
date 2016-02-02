@@ -229,27 +229,35 @@ static void rollEventsBackToWaitList(UAMQP_TRANSPORT_INSTANCE* transport_state)
 	}
 }
 
-void on_message_send_complete(const void* context, MESSAGE_SEND_RESULT send_result)
+static void on_message_send_complete(const void* context, MESSAGE_SEND_RESULT send_result)
 {
 	if (context != NULL)
 	{
 		EVENT_TRACKER* event_tracker = (EVENT_TRACKER*)context;
 
-		IOTHUB_BATCHSTATE_RESULT iot_hub_send_result;
+		IOTHUB_CLIENT_RESULT iot_hub_send_result;
 
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_142: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_BATCHSTATE_SUCCESS if the result received is MESSAGE_SEND_OK] 
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_142: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_CLIENT_CONFIRMATION_OK if the result received is MESSAGE_SEND_OK] 
 		if (send_result == MESSAGE_SEND_OK)
 		{
-			iot_hub_send_result = IOTHUB_BATCHSTATE_SUCCESS;
+			iot_hub_send_result = IOTHUB_CLIENT_CONFIRMATION_OK;
 		}
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_143: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_BATCHSTATE_FAILED if the result received is MESSAGE_SEND_ERROR]
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_143: [The callback ‘on_message_send_complete’ shall pass to the upper layer callback an IOTHUB_CLIENT_CONFIRMATION_ERROR if the result received is MESSAGE_SEND_ERROR]
 		else if (send_result == MESSAGE_SEND_ERROR)
 		{
-			iot_hub_send_result = IOTHUB_BATCHSTATE_FAILED;
+			iot_hub_send_result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
 		}
 
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_102: [The callback ‘on_message_send_complete’ shall invoke the upper layer IoTHubClient_LL_SendComplete() passing the client handle, message received and batch state result] 
-		IoTHubClient_LL_SendComplete(event_tracker->iothub_client_handle, &event_tracker->message->entry, iot_hub_send_result);
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_102: [The callback ‘on_message_send_complete’ shall invoke the upper layer callback for message received if provided] 
+		if (event_tracker->message->callback != NULL)
+		{
+			event_tracker->message->callback(iot_hub_send_result, event_tracker->message->context);
+		}
+
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_151: [The callback ‘on_message_send_complete’ shall destroy the message handle (IOTHUB_MESSAGE_HANDLE) using IoTHubMessage_Destroy()]
+		IoTHubMessage_Destroy(event_tracker->message->messageHandle);
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_152: [The callback ‘on_message_send_complete’ shall destroy the IOTHUB_MESSAGE_LIST instance]
+		free(event_tracker->message);
 
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_100: [The callback ‘on_message_send_complete’ shall remove the target message from the in-progress list after the upper layer callback] 
 		if (isEventInInProgressList(event_tracker))
@@ -258,10 +266,9 @@ void on_message_send_complete(const void* context, MESSAGE_SEND_RESULT send_resu
 			destroyEventTracker(event_tracker);
 		}
 	}
-
 }
 
-void on_put_token_complete(const void* context, OPERATION_RESULT operation_result, unsigned int status_code, const char* status_description)
+static void on_put_token_complete(const void* context, OPERATION_RESULT operation_result, unsigned int status_code, const char* status_description)
 {
 	UAMQP_TRANSPORT_INSTANCE* transportState = (UAMQP_TRANSPORT_INSTANCE*)context;
 
