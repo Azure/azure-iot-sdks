@@ -5,6 +5,6 @@ namespace Microsoft.Azure.Devices.Client
 {
     class ClientApiVersionHelper
     {
-        public const string ApiVersionQueryString = "api-version=2015-08-15-preview";
+        public const string ApiVersionQueryString = "api-version=2016-02-03";
     }
 }
