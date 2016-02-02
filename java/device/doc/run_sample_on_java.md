@@ -45,13 +45,13 @@ If you have successfully [prepared your development environment][devbox-setup] t
 	Note that the double quotes around each argument are required, but the braces '{' and '}' should be removed.
 
 ## Next Steps
-To learn how to create a Java application that communicates with an IoT hub from scratch, see [How to write an Azure IoT client application from scratch with Java on Windows][create-from-scratch].
+To learn how to create a Java application that communicates with an IoT hub from scratch, see [Get started with Azure IoT Hub for Java][create-from-scratch].
 
 ## Documentation
 
 The documentation can be found [here](https://azure.github.io/azure-iot-sdks/java/device/api_reference/index.html).
 
-[create-from-scratch]: how_to_build_a_java_app_from_scratch.md
+[create-from-scratch]: https://azure.microsoft.com/documentation/articles/iot-hub-java-java-getstarted/
 [devbox-setup]: devbox_setup.md
 [setup-iothub]: ../../../doc/setup_iothub.md
 [device-explorer]: ../../../tools/DeviceExplorer/devdoc/how_to_use_device_explorer.md
