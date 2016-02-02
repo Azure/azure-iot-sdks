@@ -32,6 +32,7 @@
 #include "iothub_client_ll.h"
 #include "iothub_client_private.h"
 #include "iothubtransportuamqp.h"
+#include "iothub_client_version.h"
 
 #define RESULT_OK 0
 #define RESULT_FAILURE 1
@@ -561,6 +562,49 @@ static void handleEventSendTimeouts(UAMQP_TRANSPORT_INSTANCE* transport_state)
 	}
 }
 
+static void attachDeviceClientTypeToLink(LINK_HANDLE link)
+{
+    fields attach_properties = NULL;
+    AMQP_VALUE deviceClientTypeKeyName = NULL;
+    AMQP_VALUE deviceClientTypeValue = NULL;
+    int result;
+
+    //
+    // Attempt to add the device client type string to the attach properties.
+    // If this doesn't happen, well, this isn't that important.  We can operate
+    // without this property.  It's worth noting that even though we are going
+    // on, the reasons any of these operations fail don't bode well for the
+    // actual upcoming attach.
+    //
+
+    // Codes_SRS_IOTHUBTRANSPORTUAMQP_06_187: [If IotHubTransportuAMQP_DoWork fails to create an attach properties map and assign that map to the link the function will STILL proceed with the attempt to create the message sender.]
+
+    if ((attach_properties = amqpvalue_create_map()) == NULL)
+    {
+        LogError("Failed to create the map for device client type.\r\n");
+    }
+    else if ((deviceClientTypeKeyName = amqpvalue_create_symbol("com.microsoft:client-version")) == NULL)
+    {
+        LogError("Failed to create the key name for the device client type.\r\n");
+    }
+    else if ((deviceClientTypeValue = amqpvalue_create_string(CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION)) == NULL)
+    {
+        LogError("Failed to create the key value for the device client type.\r\n");
+    }
+    else if ((result = amqpvalue_set_map_value(attach_properties, deviceClientTypeKeyName, deviceClientTypeValue)) != 0)
+    {
+        LogError("Failed to set the property map for the device client type.  Error code is: %d\r\n", result);
+    }
+    else if ((result = link_set_attach_properties(link, attach_properties)) != 0)
+    {
+        LogError("Unable to attach the device client type to the link properties. Error code is: %d\r\n", result);
+    }
+    amqpvalue_destroy(attach_properties);
+    amqpvalue_destroy(deviceClientTypeKeyName);
+    amqpvalue_destroy(deviceClientTypeValue);
+
+}
+
 static int destroyEventSender(UAMQP_TRANSPORT_INSTANCE* transport_state)
 {
 	int result = RESULT_FAILURE;
@@ -611,6 +655,8 @@ static int createEventSender(UAMQP_TRANSPORT_INSTANCE* transport_state)
 			{
 				LogError("Failed setting uAMQP link max message size.\r\n");
 			}
+
+            attachDeviceClientTypeToLink(transport_state->sender_link);
 
 			// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_070: [IoTHubTransportuAMQP_DoWork shall create the AMQP message sender using messagesender_create() uAMQP API] 
 			if ((transport_state->message_sender = messagesender_create(transport_state->sender_link, NULL, NULL, NULL)) == NULL)
@@ -703,6 +749,8 @@ static int createMessageReceiver(UAMQP_TRANSPORT_INSTANCE* transport_state, IOTH
 			{
 				LogError("Failed setting uAMQP link max message size for message receiver.\r\n");
 			}
+
+            attachDeviceClientTypeToLink(transport_state->receiver_link);
 
 			// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_077: [IoTHubTransportuAMQP_DoWork shall create the AMQP message receiver using messagereceiver_create() uAMQP API] 
 			if ((transport_state->message_receiver = messagereceiver_create(transport_state->receiver_link, NULL, NULL)) == NULL)
@@ -1068,6 +1116,7 @@ static void IoTHubTransportuAMQP_Destroy(TRANSPORT_HANDLE handle)
 		STRING_delete(transport_state->sasTokenKeyName);
 		STRING_delete(transport_state->deviceKey);
 		STRING_delete(transport_state->devicesPath);
+        STRING_delete(transport_state->iotHubHostFqdn);
 
 		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_036 : [IoTHubTransportuAMQP_Destroy shall return the remaining items in inProgress to waitingToSend list.]
 		rollEventsBackToWaitList(transport_state);
