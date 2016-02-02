@@ -12,6 +12,9 @@ namespace Microsoft.Azure.Devices
     using Microsoft.Azure.Devices.Common;
     using SharedAccessSignatureParser = Microsoft.Azure.Devices.Common.Security.SharedAccessSignature;
 
+    /// <summary>
+    /// Builds a connection string for the IoT Hub service based on the properties populated by the user.
+    /// </summary>
     public class IotHubConnectionStringBuilder
     {
         const char ValuePairDelimiter = ';';

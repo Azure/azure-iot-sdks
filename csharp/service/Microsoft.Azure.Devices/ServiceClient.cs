@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Devices
         /// <summary>
         /// Advanced Message Queuing Protocol transport over WebSocket only.
         /// </summary>
-        Amqp_WebSocket
+        Amqp_WebSocket_Only
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.Azure.Devices
         public static ServiceClient CreateFromConnectionString(string connectionString, TransportType transportType)
         {
             var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
-            var serviceClient = new AmqpServiceClient(iotHubConnectionString, (transportType == TransportType.Amqp_WebSocket) ? true : false);
+            var serviceClient = new AmqpServiceClient(iotHubConnectionString, (transportType == TransportType.Amqp_WebSocket_Only) ? true : false);
             return serviceClient;
         }
 

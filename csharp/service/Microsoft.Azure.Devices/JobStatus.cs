@@ -7,6 +7,9 @@ namespace Microsoft.Azure.Devices
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
+    /// <summary>
+    /// Specifies the various job status for a job.
+    /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum JobStatus
     {

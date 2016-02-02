@@ -6,6 +6,9 @@ namespace Microsoft.Azure.Devices
     using System;
     using Newtonsoft.Json;
 
+    /// <summary>
+    /// Contains properties of an individual feedback record. 
+    /// </summary>
     public class FeedbackRecord
     {
         [JsonProperty(PropertyName = "originalMessageId", DefaultValueHandling = DefaultValueHandling.Ignore)]

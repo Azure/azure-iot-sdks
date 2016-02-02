@@ -4,7 +4,7 @@
 namespace Microsoft.Azure.Devices
 {
     /// <summary>
-    /// Used to provide parameters when requesting an import through the Resource Provider
+    /// Used to provide parameters when requesting an export through the Resource Provider.
     /// </summary>
     public sealed class ExportDevicesRequest
     {
