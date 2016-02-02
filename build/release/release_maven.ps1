@@ -72,13 +72,10 @@ function Release-Client
 
 	# Save attributes we will need
 	if($hasParent){
-		#$groupId = $xml.project.parent.groupId
 		$version = $xml.project.parent.version
 	} else {
-		#$groupId = $xml.project.groupId
 		$version = $xml.project.version
 	}
-	#$artifactId = $xml.project.artifactId
 	$name = $xml.project.name
 	$pom_description = $xml.project.description
 	$dependencies = $xml.SelectNodes('/project/dependencies/dependency')
