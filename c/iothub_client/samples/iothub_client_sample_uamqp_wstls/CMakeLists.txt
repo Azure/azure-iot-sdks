@@ -11,6 +11,7 @@ endif()
 
 set(iothub_client_sample_uamqp_c_files
 	iothub_client_sample_uamqp.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 if(WIN32)
@@ -21,6 +22,7 @@ endif()
 
 set(iothub_client_sample_uamqp_h_files
 	iothub_client_sample_uamqp.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
 IF(WIN32)

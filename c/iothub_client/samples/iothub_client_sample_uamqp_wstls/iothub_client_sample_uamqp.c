@@ -11,10 +11,7 @@
 #include "crt_abstractions.h"
 #include "iothubtransportuamqp_wstls.h"
 
-
-#ifdef MBED_BUILD_TIMESTAMP
-#include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
+#include "..\..\..\certs\certs.h"
 
 static const char* connectionString = "[IoT Hub Device Connection String]";
 static int callbackCounter;
@@ -127,13 +124,10 @@ void iothub_client_sample_uamqp_run(void)
     }
     else
     {
-#ifdef MBED_BUILD_TIMESTAMP
-        // For mbed add the certificate information
-        if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+        if (IoTHubClient_SetOption(iotHubClientHandle, "trusted_certificates", certificates) != IOTHUB_CLIENT_OK)
         {
-            printf("failure to set option \"TrustedCerts\"\r\n");
+            printf("failure to set option \"trusted_certificates\"\r\n");
         }
-#endif // MBED_BUILD_TIMESTAMP
 
         /* Setting Message call back, so we can receive Commands. */
         if (IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
