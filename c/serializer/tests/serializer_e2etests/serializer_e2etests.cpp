@@ -344,6 +344,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
 
     TEST_FUNCTION(IoTClient_AMQP_AmqpMacroRecv_E2ETests)
     {
+#if 0
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
@@ -400,10 +401,12 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         DESTROY_MODEL_INSTANCE(devModel);
         RecvTestData_Destroy(g_recvMacroData);
         IoTHubClient_Destroy(iotHubClientHandle);
+#endif
     }
 
     TEST_FUNCTION(IoTClient_AMQP_MacroSend_E2ETests)
     {
+#if 0
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
@@ -493,10 +496,12 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_Destroy(iotHubClientHandle);
         SendTestData_Destroy(expectedData); //cleanup
+#endif
     }
 
     TEST_FUNCTION(IoTClient_Http_MacroRecv_E2ETests)
     {
+#if 0
         IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
         deviceModel* devModel;
@@ -565,11 +570,12 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_LL_Destroy(iotHubClientHandle);
         RecvTestData_Destroy(g_recvMacroData);
+#endif
     }
 
     TEST_FUNCTION(IoTClient_Http_MacroSend_E2ETests)
     {
-
+#if 0
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
@@ -648,6 +654,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         DESTROY_MODEL_INSTANCE(devModel);
         IoTHubClient_LL_Destroy(iotHubClientHandle);
         SendTestData_Destroy(expectedData); //cleanup
+#endif
     }
 
 END_TEST_SUITE(serializer_e2etests)
