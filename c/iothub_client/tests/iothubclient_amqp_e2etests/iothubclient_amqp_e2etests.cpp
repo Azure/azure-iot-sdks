@@ -390,18 +390,18 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
         ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
 
-        time_t beginOperation, nowTime;
-        beginOperation = time(NULL);
-        while (
-            (
-            (nowTime = time(NULL)),
-            (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
-            ) &&
-            (!notifyData->wasFound) //condition box
-            )
-        {
-            //just go on;
-        }
+        //time_t beginOperation, nowTime;
+        //beginOperation = time(NULL);
+        //while (
+        //    (
+        //    (nowTime = time(NULL)),
+        //    (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
+        //    ) &&
+        //    (!notifyData->wasFound) //condition box
+        //    )
+        //{
+        //    //just go on;
+        //}
 
         // assert
         // Since sending a NULL message is technically against protocol we should never find the message
