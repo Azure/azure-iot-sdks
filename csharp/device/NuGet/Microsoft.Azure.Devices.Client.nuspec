@@ -20,6 +20,10 @@
             <group targetFramework="net45" >
                 <dependency id="Microsoft.Azure.Amqp" version="1.0.0" />
             </group>
+            <group targetFramework="net45" >
+                <dependency id="DotNetty.Codecs.Mqtt" version="0.2.2" />
+                <dependency id="DotNetty.Handlers" version="0.2.2" />
+            </group>
         </dependencies>
     </metadata>
     <files>

@@ -5,18 +5,17 @@ namespace Microsoft.Azure.Devices.Client.Extensions
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Net.Sockets;
     using System.Text;
-    using System.Text.RegularExpressions;
+
 #if !WINDOWS_UWP // Owin NuGet package is not compatible with UAP
     using Microsoft.Owin;
 #endif
 
-    delegate bool TryParse<TInput, TOutput>(TInput input, bool ignoreCase, out TOutput output);
+    delegate bool TryParse<in TInput, TOutput>(TInput input, bool ignoreCase, out TOutput output);
 
     static class CommonExtensionMethods
     {
@@ -27,7 +26,7 @@ namespace Microsoft.Azure.Devices.Client.Extensions
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             if (value.Length == 0)
@@ -172,6 +171,36 @@ namespace Microsoft.Azure.Devices.Client.Extensions
         public static string RemoveWhitespace(this string value)
         {
             return new string(value.Where(c => !char.IsWhiteSpace(c)).ToArray());
+        }
+
+        public static int NthIndexOf(this string str, char value, int startIndex, int n)
+        {
+            if (str == null)
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+            if (startIndex < 0 || startIndex >= str.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
+            }
+            if (n <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(n));
+            }
+            
+            int entryIndex = -1;
+            int nextSearchStartIndex = startIndex;
+            for (int i = 0; i < n; i++)
+            {
+                entryIndex = str.IndexOf(value, nextSearchStartIndex);
+                if (entryIndex < 0)
+                {
+                    return -1;
+                }
+                nextSearchStartIndex = entryIndex + 1;
+            }
+            
+            return entryIndex;
         }
     }
 }

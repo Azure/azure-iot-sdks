@@ -7,10 +7,11 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using Microsoft.Azure.Devices.Client.Extensions;
+    using Microsoft.Azure.Devices.Client.Transport;
 #if !WINDOWS_UWP
-    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client.Exceptions;
+    using Microsoft.Azure.Devices.Client.Transport.Mqtt;
 #endif
 
     // C# using aliases cannot name an unbound generic type declaration without supplying type arguments
@@ -47,7 +48,12 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Advanced Message Queuing Protocol transport over native TCP only
         /// </summary>
-        Amqp_Tcp_Only = 3
+        Amqp_Tcp_Only = 3,
+
+        /// <summary>
+        /// Message Queuing Telemetry Transport.
+        /// </summary>
+        Mqtt = 4
     }
 
     /// <summary>
@@ -60,7 +66,7 @@ namespace Microsoft.Azure.Devices.Client
         const RegexOptions RegexOptions = System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase;
 
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, RegexOptions);
-        DeviceClientHelper impl;
+        TransportHandlerBase impl;
 #if !WINDOWS_UWP
         readonly IotHubConnectionString iotHubConnectionString;
         readonly ITransportSettings[] transportSettings;
@@ -76,7 +82,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 
 #else
-        DeviceClient(DeviceClientHelper impl, TransportType transportType)
+        DeviceClient(TransportHandlerBase impl, TransportType transportType)
         {
             this.impl = impl;
             this.TransportTypeInUse = transportType;
@@ -173,10 +179,16 @@ namespace Microsoft.Azure.Devices.Client
                     throw new NotImplementedException("Amqp protocol is not supported");
 #else
                     return CreateFromConnectionString(connectionString, new ITransportSettings[]
-                    {
+            {
                         new AmqpTransportSettings(TransportType.Amqp_Tcp_Only),
                         new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
                     });
+#endif
+                case TransportType.Mqtt:
+#if WINDOWS_UWP
+                    throw new NotImplementedException("Mqtt protocol is not supported");
+#else
+                    return CreateFromConnectionString(connectionString, new ITransportSettings[] { new MqttTransportSettings(transportType) });
 #endif
                 case TransportType.Amqp_WebSocket_Only:
                 case TransportType.Amqp_Tcp_Only:
@@ -188,7 +200,7 @@ namespace Microsoft.Azure.Devices.Client
                 case TransportType.Http1:
 #if WINDOWS_UWP
                     var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
-                    return new DeviceClient(new HttpDeviceClient(iotHubConnectionString), TransportType.Http1);
+                    return new DeviceClient(new HttpTransportHandler(iotHubConnectionString), TransportType.Http1);
 #else
                     return CreateFromConnectionString(connectionString, new ITransportSettings[] { new Http1TransportSettings() });
 #endif
@@ -223,7 +235,7 @@ namespace Microsoft.Azure.Devices.Client
 
             return CreateFromConnectionString(connectionString + ";" + DeviceId + "=" + deviceId, transportType);
         }
-        
+
 #if !WINDOWS_UWP
         /// <summary>
         /// Create DeviceClient from the specified connection string using a prioritized list of transports
@@ -263,6 +275,12 @@ namespace Microsoft.Azure.Devices.Client
                         break;
                     case TransportType.Http1:
                         if (!(transportSetting is Http1TransportSettings))
+                        {
+                            throw new InvalidOperationException("Unknown implementation of ITransportSettings type");
+                        }
+                        break;
+                    case TransportType.Mqtt:
+                        if (!(transportSetting is MqttTransportSettings))
                         {
                             throw new InvalidOperationException("Unknown implementation of ITransportSettings type");
                         }
@@ -328,7 +346,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
                 return this.impl.CloseAsync().AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
-            }
+        }
 
             return TaskHelpers.CompletedTask;
 #endif
@@ -402,13 +420,13 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
                 });
-            }
+        }
             else
             {
 #endif
                 return this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
-            }
+        }
 #endif
         }
 
@@ -427,7 +445,7 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.CompleteAsync(message).AsTaskOrAsyncOp();
                 });
-            }
+        }
             else
             {
 #endif
@@ -455,7 +473,7 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.AbandonAsync(lockToken).AsTaskOrAsyncOp();
                 });
-            }
+        }
             else
             {
 #endif
@@ -480,13 +498,13 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.AbandonAsync(message).AsTaskOrAsyncOp();
                 });
-            }
+        }
             else
             {
 #endif
                 return this.impl.AbandonAsync(message).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
-            }
+        }
 #endif
         }
 
@@ -508,7 +526,7 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.RejectAsync(lockToken).AsTaskOrAsyncOp();
                 });
-            }
+        }
             else
             {
 #endif
@@ -533,7 +551,7 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.RejectAsync(message).AsTaskOrAsyncOp();
                 });
-            }
+        }
             else
             {
 #endif
@@ -564,7 +582,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
                 return this.impl.SendEventAsync(message).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
-            }
+        }
 #endif
         }
 
@@ -639,17 +657,20 @@ namespace Microsoft.Azure.Devices.Client
             // Concrete Device Client creation was deferred. Use prioritized list of transports.
             foreach (var transportSetting in this.transportSettings)
             {
-                DeviceClientHelper helper;
+                TransportHandlerBase helper;
                 try
                 {
                     switch (transportSetting.GetTransportType())
                     {                    
                         case TransportType.Amqp_WebSocket_Only:
                         case TransportType.Amqp_Tcp_Only:
-                            helper = new AmqpDeviceClient(this.iotHubConnectionString, transportSetting as AmqpTransportSettings);
+                            helper = new AmqpTransportHandler(this.iotHubConnectionString, transportSetting as AmqpTransportSettings);
                             break;
                         case TransportType.Http1:
-                            helper = new HttpDeviceClient(this.iotHubConnectionString, transportSetting as Http1TransportSettings);
+                            helper = new HttpTransportHandler(this.iotHubConnectionString, transportSetting as Http1TransportSettings);
+                            break;
+                        case TransportType.Mqtt:
+                            helper = new MqttTransportHandler(this.iotHubConnectionString, transportSetting as MqttTransportSettings);
                             break;
                         default:
                             throw new InvalidOperationException("Unsupported Transport Setting {0}".FormatInvariant(transportSetting));
