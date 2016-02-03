@@ -12,7 +12,7 @@ add_subdirectory(iothubmessage_unittests)
 if(${use_amqp})
 	add_subdirectory(iothubtransportamqp_unittests)
 	add_subdirectory(iothubclient_amqp_e2etests)
-#	add_subdirectory(longhaul_tests)
+	add_subdirectory(longhaul_tests)
 endif()
 
 if(${use_http})
