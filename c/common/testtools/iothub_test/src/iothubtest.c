@@ -37,7 +37,6 @@ const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
 const char* AMQP_SEND_TARGET_ADDRESS_FMT = "amqps://%s/messages/deviceBound";
 const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 
-#define PROTON_DEFAULT_TIMEOUT      20*1000
 #define THREAD_CONTINUE             0
 #define THREAD_END                  1
 #define MAX_DRAIN_TIME              1000.0
