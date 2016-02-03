@@ -34,7 +34,7 @@
 
 const char* AMQP_RECV_ADDRESS_FMT = "%s/ConsumerGroups/%s/Partitions/%u";
 const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
-const char* AMQP_SEND_TARGET_ADDRESS_FMT = "amqps://%s.%s/messages/deviceBound";
+const char* AMQP_SEND_TARGET_ADDRESS_FMT = "amqps://%s/messages/deviceBound";
 const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 
 #define PROTON_DEFAULT_TIMEOUT      20*1000
@@ -57,7 +57,6 @@ typedef struct IOTHUB_VALIDATION_INFO_TAG
 {
     char* iotHubName;
     char* hostName;
-    char* fullHostName;
     char* partnerName;
     char* partnerHost;
     STRING_HANDLE consumerGroup;
@@ -263,16 +262,16 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
     }
     else
     {
-        if ( (dvhInfo->iotHubName = (char*)malloc(endName+beginName+1) ) == NULL)
+        if ( (dvhInfo->iotHubName = (char*)malloc(endName-beginName+1) ) == NULL)
         {
             result = __LINE__;
         }
-        else if ( (dvhInfo->hostName = (char*)malloc(endHost+beginHost+1) ) == NULL)
+        else if ( (dvhInfo->hostName = (char*)malloc(endHost-beginName+1) ) == NULL)
         {
             free(dvhInfo->iotHubName);
             result = __LINE__;
         }
-        else if (sscanf(pszIotConnString, "HostName=%[^.].%[^;];SharedAccessKeyName=*;SharedAccessKey=*", dvhInfo->iotHubName, dvhInfo->hostName) != 2)
+        else if (sscanf(pszIotConnString, "HostName=%[^.].%[^;];SharedAccessKeyName=*;SharedAccessKey=*", dvhInfo->iotHubName, dvhInfo->hostName + endName - beginName + 1) != 2)
         {
             free(dvhInfo->iotHubName);
             free(dvhInfo->hostName);
@@ -280,18 +279,9 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
         }
         else
         {
-            dvhInfo->fullHostName = (char*)malloc(strlen(dvhInfo->iotHubName) + strlen(dvhInfo->hostName) + 1);
-            if (dvhInfo->fullHostName == NULL)
-            {
-                result = __LINE__;
-            }
-            else
-            {
-                (void)strcpy(dvhInfo->fullHostName, dvhInfo->iotHubName);
-                (void)strcat(dvhInfo->fullHostName, ".");
-                (void)strcat(dvhInfo->fullHostName, dvhInfo->hostName);
-                result = 0;
-            }
+            (void)strcpy(dvhInfo->hostName, dvhInfo->iotHubName);
+            dvhInfo->hostName[endName - beginName] = '.';
+            result = 0;
         }
     }
     return result;
@@ -477,11 +467,11 @@ static char* CreateReceiveHostName(IOTHUB_VALIDATION_INFO* devhubValInfo)
 static char* CreateSendTargetAddress(IOTHUB_VALIDATION_INFO* devhubValInfo)
 {
     char* result;
-    size_t addressLen = strlen(AMQP_SEND_TARGET_ADDRESS_FMT)+strlen(devhubValInfo->iotHubName)+strlen(devhubValInfo->hostName);
+    size_t addressLen = strlen(AMQP_SEND_TARGET_ADDRESS_FMT)+strlen(devhubValInfo->hostName);
     result = (char*)malloc(addressLen+1);
     if (result != NULL)
     {
-        sprintf_s(result, addressLen+1, AMQP_SEND_TARGET_ADDRESS_FMT, devhubValInfo->iotHubName, devhubValInfo->hostName);
+        sprintf_s(result, addressLen+1, AMQP_SEND_TARGET_ADDRESS_FMT, devhubValInfo->hostName);
     }
     return result;
 }
@@ -741,7 +731,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                         XIO_HANDLE tls_io;
 
                         /* create the TLS IO */
-                        TLSIO_CONFIG tls_io_config = { devhubValInfo->fullHostName, 5671 };
+                        TLSIO_CONFIG tls_io_config = { devhubValInfo->hostName, 5671 };
                         const IO_INTERFACE_DESCRIPTION* tlsio_interface = platform_get_default_tlsio();
                         tls_io = xio_create(tlsio_interface, &tls_io_config, NULL);
 
@@ -750,7 +740,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                         sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_io_config, consolelogger_log);
 
                         /* create the connection, session and link */
-                        connection = connection_create(sasl_io, devhubValInfo->fullHostName, "some", NULL, NULL);
+                        connection = connection_create(sasl_io, devhubValInfo->hostName, "some", NULL, NULL);
                         session = session_create(connection, NULL, NULL);
                         (void)session_set_incoming_window(session, 2147483647);
                         (void)session_set_outgoing_window(session, 65536);
