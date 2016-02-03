@@ -24,6 +24,8 @@
 #include "MacroE2EModelAction.h"
 #include "iothub_client.h"
 
+#include "platform.h"
+
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 
 /*the following time expressed in seconds denotes the maximum time to read all the events available in an event hub*/
@@ -307,6 +309,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         g_testByTest = MicroMockCreateMutex();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
+        ASSERT_ARE_EQUAL(int, 0, platform_init() );
         ASSERT_ARE_EQUAL(int, 0, serializer_init(NULL));
 
         g_uniqueTestId = 0;
@@ -314,6 +317,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
+        platform_deinit();
         serializer_deinit();
 
         MicroMockDestroyMutex(g_testByTest);
