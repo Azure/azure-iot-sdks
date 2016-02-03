@@ -55,6 +55,8 @@
 #define MESSAGE_SENDER_SOURCE_ADDRESS "ingress"
 #define MESSAGE_SENDER_MAX_LINK_SIZE 65536
 
+typedef XIO_HANDLE(*TLS_IO_TRANSPORT_PROVIDER)(const char* fqdn, int port, const char* certificates);
+
 typedef enum CBS_STATE_TAG
 {
 	CBS_STATE_IDLE,
@@ -90,13 +92,13 @@ typedef struct UAMQP_TRANSPORT_STATE_TAG
 	size_t message_send_timeout;
 	// Maximum time for the connection establishment/retry logic should wait for a connection to succeed, in milliseconds.
 	size_t connection_timeout;
-	// A callback passed by the app layer to provide the I/O transport instance (e.g., TLS, WebSockets, etc).
-	IO_TRANSPORT_PROVIDER_CALLBACK io_transport_provider_callback;
 	// Saved reference to the IoTHub LL Client.
 	IOTHUB_CLIENT_LL_HANDLE iothub_client_handle;
 	
-	// Instance obtained using io_transport_provider_callback.
+	// TSL I/O transport.
 	XIO_HANDLE tls_io;
+	// Pointer to the function that creates the TLS I/O (internal use only).
+	TLS_IO_TRANSPORT_PROVIDER tls_io_transport_provider;
 	// AMQP SASL I/O transport created on top of the TLS I/O layer.
 	XIO_HANDLE sasl_io;
 	// AMQP SASL I/O mechanism to be used.
@@ -139,6 +141,8 @@ typedef struct EVENT_TRACKER_TAG
 	time_t time_sent;
 	DLIST_ENTRY entry;
 } EVENT_TRACKER;
+
+
 
 
 // Auxiliary functions
@@ -340,25 +344,10 @@ AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
 	return result;
 }
 
-XIO_HANDLE default_io_transport_provider(const char* fqdn, int port, const char* certificates)
+XIO_HANDLE getTLSIOTransport(const char* fqdn, int port, const char* certificates)
 {
-	const IO_INTERFACE_DESCRIPTION* io_interface_description;
-
-#ifdef _WIN32
-    // Codes_SRS_IOTHUBTRANSPORTUAMQP_09_126: [default_io_transport_provider shall create and return a XIO_HANDLE instance for TLS transport using SChannel if the current platform is WINDOWS] 
-    TLSIO_CONFIG tls_io_config = { fqdn, port };
-    io_interface_description = tlsio_schannel_get_interface_description();
-#else
-#ifdef MBED_BUILD_TIMESTAMP
-    TLSIO_CONFIG tls_io_config = { fqdn, port };
-    io_interface_description = tlsio_wolfssl_get_interface_description();
-#else
-    // Codes_SRS_IOTHUBTRANSPORTUAMQP_09_127: [default_io_transport_provider shall create and return a XIO_HANDLE instance for TLS transport using OpenSSL if the current platform is not WINDOWS]
-    TLSIO_CONFIG tls_io_config = { fqdn, port };
-    io_interface_description = tlsio_openssl_get_interface_description();
-#endif
-#endif
-
+	TLSIO_CONFIG tls_io_config = { fqdn, port };
+	const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
 	return xio_create(io_interface_description, &tls_io_config, NULL);
 }
 
@@ -398,12 +387,8 @@ static void destroyConnection(UAMQP_TRANSPORT_INSTANCE* transport_state)
 
 		if (transport_state->tls_io != NULL)
 		{
-			// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_034: [IoTHubTransportuAMQP_Destroy shall destroy the uAMQP TLS I/O transport if created internally.]
-			if (transport_state->io_transport_provider_callback == default_io_transport_provider)
-			{
-				xio_destroy(transport_state->tls_io);
-			}
-
+			// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_034: [IoTHubTransportuAMQP_Destroy shall destroy the uAMQP TLS I/O transport.]
+			xio_destroy(transport_state->tls_io);
 			transport_state->tls_io = NULL;
 		}
 	}
@@ -422,13 +407,13 @@ static int establishConnection(UAMQP_TRANSPORT_INSTANCE* transport_state)
 {
 	int result;
 
-	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_110: [IoTHubTransportuAMQP_DoWork shall create the TLS IO using transport_state->io_transport_provider callback function] 
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_110: [IoTHubTransportuAMQP_DoWork shall create the TLS I/O] 
 	if (transport_state->tls_io == NULL &&
-		(transport_state->tls_io = transport_state->io_transport_provider_callback(STRING_c_str(transport_state->iotHubHostFqdn), transport_state->iotHubPort, transport_state->trusted_certificates)) == NULL)
+		(transport_state->tls_io = transport_state->tls_io_transport_provider(STRING_c_str(transport_state->iotHubHostFqdn), transport_state->iotHubPort, transport_state->trusted_certificates)) == NULL)
 	{
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_136: [If transport_state->io_transport_provider_callback fails, IoTHubTransportuAMQP_DoWork shall fail and return immediately]
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_136: [If the creation of the TLS I/O transport fails, IoTHubTransportuAMQP_DoWork shall fail and return immediately]
 		result = RESULT_FAILURE;
-		LogError("Failed to obtain a I/O transport layer from io_transport_provider_callback.\r\n");
+		LogError("Failed to obtain a TLS I/O transport layer.\r\n");
 	}
 	// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_056: [IoTHubTransportuAMQP_DoWork shall create the SASL mechanism using uAMQP’s saslmechanism_create() API] 
 	else if ((transport_state->sasl_mechanism = saslmechanism_create(saslmssbcbs_get_interface(), NULL)) == NULL)
@@ -439,7 +424,7 @@ static int establishConnection(UAMQP_TRANSPORT_INSTANCE* transport_state)
 	}
 	else
 	{
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_060: [IoTHubTransportuAMQP_DoWork shall create the SASL I / O layer using the xio_create() C Shared Utility API]
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_060: [IoTHubTransportuAMQP_DoWork shall create the SASL I/O layer using the xio_create() C Shared Utility API]
 		SASLCLIENTIO_CONFIG sasl_client_config = { transport_state->tls_io, transport_state->sasl_mechanism };
 		if ((transport_state->sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_client_config, NULL)) == NULL)
 		{
@@ -995,6 +980,7 @@ static TRANSPORT_HANDLE IoTHubTransportuAMQP_Create(const IOTHUBTRANSPORT_CONFIG
 			transport_state->sender_link = NULL;
 			transport_state->session = NULL;
 			transport_state->tls_io = NULL;
+			transport_state->tls_io_transport_provider = getTLSIOTransport;
 
 			transport_state->waitingToSend = config->waitingToSend;
 			DList_InitializeListHead(&transport_state->inProgress);
@@ -1054,17 +1040,6 @@ static TRANSPORT_HANDLE IoTHubTransportuAMQP_Create(const IOTHUBTRANSPORT_CONFIG
 
 				// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_130 : [IoTHubTransportuAMQP_Create shall set parameter transport_state->message_send_timeout with the default value of 300000 (milliseconds).]
 				transport_state->message_send_timeout = DEFAULT_MESSAGE_SEND_TIMEOUT_MS;
-
-				// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_132: [If config->upperConfig->io_transport_provider_callback is not NULL, IoTHubTransportuAMQP_Create shall set transport_state->io_transport_provider_callback to config->upperConfig->io_transport_provider_callback]
-				if (config->upperConfig->io_transport_provider_callback != NULL)
-				{
-					transport_state->io_transport_provider_callback = config->upperConfig->io_transport_provider_callback;
-				}
-				// Codes_SRS_IOTHUBTRANSPORTUAMQP_09_125: [If config->upperConfig->io_transport_provider_callback is NULL, IoTHubTransportuAMQP_Create shall set it to default_io_transport_provider] 
-				else
-				{
-					transport_state->io_transport_provider_callback = default_io_transport_provider;
-				}
 			}
 		}
 	}

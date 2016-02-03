@@ -23,6 +23,7 @@
 #include "tlsio_wolfssl.h"
 #include "tlsio_openssl.h"
 #include "tlsio.h"
+#include "platform.h"
 
 #include "iothub_client_version.h"
 
@@ -66,7 +67,6 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     DLIST_ENTRY waitingForAck;
     PDLIST_ENTRY waitingToSend;
     IOTHUB_CLIENT_LL_HANDLE llClientHandle;
-    IO_TRANSPORT_PROVIDER_CALLBACK io_transport_provider_callback;
     CONTROL_PACKET_TYPE currPacketState;
     XIO_HANDLE xioTransport;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
@@ -245,23 +245,10 @@ static void MqttOpCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_
     }
 }
 
-const XIO_HANDLE defaultIoTransportProvider(const char* fqdn, int port)
+const XIO_HANDLE getIoTransportProvider(const char* fqdn, int port)
 {
-    const IO_INTERFACE_DESCRIPTION* io_interface_description;
-
-#ifdef _WIN32
     TLSIO_CONFIG tls_io_config = { fqdn, port };
-    io_interface_description = tlsio_schannel_get_interface_description();
-#else
-    #ifdef MBED_BUILD_TIMESTAMP
-        TLSIO_CONFIG tls_io_config = { fqdn, port };
-        io_interface_description = tlsio_wolfssl_get_interface_description();
-    #else
-        TLSIO_CONFIG tls_io_config = { fqdn, port };
-        io_interface_description = tlsio_openssl_get_interface_description();
-    #endif
-#endif
-
+	const IO_INTERFACE_DESCRIPTION* io_interface_description = (IO_INTERFACE_DESCRIPTION*)platform_get_default_tlsio();
     return (void*)xio_create(io_interface_description, &tls_io_config, NULL/*defaultPrintLogFunction*/);
 }
 
@@ -422,7 +409,8 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transportState, bool 
                 // Increment beyond the double backslash
                 hostName += 2;
             }
-            transportState->xioTransport = transportState->io_transport_provider_callback(hostName, transportState->portNum);
+
+            transportState->xioTransport = getIoTransportProvider(hostName, transportState->portNum);
             if (mqtt_client_connect(transportState->mqttClient, transportState->xioTransport, &options) != 0)
             {
                 LogError("failure connecting to address %s:%d.\r\n", STRING_c_str(transportState->hostAddress), transportState->portNum);
@@ -554,15 +542,6 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
             }
             else
             {
-                if (upperConfig->io_transport_provider_callback != NULL)
-                {
-                    state->io_transport_provider_callback = upperConfig->io_transport_provider_callback;
-                }
-                else
-                {
-                    state->io_transport_provider_callback = defaultIoTransportProvider;
-                }
-
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_010: [IoTHubTransportMqtt_Create shall allocate memory to save its internal state where all topics, hostname, device_id, device_key, sasTokenSr and client handle shall be saved.] */
                 DList_InitializeListHead(&(state->waitingForAck));
                 state->destroyCalled = false;
@@ -667,10 +646,7 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle)
 
         (void)mqtt_client_disconnect(transportState->mqttClient);
 
-        if (transportState->io_transport_provider_callback == defaultIoTransportProvider && transportState->xioTransport != NULL)
-        {
-            xio_destroy(transportState->xioTransport);
-        }
+        xio_destroy(transportState->xioTransport);
 
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_014: [IoTHubTransportMqtt_Destroy shall free all the resources currently in use.] */
         transportState->connected = false;

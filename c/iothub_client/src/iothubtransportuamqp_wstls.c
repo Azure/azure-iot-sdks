@@ -9,7 +9,7 @@
 #define DEFAULT_WS_RELATIVE_PATH "/$iothub/websocket"
 #define DEFAULT_WS_PORT 443
 
-XIO_HANDLE default_io_transport_provider_websockets_tls(const char* fqdn, int port, const char* certificates)
+XIO_HANDLE getWebSocketsIOTransport(const char* fqdn, int port, const char* certificates)
 {
 	WSIO_CONFIG ws_io_config = { fqdn, port, DEFAULT_WS_PROTOCOL_NAME, DEFAULT_WS_RELATIVE_PATH, true, certificates };
 
@@ -21,7 +21,7 @@ static TRANSPORT_HANDLE IoTHubTransportuAMQP_Create_WebSocketsOverTls(const IOTH
 
 	if (transport_state != NULL)
 	{
-		transport_state->io_transport_provider_callback = default_io_transport_provider_websockets_tls;
+		transport_state->tls_io_transport_provider = getWebSocketsIOTransport;
 		transport_state->iotHubPort = DEFAULT_WS_PORT;
 	}
 

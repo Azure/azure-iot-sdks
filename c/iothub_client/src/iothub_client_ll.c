@@ -83,7 +83,6 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
             config->deviceKey = NULL;
             /* Codes_SRS_IOTHUBCLIENT_LL_04_002: [If it does not, it shall pass the protocolGatewayHostName NULL.] */
             config->protocolGatewayHostName = NULL;
-            config->io_transport_provider_callback = NULL;
 
             if ((connString = STRING_construct(connectionString)) == NULL)
             {
