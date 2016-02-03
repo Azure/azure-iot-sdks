@@ -29,9 +29,6 @@ This document describes how to build and run the **simple_sample_http.js** Node.
 # Step 1: Prerequisites
 
 You should have the following items ready before beginning the process:
-
--   [Prepare your development environment][setup-devbox].
-You should have the following items ready before beginning the process:
 -   Computer with Git client installed and access to the
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
 -   [Prepare your development environment](https://github.com/Azure/azure-iot-sdks/blob/master/csharp/device/doc/devbox_setup.md).
@@ -83,4 +80,6 @@ You should have the following items ready before beginning the process:
 
 - The sample application will send messages to your IoT hub, and the **iothub-explorer** utility will display the messages as your IoT hub receives them.
 
-[setup-devbox]: node-devbox-setup.md
+# Debugging the samples (and/or your code)
+[Visual Studio Code](https://code.visualstudio.com/) provides an excellent environment to write and debug Node.js code:
+- [Debugging with Visual Studio Code](../../doc/get_started/node-debug-vscode.md)
