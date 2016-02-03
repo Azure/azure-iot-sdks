@@ -15,7 +15,7 @@ For more information on how to use this library refer to the documents below:
 - [Setup IoT Hub](../../doc/setup_iothub.md)
 - [Provision devices](../../tools/iothub-explorer/doc/provision_device.md)
 - [Run a node.js sample application](doc/run_sample.md)
-- [Node API reference](http://azure.github.io/azure-iot-sdks/node/api_reference/azure-iot-device/1.0.0-preview.10/index.html)
+- [Node API reference](http://azure.github.io/azure-iot-sdks/node/api_reference/azure-iot-device/1.0.0/index.html)
 - [Debugging with Visual Studio Code](../../doc/get_started/node-debug-vscode.md)
 
 ## Directory structure
