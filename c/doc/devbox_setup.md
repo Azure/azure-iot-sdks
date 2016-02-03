@@ -28,11 +28,21 @@ Use the **master** branch to ensure you fetch the latest release version.
 
 	\|\-\-\- azure-iot-sdk
 
-	\|\-\-\-\-\-\- c
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- c
   
-	\|\-\-\-\-\-\-\-\-\- azure-c-shared-utility
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-c-shared-utility
+	
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-uamqp-c
+	
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-c-shared-utility
+	
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- libwebsockets
+	
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- azure-umqtt-c
+	
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- azure-c-shared-utility
  
- 2.  If you have a previous version of the repository you will need to run the following commands:
+ 2.  If you have a previous version of the repository you will need to run the following commands (under each submodule):
 ```
     git submodule init
     git submodule update
@@ -83,6 +93,12 @@ The following instructions outline how you can build the libraries in Windows:
 8. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
 
 > Note: In order to test MQTT End2End you must also deploy an [Azure IoT Protocol Gateway](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md).
+
+
+> Note: To enable support to AMQP over WebSockets, 
+  1. Install [OpenSSL 1.0.1 (x86)](https://github.com/openssl/openssl) (tip: install with dynamic libraries); 
+  2. Additionally to instructions on **step 1 above**, create the environment variable **OPENSSL_ROOT_DIR=C:\\OpenSSL** 
+  3. Run the **build\_client.cmd** script with the option ```--use-websockets```.
 
 <a name="linux"/>
 ## Set up a Linux development environment

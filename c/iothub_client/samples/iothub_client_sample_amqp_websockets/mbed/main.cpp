@@ -5,7 +5,7 @@
 #include "EthernetInterface.h"
 #include "mbed/logging.h"
 #include "mbed/mbedtime.h"
-#include "iothub_client_sample_uamqp.h"
+#include "iothub_client_sample_amqp_websockets.h"
 #include "NTPClient.h"
 #includes "platform.h"
 

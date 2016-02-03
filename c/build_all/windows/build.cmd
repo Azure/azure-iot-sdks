@@ -52,6 +52,7 @@ set build-platform=Win32
 set CMAKE_run_e2e_tests=OFF
 set CMAKE_run_longhaul_tests=OFF
 set CMAKE_skip_unittests=OFF
+set CMAKE_use_wsio=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -62,6 +63,7 @@ if "%1" equ "--platform" goto arg-build-platform
 if "%1" equ "--run-e2e-tests" goto arg-run-e2e-tests
 if "%1" equ "--run-longhaul-tests" goto arg-longhaul-tests
 if "%1" equ "--skip-unittests" goto arg-skip-unittests
+if "%1" equ "--use-websockets" goto arg-use-websockets
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -90,6 +92,11 @@ goto args-continue
 
 :arg-skip-unittests
 set CMAKE_skip_unittests=ON
+goto args-continue
+
+:arg-use-websockets
+shift
+set CMAKE_use_wsio=ON
 goto args-continue
 
 :args-continue
@@ -181,6 +188,10 @@ rem ----------------------------------------------------------------------------
 rem -- build with CMAKE and run tests
 rem -----------------------------------------------------------------------------
 
+if %CMAKE_use_wsio% == ON (
+	echo WebSockets support only available for x86 platform.
+)
+
 rmdir /s/q %USERPROFILE%\cmake
 rem no error checking
 
@@ -188,7 +199,7 @@ mkdir %USERPROFILE%\cmake
 rem no error checking
 
 pushd %USERPROFILE%\cmake
-cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% %build-root% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% %build-root%
+cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% %build-root% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root% 
 if not %errorlevel%==0 exit /b %errorlevel%
 
 msbuild /m azure_iot_sdks.sln

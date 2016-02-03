@@ -6,7 +6,7 @@
 
 for %%i in ("%~dp0..\..\..\..") do set "root_path=%%~fi"
 
-set base=iothub_client_sample_amqp
+set base=iothub_client_sample_amqp_websockets
 
 set "sample_path=%~dp0"
 set "zip_path=%~dp0%base%.zip"

@@ -10,7 +10,7 @@ if(NOT ${use_uamqp})
 endif()
 
 set(iothub_client_sample_uamqp_c_files
-	iothub_client_sample_uamqp.c
+	iothub_client_sample_amqp_websockets.c
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
@@ -21,7 +21,7 @@ else()
 endif()
 
 set(iothub_client_sample_uamqp_h_files
-	iothub_client_sample_uamqp.h
+	iothub_client_sample_amqp_websockets.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
