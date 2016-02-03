@@ -57,12 +57,12 @@ if(${use_uamqp})
 	if (${use_wsio})
 		set(iothub_client_uamqp_transport_c_files
 			${iothub_client_ll_transport_c_files}
-			./src/iothubtransportuamqp_wstls.c
+			./src/iothubtransportamqp_websockets.c
 		)
 		
 		set(iothub_client_uamqp_transport_h_files
 			${iothub_client_ll_transport_h_files}
-			./inc/iothubtransportuamqp_wstls.h
+			./inc/iothubtransportamqp_websockets.h
 		)
 	else()
 		set(iothub_client_uamqp_transport_c_files

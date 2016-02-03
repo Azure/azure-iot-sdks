@@ -28,6 +28,6 @@ if(${use_uamqp})
 	add_sample_directory(iothub_client_sample_uamqp)
 	
 	if (${use_wsio})
-		add_sample_directory(iothub_client_sample_uamqp_wstls)
+		add_sample_directory(iothub_client_sample_amqp_websockets)
 	endif()
 endif()

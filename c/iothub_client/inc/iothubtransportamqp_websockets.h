@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef IOTHUBTRANSPORTUAMQP_WSTLS_H
-#define IOTHUBTRANSPORTUAMQP_WSTLS_H
+#ifndef IOTHUBTRANSPORTAMQP_WEBSOCKETS_H
+#define IOTHUBTRANSPORTAMQP_WEBSOCKETS_H
 
 #include "iothub_client_private.h"
 
@@ -17,4 +17,4 @@ extern "C"
 }
 #endif
 
-#endif /*IOTHUBTRANSPORTUAMQP_WSTLS_H*/
+#endif /*IOTHUBTRANSPORTAMQP_WEBSOCKETS_H*/

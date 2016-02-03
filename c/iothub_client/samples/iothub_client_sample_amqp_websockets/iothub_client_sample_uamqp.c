@@ -9,7 +9,7 @@
 #include "iothub_message.h"
 #include "threadapi.h"
 #include "crt_abstractions.h"
-#include "iothubtransportuamqp_wstls.h"
+#include "iothubtransportamqp_websockets.h"
 
 #include "..\..\..\certs\certs.h"
 
