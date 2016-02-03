@@ -397,6 +397,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         IoTHubClient_Destroy(iotHubClientHandle);
     }
 
+#if 0
     TEST_FUNCTION(IoTClient_AMQP_MacroSend_E2ETests)
     {
         // arrange
@@ -488,6 +489,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         IoTHubClient_Destroy(iotHubClientHandle);
         SendTestData_Destroy(expectedData); //cleanup
     }
+#endif
 
     TEST_FUNCTION(IoTClient_Http_MacroRecv_E2ETests)
     {
@@ -560,6 +562,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         RecvTestData_Destroy(g_recvMacroData);
     }
 
+#if 0
     TEST_FUNCTION(IoTClient_Http_MacroSend_E2ETests)
     {
 
@@ -641,5 +644,6 @@ BEGIN_TEST_SUITE(serializer_e2etests)
         IoTHubClient_LL_Destroy(iotHubClientHandle);
         SendTestData_Destroy(expectedData); //cleanup
     }
+#endif
 
 END_TEST_SUITE(serializer_e2etests)
