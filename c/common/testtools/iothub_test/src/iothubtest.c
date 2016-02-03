@@ -252,35 +252,6 @@ static size_t ResolvePartitionIndex(const char* partitionKey, size_t maxPartitio
     return result;
 }
 
-/*
-static bool AddPropertyToMessage(pn_messenger_t* messenger, pn_message_t* message, const char* pszDeviceId, const char* pszAddress)
-{
-    bool result;
-    size_t addressLen = strlen(AMQP_ADDRESS_PATH_FMT)+strlen(pszDeviceId)+1;
-    char* deviceDest = (char*)malloc(addressLen+1);
-    if (deviceDest == NULL)
-    {
-        result = false;
-    }
-    else
-    {
-        sprintf_s(deviceDest, addressLen+1, AMQP_ADDRESS_PATH_FMT, pszDeviceId);
-        if (pn_messenger_route(messenger, deviceDest, pszAddress) != 0 ||
-            pn_message_set_address(message, deviceDest) != 0
-           )
-        {
-            result = false;
-        }
-        else
-        {
-            result = true;
-        }
-        free(deviceDest);
-    }
-    return result;
-}
-*/
-
 static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDATION_INFO* dvhInfo)
 {
     int result;
