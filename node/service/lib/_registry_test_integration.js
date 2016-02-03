@@ -21,6 +21,6 @@ var badConnStrings = [
 ];
 
 describe('Over real HTTPS', function () {
-  this.timeout(15000);
+  this.timeout(60000);
   runTests(null, connectionString, badConnStrings, deviceId);
 });
