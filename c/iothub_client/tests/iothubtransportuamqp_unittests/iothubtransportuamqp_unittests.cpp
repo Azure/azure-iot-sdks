@@ -176,6 +176,7 @@ std::ostream& operator<<(std::ostream& left, const BINARY_DATA bindata)
 #define TEST_OPTION_SASTOKEN_REFRESH_TIME "sas_token_refresh_time"
 #define TEST_OPTION_CBS_REQUEST_TIMEOUT "cbs_request_timeout"
 #define TEST_OPTION_MESSAGE_SEND_TIMEOUT "message_send_timeout"
+#define TEST_AMQP_VALUE_TEST_HANDLE (AMQP_VALUE)0x300
 
 
 time_t test_current_time;
@@ -217,7 +218,19 @@ public:
 	MOCK_STATIC_METHOD_1(, void, amqpvalue_destroy, AMQP_VALUE, value)
 	MOCK_VOID_METHOD_END()
 
-	/* crt_abstractions mocks */
+    MOCK_STATIC_METHOD_0(, AMQP_VALUE, amqpvalue_create_map)
+    MOCK_METHOD_END(AMQP_VALUE, NULL)
+
+    MOCK_STATIC_METHOD_1(, AMQP_VALUE, amqpvalue_create_symbol, const char*, value)
+    MOCK_METHOD_END(AMQP_VALUE, NULL)
+
+    MOCK_STATIC_METHOD_1(, AMQP_VALUE, amqpvalue_create_string, const char*, value)
+    MOCK_METHOD_END(AMQP_VALUE, NULL)
+
+    MOCK_STATIC_METHOD_3(, int, amqpvalue_set_map_value, AMQP_VALUE, map, AMQP_VALUE, key, AMQP_VALUE, value)
+    MOCK_METHOD_END(int, -1)
+
+    /* crt_abstractions mocks */
 	MOCK_STATIC_METHOD_2(, int, mallocAndStrcpy_s, char**, destination, const char*, source)
 	MOCK_METHOD_END(int, (*destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(source) + 1), strcpy(*destination, source), 0))
 
@@ -522,7 +535,10 @@ public:
 	MOCK_STATIC_METHOD_1(, void, link_destroy, LINK_HANDLE, handle)
 	MOCK_VOID_METHOD_END()
 
-	// message.h
+    MOCK_STATIC_METHOD_2(, int, link_set_attach_properties, LINK_HANDLE, link, fields, attach_properties)
+    MOCK_METHOD_END(int, 0)
+
+    // message.h
 	MOCK_STATIC_METHOD_2(, int, message_add_body_amqp_data, MESSAGE_HANDLE, message, BINARY_DATA, binary_data)
 	MOCK_METHOD_END(int, 0)
 
@@ -672,6 +688,11 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportuAMQPMocks, , static STRING_HANDLE,
 
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportuAMQPMocks, , MESSAGE_HANDLE, message_create);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportuAMQPMocks, , void, amqpvalue_destroy, AMQP_VALUE, value);
+DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportuAMQPMocks, , AMQP_VALUE, amqpvalue_create_map);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportuAMQPMocks, , AMQP_VALUE, amqpvalue_create_symbol, const char*, value);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportuAMQPMocks, , AMQP_VALUE, amqpvalue_create_string, const char*, value);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportuAMQPMocks, , int, amqpvalue_set_map_value, AMQP_VALUE, map, AMQP_VALUE, key, AMQP_VALUE, value);
+
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportuAMQPMocks, , IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromByteArray, const unsigned char*, buffre, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportuAMQPMocks, , const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, handle);
@@ -776,6 +797,8 @@ DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportuAMQPMocks, , LINK_HANDLE, link_cre
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportuAMQPMocks, , int, link_set_max_message_size, LINK_HANDLE, link, uint64_t, max_message_size);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportuAMQPMocks, , int, link_set_rcv_settle_mode, LINK_HANDLE, link, receiver_settle_mode, rcv_settle_mode);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportuAMQPMocks, , void, link_destroy, LINK_HANDLE, handle);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportuAMQPMocks, , int, link_set_attach_properties, LINK_HANDLE, link, fields, attach_properties);
+
 
 // message.h
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportuAMQPMocks, , int, message_add_body_amqp_data, MESSAGE_HANDLE, message, BINARY_DATA, binary_data);
@@ -980,7 +1003,15 @@ void setExpectedCallsForCreateMessageReceiver(CIoTHubTransportuAMQPMocks& mocks,
 	EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGERECEIVER_LINK);
 	STRICT_EXPECTED_CALL(mocks, link_set_rcv_settle_mode(NULL, receiver_settle_mode_first)).IgnoreArgument(1);
 	EXPECTED_CALL(mocks, link_set_max_message_size(NULL, TEST_MESSAGE_RECEIVER_MAX_LINK_SIZE)).IgnoreArgument(1);
-	EXPECTED_CALL(mocks, messagereceiver_create(NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_RECEIVER);
+    EXPECTED_CALL(mocks, amqpvalue_create_map()).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_symbol(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_string(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_set_map_value(NULL, NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, link_set_attach_properties(NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, messagereceiver_create(NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_RECEIVER);
 	EXPECTED_CALL(mocks, messagereceiver_open(NULL, NULL, NULL));
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_SOURCE));
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
@@ -1000,7 +1031,15 @@ void setExpectedCallsForCreateEventSender(CIoTHubTransportuAMQPMocks& mocks, IOT
 	EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn(TEST_MESSAGESENDER_TARGET);
 	EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGESENDER_LINK);
 	STRICT_EXPECTED_CALL(mocks, link_set_max_message_size(NULL, TEST_MESSAGE_SENDER_MAX_LINK_SIZE)).IgnoreArgument(1);
-	EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_SENDER);
+    EXPECTED_CALL(mocks, amqpvalue_create_map()).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_symbol(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_string(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_set_map_value(NULL, NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, link_set_attach_properties(NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_SENDER);
 	EXPECTED_CALL(mocks, messagesender_open(TEST_MESSAGE_SENDER));
 	EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
 	EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
@@ -1086,6 +1125,7 @@ void setExpectedCallsForTransportDestroy(CIoTHubTransportuAMQPMocks& mocks, IOTH
 	EXPECTED_CALL(mocks, STRING_delete(0));
 	EXPECTED_CALL(mocks, STRING_delete(0));
 	EXPECTED_CALL(mocks, STRING_delete(0));
+    EXPECTED_CALL(mocks, STRING_delete(0));
 
 	while (numberOfEventsInProgress-- > 0)
 	{
@@ -2495,7 +2535,15 @@ TEST_FUNCTION(uAMQP_DoWork_messagesender_create_fails)
 	EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn(TEST_MESSAGESENDER_TARGET);
 	EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGESENDER_LINK);
 	EXPECTED_CALL(mocks, link_set_max_message_size(NULL, NULL));
-	EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL)).SetReturn((MESSAGE_SENDER_HANDLE)NULL);
+    EXPECTED_CALL(mocks, amqpvalue_create_map()).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_symbol(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_string(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_set_map_value(NULL, NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, link_set_attach_properties(NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL)).SetReturn((MESSAGE_SENDER_HANDLE)NULL);
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
 	setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
@@ -2545,7 +2593,15 @@ TEST_FUNCTION(uAMQP_DoWork_messagesender_open_fails)
 	EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn(TEST_MESSAGESENDER_TARGET);
 	EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGESENDER_LINK);
 	EXPECTED_CALL(mocks, link_set_max_message_size(NULL, NULL));
-	EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_SENDER);
+    EXPECTED_CALL(mocks, amqpvalue_create_map()).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_symbol(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_string(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_set_map_value(NULL, NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, link_set_attach_properties(NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_SENDER);
 	EXPECTED_CALL(mocks, messagesender_open(TEST_MESSAGE_SENDER)).SetReturn(1);
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
@@ -2800,7 +2856,15 @@ TEST_FUNCTION(uAMQP_DoWork_messagereceiver_create_fails)
 	EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGERECEIVER_LINK);
 	STRICT_EXPECTED_CALL(mocks, link_set_rcv_settle_mode(TEST_MESSAGERECEIVER_LINK, receiver_settle_mode_first));
 	EXPECTED_CALL(mocks, link_set_max_message_size(NULL, NULL));
-	EXPECTED_CALL(mocks, messagereceiver_create(NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_RECEIVER).SetReturn((MESSAGE_RECEIVER_HANDLE)NULL);
+    EXPECTED_CALL(mocks, amqpvalue_create_map()).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_symbol(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_string(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_set_map_value(NULL, NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, link_set_attach_properties(NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, messagereceiver_create(NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_RECEIVER).SetReturn((MESSAGE_RECEIVER_HANDLE)NULL);
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_SOURCE));
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
 	EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
@@ -2854,7 +2918,15 @@ TEST_FUNCTION(uAMQP_DoWork_messagereceiver_open_fails)
 	EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGERECEIVER_LINK);
 	STRICT_EXPECTED_CALL(mocks, link_set_rcv_settle_mode(TEST_MESSAGERECEIVER_LINK, receiver_settle_mode_first));
 	EXPECTED_CALL(mocks, link_set_max_message_size(NULL, NULL));
-	EXPECTED_CALL(mocks, messagereceiver_create(NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_RECEIVER);
+    EXPECTED_CALL(mocks, amqpvalue_create_map()).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_symbol(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_create_string(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
+    EXPECTED_CALL(mocks, amqpvalue_set_map_value(NULL, NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, link_set_attach_properties(NULL, NULL)).IgnoreAllArguments().SetReturn(0);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
+    EXPECTED_CALL(mocks, messagereceiver_create(NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_RECEIVER);
 	EXPECTED_CALL(mocks, messagereceiver_open(TEST_MESSAGE_RECEIVER, NULL, NULL)).SetReturn(1);
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_SOURCE));
 	STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
@@ -2999,8 +3071,8 @@ TEST_FUNCTION(uAMQP_GetSendStatus_idle_succeeds)
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
-	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
-	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_IDLE, "IoTHubTransport_GetSendStatus returned unexpected status.");
+	ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
+	ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_IDLE, "IoTHubTransport_GetSendStatus returned unexpected status.");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
@@ -3036,8 +3108,8 @@ TEST_FUNCTION(uAMQP_GetSendStatus_inProgress_not_empty_succeeds)
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
-	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
-	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_BUSY, "IoTHubTransport_GetSendStatus returned unexpected status.");
+	ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
+	ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_BUSY, "IoTHubTransport_GetSendStatus returned unexpected status.");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
@@ -3072,8 +3144,8 @@ TEST_FUNCTION(uAMQP_GetSendStatus_waitingToSend_not_empty_succeeds)
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
-	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
-	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_BUSY, "IoTHubTransport_GetSendStatus returned unexpected status.");
+	ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK, "IoTHubTransport_GetSendStatus returned unexpected result.");
+	ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_STATUS, iotHubClientStatus, IOTHUB_CLIENT_SEND_STATUS_BUSY, "IoTHubTransport_GetSendStatus returned unexpected status.");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
@@ -3152,7 +3224,7 @@ TEST_FUNCTION(uAMQP_SetOption_NULL_transport_fails)
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
-	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+	ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
@@ -3180,7 +3252,7 @@ TEST_FUNCTION(uAMQP_SetOption_NULL_option_fails)
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
-	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+	ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
@@ -3207,7 +3279,7 @@ TEST_FUNCTION(uAMQP_SetOption_NULL_value_fails)
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
-	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+	ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
@@ -3234,7 +3306,7 @@ TEST_FUNCTION(uAMQP_SetOption_invalid_option_fails)
 
 	// assert
 	mocks.AssertActualAndExpectedCalls();
-	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+	ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
