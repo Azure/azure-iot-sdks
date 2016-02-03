@@ -501,12 +501,28 @@ static char* CreateSendAuthCid(IOTHUB_VALIDATION_INFO* devhubValInfo)
     return result;
 }
 
+typedef struct MESSAGE_RECEIVER_CONTEXT_TAG
+{
+    pfIoTHubMessageCallback msgCallback;
+    void* context;
+    bool message_received;
+} MESSAGE_RECEIVER_CONTEXT;
+
 static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
 {
-    (void)message;
-    (void)context;
+    MESSAGE_RECEIVER_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_CONTEXT*)context;
+    BINARY_DATA binary_data;
 
-    printf("Message received.\r\n");
+    if (message_get_body_amqp_data(message, 0, &binary_data) == 0)
+    {
+        if (msg_received_context->msgCallback != NULL)
+        {
+            if (msg_received_context->msgCallback(msg_received_context->context, binary_data.bytes, binary_data.length) != 0)
+            {
+                msg_received_context->message_received = true;
+            }
+        }
+    }
 
     return messaging_delivery_accepted();
 }
@@ -566,6 +582,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                 const char filter_name[] = "apache.org:selector-filter:string";
                 int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000);
 
+                /* create the filter set to be used for the source of the link */
                 filter_set filter_set = amqpvalue_create_map();
                 AMQP_VALUE filter_key = amqpvalue_create_symbol(filter_name);
                 AMQP_VALUE descriptor = amqpvalue_create_symbol(filter_name);
@@ -575,6 +592,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                 amqpvalue_destroy(filter_key);
                 amqpvalue_destroy(described_filter_value);
 
+                /* create the source of the link */
                 SOURCE_HANDLE source_handle = source_create();
                 AMQP_VALUE address_value = amqpvalue_create_string(receive_address);
                 source_set_address(source_handle, address_value);
@@ -583,17 +601,18 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                 AMQP_VALUE source = amqpvalue_create_source(source_handle);
                 source_destroy(source_handle);
 
-
                 AMQP_VALUE target = messaging_create_target(receive_address);
                 link = link_create(session, "receiver-link", role_receiver, source, target);
                 link_set_rcv_settle_mode(link, receiver_settle_mode_first);
                 amqpvalue_destroy(source);
                 amqpvalue_destroy(target);
 
+                MESSAGE_RECEIVER_CONTEXT message_receiver_context = { msgCallback , context, false };
+
                 /* create a message receiver */
                 message_receiver = messagereceiver_create(link, NULL, NULL);
                 if ((message_receiver == NULL) ||
-                    (messagereceiver_open(message_receiver, on_message_received, message_receiver) != 0))
+                    (messagereceiver_open(message_receiver, on_message_received, &message_receiver_context) != 0))
                 {
                     result = -1;
                 }
@@ -608,9 +627,21 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                         connection_dowork(connection);
 
                         ThreadAPI_Sleep(10);
+
+                        if (message_receiver_context.message_received)
+                        {
+                            break;
+                        }
                     }
 
-                    result = 0;
+                    if (!message_receiver_context.message_received)
+                    {
+                        result = IOTHUB_TEST_CLIENT_ERROR;
+                    }
+                    else
+                    {
+                        result = IOTHUB_TEST_CLIENT_OK;
+                    }
                 }
 
                 messagereceiver_destroy(message_receiver);
@@ -623,190 +654,8 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 
             free(eh_hostname);
         }
-        
-#if 0        
-        IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)devhubHandle;
-        time_t beginExecutionTime, nowExecutionTime;
-        double timespan;
-        pn_messenger_t* messenger;
-        if ( (messenger = pn_messenger(NULL) ) == NULL)
-        {
-            result = IOTHUB_TEST_CLIENT_ERROR;
-        }
-        else
-        {
-            // Sets the Messenger Windows
-            pn_messenger_set_incoming_window(messenger, 1);
-
-            pn_messenger_start(messenger);
-            if (pn_messenger_errno(messenger) )
-            {
-                result = IOTHUB_TEST_CLIENT_ERROR;
-            }
-            else
-            {
-                if (pn_messenger_set_timeout(messenger, PROTON_DEFAULT_TIMEOUT) != 0)
-                {
-                    result = IOTHUB_TEST_CLIENT_ERROR;
-                }
-                else
-                {
-                    result = IOTHUB_TEST_CLIENT_OK;
-
-                    devhubValInfo->partitionCount = partitionCount;
-                    devhubValInfo->messageThreadExit = THREAD_CONTINUE;
-
-                    // Allocate the Address
-                    char* szAddress = CreateReceiveAddress(devhubValInfo, partitionCount);
-                    if (szAddress == NULL)
-                    {
-                        result = IOTHUB_TEST_CLIENT_ERROR;
-                    }
-                    else
-                    {
-						char tempBuffer[256];
-
-                        // subscribe the messenger to all the partitions
-                        bool atLeastOneMessageReceived = true;
-                        beginExecutionTime = time(NULL);
-
-						const char filter_name[] = "apache.org:selector-filter:string";
-
-						pn_data_t* filter = pn_data(0);
-						if (filter == NULL)
-						{
-							result = IOTHUB_TEST_CLIENT_ERROR;
-						}
-						else
-						{
-							/* 330s = 5:30. 5 minutes for clock skew on the service side and 30s lag for communication timeout. */
-							int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000);
-
-							if ((filter_string_length < 0) ||
-								(pn_data_put_map(filter) != 0) ||
-								!pn_data_enter(filter) ||
-								(pn_data_put_symbol(filter, pn_bytes((sizeof(filter_name) / sizeof(filter_name[0]) - 1), filter_name)) != 0) ||
-								(pn_data_put_described(filter) != 0) ||
-								!pn_data_enter(filter) ||
-								(pn_data_put_symbol(filter, pn_bytes((sizeof(filter_name) / sizeof(filter_name[0]) - 1), filter_name)) != 0) ||
-								(pn_data_put_string(filter, pn_bytes(filter_string_length, tempBuffer)) != 0) ||
-								!pn_data_exit(filter) ||
-								!pn_data_exit(filter))
-							{
-								result = IOTHUB_TEST_CLIENT_ERROR;
-							}
-							else
-							{
-								if (pn_messenger_subscribe_with_filter(messenger, szAddress, filter) == NULL)
-								{
-									result = IOTHUB_TEST_CLIENT_ERROR;
-									LogError("Unable to create a subscription using address %s\r\n", szAddress);
-								}
-								else
-								{
-
-									while (
-										(atLeastOneMessageReceived) &&
-										(devhubValInfo->messageThreadExit == THREAD_CONTINUE) &&
-										((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
-										)
-									{
-										atLeastOneMessageReceived = false;
-										// Wait for the message to be recieved
-										pn_messenger_recv(messenger, -1);
-										if (pn_messenger_errno(messenger) == 0)
-										{
-											while ((devhubValInfo->messageThreadExit == THREAD_CONTINUE) && pn_messenger_incoming(messenger))
-											{
-												pn_message_t* pnMessage = pn_message();
-												if (pnMessage == NULL)
-												{
-													devhubValInfo->messageThreadExit = THREAD_END;
-												}
-												else
-												{
-													pn_messenger_get(messenger, pnMessage);
-													if (pn_messenger_errno(messenger) == 0)
-													{
-														pn_tracker_t tracker = pn_messenger_incoming_tracker(messenger);
-
-														pn_data_t* pBody = pn_message_body(pnMessage);
-														if (pBody != NULL)
-														{
-															if (!pn_data_next(pBody))
-															{
-																devhubValInfo->messageThreadExit = THREAD_END;
-															}
-															else
-															{
-																pn_type_t typeOfBody = pn_data_type(pBody);
-																atLeastOneMessageReceived = true;
-																if (PN_STRING == typeOfBody)
-																{
-																	pn_bytes_t descriptor = pn_data_get_string(pBody);
-																	if (msgCallback != NULL)
-																	{
-																		if (msgCallback(context, descriptor.start, descriptor.size) != 0)
-																		{
-																			devhubValInfo->messageThreadExit = THREAD_END;
-																		}
-																	}
-																}
-																else if (PN_BINARY == typeOfBody)
-																{
-																	pn_bytes_t descriptor = pn_data_get_binary(pBody);
-																	if (msgCallback != NULL)
-																	{
-																		if (msgCallback(context, descriptor.start, descriptor.size) != 0)
-																		{
-																			devhubValInfo->messageThreadExit = THREAD_END;
-																		}
-																	}
-																}
-																else
-																{
-																	//Unknown Data Item
-																}
-															}
-														}
-														pn_messenger_accept(messenger, tracker, 0);
-														pn_message_clear(pnMessage);
-														pn_messenger_settle(messenger, tracker, 0);
-													}
-													else
-													{
-														devhubValInfo->messageThreadExit = THREAD_END;
-													}
-													pn_message_free(pnMessage);
-												}
-											}
-										}
-										else
-										{
-											devhubValInfo->messageThreadExit = THREAD_END;
-											break;
-										}
-									}
-								}
-							}
-
-							pn_data_free(filter);
-						}
-
-                        free(szAddress);
-                    }
-                }
-            }
-
-            // bring down the messenger
-            do
-            {
-                pn_messenger_stop(messenger);
-            } while (!pn_messenger_stopped(messenger) );
-            pn_messenger_free(messenger);
-        }
-#endif
     }
+
     return result;
 }
 
