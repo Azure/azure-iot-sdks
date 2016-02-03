@@ -32,7 +32,7 @@
 #include "cbs.h"
 #include "consolelogger.h"
 
-const char* AMQP_RECV_ADDRESS_FMT = "amqps://iothubowner:%s@%s.%s/%s/ConsumerGroups/%s/Partitions/%u";
+const char* AMQP_RECV_ADDRESS_FMT = "amqps://%s.%s/%s/ConsumerGroups/%s/Partitions/%u";
 const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
 const char* AMQP_SEND_TARGET_ADDRESS_FMT = "amqps://%s.%s/messages/deviceBound";
 const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
@@ -66,7 +66,6 @@ typedef struct IOTHUB_VALIDATION_INFO_TAG
     STRING_HANDLE eventhubName;
     STRING_HANDLE iotSharedSig;
     STRING_HANDLE eventhubAccessKey;
-    unsigned int partitionCount;
     volatile sig_atomic_t messageThreadExit;
 } IOTHUB_VALIDATION_INFO;
 
@@ -444,17 +443,34 @@ void IoTHubTest_Deinit(IOTHUB_TEST_HANDLE devhubHandle)
 static char* CreateReceiveAddress(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount)
 {
     char* result;
-    size_t addressLen = strlen(AMQP_RECV_ADDRESS_FMT) + STRING_length(devhubValInfo->eventhubAccessKey) + STRING_length(devhubValInfo->eventhubName) + strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + STRING_length(devhubValInfo->consumerGroup) + 5;
+    size_t addressLen = strlen(AMQP_RECV_ADDRESS_FMT) + STRING_length(devhubValInfo->eventhubName) + strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + STRING_length(devhubValInfo->consumerGroup) + 5;
     result = (char*)malloc(addressLen + 1);
     if (result != NULL)
     {
         size_t targetPartition = ResolvePartitionIndex(STRING_c_str(devhubValInfo->deviceId), partitionCount);
-        sprintf_s(result, addressLen+1, AMQP_RECV_ADDRESS_FMT, STRING_c_str(devhubValInfo->eventhubAccessKey), devhubValInfo->partnerName, devhubValInfo->partnerHost, STRING_c_str(devhubValInfo->eventhubName), STRING_c_str(devhubValInfo->consumerGroup), targetPartition);
+        sprintf_s(result, addressLen+1, AMQP_RECV_ADDRESS_FMT, devhubValInfo->partnerName, devhubValInfo->partnerHost, STRING_c_str(devhubValInfo->eventhubName), STRING_c_str(devhubValInfo->consumerGroup), targetPartition);
     }
     else
     {
         result = NULL;
     }
+    return result;
+}
+
+static char* CreateReceiveHostName(IOTHUB_VALIDATION_INFO* devhubValInfo)
+{
+    char* result;
+    size_t partner_host_len = strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + 2;
+    result = (char*)malloc(partner_host_len + 1);
+    if (result != NULL)
+    {
+        sprintf_s(result, partner_host_len + 1, "%s.%s", devhubValInfo->partnerName, devhubValInfo->partnerHost);
+    }
+    else
+    {
+        result = NULL;
+    }
+
     return result;
 }
 
@@ -485,7 +501,16 @@ static char* CreateSendAuthCid(IOTHUB_VALIDATION_INFO* devhubValInfo)
     return result;
 }
 
-#if 0
+static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
+{
+    (void)message;
+    (void)context;
+
+    printf("Message received.\r\n");
+
+    return messaging_delivery_accepted();
+}
+
 IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, time_t receiveTimeRangeStart, double maxDrainTimeInSeconds)
 {
     IOTHUB_TEST_CLIENT_RESULT result = 0;
@@ -495,6 +520,89 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
     }
     else 
     {
+        XIO_HANDLE sasl_io = NULL;
+        CONNECTION_HANDLE connection = NULL;
+        SESSION_HANDLE session = NULL;
+        LINK_HANDLE link = NULL;
+        MESSAGE_RECEIVER_HANDLE message_receiver = NULL;
+        IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)devhubHandle;
+
+        char* eh_hostname = CreateReceiveHostName(devhubValInfo);
+        if (eh_hostname == NULL)
+        {
+            result = IOTHUB_TEST_CLIENT_ERROR;
+        }
+        else
+        {
+            char* receive_address = CreateReceiveAddress(devhubValInfo, partitionCount);
+            if (receive_address == NULL)
+            {
+                result = IOTHUB_TEST_CLIENT_ERROR;
+            }
+            else
+            {
+                /* create SASL plain handler */
+                SASL_PLAIN_CONFIG sasl_plain_config = { "iothubowner", STRING_c_str(devhubValInfo->eventhubAccessKey), NULL };
+                SASL_MECHANISM_HANDLE sasl_mechanism_handle = saslmechanism_create(saslplain_get_interface(), &sasl_plain_config);
+                XIO_HANDLE tls_io;
+
+                /* create the TLS IO */
+                TLSIO_CONFIG tls_io_config = { eh_hostname, 5671 };
+                const IO_INTERFACE_DESCRIPTION* tlsio_interface = platform_get_default_tlsio();
+                tls_io = xio_create(tlsio_interface, &tls_io_config, NULL);
+
+                /* create the SASL client IO using the TLS IO */
+                SASLCLIENTIO_CONFIG sasl_io_config = { tls_io, sasl_mechanism_handle };
+                sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_io_config, NULL);
+
+                /* create the connection, session and link */
+                connection = connection_create(sasl_io, eh_hostname, "whatever", NULL, NULL);
+                session = session_create(connection, NULL, NULL);
+
+                /* set incoming window to 100 for the session */
+                session_set_incoming_window(session, 100);
+                AMQP_VALUE source = messaging_create_source(receive_address);
+                AMQP_VALUE target = messaging_create_target("ingress-rx");
+                link = link_create(session, "receiver-link", role_receiver, source, target);
+                link_set_rcv_settle_mode(link, receiver_settle_mode_first);
+                amqpvalue_destroy(source);
+                amqpvalue_destroy(target);
+
+                /* create a message receiver */
+                message_receiver = messagereceiver_create(link, NULL, NULL);
+                if ((message_receiver == NULL) ||
+                    (messagereceiver_open(message_receiver, on_message_received, message_receiver) != 0))
+                {
+                    result = -1;
+                }
+                else
+                {
+                    time_t nowExecutionTime;
+                    time_t beginExecutionTime = time(NULL);
+                    double timespan;
+
+                    while ((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
+                    {
+                        connection_dowork(connection);
+
+                        ThreadAPI_Sleep(10);
+                    }
+
+                    result = 0;
+                }
+
+                messagereceiver_destroy(message_receiver);
+                link_destroy(link);
+                session_destroy(session);
+                connection_destroy(connection);
+
+                free(receive_address);
+            }
+
+            free(eh_hostname);
+        }
+        
+#if 0        
         IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)devhubHandle;
         time_t beginExecutionTime, nowExecutionTime;
         double timespan;
@@ -675,6 +783,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
             } while (!pn_messenger_stopped(messenger) );
             pn_messenger_free(messenger);
         }
+#endif
     }
     return result;
 }
@@ -688,7 +797,6 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventForMaxDrainTime(IOTHUB_TEST_H
 {
     return IoTHubTest_ListenForRecentEvent(devhubHandle, msgCallback, partitionCount, context, MAX_DRAIN_TIME);
 }
-#endif
 
 static void on_message_send_complete(const void* context, MESSAGE_SEND_RESULT send_result)
 {
