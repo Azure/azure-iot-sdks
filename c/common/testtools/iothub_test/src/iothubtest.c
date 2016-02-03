@@ -32,7 +32,7 @@
 #include "cbs.h"
 #include "consolelogger.h"
 
-const char* AMQP_RECV_ADDRESS_FMT = "amqps://%s.%s/%s/ConsumerGroups/%s/Partitions/%u";
+const char* AMQP_RECV_ADDRESS_FMT = "%s/ConsumerGroups/%s/Partitions/%u";
 const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
 const char* AMQP_SEND_TARGET_ADDRESS_FMT = "amqps://%s.%s/messages/deviceBound";
 const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
@@ -356,7 +356,7 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
         free(devhubValInfo);
         result = NULL;
     }
-    else if ( (devhubValInfo->eventhubAccessKey = URL_EncodeString(eventhubAccessKey) ) == NULL)
+    else if ( (devhubValInfo->eventhubAccessKey = STRING_construct(eventhubAccessKey)) == NULL)
     {
         STRING_delete(devhubValInfo->consumerGroup);
         STRING_delete(devhubValInfo->deviceId);
@@ -443,12 +443,12 @@ void IoTHubTest_Deinit(IOTHUB_TEST_HANDLE devhubHandle)
 static char* CreateReceiveAddress(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount)
 {
     char* result;
-    size_t addressLen = strlen(AMQP_RECV_ADDRESS_FMT) + STRING_length(devhubValInfo->eventhubName) + strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + STRING_length(devhubValInfo->consumerGroup) + 5;
+    size_t addressLen = strlen(AMQP_RECV_ADDRESS_FMT) + STRING_length(devhubValInfo->eventhubName) + STRING_length(devhubValInfo->consumerGroup) + 5;
     result = (char*)malloc(addressLen + 1);
     if (result != NULL)
     {
         size_t targetPartition = ResolvePartitionIndex(STRING_c_str(devhubValInfo->deviceId), partitionCount);
-        sprintf_s(result, addressLen+1, AMQP_RECV_ADDRESS_FMT, devhubValInfo->partnerName, devhubValInfo->partnerHost, STRING_c_str(devhubValInfo->eventhubName), STRING_c_str(devhubValInfo->consumerGroup), targetPartition);
+        sprintf_s(result, addressLen+1, AMQP_RECV_ADDRESS_FMT, STRING_c_str(devhubValInfo->eventhubName), STRING_c_str(devhubValInfo->consumerGroup), targetPartition);
     }
     else
     {
@@ -561,8 +561,30 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 
                 /* set incoming window to 100 for the session */
                 session_set_incoming_window(session, 100);
-                AMQP_VALUE source = messaging_create_source(receive_address);
-                AMQP_VALUE target = messaging_create_target("ingress-rx");
+
+                char tempBuffer[256];
+                const char filter_name[] = "apache.org:selector-filter:string";
+                int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000);
+
+                filter_set filter_set = amqpvalue_create_map();
+                AMQP_VALUE filter_key = amqpvalue_create_symbol(filter_name);
+                AMQP_VALUE descriptor = amqpvalue_create_symbol(filter_name);
+                AMQP_VALUE filter_value = amqpvalue_create_string(tempBuffer);
+                AMQP_VALUE described_filter_value = amqpvalue_create_described(descriptor, filter_value);
+                amqpvalue_set_map_value(filter_set, filter_key, described_filter_value);
+                amqpvalue_destroy(filter_key);
+                amqpvalue_destroy(described_filter_value);
+
+                SOURCE_HANDLE source_handle = source_create();
+                AMQP_VALUE address_value = amqpvalue_create_string(receive_address);
+                source_set_address(source_handle, address_value);
+                source_set_filter(source_handle, filter_set);
+                amqpvalue_destroy(address_value);
+                AMQP_VALUE source = amqpvalue_create_source(source_handle);
+                source_destroy(source_handle);
+
+
+                AMQP_VALUE target = messaging_create_target(receive_address);
                 link = link_create(session, "receiver-link", role_receiver, source, target);
                 link_set_rcv_settle_mode(link, receiver_settle_mode_first);
                 amqpvalue_destroy(source);
