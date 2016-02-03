@@ -823,7 +823,6 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                         xio_destroy(sasl_io);
                         xio_destroy(tls_io);
                         saslmechanism_destroy(sasl_mechanism_handle);
-                        platform_deinit();
                     }
 
                     free(deviceDest);
