@@ -191,11 +191,7 @@
     <Compile Include="$(DeviceClientDir)\DeviceAuthenticationWithToken.cs" />
     <Compile Include="$(DeviceClientDir)\DeviceAuthenticationWithSharedAccessPolicyKey.cs" />
     <Compile Include="$(DeviceClientDir)\DeviceClient.cs" />
-    <Compile Include="$(DeviceClientDir)\DeviceClientHelper.cs" />
-    <Compile Include="$(DeviceClientDir)\HttpClientHelper.cs" />
-    <Compile Include="$(DeviceClientDir)\HttpDeviceClient.cs" />
     <Compile Include="$(DeviceClientDir)\IAuthorizationHeaderProvider.cs" />
-    <Compile Include="$(DeviceClientDir)\IHttpClientHelper.cs" />
     <Compile Include="$(DeviceClientDir)\IotHubConnection.cs" />
     <Compile Include="$(DeviceClientDir)\IotHubConnectionCache.cs" />
     <Compile Include="$(DeviceClientDir)\IotHubConnectionString.cs" />
@@ -207,6 +203,18 @@
     <Compile Include="$(DeviceClientDir)\PutOperationType.cs" />
     <Compile Include="$(DeviceClientDir)\WinRTHelpers.cs" />
     <Compile Include="$(DeviceClientDir)\WinRTResources.cs" />
+    <Compile Include="$(DeviceClientDir)\Transport\HttpClientHelper.cs">
+      <Link>HttpClientHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(DeviceClientDir)\Transport\HttpTransportHandler.cs">
+      <Link>HttpTransportHandler.cs</Link>
+    </Compile>
+    <Compile Include="$(DeviceClientDir)\Transport\IHttpClientHelper.cs">
+      <Link>IHttpClientHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(DeviceClientDir)\Transport\TransportHandlerBase.cs">
+      <Link>TransportHandlerBase.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

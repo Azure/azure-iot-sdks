@@ -22,7 +22,7 @@ Each language SDK includes sample code and documentation in addition to the libr
 
 ### OS platforms and hardware compatibility
 
-Azure IoT device SDKs can be used with a broad range of OS platforms and devices. See [OS Platforms and hardware compatibility](doc/tested_configurations.md).
+Azure IoT device SDKs can be used with a broad range of OS platforms and devices. See [OS Platforms and hardware compatibility](https://acom-sandbox.azurewebsites.net/en-us/documentation/articles/iot-hub-tested-configurations/?rnd=1).
 
 ## Microsoft Azure IoT service SDKs
 
