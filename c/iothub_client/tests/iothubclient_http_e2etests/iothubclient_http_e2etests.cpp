@@ -417,7 +417,6 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
     }
 #endif
 
-#if 0
     TEST_FUNCTION(IoTHub_HTTP_RecvMessage_E2ETest)
     {
         // arrange
@@ -474,7 +473,6 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         MessageData_Destroy(notifyData);
         IoTHubClient_Destroy(iotHubClientHandle);
     }
-#endif
 
 END_TEST_SUITE(iothubclient_http_e2etests)
  
