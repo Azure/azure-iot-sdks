@@ -6,6 +6,9 @@ namespace Microsoft.Azure.Devices
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
+    /// <summary>
+    /// Specifies the various feedback status codes for a command sent to a device.
+    /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum FeedbackStatusCode
     {

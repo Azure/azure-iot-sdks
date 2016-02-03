@@ -6,11 +6,19 @@ namespace Microsoft.Azure.Devices
     using System;
     using Microsoft.Azure.Devices.Common.Security;
 
+    /// <summary>
+    /// Authentication method that uses a shared access policy token. 
+    /// </summary>
     public sealed class ServiceAuthenticationWithSharedAccessPolicyToken : IAuthenticationMethod
     {
         string policyName;
         string token;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceAuthenticationWithSharedAccessPolicyToken"/> class.
+        /// </summary>
+        /// <param name="policyName">Name of the shared access policy to use.</param>
+        /// <param name="token">Token associated with the shared access policy.</param>
         public ServiceAuthenticationWithSharedAccessPolicyToken(string policyName, string token)
         {
             this.SetPolicyName(policyName);

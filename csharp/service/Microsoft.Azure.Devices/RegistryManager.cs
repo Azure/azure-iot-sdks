@@ -7,6 +7,9 @@ namespace Microsoft.Azure.Devices
     using System.Threading;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Contains methods that services can use to perform create, remove, update and delete operations on devices.
+    /// </summary>
     public abstract class RegistryManager
     {
         /// <summary>

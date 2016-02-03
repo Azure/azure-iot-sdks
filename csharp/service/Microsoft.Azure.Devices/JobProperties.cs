@@ -8,6 +8,9 @@ namespace Microsoft.Azure.Devices
     using Newtonsoft.Json;
     using Microsoft.Azure.Devices.Common;
 
+    /// <summary>
+    /// Contains properties of a Job.
+    /// </summary>
     public class JobProperties
     {
         public JobProperties()

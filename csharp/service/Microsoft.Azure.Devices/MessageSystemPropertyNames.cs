@@ -3,6 +3,9 @@
 
 namespace Microsoft.Azure.Devices
 {
+    /// <summary>
+    /// The names of the system properties in the <see cref="Message"/> class.
+    /// </summary>
     public static class MessageSystemPropertyNames
     {
         public const string MessageId = "message-id";
