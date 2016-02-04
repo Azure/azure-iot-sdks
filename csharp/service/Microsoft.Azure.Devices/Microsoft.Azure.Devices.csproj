@@ -196,7 +196,6 @@
     <Compile Include="Common\WebApi\CustomHeaderConstants.cs" />
     <Compile Include="Common\WebApi\ResourceRequest.cs" />
     <Compile Include="DeliveryAcknowledgement.cs" />
-    <Compile Include="DeliveryException.cs" />
     <Compile Include="DeliveryFailureReason.cs" />
     <Compile Include="Device.cs" />
     <Compile Include="DeviceConnectionState.cs" />

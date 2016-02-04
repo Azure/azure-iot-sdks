@@ -3,6 +3,9 @@
 
 namespace Microsoft.Azure.Devices
 {
+    /// <summary>
+    /// Authentication interface to use for IoTHub communications.
+    /// </summary>
     public interface IAuthenticationMethod
     {
         IotHubConnectionStringBuilder Populate(IotHubConnectionStringBuilder iotHubConnectionStringBuilder);

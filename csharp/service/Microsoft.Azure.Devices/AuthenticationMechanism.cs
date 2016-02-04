@@ -5,6 +5,9 @@ namespace Microsoft.Azure.Devices
 {
     using Newtonsoft.Json;
 
+    /// <summary>
+    /// Used to specify the authentication mechanism used by a device.
+    /// </summary>
     public sealed class AuthenticationMechanism
     {
         public AuthenticationMechanism()
