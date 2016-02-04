@@ -135,7 +135,7 @@ The result should be the following:
 
 ```
 Starting the IoTHub client sample AMQP...
-Info: IoT Hub SDK for C, version 1.0.0-preview.8
+Info: IoT Hub SDK for C, version 1.0.0
 IoTHubClient_SetMessageCallback...successful.
 IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
 IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.

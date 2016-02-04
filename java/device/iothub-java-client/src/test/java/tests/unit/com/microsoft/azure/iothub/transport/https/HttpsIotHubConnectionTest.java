@@ -53,7 +53,7 @@ public class HttpsIotHubConnectionTest
     @Mocked
     IotHubStatusCode mockStatus;
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2015-08-15-preview'.] 
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03'.] 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_001: [The constructor shall save the client configuration.]
     @Test
     public void sendEventHasCorrectUrl(
@@ -322,7 +322,7 @@ public class HttpsIotHubConnectionTest
         conn.sendEvent(mockMsg);
     }
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_013: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2015-08-15-preview'.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_013: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03'.]
     @Test
     public void receiveMessageHasCorrectUrl(@Mocked final IotHubMessageUri mockUri) throws IOException
     {
@@ -587,7 +587,7 @@ public class HttpsIotHubConnectionTest
         conn.receiveMessage();
     }
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_024: [If the result is COMPLETE, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]?api-version=2015-08-15-preview'.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_024: [If the result is COMPLETE, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]?api-version=2016-02-03'.]
     @Test
     public void sendMessageResultWhenCompleteUsesCompleteUrl(@Mocked final IotHubCompleteUri mockUri) throws IOException
     {
@@ -709,7 +709,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_027: [If the result is ABANDON, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]/abandon?api-version=2015-08-15-preview'.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_027: [If the result is ABANDON, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]/abandon?api-version=2016-02-03'.]
     @Test
     public void sendMessageResultWhenAbandonUsesAbandonUrl(@Mocked final IotHubAbandonUri mockUri) throws IOException
     {
@@ -831,7 +831,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_030: [If the result is REJECT, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2015-08-15-preview' (the query parameters can be in any order).]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_030: [If the result is REJECT, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2016-02-03' (the query parameters can be in any order).]
     @Test
     public void sendMessageResultWhenRejectUsesRejectUrl(@Mocked final IotHubRejectUri mockUri) throws IOException
     {

@@ -21,7 +21,7 @@ public final class IotHubMessageUri
      */
     public IotHubMessageUri(String iotHubHostname, String deviceId)
     {
-        // Codes_SRS_IOTHUBMESSAGEURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2015-08-15-preview".]
+        // Codes_SRS_IOTHUBMESSAGEURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03".]
         this.uri = new IotHubUri(iotHubHostname, deviceId, MESSAGE_PATH);
     }
 
@@ -33,7 +33,7 @@ public final class IotHubMessageUri
     @Override
     public String toString()
     {
-        // Codes_SRS_IOTHUBMESSAGEURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2015-08-15-preview".]
+        // Codes_SRS_IOTHUBMESSAGEURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03".]
         return this.uri.toString();
     }
 
