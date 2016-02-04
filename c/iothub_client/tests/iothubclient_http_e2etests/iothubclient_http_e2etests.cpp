@@ -297,7 +297,6 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
             // Just go on here
         }
         ASSERT_IS_TRUE(sendData->dataWasRecv); // was found is written by the callback...
-        IoTHubClient_Destroy(iotHubClientHandle);
 
         {
             IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(), IoTHubAccount_GetIoTHubConnString(), IoTHubAccount_GetDeviceId(), IoTHubAccount_GetDeviceKey(), IoTHubAccount_GetEventhubListenName(), IoTHubAccount_GetEventhubAccessKey(), IoTHubAccount_GetSharedAccessSignature(), IoTHubAccount_GetEventhubConsumerGroup() );
@@ -315,6 +314,8 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         // cleanup
         IoTHubMessage_Destroy(msgHandle);
         EventData_Destroy(sendData);
+
+        IoTHubClient_Destroy(iotHubClientHandle);
     }
 
     #if 0
