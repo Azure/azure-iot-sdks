@@ -237,7 +237,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
     {
     }
 
-
+#if 0
     TEST_FUNCTION(IoTHub_AMQP_SendEvent_E2ETests)
     {
 #ifdef FALSE
@@ -412,6 +412,6 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         MessageData_Destroy(notifyData);
         IoTHubClient_Destroy(iotHubClientHandle);
     }
-
+#endif
 END_TEST_SUITE(iothubclient_amqp_e2etests)
  
