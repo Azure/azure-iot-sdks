@@ -1,3 +1,2 @@
 ..\inc\iothubtransportamqp.h
 ..\src\iothubtransportamqp.c
-..\inc\iothub_client_amqp_internal.h

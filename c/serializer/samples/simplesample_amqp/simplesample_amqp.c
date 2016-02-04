@@ -129,75 +129,67 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
 
 void simplesample_amqp_run(void)
 {
-    if (platform_init() != 0)
+    if (serializer_init(NULL) != SERIALIZER_OK)
     {
         (void)printf("Failed on serializer_init\r\n");
     }
     else
     {
-        if (serializer_init(NULL) != SERIALIZER_OK)
+        /* Setup IoTHub client configuration */
+        IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol);
+        srand((unsigned int)time(NULL));
+        int avgWindSpeed = 10;
+
+        if (iotHubClientHandle == NULL)
         {
-            (void)printf("Failed on serializer_init\r\n");
+            (void)printf("Failed on IoTHubClient_Create\r\n");
         }
         else
         {
-            /* Setup IoTHub client configuration */
-            IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol);
-            srand((unsigned int)time(NULL));
-            int avgWindSpeed = 10;
-
-            if (iotHubClientHandle == NULL)
+#ifdef MBED_BUILD_TIMESTAMP
+            // For mbed add the certificate information
+            if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
-                (void)printf("Failed on IoTHubClient_Create\r\n");
+                (void)printf("failure to set option \"TrustedCerts\"\r\n");
+            }
+#endif // MBED_BUILD_TIMESTAMP
+
+            ContosoAnemometer* myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
+            if (myWeather == NULL)
+            {
+                (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");
             }
             else
             {
-#ifdef MBED_BUILD_TIMESTAMP
-                // For mbed add the certificate information
-                if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
-                {
-                    (void)printf("failure to set option \"TrustedCerts\"\r\n");
-                }
-#endif // MBED_BUILD_TIMESTAMP
+                unsigned char* destination;
+                size_t destinationSize;
 
-                ContosoAnemometer* myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
-                if (myWeather == NULL)
+                if (IoTHubClient_SetMessageCallback(iotHubClientHandle, IoTHubMessage, myWeather) != IOTHUB_CLIENT_OK)
                 {
-                    (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");
+                    printf("unable to IoTHubClient_SetMessageCallback\r\n");
                 }
                 else
                 {
-                    unsigned char* destination;
-                    size_t destinationSize;
+                    myWeather->DeviceId = "myFirstDevice";
+                    myWeather->WindSpeed = avgWindSpeed + (rand() % 4 + 2);
 
-                    if (IoTHubClient_SetMessageCallback(iotHubClientHandle, IoTHubMessage, myWeather) != IOTHUB_CLIENT_OK)
+                    if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed) != IOT_AGENT_OK)
                     {
-                        printf("unable to IoTHubClient_SetMessageCallback\r\n");
+                        (void)printf("Failed to serialize\r\n");
                     }
                     else
                     {
-                        myWeather->DeviceId = "myFirstDevice";
-                        myWeather->WindSpeed = avgWindSpeed + (rand() % 4 + 2);
-
-                        if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed) != IOT_AGENT_OK)
-                        {
-                            (void)printf("Failed to serialize\r\n");
-                        }
-                        else
-                        {
-                            sendMessage(iotHubClientHandle, destination, destinationSize);
-                        }
-
-                        /* wait for commands */
-                        (void)getchar();
+                        sendMessage(iotHubClientHandle, destination, destinationSize);
                     }
-                    DESTROY_MODEL_INSTANCE(myWeather);
+
+                    /* wait for commands */
+                    (void)getchar();
                 }
-                IoTHubClient_Destroy(iotHubClientHandle);
+                DESTROY_MODEL_INSTANCE(myWeather);
             }
-            serializer_deinit();
+            IoTHubClient_Destroy(iotHubClientHandle);
         }
-        platform_deinit();
+        serializer_deinit();
     }
 }
 
