@@ -251,12 +251,12 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     {
     }
-
+#if 0
     // Will enable as soon as it's ready
     TEST_FUNCTION(IoTHub_MQTT_SendEvent_E2ETests)
     {
         // arrange
-        /*IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig;
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         IOTHUB_MESSAGE_HANDLE msgHandle;
 
@@ -316,13 +316,13 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
         // cleanup
         IoTHubMessage_Destroy(msgHandle);
-        EventData_Destroy(sendData);*/
+        EventData_Destroy(sendData);
     }
 
     TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest)
     {
         // arrange
-        /*IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig;
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
         EXPECTED_RECEIVE_DATA* notifyData = MessageData_Create();
@@ -369,6 +369,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
         // cleanup
         MessageData_Destroy(notifyData);
-        IoTHubClient_Destroy(iotHubClientHandle);*/
+        IoTHubClient_Destroy(iotHubClientHandle);
     }
+#endif
 END_TEST_SUITE(iothubclient_mqtt_e2etests)

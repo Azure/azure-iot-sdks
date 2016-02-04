@@ -109,7 +109,7 @@ static char msgText[1024];
 static char propText[1024];
 #define MESSAGE_COUNT 5
 
-void iothub_client_sample_uamqp_run(void)
+void iothub_client_sample_amqp_websockets_run(void)
 {
     IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
@@ -121,13 +121,13 @@ void iothub_client_sample_uamqp_run(void)
     callbackCounter = 0;
     int receiveContext = 0;
 
-    (void)printf("Starting the IoTHub client sample uAMQP...\r\n");
+    (void)printf("Starting the IoTHub client sample AMQP over WebSockets...\r\n");
 	
 	if (platform_init() != 0)
 	{
 		(void)printf("ERROR: failed initializing the platform.\r\n");
 	}
-    else if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, uAMQP_Protocol_over_WebSocketsTls)) == NULL)
+    else if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol_over_WebSocketsTls)) == NULL)
     {
         (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
     }

@@ -5,6 +5,6 @@
 
 int main(void)
 {
-    iothub_client_sample_uamqp_run();
+    iothub_client_sample_amqp_websockets_run();
     return 0;
 }

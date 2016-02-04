@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef IOTHUB_CLIENT_SAMPLE_UAMQP_H
-#define IOTHUB_CLIENT_SAMPLE_UAMQP_H
+#ifndef IOTHUB_CLIENT_SAMPLE_AMQP_WEBSOCKETS
+#define IOTHUB_CLIENT_SAMPLE_AMQP_WEBSOCKETS
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	void iothub_client_sample_uamqp_run(void);
+	void iothub_client_sample_amqp_websockets_run(void);
 
 #ifdef __cplusplus
 }

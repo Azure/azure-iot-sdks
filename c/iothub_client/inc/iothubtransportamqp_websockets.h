@@ -11,7 +11,7 @@ extern "C"
 {
 #endif
 
-	extern const void* uAMQP_Protocol_over_WebSocketsTls(void);
+	extern const void* AMQP_Protocol_over_WebSocketsTls(void);
 
 #ifdef __cplusplus
 }

@@ -528,7 +528,6 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 						char tempBuffer[256];
 
                         // subscribe the messenger to all the partitions
-                        bool atLeastOneMessageReceived = true;
                         beginExecutionTime = time(NULL);
 
 						const char filter_name[] = "apache.org:selector-filter:string";
@@ -567,12 +566,10 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 								{
 
 									while (
-										(atLeastOneMessageReceived) &&
 										(devhubValInfo->messageThreadExit == THREAD_CONTINUE) &&
 										((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
 										)
 									{
-										atLeastOneMessageReceived = false;
 										// Wait for the message to be recieved
 										pn_messenger_recv(messenger, -1);
 										if (pn_messenger_errno(messenger) == 0)
@@ -601,7 +598,6 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 															else
 															{
 																pn_type_t typeOfBody = pn_data_type(pBody);
-																atLeastOneMessageReceived = true;
 																if (PN_STRING == typeOfBody)
 																{
 																	pn_bytes_t descriptor = pn_data_get_string(pBody);

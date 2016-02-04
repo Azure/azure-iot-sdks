@@ -3,7 +3,7 @@
 
 #include "iothubtransportamqp_websockets.h"
 #include "wsio.h"
-#include "iothubtransportuamqp.c"
+#include "iothubtransportamqp.c"
 
 #define DEFAULT_WS_PROTOCOL_NAME "AMQPWSB10"
 #define DEFAULT_WS_RELATIVE_PATH "/$iothub/websocket"
@@ -15,9 +15,9 @@ XIO_HANDLE getWebSocketsIOTransport(const char* fqdn, int port, const char* cert
 
 	return xio_create(wsio_get_interface_description(), &ws_io_config, NULL);
 }
-static TRANSPORT_HANDLE IoTHubTransportuAMQP_Create_WebSocketsOverTls(const IOTHUBTRANSPORT_CONFIG* config)
+static TRANSPORT_HANDLE IoTHubTransportAMQP_Create_WebSocketsOverTls(const IOTHUBTRANSPORT_CONFIG* config)
 {
-	UAMQP_TRANSPORT_INSTANCE* transport_state = (UAMQP_TRANSPORT_INSTANCE*)IoTHubTransportuAMQP_Create(config);
+	AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)IoTHubTransportAMQP_Create(config);
 
 	if (transport_state != NULL)
 	{
@@ -29,16 +29,16 @@ static TRANSPORT_HANDLE IoTHubTransportuAMQP_Create_WebSocketsOverTls(const IOTH
 }
 
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
-	IoTHubTransportuAMQP_SetOption,
-	IoTHubTransportuAMQP_Create_WebSocketsOverTls,
-	IoTHubTransportuAMQP_Destroy,
-	IoTHubTransportuAMQP_Subscribe,
-	IoTHubTransportuAMQP_Unsubscribe,
-	IoTHubTransportuAMQP_DoWork,
-	IoTHubTransportuAMQP_GetSendStatus
+	IoTHubTransportAMQP_SetOption,
+	IoTHubTransportAMQP_Create_WebSocketsOverTls,
+	IoTHubTransportAMQP_Destroy,
+	IoTHubTransportAMQP_Subscribe,
+	IoTHubTransportAMQP_Unsubscribe,
+	IoTHubTransportAMQP_DoWork,
+	IoTHubTransportAMQP_GetSendStatus
 };
 
-extern const void* uAMQP_Protocol_over_WebSocketsTls(void)
+extern const void* AMQP_Protocol_over_WebSocketsTls(void)
 {
 	return &thisTransportProvider_WebSocketsOverTls;
 }
