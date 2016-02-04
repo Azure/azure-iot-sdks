@@ -24,7 +24,7 @@
 
 /*String containing Hostname, Device Id & Device Key in the format:             */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
-static const char* connectionString = "HostName=iot-internal-test.azure-devices.net;DeviceId=ewertons-device2;SharedAccessKey=8jydk+Uw+BN32AHQ0Xi4UfdlMvz1+6otOEGNLJZ7zTs=";
+static const char* connectionString = "[device connection string]";
 
 static int callbackCounter;
 static char msgText[1024];
