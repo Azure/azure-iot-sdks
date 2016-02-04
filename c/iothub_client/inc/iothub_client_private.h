@@ -33,7 +33,7 @@ DEFINE_ENUM(IOTHUB_BATCHSTATE_RESULT, IOTHUB_BATCHSTATE_RESULT_VALUES);
 #define CLIENT_DEVICE_BACKSLASH "/"
 #define CBS_REPLY_TO "cbs"
 #define CBS_ENDPOINT "/$" CBS_REPLY_TO
-#define API_VERSION "?api-version=2015-08-15-preview"
+#define API_VERSION "?api-version=2016-02-03"
 #define REJECT_QUERY_PARAMETER "&reject"
 
 extern void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY completed, IOTHUB_BATCHSTATE_RESULT result);

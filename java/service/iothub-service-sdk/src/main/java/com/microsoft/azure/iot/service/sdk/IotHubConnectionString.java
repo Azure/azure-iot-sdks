@@ -37,7 +37,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_SEPARATOR_2 = "&";
     private static final String URL_HTTPS = "https:" + URL_SEPARATOR_0 + URL_SEPARATOR_0;
     private static final String URL_PATH_DEVICES = "devices";
-    private static final String URL_API_VERSION = "api-version=2015-08-15-preview";
+    private static final String URL_API_VERSION = "api-version=2016-02-03";
     private static final String URL_MAX_COUNT = "top=";
     private static final String URL_PATH_DEVICESTATISTICS = "statistics";
     private static final String USER_SEPARATOR = "@";

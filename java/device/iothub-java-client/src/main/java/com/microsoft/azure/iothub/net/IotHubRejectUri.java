@@ -43,7 +43,7 @@ public final class IotHubRejectUri
      */
     public IotHubRejectUri(String iotHubHostname, String deviceId, String eTag)
     {
-        // Codes_SRS_IOTHUBREJECTURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2015-08-15-preview" (the query parameters can be in any order).]
+        // Codes_SRS_IOTHUBREJECTURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2016-02-03" (the query parameters can be in any order).]
         String rejectPath = String.format(REJECT_PATH_FORMAT, eTag);
 
         this.uri = new IotHubUri(iotHubHostname, deviceId, rejectPath,
@@ -58,7 +58,7 @@ public final class IotHubRejectUri
     @Override
     public String toString()
     {
-        // Codes_SRS_IOTHUBREJECTURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2015-08-15-preview" (the query parameters can be in any order).]
+        // Codes_SRS_IOTHUBREJECTURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2016-02-03" (the query parameters can be in any order).]
         return this.uri.toString();
     }
 
