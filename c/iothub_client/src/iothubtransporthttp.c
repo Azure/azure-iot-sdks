@@ -169,7 +169,7 @@ static void destroy_eventHTTPrequestHeaders(HTTPTRANSPORT_HANDLE_DATA* handleDat
 "Content-Type":"application/vnd.microsoft.iothub.json"
 "Accept":"application/json"
 "Connection":"Keep-Alive"
-"User-Agent":"iothubclient1.0.0-preview.7]*/
+"User-Agent":"iothubclient1.0.0]*/
 static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_HANDLE_DATA* handleData, const IOTHUBTRANSPORT_CONFIG* config)
 {
     bool result;
