@@ -76,15 +76,13 @@ The following instructions outline how you can build the libraries in Windows:
 
 1. Create the folder **C:\\OpenSSL** on your development machine in which to download OpenSSL.
 
-2. Create the environment variable **OpenSSLDir=C:\\OpenSSL**..
+2. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path, type "cmake -version" to verify).
 
-3. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path, type "cmake -version" to verify).
+3. Ensure that the git.exe application is in your system path.
 
-4. Ensure that the git.exe application is in your system path.
+4. Open a Visual Studio 2015 x86 Native Tools command prompt.
 
-5. Open a Visual Studio 2015 x86 Native Tools command prompt.
-
-6. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
+5. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
 
 
 > Note: To enable support to AMQP over WebSockets, 
