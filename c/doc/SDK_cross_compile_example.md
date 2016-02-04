@@ -1,4 +1,4 @@
-# Cross Compiling the Azure IoT Hub SDK
+﻿# Cross Compiling the Azure IoT Hub SDK
 ## Background
 
 The SDK for the Azure IoT Hub was written to use the C99 standard in order to retain a high level of compatibility with hardware platforms that have not yet seen an official release of the SDK. This should ease the burden of porting the SDK code to those platforms.
@@ -103,10 +103,6 @@ Note that if you need to add additional compiler flags to the build you can do s
 ## Summary
 
 This document has demonstrated how to cross compile the Azure IoT SDK on a 64-bit Debian host targeting the Raspbian operating system.
-
-## Limitations
-
-Currently this procedure does not support cross compiling the AMQP and MQTT transports. In order to do that one would first need to cross compile the Proton library for AMQP. This may be addressed at a later time.
 
 ## References
 

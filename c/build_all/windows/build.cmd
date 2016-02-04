@@ -16,17 +16,6 @@ rem ----------------------------------------------------------------------------
 rem -- check prerequisites
 rem -----------------------------------------------------------------------------
 
-rem // some of our projects expect PROTON_PATH to be defined
-if not defined PROTON_PATH (
-    set PROTON_PATH=%~d0\proton
-)
-
-if not exist %PROTON_PATH% (
-    echo ERROR: PROTON_PATH must point to the root of your QPID Proton installation, but
-    echo "%PROTON_PATH%" does not exist. Exiting...
-    exit /b 1
-)
-
 rem ensure nuget.exe exists
 where /q nuget.exe
 if not !errorlevel! == 0 (
