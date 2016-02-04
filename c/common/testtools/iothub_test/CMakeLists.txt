@@ -20,8 +20,7 @@ set(iothub_test_h_files
 #the following "set" statetement exports across the project a global variable called IOTHUB_TEST_INC_FOLDER that expands to whatever needs to included when using iothub_test library
 set(IOTHUB_TEST_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_test" FORCE)
 
-include_directories(${IOTHUB_TEST_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER} ${PROTON_C_INCLUDES})
-includeProton()
+include_directories(${IOTHUB_TEST_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER} ${UAMQP_INC_FOLDER})
 
 IF(WIN32)
 	#windows needs this define
@@ -30,3 +29,5 @@ IF(WIN32)
 ENDIF(WIN32)
 
 add_library(iothub_test ${iothub_test_c_files} ${iothub_test_h_files})
+
+target_link_libraries(iothub_test uamqp)

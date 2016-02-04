@@ -16,17 +16,6 @@ rem ----------------------------------------------------------------------------
 rem -- check prerequisites
 rem -----------------------------------------------------------------------------
 
-rem // some of our projects expect PROTON_PATH to be defined
-if not defined PROTON_PATH (
-    set PROTON_PATH=%~d0\proton
-)
-
-if not exist %PROTON_PATH% (
-    echo ERROR: PROTON_PATH must point to the root of your QPID Proton installation, but
-    echo "%PROTON_PATH%" does not exist. Exiting...
-    exit /b 1
-)
-
 rem ensure nuget.exe exists
 where /q nuget.exe
 if not !errorlevel! == 0 (
@@ -168,7 +157,7 @@ if not %errorlevel%==0 exit /b %errorlevel%
 rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
 rem if not %errorlevel%==0 exit /b %errorlevel%
 
-call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
+rem call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
@@ -177,10 +166,10 @@ if not %errorlevel%==0 exit /b %errorlevel%
 rem call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
 rem if not %errorlevel%==0 exit /b %errorlevel%
 
-call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
+rem call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
-call :build-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
+rem call :build-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------

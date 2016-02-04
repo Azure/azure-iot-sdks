@@ -74,25 +74,17 @@ You do *not* need to build the libraries in order to run the sample applications
 
 The following instructions outline how you can build the libraries in Windows:
 
-1. Create the folders **C:\\Proton** and **C:\\OpenSSL** on your development machine in which to download the dependencies.
+1. Create the folder **C:\\OpenSSL** on your development machine in which to download OpenSSL.
 
-2. Create the environment variables **PROTON\_PATH=C:\\Proton** and **OpenSSLDir=C:\\OpenSSL**..
+2. Create the environment variable **OpenSSLDir=C:\\OpenSSL**..
 
 3. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path, type "cmake -version" to verify).
 
-4. Install  [Python ver. 2.7.9](https://www.python.org/downloads/) (make sure it is installed in your path, type "python -V" to verify).
+4. Ensure that the git.exe application is in your system path.
 
-5. Install [Perl ver. 5.20.2 or higher](https://www.perl.org/get.html) (make sure it is installed in your path, type "perl -v" to verify).
+5. Open a Visual Studio 2015 x86 Native Tools command prompt.
 
-6. Ensure that the git.exe application is in your system path.
-
-6. Open a Visual Studio 2015 x86 Native Tools command prompt.
-
-7. Run the script **build\_proton.cmd** in the **c\\build_all\\windows** directory to build the proton libraries.
-
-8. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
-
-> Note: In order to test MQTT End2End you must also deploy an [Azure IoT Protocol Gateway](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md).
+6. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
 
 
 > Note: To enable support to AMQP over WebSockets, 
