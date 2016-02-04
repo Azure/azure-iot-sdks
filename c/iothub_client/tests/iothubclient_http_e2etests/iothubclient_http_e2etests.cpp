@@ -46,7 +46,7 @@ typedef struct EXPECTED_SEND_DATA_TAG
 
 typedef struct EXPECTED_RECEIVE_DATA_TAG
 {
-    const char* toBeSend;
+    const unsigned char* toBeSend;
     size_t toBeSendSize;
     const char* data;
     size_t dataSize;
@@ -163,8 +163,8 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
                 result->data = tempString;
                 result->dataSize = strlen(result->data);
                 result->wasFound = false;
-                result->toBeSend = tempString;
-                result->toBeSendSize = strlen(result->toBeSend);
+                result->toBeSend = (const unsigned char*)tempString;
+                result->toBeSendSize = strlen(tempString);
             }
         }
         return result;
@@ -253,7 +253,6 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
     {
     }
 
-#if 0
     TEST_FUNCTION(IoTHub_HTTP_SendEvent_E2ETests)
     {
         // arrange
@@ -318,7 +317,6 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
 
         IoTHubClient_Destroy(iotHubClientHandle);
     }
-#endif
 
     #if 0
     TEST_FUNCTION(IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched)
@@ -420,7 +418,6 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
     }
 #endif
 
-#if 0
     TEST_FUNCTION(IoTHub_HTTP_RecvMessage_E2ETest)
     {
         // arrange
@@ -477,7 +474,6 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         MessageData_Destroy(notifyData);
         IoTHubClient_Destroy(iotHubClientHandle);
     }
-#endif
 
 END_TEST_SUITE(iothubclient_http_e2etests)
  

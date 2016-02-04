@@ -41,7 +41,10 @@ const char* IoTHubAccount_GetIoTHubName(void)
 
 	if (iothub_connection_string != NULL)
 	{
-		sscanf(iothub_connection_string, "HostName=%[^.]", iothub_name);
+        if (sscanf(iothub_connection_string, "HostName=%[^.]", iothub_name) != 1)
+        {
+            iothub_name[0] = '\0';
+        }
 	}
 
 	return iothub_name;
@@ -56,7 +59,10 @@ const char* IoTHubAccount_GetIoTHubSuffix(void)
 
 	if (iothub_connection_string != NULL)
 	{
-		sscanf(iothub_connection_string, "HostName=%*[^.].%[^;/]", iothub_suffix);
+        if (sscanf(iothub_connection_string, "HostName=%*[^.].%[^;/]", iothub_suffix) != 1)
+        {
+            iothub_suffix[0] = '\0';
+        }
 	}
 
 	return iothub_suffix;
