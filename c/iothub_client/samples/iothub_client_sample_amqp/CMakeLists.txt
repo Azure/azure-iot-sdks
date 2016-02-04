@@ -6,7 +6,7 @@
 compileAsC99()
 
 if(NOT ${use_amqp})
-	message(FATAL_ERROR "iothub_client_sample_amqp being generated without amqp support")
+	message(FATAL_ERROR "iothub_client_sample_amqp being generated without uamqp support")
 endif()
 
 set(iothub_client_sample_amqp_c_files
@@ -20,7 +20,7 @@ else()
 endif()
 
 set(iothub_client_sample_amqp_h_files
-iothub_client_sample_amqp.h
+	iothub_client_sample_amqp.h
 )
 
 IF(WIN32)
@@ -38,5 +38,4 @@ target_link_libraries(iothub_client_sample_amqp
 		iothub_client_amqp_transport)
 
 linkSharedUtil(iothub_client_sample_amqp)
-linkProton(iothub_client_sample_amqp)
-
+linkUAMQP(iothub_client_sample_amqp)

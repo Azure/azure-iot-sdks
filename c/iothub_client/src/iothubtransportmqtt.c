@@ -217,7 +217,7 @@ static void MqttOpCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_
                     }
                     else
                     {
-                        LogError("QOS count was not expected: %d.\r\n", suback->qosCount);
+                        LogError("QOS count was not expected: %d.\r\n", (int)suback->qosCount);
                     }
                 }
                 break;
@@ -520,17 +520,10 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
         }
         else
         {
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value the this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [The hostname shall be constructed using the iothubname and iothubSuffix.] */
             // TODO: need to strip the ssl or http or tls
             char tempAddress[DEFAULT_TEMP_STRING_LEN];
-            if (upperConfig->protocolGatewayHostName)
-            {
-                (void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s", upperConfig->protocolGatewayHostName);
-            }
-            else
-            {
-                (void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
-            }
+            (void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
             if ((state->hostAddress = STRING_construct(tempAddress)) == NULL)
             {
                 STRING_delete(state->mqttEventTopic);
@@ -621,12 +614,6 @@ extern TRANSPORT_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG*
     else if (strlen(config->upperConfig->iotHubName) == 0)
     {
         LogError("Invalid Argument: iotHubName is empty\r\n");
-        result = NULL;
-    }
-    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_007: [If the upperConfig's variables protocolGatewayHostName is non-Null and the length is an empty string then IoTHubTransportMqtt_Create shall return NULL.] */
-    else if (config->upperConfig->protocolGatewayHostName != NULL && strlen(config->upperConfig->protocolGatewayHostName) == 0)
-    {
-        LogError("Invalid Argument: protocolGatewayHostName is an empty string\r\n");
         result = NULL;
     }
     else

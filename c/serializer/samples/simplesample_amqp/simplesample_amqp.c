@@ -12,6 +12,7 @@
 #include "iothub_client.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_ll.h"
+#include "platform.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
@@ -128,67 +129,75 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
 
 void simplesample_amqp_run(void)
 {
-    if (serializer_init(NULL) != SERIALIZER_OK)
+    if (platform_init() != 0)
     {
         (void)printf("Failed on serializer_init\r\n");
     }
     else
     {
-        /* Setup IoTHub client configuration */
-        IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol);
-        srand((unsigned int)time(NULL));
-        int avgWindSpeed = 10;
-
-        if (iotHubClientHandle == NULL)
+        if (serializer_init(NULL) != SERIALIZER_OK)
         {
-            (void)printf("Failed on IoTHubClient_Create\r\n");
+            (void)printf("Failed on serializer_init\r\n");
         }
         else
         {
-#ifdef MBED_BUILD_TIMESTAMP
-            // For mbed add the certificate information
-            if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
-            {
-                (void)printf("failure to set option \"TrustedCerts\"\r\n");
-            }
-#endif // MBED_BUILD_TIMESTAMP
+            /* Setup IoTHub client configuration */
+            IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol);
+            srand((unsigned int)time(NULL));
+            int avgWindSpeed = 10;
 
-            ContosoAnemometer* myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
-            if (myWeather == NULL)
+            if (iotHubClientHandle == NULL)
             {
-                (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");
+                (void)printf("Failed on IoTHubClient_Create\r\n");
             }
             else
             {
-                unsigned char* destination;
-                size_t destinationSize;
-
-                if (IoTHubClient_SetMessageCallback(iotHubClientHandle, IoTHubMessage, myWeather) != IOTHUB_CLIENT_OK)
+#ifdef MBED_BUILD_TIMESTAMP
+                // For mbed add the certificate information
+                if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
                 {
-                    printf("unable to IoTHubClient_SetMessageCallback\r\n");
+                    (void)printf("failure to set option \"TrustedCerts\"\r\n");
+                }
+#endif // MBED_BUILD_TIMESTAMP
+
+                ContosoAnemometer* myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
+                if (myWeather == NULL)
+                {
+                    (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");
                 }
                 else
                 {
-                    myWeather->DeviceId = "myFirstDevice";
-                    myWeather->WindSpeed = avgWindSpeed + (rand() % 4 + 2);
+                    unsigned char* destination;
+                    size_t destinationSize;
 
-                    if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed) != IOT_AGENT_OK)
+                    if (IoTHubClient_SetMessageCallback(iotHubClientHandle, IoTHubMessage, myWeather) != IOTHUB_CLIENT_OK)
                     {
-                        (void)printf("Failed to serialize\r\n");
+                        printf("unable to IoTHubClient_SetMessageCallback\r\n");
                     }
                     else
                     {
-                        sendMessage(iotHubClientHandle, destination, destinationSize);
-                    }
+                        myWeather->DeviceId = "myFirstDevice";
+                        myWeather->WindSpeed = avgWindSpeed + (rand() % 4 + 2);
 
-                    /* wait for commands */
-                    (void)getchar();
+                        if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed) != IOT_AGENT_OK)
+                        {
+                            (void)printf("Failed to serialize\r\n");
+                        }
+                        else
+                        {
+                            sendMessage(iotHubClientHandle, destination, destinationSize);
+                        }
+
+                        /* wait for commands */
+                        (void)getchar();
+                    }
+                    DESTROY_MODEL_INSTANCE(myWeather);
                 }
-                DESTROY_MODEL_INSTANCE(myWeather);
+                IoTHubClient_Destroy(iotHubClientHandle);
             }
-            IoTHubClient_Destroy(iotHubClientHandle);
+            serializer_deinit();
         }
-        serializer_deinit();
+        platform_deinit();
     }
 }
 
