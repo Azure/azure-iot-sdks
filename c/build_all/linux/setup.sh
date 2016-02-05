@@ -37,20 +37,6 @@ clone_source ()
     git clone $repo
 }
 
-install_proton_from_source ()
-{
-    #Skip if already installed
-    code_dir="$HOME/qpid-proton"
-    if [ -d $code_dir ] && [ -d "$code_dir/proton-c" ] && [ -f "$code_dir/build/install_manifest.txt" ]
-    then
-        echo "Proton already installed."
-        return 0
-    fi
-
-    sudo bash c/build_all/linux/build_proton.sh --install /usr
-    [ $? -eq 0 ] || return $?
-}
-
 deps_install
 
 if repo_exists
@@ -62,5 +48,4 @@ else
     push_dir "$repo_name"
 fi
 
-install_proton_from_source || exit 1
 pop_dir
