@@ -594,7 +594,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                         LogError("Failed creating the session.\r\n");
                         result = IOTHUB_TEST_CLIENT_ERROR;
                     }
-                    else if (session_set_incoming_window(session, 10) != 0)
+                    else if (session_set_incoming_window(session, 100) != 0)
                     {
                         /* set incoming window to 100 for the session */
                         LogError("Failed setting the session incoming window.\r\n");
@@ -604,7 +604,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                     {
                         char tempBuffer[256];
                         const char filter_name[] = "apache.org:selector-filter:string";
-                        int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 300030) * 1000);
+                        int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000);
 
                         /* create the filter set to be used for the source of the link */
                         filter_set filter_set = amqpvalue_create_map();
