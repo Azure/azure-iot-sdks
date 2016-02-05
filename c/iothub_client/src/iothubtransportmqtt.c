@@ -23,6 +23,7 @@
 #include "tlsio_wolfssl.h"
 #include "tlsio_openssl.h"
 #include "tlsio.h"
+#include "platform.h"
 
 #include "iothub_client_version.h"
 
@@ -66,7 +67,6 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     DLIST_ENTRY waitingForAck;
     PDLIST_ENTRY waitingToSend;
     IOTHUB_CLIENT_LL_HANDLE llClientHandle;
-    IO_TRANSPORT_PROVIDER_CALLBACK io_transport_provider_callback;
     CONTROL_PACKET_TYPE currPacketState;
     XIO_HANDLE xioTransport;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
@@ -217,7 +217,7 @@ static void MqttOpCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_
                     }
                     else
                     {
-                        LogError("QOS count was not expected: %d.\r\n", suback->qosCount);
+                        LogError("QOS count was not expected: %d.\r\n", (int)suback->qosCount);
                     }
                 }
                 break;
@@ -245,23 +245,10 @@ static void MqttOpCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_
     }
 }
 
-const XIO_HANDLE defaultIoTransportProvider(const char* fqdn, int port)
+const XIO_HANDLE getIoTransportProvider(const char* fqdn, int port)
 {
-    const IO_INTERFACE_DESCRIPTION* io_interface_description;
-
-#ifdef _WIN32
     TLSIO_CONFIG tls_io_config = { fqdn, port };
-    io_interface_description = tlsio_schannel_get_interface_description();
-#else
-    #ifdef MBED_BUILD_TIMESTAMP
-        TLSIO_CONFIG tls_io_config = { fqdn, port };
-        io_interface_description = tlsio_wolfssl_get_interface_description();
-    #else
-        TLSIO_CONFIG tls_io_config = { fqdn, port };
-        io_interface_description = tlsio_openssl_get_interface_description();
-    #endif
-#endif
-
+	const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
     return (void*)xio_create(io_interface_description, &tls_io_config, NULL/*defaultPrintLogFunction*/);
 }
 
@@ -422,7 +409,8 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transportState, bool 
                 // Increment beyond the double backslash
                 hostName += 2;
             }
-            transportState->xioTransport = transportState->io_transport_provider_callback(hostName, transportState->portNum);
+
+            transportState->xioTransport = getIoTransportProvider(hostName, transportState->portNum);
             if (mqtt_client_connect(transportState->mqttClient, transportState->xioTransport, &options) != 0)
             {
                 LogError("failure connecting to address %s:%d.\r\n", STRING_c_str(transportState->hostAddress), transportState->portNum);
@@ -520,17 +508,10 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
         }
         else
         {
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value the this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [The hostname shall be constructed using the iothubname and iothubSuffix.] */
             // TODO: need to strip the ssl or http or tls
             char tempAddress[DEFAULT_TEMP_STRING_LEN];
-            if (upperConfig->protocolGatewayHostName)
-            {
-                (void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s", upperConfig->protocolGatewayHostName);
-            }
-            else
-            {
-                (void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
-            }
+            (void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
             if ((state->hostAddress = STRING_construct(tempAddress)) == NULL)
             {
                 STRING_delete(state->mqttEventTopic);
@@ -554,15 +535,6 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
             }
             else
             {
-                if (upperConfig->io_transport_provider_callback != NULL)
-                {
-                    state->io_transport_provider_callback = upperConfig->io_transport_provider_callback;
-                }
-                else
-                {
-                    state->io_transport_provider_callback = defaultIoTransportProvider;
-                }
-
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_010: [IoTHubTransportMqtt_Create shall allocate memory to save its internal state where all topics, hostname, device_id, device_key, sasTokenSr and client handle shall be saved.] */
                 DList_InitializeListHead(&(state->waitingForAck));
                 state->destroyCalled = false;
@@ -623,12 +595,6 @@ extern TRANSPORT_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG*
         LogError("Invalid Argument: iotHubName is empty\r\n");
         result = NULL;
     }
-    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_007: [If the upperConfig's variables protocolGatewayHostName is non-Null and the length is an empty string then IoTHubTransportMqtt_Create shall return NULL.] */
-    else if (config->upperConfig->protocolGatewayHostName != NULL && strlen(config->upperConfig->protocolGatewayHostName) == 0)
-    {
-        LogError("Invalid Argument: protocolGatewayHostName is an empty string\r\n");
-        result = NULL;
-    }
     else
     {
         result = InitializeTransportHandleData(config->upperConfig, config->waitingToSend);
@@ -667,10 +633,7 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle)
 
         (void)mqtt_client_disconnect(transportState->mqttClient);
 
-        if (transportState->io_transport_provider_callback == defaultIoTransportProvider && transportState->xioTransport != NULL)
-        {
-            xio_destroy(transportState->xioTransport);
-        }
+        xio_destroy(transportState->xioTransport);
 
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_014: [IoTHubTransportMqtt_Destroy shall free all the resources currently in use.] */
         transportState->connected = false;

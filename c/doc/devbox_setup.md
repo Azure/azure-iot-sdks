@@ -28,11 +28,21 @@ Use the **master** branch to ensure you fetch the latest release version.
 
 	\|\-\-\- azure-iot-sdk
 
-	\|\-\-\-\-\-\- c
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- c
   
-	\|\-\-\-\-\-\-\-\-\- azure-c-shared-utility
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-c-shared-utility
+	
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-uamqp-c
+	
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-c-shared-utility
+	
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- libwebsockets
+	
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- azure-umqtt-c
+	
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- azure-c-shared-utility
  
- 2.  If you have a previous version of the repository you will need to run the following commands:
+ 2.  If you have a previous version of the repository you will need to run the following commands (under each submodule):
 ```
     git submodule init
     git submodule update
@@ -64,25 +74,21 @@ You do *not* need to build the libraries in order to run the sample applications
 
 The following instructions outline how you can build the libraries in Windows:
 
-1. Create the folders **C:\\Proton** and **C:\\OpenSSL** on your development machine in which to download the dependencies.
+1. Create the folder **C:\\OpenSSL** on your development machine in which to download OpenSSL.
 
-2. Create the environment variables **PROTON\_PATH=C:\\Proton** and **OpenSSLDir=C:\\OpenSSL**..
+2. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path, type "cmake -version" to verify).
 
-3. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path, type "cmake -version" to verify).
+3. Ensure that the git.exe application is in your system path.
 
-4. Install  [Python ver. 2.7.9](https://www.python.org/downloads/) (make sure it is installed in your path, type "python -V" to verify).
+4. Open a Visual Studio 2015 x86 Native Tools command prompt.
 
-5. Install [Perl ver. 5.20.2 or higher](https://www.perl.org/get.html) (make sure it is installed in your path, type "perl -v" to verify).
+5. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
 
-6. Ensure that the git.exe application is in your system path.
 
-6. Open a Visual Studio 2015 x86 Native Tools command prompt.
-
-7. Run the script **build\_proton.cmd** in the **c\\build_all\\windows** directory to build the proton libraries.
-
-8. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
-
-> Note: In order to test MQTT End2End you must also deploy an [Azure IoT Protocol Gateway](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md).
+> Note: To enable support to AMQP over WebSockets, 
+  1. Install [OpenSSL 1.0.1 (x86)](https://github.com/openssl/openssl) (tip: install with dynamic libraries); 
+  2. Additionally to instructions on **step 1 above**, create the environment variable **OPENSSL_ROOT_DIR=C:\\OpenSSL** 
+  3. Run the **build\_client.cmd** script with the option ```--use-websockets```.
 
 <a name="linux"/>
 ## Set up a Linux development environment
