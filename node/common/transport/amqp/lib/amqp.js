@@ -68,7 +68,7 @@ function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
   
   this.uri = saslPlainUri;
   
-  if (this.uri.startsWith('wss')) {
+  if (this.uri.substring(0,3) === 'wss') {
     var wsTransport = require('amqp10-transport-ws');
     wsTransport.register(amqp10.TransportProvider);
   }
