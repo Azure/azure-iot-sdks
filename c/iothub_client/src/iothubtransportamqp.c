@@ -827,7 +827,7 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
             else
             {
                 // Codes_SRS_IOTHUBTRANSPORTAMQP_09_097: [IoTHubTransportAMQP_DoWork shall pass the encoded AMQP message to AMQP for sending (along with on_message_send_complete callback) using messagesender_send()] 
-                if (messagesender_send(transport_state->message_sender, amqp_message, on_message_send_complete, (const void*)event_tracker) != RESULT_OK)
+                if (messagesender_send(transport_state->message_sender, amqp_message, on_message_send_complete, event_tracker) != RESULT_OK)
                 {
                     LogError("Failed sending the AMQP message.\r\n");
                 }
