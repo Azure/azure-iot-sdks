@@ -82,7 +82,13 @@ ARTIK supports both Ethernet and WiFi. If you want to use WiFi on your ARTIK, pl
 
 -   Replace the above placeholder with device connection string you obtained in [Step 1](#Step-1:-Prerequisites) and save the changes.
 
--   Build the SDK samples using the following command:
+-   On the board, run the following command to build and install Apache Proton library:
+
+        ./azure-iot-sdks/c/build_all/linux/build_proton.sh --install /usr
+        chmod +x ./azure-iot-sdks/c/build_all/linux/build_paho.sh
+        ./azure-iot-sdks/c/build_all/linux/build_paho.sh
+
+-   Assuming everything went OK on the build_proton.sh, you can now build the SDK samples using the following command:
 
         ./azure-iot-sdks/c/build_all/linux/build.sh
 

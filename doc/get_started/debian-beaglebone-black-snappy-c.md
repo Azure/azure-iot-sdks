@@ -224,7 +224,15 @@ You should have the following items ready before beginning the process:
 
 ## Build the sample
 
-- Build the SDK code using the following command
+- The Azure IoT Hub SDK depends on Apache Qpid Proton (AMQP) to integrate with the device hub and Event Hubs. On the board, run the following command to build/install Apache Proton:
+
+		sudo ~/azure-iot-sdks/c/build_all/linux/build_proton.sh --install /usr
+
+- This SDK sample depends on the presences of a few libraries. Run the following command to build them:
+
+		sudo ~/azure-iot-sdks/c/build_all/linux/build_paho.sh
+
+- You can now build the SDK code using the following command, assuming everything went OK on build\_proton.sh and build\_paho.sh
 
 		~/azure-iot-sdks/c/build_all/linux/build.sh
 
