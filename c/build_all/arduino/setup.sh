@@ -47,14 +47,6 @@ setup_sdk()
   #fi
 }
 
-setup_proton()
-{
-  cd $working_dir
-  echo "Setting up qpid-proton"
-  ./build_proton.sh -s "$install_root/$openwrt_folder/$openwrt_sdk_folder"
-}
-
 process_args $*
 
 setup_sdk
-setup_proton
