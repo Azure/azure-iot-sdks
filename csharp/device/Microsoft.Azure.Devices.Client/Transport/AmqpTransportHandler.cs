@@ -15,7 +15,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
     sealed class AmqpTransportHandler : TransportHandlerBase
     {
-        static readonly IotHubConnectionCache connectionCache = new IotHubConnectionCache(AccessRights.DeviceConnect);
+        static readonly IotHubConnectionCache tcpConnectionCache = new IotHubConnectionCache(AccessRights.DeviceConnect);
+        static readonly IotHubConnectionCache wsConnectionCache = new IotHubConnectionCache(AccessRights.DeviceConnect);
         readonly string deviceId;
         readonly Client.FaultTolerantAmqpObject<SendingAmqpLink> faultTolerantEventSendingLink;
         readonly Client.FaultTolerantAmqpObject<ReceivingAmqpLink> faultTolerantDeviceBoundReceivingLink;
@@ -23,12 +24,25 @@ namespace Microsoft.Azure.Devices.Client.Transport
         readonly TimeSpan openTimeout;
         readonly TimeSpan operationTimeout;
         readonly uint prefetchCount;
+        readonly TransportType transportType;
 
         int eventsDeliveryTag;
 
         public AmqpTransportHandler(IotHubConnectionString connectionString, AmqpTransportSettings transportSettings)
         {
-            this.IotHubConnection = connectionCache.GetConnection(connectionString, transportSettings);
+            this.transportType = transportSettings.GetTransportType();
+            switch (this.transportType)
+            {
+                case TransportType.Amqp_Tcp_Only:
+                    this.IotHubConnection = tcpConnectionCache.GetConnection(connectionString, transportSettings);
+                    break;
+                case TransportType.Amqp_WebSocket_Only:
+                    this.IotHubConnection = wsConnectionCache.GetConnection(connectionString, transportSettings);
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid Transport Type {0}".FormatInvariant(this.transportType));
+            }
+            
             this.deviceId = connectionString.DeviceId;
             this.openTimeout = IotHubConnection.DefaultOpenTimeout;
             this.operationTimeout = IotHubConnection.DefaultOperationTimeout;
@@ -152,7 +166,15 @@ namespace Microsoft.Azure.Devices.Client.Transport
         protected override Task OnCloseAsync()
         {
             GC.SuppressFinalize(this);
-            return connectionCache.ReleaseConnectionAsync(this.Connection);
+            switch (this.transportType)
+            {
+                case TransportType.Amqp_Tcp_Only:
+                    return tcpConnectionCache.ReleaseConnectionAsync(this.Connection);
+                case TransportType.Amqp_WebSocket_Only:
+                    return wsConnectionCache.ReleaseConnectionAsync(this.Connection);
+                default:
+                    throw new InvalidOperationException("Invalid Transport Type {0}".FormatInvariant(this.transportType));
+            }
         }
 
         protected async override Task OnSendEventAsync(Message message)

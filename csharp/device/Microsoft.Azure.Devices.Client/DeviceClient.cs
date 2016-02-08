@@ -9,6 +9,8 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Devices.Client.Extensions;
     using Microsoft.Azure.Devices.Client.Transport;
 #if !WINDOWS_UWP
+    using System.Linq;
+    using System.Net.Sockets;
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Transport.Mqtt;
@@ -657,7 +659,7 @@ namespace Microsoft.Azure.Devices.Client
             // Concrete Device Client creation was deferred. Use prioritized list of transports.
             foreach (var transportSetting in this.transportSettings)
             {
-                TransportHandlerBase helper;
+                TransportHandlerBase helper = null;
                 try
                 {
                     switch (transportSetting.GetTransportType())
@@ -681,9 +683,21 @@ namespace Microsoft.Azure.Devices.Client
                 }
                 catch (Exception exception)
                 {
-                    if (exception.IsFatal() || exception is UnauthorizedException || exception is InvalidOperationException)
+                    await helper.CloseAsync();
+
+                    if (!(exception is IotHubCommunicationException || exception is TimeoutException || exception is SocketException || exception is AggregateException))
                     {
                         throw;
+                    }
+
+                    if (exception is AggregateException)
+                    {
+                        var aggregateException = (AggregateException)exception;
+                        var innerExceptions = aggregateException.Flatten().InnerExceptions;
+                        if (!innerExceptions.Any(x => x is IotHubCommunicationException || x is SocketException || x is TimeoutException))
+                        {
+                            throw;
+                        }
                     }
 
                     lastException = exception;
