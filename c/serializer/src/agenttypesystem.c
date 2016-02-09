@@ -52,7 +52,7 @@
 // An example of this would be printf("%.*f", MAX_FLOATING_POINT_STRING_LENGTH, 1.3);
 // But currently no explicit requests for this exist in the file nor are
 // any expected to reasonably occur when being used (numbers that hit
-// this limit would be experiencing signifcant precision loss in storage anyway.
+// this limit would be experiencing significant precision loss in storage anyway.
 #define MAX_FLOATING_POINT_STRING_LENGTH (DECIMAL_DIG *2 + 2)
 
 // This maximum length is 11 for 32 bit integers (including the sign)
@@ -1429,40 +1429,40 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                             1 + //\"
                             1;  // " (terminating NULL);
 
-                        char* tempBuffer = malloc(tempBufferSize);
+                        char* tempBuffer = (char*)malloc(tempBufferSize);
                         if (tempBuffer == NULL)
-                        {
-                            result = AGENT_DATA_TYPES_ERROR;
-                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                        }
-                        else if (sprintf_s(tempBuffer, tempBufferSize, "\"%.4d-%.2d-%.2dT%.2d:%.2d:%.2d.%.12llu%+.2d:%.2d\"", /*+ in printf forces the sign to appear*/
-                            value->value.edmDateTimeOffset.dateTime.tm_year+1900,
-                            value->value.edmDateTimeOffset.dateTime.tm_mon+1,
-                            value->value.edmDateTimeOffset.dateTime.tm_mday,
-                            value->value.edmDateTimeOffset.dateTime.tm_hour,
-                            value->value.edmDateTimeOffset.dateTime.tm_min,
-                            value->value.edmDateTimeOffset.dateTime.tm_sec,
-                            value->value.edmDateTimeOffset.fractionalSecond,
-                            value->value.edmDateTimeOffset.timeZoneHour,
-                            value->value.edmDateTimeOffset.timeZoneMinute) < 0)
-                        {
-                            result = AGENT_DATA_TYPES_ERROR;
-                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                        } 
-                        else if (STRING_concat(destination, tempBuffer) != 0)
                         {
                             result = AGENT_DATA_TYPES_ERROR;
                             LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                         }
                         else
                         {
-                            result = AGENT_DATA_TYPES_OK;
-                        }
+                            if (sprintf_s(tempBuffer, tempBufferSize, "\"%.4d-%.2d-%.2dT%.2d:%.2d:%.2d.%.12llu%+.2d:%.2d\"", /*+ in printf forces the sign to appear*/
+                                value->value.edmDateTimeOffset.dateTime.tm_year+1900,
+                                value->value.edmDateTimeOffset.dateTime.tm_mon+1,
+                                value->value.edmDateTimeOffset.dateTime.tm_mday,
+                                value->value.edmDateTimeOffset.dateTime.tm_hour,
+                                value->value.edmDateTimeOffset.dateTime.tm_min,
+                                value->value.edmDateTimeOffset.dateTime.tm_sec,
+                                value->value.edmDateTimeOffset.fractionalSecond,
+                                value->value.edmDateTimeOffset.timeZoneHour,
+                                value->value.edmDateTimeOffset.timeZoneMinute) < 0)
+                            {
+                                result = AGENT_DATA_TYPES_ERROR;
+                                LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                            }
+                            else if (STRING_concat(destination, tempBuffer) != 0)
+                            {
+                                result = AGENT_DATA_TYPES_ERROR;
+                                LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                            }
+                            else
+                            {
+                                result = AGENT_DATA_TYPES_OK;
+                            }
 
-                        // Clean up temp buffer if allocated
-                        if (tempBuffer != NULL) {
+                            // Clean up temp buffer if allocated
                             free(tempBuffer);
-                            tempBuffer = NULL;
                         }
                     }
                     else
@@ -1484,41 +1484,40 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                             MAX_LONG_STRING_LENGTH + // %.2d
                             1 + // \"
                             1; // " terminating NULL
-                        char* tempBuffer = malloc(tempBufferSize);
+                        char* tempBuffer = (char*)malloc(tempBufferSize);
 
                         if (tempBuffer == NULL)
                         {
                             result - AGENT_DATA_TYPES_ERROR;
                             LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                         }
-                        else if (sprintf_s(tempBuffer, tempBufferSize, "\"%.4d-%.2d-%.2dT%.2d:%.2d:%.2d%+.2d:%.2d\"", /*+ in printf forces the sign to appear*/
-                            value->value.edmDateTimeOffset.dateTime.tm_year + 1900,
-                            value->value.edmDateTimeOffset.dateTime.tm_mon+1,
-                            value->value.edmDateTimeOffset.dateTime.tm_mday,
-                            value->value.edmDateTimeOffset.dateTime.tm_hour,
-                            value->value.edmDateTimeOffset.dateTime.tm_min,
-                            value->value.edmDateTimeOffset.dateTime.tm_sec,
-                            value->value.edmDateTimeOffset.timeZoneHour,
-                            value->value.edmDateTimeOffset.timeZoneMinute) < 0)
-                        {
-                            result = AGENT_DATA_TYPES_ERROR;
-                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                        }
-                        else if (STRING_concat(destination, tempBuffer) != 0)
-                        {
-                            result = AGENT_DATA_TYPES_ERROR;
-                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                        }
                         else
                         {
-                            result = AGENT_DATA_TYPES_OK;
-                        }
+                            if (sprintf_s(tempBuffer, tempBufferSize, "\"%.4d-%.2d-%.2dT%.2d:%.2d:%.2d%+.2d:%.2d\"", /*+ in printf forces the sign to appear*/
+                                value->value.edmDateTimeOffset.dateTime.tm_year + 1900,
+                                value->value.edmDateTimeOffset.dateTime.tm_mon+1,
+                                value->value.edmDateTimeOffset.dateTime.tm_mday,
+                                value->value.edmDateTimeOffset.dateTime.tm_hour,
+                                value->value.edmDateTimeOffset.dateTime.tm_min,
+                                value->value.edmDateTimeOffset.dateTime.tm_sec,
+                                value->value.edmDateTimeOffset.timeZoneHour,
+                                value->value.edmDateTimeOffset.timeZoneMinute) < 0)
+                            {
+                                result = AGENT_DATA_TYPES_ERROR;
+                                LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                            }
+                            else if (STRING_concat(destination, tempBuffer) != 0)
+                            {
+                                result = AGENT_DATA_TYPES_ERROR;
+                                LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                            }
+                            else
+                            {
+                                result = AGENT_DATA_TYPES_OK;
+                            }
 
-                        // Clean up temp buffer if allocated
-                        if (tempBuffer != NULL)
-                        {
+                            // Clean up temp buffer if allocated
                             free(tempBuffer);
-                            tempBuffer = NULL;
                         }
                     }
                 }
@@ -1543,39 +1542,38 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                             1 + // Z
                             1 + // \"
                             1; // " (terminating NULL)
-                        char* tempBuffer = malloc(tempBufferSize);
+                        char* tempBuffer = (char*)malloc(tempBufferSize);
 
                         if (tempBuffer == NULL)
                         {
                             result = AGENT_DATA_TYPES_ERROR;
                             LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                         }
-                        else if (sprintf_s(tempBuffer, tempBufferSize, "\"%.4d-%.2d-%.2dT%.2d:%.2d:%.2d.%.12lluZ\"", /*+ in printf forces the sign to appear*/
-                            value->value.edmDateTimeOffset.dateTime.tm_year + 1900,
-                            value->value.edmDateTimeOffset.dateTime.tm_mon+1,
-                            value->value.edmDateTimeOffset.dateTime.tm_mday,
-                            value->value.edmDateTimeOffset.dateTime.tm_hour,
-                            value->value.edmDateTimeOffset.dateTime.tm_min,
-                            value->value.edmDateTimeOffset.dateTime.tm_sec,
-                            value->value.edmDateTimeOffset.fractionalSecond) < 0)
-                        {
-                            result = AGENT_DATA_TYPES_ERROR;
-                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                        }
-                        else if (STRING_concat(destination, tempBuffer) != 0)
-                        {
-                            result = AGENT_DATA_TYPES_ERROR;
-                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                        }
                         else
                         {
-                            result = AGENT_DATA_TYPES_OK;
-                        }
+                            if (sprintf_s(tempBuffer, tempBufferSize, "\"%.4d-%.2d-%.2dT%.2d:%.2d:%.2d.%.12lluZ\"", /*+ in printf forces the sign to appear*/
+                                value->value.edmDateTimeOffset.dateTime.tm_year + 1900,
+                                value->value.edmDateTimeOffset.dateTime.tm_mon+1,
+                                value->value.edmDateTimeOffset.dateTime.tm_mday,
+                                value->value.edmDateTimeOffset.dateTime.tm_hour,
+                                value->value.edmDateTimeOffset.dateTime.tm_min,
+                                value->value.edmDateTimeOffset.dateTime.tm_sec,
+                                value->value.edmDateTimeOffset.fractionalSecond) < 0)
+                            {
+                                result = AGENT_DATA_TYPES_ERROR;
+                                LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                            }
+                            else if (STRING_concat(destination, tempBuffer) != 0)
+                            {
+                                result = AGENT_DATA_TYPES_ERROR;
+                                LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                            }
+                            else
+                            {
+                                result = AGENT_DATA_TYPES_OK;
+                            }
 
-                        if (tempBuffer != NULL)
-                        {
                             free(tempBuffer);
-                            tempBuffer = NULL;
                         }
                     }
                     else
@@ -1596,42 +1594,39 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                             1 + // \"
                             1; // " (terminating null);
 
-                        char* tempBuffer = malloc(tempBufferSize);
+                        char* tempBuffer = (char*)malloc(tempBufferSize);
 
                         if (tempBuffer == NULL)
                         {
                             result = AGENT_DATA_TYPES_ERROR;
                             LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                         }
-                        else if (sprintf_s(tempBuffer, tempBufferSize, "\"%.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ\"",
-                            value->value.edmDateTimeOffset.dateTime.tm_year + 1900,
-                            value->value.edmDateTimeOffset.dateTime.tm_mon+1,
-                            value->value.edmDateTimeOffset.dateTime.tm_mday,
-                            value->value.edmDateTimeOffset.dateTime.tm_hour,
-                            value->value.edmDateTimeOffset.dateTime.tm_min,
-                            value->value.edmDateTimeOffset.dateTime.tm_sec) < 0)
-                        {
-                            result = AGENT_DATA_TYPES_ERROR;
-                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                        }
-                        else if (STRING_concat(destination, tempBuffer) != 0)
-                        {
-                            result = AGENT_DATA_TYPES_ERROR;
-                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                        }
                         else
                         {
-                            result = AGENT_DATA_TYPES_OK;
-                        }
+                            if (sprintf_s(tempBuffer, tempBufferSize, "\"%.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ\"",
+                                value->value.edmDateTimeOffset.dateTime.tm_year + 1900,
+                                value->value.edmDateTimeOffset.dateTime.tm_mon+1,
+                                value->value.edmDateTimeOffset.dateTime.tm_mday,
+                                value->value.edmDateTimeOffset.dateTime.tm_hour,
+                                value->value.edmDateTimeOffset.dateTime.tm_min,
+                                value->value.edmDateTimeOffset.dateTime.tm_sec) < 0)
+                            {
+                                result = AGENT_DATA_TYPES_ERROR;
+                                LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                            }
+                            else if (STRING_concat(destination, tempBuffer) != 0)
+                            {
+                                result = AGENT_DATA_TYPES_ERROR;
+                                LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                            }
+                            else
+                            {
+                                result = AGENT_DATA_TYPES_OK;
+                            }
 
-                        if (tempBuffer != NULL)
-                        {
                             free(tempBuffer);
-                            tempBuffer = NULL;
                         }
                     }
-                    
-
                 }
                 break;
             }
@@ -1846,7 +1841,7 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 {
                     /*forward parse the string to scan for " and for \ that in JSON are \" respectively \\*/
                     size_t tempBufferSize = vlen + 5 * nControlCharacters + nEscapeCharacters + 3 + 1;
-                    char* tempBuffer = malloc(tempBufferSize);
+                    char* tempBuffer = (char*)malloc(tempBufferSize);
                     if (tempBuffer == NULL)
                     {
                         result = AGENT_DATA_TYPES_ERROR;
@@ -1904,12 +1899,8 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                         {
                             result = AGENT_DATA_TYPES_OK;
                         }
-                    }
 
-                    if (tempBuffer != NULL)
-                    {
                         free(tempBuffer);
-                        tempBuffer = NULL;
                     }
                 }
 
@@ -1981,31 +1972,30 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 else
                 {
                     size_t tempBufferSize = MAX_FLOATING_POINT_STRING_LENGTH;
-                    char* tempBuffer = malloc(tempBufferSize);
+                    char* tempBuffer = (char*)malloc(tempBufferSize);
                     if (tempBuffer == NULL)
-                    {
-                        result = AGENT_DATA_TYPES_ERROR;
-                        LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                    }
-                    else if (sprintf_s(tempBuffer, tempBufferSize, "%.*f", FLT_DIG, (double)(value->value.edmSingle.value)) < 0)
-                    {
-                        result = AGENT_DATA_TYPES_ERROR;
-                        LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                    }
-                    else if (STRING_concat(destination, tempBuffer) != 0)
                     {
                         result = AGENT_DATA_TYPES_ERROR;
                         LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                     }
                     else
                     {
-                        result = AGENT_DATA_TYPES_OK;
-                    }
+                        if (sprintf_s(tempBuffer, tempBufferSize, "%.*f", FLT_DIG, (double)(value->value.edmSingle.value)) < 0)
+                        {
+                            result = AGENT_DATA_TYPES_ERROR;
+                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                        }
+                        else if (STRING_concat(destination, tempBuffer) != 0)
+                        {
+                            result = AGENT_DATA_TYPES_ERROR;
+                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                        }
+                        else
+                        {
+                            result = AGENT_DATA_TYPES_OK;
+                        }
 
-                    if (tempBuffer != NULL)
-                    {
                         free(tempBuffer);
-                        tempBuffer = NULL;
                     }
                 }
                 break;
@@ -2060,31 +2050,30 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 else
                 {
                     size_t tempBufferSize = DECIMAL_DIG * 2;
-                    char* tempBuffer = malloc(tempBufferSize);
+                    char* tempBuffer = (char*)malloc(tempBufferSize);
                     if (tempBuffer == NULL)
-                    {
-                        result = AGENT_DATA_TYPES_ERROR;
-                        LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                    }
-                    else if (sprintf_s(tempBuffer, tempBufferSize, "%.*f", DBL_DIG, value->value.edmDouble.value) < 0)
-                    {
-                        result = AGENT_DATA_TYPES_ERROR;
-                        LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
-                    }
-                    else if (STRING_concat(destination, tempBuffer) != 0)
                     {
                         result = AGENT_DATA_TYPES_ERROR;
                         LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                     }
                     else
                     {
-                        result = AGENT_DATA_TYPES_OK;
-                    }
+                        if (sprintf_s(tempBuffer, tempBufferSize, "%.*f", DBL_DIG, value->value.edmDouble.value) < 0)
+                        {
+                            result = AGENT_DATA_TYPES_ERROR;
+                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                        }
+                        else if (STRING_concat(destination, tempBuffer) != 0)
+                        {
+                            result = AGENT_DATA_TYPES_ERROR;
+                            LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                        }
+                        else
+                        {
+                            result = AGENT_DATA_TYPES_OK;
+                        }
 
-                    if (tempBuffer != NULL)
-                    {
                         free(tempBuffer);
-                        tempBuffer = NULL;
                     }
                 }
                 break;
