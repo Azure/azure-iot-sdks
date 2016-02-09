@@ -6,6 +6,9 @@ namespace Microsoft.Azure.Devices
     using System;
     using Microsoft.Azure.Devices.Common;
 
+    /// <summary>
+    /// Creates an instance of an implementation of <see cref="IAuthenticationMethod"/> based on known authentication parameters.
+    /// </summary>
     public sealed class AuthenticationMethodFactory
     {
         static internal IAuthenticationMethod GetAuthenticationMethod(IotHubConnectionStringBuilder iotHubConnectionStringBuilder)

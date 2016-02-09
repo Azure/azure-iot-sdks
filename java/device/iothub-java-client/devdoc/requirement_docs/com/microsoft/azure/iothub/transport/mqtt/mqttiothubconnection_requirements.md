@@ -99,8 +99,6 @@ public void connectionLost(Throwable throwable);
 
 **SRS_MQTTIOTHUBCONNECTION_15_016: [**The function shall attempt to reconnect to the IoTHub in a loop with exponential backoff until it succeeds**]**
 
-**SRS_MQTTIOTHUBCONNECTION_15_017: [**The function shall generate a new sas token to be used for every new attempt to connect to the mqtt broker.**]**
-
 **SRS_MQTTIOTHUBCONNECTION_15_018: [**The maximum wait interval until a reconnect is attempted shall be 60 seconds.**]**
 
 

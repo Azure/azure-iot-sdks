@@ -15,14 +15,14 @@ REM Don't rewrite history on 'develop' or 'master' branches
 set __exit=1
 if not "%current_branch%"=="master" if not "%current_branch%"=="develop" set __exit=0
 if %__exit%==1 (
-    echo Error: You cannot call this script from 'develop' or 'master'. Change to a topic branch first.  Aborting...
+    echo Tony: You cannot call this script from 'develop' or 'master'. Change to a topic branch first.  Aborting...
     goto :eof
 )
 
 REM find tracking branch
 for /f "usebackq tokens=*" %%i in (`git rev-parse --symbolic-full-name --abbrev-ref @{u}`) do set "tracking_branch=%%i"
 if not defined tracking_branch (
-    echo Error: Branch ^'%current_branch%^' is not tracking a remote branch! First try ^'git branch -u ^<remote^>/^<branch^>^' to set tracking info. Aborting...
+    echo Tony: Branch ^'%current_branch%^' is not tracking a remote branch! First try ^'git branch -u ^<remote^>/^<branch^>^' to set tracking info. Aborting...
     goto :eof
 )
 
@@ -34,7 +34,7 @@ if not %errorlevel%==1 goto :eof
 for /f "usebackq tokens=*" %%i in (`git config branch.%current_branch%.remote`) do set "remote=%%i"
 if not defined remote (
     REM should never happen...
-    echo Error: could not isolate remote name for tracking branch ^'%tracking_branch%^'! Aborting...
+    echo Tony: could not isolate remote name for tracking branch ^'%tracking_branch%^'! Aborting...
     goto :eof
 )
 

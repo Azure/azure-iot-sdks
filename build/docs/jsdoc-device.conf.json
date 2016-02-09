@@ -6,10 +6,29 @@
   "source": {
     "include": [
       "../build/docs/node-main-page-device.md",
-      "common/common.js",
-      "common/lib/message.js",
-      "device/device.js",
-      "device/lib/client.js"
+      "common/core/common.js",
+      "common/core/lib/errors.js",
+      "common/core/lib/message.js",
+      "common/core/lib/shared_access_signature.js",
+      "common/transport/amqp/index.js",
+      "common/transport/amqp/lib/amqp.js",
+      "common/transport/amqp/lib/amqp_message.js",
+      "common/transport/amqp/lib/amqp_receiver.js",
+      "common/transport/http/index.js",
+      "common/transport/http/lib/http.js",
+      "common/transport/mqtt/index.js",
+      "common/transport/mqtt/lib/mqtt.js",
+      "device/core/device.js",
+      "device/core/lib/client.js",
+      "device/transport/amqp/index.js",
+      "device/transport/amqp/lib/amqp.js",
+      "device/transport/amqp-ws/index.js",
+      "device/transport/amqp-ws/lib/amqp_ws.js",
+      "device/transport/http/index.js",
+      "device/transport/http/lib/http.js",
+      "device/transport/http/lib/http_receiver.js",
+      "device/transport/mqtt/index.js",
+      "device/transport/mqtt/lib/mqtt.js"
     ],
     "includePattern": ".+\\.js(doc)?$",
     "excludePattern": "(^|\\/|\\\\)_"
@@ -18,6 +37,9 @@
     "plugins/markdown"
   ],
   "templates": {
+    "default": {
+        "useLongnameInNav": true
+    },
     "cleverLinks": false,
     "monospaceLinks": false
   },

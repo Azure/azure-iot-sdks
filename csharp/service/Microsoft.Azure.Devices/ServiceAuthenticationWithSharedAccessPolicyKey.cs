@@ -6,16 +6,19 @@ namespace Microsoft.Azure.Devices
     using System;
     using Microsoft.Azure.Devices.Common.Security;
 
+    /// <summary>
+    /// Authentication method that uses a shared access policy key. 
+    /// </summary>
     public sealed class ServiceAuthenticationWithSharedAccessPolicyKey : IAuthenticationMethod
     {
         string policyName;
         string key;
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="ServiceAuthenticationWithSharedAccessPolicyKey"/> class.
         /// </summary>
-        /// <param name="policyName"></param>
-        /// <param name="key"></param>
+        /// <param name="policyName">Name of the shared access policy to use.</param>
+        /// <param name="key">Key associated with the shared access policy.</param>
         public ServiceAuthenticationWithSharedAccessPolicyKey(string policyName, string key)
         {
             this.SetPolicyName(policyName);

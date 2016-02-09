@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -450,44 +451,7 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_014: [If the event type is DELIVERY, the event handler shall close the Sender link.]
-    @Test
-    public void onDeliveryClosesSender(){
-        final String hostName = "test.host.name";
-        final String deviceId = "test-deviceId";
-        final String userName = "test-deviceId@sas.test.host.name";
-        final String sasToken = "test-token";
-        final String sendTag = "sender";
-
-        new NonStrictExpectations()
-        {
-            {
-                mockEvent.getLink();
-                result = mockSender;
-                mockSender.getName();
-                result = sendTag;
-                mockEvent.getType();
-                result = Event.Type.DELIVERY;
-                mockEvent.getDelivery();
-                result = mockDelivery;
-            }
-        };
-
-        AmqpsIotHubConnectionBaseHandler handler = new AmqpsIotHubConnectionBaseHandler(hostName, userName, sasToken, deviceId, mockIotHubConnection);
-
-        Deencapsulation.setField(handler, "sender", mockSender);
-
-        handler.onDelivery(mockEvent);
-
-        new Verifications()
-        {
-            {
-                mockSender.close();
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_015: [If this link is the Receiver link, the event handler shall close the Session and Connection (Proton) objects.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_015: [The event handler shall close the Session and Connection (Proton) objects.]
     @Test
     public void onLinkLocalCloseClosesSessionAndConnection(
             @Mocked final CompletableFuture<Integer> mockFuture)
@@ -496,15 +460,10 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
         final String deviceId = "test-deviceId";
         final String userName = "test-deviceId@sas.test.host.name";
         final String sasToken = "test-token";
-        final String receiveTag = "receiver";
 
         new NonStrictExpectations()
         {
             {
-                mockEvent.getLink();
-                result = mockReceiver;
-                mockReceiver.getName();
-                result = receiveTag;
                 mockFuture.isDone();
                 result = true;
             }
@@ -560,11 +519,8 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_017: [The event handler shall get the Sender (Proton) object from the link.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_018: [The event handler shall encode the message and copy the contents to the byte buffer.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_019: [The event handler shall set the delivery tag on the Sender (Proton) object.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_020: [The event handler shall send the encoded bytes.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_021: [The event handler shall advance the Sender and complete the sent message CompletableFuture using the Delivery (Proton) object hash code.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_049: [The event handler shall get the link credit from the event and complete the linkCredit future with the same value.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_050: [The event handler shall set the link flow flag to allow sending.]
     @Test
     public void onLinkFlowFullTest(
             @Mocked final CompletableFuture<Integer> mockFuture)
@@ -573,78 +529,30 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
         final String deviceId = "test-deviceId";
         final String userName = "test-deviceId@sas.test.host.name";
         final String sasToken = "test-token";
-        final byte[] msgBody = { 0x61, 0x62, 0x63 };
-        final int tag = 0;
 
         new NonStrictExpectations()
         {
             {
-                mockMessage.encode(msgBody, 0, msgBody.length);
-                result = 3;
                 mockEvent.getLink();
                 result = mockSender;
                 mockSender.getCredit();
                 result = 1;
-                mockSender.getUnsettled();
-                result = 0;
             }
         };
 
         AmqpsIotHubConnectionBaseHandler handler = new AmqpsIotHubConnectionBaseHandler(hostName, userName, sasToken, deviceId, mockIotHubConnection);
 
         Deencapsulation.setField(handler, "sender", mockSender);
-        Deencapsulation.setField(handler, "currentSentMessageFuture", mockFuture);
-        handler.createBinaryMessage(msgBody, null);
+        Deencapsulation.setField(handler, "linkCredit", mockFuture);
         handler.onLinkFlow(mockEvent);
 
-        new Verifications()
-        {
-            {
-                mockEvent.getLink();
-                byte[] buffer = new byte[1024];
-                int length = mockMessage.encode(buffer, 0, buffer.length);
-                byte[] deliveryTag = String.valueOf(tag).getBytes();
-                Delivery d = mockSender.delivery(deliveryTag);
-                mockSender.send((byte[]) any, 0, length);
-
-                mockSender.advance();
-                mockFuture.complete(d.hashCode());
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_022: [If the link is the Sender link and the message was sent successfully over this link, the event handler shall reset the private Sender (Proton) member variable and open the AmqpsIotHubConnection for sending.]
-    @Test
-    public void onLinkRemoteCloseResetsSenderAndOpens(
-            @Mocked final CompletableFuture<Integer> mockFuture)
-    {
-        final String hostName = "test.host.name";
-        final String deviceId = "test-deviceId";
-        final String userName = "test-deviceId@sas.test.host.name";
-        final String sasToken = "test-token";
-        final String sendTag = "sender";
-
-        new NonStrictExpectations()
-        {
-            {
-                mockEvent.getLink();
-                result = mockSender;
-                mockSender.getName();
-                result = sendTag;
-                mockFuture.isCompletedExceptionally();
-                result = false;
-            }
-        };
-
-        AmqpsIotHubConnectionBaseHandler handler = new AmqpsIotHubConnectionBaseHandler(hostName, userName, sasToken, deviceId, mockIotHubConnection);
-        Deencapsulation.setField(handler, "currentSentMessageFuture", mockFuture);
-        handler.onLinkRemoteClose(mockEvent);
+        assertEquals(true, Deencapsulation.getField(handler, "linkFlow"));
 
         new Verifications()
         {
             {
-                mockEvent.getSession().sender(sendTag);
-                Deencapsulation.invoke(mockIotHubConnection, "openSending");
+                mockSender.getCredit();
+                mockFuture.complete((Integer)any);
             }
         };
     }
@@ -712,7 +620,7 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_026: [The event handler shall get the Connection (Proton) object from the event handler and set the host name on the connection.]
     // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_027: [The event handler shall create a Session (Proton) object from the connection.]
     // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_028: [The event handler shall create a Receiver and Sender (Proton) object and set the protocol tag on them to a predefined constant.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_029: [The event handler shall open the Connection, Session, and Receiver objects.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_029: [The event handler shall open the Connection, Session, Sender, and Receiver objects.]
     @Test
     public void onConnectionInitCreatesSession(){
         final String hostName = "test.host.name";
@@ -736,6 +644,7 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
                 mockConnection.open();
                 mockSession.open();
                 mockReceiver.open();
+                mockSender.open();
             }
         };
     }
@@ -789,14 +698,24 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_036: [The event handler shall inform the AmqpsIotHubConnection that the Reactor (Proton) is ready.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_036: [The event handler shall inform the AmqpsIotHubConnection that the Reactor (Proton) is ready if the event link is the Sender link.]
     @Test
-    public void onSessionRemoteOpenInformsReactorReady(){
+    public void onLinkRemoteOpenInformsReactorReadySuccess(){
         final String hostName = "test.host.name";
         final String deviceId = "test-deviceId";
         final String userName = "test-deviceId@sas.test.host.name";
         final String sasToken = "test-token";
         final CompletableFuture<Boolean> future = new CompletableFuture<>();
+
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getLink();
+                result = mockSender;
+                mockSender.getName();
+                result = "sender";
+            }
+        };
 
         AmqpsIotHubConnectionBaseHandler handler = new AmqpsIotHubConnectionBaseHandler(hostName, userName, sasToken, deviceId, mockIotHubConnection);
 
@@ -924,6 +843,28 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
         };
     }
 
+    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_051: [The method shall get the link credit from the CompletableFuture link credit object.]
+    @Test
+    public void getLinkCreditSuccess() throws InterruptedException, ExecutionException, TimeoutException {
+        final String hostName = "test.host.name";
+        final String deviceId = "test-deviceId";
+        final String userName = "test-deviceId@sas.test.host.name";
+        final String sasToken = "test-token";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getLink();
+                result = mockSender;
+                mockSender.getCredit();
+                result = 1;
+            }
+        };
+        AmqpsIotHubConnectionBaseHandler handler = new AmqpsIotHubConnectionBaseHandler(hostName, userName, sasToken, deviceId, mockIotHubConnection);
+        handler.onLinkFlow(mockEvent);
+        assertEquals(1,handler.getLinkCredit());
+    }
+
     // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_040: [The function shall create a new Message (Proton) object.]
     @Test
     public void createBinaryMessageCreatesNewProtonMessage(){
@@ -1008,9 +949,7 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_046: [The function shall open the Sender (Proton) link.]
     // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_047: [The function shall return a new CompletableFuture for the sent message.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_048: [The function shall lock sending on the AmqpsIotHubConnection.]
     @Test
     public void createBinaryMessageOpensSenderAndLocksSending(
             @Mocked final CompletableFuture<Integer> mockFuture)
@@ -1036,14 +975,34 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
         CompletableFuture<Integer> actualFuture = handler.createBinaryMessage(msgBody, messageId);
 
         assertEquals(CompletableFuture.class, actualFuture.getClass());
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_052: [The function shall set the linkFlow field to false.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_053: [The function shall close the Sender, Receiver, Session, and Connection.]
+    @Test
+    public void shutdownFullTests(){
+        final String hostName = "test.host.name";
+        final String deviceId = "test-deviceId";
+        final String userName = "test-deviceId@sas.test.host.name";
+        final String sasToken = "test-token";
+
+        AmqpsIotHubConnectionBaseHandler handler = new AmqpsIotHubConnectionBaseHandler(hostName, userName, sasToken, deviceId, mockIotHubConnection);
+        Deencapsulation.setField(handler, "sender", mockSender);
+        Deencapsulation.setField(handler, "receiver", mockReceiver);
+        Deencapsulation.setField(handler, "session", mockSession);
+        Deencapsulation.setField(handler, "connection", mockConnection);
+        handler.shutdown();
+
+        assertEquals(false, Deencapsulation.getField(handler, "linkFlow"));
 
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockIotHubConnection, "lockSending");
-                mockSender.open();
+                mockSender.close();
+                mockReceiver.close();
+                mockSession.close();
+                mockConnection.close();
             }
         };
     }
-
 }

@@ -25,8 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 /** Unit tests for AmqpsTransport. */
 public class AmqpsTransportTest
@@ -45,7 +44,7 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_11_019: [The function shall open an AMQPS session with the IoT Hub given in the configuration.]
     @Test
-    public void openOpensAmqpsConnection() throws IOException, ExecutionException, InterruptedException {
+    public void openOpensAmqpsConnection() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         new NonStrictExpectations()
         {
             {
@@ -68,7 +67,7 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_11_020: [If an AMQPS session is already open, the function shall do nothing.]
     @Test
-    public void openDoesNothingIfAlreadyOpened() throws IOException, ExecutionException, InterruptedException {
+    public void openDoesNothingIfAlreadyOpened() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
         transport.open();
         transport.open();
@@ -96,23 +95,6 @@ public class AmqpsTransportTest
         {
             {
                 expectedConnection.close();
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSTRANSPORT_11_023: [If the AMQPS session is closed, the function shall do nothing.]
-    @Test
-    public void closeDoesNothingIfConnectionNeverOpened() throws IOException
-    {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.close();
-
-        final AmqpsIotHubConnection expectedConnection = mockConnection;
-        new Verifications()
-        {
-            {
-                expectedConnection.close();
-                times = 0;
             }
         };
     }
@@ -261,7 +243,7 @@ public class AmqpsTransportTest
             @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final IotHubOutboundPacket mockPacket,
-            @Mocked final LinkedList<IotHubOutboundPacket> mockQueue)
+            @Mocked final LinkedBlockingQueue<IotHubOutboundPacket> mockQueue)
             throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
@@ -274,7 +256,7 @@ public class AmqpsTransportTest
                 result = mockPacket;
                 mockPacket.getMessage();
                 result = mockMsg;
-                new LinkedList<>();
+                new LinkedBlockingQueue<>();
                 result = mockQueue;
                 mockQueue.size();
                 result = 1;
@@ -311,7 +293,7 @@ public class AmqpsTransportTest
             @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException, ExecutionException, InterruptedException {
+            throws IOException, ExecutionException, InterruptedException, TimeoutException {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
         {
@@ -695,7 +677,7 @@ public class AmqpsTransportTest
     @Test
     public void handleMessageReopensAmqpsConnectionIfConnectionFails(
             @Mocked final MessageCallback mockCallback,
-            @Mocked final Message mockMsg) throws IOException, ExecutionException, InterruptedException {
+            @Mocked final Message mockMsg) throws IOException, ExecutionException, InterruptedException, TimeoutException {
         new MockUp<AmqpsUtilities>(){
             @Mock
             Message protonMessageToMessage(MessageImpl msg){

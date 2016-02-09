@@ -4,6 +4,9 @@
 namespace Microsoft.Azure.Devices
 {
     // TODO : we should just throw typed exceptions rather than this
+    /// <summary>
+    /// Specifies the different failure reasons for message delivery.
+    /// </summary>
     public enum DeliveryFailureReason
     {
         TimeToLiveExpired,

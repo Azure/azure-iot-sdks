@@ -81,6 +81,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="consolereportwriter.cs" />
     <Compile Include="csvreportwriter.cs" />
     <Compile Include="filefinder.cs" />
     <Compile Include="invalidreqdictionary.cs" />

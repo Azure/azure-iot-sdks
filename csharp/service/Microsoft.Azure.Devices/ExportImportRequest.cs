@@ -3,6 +3,9 @@
 
 namespace Microsoft.Azure.Devices
 {
+    /// <summary>
+    /// Used to provide storage parameters when making an export or import request.
+    /// </summary>
     public sealed class ExportImportRequest
     {
         public string StorageConnectionString;

@@ -55,7 +55,6 @@ endfunction(verifyCompileMbedTool)
 
 
 function(verifyRequiredTools)
-	verifyTarIsInstalled()
 	verifyMercurialIsInstalled()
 	verifyCompileMbedTool()
 endfunction(verifyRequiredTools)

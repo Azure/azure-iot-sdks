@@ -23,7 +23,15 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "c/iothub_client/inc/version.h",
+        "filePath": "build/release/release_mbed_project.cmd",
+        "search": "(MBED\\_HG\\_USER\%\"\ \-m)([ ]+)(\".*\")",
+        "replaceString": function(versions) {
+            return '$1' + '$2' + '"' + versions.c.device + '"';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/iothub_client/inc/iothub_client_version.h",
         "search": "(IOTHUB\\_SDK\\_VERSION)([ ]+)(\".*\")",
         "replaceString": function(versions) {
             return '$1' + '$2' + '"' + versions.c.device + '"';
@@ -111,7 +119,7 @@ module.exports = [
     },
 
     ///////////////////////////////////////////////////
-    // Java Device SDK POM files
+    // Java Device SDK files
     ///////////////////////////////////////////////////
     {
         "taskType": "xmlReplaceTask",
@@ -165,8 +173,16 @@ module.exports = [
         "search": "//project/parent/version",
         "replaceString": "java.device"
     },
+	{
+		"taskType": "regexReplaceTask",
+		"filePath": "java/device/iothub-java-client/src/main/java/com/microsoft/azure/iothub/transport/TransportUtils.java",
+		"search": "(clientVersion =)([ ]+)(\".*\")",
+		"replaceString": function(versions) {
+			return '$1' + '$2' + '"' + versions.java.device + '"';
+		}
+    },
     ///////////////////////////////////////////////////
-    // Java Service SDK POM files
+    // Java Service SDK files
     ///////////////////////////////////////////////////
     {
         "taskType": "xmlReplaceTask",
@@ -227,6 +243,14 @@ module.exports = [
                 "replaceString": "java.service"
             }
         ]
+    },
+		{
+		"taskType": "regexReplaceTask",
+		"filePath": "java/service/iothub-service-sdk/src/main/java/com/microsoft/azure/iot/service/transport/TransportUtils.java",
+		"search": "(serviceVersion =)([ ]+)(\".*\")",
+		"replaceString": function(versions) {
+			return '$1' + '$2' + '"' + versions.java.service + '"';
+		}
     },
     ///////////////////////////////////////////////////
     // Node SDK package.json files
@@ -436,6 +460,42 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device",
                 "replaceString": "node.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "node/e2etests/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp",
+                "replaceString": "node.device-amqp"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-http",
+                "replaceString": "node.device-http"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iothub",
+                "replaceString": "node.service"
             }
         ]
     },

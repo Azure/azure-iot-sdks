@@ -29,15 +29,12 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
-link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
+#link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
 
 add_executable(simplesample_mqtt ${simplesample_mqtt_c_files} ${simplesample_mqtt_h_files})
 
 target_link_libraries(simplesample_mqtt 
+	iothub_client_mqtt_transport
 	serializer 
 	iothub_client
-	iothub_client_mqtt_transport
 	)
-	
-linkSharedUtil(simplesample_mqtt)
-linkPaho(simplesample_mqtt)

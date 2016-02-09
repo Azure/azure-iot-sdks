@@ -36,4 +36,4 @@ add_executable(remote_monitoring ${remote_monitoring_c_files} ${remote_monitorin
 target_link_libraries(remote_monitoring serializer iothub_client iothub_client_amqp_transport)
 
 linkSharedUtil(remote_monitoring)
-linkProton(remote_monitoring)
+linkUAMQP(remote_monitoring)

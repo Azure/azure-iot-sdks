@@ -10,10 +10,6 @@ var Message = require('azure-iot-common').Message;
 var SharedAccessSignature = require('./shared_access_signature.js');
 
 /**
- * @class Client
- */
-
-/**
  * @class           module:azure-iothub.Client
  * @classdesc       Creates an IoT Hub service client. Normally, consumers will
  *                  call one of the factory methods,

@@ -15,6 +15,7 @@ and removing calls to _DoWork will yield the same results. */
 #include "iothub_client_ll.h"
 #include "iothubtransportmqtt.h"
 #include "threadapi.h"
+#include "platform.h"
 
 /*String containing Hostname, Device Id & Device Key in the format:             */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
@@ -126,81 +127,89 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
 
 void simplesample_mqtt_run(void)
 {
-    if (serializer_init(NULL) != SERIALIZER_OK)
+    if (platform_init() != 0)
     {
         (void)printf("Failed on serializer_init\r\n");
     }
     else
     {
-        IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol);
-        srand((unsigned int)time(NULL));
-        int avgWindSpeed = 10;
-
-        if (iotHubClientHandle == NULL)
+        if (serializer_init(NULL) != SERIALIZER_OK)
         {
-            (void)printf("Failed on IoTHubClient_LL_Create\r\n");
+            (void)printf("Failed on serializer_init\r\n");
         }
         else
         {
+            IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol);
+            srand((unsigned int)time(NULL));
+            int avgWindSpeed = 10;
 
-            ContosoAnemometer* myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
-            if (myWeather == NULL)
+            if (iotHubClientHandle == NULL)
             {
-                (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");
+                (void)printf("Failed on IoTHubClient_LL_Create\r\n");
             }
             else
             {
-                if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, IoTHubMessage, myWeather) != IOTHUB_CLIENT_OK)
+
+                ContosoAnemometer* myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
+                if (myWeather == NULL)
                 {
-                    printf("unable to IoTHubClient_SetMessageCallback\r\n");
+                    (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");
                 }
                 else
                 {
-                    myWeather->DeviceId = "myFirstDevice";
-                    myWeather->WindSpeed = avgWindSpeed + (rand() % 4 + 2);
+                    if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, IoTHubMessage, myWeather) != IOTHUB_CLIENT_OK)
                     {
-                        unsigned char* destination;
-                        size_t destinationSize;
-                        if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed) != IOT_AGENT_OK)
+                        printf("unable to IoTHubClient_SetMessageCallback\r\n");
+                    }
+                    else
+                    {
+                        myWeather->DeviceId = "myFirstDevice";
+                        myWeather->WindSpeed = avgWindSpeed + (rand() % 4 + 2);
                         {
-                            (void)printf("Failed to serialize\r\n");
-                        }
-                        else
-                        {
-                            IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromByteArray(destination, destinationSize);
-                            if (messageHandle == NULL)
+                            unsigned char* destination;
+                            size_t destinationSize;
+                            if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed) != IOT_AGENT_OK)
                             {
-                                printf("unable to create a new IoTHubMessage\r\n");
+                                (void)printf("Failed to serialize\r\n");
                             }
                             else
                             {
-                                if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messageHandle, sendCallback, (void*)1) != IOTHUB_CLIENT_OK)
+                                IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromByteArray(destination, destinationSize);
+                                if (messageHandle == NULL)
                                 {
-                                    printf("failed to hand over the message to IoTHubClient");
+                                    printf("unable to create a new IoTHubMessage\r\n");
                                 }
                                 else
                                 {
-                                    printf("IoTHubClient accepted the message for delivery\r\n");
-                                }
+                                    if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messageHandle, sendCallback, (void*)1) != IOTHUB_CLIENT_OK)
+                                    {
+                                        printf("failed to hand over the message to IoTHubClient");
+                                    }
+                                    else
+                                    {
+                                        printf("IoTHubClient accepted the message for delivery\r\n");
+                                    }
 
-                                IoTHubMessage_Destroy(messageHandle);
+                                    IoTHubMessage_Destroy(messageHandle);
+                                }
+                                free(destination);
                             }
-                            free(destination);
+                        }
+
+                        /* wait for commands */
+                        while (1)
+                        {
+                            IoTHubClient_LL_DoWork(iotHubClientHandle);
+                            ThreadAPI_Sleep(100);
                         }
                     }
 
-                    /* wait for commands */
-                    while (1)
-                    {
-                        IoTHubClient_LL_DoWork(iotHubClientHandle);
-                        ThreadAPI_Sleep(100);
-                    }
+                    DESTROY_MODEL_INSTANCE(myWeather);
                 }
-
-                DESTROY_MODEL_INSTANCE(myWeather);
+                IoTHubClient_LL_Destroy(iotHubClientHandle);
             }
-            IoTHubClient_LL_Destroy(iotHubClientHandle);
+            serializer_deinit();
         }
-        serializer_deinit();
+        platform_deinit();
     }
 }

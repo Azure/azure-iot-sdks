@@ -34,6 +34,9 @@ namespace Microsoft.Azure.Devices.Client
 
         readonly IHttpClientHelper httpClientHelper;
         readonly string deviceId;
+#if !WINDOWS_UWP
+        readonly Http1TransportSettings transportSettings;
+#endif
 
         internal HttpDeviceClient(IotHubConnectionString iotHubConnectionString)
         {
@@ -46,6 +49,14 @@ namespace Microsoft.Azure.Devices.Client
                 null);
             this.DefaultReceiveTimeout = DefaultReceiveTimeoutInSeconds;
         }
+
+#if !WINDOWS_UWP
+        internal HttpDeviceClient(IotHubConnectionString iotHubConnectionString, Http1TransportSettings transportSettings)
+            :this(iotHubConnectionString)
+        {
+            this.transportSettings = transportSettings;
+        }
+#endif
 
         /// <summary>
         /// Create a DeviceClient from individual parameters

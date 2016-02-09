@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * <p>
@@ -30,6 +31,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class AmqpsTransport implements IotHubTransport
 {
+    private static final int DEFAULT_LINK_CREDIT_PAUSE_TIME = 2;
+
     /** The state of the AMQPS transport. */
     protected enum AmqpsTransportState
     {
@@ -58,7 +61,7 @@ public final class AmqpsTransport implements IotHubTransport
     public AmqpsTransport(DeviceClientConfig config)
     {
         // Codes_SRS_AMQPSTRANSPORT_11_001: [The function shall initialize an empty queue for messages waiting to be sent.]
-        this.waitingList = new LinkedList<>();
+        this.waitingList = new LinkedBlockingQueue<>();
         // Codes_SRS_AMQPSTRANSPORT_11_002: [The function shall initialize an empty queue for completed messages whose callbacks are waiting to be invoked.]
         this.callbackList = new LinkedList<>();
         this.config = config;
@@ -202,7 +205,7 @@ public final class AmqpsTransport implements IotHubTransport
                     IotHubStatusCode status = IotHubStatusCode.ERROR;
 
                     try {
-                        CompletableFuture<Boolean> futureStatus = connection.scheduleSend(packet.getMessage().getBytes(), packet.getMessage().messageId);
+                        CompletableFuture<Boolean> futureStatus = connection.scheduleSend(packet.getMessage().getBytes(), packet.getMessage().getMessageId());
                         Boolean result = futureStatus.get();
                         if(result.booleanValue()){
                             status = IotHubStatusCode.OK_EMPTY;
@@ -215,6 +218,12 @@ public final class AmqpsTransport implements IotHubTransport
                     }
                     catch(Exception e){
                         System.out.println("Failed to send message because: " + e.getMessage());
+                        try {
+                            Thread.sleep(DEFAULT_LINK_CREDIT_PAUSE_TIME*1000);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                        this.waitingList.add(packet);
                     }
                     //Instead of adding to callback packet, just invoke callbacks here in thread.
                     IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(status, packet.getCallback(), packet.getContext());

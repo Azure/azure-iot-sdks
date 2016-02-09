@@ -22,7 +22,7 @@ public final class IotHubUri
     public static final String PATH_FORMAT = "/devices/%s%s";
 
     /** The API version will be passed as a param in the URI. */
-    public static final String API_VERSION = "api-version=2015-08-15-preview";
+    public static final String API_VERSION = "api-version=2016-02-03";
 
     /** The charset used when URL-encoding the IoT Hub name and device ID. */
     public static final Charset IOTHUB_URL_ENCODING_CHARSET =
@@ -58,8 +58,8 @@ public final class IotHubUri
         // Codes_SRS_IOTHUBURI_11_012: [The constructor shall URL-encode the IoT Hub method path.]
         this.path = urlEncodePath(rawPath);
 
-        // Codes_SRS_IOTHUBURI_11_008: [If queryParams is not empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]? api-version=2015-08-15-preview &[queryFragment] '.]
-        // Codes_SRS_IOTHUBURI_11_009: [If the queryParams is empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2015-08-15-preview'.]
+        // Codes_SRS_IOTHUBURI_11_008: [If queryParams is not empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]? api-version=2016-02-03 &[queryFragment] '.]
+        // Codes_SRS_IOTHUBURI_11_009: [If the queryParams is empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03'.]
         StringBuilder uriBuilder = new StringBuilder(this.hostname);
         uriBuilder.append(this.path);
         uriBuilder.append("?");
@@ -93,7 +93,7 @@ public final class IotHubUri
     public IotHubUri(String iotHubHostname, String deviceId,
             String iotHubMethodPath)
     {
-        // Codes_SRS_IOTHUBURI_11_007: [The constructor shall return a URI pointing to the address '[iotHubHostname] /devices/[deviceId]/[IoT Hub method path]?api-version=2015-08-15-preview'.]
+        // Codes_SRS_IOTHUBURI_11_007: [The constructor shall return a URI pointing to the address '[iotHubHostname] /devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03'.]
         // Codes_SRS_IOTHUBURI_11_015: [The constructor shall URL-encode the device ID.]
         // Codes_SRS_IOTHUBURI_11_016: [The constructor shall URL-encode the IoT Hub method path.]
         this(iotHubHostname, deviceId, iotHubMethodPath, null);
@@ -107,7 +107,7 @@ public final class IotHubUri
     @Override
     public String toString()
     {
-        // Codes_SRS_IOTHUBURI_11_001: [The string representation of the IoT Hub URI shall be constructed with the format '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2015-08-15-preview(&[queryFragment]) '.]
+        // Codes_SRS_IOTHUBURI_11_001: [The string representation of the IoT Hub URI shall be constructed with the format '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03(&[queryFragment]) '.]
         return this.uri;
     }
 

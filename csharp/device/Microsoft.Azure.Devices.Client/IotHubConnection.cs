@@ -17,6 +17,7 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Amqp.Transport;
+    using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
 #endif
 
@@ -38,10 +39,10 @@ namespace Microsoft.Azure.Devices.Client
         readonly ConcurrentDictionary<string, IotHubLinkRefreshTokenTimer> iotHubLinkRefreshTokenTimers; // There can be multiple device-scope connection strings per IotHubConnection instance
         readonly string hostName;
         readonly int port;
-        readonly bool useWebSocketOnly;
+        readonly AmqpTransportSettings amqpTransportSettings;
         readonly IotHubConnectionCache.CachedConnection cachedConnection;
 
-        public IotHubConnection(IotHubConnectionCache.CachedConnection cachedConnection, IotHubConnectionString connectionString, AccessRights accessRights, bool useWebSocketOnly)
+        public IotHubConnection(IotHubConnectionCache.CachedConnection cachedConnection, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
         {
             if (connectionString.SharedAccessKeyName != null)
             {
@@ -55,7 +56,7 @@ namespace Microsoft.Azure.Devices.Client
             this.faultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
             this.hubScopeRefreshTokenTimer = new IOThreadTimer(s => ((IotHubConnection)s).OnRefreshTokenAsync(), this, false);
             this.iotHubLinkRefreshTokenTimers = new ConcurrentDictionary<string, IotHubLinkRefreshTokenTimer>();
-            this.useWebSocketOnly = useWebSocketOnly;
+            this.amqpTransportSettings = amqpTransportSettings;
         }
 
         public IotHubConnectionString HubScopeConnectionString { get; private set; }
@@ -210,40 +211,22 @@ namespace Microsoft.Azure.Devices.Client
 
             // Cleanup any lingering link refresh token timers
             this.CancelRefreshTokenTimers();
-
-            var amqpSettings = CreateAmqpSettings();
-            var tlsTransportSettings = this.CreateTlsTransportSettings();
+            AmqpSettings amqpSettings = CreateAmqpSettings();
+            TlsTransportSettings tlsTransportSettings = this.CreateTlsTransportSettings();
 
             var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
             TransportBase transport;
-            if (this.useWebSocketOnly)
-            {
-                // Try only Amqp transport over WebSocket
-                transport = await this.CreateClientWebSocketTransportAsync(timeoutHelper.RemainingTime());
-            }
-            else
-            {
-                try
-                {
-                    transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
-                }
-                catch (Exception e)
-                {
-                    if (Fx.IsFatal(e))
-                    {
-                        throw;
-                    }
 
-                    // Amqp transport over TCP failed. Retry Amqp transport over WebSocket
-                    if (timeoutHelper.RemainingTime() != TimeSpan.Zero)
-                    {
-                        transport = await this.CreateClientWebSocketTransportAsync(timeoutHelper.RemainingTime());
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+            switch (this.amqpTransportSettings.GetTransportType())
+            {
+                case TransportType.Amqp_WebSocket_Only:
+                transport = await this.CreateClientWebSocketTransportAsync(timeoutHelper.RemainingTime());
+                    break;
+                case TransportType.Amqp_Tcp_Only:
+                    transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
+                    break;
+                default:
+                    throw new InvalidOperationException("AmqpTransportSettings must specify WebSocketOnly or TcpOnly");
             }
 
             var amqpConnectionSettings = new AmqpConnectionSettings()
@@ -402,18 +385,18 @@ namespace Microsoft.Azure.Devices.Client
         public async Task SendCbsTokenAsync(AmqpCbsLink cbsLink, TimeSpan timeout)
         {
             if (this.HubScopeConnectionString != null)
-            {
+        {
                 string audience = this.HubScopeConnectionString.AmqpEndpoint.DnsSafeHost;
                 string resource = this.HubScopeConnectionString.AmqpEndpoint.AbsoluteUri;
-                var expiresAtUtc = await cbsLink.SendTokenAsync(
+            var expiresAtUtc = await cbsLink.SendTokenAsync(
                     this.HubScopeConnectionString,
                     this.HubScopeConnectionString.AmqpEndpoint,
-                    audience,
-                    resource,
-                    AccessRightsHelper.AccessRightsToStringArray(this.accessRights),
-                    timeout);
-                this.ScheduleTokenRefresh(expiresAtUtc);
-            }
+                audience,
+                resource,
+                AccessRightsHelper.AccessRightsToStringArray(this.accessRights),
+                timeout);
+            this.ScheduleTokenRefresh(expiresAtUtc);
+        }
         }
 
         async void OnRefreshTokenAsync()
@@ -439,14 +422,14 @@ namespace Microsoft.Azure.Devices.Client
                     }
                 }
             }
-        }
+                    }
 
         void ScheduleTokenRefresh(DateTime expiresAtUtc)
         {
             if (expiresAtUtc == DateTime.MaxValue)
             {
                 return;
-            }
+                }
 
             TimeSpan timeFromNow = expiresAtUtc.Subtract(RefreshTokenBuffer).Subtract(DateTime.UtcNow);
             if (timeFromNow > TimeSpan.Zero)
@@ -545,18 +528,18 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             void ScheduleLinkTokenRefresh(DateTime expiresAtUtc)
+        {
+            if (expiresAtUtc == DateTime.MaxValue)
             {
-                if (expiresAtUtc == DateTime.MaxValue)
-                {
-                    return;
-                }
-
-                TimeSpan timeFromNow = expiresAtUtc.Subtract(RefreshTokenBuffer).Subtract(DateTime.UtcNow);
-                if (timeFromNow > TimeSpan.Zero)
-                {
-                    this.refreshTokenTimer.Set(timeFromNow);
-                }
+                return;
             }
+
+            TimeSpan timeFromNow = expiresAtUtc.Subtract(RefreshTokenBuffer).Subtract(DateTime.UtcNow);
+            if (timeFromNow > TimeSpan.Zero)
+            {
+                this.refreshTokenTimer.Set(timeFromNow);
+            }
+        }
 
             async void OnLinkRefreshTokenAsync()
             {

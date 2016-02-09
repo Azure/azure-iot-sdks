@@ -5,6 +5,7 @@ using System;                      // Used for Exception and Console classes
 using System.Collections.Generic;  // Used for List class
 using System.IO;                   // Used for DirectoryInfo class
 using System.Windows.Forms;        // Used for MessageBox class
+using System.Linq;
 
 namespace TraceabilityTool
 {
@@ -14,7 +15,7 @@ namespace TraceabilityTool
     {
         public static List<string> filterPatternList;
 
-        public static void GetFileList(string rootDirPath, ref List<string>FileList)
+        public static void GetFileList(string rootDirPath, string[] exceptions, ref List<string>FileList)
         {
             System.IO.FileInfo[] files = null;
             System.IO.DirectoryInfo[] subDirs = null;
@@ -59,8 +60,11 @@ namespace TraceabilityTool
 
                 foreach (System.IO.DirectoryInfo dirInfo in subDirs)
                 {
-                    // Resursive call for each subdirectory.
-                    GetFileList(dirInfo.FullName, ref FileList);
+                    if ((exceptions== null) || !(exceptions.Any(s => s.Equals(dirInfo.FullName))))
+                    {
+                        // Resursive call for each subdirectory.
+                        GetFileList(dirInfo.FullName, exceptions, ref FileList);
+                    }
                 }
             }
             catch (Exception exception)

@@ -15,15 +15,15 @@ public final class AMqpsIotHubConnectionBaseHandler extends BaseHandler
 	public void onDelivery(Event event);
 	public void onLinkLocalClose(Event event);
 	public void onLinkFlow(Event event);
-	public void onLinkRemoteClose(Event event);
 	public void onConnectionBound(Event event);
 	public void onConnectionInit(Event event);
 	public void onConnectionLocalOpen(Event event);
 	public void onConnectionRemoteClose(Event event);
-	public void onSessionRemoteOpen(Event event);
 	public void onLinkInit(Event event);
 	public void onTransportError(Event event);
+    public int getLinkCredit() throws ExecutionException, InterruptedException, TimeoutException;
 	public synchronized CompletableFuture<Integer> createBinaryMessage(byte[] content[, Object messageId]);
+    public void shutdown();
 }
 ```
 
@@ -67,8 +67,6 @@ public void onDelivery(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_013: [**If the event type is DELIVERY, the event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.**]**
 
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_014: [**If the event type is DELIVERY, the event handler shall close the Sender link.**]**
-
 
 ### onLinkLocalClose
 
@@ -76,7 +74,7 @@ public void onDelivery(Event event)
 public void onLinkLocalClose(Event event)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_015: [**If this link is the Receiver link, the event handler shall close the Session and Connection (Proton) objects.**]**
+**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_015: [**The event handler shall close the Session and Connection (Proton) objects.**]**
 
 **SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_016: [**If the link was locally closed before the current message is sent, the sent message CompletableFuture will be completed exceptionally with a new HandlerException.**]**
 
@@ -86,25 +84,9 @@ public void onLinkLocalClose(Event event)
 ```java
 public void onLinkFlow(Event event)
 ```
+**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_049: [** The event handler shall get the link credit from the event and complete the linkCredit future with the same value. **]**
 
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_017: [**The event handler shall get the Sender (Proton) object from the link.**]**
-
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_018: [**The event handler shall encode the message and copy the contents to the byte buffer.**]**
-
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_019: [**The event handler shall set the delivery tag on the Sender (Proton) object.**]**
-
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_020: [**The event handler shall send the encoded bytes.**]**
-
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_021: [**The event handler shall advance the Sender and complete the sent message CompletableFuture using the Delivery (Proton) object hash code.**]**
-
-
-### onLinkRemoteClose
-
-```java
-public void onLinkRemoteClose(Event event)
-```
-
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_022: [**If the link is the Sender link and the message was sent successfully over this link, the event handler shall reset the private Sender (Proton) member variable and open the AmqpsIotHubConnection for sending.**]**
+**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_050: [** The event handler shall set the link flow flag to allow sending. **]**
 
 
 ### onConnectionBound
@@ -132,7 +114,7 @@ public void onConnectionInit(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_028: [**The event handler shall create a Receiver and Sender (Proton) object and set the protocol tag on them to a predefined constant.**]**
 
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_029: [**The event handler shall open the Connection, Session, and Receiver objects.**]**
+**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_029: [**The event handler shall open the Connection, Session, Sender, and Receiver objects.**]**
 
 
 ### onConnectionLocalOpen
@@ -153,13 +135,13 @@ public void onConnectionRemoteClose(Event event)
 **SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_035: [**If the Connection was remotely closed abnormally, the event handler shall complete the sent message CompletableFuture with a new HandlerException.**]**
 
 
-### onSessionRemoteOpen
+### onLinkRemoteOpen
 
 ```java
-public void onSessionRemoteOpen(Event event)
+public void onLinkRemoteOpen(Event event)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_036: [**The event handler shall inform the AmqpsIotHubConnection that the Reactor (Proton) is ready.**]**
+**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_036: [**The event handler shall inform the AmqpsIotHubConnection that the Reactor (Proton) is ready if the event link is the Sender link.**]**
 
 
 ### onLinkInit
@@ -190,7 +172,16 @@ public void onTransportError(Event event)
 **SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_039: [**The event handler shall cause the AmqpsIotHubConnection to fail.**]**
 
 
-### synchronized
+### getLinkCredit
+
+```java
+public int getLinkCredit() throws ExecutionException, InterruptedException, TimeoutException
+```
+
+**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_051: [**The method shall get the link credit from the CompletableFuture link credit object. **]**
+
+
+### createBinaryMessage
 
 ```java
 public synchronized CompletableFuture<Integer> createBinaryMessage(byte[] content[, Object messageId])
@@ -208,8 +199,16 @@ public synchronized CompletableFuture<Integer> createBinaryMessage(byte[] conten
 
 **SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_045: [**The function shall set the Message body to the created data Section.**]**
 
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_046: [**The function shall open the Sender (Proton) link.**]**
-
 **SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_047: [**The function shall return a new CompletableFuture for the sent message.**]**
 
-**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_048: [**The function shall lock sending on the AmqpsIotHubConnection.**]**
+**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_054: [**The function shall asynchronously send the message.**]**
+
+### shutdown
+
+```java
+public void shutdown()
+```
+
+**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_052: [**The function shall set the linkFlow field to false.**]**
+
+**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_053: [**The function shall close the Sender, Receiver, Session, and Connection.**]**

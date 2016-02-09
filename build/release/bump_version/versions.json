@@ -1,33 +1,31 @@
 {
     "c": {
-        "device": "1.0.0-preview.8"
+        "device": "1.0.0"
     },
     "c_nuget": {
-        "device": "1.0.0-preview-010"
+        "device": "1.0.0"
     },
-    "qpid_proton_nuget": "0.9.0.1-preview-003",
-    "eclipse_paho_nuget": "1.0.3",
     "csharp": {
-        "device": "1.0.0-preview-009",
-        "service": "1.0.0-preview-007"
+        "device": "1.0.1",
+        "service": "1.0.0"
     },
     "java": {
-        "device": "1.0.0-preview.8",
-        "service": "1.0.0-preview.8"
+        "device": "1.0.0",
+        "service": "1.0.0"
     },
     "node": {
-        "common": "1.0.0-preview.9",
-        "amqp-base": "1.0.0-preview.9",
-        "http-base": "1.0.0-preview.9",
-        "mqtt-base": "1.0.0-preview.9",
-        "device": "1.0.0-preview.9",
-        "device-amqp": "1.0.0-preview.9",
-        "device-amqp-ws": "1.0.0-preview.9",
-        "device-http": "1.0.0-preview.9",
-        "device-mqtt": "1.0.0-preview.9",
-        "service": "1.0.0-preview.9"
+        "common": "1.0.0",
+        "amqp-base": "1.0.0",
+        "http-base": "1.0.0",
+        "mqtt-base": "1.0.0",
+        "device": "1.0.0",
+        "device-amqp": "1.0.0",
+        "device-amqp-ws": "1.0.0",
+        "device-http": "1.0.0",
+        "device-mqtt": "1.0.0",
+        "service": "1.0.0"
     },
-    "iothub-explorer": "1.0.0-preview.9",
-    "device-explorer": "1.0.0-preview.8",
-    "github-release": "v1.0.0-preview.8"
+    "iothub-explorer": "1.0.0",
+    "device-explorer": "1.0.0",
+    "github-release": "v1.0.0"
 }

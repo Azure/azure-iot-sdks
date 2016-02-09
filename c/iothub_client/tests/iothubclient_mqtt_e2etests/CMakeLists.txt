@@ -34,8 +34,8 @@ if(WIN32)
 			aziotsharedutil
 			iothub_client_mqtt_transport
 		)
-		linkProton(${theseTestsName}_dll)
-		linkPaho(${theseTestsName}_dll)
+		linkUAMQP(${theseTestsName}_dll)
+		linkMqttLibrary(${theseTestsName}_dll)
 	endif()
 	
 	if(TARGET ${theseTestsName}_exe)
@@ -46,8 +46,8 @@ if(WIN32)
 			aziotsharedutil
 			iothub_client_mqtt_transport
 		)
-		linkProton(${theseTestsName}_exe)
-		linkPaho(${theseTestsName}_exe)
+		linkUAMQP(${theseTestsName}_exe)
+		linkMqttLibrary(${theseTestsName}_exe)
 	endif()
 else()
 	if(TARGET ${theseTestsName}_exe)
@@ -59,8 +59,7 @@ else()
 			iothub_client_mqtt_transport
 		)
 		target_link_libraries(${theseTestsName}_exe pthread)
-		linkProton(${theseTestsName}_exe)
-		linkPaho(${theseTestsName}_exe)
+		linkUAMQP(${theseTestsName}_exe)
+		linkMqttLibrary(${theseTestsName}_exe)
 	endif()
 endif()
-

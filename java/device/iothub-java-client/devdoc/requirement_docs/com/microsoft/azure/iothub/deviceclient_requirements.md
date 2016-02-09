@@ -37,10 +37,6 @@ public DeviceClient(String connString, IotHubClientProtocol protocol) throws URI
 
 **SRS_DEVICECLIENT_11_043: [**The constructor shall save the IoT Hub hostname as the value of 'HostName' in the connection string.**]**
 
-**SRS_DEVICECLIENT_15_052: [**The constructor shall save the Protocol Gateway hostname as the value of ' GatewayHostName' in the connection string.**]**
-
-**SRS_DEVICECLIENT_15_053: [**If no value for 'GatewayHostName' is found in the connection string, the function shall continue setting up the other parameters.**]**
-
 **SRS_DEVICECLIENT_11_044: [**The constructor shall save the device ID as the UTF-8 URL-decoded value of 'DeviceId' in the connection string.**]**
 
 **SRS_DEVICECLIENT_11_045: [**The constructor shall save the device key as the value of 'SharedAccessKey' in the connection string.**]**

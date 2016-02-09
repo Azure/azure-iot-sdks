@@ -36,4 +36,4 @@ add_executable(simplesample_amqp ${simplesample_amqp_c_files} ${simplesample_amq
 target_link_libraries(simplesample_amqp serializer iothub_client iothub_client_amqp_transport)
 
 linkSharedUtil(simplesample_amqp)
-linkProton(simplesample_amqp)
+linkUAMQP(simplesample_amqp)

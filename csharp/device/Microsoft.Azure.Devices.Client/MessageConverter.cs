@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.Serialization;
+    using System.Text;
 #if !WINDOWS_UWP
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Encoding;
@@ -46,7 +47,7 @@ namespace Microsoft.Azure.Devices.Client
                 }
 
                 data.CorrelationId = amqpMessage.Properties.CorrelationId != null ? amqpMessage.Properties.CorrelationId.ToString() : null;
-                data.UserId = amqpMessage.Properties.UserId != null ? amqpMessage.Properties.UserId.ToString() : null;
+                data.UserId = amqpMessage.Properties.UserId.Array != null ? Encoding.UTF8.GetString(amqpMessage.Properties.UserId.Array) : null;
             }
 
             if ((sections & SectionFlag.MessageAnnotations) != 0)
@@ -128,6 +129,11 @@ namespace Microsoft.Azure.Devices.Client
             if (data.CorrelationId != null)
             {
                 amqpMessage.Properties.CorrelationId = data.CorrelationId;
+            }
+
+            if (data.UserId != null)
+            {
+                amqpMessage.Properties.UserId = new ArraySegment<byte>(Encoding.UTF8.GetBytes(data.UserId));
             }
 
             if (amqpMessage.ApplicationProperties == null)

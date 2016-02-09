@@ -16,17 +16,6 @@ rem ----------------------------------------------------------------------------
 rem -- check prerequisites
 rem -----------------------------------------------------------------------------
 
-rem // some of our projects expect PROTON_PATH to be defined
-if not defined PROTON_PATH (
-    set PROTON_PATH=%~d0\proton
-)
-
-if not exist %PROTON_PATH% (
-    echo ERROR: PROTON_PATH must point to the root of your QPID Proton installation, but
-    echo "%PROTON_PATH%" does not exist. Exiting...
-    exit /b 1
-)
-
 rem ensure nuget.exe exists
 where /q nuget.exe
 if not !errorlevel! == 0 (
@@ -52,6 +41,7 @@ set build-platform=Win32
 set CMAKE_run_e2e_tests=OFF
 set CMAKE_run_longhaul_tests=OFF
 set CMAKE_skip_unittests=OFF
+set CMAKE_use_wsio=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -62,6 +52,7 @@ if "%1" equ "--platform" goto arg-build-platform
 if "%1" equ "--run-e2e-tests" goto arg-run-e2e-tests
 if "%1" equ "--run-longhaul-tests" goto arg-longhaul-tests
 if "%1" equ "--skip-unittests" goto arg-skip-unittests
+if "%1" equ "--use-websockets" goto arg-use-websockets
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -92,6 +83,11 @@ goto args-continue
 set CMAKE_skip_unittests=ON
 goto args-continue
 
+:arg-use-websockets
+shift
+set CMAKE_use_wsio=ON
+goto args-continue
+
 :args-continue
 shift
 goto args-loop
@@ -102,7 +98,7 @@ rem ----------------------------------------------------------------------------
 rem -- restore packages for solutions
 rem -----------------------------------------------------------------------------
 
-call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+rem call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
 call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
 call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
 
@@ -118,20 +114,20 @@ rem ----------------------------------------------------------------------------
 
 if %build-clean%==1 (
 	
-    call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-    call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
+    rem call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+    rem call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+    rem if not %errorlevel%==0 exit /b %errorlevel%
 
     call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
     call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
 
-    call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-    call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
+    rem call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+    rem call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+    rem if not %errorlevel%==0 exit /b %errorlevel%
     
     call :clean-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-    rem if not %errorlevel%==0 exit /b %errorlevel%
+    if not %errorlevel%==0 exit /b %errorlevel%
     
     call :clean-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
@@ -144,7 +140,6 @@ if %build-clean%==1 (
 	
 	call :clean-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
     if not %errorlevel%==0 exit /b %errorlevel%
-
 )
 
 
@@ -153,16 +148,16 @@ rem ----------------------------------------------------------------------------
 rem -- build solutions
 rem -----------------------------------------------------------------------------
 
-call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
+rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+rem if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
- if not %errorlevel%==0 exit /b %errorlevel%
+if not %errorlevel%==0 exit /b %errorlevel%
 
 rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
 rem if not %errorlevel%==0 exit /b %errorlevel%
 
-call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
+rem call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
 call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
@@ -171,15 +166,19 @@ if not %errorlevel%==0 exit /b %errorlevel%
 rem call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
 rem if not %errorlevel%==0 exit /b %errorlevel%
 
-call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
+rem call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
-call :build-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
+rem call :build-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
 rem -- build with CMAKE and run tests
 rem -----------------------------------------------------------------------------
+
+if %CMAKE_use_wsio% == ON (
+	echo WebSockets support only available for x86 platform.
+)
 
 rmdir /s/q %USERPROFILE%\cmake
 rem no error checking
@@ -188,7 +187,7 @@ mkdir %USERPROFILE%\cmake
 rem no error checking
 
 pushd %USERPROFILE%\cmake
-cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% %build-root% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% %build-root%
+cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% %build-root% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root% 
 if not %errorlevel%==0 exit /b %errorlevel%
 
 msbuild /m azure_iot_sdks.sln

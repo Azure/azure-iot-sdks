@@ -21,7 +21,7 @@ public class ServiceClientE2ETest
     private static String connectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String connectionString = "";
     private static String deviceId = "java-service-client-e2e-test";
-    private static String message = "abcdefghijklmnopqrstuvwxyz1234567890";
+    private static String content = "abcdefghijklmnopqrstuvwxyz1234567890";
 
     @Before
     public void setUp()
@@ -59,7 +59,7 @@ public class ServiceClientE2ETest
         {
         }
 
-        Device deviceAdded = Device.createFromId(deviceId);
+        Device deviceAdded = Device.createFromId(deviceId, null, null);
         registryManager.addDevice(deviceAdded);
 
         Device deviceGetBefore = registryManager.getDevice(deviceId);
@@ -71,6 +71,7 @@ public class ServiceClientE2ETest
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
         futureOpen.get();
 
+        Message message = new Message(content.getBytes());
         CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, message);
         completableFuture.get();
 

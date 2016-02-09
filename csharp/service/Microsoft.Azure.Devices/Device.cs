@@ -8,6 +8,9 @@ namespace Microsoft.Azure.Devices
     using Newtonsoft.Json.Converters;
     using Microsoft.Azure.Devices.Common;
 
+    /// <summary>
+    /// contains device properties and their accessors.
+    /// </summary>
     public class Device : IETagHolder
     {
         // only for deserialization

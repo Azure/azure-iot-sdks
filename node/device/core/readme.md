@@ -1,45 +1,34 @@
-# Microsoft Azure IoT device SDK for Node.js
+#azure-iot-device
+The core components of the Azure IoT device SDK.
 
-The Microsoft Azure IoT device libraries for Node.js contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub.
+[![npm version](https://badge.fury.io/js/azure-iot-device.svg)](https://badge.fury.io/js/azure-iot-device)
 
-## Features
+## Install
 
-The IoT device SDK for Node.js libraries enable you to:
-* Send event data to Azure IoT based services.
-* Map server commands to device functions.
-* Batch messages to improve communication efficiency.
-* Support pluggable transport protocols. HTTPS protocol is available now.
+`npm install -g azure-iot-device@latest` to get the latest (pre-release) version.
 
-## Application development guides
-For more information on how to use this library refer to the documents below:
-- [Prepare your node.js development environment](doc/devbox_setup.md)
-- [Setup IoT Hub](../../doc/setup_iothub.md)
-- [Provision devices](../../tools/iothub-explorer/doc/provision_device.md)
-- [Using the DeviceExplorer application to test IoT Hub device connectivity](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
-- [Run the node.js sample application](doc/run_sample.md)
-- [Node API reference](http://azure.github.io/azure-iot-sdks/node/api_reference/azure-iot-device/1.0.0-preview.9/index.html)
+## Getting Started
 
-## Directory structure of repository
+This package contains the core components of the Azure IoT device SDK, but is lacking a transport over which to send events and receive messages. Your application must require a transport package in addition to the core package to do something useful.
 
-All the Node.js specific resources are located in the **node** folder. This folder contains various script files to help you to prepare your development environment. The **node** folder contains the following subfolders:
+For example, if you want to send an event from your device to an IoT Hub _using the AMQP protocol_:
 
-### /build
+```js
+var connectionString = '[IoT Hub device connection string]';
 
-This folder contains various JavaScript build scripts.
+// use factory function from AMQP-specific package
+var clientFromConnectionString = require('azure-iot-device-amqp').clientFromConnectionString;
+// AMQP-specific factory function returns Client object from core package
+var client = clientFromConnectionString(connectionString);
 
-### /common
+// use Message object from core package
+var Message = require('azure-iot-device').Message;
+var msg = new Message('some data from my device');
 
-This folder contains common library code used by both the device and service libraries.
+// send the event
+client.sendEvent(msg, function (err) {
+  if (err) console.log(err.toString());
+});
+```
 
-### /device/doc
-
-This folder contains application development guideline documents:
-
-
-### /device/lib
-
-This folder contains the device SDK library code.
-
-### /device/samples
-
-This folder contains various sample applications that illustrate how to use the device features of the Microsoft Azure IoT SDK for Node.js.
+See the `azure-iot-device-*` transport-specific packages for more information.
