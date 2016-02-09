@@ -1488,7 +1488,7 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
 
                         if (tempBuffer == NULL)
                         {
-                            result - AGENT_DATA_TYPES_ERROR;
+                            result = AGENT_DATA_TYPES_ERROR;
                             LogError("(result = %s)\r\n", ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                         }
                         else
@@ -3088,10 +3088,29 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
             /* Codes_SRS_AGENT_TYPE_SYSTEM_99_082:[ EDM_INT32] */
             case EDM_INT32_TYPE:
             {
-                long long int32Value;
-                if ((sscanf(source, "%lld", &int32Value) != 1) ||
-                    (int32Value < -2147483648LL) ||
-                    (int32Value > 2147483647))
+                int32_t int32Value;
+                unsigned char isNegative;
+                uint32_t uint32Value;
+                const char* pos;
+                size_t strLength;
+
+                if (source[0] == '-')
+                {
+                    isNegative = 1;
+                    pos = &source[1];
+                }
+                else
+                {
+                    isNegative = 0;
+                    pos = &source[0];
+                }
+
+                strLength = strlen(source);
+
+                if ((sscanf(pos, "%lu", &uint32Value) != 1) ||
+                    (strLength > 11) ||
+                    ((uint32Value > 2147483648UL) && isNegative) ||
+                    ((uint32Value > 2147483647UL) && (!isNegative)))
                 {
                     /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -3099,6 +3118,22 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 }
                 else
                 {
+                    if (isNegative)
+                    {
+                        if (uint32Value == 2147483648UL)
+                        {
+                           int32Value = -2147483647L - 1L;
+                        }
+                        else
+                        {
+                            int32Value = -(int32_t)uint32Value;
+                        }
+                    }
+                    else
+                    {
+                        int32Value = uint32Value;
+                    }
+
                     agentData->type = EDM_INT32_TYPE;
                     agentData->value.edmInt32.value = (int32_t)int32Value;
                     result = AGENT_DATA_TYPES_OK;
