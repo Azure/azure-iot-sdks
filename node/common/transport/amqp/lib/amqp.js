@@ -96,6 +96,7 @@ Amqp.prototype.connect = function connect(done) {
             }.bind(this));
     } else {
         debug('connect called when already connected.');
+        if (done) done(null, new results.Connected());
     }
 };
 

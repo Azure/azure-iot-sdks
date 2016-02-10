@@ -82,7 +82,10 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             client.sendEvent(message, function (err, res) {
               assert.isNull(err);
               assert.equal(res.constructor.name, 'MessageEnqueued', 'Type of the result object of the client.sendEvent method is wrong');
-              done();
+              client.close(function (err) {
+                assert.isNull(err);
+                done();
+              });
             });
         });
       });
