@@ -22,6 +22,11 @@ This document contains both general FAQs about the Microsoft Azure IoT device SD
 - [Error when using AMQP on Raspberry Pi2](#javapi2error)
 - [qpid-jms build fails](#qpidjmsbuildfail)
 
+**Microsoft Azure IoT SDK for Node.js FAQs**
+
+- [Using promises instead of callbacks with the device client](#nodepromisify)
+- [Why not use Typescript instead of Javascript?](#whyunotypescript)
+
 <a name="vs2013"/>
 ## Using Visual Studio 2013
 
@@ -34,7 +39,7 @@ Note: You can download the free Community edition of Visual Studio 2015 [here](h
 3. Expand **Configuration Properties**, and then select **General**.
 4. Change the **Platform Toolset** to **Visual Studio 2013 (v120)**, then click **OK**.
 
-   ![][1]
+  ![][1]
 
 <a name="lineendings"/>
 ## Line-endings in repository zip archive
@@ -166,3 +171,25 @@ Windows: `set _JAVA_OPTIONS=-Xmx512M`
 Linux: `export _JAVA_OPTIONS=-Xmx512M`
 
 [1]: media/platformtoolset.png
+
+<a name="nodepromisify"/>
+## Using promises instead of callbacks with the device client
+Currently the device client asynchronous functions follow the callback pattern rather than returning promises. If you wish to use the SDK with promises instead of callbacks, it's extremely easy though, using the bluebird library to "promisify" the device client class.
+
+```javascript
+var Promise = require('bluebird'); 
+var client = Promise.promisifyAll(Client.fromConnectionString(connectionString, Amqp));
+```
+
+And there you have it. All the existing functions of the client still exist, and the promise-returning equivalent has been created and has the same name with `Async` appended to it. In other words:
+- `client.open(callback)` becomes `client.openAsync().then(...).catch(...)`
+- `client.send(message, callback)` becomes `client.sendAsync(message).then(...).catch(...)`
+- `client.complete(message, callback)` becomes `client.completeAsync(message).then(...).catch(...)`
+- etc.
+
+Events are unchanged, so you still subscribe to those the way you would with the un-promisified client.
+
+<a name="whyunotypescript" />
+## Why not use typescript instead of javascript for the SDK?
+At the time when the SDK development was started, pure javascript felt like a better choice in order to make contributions as easy as possible for any node developer, whether or not he or she was aware and proficient with typescript. 
+We regularly reevaluate this decision as we move forward and you are most welcome to provide feedback or contribute by opening issues or pull-requests and help us decide what to do in the future.
