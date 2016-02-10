@@ -202,6 +202,10 @@ section. These will be needed in [Step 4](#Step_4_2).*
 
         java -jar ./send-event-{version}-with-deps.jar "{connection string}" "{number of requests to send}" "https"
 
+    **If using MQTT protocol:**
+
+        java -jar ./send-event-{version}-with-deps.jar "{connection string}" "{number of requests to send}" "mqtt"
+
     Replace the following in above command:
     
     -   `{version}`: Version of binaries you have build
@@ -216,6 +220,9 @@ section. These will be needed in [Step 4](#Step_4_2).*
     **If using HTTP protocol:**  
     ![Terminal\_HTTP\_send\_event](images/terminal_http_send_event.PNG)
 
+    **If using MQTT protocol:**  
+    ![Terminal\_MQTT\_send\_event](images/terminal_mqtt_send_event.png)
+
 6.  DeviceExplorer should show that IoT Hub has successfully received data sent by sample test.
 
     **If using AMQP protocol:**  
@@ -223,6 +230,9 @@ section. These will be needed in [Step 4](#Step_4_2).*
 
     **If using HTTP protocol:**  
     ![DeviceExplorer\_HTTP\_message\_received](images/device_explorer_http_message_received.PNG)
+
+    **If using MQTT protocol:**  
+    ![DeviceExplorer\_MQTT\_message\_received](images/device_explorer_mqtt_message_received.png)
 
 <a name="Step_3_2_2"/>
 ### 3.2.2 Receive messages from IoT Hub
@@ -249,6 +259,10 @@ section. These will be needed in [Step 4](#Step_4_2).*
    
         java -jar ./handle-messages-{version}-with-deps.jar "{connection string}" "https"
 
+    **If using MQTT protocol:**
+   
+        java -jar ./handle-messages-{version}-with-deps.jar "{connection string}" "mqtt"
+
     Replace the following in above command:
     
     -   `{version}`: Version of binaries you have build
@@ -262,6 +276,9 @@ section. These will be needed in [Step 4](#Step_4_2).*
 
     **If using HTTP protocol:**  
     ![Terminal\_HTTP\_message\_received](images/terminal_http_message_received.PNG)
+
+    **If using MQTT protocol:**  
+    ![Terminal\_MQTT\_message\_received](images/terminal_mqtt_message_received.png)
 
 <a name="Step_4"/>
 # Step 4: Package and Share
