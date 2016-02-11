@@ -8,6 +8,8 @@ var deviceAmqp = require('azure-iot-device-amqp');
 var deviceHttp = require('azure-iot-device-http');
 var Message = require('azure-iot-common').Message;
 
+var EventHubClient = require('./eh/eventhubclient.js');
+
 var ConnectionString = require('azure-iot-common').ConnectionString;
 
 var assert = require('chai').assert;
@@ -17,14 +19,15 @@ var uuid = require('uuid');
 var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) {
     describe('Device connected over ' + DeviceTransport.name + ':', function () {
         
-        var serviceClient, deviceClient;
+        var serviceClient, deviceClient, ehClient;
         
         beforeEach(function(){
             serviceClient =  serviceSdk.Client.fromConnectionString(hubConnStr);
-            deviceClient = deviceSdk.Client.fromConnectionString(deviceConStr, DeviceTransport);  
+            deviceClient = deviceSdk.Client.fromConnectionString(deviceConStr, DeviceTransport);
+            ehClient = new EventHubClient(hubConnStr, 'messages/events/');            
         });
         
-        var closeConnectionsAndTerminateTest = function (done) {
+        afterEach(function (done) {
            serviceClient.close(function (err) {
              if(err) {
                done(err);
@@ -37,12 +40,18 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
                  } else {
                    deviceClient = null;
                    debug('Connection as the device closed.');
-                   done(); 
+                   ehClient.close().then(function() {
+                     ehClient = null;
+                     debug('Event hub connection closed');  
+                     done();
+                   }).catch(function (err) {
+                       done(err);
+                   }); 
                  }
                });
              }
            });
-        };
+        });
         
         it('Service sends 1 C2D message and it is re-sent until the device completes it', function(done)
         {
@@ -69,7 +78,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
                                 deviceClient.complete(msg, function (err, res){
                                     assert.isNull(err);
                                     assert.equal(res.constructor.name, 'MessageCompleted');
-                                    closeConnectionsAndTerminateTest(done);
+                                    done();
                                 });
                             }
                         } else {
@@ -120,7 +129,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
                                 deviceClient.reject(msg, function (err, res) {
                                     assert.isNull(err);
                                     assert.equal(res.constructor.name, 'MessageRejected');
-                                    closeConnectionsAndTerminateTest(done);
+                                    done();
                                 });
                             }
                         } else {
@@ -163,7 +172,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
                         });
                         
                         if(deviceMessageCounter === 5) {
-                            closeConnectionsAndTerminateTest(done);
+                            done();
                         }
                     });
                 }
@@ -187,6 +196,57 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
                         serviceClient.send(deviceName, msg, sendCallback);
                     }
                 }
+            });
+        });
+        
+        it('Device sends a message and it is received by the service', function(done) {
+            this.timeout(60000);
+            var guid = uuid.v4();
+            debug('GUID for message: ' + guid);
+            var startTime = Date.now();
+            
+            deviceClient.open(function(openErr) {
+                if(openErr) {
+                    done(openErr);
+                } else {
+                    var message = new Message(guid);
+                    deviceClient.sendEvent(message, function(sendErr) {
+                        assert.isNull(sendErr);
+                        debug('Message with guid ' + guid + ' sent at ' + Date.now());
+                    });
+                }
+            });
+            
+            ehClient.GetPartitionIds().then(function(partitionIds) {
+              partitionIds.forEach(function(partitionId) {
+                ehClient.CreateReceiver('$Default', partitionId).then(function(receiver) {
+                    // start receiving
+                  receiver.StartReceive(startTime).then(function() {
+                    receiver.on('error', function(error) {
+                      done(error);
+                    });
+                    receiver.on('eventReceived', function(eventData) {
+                      if ((eventData.SystemProperties['iothub-connection-device-id'] === deviceName) &&
+                          (eventData.SystemProperties['x-opt-enqueued-time'] >= startTime - 5000)) {
+                        debug('Event received: ' + eventData.Bytes);
+                        if(eventData.Bytes === guid) {
+                            receiver.removeAllListeners();
+                            ehClient.close();
+                            done();
+                        } else {
+                            debug('eventData.Bytes: ' + eventData.Bytes + ' doesn\'t match ' + guid);
+                        }
+                      }
+                    });
+                  });
+                  return receiver;
+                }).catch(function (err) {
+                    done(err);
+                });
+              });
+              return partitionIds;
+            }).catch(function (err) {
+                done(err);
             });
         });
     });

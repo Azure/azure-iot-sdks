@@ -75,8 +75,10 @@ Client.prototype._connectReceiver = function() {
 };
 
 Client.prototype._disconnectReceiver = function() {
-    this._receiver.removeAllListeners('message');
-    this._receiver = null;
+    if (this._receiver) {
+        this._receiver.removeAllListeners('message');
+        this._receiver = null;
+    }
 };
 
 Client.prototype._renewSharedAccessSignature = function () {
