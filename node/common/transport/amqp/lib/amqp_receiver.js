@@ -77,6 +77,8 @@ AmqpReceiver.prototype._onAmqpMessage = function (amqpMessage) {
         msg.data = amqpMessage.body;
     }
     
+    msg.transportObj = amqpMessage;
+    
     this.emit('message', msg);
 };
   
@@ -101,7 +103,7 @@ AmqpReceiver.prototype._removeAmqpReceiverListeners = function () {
 /* Codes_SRS_NODE_IOTHUB_AMQPRECEIVER_16_006: [If the message object passed as an argument is falsy, a ReferenceError should be thrown]*/ 
 AmqpReceiver.prototype.complete = function (message, done) {
   if (!message) { throw new ReferenceError('Invalid message object.'); }
-  this._amqpReceiver.accept(message);
+  this._amqpReceiver.accept(message.transportObj);
   if(done) done(null, new results.MessageCompleted());
 };
 
@@ -113,7 +115,7 @@ AmqpReceiver.prototype.complete = function (message, done) {
 /* Codes_SRS_NODE_IOTHUB_AMQPRECEIVER_16_008: [If the message object passed as an argument is falsy, a ReferenceError should be thrown]*/ 
 AmqpReceiver.prototype.abandon = function (message, done) {
   if (!message) { throw new ReferenceError('Invalid message object.'); }
-  this._amqpReceiver.release(message);
+  this._amqpReceiver.release(message.transportObj);
   if(done) done(null, new results.MessageAbandoned());
 };
 
@@ -125,7 +127,7 @@ AmqpReceiver.prototype.abandon = function (message, done) {
 /* Codes_SRS_NODE_IOTHUB_AMQPRECEIVER_16_010: [If the message object passed as an argument is falsy, a ReferenceError should be thrown]*/ 
 AmqpReceiver.prototype.reject = function (message, done) {
   if (!message) { throw new ReferenceError('Invalid message object.'); }
-  this._amqpReceiver.reject(message);
+  this._amqpReceiver.reject(message.transportObj, "Message rejected by the device");
   if(done) done(null, new results.MessageRejected());
 };
 

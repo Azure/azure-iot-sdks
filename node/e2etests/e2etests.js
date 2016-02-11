@@ -6,6 +6,7 @@ var serviceSdk = require('azure-iothub');
 var deviceSdk = require('azure-iot-device');
 var deviceAmqp = require('azure-iot-device-amqp');
 var deviceHttp = require('azure-iot-device-http');
+var Message = require('azure-iot-common').Message;
 
 var ConnectionString = require('azure-iot-common').ConnectionString;
 
@@ -23,150 +24,168 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
             deviceClient = deviceSdk.Client.fromConnectionString(deviceConStr, DeviceTransport);  
         });
         
-        afterEach(function(){
-            serviceClient = null;
-            deviceClient = null;
-        });
+        var closeConnectionsAndTerminateTest = function (done) {
+           serviceClient.close(function (err) {
+             if(err) {
+               done(err);
+             } else {
+               serviceClient = null;
+               debug('Connection to the service closed.');
+               deviceClient.close(function(err) {
+                 if(err) {
+                   done(err);
+                 } else {
+                   deviceClient = null;
+                   debug('Connection as the device closed.');
+                   done(); 
+                 }
+               });
+             }
+           });
+        };
         
         it('Service sends 1 C2D message and it is re-sent until the device completes it', function(done)
         {
-            this.timeout(30000);
+            this.timeout(60000);
             var guid = uuid.v4();
-            var closeConnectionsAndTerminateTest = function () {
-               serviceClient.close(function () {
-                  debug('Connection to the service closed.');
-               });
-               deviceClient.close(function() {
-                   debug('Connection as the device closed.');
-               });
-               
-               done(); 
-            };
             
             var abandonnedOnce = false;
-            deviceClient.open(function (openErr, openRes) {
-                deviceClient.on('message', function (msg){
-                    debug('Received a message with guid: ' + msg.data);
-                    if (msg.data === guid) {
-                        if(!abandonnedOnce) {
-                            debug('Abandon the message with guid ' + msg.data);
-                            abandonnedOnce = true;
-                            deviceClient.abandon(msg, function (err, result){
-                                assert.isNull(err);
-                                assert.equal(result.constructor.name, 'MessageAbandoned');
-                            });
+            deviceClient.open(function (openErr) {
+                if(openErr) {
+                    done(openErr);
+                } else {
+                    deviceClient.on('message', function (msg){
+                        debug('Received a message with guid: ' + msg.data);
+                        if (msg.data === guid) {
+                            if(!abandonnedOnce) {
+                                debug('Abandon the message with guid ' + msg.data);
+                                abandonnedOnce = true;
+                                deviceClient.abandon(msg, function (err, result){
+                                    assert.isNull(err);
+                                    assert.equal(result.constructor.name, 'MessageAbandoned');
+                                });
+                            } else {
+                                debug('Complete the message with guid ' + msg.data);                            
+                                deviceClient.complete(msg, function (err, res){
+                                    assert.isNull(err);
+                                    assert.equal(res.constructor.name, 'MessageCompleted');
+                                    closeConnectionsAndTerminateTest(done);
+                                });
+                            }
                         } else {
-                            debug('Complete the message with guid ' + msg.data);                            
-                            deviceClient.complete(msg, function (err, res){
+                            debug('not the message I\'m looking for, completing it to clean the queue (' + msg.data + ')');
+                            deviceClient.complete(msg, function (err, result){
                                 assert.isNull(err);
-                                assert.equal(res.constructor.name, 'MessageCompleted');
-                                closeConnectionsAndTerminateTest();
+                                assert.equal(result.constructor.name, 'MessageCompleted');
                             });
                         }
-                    }
-                });
+                    });
+                }
             });
             
-            serviceClient.open(function () {
-                serviceClient.send(deviceName, guid, function (sendErr, sendRes) {
-                    assert.isNull(sendErr);
-                    debug('Sent one message with guid: ' + guid);
-                });
+            serviceClient.open(function (serviceErr) {
+                if(serviceErr) {
+                    done(serviceErr);
+                } else {
+                    serviceClient.send(deviceName, guid, function (sendErr) {
+                        assert.isNull(sendErr);
+                        debug('Sent one message with guid: ' + guid);
+                    });
+                }
             });
         });
         
-        it.skip('Service sends 1 C2D message and it is re-sent until the device rejects it', function(done)
+        it('Service sends 1 C2D message and it is re-sent until the device rejects it', function(done)
         {
-            this.timeout(30000);
+            this.timeout(60000);
             var guid = uuid.v4();
-            var closeConnectionsAndTerminateTest = function () {
-               serviceClient.close(function () {
-                  debug('Connection to the service closed.');
-               });
-               deviceClient.close(function() {
-                   debug('Connection as the device closed.');
-               });
-               
-               done(); 
-            };
             
             var abandonnedOnce = false;
-            deviceClient.open(function (openErr, openRes) {
-                deviceClient.on('message', function (msg) {
-                    debug('Received a message with guid: ' + msg.data);
-                    if (msg.data === guid) {
-                        if(!abandonnedOnce) {
-                            debug('Abandon the message with guid ' + msg.data);
-                            abandonnedOnce = true;
-                            deviceClient.abandon(msg, function (err, result){
-                                assert.isNull(err);
-                                assert.equal(result.constructor.name, 'MessageAbandoned');
-                            });
+            deviceClient.open(function (openErr) {
+                if(openErr) {
+                    done(openErr);
+                } else {
+                    deviceClient.on('message', function (msg) {
+                        debug('Received a message with guid: ' + msg.data);
+                        if (msg.data === guid) {
+                            if(!abandonnedOnce) {
+                                debug('Abandon the message with guid ' + msg.data);
+                                abandonnedOnce = true;
+                                deviceClient.abandon(msg, function (err, result){
+                                    assert.isNull(err);
+                                    assert.equal(result.constructor.name, 'MessageAbandoned');
+                                });
+                            } else {
+                                debug('Rejects the message with guid ' + msg.data);                            
+                                deviceClient.reject(msg, function (err, res) {
+                                    assert.isNull(err);
+                                    assert.equal(res.constructor.name, 'MessageRejected');
+                                    closeConnectionsAndTerminateTest(done);
+                                });
+                            }
                         } else {
-                            debug('Rejects the message with guid ' + msg.data);                            
-                            deviceClient.reject(msg, function (err, res) {
+                            debug('not the message I\'m looking for, completing it to clean the queue (' + msg.data + ')');
+                            deviceClient.complete(msg, function (err, result){
                                 assert.isNull(err);
-                                assert.equal(res.constructor.name, 'MessageRejected');
-                                closeConnectionsAndTerminateTest();
+                                assert.equal(result.constructor.name, 'MessageCompleted');
                             });
                         }
-                    } else {
-                        debug('not the message I\'m looking for, abandoning it (' + msg.data + ')');
-                        deviceClient.abandon(msg, function (err, result){
-                            assert.isNull(err);
-                            assert.equal(result.constructor.name, 'MessageAbandoned');
-                        });
-                    }
-                });
+                    });
+                }
             });
             
-            serviceClient.open(function () {
-                serviceClient.send(deviceName, guid, function (sendErr, sendRes) {
-                    assert.isNull(sendErr);
-                    debug('Sent one message with guid: ' + guid);
-                });
+            serviceClient.open(function (serviceErr) {
+                if(serviceErr) {
+                    done(serviceErr);
+                } else {
+                    serviceClient.send(deviceName, guid, function (sendErr) {
+                        assert.isNull(sendErr);
+                        debug('Sent one message with guid: ' + guid);
+                    });
+                }
             });
         });
         
-        it.skip('Service sends 5 C2D messages and they are received by the device', function (done) {
-            this.timeout(30000);
+        it('Service sends 5 C2D messages and they are all received by the device', function (done) {
+            this.timeout(60000);
             var deviceMessageCounter = 0;
             
-            var closeConnectionsAndTerminateTest = function () {
-               serviceClient.close(function () {
-                  debug('Connection to the service closed.');
-               });
-               deviceClient.close(function() {
-                   debug('Connection as the device closed.');
-               });
-               
-               done(); 
-            };
-            
-            deviceClient.open(function (openErr, openRes) {
-                deviceClient.on('message', function (msg) {
-                    deviceMessageCounter++;
-                    debug('Received ' + deviceMessageCounter + ' message(s)');
-                    deviceClient.complete(msg, function (err, result){
-                        assert.isNull(err);
-                        assert.equal(result.constructor.name, 'MessageCompleted');
+            deviceClient.open(function (openErr) {
+                if(openErr) {
+                    done(openErr);
+                } else {
+                    deviceClient.on('message', function (msg) {
+                        deviceMessageCounter++;
+                        debug('Received ' + deviceMessageCounter + ' message(s)');
+                        deviceClient.complete(msg, function (err, result){
+                            assert.isNull(err);
+                            assert.equal(result.constructor.name, 'MessageCompleted');
+                        });
+                        
+                        if(deviceMessageCounter === 5) {
+                            closeConnectionsAndTerminateTest(done);
+                        }
                     });
-                    
-                    if(deviceMessageCounter === 5) {
-                        closeConnectionsAndTerminateTest();
-                    }
-                });
+                }
             });
             
-            serviceClient.open(function () {
-                var msgSentCounter = 0;
-                for (var i = 0; i < 5; i++) {
-                    debug('Sending message #' + i);
-                    serviceClient.send(deviceName, { 'counter' : i }, function (sendErr, sendRes) {
+            serviceClient.open(function (serviceErr) {
+                if(serviceErr) {
+                    done(serviceErr);
+                } else {
+                    var msgSentCounter = 0;
+                    var sendCallback = function (sendErr) {
                         assert.isNull(sendErr);
                         msgSentCounter++;
                         debug('Sent ' + msgSentCounter + ' message(s)');
-                    });
+                    };
+                    
+                    for (var i = 0; i < 5; i++) {
+                        debug('Sending message #' + i);
+                        var msg = new Message({ 'counter' : i });
+                        msg.expiryTimeUtc = Date.now() + 10000; // Expire 10s from now, to reduce the chance of us hitting the 50-message limit on the IoT Hub
+                        serviceClient.send(deviceName, msg, sendCallback);
+                    }
                 }
             });
         });
