@@ -92,13 +92,7 @@ You should have the following items ready before beginning the process:
 
 -   Replace the above placeholder with device connection string you obtained in [Step 1](#Step-1-Prerequisites) and save the changes.
 
--   On the board, run the following command to build and install Apache Proton library:
-
-        sudo ./azure-iot-sdks/c/build_all/linux/build_proton.sh --install /usr
-        chmod +x ./azure-iot-sdks/c/build_all/linux/build_paho.sh
-        ./azure-iot-sdks/c/build_all/linux/build_paho.sh
-
--   Assuming everything went OK on the build_proton.sh, you can now build the SDK samples using the following command:
+-   Build the SDK samples using the following command:
 
         sudo ./azure-iot-sdks/c/build_all/linux/build.sh
 

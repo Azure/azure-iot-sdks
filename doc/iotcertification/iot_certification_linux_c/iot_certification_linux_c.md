@@ -176,13 +176,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 -   Press Ctrl+X to exit nano.
 
--   Azure IoT Hub SDK depends on Apache Qpid Proton AMQP/HTTP to integrate with the IoT Hub. Run the following command to build/install Apache Proton.
-
-        sudo ./azure-iot-sdks/c/build_all/linux/build_proton.sh --install /usr
-        chmod +x ./azure-iot-sdks/c/build_all/linux/build_paho.sh
-        ./azure-iot-sdks/c/build_all/linux/build_paho.sh
-
--   Assuming everything went OK with the build\_proton.sh and build\_paho.sh, proceed to set environment variables.
+-   Set environment variables.
 
 -   Open **IOT_DEVICE_PARAMS.TXT** to edit.
 
