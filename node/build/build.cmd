@@ -79,6 +79,9 @@ if errorlevel 1 goto :eof
 call :lint-and-test %node-root%\service
 if errorlevel 1 goto :eof
 
+call :lint-and-test %node-root%\e2etests
+if errorlevel 1 goto :eof
+
 cd %node-root%\..\tools\iothub-explorer
 call npm -s test
 if errorlevel 1 goto :eof
