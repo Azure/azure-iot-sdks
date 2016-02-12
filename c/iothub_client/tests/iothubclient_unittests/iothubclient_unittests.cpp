@@ -7,6 +7,8 @@
 #endif
 
 #include <cstdbool>
+#include <cstddef>
+#include <csignal>
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
@@ -57,6 +59,7 @@ static size_t doWorkCallCount = 0;
 static THREAD_START_FUNC threadFunc;
 static void* threadFuncArg;
 static const void* provideFAKE(void);
+extern "C" const size_t IoTHubClient_ThreadTerminationOffset;
 
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG =
 {
@@ -112,7 +115,8 @@ public:
     MOCK_STATIC_METHOD_1(, void, ThreadAPI_Sleep, unsigned int, milliseconds)
         if ((howManyDoWorkCalls > 0) && (howManyDoWorkCalls == doWorkCallCount))
         {
-            IoTHubClient_Destroy(current_iothub_client);
+            //IoTHubClient_Destroy(current_iothub_client);
+            *(sig_atomic_t*)(((char*)threadFuncArg) + IoTHubClient_ThreadTerminationOffset) = 1; /*tell the thread to stop*/
         }
     MOCK_VOID_METHOD_END();
 
@@ -1126,17 +1130,14 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, ThreadAPI_Sleep(1));
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
-        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(TEST_THREAD_HANDLE, IGNORED_PTR_ARG))
-            .IgnoreArgument(2);
-        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
-        EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-
         // act
         threadFunc(threadFuncArg);
-
+        
         // assert
-        // uMock checks the calls
+        mocks.AssertActualAndExpectedCalls();
+        
+        ///cleanup
+        IoTHubClient_Destroy(iotHubClient);
     }
 
     /* Tests_SRS_IOTHUBCLIENT_01_037: [The thread created by IoTHubClient_Create shall call IoTHubClient_LL_DoWork every 1 ms.] */
@@ -1162,17 +1163,14 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, ThreadAPI_Sleep(1));
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
-        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(TEST_THREAD_HANDLE, IGNORED_PTR_ARG))
-            .IgnoreArgument(2);
-        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
-        EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-
         // act
         threadFunc(threadFuncArg);
 
         // assert
-        // uMock checks the calls
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(iotHubClient);
     }
 
     /* Tests_SRS_IOTHUBCLIENT_01_040: [If acquiring the lock fails, IoTHubClient_LL_DoWork shall not be called.] */
@@ -1198,17 +1196,17 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, ThreadAPI_Sleep(1));
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
-        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(TEST_THREAD_HANDLE, IGNORED_PTR_ARG))
-            .IgnoreArgument(2);
-        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
-        EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+        // act
+        threadFunc(threadFuncArg);
 
         // act
         threadFunc(threadFuncArg);
 
         // assert
-        // uMock checks the calls
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(iotHubClient);
     }
 
     /*Tests_SRS_IOTHUBCLIENT_02_034: [If parameter iotHubClientHandle is NULL then IoTHubClient_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
