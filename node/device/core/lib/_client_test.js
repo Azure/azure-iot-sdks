@@ -143,9 +143,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         var client = Client.fromConnectionString(goodConnectionString, Transport);
         var message = new Message('hello');
         client.sendEvent(message, function (err, res) {
-          assert.isNull(err);
-          assert.equal(res.constructor.name, 'MessageEnqueued');
-          done();
+          if(err) {
+            done(err);
+          } else {
+            assert.equal(res.constructor.name, 'MessageEnqueued');
+            done();
+          }
         });
       });
 
@@ -167,9 +170,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
           messages[i] = new Message('Event Msg ' + i);
         }
         client.sendEventBatch(messages, function (err, res) {
-          assert.isNull(err);
-          assert.equal(res.constructor.name, 'MessageEnqueued');
-          done();
+          if(err) {
+            done(err);
+          } else {
+            assert.equal(res.constructor.name, 'MessageEnqueued');
+            done();
+          }
         });
       });
 
@@ -195,9 +201,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
            
            var client = Client.fromConnectionString(goodConnectionString, TransportCanOpen);
            client.open(function(err, result) {
-               assert.isNull(err);
+              if(err) {
+                done(err);
+              } else {           
                assert.equal(result.constructor.name, 'Connected');
                done();
+              }
            });    
        });
        
@@ -227,10 +236,13 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
            var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
            client.on('message', function () {});
            client.open(function(err, result) {
-               assert.isNull(err);
-               assert.equal(result.constructor.name, 'Connected');
-               assert(receiver.on.calledWith('message'));
-               done();
+               if(err) {
+                   done(err);
+               } else {
+                   assert.equal(result.constructor.name, 'Connected');
+                   assert(receiver.on.calledWith('message'));
+                   done();
+               }
            });
        });
     });
@@ -266,9 +278,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             };
             var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
             client.setTransportOptions(testOptions, function(err, result) {
-                assert.isNull(err);
-                assert.equal(result.constructor.name, 'TransportConfigured');
-                done();
+                if(err) {
+                    done(err);
+                } else {               
+                    assert.equal(result.constructor.name, 'TransportConfigured');
+                    done();
+                }
             });
         });
         
@@ -431,9 +446,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
             var message = new Message();
             client.complete(message, function(err, res){
-                assert.isNull(err);
-                assert.equal(res.constructor.name, 'MessageCompleted');
-                done();
+                if(err) {
+                    done(err);
+                } else {               
+                    assert.equal(res.constructor.name, 'MessageCompleted');
+                    done();
+                }
             });
         });
         
@@ -448,9 +466,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
             var message = new Message();
             client.complete(message, function(err, res){
-                assert.isNull(err);
-                assert.equal(res.constructor.name, 'MessageCompleted');
-                done();
+                if(err) {
+                    done(err);
+                } else {               
+                    assert.equal(res.constructor.name, 'MessageCompleted');
+                    done();
+                }
             });
         });
     });
@@ -490,9 +511,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
             var message = new Message();
             client.reject(message, function(err, res){
-                assert.isNull(err);
-                assert.equal(res.constructor.name, 'MessageRejected');
-                done();
+                if(err) {
+                    done(err);
+                } else {               
+                    assert.equal(res.constructor.name, 'MessageRejected');
+                    done();
+                }
             });
         });
         
@@ -507,9 +531,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
             var message = new Message();
             client.reject(message, function(err, res){
-                assert.isNull(err);
-                assert.equal(res.constructor.name, 'MessageRejected');
-                done();
+                if(err) {
+                    done(err);
+                } else {               
+                    assert.equal(res.constructor.name, 'MessageRejected');
+                    done();
+                }
             });
         });
     });
@@ -549,9 +576,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
             var message = new Message();
             client.abandon(message, function(err, res){
-                assert.isNull(err);
-                assert.equal(res.constructor.name, 'MessageAbandoned');
-                done();
+                if(err) {
+                    done(err);
+                } else {               
+                    assert.equal(res.constructor.name, 'MessageAbandoned');
+                    done();
+                }
             });
         });
         
@@ -566,9 +596,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
             var message = new Message();
             client.abandon(message, function(err, res){
-                assert.isNull(err);
-                assert.equal(res.constructor.name, 'MessageAbandoned');
-                done();
+                if(err) {
+                    done(err);
+                } else {               
+                    assert.equal(res.constructor.name, 'MessageAbandoned');
+                    done();
+                }
             });
         });
     });
@@ -618,11 +651,14 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
             client.on('message', function () {});
             client.updateSharedAccessSignature('sas', function(err, res){
-                assert.isNull(err);
-                assert.isFalse(res.needToReconnect);
-                assert(connectCalled);
-                assert(getReceiverCalled);
-                done();
+                if(err) {
+                    done(err);
+                } else {               
+                    assert.isFalse(res.needToReconnect);
+                    assert(connectCalled);
+                    assert(getReceiverCalled);
+                    done();
+                }
             }); 
         });
         
@@ -637,9 +673,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             
             var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
             client.updateSharedAccessSignature('sas', function(err, res){
-                assert.isNull(err);
-                assert.isFalse(res.needToReconnect);
-                done();
+                if(err) {
+                    done(err);
+                } else {               
+                    assert.isFalse(res.needToReconnect);
+                    done();
+                }
             }); 
         });
         
@@ -669,9 +708,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
             
             var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
             client.updateSharedAccessSignature('sas', function(err, res){
-                assert.isNull(err);
-                assert.equal(res.constructor.name, 'SharedAccessSignatureUpdated');
-                done();
+                if(err) {
+                    done(err);
+                } else {               
+                    assert.equal(res.constructor.name, 'SharedAccessSignatureUpdated');
+                    done();
+                }
             });
         });
     });

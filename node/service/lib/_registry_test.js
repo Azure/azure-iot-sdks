@@ -134,10 +134,13 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
         var deviceInfo = new Device(deviceJson);
         registry.create(deviceInfo, function(err, dev) {
-          assert.isNull(err);
-          assert.instanceOf(dev, Device);
-          assert.equal(deviceInfo.deviceId, dev.deviceId);
-          done();
+          if (err) {
+            done(err);
+          } else {
+            assert.instanceOf(dev, Device);
+            assert.equal(deviceInfo.deviceId, dev.deviceId);
+            done();
+          }
         });
       });
 
@@ -172,10 +175,13 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
       it('returns information about the given device', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
         registry.get(deviceId, function (err, dev) {
-          assert.isNull(err);
-          assert.instanceOf(dev, Device);
-          assert.equal(deviceId, dev.deviceId);
-          done();
+          if (err) {
+            done(err);
+          } else {
+            assert.instanceOf(dev, Device);
+            assert.equal(deviceId, dev.deviceId);
+            done();
+          }
         });
       });
 
@@ -202,9 +208,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
       it('returns information about a list of devices', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
         registry.list(function(err, deviceList) {
-          assert.isNull(err);
-          assert.isArray(deviceList);
-          done();
+          if (err) {
+            done(err);
+          } else {
+            assert.isArray(deviceList);
+            done();
+          }
         });
       });
 
@@ -243,10 +252,13 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
         var device = new Device(deviceJson);
         registry.update(device, function(err, dev) {
-          assert.isNull(err);
-          assert.instanceOf(dev, Device);
-          assert.equal(device.deviceId, dev.deviceId);
-          done();
+          if (err) {
+            done(err);
+          } else {
+            assert.instanceOf(dev, Device);
+            assert.equal(device.deviceId, dev.deviceId);
+            done();
+          }
         });
       });
 
@@ -283,8 +295,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
         var deviceInfo = new Device(deviceJson);
         registry.delete(deviceInfo.deviceId, function(err) {
-          assert.isNull(err);
-          done();
+          done(err);
         });
       });
 
@@ -323,9 +334,12 @@ function bulkTests(Transport, goodConnectionString) {
             it ('calls the done callback with a job identifier', function (done) {
                 var registry = Registry.fromConnectionString(goodConnectionString, Transport);
                 registry.importDevicesFromBlob("foo", "bar", function (err, res) {
-                assert.isNull(err);
-                assert.isOk(res.jobId);
-                done(); 
+                    if (err) {
+                        done(err);
+                    } else {
+                        assert.isOk(res.jobId);
+                        done(); 
+                    }
                 });            
             });
             
@@ -340,13 +354,16 @@ function bulkTests(Transport, goodConnectionString) {
                 var inputUri = "foo";
                 var outputUri = "bar";
                 registry.importDevicesFromBlob(inputUri, outputUri, function (err, res) {
-                assert.isNull(err);
-                assert.isOk(res.jobId);
-                testJobId = res.jobId;
-                assert.equal(res.type, 'import');
-                assert.equal(res.inputBlobContainerUri, inputUri);
-                assert.equal(res.outputBlobContainerUri, outputUri);
-                done(); 
+                    if (err) {
+                        done(err);
+                    } else {
+                        assert.isOk(res.jobId);
+                        testJobId = res.jobId;
+                        assert.equal(res.type, 'import');
+                        assert.equal(res.inputBlobContainerUri, inputUri);
+                        assert.equal(res.outputBlobContainerUri, outputUri);
+                        done(); 
+                    }
                 });
             });
         });
@@ -366,9 +383,12 @@ function bulkTests(Transport, goodConnectionString) {
             it('calls the done callback with a job identifier', function (done) {
                 var registry = Registry.fromConnectionString(goodConnectionString, Transport);
                 registry.exportDevicesToBlob("foo", true, function (err, res) {
-                assert.isNull(err);
-                assert.isOk(res.jobId);
-                done();
+                    if (err) {
+                        done(err);
+                    } else {
+                        assert.isOk(res.jobId);
+                        done();
+                    }
                 });
             });
             
@@ -383,12 +403,15 @@ function bulkTests(Transport, goodConnectionString) {
                     var registry = Registry.fromConnectionString(goodConnectionString, Transport);
                     var outputUri = "bar";
                     registry.exportDevicesToBlob(outputUri, excludeKeys, function (err, res) {
-                    assert.isNull(err);
-                    assert.isOk(res.jobId);
-                    assert.equal(res.type, 'export');
-                    assert.equal(res.outputBlobContainerUri, outputUri);
-                    assert.equal(res.excludeKeysInExport, excludeKeys);
-                    done(); 
+                        if (err) {
+                            done(err);
+                        } else {
+                            assert.isOk(res.jobId);
+                            assert.equal(res.type, 'export');
+                            assert.equal(res.outputBlobContainerUri, outputUri);
+                            assert.equal(res.excludeKeysInExport, excludeKeys);
+                            done(); 
+                        }
                     });
                 });
             });
@@ -402,9 +425,12 @@ function bulkTests(Transport, goodConnectionString) {
                 var registry = Registry.fromConnectionString(goodConnectionString, Transport);
                 
                 registry.listJobs(function(err, res) {
-                    assert.isNull(err);
-                    assert.isOk(res);
-                    done();
+                    if (err) {
+                        done(err);
+                    } else {
+                        assert.isOk(res);
+                        done();
+                    }
                 });
             });
             
@@ -444,9 +470,12 @@ function bulkTests(Transport, goodConnectionString) {
                 var registry = Registry.fromConnectionString(goodConnectionString, Transport);
                 
                 registry.getJob(testJobId, function(err, res) {
-                    assert.isNull(err);
-                    assert.isOk(res);
-                    done();
+                    if (err) {
+                        done(err);
+                    } else {
+                        assert.isOk(res);
+                        done();
+                    }
                 });
             }); 
             

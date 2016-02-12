@@ -76,17 +76,22 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         this.timeout(30000);
         var client = Client.fromConnectionString(goodConnectionString, Transport);
         client.open(function (err, res){
-            assert.isNull(err);
-            assert.equal(res.constructor.name, 'Connected', 'Type of the result object of the client.open method is wrong');
-            var message = new Message('hello');
-            client.sendEvent(message, function (err, res) {
-              assert.isNull(err);
-              assert.equal(res.constructor.name, 'MessageEnqueued', 'Type of the result object of the client.sendEvent method is wrong');
-              client.close(function (err) {
-                assert.isNull(err);
-                done();
-              });
-            });
+            if(err) {
+                done(err);
+            } else {
+                assert.equal(res.constructor.name, 'Connected', 'Type of the result object of the client.open method is wrong');
+                var message = new Message('hello');
+                client.sendEvent(message, function (err, res) {
+                    if(err) { 
+                        done(err);
+                    } else {
+                        assert.equal(res.constructor.name, 'MessageEnqueued', 'Type of the result object of the client.sendEvent method is wrong');
+                        client.close(function (err) {
+                            done(err);
+                        });
+                    }
+                });
+            }
         });
       });
 
