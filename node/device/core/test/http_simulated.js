@@ -21,7 +21,7 @@ function makeError(statusCode) {
 
 function SimulatedHttp(config) {
   this._receiver = null;
-  this.handleRequest = function(done) {
+  this.handleRequest = function (done) {
     var sig = SharedAccessSignature.parse(config.sharedAccessSignature);
 
     if (config.host === 'bad') {                      // bad host
@@ -61,7 +61,7 @@ SimulatedHttp.prototype.receive = function (done) {
 };
 
 SimulatedHttp.prototype.getReceiver = function (done) {
-  if(!this._receiver) { this._receiver = new EventEmitter(); }
+  if (!this._receiver) { this._receiver = new EventEmitter(); }
   done(null, this._receiver);
 };
 

@@ -12,7 +12,7 @@ var deviceId = process.env.IOTHUB_DEVICE_ID;
 var key = process.env.IOTHUB_DEVICE_KEY;
 
 function makeConnectionString(host, device, key) {
-  return 'HostName='+host+';DeviceId='+device+';SharedAccessKey='+key;
+  return 'HostName=' + host + ';DeviceId=' + device + ';SharedAccessKey=' + key;
 }
 
 var connectionString = makeConnectionString(host, deviceId, key);

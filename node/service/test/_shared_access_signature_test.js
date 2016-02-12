@@ -8,10 +8,10 @@ var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var SharedAccessSignature = require('../lib/shared_access_signature.js');
 
 var incompleteSignatures = {
-  sr:  'SharedAccessSignature sig=signature&skn=keyname&se=expiry',
+  sr: 'SharedAccessSignature sig=signature&skn=keyname&se=expiry',
   sig: 'SharedAccessSignature sr=audience&skn=keyname&se=expiry',
   skn: 'SharedAccessSignature sr=audience&sig=signature&se=expiry',
-  se:  'SharedAccessSignature sr=audience&sig=signature&skn=keyname'
+  se: 'SharedAccessSignature sr=audience&sig=signature&skn=keyname'
 };
 
 describe('SharedAccessSignature', function () {

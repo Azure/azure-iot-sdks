@@ -166,7 +166,7 @@ var utils = {
     se: 'expiry'
   },
 
-  fields: function() {
+  fields: function () {
     return Object.keys(this.properties);
   },
 

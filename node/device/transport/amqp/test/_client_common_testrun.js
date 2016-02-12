@@ -20,7 +20,7 @@ function badConfigTests(opName, badConnStrings, Transport, requestFn) {
   function expectNotFoundError(err) {
     assert.include(err.message, 'getaddrinfo ENOTFOUND bad');
   }
-  
+
   function expectTimeout(err) {
     assert.isNotNull(err);
     assert.include(err.message, "ETIMEDOUT");
@@ -49,28 +49,28 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
       /*Tests_SRS_NODE_DEVICE_CLIENT_05_017: [With the exception of receive, when a Client method completes successfully, the callback function (indicated by the done argument) shall be invoked with the following arguments:
         err - null
         response - a transport-specific response object]*/
-      /*Tests_SRS_NODE_DEVICE_AMQP_16_002: [The sendEvent method shall construct an AMQP request using the message passed in argument as the body of the message.] */ 
-      /*Tests_SRS_NODE_DEVICE_AMQP_16_003: [The sendEvent method shall call the done() callback with no arguments when the message has been successfully sent.] */ 
+      /*Tests_SRS_NODE_DEVICE_AMQP_16_002: [The sendEvent method shall construct an AMQP request using the message passed in argument as the body of the message.] */
+      /*Tests_SRS_NODE_DEVICE_AMQP_16_003: [The sendEvent method shall call the done() callback with no arguments when the message has been successfully sent.] */
       /*Tests_SRS_NODE_DEVICE_AMQP_16_004: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message). ] */
       it('sends the event', function (done) {
         var client = Client.fromConnectionString(goodConnectionString, Transport);
-        client.open(function (err, res){
-            if(err) {
+        client.open(function (err, res) {
+          if (err) {
+            done(err);
+          } else {
+            assert.equal(res.constructor.name, 'Connected', 'Type of the result object of the client.open method is wrong');
+            var message = new Message('hello');
+            client.sendEvent(message, function (err, res) {
+              if (err) {
                 done(err);
-            } else {
-                assert.equal(res.constructor.name, 'Connected', 'Type of the result object of the client.open method is wrong');
-                var message = new Message('hello');
-                client.sendEvent(message, function (err, res) {
-                    if(err) { 
-                        done(err);
-                    } else {
-                        assert.equal(res.constructor.name, 'MessageEnqueued', 'Type of the result object of the client.sendEvent method is wrong');
-                        client.close(function (err) {
-                            done(err);
-                        });
-                    }
+              } else {
+                assert.equal(res.constructor.name, 'MessageEnqueued', 'Type of the result object of the client.sendEvent method is wrong');
+                client.close(function (err) {
+                  done(err);
                 });
-            }
+              }
+            });
+          }
         });
       });
 

@@ -7,7 +7,7 @@ var ConnectionString = require('../lib/connection_string.js');
 var runTests = require('./_registry_common_testrun.js');
 
 function makeConnectionString(host, policy, key) {
-  return 'HostName='+host+';SharedAccessKeyName='+policy+';SharedAccessKey='+key;
+  return 'HostName=' + host + ';SharedAccessKeyName=' + policy + ';SharedAccessKey=' + key;
 }
 
 var connectionString = process.env.IOTHUB_CONNECTION_STRING;
@@ -15,9 +15,9 @@ var deviceId = process.env.IOTHUB_DEVICE_ID;
 var cn = ConnectionString.parse(connectionString);
 
 var badConnStrings = [
-  makeConnectionString('bad',       cn.SharedAccessKeyName, cn.SharedAccessKey),
-  makeConnectionString(cn.HostName, 'bad',                  cn.SharedAccessKey),
-  makeConnectionString(cn.HostName, cn.SharedAccessKeyName, 'bad'             ),
+  makeConnectionString('bad', cn.SharedAccessKeyName, cn.SharedAccessKey),
+  makeConnectionString(cn.HostName, 'bad', cn.SharedAccessKey),
+  makeConnectionString(cn.HostName, cn.SharedAccessKeyName, 'bad'),
 ];
 
 describe('Over real HTTPS', function () {

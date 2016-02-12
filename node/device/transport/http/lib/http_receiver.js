@@ -26,10 +26,10 @@ var defaultOptions = {
 /**
  * @class module:azure-iot-device-http.HttpReceiver
  * @classdesc Provides a receiver link that can pull messages from the IoT Hub service and settle them.
- * 
+ *
  * @emits message When a message is received
  * @emits errorReceived When there was an error trying to receive messages
- * 
+ *
  */
 /**
  * @event module:azure-iot-device-http.HttpReceiver#errorReceived
@@ -40,23 +40,23 @@ var defaultOptions = {
  * @type {Message}
  */
 function HttpReceiver(config, httpHelper) {
-	EventEmitter.call(this);
+  EventEmitter.call(this);
   this._config = config;
   this._http = httpHelper;
-  
+
   this._opts = defaultOptions;
   this._cronObj = null;
   this._intervalObj = null;
   this._timeoutObj = null;
   this._receiverStarted = false;
-  
-  
+
+
   this.on('removeListener', function () {
     if (this._receiverStarted && this.listenerCount('message') === 0) {
       this._stopReceiver();
     }
   }.bind(this));
-  
+
   this.on('newListener', function () {
     if (!this._receiverStarted) {
       this._startReceiver();
@@ -76,48 +76,48 @@ HttpReceiver.prototype._startReceiver = function () {
       /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_003: [if opts.at is set, messages shall be received at the Date and time specified.]*/
       var at = new Date(this._opts.at).getTime();
       var diff = Math.max(at - Date.now(), 0);
-      this._timeoutObj = setTimeout(this.receive.bind(this), diff);    
-      this._receiverStarted = true;  
+      this._timeoutObj = setTimeout(this.receive.bind(this), diff);
+      this._receiverStarted = true;
     } else if (this._opts.cron) {
       /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_020: [If opts.cron is set messages shall be received according to the schedule described by the expression.]*/
       this.cronObj = cron.scheduleJob(this._opts.cron, this.receive.bind(this));
       this._receiverStarted = true;
     } else if (this._opts.manualPolling) {
       /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_023: [If opts.manualPolling is true, messages shall be received only when receive() is called] */
-        this.receiverStarted = true;
+      this.receiverStarted = true;
     }
   }
 };
 
 HttpReceiver.prototype._stopReceiver = function () {
-  if (this._cronObj) { 
-      cron.cancelJob(this._cronObj);
-      this._cronObj = null;
-      this._receiverStarted = false;
-    }
-    
-    if (this._intervalObj) { 
-      clearInterval(this._intervalObj); 
-      this._intervalObj = null;
-      this._receiverStarted = false;
-    }
-    
-    if (this._timeoutObj) { 
-      clearTimeout(this._timeoutObj); 
-      this._timeoutObj = null;
-      this._receiverStarted = false;
-    }
-    
-    if (this._opts.manualPolling) {
-        this._receiverStarted = false;
-    }
+  if (this._cronObj) {
+    cron.cancelJob(this._cronObj);
+    this._cronObj = null;
+    this._receiverStarted = false;
+  }
+
+  if (this._intervalObj) {
+    clearInterval(this._intervalObj);
+    this._intervalObj = null;
+    this._receiverStarted = false;
+  }
+
+  if (this._timeoutObj) {
+    clearTimeout(this._timeoutObj);
+    this._timeoutObj = null;
+    this._receiverStarted = false;
+  }
+
+  if (this._opts.manualPolling) {
+    this._receiverStarted = false;
+  }
 };
 
 /**
  * @method          module:azure-iot-device-http.HttpReceiver#receive
  * @description     The receive method queries the IoT Hub immediately (as the device indicated in the
  *                  `config` parameter) for the next message in the queue.
- * 
+ *
  * @param {Object}  config            This is a dictionary containing the
  *                                    following keys and values:
  *
@@ -144,8 +144,8 @@ HttpReceiver.prototype.receive = function () {
     'Authorization': this._config.sharedAccessSignature.toString(),
     'iothub-to': path
   };
-  
-  /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_017: [If opts.drain is true all messages in the queue should be pulled at once.]*/ 
+
+  /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_017: [If opts.drain is true all messages in the queue should be pulled at once.]*/
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_018: [If opts.drain is false, only one message shall be received at a time]*/
   var drainRequester = new EventEmitter();
   drainRequester.on('nextRequest', function () {
@@ -166,16 +166,16 @@ HttpReceiver.prototype.receive = function () {
     }.bind(this));
     request.end();
   }.bind(this));
-  
+
   drainRequester.emit('nextRequest');
 };
 
 /**
  * @method          module:azure-iot-device-http.HttpReceiver#setOptions
  * @description     This method sets the options defining how the receiver object should poll the IoT Hub service to get messages.
- *                  There is only one instance of the receiver object. If the receiver has already been created, calling setOptions will 
+ *                  There is only one instance of the receiver object. If the receiver has already been created, calling setOptions will
  *                  change the options of the existing instance and restart it.
- * 
+ *
  * @param {Object} opts Receiver options formatted as: { interval: (Number), at: (Date), cron: (string), drain: (Boolean) }
  */
 /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_001: [The setOptions method shall accept an argument formatted as such:
@@ -191,14 +191,13 @@ HttpReceiver.prototype.setOptions = function (opts) {
   if (this._receiverStarted) {
     this._stopReceiver();
   }
-  
-  if (!opts)
-  {
+
+  if (!opts) {
     this._opts = defaultOptions;
   }
-  
+
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_008: [Only one of the interval, at, and cron fields should be populated: if more than one is populated, an ArgumentError shall be thrown.]*/
-  if (opts.interval && opts.cron || 
+  if (opts.interval && opts.cron ||
       opts.interval && opts.at ||
       opts.interval && opts.manualPolling ||
       opts.at && opts.cron ||
@@ -206,29 +205,29 @@ HttpReceiver.prototype.setOptions = function (opts) {
       opts.cron && opts.manualPolling) {
     throw new ArgumentError('Only one of the (interval|at|cron) fields should be set.');
   }
-  
-  /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_002: [opts.interval is not a number, an ArgumentError should be thrown.]*/ 
-  if (opts.interval && typeof(opts.interval) !== "number") {
+
+  /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_002: [opts.interval is not a number, an ArgumentError should be thrown.]*/
+  if (opts.interval && typeof (opts.interval) !== "number") {
     throw new ArgumentError('The \'interval\' parameter must be a number');
   }
-  
+
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_005: [If opts.interval is a negative number, an ArgumentError should be thrown.]*/
   if (opts.interval && opts.interval <= 0) {
     throw new ArgumentError('the \'interval\' parameter must be strictly greater than 0 (zero)');
   }
-  
+
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_022: [If opts.at is not a Date object, an ArgumentError should be thrown]*/
   if (opts.at && !(opts.at instanceof Date)) {
     throw new ArgumentError('The \'at\' parameter must be a Date');
   }
-  
+
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_004: [if opts.cron is set it shall be a string that can be interpreted as a cron expression]*/
-  if (opts.cron && typeof(opts.cron) !== "string") {
+  if (opts.cron && typeof (opts.cron) !== "string") {
     throw new ArgumentError('The \'at\' parameter must be a String and use the cron syntax (see https://www.npmjs.com/package/node-crontab)');
   }
-  
+
   this._opts = opts;
-  
+
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_019: [If the receiver is already running with a previous configuration, the existing receiver should be restarted with the new configuration]*/
   if (restartReceiver) {
     this._startReceiver();
@@ -240,7 +239,7 @@ HttpReceiver.prototype.setOptions = function (opts) {
  * @description     Sets the SAS Token used for authentication with the IoT Hub service when receiving messages.
  */
 HttpReceiver.prototype.setSharedAccessSignature = function (sharedAccessSignature) {
-    this._config.sharedAccessSignature = sharedAccessSignature;
+  this._config.sharedAccessSignature = sharedAccessSignature;
 };
 
 /**
@@ -248,8 +247,8 @@ HttpReceiver.prototype.setSharedAccessSignature = function (sharedAccessSignatur
  * @description     Sends a completion message to the IoT Hub service, effectively removing the message from the queue and flagging it as succesfully delivered.
  */
 HttpReceiver.prototype.complete = function (message, done) {
-    if(!message) throw new ReferenceError('Invalid message object.');
-	this._sendFeedback('complete', message, done);
+  if (!message) throw new ReferenceError('Invalid message object.');
+  this._sendFeedback('complete', message, done);
 };
 
 /**
@@ -257,8 +256,8 @@ HttpReceiver.prototype.complete = function (message, done) {
  * @description     Sends an abandon message to the IoT Hub service. The message remains in the queue and the service will retry delivering it.
  */
 HttpReceiver.prototype.abandon = function (message, done) {
-    if(!message) throw new ReferenceError('Invalid message object.');
-	this._sendFeedback('abandon', message, done);
+  if (!message) throw new ReferenceError('Invalid message object.');
+  this._sendFeedback('abandon', message, done);
 };
 
 /**
@@ -266,8 +265,8 @@ HttpReceiver.prototype.abandon = function (message, done) {
  * @description     Sends a rejection message to the IoT Hub service, effectively removing the message from the queue and flagging it as rejected.
  */
 HttpReceiver.prototype.reject = function (message, done) {
-    if(!message) throw new ReferenceError('Invalid message object.');
-	this._sendFeedback('reject', message, done);
+  if (!message) throw new ReferenceError('Invalid message object.');
+  this._sendFeedback('reject', message, done);
 };
 
 /**
@@ -295,12 +294,12 @@ HttpReceiver.prototype._sendFeedback = function (action, message, done) {
     'Authorization': config.sharedAccessSignature.toString(),
     'If-Match': message.lockToken
   };
-  
+
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_009: [abandon shall construct an HTTP request using information supplied by the caller, as follows:
   POST <config.host>/devices/<config.deviceId>/messages/devicebound/<lockToken>/abandon?api-version=<version> HTTP/1.1
   Authorization: <config.sharedAccessSignature>
   If-Match: <lockToken>
-  Host: <config.host>] 
+  Host: <config.host>]
   */
   if (action === 'abandon') {
     path += '/abandon' + endpoint.versionQueryString();
@@ -329,19 +328,19 @@ HttpReceiver.prototype._sendFeedback = function (action, message, done) {
   }
 
   /*Codes_SRS_NODE_DEVICE_HTTP_05_008: [If any Http method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-  var request = this._http.buildRequest(method, path, httpHeaders, config.host, function(err, body, response){
-      if (done) { 
-          if (!err && response.statusCode === 204) {
-              var result = new ResultConstructor(response);
-              done (null, result);
-          } else {
-              err.response = response;
-              err.responseBody = body;
-              done(err);
-          }
+  var request = this._http.buildRequest(method, path, httpHeaders, config.host, function (err, body, response) {
+    if (done) {
+      if (!err && response.statusCode === 204) {
+        var result = new ResultConstructor(response);
+        done(null, result);
+      } else {
+        err.response = response;
+        err.responseBody = body;
+        done(err);
       }
+    }
   });
-  
+
   request.end();
 };
 

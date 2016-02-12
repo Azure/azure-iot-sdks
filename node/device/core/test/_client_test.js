@@ -33,63 +33,63 @@ describe('Client', function () {
         }, ReferenceError, 'connStr is \'' + value + '\'');
       });
     });
-    
+
     /*Tests_SRS_NODE_DEVICE_CLIENT_05_006: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(new Transport(...)).]*/
     it('returns an instance of Client', function () {
-      var DummyTransport = function(){};
+      var DummyTransport = function () { };
       var client = Client.fromConnectionString(connectionString, DummyTransport);
       assert.instanceOf(client, Client);
     });
-    
+
     /*Tests_SRS_NODE_DEVICE_CLIENT_16_027: [If a connection string argument is provided, the Client shall automatically generate and renew SAS tokens.] */
-    it('automatically renews the SAS token before it expires', function(done){
-        this.clock = sinon.useFakeTimers();
-        var clock = this.clock;
-        var tick = 0;
-        var firstTick = 1800000;
-        var secondTick = 1200000;
-        var sasUpdated = false;
-        var DummyTransport = function() {
-            this.updateSharedAccessSignature = function() {
-                sasUpdated = true;
-                assert.equal(tick, secondTick);
-                clock.restore();
-                done();
-            };
+    it('automatically renews the SAS token before it expires', function (done) {
+      this.clock = sinon.useFakeTimers();
+      var clock = this.clock;
+      var tick = 0;
+      var firstTick = 1800000;
+      var secondTick = 1200000;
+      var sasUpdated = false;
+      var DummyTransport = function () {
+        this.updateSharedAccessSignature = function () {
+          sasUpdated = true;
+          assert.equal(tick, secondTick);
+          clock.restore();
+          done();
         };
-        
-        var client = Client.fromConnectionString(connectionString, DummyTransport);
-        assert.instanceOf(client, Client);
-        tick = firstTick;
-        this.clock.tick(tick); // 30 minutes. shouldn't have updated yet.
-        assert.isFalse(sasUpdated);
-        tick = secondTick;        
-        this.clock.tick(tick); // +20 => 50 minutes. should've updated so the callback will be called and the test will terminate.
+      };
+
+      var client = Client.fromConnectionString(connectionString, DummyTransport);
+      assert.instanceOf(client, Client);
+      tick = firstTick;
+      this.clock.tick(tick); // 30 minutes. shouldn't have updated yet.
+      assert.isFalse(sasUpdated);
+      tick = secondTick;
+      this.clock.tick(tick); // +20 => 50 minutes. should've updated so the callback will be called and the test will terminate.
     });
   });
-  
-  describe('#fromSharedAccessSignature', function() {
-      /*Tests_SRS_NODE_DEVICE_CLIENT_16_029: [The fromSharedAccessSignature method shall throw a ReferenceError if the sharedAccessSignature argument is falsy.] */
-      it('throws if sharedAccessSignature arg is falsy', function () {
-          [null, undefined, '', 0].forEach(function (value) {
-              assert.throws(function () {
-                  return Client.fromSharedAccessSignature(value);
-              }, ReferenceError, 'sharedAccessSignature is \'' + value + '\'');
-          });
+
+  describe('#fromSharedAccessSignature', function () {
+    /*Tests_SRS_NODE_DEVICE_CLIENT_16_029: [The fromSharedAccessSignature method shall throw a ReferenceError if the sharedAccessSignature argument is falsy.] */
+    it('throws if sharedAccessSignature arg is falsy', function () {
+      [null, undefined, '', 0].forEach(function (value) {
+        assert.throws(function () {
+          return Client.fromSharedAccessSignature(value);
+        }, ReferenceError, 'sharedAccessSignature is \'' + value + '\'');
       });
-      
-      /*Tests_SRS_NODE_DEVICE_CLIENT_16_030: [The fromSharedAccessSignature method shall return a new instance of the Client object] */
-      it('returns an instance of Client', function () {
-          var DummyTransport = function(){};
-          var sharedAccessSignature = '"SharedAccessSignature sr=hubName.azure-devices.net/devices/deviceId&sig=s1gn4tur3&se=1454204843"';
-          var client = Client.fromSharedAccessSignature(sharedAccessSignature, DummyTransport);
-          assert.instanceOf(client, Client);
-      });
+    });
+
+    /*Tests_SRS_NODE_DEVICE_CLIENT_16_030: [The fromSharedAccessSignature method shall return a new instance of the Client object] */
+    it('returns an instance of Client', function () {
+      var DummyTransport = function () { };
+      var sharedAccessSignature = '"SharedAccessSignature sr=hubName.azure-devices.net/devices/deviceId&sig=s1gn4tur3&se=1454204843"';
+      var client = Client.fromSharedAccessSignature(sharedAccessSignature, DummyTransport);
+      assert.instanceOf(client, Client);
+    });
   });
 });
 
 function makeConnectionString(host, device, key) {
-  return 'HostName='+host+';DeviceId='+device+';SharedAccessKey='+key;
+  return 'HostName=' + host + ';DeviceId=' + device + ';SharedAccessKey=' + key;
 }
 
 var connectionString = makeConnectionString('host', 'device', 'key');

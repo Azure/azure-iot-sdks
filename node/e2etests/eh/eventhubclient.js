@@ -43,9 +43,9 @@ function EventHubClient(connString, path) {
   var token = SharedAccessSignature.create(this.config.host, this.config.keyName, this.config.key, anHourFromNow()).toString();
 
   this.uri = 'amqps://' +
-    encodeURIComponent(this.config.keyName + '@sas.root.' + this.config.namespace) + ':' +
-    encodeURIComponent(token) + '@' +
-    this.config.host;
+  encodeURIComponent(this.config.keyName + '@sas.root.' + this.config.namespace) + ':' +
+  encodeURIComponent(token) + '@' +
+  this.config.host;
 
   this.amqpClient = new amqp10.Client(amqp10.Policy.EventHub);
 }
@@ -66,16 +66,16 @@ EventHubClient.prototype._connect = function () {
               var res = rx_err.errorInfo.address.match('amqps://([^/]*)/([^/]*)');
               self.config.eventHubName = res[2];
               self.uri = 'amqps://' +
-                encodeURIComponent(self.config.keyName) + ':' +
-                encodeURIComponent(self.config.key) + '@' +
-                rx_err.errorInfo.hostname;
+              encodeURIComponent(self.config.keyName) + ':' +
+              encodeURIComponent(self.config.key) + '@' +
+              rx_err.errorInfo.hostname;
               self.amqpClient.disconnect()
                 .then(function () {
                   self.amqpClient = new amqp10.Client(amqp10.Policy.EventHub);
                   return self.amqpClient.connect(self.uri);
                 })
                 .then(function () {
-                    resolve();
+                  resolve();
                 });
             }
             else {
@@ -127,8 +127,8 @@ EventHubClient.prototype.GetPartitionIds = function () {
   });
 };
 
-EventHubClient.prototype.close = function() {
-    return this.amqpClient.disconnect();
+EventHubClient.prototype.close = function () {
+  return this.amqpClient.disconnect();
 };
 
 /**

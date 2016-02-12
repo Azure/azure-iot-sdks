@@ -78,9 +78,9 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         var client = Client.fromConnectionString(goodConnectionString, Transport);
         var message = new Message('hello');
         client.sendEvent(message, function (err, res) {
-          if(err) {
+          if (err) {
             done(err);
-          } else {               
+          } else {
             assert.equal(res, 'OK');
             done();
           }

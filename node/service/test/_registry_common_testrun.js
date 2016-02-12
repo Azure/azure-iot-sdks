@@ -27,7 +27,7 @@ function badConfigTests(opName, badConnStrings, Transport, requestFn) {
 
   /*Tests_SRS_NODE_IOTHUB_HTTP_05_007: [If any registry operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
   function expectNotFoundError(err) {
-      assert.include(err.message, 'getaddrinfo ENOTFOUND bad');
+    assert.include(err.message, 'getaddrinfo ENOTFOUND bad');
   }
 
   /*Tests_SRS_NODE_IOTHUB_HTTP_05_008: [When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
@@ -133,7 +133,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
       it('creates a new device', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
         var deviceInfo = new Device(deviceJson);
-        registry.create(deviceInfo, function(err, dev) {
+        registry.create(deviceInfo, function (err, dev) {
           if (err) {
             done(err);
           } else {
@@ -207,7 +207,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
       response - the Node.js http.ServerResponse object returned by the transport]*/
       it('returns information about a list of devices', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        registry.list(function(err, deviceList) {
+        registry.list(function (err, deviceList) {
           if (err) {
             done(err);
           } else {
@@ -251,7 +251,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
       it('updates information about a device', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
         var device = new Device(deviceJson);
-        registry.update(device, function(err, dev) {
+        registry.update(device, function (err, dev) {
           if (err) {
             done(err);
           } else {
@@ -294,7 +294,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
       it('deletes the given device', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
         var deviceInfo = new Device(deviceJson);
-        registry.delete(deviceInfo.deviceId, function(err) {
+        registry.delete(deviceInfo.deviceId, function (err) {
           done(err);
         });
       });
