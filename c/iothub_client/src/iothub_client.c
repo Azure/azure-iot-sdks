@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <signal.h>
+#include <stddef.h>
 #include "crt_abstractions.h"
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
@@ -23,6 +24,9 @@ typedef struct IOTHUB_CLIENT_INSTANCE_TAG
     LOCK_HANDLE LockHandle;
     sig_atomic_t StopThread;
 } IOTHUB_CLIENT_INSTANCE;
+
+/*used by unittests only*/
+const size_t IoTHubClient_ThreadTerminationOffset = offsetof(IOTHUB_CLIENT_INSTANCE, StopThread);
 
 static int ScheduleWork_Thread(void* threadArgument)
 {
