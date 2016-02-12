@@ -1131,7 +1131,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
         // act
         threadFunc(threadFuncArg);
-        
+
         // assert
         mocks.AssertActualAndExpectedCalls();
         
