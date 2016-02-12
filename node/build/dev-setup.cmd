@@ -90,6 +90,7 @@ call npm link azure-iot-device-amqp-ws
 call npm link azure-iot-device-http
 call npm link azure-iot-device-mqtt
 call npm link azure-iothub
+call npm install
 
 cd %node-root%\..\tools\iothub-explorer
 echo.
