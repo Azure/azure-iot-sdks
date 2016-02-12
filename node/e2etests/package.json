@@ -7,11 +7,13 @@
   "license": "MIT",
   "main": "e2etests.js",
   "dependencies": {
+    "amqp10": "^2.2.2",
     "azure-iot-common": "1.0.0",
     "azure-iot-device": "1.0.0",
     "azure-iot-device-amqp": "1.0.0",
     "azure-iot-device-http": "1.0.0",
     "azure-iothub": "1.0.0",
+    "bluebird": "^3.3.0",
     "debug": "^2.2.0",
     "uuid": "^2.0.1"
   },
@@ -29,7 +31,7 @@
     "ci": "npm -s run lint && npm -s run alltest-min",
     "test": "npm -s run lint && npm -s run unittest"
   },
-  "engines": {    
+  "engines": {
     "node": "0.12.x || 4.x.x || 5.x.x"
   },
   "repository": {
