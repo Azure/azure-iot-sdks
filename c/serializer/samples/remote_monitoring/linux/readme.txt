@@ -24,21 +24,17 @@ git checkout develop
 
 cd build_all/linux
 
-8. install proton by (-i /usr will install it /usr)
-
-sudo bash ./build_proton.sh -i /usr
-
-9. switch to the folder of the remote monitoring machine source code:
+8. switch to the folder of the remote monitoring machine source code:
 
 cd ../../serializer/samples/remote_monitoring/
 
-10. edit main.c providing your credentials (nano editor can be used)
+9. edit main.c providing your credentials (nano editor can be used)
 
-11. go back to the build folder (cd -) and build all the software (lib, samples, unittests). This will also run unittests. Might take some minutes.
+10. go back to the build folder (cd -) and build all the software (lib, samples, unittests). This will also run unittests. Might take some minutes.
 
 cd -
 bash ./build.sh
 
-12. at this moment, remote_monitoring executable can be run by
+11. at this moment, remote_monitoring executable can be run by
 
 ../../serializer/samples/remote_monitoring/linux/remote_monitoring

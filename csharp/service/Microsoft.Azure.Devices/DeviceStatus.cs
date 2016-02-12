@@ -7,6 +7,9 @@ namespace Microsoft.Azure.Devices
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
+    /// <summary>
+    /// Specifies the different states of a device.
+    /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum DeviceStatus
     {

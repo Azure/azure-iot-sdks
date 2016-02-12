@@ -20,21 +20,37 @@
 #include "strings.h"
 #include "iothubtest.h"
 #include "iot_logging.h"
-#include <proton/message.h>
-#include <proton/messenger.h>
-#include <proton/error.h>
+#include "connection.h"
+#include "message_receiver.h"
+#include "message_sender.h"
+#include "messaging.h"
+#include "tlsio.h"
+#include "platform.h"
+#include "sasl_mechanism.h"
+#include "saslclientio.h"
+#include "sasl_plain.h"
+#include "cbs.h"
+#include "consolelogger.h"
 
-const char* AMQP_RECV_ADDRESS_FMT = "amqps://iothubowner:%s@%s.%s/%s/ConsumerGroups/%s/Partitions/%u";
+const char* AMQP_RECV_ADDRESS_FMT = "%s/ConsumerGroups/%s/Partitions/%u";
 const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
-const char* AMQP_SEND_ADDRESS_FMT = "amqps://iothubowner%%40sas.root.%s:%s@%s.%s/messages/deviceBound";
+const char* AMQP_SEND_TARGET_ADDRESS_FMT = "amqps://%s/messages/deviceBound";
+const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 
-#define PROTON_DEFAULT_TIMEOUT      20*1000
 #define THREAD_CONTINUE             0
 #define THREAD_END                  1
 #define MAX_DRAIN_TIME              1000.0
 #define MAX_SHORT_VALUE             32767         /* maximum (signed) short value */
 
 DEFINE_ENUM_STRINGS(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
+
+typedef enum MESSAGE_SEND_STATE_TAG
+{
+    MESSAGE_SEND_STATE_NOT_SENT,
+    MESSAGE_SEND_STATE_SEND_IN_PROGRESS,
+    MESSAGE_SEND_STATE_SENT_OK,
+    MESSAGE_SEND_STATE_SEND_FAILED
+} MESSAGE_SEND_STATE;
 
 typedef struct IOTHUB_VALIDATION_INFO_TAG
 {
@@ -48,7 +64,6 @@ typedef struct IOTHUB_VALIDATION_INFO_TAG
     STRING_HANDLE eventhubName;
     STRING_HANDLE iotSharedSig;
     STRING_HANDLE eventhubAccessKey;
-    unsigned int partitionCount;
     volatile sig_atomic_t messageThreadExit;
 } IOTHUB_VALIDATION_INFO;
 
@@ -234,33 +249,6 @@ static size_t ResolvePartitionIndex(const char* partitionKey, size_t maxPartitio
     return result;
 }
 
-static bool AddPropertyToMessage(pn_messenger_t* messenger, pn_message_t* message, const char* pszDeviceId, const char* pszAddress)
-{
-    bool result;
-    size_t addressLen = strlen(AMQP_ADDRESS_PATH_FMT)+strlen(pszDeviceId)+1;
-    char* deviceDest = (char*)malloc(addressLen+1);
-    if (deviceDest == NULL)
-    {
-        result = false;
-    }
-    else
-    {
-        sprintf_s(deviceDest, addressLen+1, AMQP_ADDRESS_PATH_FMT, pszDeviceId);
-        if (pn_messenger_route(messenger, deviceDest, pszAddress) != 0 ||
-            pn_message_set_address(message, deviceDest) != 0
-           )
-        {
-            result = false;
-        }
-        else
-        {
-            result = true;
-        }
-        free(deviceDest);
-    }
-    return result;
-}
-
 static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDATION_INFO* dvhInfo)
 {
     int result;
@@ -273,16 +261,16 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
     }
     else
     {
-        if ( (dvhInfo->iotHubName = (char*)malloc(endName+beginName+1) ) == NULL)
+        if ( (dvhInfo->iotHubName = (char*)malloc(endName-beginName+1) ) == NULL)
         {
             result = __LINE__;
         }
-        else if ( (dvhInfo->hostName = (char*)malloc(endHost+beginHost+1) ) == NULL)
+        else if ( (dvhInfo->hostName = (char*)malloc(endHost-beginName+1) ) == NULL)
         {
             free(dvhInfo->iotHubName);
             result = __LINE__;
         }
-        else if (sscanf(pszIotConnString, "HostName=%[^.].%[^;];SharedAccessKeyName=*;SharedAccessKey=*", dvhInfo->iotHubName, dvhInfo->hostName) != 2)
+        else if (sscanf(pszIotConnString, "HostName=%[^.].%[^;];SharedAccessKeyName=*;SharedAccessKey=*", dvhInfo->iotHubName, dvhInfo->hostName + endName - beginName + 1) != 2)
         {
             free(dvhInfo->iotHubName);
             free(dvhInfo->hostName);
@@ -290,6 +278,8 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
         }
         else
         {
+            (void)strcpy(dvhInfo->hostName, dvhInfo->iotHubName);
+            dvhInfo->hostName[endName - beginName] = '.';
             result = 0;
         }
     }
@@ -302,7 +292,7 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
     int beginName, endName;
     int beginHost, endHost;
 
-    if (sscanf(pszconnString, "Endpoint=sb://%n%*[^.]%n.%n%*[^/]%n/;SharedAccessKeyName=owner;SharedAccessKey=*", &beginName, &endName, &beginHost, &endHost) != 0)
+    if (sscanf(pszconnString, "Endpoint=sb://%n%*[^.]%n.%n%*[^/]%n/;SharedAccessKeyName=owner;SharedAccessKey=%*s", &beginName, &endName, &beginHost, &endHost) != 0)
     {
         result = __LINE__;
     }
@@ -317,7 +307,7 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
             free(dvhInfo->partnerName);
             result = __LINE__;
         }
-        else if (sscanf(pszconnString, "Endpoint=sb://%[^.].%[^/]/;SharedAccessKeyName=owner;SharedAccessKey=*", dvhInfo->partnerName, dvhInfo->partnerHost) != 2)
+        else if (sscanf(pszconnString, "Endpoint=sb://%[^.].%[^/]/;SharedAccessKeyName=owner;SharedAccessKey=%*s", dvhInfo->partnerName, dvhInfo->partnerHost) != 2)
         {
             free(dvhInfo->partnerName);
             free(dvhInfo->partnerHost);
@@ -355,7 +345,7 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
         free(devhubValInfo);
         result = NULL;
     }
-    else if ( (devhubValInfo->eventhubAccessKey = URL_EncodeString(eventhubAccessKey) ) == NULL)
+    else if ( (devhubValInfo->eventhubAccessKey = STRING_construct(eventhubAccessKey)) == NULL)
     {
         STRING_delete(devhubValInfo->consumerGroup);
         STRING_delete(devhubValInfo->deviceId);
@@ -442,12 +432,12 @@ void IoTHubTest_Deinit(IOTHUB_TEST_HANDLE devhubHandle)
 static char* CreateReceiveAddress(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount)
 {
     char* result;
-    size_t addressLen = strlen(AMQP_RECV_ADDRESS_FMT) + STRING_length(devhubValInfo->eventhubAccessKey) + STRING_length(devhubValInfo->eventhubName) + strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + STRING_length(devhubValInfo->consumerGroup) + 5;
+    size_t addressLen = strlen(AMQP_RECV_ADDRESS_FMT) + STRING_length(devhubValInfo->eventhubName) + STRING_length(devhubValInfo->consumerGroup) + 5;
     result = (char*)malloc(addressLen + 1);
     if (result != NULL)
     {
         size_t targetPartition = ResolvePartitionIndex(STRING_c_str(devhubValInfo->deviceId), partitionCount);
-        sprintf_s(result, addressLen+1, AMQP_RECV_ADDRESS_FMT, STRING_c_str(devhubValInfo->eventhubAccessKey), devhubValInfo->partnerName, devhubValInfo->partnerHost, STRING_c_str(devhubValInfo->eventhubName), STRING_c_str(devhubValInfo->consumerGroup), targetPartition);
+        sprintf_s(result, addressLen+1, AMQP_RECV_ADDRESS_FMT, STRING_c_str(devhubValInfo->eventhubName), STRING_c_str(devhubValInfo->consumerGroup), targetPartition);
     }
     else
     {
@@ -456,25 +446,74 @@ static char* CreateReceiveAddress(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t 
     return result;
 }
 
-static char* CreateSendAddress(IOTHUB_VALIDATION_INFO* devhubValInfo)
+static char* CreateReceiveHostName(IOTHUB_VALIDATION_INFO* devhubValInfo)
 {
     char* result;
-    STRING_HANDLE encodedSig = URL_Encode(devhubValInfo->iotSharedSig);
-    if (encodedSig != NULL)
+    size_t partner_host_len = strlen(devhubValInfo->partnerName) + strlen(devhubValInfo->partnerHost) + 2;
+    result = (char*)malloc(partner_host_len + 1);
+    if (result != NULL)
     {
-        size_t addressLen = strlen(AMQP_SEND_ADDRESS_FMT)+(strlen(devhubValInfo->iotHubName)*2)+strlen(devhubValInfo->hostName)+(STRING_length(encodedSig) );
-        result = (char*)malloc(addressLen+1);
-        if (result != NULL)
-        {
-            sprintf_s(result, addressLen+1, AMQP_SEND_ADDRESS_FMT, devhubValInfo->iotHubName, STRING_c_str(encodedSig), devhubValInfo->iotHubName, devhubValInfo->hostName);
-        }
-        STRING_delete(encodedSig);
+        sprintf_s(result, partner_host_len + 1, "%s.%s", devhubValInfo->partnerName, devhubValInfo->partnerHost);
     }
     else
     {
         result = NULL;
     }
+
     return result;
+}
+
+static char* CreateSendTargetAddress(IOTHUB_VALIDATION_INFO* devhubValInfo)
+{
+    char* result;
+    size_t addressLen = strlen(AMQP_SEND_TARGET_ADDRESS_FMT)+strlen(devhubValInfo->hostName);
+    result = (char*)malloc(addressLen+1);
+    if (result != NULL)
+    {
+        sprintf_s(result, addressLen+1, AMQP_SEND_TARGET_ADDRESS_FMT, devhubValInfo->hostName);
+    }
+    return result;
+}
+
+/* RFC SASL PLAIN, we construct the AuthCid here (http://tools.ietf.org/html/rfc4616) */
+static char* CreateSendAuthCid(IOTHUB_VALIDATION_INFO* devhubValInfo)
+{
+    char* result;
+
+    size_t authCidLen = strlen(AMQP_SEND_AUTHCID_FMT) + strlen(devhubValInfo->iotHubName);
+    result = (char*)malloc(authCidLen + 1);
+    if (result != NULL)
+    {
+        sprintf_s(result, authCidLen + 1, AMQP_SEND_AUTHCID_FMT, devhubValInfo->iotHubName);
+    }
+
+    return result;
+}
+
+typedef struct MESSAGE_RECEIVER_CONTEXT_TAG
+{
+    pfIoTHubMessageCallback msgCallback;
+    void* context;
+    bool message_received;
+} MESSAGE_RECEIVER_CONTEXT;
+
+static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
+{
+    MESSAGE_RECEIVER_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_CONTEXT*)context;
+    BINARY_DATA binary_data;
+
+    if (message_get_body_amqp_data(message, 0, &binary_data) == 0)
+    {
+        if (msg_received_context->msgCallback != NULL)
+        {
+            if (msg_received_context->msgCallback(msg_received_context->context, binary_data.bytes, binary_data.length) != 0)
+            {
+                msg_received_context->message_received = true;
+            }
+        }
+    }
+
+    return messaging_delivery_accepted();
 }
 
 IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, time_t receiveTimeRangeStart, double maxDrainTimeInSeconds)
@@ -486,187 +525,204 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
     }
     else 
     {
+        XIO_HANDLE sasl_io = NULL;
+        CONNECTION_HANDLE connection = NULL;
+        SESSION_HANDLE session = NULL;
+        LINK_HANDLE link = NULL;
+        MESSAGE_RECEIVER_HANDLE message_receiver = NULL;
         IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)devhubHandle;
-        time_t beginExecutionTime, nowExecutionTime;
-        double timespan;
-        pn_messenger_t* messenger;
-        if ( (messenger = pn_messenger(NULL) ) == NULL)
+
+        char* eh_hostname = CreateReceiveHostName(devhubValInfo);
+        if (eh_hostname == NULL)
         {
             result = IOTHUB_TEST_CLIENT_ERROR;
         }
         else
         {
-            // Sets the Messenger Windows
-            pn_messenger_set_incoming_window(messenger, 1);
-
-            pn_messenger_start(messenger);
-            if (pn_messenger_errno(messenger) )
+            char* receive_address = CreateReceiveAddress(devhubValInfo, partitionCount);
+            if (receive_address == NULL)
             {
                 result = IOTHUB_TEST_CLIENT_ERROR;
             }
             else
             {
-                if (pn_messenger_set_timeout(messenger, PROTON_DEFAULT_TIMEOUT) != 0)
+                /* create SASL plain handler */
+                SASL_PLAIN_CONFIG sasl_plain_config = { "iothubowner", STRING_c_str(devhubValInfo->eventhubAccessKey), NULL };
+                const SASL_MECHANISM_INTERFACE_DESCRIPTION* sasl_plain_interface_description;
+                SASL_MECHANISM_HANDLE sasl_mechanism_handle = NULL;
+                XIO_HANDLE tls_io = NULL;
+                TLSIO_CONFIG tls_io_config = { eh_hostname, 5671 };
+                const IO_INTERFACE_DESCRIPTION* tlsio_interface = NULL;
+
+                if ((sasl_plain_interface_description = saslplain_get_interface()) == NULL)
                 {
+                    LogError("Failed getting saslplain_get_interface.\r\n");
+                    result = IOTHUB_TEST_CLIENT_ERROR;
+                }
+                else if ((sasl_mechanism_handle = saslmechanism_create(sasl_plain_interface_description, &sasl_plain_config)) == NULL)
+                {
+                    LogError("Failed creating sasl PLAN mechanism.\r\n");
+                    result = IOTHUB_TEST_CLIENT_ERROR;
+                }
+                else if ((tlsio_interface = platform_get_default_tlsio()) == NULL)
+                {
+                    LogError("Failed getting default TLS IO interface.\r\n");
+                    result = IOTHUB_TEST_CLIENT_ERROR;
+                }
+                else if ((tls_io = xio_create(tlsio_interface, &tls_io_config, NULL)) == NULL)
+                {
+                    LogError("Failed creating the TLS IO.\r\n");
                     result = IOTHUB_TEST_CLIENT_ERROR;
                 }
                 else
                 {
-                    result = IOTHUB_TEST_CLIENT_OK;
-
-                    devhubValInfo->partitionCount = partitionCount;
-                    devhubValInfo->messageThreadExit = THREAD_CONTINUE;
-
-                    // Allocate the Address
-                    char* szAddress = CreateReceiveAddress(devhubValInfo, partitionCount);
-                    if (szAddress == NULL)
+                    /* create the SASL client IO using the TLS IO */
+                    SASLCLIENTIO_CONFIG sasl_io_config = { tls_io, sasl_mechanism_handle };
+                    if ((sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_io_config, NULL)) == NULL)
                     {
+                        LogError("Failed creating the SASL IO.\r\n");
+                        result = IOTHUB_TEST_CLIENT_ERROR;
+                    }
+                    /* create the connection, session and link */
+                    else if ((connection = connection_create(sasl_io, eh_hostname, "whatever", NULL, NULL)) == NULL)
+                    {
+                        LogError("Failed creating the connection.\r\n");
+                        result = IOTHUB_TEST_CLIENT_ERROR;
+                    }
+                    else if ((session = session_create(connection, NULL, NULL)) == NULL)
+                    {
+                        LogError("Failed creating the session.\r\n");
+                        result = IOTHUB_TEST_CLIENT_ERROR;
+                    }
+                    else if (session_set_incoming_window(session, 100) != 0)
+                    {
+                        /* set incoming window to 100 for the session */
+                        LogError("Failed setting the session incoming window.\r\n");
                         result = IOTHUB_TEST_CLIENT_ERROR;
                     }
                     else
                     {
-						char tempBuffer[256];
+                        char tempBuffer[256];
+                        const char filter_name[] = "apache.org:selector-filter:string";
+                        int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000);
 
-                        // subscribe the messenger to all the partitions
-                        bool atLeastOneMessageReceived = true;
-                        beginExecutionTime = time(NULL);
+                        /* create the filter set to be used for the source of the link */
+                        filter_set filter_set = amqpvalue_create_map();
+                        AMQP_VALUE filter_key = amqpvalue_create_symbol(filter_name);
+                        AMQP_VALUE descriptor = amqpvalue_create_symbol(filter_name);
+                        AMQP_VALUE filter_value = amqpvalue_create_string(tempBuffer);
+                        AMQP_VALUE described_filter_value = amqpvalue_create_described(descriptor, filter_value);
+                        amqpvalue_set_map_value(filter_set, filter_key, described_filter_value);
+                        amqpvalue_destroy(filter_key);
+                        amqpvalue_destroy(described_filter_value);
 
-						const char filter_name[] = "apache.org:selector-filter:string";
+                        if (filter_set == NULL)
+                        {
+                            LogError("Failed creating filter set with enqueuedtimeutc filter.\r\n");
+                            result = IOTHUB_TEST_CLIENT_ERROR;
+                        }
+                        else
+                        {
+                            AMQP_VALUE target = NULL;
+                            AMQP_VALUE source = NULL;
 
-						pn_data_t* filter = pn_data(0);
-						if (filter == NULL)
-						{
-							result = IOTHUB_TEST_CLIENT_ERROR;
-						}
-						else
-						{
-							/* 330s = 5:30. 5 minutes for clock skew on the service side and 30s lag for communication timeout. */
-							int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000);
+                            /* create the source of the link */
+                            SOURCE_HANDLE source_handle = source_create();
+                            AMQP_VALUE address_value = amqpvalue_create_string(receive_address);
+                            source_set_address(source_handle, address_value);
+                            source_set_filter(source_handle, filter_set);
+                            amqpvalue_destroy(address_value);
+                            source = amqpvalue_create_source(source_handle);
+                            source_destroy(source_handle);
 
-							if ((filter_string_length < 0) ||
-								(pn_data_put_map(filter) != 0) ||
-								!pn_data_enter(filter) ||
-								(pn_data_put_symbol(filter, pn_bytes((sizeof(filter_name) / sizeof(filter_name[0]) - 1), filter_name)) != 0) ||
-								(pn_data_put_described(filter) != 0) ||
-								!pn_data_enter(filter) ||
-								(pn_data_put_symbol(filter, pn_bytes((sizeof(filter_name) / sizeof(filter_name[0]) - 1), filter_name)) != 0) ||
-								(pn_data_put_string(filter, pn_bytes(filter_string_length, tempBuffer)) != 0) ||
-								!pn_data_exit(filter) ||
-								!pn_data_exit(filter))
-							{
-								result = IOTHUB_TEST_CLIENT_ERROR;
-							}
-							else
-							{
-								if (pn_messenger_subscribe_with_filter(messenger, szAddress, filter) == NULL)
-								{
-									result = IOTHUB_TEST_CLIENT_ERROR;
-									LogError("Unable to create a subscription using address %s\r\n", szAddress);
-								}
-								else
-								{
+                            if (source == NULL)
+                            {
+                                LogError("Failed creating source for link.\r\n");
+                                result = IOTHUB_TEST_CLIENT_ERROR;
+                            }
+                            else
+                            {
+                                target = messaging_create_target(receive_address);
+                                if (target == NULL)
+                                {
+                                    LogError("Failed creating target for link.\r\n");
+                                    result = IOTHUB_TEST_CLIENT_ERROR;
+                                }
+                                else if ((link = link_create(session, "receiver-link", role_receiver, source, target)) == NULL)
+                                {
+                                    LogError("Failed creating link.\r\n");
+                                    result = IOTHUB_TEST_CLIENT_ERROR;
+                                }
+                                else if (link_set_rcv_settle_mode(link, receiver_settle_mode_first) != 0)
+                                {
+                                    LogError("Failed setting link receive settle mode.\r\n");
+                                    result = IOTHUB_TEST_CLIENT_ERROR;
+                                }
+                                else
+                                {
+                                    MESSAGE_RECEIVER_CONTEXT message_receiver_context = { msgCallback , context, false };
 
-									while (
-										(atLeastOneMessageReceived) &&
-										(devhubValInfo->messageThreadExit == THREAD_CONTINUE) &&
-										((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
-										)
-									{
-										atLeastOneMessageReceived = false;
-										// Wait for the message to be recieved
-										pn_messenger_recv(messenger, -1);
-										if (pn_messenger_errno(messenger) == 0)
-										{
-											while ((devhubValInfo->messageThreadExit == THREAD_CONTINUE) && pn_messenger_incoming(messenger))
-											{
-												pn_message_t* pnMessage = pn_message();
-												if (pnMessage == NULL)
-												{
-													devhubValInfo->messageThreadExit = THREAD_END;
-												}
-												else
-												{
-													pn_messenger_get(messenger, pnMessage);
-													if (pn_messenger_errno(messenger) == 0)
-													{
-														pn_tracker_t tracker = pn_messenger_incoming_tracker(messenger);
+                                    /* create a message receiver */
+                                    message_receiver = messagereceiver_create(link, NULL, NULL);
+                                    if (message_receiver == NULL)
+                                    {
+                                        LogError("Failed creating message receiver.\r\n");
+                                        result = IOTHUB_TEST_CLIENT_ERROR;
+                                    }
+                                    else if (messagereceiver_open(message_receiver, on_message_received, &message_receiver_context) != 0)
+                                    {
+                                        LogError("Failed opening message receiver.\r\n");
+                                        result = IOTHUB_TEST_CLIENT_ERROR;
+                                    }
+                                    else
+                                    {
+                                        time_t nowExecutionTime;
+                                        time_t beginExecutionTime = time(NULL);
+                                        double timespan;
 
-														pn_data_t* pBody = pn_message_body(pnMessage);
-														if (pBody != NULL)
-														{
-															if (!pn_data_next(pBody))
-															{
-																devhubValInfo->messageThreadExit = THREAD_END;
-															}
-															else
-															{
-																pn_type_t typeOfBody = pn_data_type(pBody);
-																atLeastOneMessageReceived = true;
-																if (PN_STRING == typeOfBody)
-																{
-																	pn_bytes_t descriptor = pn_data_get_string(pBody);
-																	if (msgCallback != NULL)
-																	{
-																		if (msgCallback(context, descriptor.start, descriptor.size) != 0)
-																		{
-																			devhubValInfo->messageThreadExit = THREAD_END;
-																		}
-																	}
-																}
-																else if (PN_BINARY == typeOfBody)
-																{
-																	pn_bytes_t descriptor = pn_data_get_binary(pBody);
-																	if (msgCallback != NULL)
-																	{
-																		if (msgCallback(context, descriptor.start, descriptor.size) != 0)
-																		{
-																			devhubValInfo->messageThreadExit = THREAD_END;
-																		}
-																	}
-																}
-																else
-																{
-																	//Unknown Data Item
-																}
-															}
-														}
-														pn_messenger_accept(messenger, tracker, 0);
-														pn_message_clear(pnMessage);
-														pn_messenger_settle(messenger, tracker, 0);
-													}
-													else
-													{
-														devhubValInfo->messageThreadExit = THREAD_END;
-													}
-													pn_message_free(pnMessage);
-												}
-											}
-										}
-										else
-										{
-											devhubValInfo->messageThreadExit = THREAD_END;
-											break;
-										}
-									}
-								}
-							}
+                                        while ((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
+                                        {
+                                            connection_dowork(connection);
+                                            ThreadAPI_Sleep(10);
 
-							pn_data_free(filter);
-						}
+                                            if (message_receiver_context.message_received)
+                                            {
+                                                break;
+                                            }
+                                        }
 
-                        free(szAddress);
+                                        if (!message_receiver_context.message_received)
+                                        {
+                                            LogError("No message was received, timed out.\r\n");
+                                            result = IOTHUB_TEST_CLIENT_ERROR;
+                                        }
+                                        else
+                                        {
+                                            result = IOTHUB_TEST_CLIENT_OK;
+                                        }
+                                    }
+                                }
+                            }
+
+                            amqpvalue_destroy(filter_set);
+                            amqpvalue_destroy(source);
+                            amqpvalue_destroy(target);
+                        }
                     }
+
+                    messagereceiver_destroy(message_receiver);
+                    link_destroy(link);
+                    session_destroy(session);
+                    connection_destroy(connection);
                 }
+
+                free(receive_address);
             }
 
-            // bring down the messenger
-            do
-            {
-                pn_messenger_stop(messenger);
-            } while (!pn_messenger_stopped(messenger) );
-            pn_messenger_free(messenger);
+            free(eh_hostname);
         }
     }
+
     return result;
 }
 
@@ -680,7 +736,20 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventForMaxDrainTime(IOTHUB_TEST_H
     return IoTHubTest_ListenForRecentEvent(devhubHandle, msgCallback, partitionCount, context, MAX_DRAIN_TIME);
 }
 
-IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle, const char* data, size_t len)
+static void on_message_send_complete(const void* context, MESSAGE_SEND_RESULT send_result)
+{
+    MESSAGE_SEND_STATE* message_send_state = (MESSAGE_SEND_STATE*)context;
+    if (send_result == MESSAGE_SEND_OK)
+    {
+        *message_send_state = MESSAGE_SEND_STATE_SENT_OK;
+    }
+    else
+    {
+        *message_send_state = MESSAGE_SEND_STATE_SEND_FAILED;
+    }
+}
+
+IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle, const unsigned char* data, size_t len)
 {
     IOTHUB_TEST_CLIENT_RESULT result;
 
@@ -688,85 +757,253 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
         ((len == 0) && (data != NULL)) ||
         ((data != NULL) && (len == 0)))
     {
+        LogError("Invalid arguments for IoTHubTest_SendMessage, devhubHandle = %p, len = %lu, data = %p.\r\n", devhubHandle, (unsigned long)len, data);
         result = IOTHUB_TEST_CLIENT_ERROR;
     }
     else
     {
         IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)devhubHandle;
-        pn_messenger_t* messenger = pn_messenger(NULL);
-        if (messenger == NULL)
+        char* authcid = CreateSendAuthCid(devhubValInfo);
+        if (authcid == NULL)
         {
+            LogError("Could not create authcid for SASL plain.\r\n");
             result = IOTHUB_TEST_CLIENT_ERROR;
         }
         else
         {
-            // Sets the Messenger Windows
-            if ( (pn_messenger_start(messenger) != 0) ||
-                 (pn_messenger_set_outgoing_window(messenger, 10) != 0) ||
-                 (pn_messenger_set_blocking(messenger, true) ) ||
-                 (pn_messenger_set_timeout(messenger, PROTON_DEFAULT_TIMEOUT) != 0)
-               )
+            XIO_HANDLE sasl_io = NULL;
+            CONNECTION_HANDLE connection = NULL;
+            SESSION_HANDLE session = NULL;
+            LINK_HANDLE link = NULL;
+            MESSAGE_SENDER_HANDLE message_sender = NULL;
+            SASL_MECHANISM_HANDLE sasl_mechanism_handle = NULL;
+            XIO_HANDLE tls_io = NULL;
+
+            char* target_address = CreateSendTargetAddress(devhubValInfo);
+            if (target_address == NULL)
             {
+                LogError("Could not create target_address string.\r\n");
                 result = IOTHUB_TEST_CLIENT_ERROR;
             }
             else
             {
-                pn_message_t* message = pn_message();
-                char* szAddress = CreateSendAddress(devhubValInfo);
-                if (szAddress == NULL || !AddPropertyToMessage(messenger, message, STRING_c_str(devhubValInfo->deviceId), szAddress) )
+                size_t deviceDestLen = strlen(AMQP_ADDRESS_PATH_FMT) + STRING_length(devhubValInfo->deviceId) + 1;
+                char* deviceDest = (char*)malloc(deviceDestLen + 1);
+                if (deviceDest == NULL)
                 {
+                    LogError("Could not create device destination string.\r\n");
                     result = IOTHUB_TEST_CLIENT_ERROR;
                 }
                 else
                 {
-                    pn_data_t * body;
-                    pn_timestamp_t expireTime = LLONG_MAX/2; // Needs to be a sufficiently long time
-                    if ( (pn_message_set_inferred(message, true) != 0) ||
-                         (pn_message_set_expiry_time(message, expireTime) != 0) ||
-                         ( (body = pn_message_body(message) ) == NULL) ||
-                         (pn_data_put_binary(body, pn_bytes(len, data) ) != 0) ||
-                         (pn_messenger_put(messenger, message) != 0)
-                       )
+                    SASL_PLAIN_CONFIG sasl_plain_config = { authcid, STRING_c_str(devhubValInfo->iotSharedSig), NULL };
+                    const SASL_MECHANISM_INTERFACE_DESCRIPTION* sasl_mechanism_interface_description;
+
+                    (void)sprintf_s(deviceDest, deviceDestLen + 1, AMQP_ADDRESS_PATH_FMT, STRING_c_str(devhubValInfo->deviceId));
+
+                    if ((sasl_mechanism_interface_description = saslplain_get_interface()) == NULL)
                     {
+                        LogError("Could not get SASL plain mechanism interface.\r\n");
+                        result = IOTHUB_TEST_CLIENT_ERROR;
+                    }
+                    else if ((sasl_mechanism_handle = saslmechanism_create(sasl_mechanism_interface_description, &sasl_plain_config)) == NULL)
+                    {
+                        LogError("Could not create SASL plain mechanism.\r\n");
                         result = IOTHUB_TEST_CLIENT_ERROR;
                     }
                     else
                     {
-                        pn_status_t messengerStatus;
-                        size_t numberOfAttempts;
-                        pn_tracker_t tracker = pn_messenger_outgoing_tracker(messenger);
-                        pn_messenger_send(messenger, -1);
-                        for (numberOfAttempts = 0; numberOfAttempts < 10; numberOfAttempts++)
+                        /* create the TLS IO */
+                        TLSIO_CONFIG tls_io_config = { devhubValInfo->hostName, 5671 };
+                        const IO_INTERFACE_DESCRIPTION* tlsio_interface;
+
+                        if ((tlsio_interface = platform_get_default_tlsio()) == NULL)
                         {
-                            messengerStatus = pn_messenger_status(messenger, tracker);
-                            if (messengerStatus != PN_STATUS_PENDING)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                ThreadAPI_Sleep(500);
-                            }
+                            LogError("Could not get default TLS IO interface.\r\n");
+                            result = IOTHUB_TEST_CLIENT_ERROR;
                         }
-                        if (messengerStatus != PN_STATUS_ACCEPTED)
+                        else if ((tls_io = xio_create(tlsio_interface, &tls_io_config, NULL)) == NULL)
                         {
+                            LogError("Could not create TLS IO.\r\n");
                             result = IOTHUB_TEST_CLIENT_ERROR;
                         }
                         else
                         {
-                            result = IOTHUB_TEST_CLIENT_OK;
-                        }
+                            /* create the SASL client IO using the TLS IO */
+                            SASLCLIENTIO_CONFIG sasl_io_config = { tls_io, sasl_mechanism_handle };
+                            const IO_INTERFACE_DESCRIPTION* saslclientio_interface;
+                            
+                            if ((saslclientio_interface = saslclientio_get_interface_description()) == NULL)
+                            {
+                                LogError("Could not create get SASL IO interface description.\r\n");
+                                result = IOTHUB_TEST_CLIENT_ERROR;
+                            }
+                            else if ((sasl_io = xio_create(saslclientio_interface, &sasl_io_config, consolelogger_log)) == NULL)
+                            {
+                                LogError("Could not create SASL IO.\r\n");
+                                result = IOTHUB_TEST_CLIENT_ERROR;
+                            }
+                            /* create the connection, session and link */
+                            else if ((connection = connection_create(sasl_io, devhubValInfo->hostName, "some", NULL, NULL)) == NULL)
+                            {
+                                LogError("Could not create connection.\r\n");
+                                result = IOTHUB_TEST_CLIENT_ERROR;
+                            }
+                            else if ((session = session_create(connection, NULL, NULL)) == NULL)
+                            {
+                                LogError("Could not create session.\r\n");
+                                result = IOTHUB_TEST_CLIENT_ERROR;
+                            }
+                            else if (session_set_incoming_window(session, 2147483647) != 0)
+                            {
+                                LogError("Could not set incoming window.\r\n");
+                                result = IOTHUB_TEST_CLIENT_ERROR;
+                            }
+                            else if (session_set_outgoing_window(session, 65536) != 0)
+                            {
+                                LogError("Could not set outgoing window.\r\n");
+                                result = IOTHUB_TEST_CLIENT_ERROR;
+                            }
+                            else
+                            {
+                                AMQP_VALUE source = NULL;
+                                AMQP_VALUE target = NULL;
+                                MESSAGE_HANDLE message = NULL;
 
-                        // settle the tracker
-                        pn_messenger_settle(messenger, tracker, 0);
-                        pn_messenger_stop(messenger);
+                                if ((source = messaging_create_source("ingress")) == NULL)
+                                {
+                                    LogError("Could not create source for link.\r\n");
+                                    result = IOTHUB_TEST_CLIENT_ERROR;
+                                }
+                                else if ((target = messaging_create_target(target_address)) == NULL)
+                                {
+                                    LogError("Could not create target for link.\r\n");
+                                    result = IOTHUB_TEST_CLIENT_ERROR;
+                                }
+                                else if ((link = link_create(session, "sender-link", role_sender, source, target)) == NULL)
+                                {
+                                    LogError("Could not create link.\r\n");
+                                    result = IOTHUB_TEST_CLIENT_ERROR;
+                                }
+                                else if (link_set_snd_settle_mode(link, sender_settle_mode_unsettled) != 0)
+                                {
+                                    LogError("Could not set the sender settle mode.\r\n");
+                                    result = IOTHUB_TEST_CLIENT_ERROR;
+                                }
+                                else if (link_set_max_message_size(link, 65536) != 0)
+                                {
+                                    LogError("Could not set the message size.\r\n");
+                                    result = IOTHUB_TEST_CLIENT_ERROR;
+                                }
+                                else if ((message = message_create()) == NULL)
+                                {
+                                    LogError("Could not create a message.\r\n");
+                                    result = IOTHUB_TEST_CLIENT_ERROR;
+                                }
+                                else
+                                {
+                                    BINARY_DATA binary_data = { data, len };
+                                    if (message_add_body_amqp_data(message, binary_data) != 0)
+                                    {
+                                        LogError("Could not add the binary data to the message.\r\n");
+                                        result = IOTHUB_TEST_CLIENT_ERROR;
+                                    }
+                                    else
+                                    {
+                                        PROPERTIES_HANDLE properties = properties_create();
+                                        AMQP_VALUE to_amqp_value = amqpvalue_create_string(deviceDest);
+                                        (void)properties_set_to(properties, to_amqp_value);
+                                        amqpvalue_destroy(to_amqp_value);
+
+                                        if (properties == NULL)
+                                        {
+                                            LogError("Could not create properties for message.\r\n");
+                                            result = IOTHUB_TEST_CLIENT_ERROR;
+                                        }
+                                        else
+                                        {
+                                            if (message_set_properties(message, properties) != 0)
+                                            {
+                                                LogError("Could not set the properties on the message.\r\n");
+                                                result = IOTHUB_TEST_CLIENT_ERROR;
+                                            }
+                                            else if ((message_sender = messagesender_create(link, NULL, NULL, consolelogger_log)) == NULL)
+                                            {
+                                                LogError("Could not create message sender.\r\n");
+                                                result = IOTHUB_TEST_CLIENT_ERROR;
+                                            }
+                                            else if (messagesender_open(message_sender) != 0)
+                                            {
+                                                LogError("Could not open the message sender.\r\n");
+                                                result = IOTHUB_TEST_CLIENT_ERROR;
+                                            }
+                                            else
+                                            {
+                                                MESSAGE_SEND_STATE message_send_state = MESSAGE_SEND_STATE_NOT_SENT;
+
+                                                if (messagesender_send(message_sender, message, on_message_send_complete, &message_send_state) != 0)
+                                                {
+                                                    LogError("Could not set outgoing window.\r\n");
+                                                    result = IOTHUB_TEST_CLIENT_ERROR;
+                                                }
+                                                else
+                                                {
+                                                    size_t numberOfAttempts;
+                                                    message_send_state = MESSAGE_SEND_STATE_SEND_IN_PROGRESS;
+
+                                                    for (numberOfAttempts = 0; numberOfAttempts < 100; numberOfAttempts++)
+                                                    {
+                                                        connection_dowork(connection);
+
+                                                        if (message_send_state != MESSAGE_SEND_STATE_SEND_IN_PROGRESS)
+                                                        {
+                                                            break;
+                                                        }
+
+                                                        ThreadAPI_Sleep(50);
+                                                    }
+
+                                                    if (message_send_state != MESSAGE_SEND_STATE_SENT_OK)
+                                                    {
+                                                        LogError("Failed sending (timed out).\r\n");
+                                                        result = IOTHUB_TEST_CLIENT_ERROR;
+                                                    }
+                                                    else
+                                                    {
+                                                        result = IOTHUB_TEST_CLIENT_OK;
+                                                    }
+                                                }
+                                            }
+
+                                            properties_destroy(properties);
+                                        }
+                                    }
+                                }
+
+                                message_destroy(message);
+                                amqpvalue_destroy(source);
+                                amqpvalue_destroy(target);
+                            }
+                        }
                     }
-                    free(szAddress);
+
+                    free(deviceDest);
                 }
-                pn_message_free(message);
+
+                free(target_address);
             }
-            pn_messenger_free(messenger);
+
+            free(authcid);
+
+            messagesender_destroy(message_sender);
+            link_destroy(link);
+            session_destroy(session);
+            connection_destroy(connection);
+            xio_destroy(sasl_io);
+            xio_destroy(tls_io);
+            saslmechanism_destroy(sasl_mechanism_handle);
         }
     }
+
     return result;
 }

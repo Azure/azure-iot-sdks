@@ -5,6 +5,9 @@ namespace Microsoft.Azure.Devices
 {
     using Newtonsoft.Json;
 
+    /// <summary>
+    /// Contains service statistics that can be retrieved from IotHub.
+    /// </summary>
     public class ServiceStatistics
     {
         [JsonProperty(PropertyName = "connectedDeviceCount")]

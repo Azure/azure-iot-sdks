@@ -42,6 +42,9 @@ Http.prototype.buildRequest = function (method, path, httpHeaders, host, done) {
 
   var request = this._https.request(options, function onResponse(response) {
     var responseBody = '';
+    response.on('error', function (err) {
+        done(err);
+    });
     response.on('data', function onResponseData(chunk) {
       responseBody += chunk;
     });

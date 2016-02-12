@@ -25,7 +25,7 @@ public class IotHubRejectUriTest
 
     @Mocked IotHubUri mockIotHubUri;
 
-    // Tests_SRS_IOTHUBREJECTURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2015-08-15-preview" (the query parameters can be in any order).]
+    // Tests_SRS_IOTHUBREJECTURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2016-02-03" (the query parameters can be in any order).]
     @Test
     public void constructorConstructsIotHubUriCorrectly()
             throws URISyntaxException
@@ -46,7 +46,7 @@ public class IotHubRejectUriTest
         };
     }
 
-    // Tests_SRS_IOTHUBREJECTURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2015-08-15-preview" (the query parameters can be in any order).]
+    // Tests_SRS_IOTHUBREJECTURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2016-02-03" (the query parameters can be in any order).]
     @Test
     public void toStringIsCorrect() throws URISyntaxException
     {

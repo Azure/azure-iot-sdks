@@ -22,16 +22,15 @@ Each language SDK includes sample code and documentation in addition to the libr
 
 ### OS platforms and hardware compatibility
 
-Azure IoT device SDKs can be used with a broad range of OS platforms and devices. See [OS Platforms and hardware compatibility](doc/tested_configurations.md).
+Azure IoT device SDKs can be used with a broad range of OS platforms and devices. See [OS Platforms and hardware compatibility](https://acom-sandbox.azurewebsites.net/en-us/documentation/articles/iot-hub-tested-configurations/?rnd=1).
 
 ## Microsoft Azure IoT service SDKs
 
 The Azure IoT Service SDKs help you to build applications that interact with your devices and manage device identities in your IoT hub.
 
+- [Azure IoT service SDK for .Net](csharp/service/README.md)
 - [Azure IoT service SDK for Node.js](node/service/README.md)
 - [Azure IoT service SDK for Java](java/service/readme.md)
-
-**Note:** To manage an IoT hub using a .NET application, use the **Microsoft.Azure.Devices** NuGet package.
 
 ## Additional resources
 

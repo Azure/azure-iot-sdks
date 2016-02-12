@@ -23,7 +23,7 @@ public class IotHubEventUriIT
 
         String testUriStr = uri.toString();
 
-        String expectedUriStr = "test.iothub/devices/test-deviceid/messages/events?api-version=2015-08-15-preview";
+        String expectedUriStr = "test.iothub/devices/test-deviceid/messages/events?api-version=2016-02-03";
         assertThat(testUriStr, is(expectedUriStr));
     }
 }

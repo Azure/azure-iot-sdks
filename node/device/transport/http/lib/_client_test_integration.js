@@ -4,7 +4,7 @@
 'use strict';
 
 var ConnectionString = require('azure-iot-common').ConnectionString;
-var runTests = require('azure-iot-device/lib/_client_test.js');
+var runTests = require('azure-iot-device/lib/_client_common_testrun.js');
 var Http = require('./http.js');
 
 var host = ConnectionString.parse(process.env.IOTHUB_CONNECTION_STRING).HostName;
@@ -19,6 +19,6 @@ var badConnStrings = [
 ];
 
 describe('Over real HTTPS', function () {
-  this.timeout(30000);
+  this.timeout(60000);
   runTests(Http, connectionString, badConnStrings);
 });

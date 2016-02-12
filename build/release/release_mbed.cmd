@@ -6,6 +6,7 @@ echo Releasing mbed bits ...
 call release_mbed_project.cmd iothub_amqp_transport ..\..\c\iothub_client\build iothub_amqp_transport_filelist.txt
 call release_mbed_project.cmd iothub_http_transport ..\..\c\iothub_client\build iothub_http_transport_filelist.txt
 call release_mbed_project.cmd iothub_client ..\..\c\iothub_client\build iothub_client_filelist.txt
+call release_mbed_project.cmd azure_uamqp ..\..\c\azure-uamqp-c\build azure_uamqp_filelist.txt
 call release_mbed_project.cmd serializer ..\..\c\serializer\build serializer_filelist.txt
 call release_mbed_project.cmd azureiot_common ..\..\c\azure-c-shared-utility\c build\mbed\shared-util_filelist.txt
 call release_mbed_project.cmd iothub_client_sample_amqp ..\..\c\iothub_client\samples\iothub_client_sample_amqp mbed\filelist.txt FRDM-K64F

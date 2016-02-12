@@ -12,6 +12,7 @@
 #include "iothub_client.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_ll.h"
+#include "platform.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"

@@ -6,6 +6,9 @@ namespace Microsoft.Azure.Devices
     using System;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Contains methods that services can use to perform receive operations.
+    /// </summary>
     public abstract class Receiver<T>
     {
         /// <summary>

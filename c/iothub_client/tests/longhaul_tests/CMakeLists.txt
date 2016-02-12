@@ -34,7 +34,7 @@ if(WIN32)
 			iothub_client_amqp_transport
 			common
 		)
-		linkProton(${theseTestsName}_dll)
+		linkUAMQP(${theseTestsName}_dll)
 	endif()
 	
 	if(TARGET ${theseTestsName}_exe)
@@ -44,7 +44,7 @@ if(WIN32)
 			iothub_client_amqp_transport
 			common
 		)
-		linkProton(${theseTestsName}_exe)
+		linkUAMQP(${theseTestsName}_exe)
 	endif()
 else()
 	if(TARGET ${theseTestsName}_exe)
@@ -55,7 +55,7 @@ else()
 			common
 		)
 		target_link_libraries(${theseTestsName}_exe pthread)
-		linkProton(${theseTestsName}_exe)
+		linkUAMQP(${theseTestsName}_exe)
 	endif()
 endif()
 

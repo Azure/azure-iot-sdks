@@ -194,7 +194,7 @@ namespace Microsoft.Azure.Devices.Client
             switch (this.amqpTransportSettings.GetTransportType())
             {
                 case TransportType.Amqp_WebSocket_Only:
-                    transport = await this.CreateClientWebSocketTransport(timeoutHelper.RemainingTime());
+                transport = await this.CreateClientWebSocketTransport(timeoutHelper.RemainingTime());
                     break;
                 case TransportType.Amqp_Tcp_Only:
                     transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
@@ -285,15 +285,15 @@ namespace Microsoft.Azure.Devices.Client
             Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
             var websocket = await this.CreateClientWebSocket(websocketUri, timeoutHelper.RemainingTime());
             return new ClientWebSocketTransport(
-                websocket, 
-                this.connectionString.IotHubName, 
-                null, 
+                websocket,
+                this.connectionString.IotHubName,
+                null,
                 null);
         }
 
         AmqpSettings CreateAmqpSettings()
         {
-            var amqpSettings = new AmqpSettings();
+            var amqpSettings = new AmqpSettings();          
 
             var amqpTransportProvider = new AmqpTransportProvider();
             amqpTransportProvider.Versions.Add(AmqpVersion_1_0_0);
@@ -333,11 +333,11 @@ namespace Microsoft.Azure.Devices.Client
             string audience = this.ConnectionString.AmqpEndpoint.AbsoluteUri;
             string resource = this.ConnectionString.AmqpEndpoint.AbsoluteUri;
             var expiresAtUtc = await cbsLink.SendTokenAsync(
-                this.ConnectionString, 
-                this.ConnectionString.AmqpEndpoint, 
-                audience, 
-                resource, 
-                AccessRightsHelper.AccessRightsToStringArray(this.accessRights), 
+                this.ConnectionString,
+                this.ConnectionString.AmqpEndpoint,
+                audience,
+                resource,
+                AccessRightsHelper.AccessRightsToStringArray(this.accessRights),
                 timeout);
             this.ScheduleTokenRefresh(expiresAtUtc);
         }

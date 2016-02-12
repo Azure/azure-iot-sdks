@@ -42,4 +42,3 @@ This folder contains various Java samples that illustrate how to use the client 
 
 [devbox-setup]: doc/devbox_setup.md
 [run-java-sample]: doc/run_sample_on_java.md
-[how-to-build-a-java-app-from-scratch]: doc/how_to_build_a_java_app_from_scratch.md

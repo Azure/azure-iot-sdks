@@ -6,6 +6,9 @@ namespace Microsoft.Azure.Devices
     using System;
     using System.Collections.Generic;
 
+    /// <summary>
+    /// Contains a batch of feedback records.
+    /// </summary>
     public class FeedbackBatch
     {
         public DateTime EnqueuedTime { get; set; }

@@ -8,6 +8,9 @@ namespace Microsoft.Azure.Devices
     using Microsoft.Azure.Devices.Common.Security;
     using Newtonsoft.Json;
 
+    /// <summary>
+    /// primary and secondary symmetric keys of a device.
+    /// </summary>
     public sealed class SymmetricKey
     {
         string primaryKey;

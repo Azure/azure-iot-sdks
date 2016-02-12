@@ -93,62 +93,42 @@ We first need to update the credentials in the sample AMPQ app to match those of
   
   **Note**:--prefix=/usr will replace your current cmake with the latest one.
    
-- Use following steps to build proton libraries and Azure IoT SDK
+- Use following steps to build Azure IoT SDK
    
-1. Run following command to build proton libraries
-
-              cd azure-iot-sdks/c/build_all/linux   
-              ./build_proton.sh -i /usr
-2.  The above command will fail in some point but we need the part before  
-    failure.
-3.  Go to file: <Folder where qpid  proton is, usually your root home
-    folder>/qpid-proton/proton-c/bindings/CMakeLists.txt and edit this file
-    removing "python" from "BINDINGS".
-4. Edit the Build Proton script using following command:
-
-          vi ~/azure-iot-sdks/c/build_all/linux/build_proton.sh
-5.  Remove or comment "sync\_proton" line in build\_proton.sh, otherwise it
-    will sync again the overwrite your change.
-
-6.  In the terminal, enter /c/build\_all/linux and execute the following steps:
-    
-         $ opkg install util-linux-libuuid-dev $ 
-         ./build_proton.sh -i /usr
-       
-- Edit build.sh script to get rid of the command nproc
+    - Edit build.sh script to get rid of the command nproc
    
+          cd azure-iot-sdks/c/build_all/linux
           vi ./build.sh
     
-- Change line "make --jobs=nproc" to "make --jobs=2"
+    - Change line "make --jobs=nproc" to "make --jobs=2"
 
-- Build the Azure IoT sdk
+    - Build the Azure IoT sdk
    
-        cd ~/azure-iot-sdks/c/build_all/linux
-        ./build.sh --no-mqtt 
+            cd ~/azure-iot-sdks/c/build_all/linux
+            ./build.sh --no-mqtt 
     
 - Navigate to: ~/cmake/iothub_client/samples/iothub_client_sample_amqp/ and run the following commands
   
         ./iothub_client_sample_amqp
     
+    The result should be the following:
 
-The result should be the following:
-
-```
-Starting the IoTHub client sample AMQP...
-Info: IoT Hub SDK for C, version 1.0.0-preview.8
-IoTHubClient_SetMessageCallback...successful.
-IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
-IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
-Press any key to exit the application.
-Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT_CONFIRMATION_OK
-Confirmation[1] received for message tracking id = 1 with result = IOTHUB_CLIENT_CONFIRMATION_OK
-Confirmation[2] received for message tracking id = 2 with result = IOTHUB_CLIENT_CONFIRMATION_OK
-Confirmation[3] received for message tracking id = 3 with result = IOTHUB_CLIENT_CONFIRMATION_OK
-Confirmation[4] received for message tracking id = 4 with result = IOTHUB_CLIENT_CONFIRMATION_OK
-```
+    ```
+    Starting the IoTHub client sample AMQP...
+    Info: IoT Hub SDK for C, version 1.0.0
+    IoTHubClient_SetMessageCallback...successful.
+    IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+    IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+    IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+    IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+    IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.
+    Press any key to exit the application.
+    Confirmation[0] received for message tracking id = 0 with result = IOTHUB_CLIENT_CONFIRMATION_OK
+    Confirmation[1] received for message tracking id = 1 with result = IOTHUB_CLIENT_CONFIRMATION_OK
+    Confirmation[2] received for message tracking id = 2 with result = IOTHUB_CLIENT_CONFIRMATION_OK
+    Confirmation[3] received for message tracking id = 3 with result = IOTHUB_CLIENT_CONFIRMATION_OK
+    Confirmation[4] received for message tracking id = 4 with result = IOTHUB_CLIENT_CONFIRMATION_OK
+    ```
 
 
 [IntelEdisonGettingStarted]: https://software.intel.com/en-us/iot/library/edison-getting-started

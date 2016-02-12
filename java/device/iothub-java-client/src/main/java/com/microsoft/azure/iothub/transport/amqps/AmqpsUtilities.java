@@ -70,13 +70,16 @@ public class AmqpsUtilities {
             }
 
             // Setting the user properties
-            Map<String, String> applicationProperties = protonMsg.getApplicationProperties().getValue();
-            for(Map.Entry<String, String> entry : applicationProperties.entrySet())
+            if (protonMsg.getApplicationProperties() != null)
             {
-                String propertyKey = entry.getKey();
-                if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
+                Map<String, String> applicationProperties = protonMsg.getApplicationProperties().getValue();
+                for (Map.Entry<String, String> entry : applicationProperties.entrySet())
                 {
-                    msg.setProperty(entry.getKey(), entry.getValue());
+                    String propertyKey = entry.getKey();
+                    if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
+                    {
+                        msg.setProperty(entry.getKey(), entry.getValue());
+                    }
                 }
             }
         }

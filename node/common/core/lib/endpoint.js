@@ -20,7 +20,7 @@ function feedbackPath(id, lockToken) {
 }
 
 function versionQueryString() {
-  return '?api-version=2015-08-15-preview';
+  return '?api-version=2016-02-03';
 }
 
 var endpoint = {
