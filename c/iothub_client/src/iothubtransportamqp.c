@@ -22,9 +22,6 @@
 #include "platform.h"
 #include "sastoken.h"
 #include "strings.h"
-#include "tlsio_openssl.h"
-#include "tlsio_schannel.h"
-#include "tlsio_wolfssl.h"
 #include "urlencode.h"
 
 #include "tlsio.h"

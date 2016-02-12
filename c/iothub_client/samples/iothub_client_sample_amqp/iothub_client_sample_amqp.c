@@ -116,11 +116,7 @@ void iothub_client_sample_amqp_run(void)
 
     (void)printf("Starting the IoTHub client sample AMQP...\r\n");
     
-    if (platform_init() != 0)
-    {
-        (void)printf("ERROR: failed initializing the platform.\r\n");
-    }
-    else if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol)) == NULL)
+    if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol)) == NULL)
     {
         (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
     }
