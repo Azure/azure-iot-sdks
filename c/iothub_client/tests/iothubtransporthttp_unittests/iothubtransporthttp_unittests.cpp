@@ -1080,12 +1080,12 @@ public:
         free(handle);
     MOCK_VOID_METHOD_END()
 
-    MOCK_STATIC_METHOD_9(, HTTPAPIEX_RESULT, HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_SAS_HANDLE, sasHandle, HTTPAPIEX_HANDLE, handle, HTTPAPI_REQUEST_TYPE, requestType, const char*, relativePath, HTTP_HEADERS_HANDLE, requestHttpHeadersHandle, BUFFER_HANDLE, requestContent, unsigned int*, statusCode, HTTP_HEADERS_HANDLE, responseHttpHeadersHandle, BUFFER_HANDLE, responseContent)
-    if (last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest != NULL)
-    {
-        BASEIMPLEMENTATION::BUFFER_delete(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest);
-    }
-    last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest = BASEIMPLEMENTATION::BUFFER_clone(requestContent);
+    MOCK_STATIC_METHOD_9(, HTTPAPIEX_RESULT, HTTPAPIEX_SAS_ExecuteRequest2, HTTPAPIEX_SAS_HANDLE, sasHandle, HTTPAPIEX_HANDLE, handle, HTTPAPI_REQUEST_TYPE, requestType, const char*, relativePath, HTTP_HEADERS_HANDLE, requestHttpHeadersHandle, BUFFER_HANDLE, requestContent, unsigned int*, statusCode, HTTP_HEADERS_HANDLE, responseHttpHeadersHandle, BUFFER_HANDLE, responseContent)
+        if (last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest != NULL)
+        {
+            BASEIMPLEMENTATION::BUFFER_delete(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest);
+        }
+        last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest = BASEIMPLEMENTATION::BUFFER_clone(requestContent);
     MOCK_METHOD_END(HTTPAPIEX_RESULT, HTTPAPIEX_OK)
 
     MOCK_STATIC_METHOD_1(, time_t, get_time, time_t*, currentTime)
@@ -1173,10 +1173,16 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , STRING_HANDLE, URL_Enc
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , HTTPAPIEX_SAS_HANDLE, HTTPAPIEX_SAS_Create, STRING_HANDLE, key, STRING_HANDLE, uriResource, STRING_HANDLE, keyName);
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, HTTPAPIEX_SAS_Destroy, HTTPAPIEX_SAS_HANDLE, handle);
-DECLARE_GLOBAL_MOCK_METHOD_9(CIoTHubTransportHttpMocks, , HTTPAPIEX_RESULT, HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_SAS_HANDLE, sasHandle, HTTPAPIEX_HANDLE, handle, HTTPAPI_REQUEST_TYPE, requestType, const char*, relativePath, HTTP_HEADERS_HANDLE, requestHttpHeadersHandle, BUFFER_HANDLE, requestContent, unsigned int*, statusCode, HTTP_HEADERS_HANDLE, responseHttpHeadersHandle, BUFFER_HANDLE, responseContent);
+DECLARE_GLOBAL_MOCK_METHOD_9(CIoTHubTransportHttpMocks, , HTTPAPIEX_RESULT, HTTPAPIEX_SAS_ExecuteRequest2, HTTPAPIEX_SAS_HANDLE, sasHandle, HTTPAPIEX_HANDLE, handle, HTTPAPI_REQUEST_TYPE, requestType, const char*, relativePath, HTTP_HEADERS_HANDLE, requestHttpHeadersHandle, BUFFER_HANDLE, requestContent, unsigned int*, statusCode, HTTP_HEADERS_HANDLE, responseHttpHeadersHandle, BUFFER_HANDLE, responseContent);
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , time_t, get_time, time_t*, currentTime);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , double, get_difftime, time_t, stopTime, time_t, startTime);
+
+extern "C" HTTPAPIEX_RESULT HTTPAPIEX_SAS_ExecuteRequest(HTTPAPIEX_SAS_HANDLE sasHandle, HTTPAPIEX_HANDLE handle, HTTPAPI_REQUEST_TYPE requestType, const char* relativePath, HTTP_HEADERS_HANDLE requestHttpHeadersHandle, BUFFER_HANDLE requestContent, unsigned int* statusCode, HTTP_HEADERS_HANDLE responseHttpHeadersHandle, BUFFER_HANDLE responseContent)
+{
+    *statusCode = 204;
+    return HTTPAPIEX_SAS_ExecuteRequest2(sasHandle, handle, requestType, relativePath, requestHttpHeadersHandle, requestContent, statusCode, responseHttpHeadersHandle, responseContent);
+}
 
 static void setupInitHappyPathUpThroughEventHTTPRelativePath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
@@ -2755,7 +2761,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_036: [Otherwise, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_036: [Otherwise, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 passing the following parameters
 requestType: GET
 relativePath: the message HTTP relative path
 requestHttpHeadersHandle: message HTTP request headers created by _Create
@@ -2768,7 +2774,7 @@ responseContent: a new instance of buffer]
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_041: [_DoWork shall assemble an IOTHUBMESSAGE_HANDLE from the received HTTP content (using the responseContent buffer).]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_043: [Otherwise, _DoWork shall call IoTHubClient_LL_MessageCallback with parameters handle = iotHubClientHandle and message = newly created message.]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_044: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ACCEPTED then _DoWork shall "accept" the message.]*/
-    /*Tests_[_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+    /*Tests_[_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
 -requestType: DELETE
 -relativePath: abandon relative path begin + value of ETag + "?api-version=2015-08-15-preview" 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
@@ -2779,7 +2785,7 @@ responseContent: a new instance of buffer]
 - responseHeadearsHandle: NULL
 - responseContent: NULL]
 */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_051: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_051: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
 -requestType: DELETE
 -relativePath: abandon relative path begin + value of ETag + "?api-version=2015-08-15-preview" 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
@@ -2790,7 +2796,7 @@ responseContent: a new instance of buffer]
 - responseHeadearsHandle: NULL
 - responseContent: NULL]
 */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest2 completes successfully and the status code is 204.] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.] */ /*in this case there are 0 such properties*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_116: [After client creation, the first GET shall be allowed no matter what the value of GetMinimumPollingTime.] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_succeeds)
@@ -2815,7 +2821,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -2883,7 +2889,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -2934,7 +2940,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3002,7 +3008,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3056,7 +3062,7 @@ responseContent: a new instance of buffer]
 
             STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
                 .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-            STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+            STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
                 IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
                 IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
                 HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3124,7 +3130,7 @@ responseContent: a new instance of buffer]
 
             STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
                 .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-            STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+            STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
                 IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
                 IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
                 HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3185,7 +3191,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3253,7 +3259,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3297,6 +3303,7 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, get_time(NULL))
             .SetReturn(TEST_GET_TIME_VALUE + TEST_DEFAULT_GETMINIMUMPOLLINGTIME); /*right on the verge of the time*/
         STRICT_EXPECTED_CALL(mocks, get_difftime(TEST_GET_TIME_VALUE + TEST_DEFAULT_GETMINIMUMPOLLINGTIME, TEST_GET_TIME_VALUE));
+
         ///act
         IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
 
@@ -3337,7 +3344,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3405,7 +3412,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3455,7 +3462,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3522,7 +3529,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3571,7 +3578,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3639,7 +3646,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3688,7 +3695,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3786,7 +3793,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3881,7 +3888,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3973,7 +3980,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4062,7 +4069,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4149,7 +4156,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4231,7 +4238,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4287,7 +4294,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_050: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_050: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
 -requestType: POST
 -relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2015-08-15-preview" 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
@@ -4297,9 +4304,9 @@ responseContent: a new instance of buffer]
 - statusCode: a pointer to unsigned int which might be examined for logging
 - responseHeadearsHandle: NULL
 - responseContent: NULL]*/
-/*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
+/*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest2 doesn't fail and the statusCode is 204.]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_077: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_077: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
 -requestType: DELETE
 -relativePath: abandon relative path begin + value of ETag +"?api-version=2015-08-15-preview" + "&reject"
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
@@ -4309,7 +4316,7 @@ responseContent: a new instance of buffer]
 - statusCode: a pointer to unsigned int which might be used by logging
 - responseHeadearsHandle: NULL
 - responseContent: NULL]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_077: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_077: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
 -requestType: DELETE
 -relativePath: abandon relative path begin + value of ETag +"?reject" + "?api-version=2015-08-15-preview" 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
@@ -4320,7 +4327,7 @@ responseContent: a new instance of buffer]
 - responseHeadearsHandle: NULL
 - responseContent: NULL]
 */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest2 completes successfully and the status code is 204.] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_reject_succeeds_1)
     {
         ///arrange
@@ -4343,7 +4350,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4410,7 +4417,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4460,7 +4467,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4527,7 +4534,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4555,7 +4562,7 @@ responseContent: a new instance of buffer]
     }
 
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
-    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPAPIEX_SAS_ExecuteRequest_fails_succeeds)
+    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPAPIEX_SAS_ExecuteRequest2_fails_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
@@ -4577,7 +4584,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4644,7 +4651,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4694,7 +4701,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4792,7 +4799,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4888,7 +4895,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4979,7 +4986,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5068,7 +5075,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5155,7 +5162,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5237,7 +5244,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5317,7 +5324,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5375,7 +5382,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5424,7 +5431,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5479,7 +5486,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5534,7 +5541,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5589,7 +5596,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5644,7 +5651,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5699,7 +5706,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5732,7 +5739,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_038: [If the HTTPAPIEX_SAS_ExecuteRequest executed successfully then status code shall be examined. Any status code different than 200 causes _DoWork to advance to the next action.] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_038: [If the HTTPAPIEX_SAS_ExecuteRequest2 executed successfully then status code shall be examined. Any status code different than 200 causes _DoWork to advance to the next action.] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_top_next_action_when_httpstatus_is_500_fails)
     {
         ///arrange
@@ -5754,7 +5761,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5783,8 +5790,8 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
-    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_HTTPAPIEX_SAS_ExecuteRequest_fails)
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest2 did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
+    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_HTTPAPIEX_SAS_ExecuteRequest2_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
@@ -5805,7 +5812,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5835,7 +5842,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest2 did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_BUFFER_new_fails)
     {
         ///arrange
@@ -5863,7 +5870,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest2 did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_HTTPHeaders_Alloc_fails)
     {
         ///arrange
@@ -5909,8 +5916,8 @@ responseContent: a new instance of buffer]
     }
 
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_070: [IoTHubTransportHttp_DoWork shall build the following string:[{"body":"base64 encoding of the message1 content"},{"body":"base64 encoding of the message2 content"}...]]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_031: [Once a final payload has been obtained, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters:]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_067: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list containing all the items batched, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The batched items shall be removed from waitingToSend.] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_031: [Once a final payload has been obtained, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 passing the following parameters:]*/
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_067: [If HTTPAPIEX_SAS_ExecuteRequest2 does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list containing all the items batched, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The batched items shall be removed from waitingToSend.] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_076: [If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload.] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_102: [Request HTTP headers shall have the value of "Content-Type" created or updated to "application/vnd.microsoft.iothub.json" by a call to HTTPHeaders_ReplaceHeaderNameValuePair.] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_101: [If option SetBatching is true then _Dowork shall send batched event message as specced below.] */
@@ -6004,7 +6011,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -6038,7 +6045,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_065: [if HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_065: [if HTTPAPIEX_SAS_ExecuteRequest2 fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_http_status_is_404)
     {
         ///arrange
@@ -6127,7 +6134,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -6160,8 +6167,8 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_065: [if HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
-    TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HTTPAPIEX_SAS_ExecuteRequest_fails)
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_065: [if HTTPAPIEX_SAS_ExecuteRequest2 fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
+    TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HTTPAPIEX_SAS_ExecuteRequest2_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
@@ -6249,7 +6256,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7082,7 +7089,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7250,7 +7257,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7407,7 +7414,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7571,7 +7578,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7731,7 +7738,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7974,7 +7981,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL((*mocks), HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -8268,7 +8275,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL((*mocks), HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -8684,7 +8691,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -8750,7 +8757,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -8802,7 +8809,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -8885,7 +8892,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -8937,7 +8944,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9033,7 +9040,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9086,7 +9093,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9177,7 +9184,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9231,7 +9238,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9319,7 +9326,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9372,7 +9379,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9454,7 +9461,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9507,7 +9514,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9585,7 +9592,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9638,7 +9645,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9707,7 +9714,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9738,8 +9745,8 @@ responseContent: a new instance of buffer]
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_105: [A clone of the event HTTP request headers shall be created.]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_106: [The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_107: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */ /*well - this tests that no "phantom" properties are added when there are no properties to add*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 passing the following parameters] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest2 does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_083: [If optionName is an option handled by IoTHubTransportHttp then it shall be set.] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_097: ["SetBatching"] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatched_happy_path_succeeds)
@@ -9783,7 +9790,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -9830,8 +9837,8 @@ responseContent: a new instance of buffer]
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_105: [A clone of the event HTTP request headers shall be created.]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_106: [The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_107: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */ /*well - this tests that no "phantom" properties are added when there are no properties to add*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 passing the following parameters] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest2 does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_083: [If optionName is an option handled by IoTHubTransportHttp then it shall be set.] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_097: ["SetBatching"] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_type_unbatched_happy_path_succeeds)
@@ -9873,7 +9880,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -9970,7 +9977,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -10043,8 +10050,8 @@ responseContent: a new instance of buffer]
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_105: [A clone of the event HTTP request headers shall be created.]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_106: [The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_107: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */ /*well - this tests that no "phantom" properties are added when there are no properties to add*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 passing the following parameters] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest2 does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_083: [If optionName is an option handled by IoTHubTransportHttp then it shall be set.] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_097: ["SetBatching"] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_type_unbatched_fails_when_getString_fails)
@@ -10077,8 +10084,8 @@ responseContent: a new instance of buffer]
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_105: [A clone of the event HTTP request headers shall be created.]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_106: [The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".] */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_107: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 passing the following parameters] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest2 does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_happy_path_succeeds)
     {
         ///arrange
@@ -10131,7 +10138,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -10174,7 +10181,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_111: [If HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_111: [If HTTPAPIEX_SAS_ExecuteRequest2 fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_httpStatusCode_is_not_succeess)
     {
         ///arrange
@@ -10227,7 +10234,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -10260,7 +10267,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_111: [If HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_111: [If HTTPAPIEX_SAS_ExecuteRequest2 fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_HTTPAPIEXSAS_fails)
     {
         ///arrange
@@ -10313,7 +10320,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -10901,7 +10908,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -11308,7 +11315,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -11410,7 +11417,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -11461,7 +11468,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -11559,7 +11566,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -11638,7 +11645,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -11736,7 +11743,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
