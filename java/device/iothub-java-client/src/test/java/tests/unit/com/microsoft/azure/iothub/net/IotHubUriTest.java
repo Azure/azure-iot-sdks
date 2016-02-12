@@ -18,8 +18,8 @@ import java.util.Map;
 /** Unit tests for IotHubUri. */
 public class IotHubUriTest
 {
-    // Tests_SRS_IOTHUBURI_11_007: [The constructor shall return a URI pointing to the address '[iotHubHostname] /devices/[deviceId]/[IoT Hub method path]?api-version=2015-08-15-preview'.]
-    // Tests_SRS_IOTHUBURI_11_001: [The string representation of the IoT Hub URI shall be constructed with the format '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2015-08-15-preview(&[queryFragment]) '.]
+    // Tests_SRS_IOTHUBURI_11_007: [The constructor shall return a URI pointing to the address '[iotHubHostname] /devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03'.]
+    // Tests_SRS_IOTHUBURI_11_001: [The string representation of the IoT Hub URI shall be constructed with the format '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03(&[queryFragment]) '.]
     @Test
     public void shortConstructorHasCorrectFormat()
     {
@@ -31,7 +31,7 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2015-08-15-preview";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2016-02-03";
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -47,7 +47,7 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/%3F%26sample-deviceid/sample-path?api-version=2015-08-15-preview";
+                "sample.iothubhostname/devices/%3F%26sample-deviceid/sample-path?api-version=2016-02-03";
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -63,11 +63,11 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path%3F?api-version=2015-08-15-preview";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path%3F?api-version=2016-02-03";
         assertThat(testUriStr, is(expectedUriStr));
     }
 
-    // Tests_SRS_IOTHUBURI_11_008: [If queryParams is not empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]? api-version=2015-08-15-preview &[queryFragment] '.]
+    // Tests_SRS_IOTHUBURI_11_008: [If queryParams is not empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]? api-version=2016-02-03 &[queryFragment] '.]
     @Test
     public void constructorWithQueryFragmentHasCorrectFormat()
     {
@@ -82,14 +82,14 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr0 =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?test=true&api-version=2015-08-15-preview";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?test=true&api-version=2016-02-03";
         final String expectedUriStr1 =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2015-08-15-preview&test=true";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2016-02-03&test=true";
         assertThat(testUriStr, is(
                 anyOf(equalTo(expectedUriStr0), equalTo(expectedUriStr1))));
     }
 
-    // Tests_SRS_IOTHUBURI_11_009: [If the queryParams is empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2015-08-15-preview'.]
+    // Tests_SRS_IOTHUBURI_11_009: [If the queryParams is empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03'.]
     @Test
     public void constructorWithoutQueryFragmentHasCorrectFormat()
     {
@@ -102,7 +102,7 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2015-08-15-preview";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2016-02-03";
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -119,7 +119,7 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/%3F%26sample-deviceid/sample-path?api-version=2015-08-15-preview";
+                "sample.iothubhostname/devices/%3F%26sample-deviceid/sample-path?api-version=2016-02-03";
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -136,7 +136,7 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path%3F?api-version=2015-08-15-preview";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path%3F?api-version=2016-02-03";
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -155,9 +155,9 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr0 =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?test%3F=true%3F&api-version=2015-08-15-preview";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?test%3F=true%3F&api-version=2016-02-03";
         final String expectedUriStr1 =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2015-08-15-preview&test%3F=true%3F";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2016-02-03&test%3F=true%3F";
         assertThat(testUriStr, is(
                 anyOf(equalTo(expectedUriStr0), equalTo(expectedUriStr1))));
     }

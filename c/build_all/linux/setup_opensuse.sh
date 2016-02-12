@@ -72,20 +72,6 @@ clone_source ()
     git -c credential.helper="store --file $cred" -c core.askpass=true clone $repo
 }
 
-install_proton_from_source ()
-{
-    #Skip if already installed
-    code_dir="$HOME/qpid-proton"
-    if [ -d $code_dir ] && [ -d "$code_dir/proton-c" ] && [ -f "$code_dir/build/install_manifest.txt" ]
-    then
-        echo "Proton already installed."
-        return 0
-    fi
-
-    sudo bash c/build_all/linux/build_proton.sh --install /usr
-}
-
-
 if ! repo_exists
 then
     creds_read #read Git credentials up front, so script can be unattended-ish
@@ -104,5 +90,4 @@ else
     creds_delete
 fi
 
-install_proton_from_source
 pop_dir

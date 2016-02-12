@@ -1492,31 +1492,31 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
     // Testing the values of constants allows me to use them throughout the unit tests (e.g., when setting expectations on mocks) without fear of missing a bug.
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_003: [Otherwise IoTHubTransportHttp_Create shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENDCODED(config->upperConfig->deviceId) + "/messages/events?api-version=2015-08-15-preview".]*/
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_003: [Otherwise IoTHubTransportHttp_Create shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENDCODED(config->upperConfig->deviceId) + "/messages/events?api-version=2016-02-03".]*/
     TEST_FUNCTION(IotHubTransportHttp_EVENT_ENDPOINT_constant_is_expected_value)
     {
         ASSERT_ARE_EQUAL(char_ptr, "/messages/events", EVENT_ENDPOINT);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2015-08-15-preview".]*/
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2016-02-03".]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_061: [Otherwise, IoTHubTransportHttp_Create shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin.] */
     TEST_FUNCTION(IotHubTransportHttp_MESSAGE_ENDPOINT_HTTP_constant_is_expected_value)
     {
         ASSERT_ARE_EQUAL(char_ptr, "/messages/devicebound", MESSAGE_ENDPOINT_HTTP);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2015-08-15-preview".]*/
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2016-02-03".]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_061: [Otherwise, IoTHubTransportHttp_Create shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin.] */
     TEST_FUNCTION(IotHubTransportHttp_MESSAGE_ENDPOINT_HTTP_ETAG_constant_is_expected_value)
     {
         ASSERT_ARE_EQUAL(char_ptr, "/messages/devicebound/", MESSAGE_ENDPOINT_HTTP_ETAG);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_003: [Otherwise IoTHubTransportHttp_Create shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/events?api-version=2015-08-15-preview".]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2015-08-15-preview".]*/
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_003: [Otherwise IoTHubTransportHttp_Create shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/events?api-version=2016-02-03".]*/
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2016-02-03".]*/
     TEST_FUNCTION(IotHubTransportHttp_API_VERSION_constant_is_expected_value)
     {
-        ASSERT_ARE_EQUAL(char_ptr, "?api-version=2015-08-15-preview", API_VERSION);
+        ASSERT_ARE_EQUAL(char_ptr, "?api-version=2016-02-03", API_VERSION);
     }
 
 
@@ -1618,8 +1618,8 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
     }
 
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_003: [Otherwise IoTHubTransportHttp_Create shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/events?api-version=2015-08-15-preview".]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2015-08-15-preview".]*/
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_003: [Otherwise IoTHubTransportHttp_Create shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/events?api-version=2016-02-03".]*/
+    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2016-02-03".]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_005: [Otherwise, IoTHubTransportHttp_Create shall create a set of HTTP headers (further on called "event HTTP request headers") consisting of the following fixed field names and values:
 "iothub-to":"/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/events";
 "Authorization":""
@@ -2776,7 +2776,7 @@ responseContent: a new instance of buffer]
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_044: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ACCEPTED then _DoWork shall "accept" the message.]*/
     /*Tests_[_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
 -requestType: DELETE
--relativePath: abandon relative path begin + value of ETag + "?api-version=2015-08-15-preview" 
+-relativePath: abandon relative path begin + value of ETag + "?api-version=2016-02-03" 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag
@@ -2787,7 +2787,7 @@ responseContent: a new instance of buffer]
 */
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_051: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
 -requestType: DELETE
--relativePath: abandon relative path begin + value of ETag + "?api-version=2015-08-15-preview" 
+-relativePath: abandon relative path begin + value of ETag + "?api-version=2016-02-03" 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag
@@ -4296,7 +4296,7 @@ responseContent: a new instance of buffer]
 
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_050: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
 -requestType: POST
--relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2015-08-15-preview" 
+-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-02-03" 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag
@@ -4308,7 +4308,7 @@ responseContent: a new instance of buffer]
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
     /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_077: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
 -requestType: DELETE
--relativePath: abandon relative path begin + value of ETag +"?api-version=2015-08-15-preview" + "&reject"
+-relativePath: abandon relative path begin + value of ETag +"?api-version=2016-02-03" + "&reject"
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag
@@ -4318,7 +4318,7 @@ responseContent: a new instance of buffer]
 - responseContent: NULL]*/
     /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_077: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
 -requestType: DELETE
--relativePath: abandon relative path begin + value of ETag +"?reject" + "?api-version=2015-08-15-preview" 
+-relativePath: abandon relative path begin + value of ETag +"?reject" + "?api-version=2016-02-03" 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag

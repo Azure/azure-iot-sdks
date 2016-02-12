@@ -27,6 +27,7 @@
 #include "tlsio_schannel.h"
 #include "tlsio_wolfssl.h"
 #include "tlsio_openssl.h"
+#include "platform.h"
 
 #include "tickcounter.h"
 
@@ -353,6 +354,9 @@ public:
     MOCK_STATIC_METHOD_0(, const IO_INTERFACE_DESCRIPTION*, tlsio_openssl_get_interface_description)
     MOCK_METHOD_END(const IO_INTERFACE_DESCRIPTION*, TEST_IO_INTERFACE);
 
+	MOCK_STATIC_METHOD_0(, const IO_INTERFACE_DESCRIPTION*, platform_get_default_tlsio)
+	MOCK_METHOD_END(const IO_INTERFACE_DESCRIPTION*, TEST_IO_INTERFACE)
+
     MOCK_STATIC_METHOD_3(, XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, xio_create_parameters, LOGGER_LOG, logger_log)
     MOCK_METHOD_END(XIO_HANDLE, TEST_XIO_HANDLE);
 
@@ -379,6 +383,7 @@ public:
 
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, tlsio_schannel_get_interface_description);
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, tlsio_openssl_get_interface_description);
+DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, platform_get_default_tlsio);
 
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, xio_create_parameters, LOGGER_LOG, logger_log);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , void, xio_destroy, XIO_HANDLE, ioHandle);
@@ -445,16 +450,9 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, get_time(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mocks, STRING_new());
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)).ExpectedTimesExactly(4);
-#if _WIN32
-        STRICT_EXPECTED_CALL(mocks, tlsio_schannel_get_interface_description());
-#else
-#ifdef MBED_BUILD_TIMESTAMP
-        STRICT_EXPECTED_CALL(mocks, tlsio_wolfssl_get_interface_description());
-#else
-        STRICT_EXPECTED_CALL(mocks, tlsio_openssl_get_interface_description());
-#endif
-#endif
-        EXPECTED_CALL(mocks, mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mocks, platform_get_default_tlsio());
+
+		EXPECTED_CALL(mocks, mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         EXPECTED_CALL(mocks, SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
         EXPECTED_CALL(mocks, xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -1124,6 +1122,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 
         STRICT_EXPECTED_CALL(mocks, mqtt_client_deinit(TEST_MQTT_CLIENT_HANDLE));
         STRICT_EXPECTED_CALL(mocks, mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE));
+		EXPECTED_CALL(mocks, xio_destroy(NULL));
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(TEST_COUNTER_HANDLE));
 
@@ -1407,15 +1406,8 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         STRICT_EXPECTED_CALL(mocks, get_time(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mocks, STRING_new());
         EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)).ExpectedTimesExactly(5);
-#if _WIN32
-        STRICT_EXPECTED_CALL(mocks, tlsio_schannel_get_interface_description());
-#else
-#ifdef MBED_BUILD_TIMESTAMP
-        STRICT_EXPECTED_CALL(mocks, tlsio_wolfssl_get_interface_description());
-#else
-        STRICT_EXPECTED_CALL(mocks, tlsio_openssl_get_interface_description());
-#endif
-#endif
+        STRICT_EXPECTED_CALL(mocks, platform_get_default_tlsio());
+
         EXPECTED_CALL(mocks, mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__);
         EXPECTED_CALL(mocks, SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 

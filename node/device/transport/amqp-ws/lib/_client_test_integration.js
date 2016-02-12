@@ -4,7 +4,7 @@
 'use strict';
 
 var ConnectionString = require('azure-iot-common').ConnectionString;
-var runTests = require('azure-iot-device-amqp/lib/_client_test_integration.js');
+var runTests = require('azure-iot-device-amqp/lib/_client_common_testrun.js');
 var AmqpWs = require('./amqp_ws.js');
 
 var host = ConnectionString.parse(process.env.IOTHUB_CONNECTION_STRING).HostName;
@@ -24,6 +24,6 @@ var badConnStrings = [
 ];
 
 describe('Over AMQP/WS', function () {
-  this.timeout(30000);
+  this.timeout(60000);
   runTests(AmqpWs, connectionString, badConnStrings);
 });

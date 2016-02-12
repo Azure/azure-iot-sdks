@@ -265,7 +265,6 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = MQTT_Protocol;
-        iotHubConfig.io_transport_provider_callback = NULL;
 
         EXPECTED_SEND_DATA* sendData = EventData_Create();
         ASSERT_IS_NOT_NULL(sendData);
@@ -335,7 +334,6 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
         iotHubConfig.protocol = MQTT_Protocol;
-        iotHubConfig.io_transport_provider_callback = NULL;
 
         iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
         ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Error creating IoTHubClient.");

@@ -28,7 +28,7 @@ public final class IotHubEventUri extends IotHubUri
 public IotHubEventUri(String iotHubHostname, String deviceId);
 ```
 
-**SRS_IOTHUBEVENTURI_11_001: [**The constructor returns a URI with the format `[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2015-08-15-preview`.**]**
+**SRS_IOTHUBEVENTURI_11_001: [**The constructor returns a URI with the format `[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03`.**]**
 
 
 ### toString
@@ -37,7 +37,7 @@ public IotHubEventUri(String iotHubHostname, String deviceId);
 @Override public String toString();
 ```
 
-**SRS_IOTHUBEVENTURI_11_002: [**The string representation of the IoT Hub event URI shall be constructed with the format `[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2015-08-15-preview `.**]**
+**SRS_IOTHUBEVENTURI_11_002: [**The string representation of the IoT Hub event URI shall be constructed with the format `[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03 `.**]**
 
 
 ### getHostname

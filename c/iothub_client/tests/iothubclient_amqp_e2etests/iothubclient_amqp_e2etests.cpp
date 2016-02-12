@@ -220,10 +220,12 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
     {
         ASSERT_ARE_EQUAL(int, 0, platform_init());
         INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        platform_init();
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
+        platform_deinit();
         DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
         platform_deinit();
     }

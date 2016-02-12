@@ -53,6 +53,30 @@ if(${use_amqp})
 	)
 endif()
 
+if(${use_amqp})
+	if (${use_wsio})
+		set(iothub_client_amqp_transport_c_files
+			${iothub_client_ll_transport_c_files}
+			./src/iothubtransportamqp_websockets.c
+		)
+		
+		set(iothub_client_amqp_transport_h_files
+			${iothub_client_ll_transport_h_files}
+			./inc/iothubtransportamqp_websockets.h
+		)
+	else()
+		set(iothub_client_amqp_transport_c_files
+			${iothub_client_ll_transport_c_files}
+			./src/iothubtransportamqp.c
+		)
+
+		set(iothub_client_amqp_transport_h_files
+			${iothub_client_ll_transport_h_files}
+			./inc/iothubtransportamqp.h
+		)	
+	endif()
+endif()
+
 if(${use_mqtt})
 	set(iothub_client_mqtt_transport_c_files
 		${iothub_client_ll_transport_c_files}
