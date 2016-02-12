@@ -4,7 +4,7 @@
 'use strict';
 
 var ConnectionString = require('./connection_string.js');
-var runTests = require('./_registry_test.js');
+var runTests = require('./_registry_common_testrun.js');
 
 function makeConnectionString(host, policy, key) {
   return 'HostName='+host+';SharedAccessKeyName='+policy+';SharedAccessKey='+key;
