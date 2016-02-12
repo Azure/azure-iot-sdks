@@ -6140,7 +6140,16 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
             ///assert
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK, result);
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPE_TYPE, EDM_DATE_TIME_OFFSET_TYPE, dst.type);
-            ASSERT_ARE_EQUAL(int, 0, memcmp(&src.value.edmDateTimeOffset, &dst.value.edmDateTimeOffset, sizeof(dst.value.edmDateTimeOffset)));
+            ASSERT_ARE_EQUAL(int, src.value.edmDateTimeOffset.dateTime.tm_year,               dst.value.edmDateTimeOffset.dateTime.tm_year);
+            ASSERT_ARE_EQUAL(int, src.value.edmDateTimeOffset.dateTime.tm_mon,                dst.value.edmDateTimeOffset.dateTime.tm_mon);
+            ASSERT_ARE_EQUAL(int, src.value.edmDateTimeOffset.dateTime.tm_mday,               dst.value.edmDateTimeOffset.dateTime.tm_mday);
+            ASSERT_ARE_EQUAL(int, src.value.edmDateTimeOffset.dateTime.tm_hour,               dst.value.edmDateTimeOffset.dateTime.tm_hour);
+            ASSERT_ARE_EQUAL(int, src.value.edmDateTimeOffset.dateTime.tm_min,                dst.value.edmDateTimeOffset.dateTime.tm_min);
+            ASSERT_ARE_EQUAL(int, src.value.edmDateTimeOffset.dateTime.tm_sec,                dst.value.edmDateTimeOffset.dateTime.tm_sec);
+            ASSERT_ARE_EQUAL(int, src.value.edmDateTimeOffset.hasFractionalSecond,   dst.value.edmDateTimeOffset.hasFractionalSecond);
+            ASSERT_ARE_EQUAL(int, src.value.edmDateTimeOffset.hasTimeZone,           dst.value.edmDateTimeOffset.hasTimeZone);
+            ASSERT_ARE_EQUAL(int, src.value.edmDateTimeOffset.timeZoneHour,          dst.value.edmDateTimeOffset.timeZoneHour);
+            ASSERT_ARE_EQUAL(int, src.value.edmDateTimeOffset.timeZoneMinute,        dst.value.edmDateTimeOffset.timeZoneMinute);
 
             ///cleanup
             Destroy_AGENT_DATA_TYPE(&src);
