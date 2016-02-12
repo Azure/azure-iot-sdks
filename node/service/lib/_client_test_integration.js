@@ -3,7 +3,7 @@
 
 'use strict';
 
-var transportSpecificTests = require('./_client_test.js');
+var transportSpecificTests = require('./_client_common_testrun.js');
 
 describe('Over real AMQP', function () {
   this.timeout(60000);
