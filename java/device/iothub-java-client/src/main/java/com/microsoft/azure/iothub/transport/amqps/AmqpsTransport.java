@@ -227,8 +227,13 @@ public final class AmqpsTransport implements IotHubTransport
                     }
                     //Instead of adding to callback packet, just invoke callbacks here in thread.
                     IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(status, packet.getCallback(), packet.getContext());
-                    IotHubEventCallback callback = callbackPacket.getCallback();
-                    callback.execute(callbackPacket.getStatus(), packet.getContext());
+                    if (callbackPacket != null) {
+                        IotHubEventCallback callback = callbackPacket.getCallback();
+                        if (callback != null) {
+                            callback.execute(callbackPacket.getStatus(), packet.getContext());
+                        }
+                    }
+
                 }).start();
             }
 
