@@ -14,44 +14,24 @@ function transportSpecificTests(opts) {
     var testSubject;
     var deviceId;
 
-    beforeEach('prepare test subject', function () {
-      if (opts.transport && opts.connectionString) assert.fail('test setup error');
-      if (opts.transport) testSubject = new Client(opts.transport());
-      else testSubject = Client.fromConnectionString(opts.connectionString);
-      deviceId = opts.id;
-    });
-
-    afterEach('close the connection', function (done) {
-      testSubject.close(function (err) { done(err); });
-    });
-
-    describe('#open', function () {
+    before('prepare test subject', function (done) {
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_008: [The open method shall open a connection to the IoT Hub that was identified when the Client object was created (e.g., in Client.fromConnectionString).]*/
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_009: [When the open method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - standard JavaScript Error object (or subclass)]*/
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_010: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
-      it('opens a connection to the IoT Hub', function (done) {
-        testSubject.open(function (err) {
-          done(err);
-        });
-      });
+      if (opts.transport && opts.connectionString) assert.fail('test setup error');
+      if (opts.transport) testSubject = new Client(opts.transport());
+      else testSubject = Client.fromConnectionString(opts.connectionString);
+      deviceId = opts.id;
+      testSubject.open(function (err) { done(err); });
     });
 
-    describe('#close', function () {
+    after('close the connection', function (done) {
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_021: [The close method shall close the connection.]*/
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_022: [When the close method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - standard JavaScript Error object (or subclass)]*/
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_023: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
-      it('closes the connection to the IoT Hub', function (done) {
-        testSubject.open(function (err) {
-          if (err) done(err);
-          else {
-            testSubject.close(function (err) {
-              done(err);
-            });
-          }
-        });
-      });
+      testSubject.close(function (err) { done(err); });
     });
 
     describe('#send', function () {
@@ -66,46 +46,31 @@ function transportSpecificTests(opts) {
       response - an implementation-specific response object returned by the underlying protocol, useful for logging and troubleshooting]*/
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_017: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
       it('sends the message', function (done) {
-        testSubject.open(function (err) {
-          if (err) done(err);
-          else {
-            testSubject.send(deviceId, createTestMessage(), function (err, state) {
-              if (!err) {
-                assert.equal(state.constructor.name, "MessageEnqueued");
-              }
-              done(err);
-            });
-          }
+        testSubject.send(deviceId, createTestMessage(), function (err, state) {
+            if (!err) {
+            assert.equal(state.constructor.name, "MessageEnqueued");
+            }
+            done(err);
         });
       });
 
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_014: [The send method shall convert the message object to type azure-iot-common.Message if necessary.]*/
       it('accepts any message that is convertible to type Message', function (done) {
         var message = 'msg';
-        testSubject.open(function (err) {
-          if (err) done(err);
-          else {
-            testSubject.send(deviceId, message, function (err, state) {
-              if (!err) {
-                assert.equal(state.constructor.name, "MessageEnqueued");
-              }
-              done(err);
-            });
-          }
+        testSubject.send(deviceId, message, function (err, state) {
+            if (!err) {
+            assert.equal(state.constructor.name, "MessageEnqueued");
+            }
+            done(err);
         });
       });
 
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_019: [If the deviceId has not been registered with the IoT Hub, send shall return an instance of DeviceNotFoundError.]*/
       it('returns DeviceNotFoundError when sending to an unregistered deviceId', function (done) {
         var unregisteredDeviceId = 'no-device' + Math.random();
-        testSubject.open(function (err) {
-          if (err) done(err);
-          else {
-            testSubject.send(unregisteredDeviceId, new Message('msg'), function (err) {
-              assert.instanceOf(err, errors.DeviceNotFoundError);
-              done();
-            });
-          }
+        testSubject.send(unregisteredDeviceId, new Message('msg'), function (err) {
+            assert.instanceOf(err, errors.DeviceNotFoundError);
+            done();
         });
       });
     });
@@ -114,67 +79,36 @@ function transportSpecificTests(opts) {
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_027: [When the getFeedbackReceiver method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - standard JavaScript Error object (or subclass)
       receiver - an instance of Client.FeedbackReceiver]*/
-      it('returns an Error object', function (done) {
-        testSubject.open(function (err) {
-          if (err) done(err);
-          else {
-            testSubject._transport._config.sharedAccessSignature = 'fail'; // TODO: don't reach into internals to force failure
-            testSubject.getFeedbackReceiver(function (err) {
-              assert.instanceOf(err, Error);
-              done();
-            });
-          }
-        });
-      });
-
-      /*Tests_SRS_NODE_IOTHUB_CLIENT_05_027: [When the getFeedbackReceiver method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
-      err - standard JavaScript Error object (or subclass)
-      receiver - an instance of Client.FeedbackReceiver]*/
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_028: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
       it('returns a FeedbackReceiver object', function (done) {
-        testSubject.open(function (err) {
-          if (err) done(err);
-          else {
-            testSubject.getFeedbackReceiver(function (err, receiver) {
-              if (err) done(err);
-              else {
-                assert.instanceOf(receiver, AmqpReceiver);
-                done();
-              }
-            });
-          }
+        testSubject.getFeedbackReceiver(function (err, receiver) {
+            if (err) done(err);
+            else {
+            assert.instanceOf(receiver, AmqpReceiver);
+            done();
+            }
         });
       });
 
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_033: [getFeedbackReceiver shall return the same instance of Client.FeedbackReceiver every time it is called with a given instance of Client.]*/
       it('always returns the same FeedbackReceiver', function (done) {
-        testSubject.open(function (err) {
-          if (err) done(err);
-          else {
-            testSubject.getFeedbackReceiver(function (err, receiver1) {
-              if (err) done(err);
-              testSubject.getFeedbackReceiver(function (err, receiver2) {
-                if (err) done(err);
-                assert.equal(receiver1, receiver2);
-                done();
-              });
+        testSubject.getFeedbackReceiver(function (err, receiver1) {
+            if (err) done(err);
+            testSubject.getFeedbackReceiver(function (err, receiver2) {
+            if (err) done(err);
+            assert.equal(receiver1, receiver2);
+            done();
             });
-          }
         });
       });
 
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_030: [The FeedbackReceiver class shall inherit EventEmitter to provide consumers the ability to listen for (and stop listening for) events.]*/
       it('FeedbackReceiver inherits EventEmitter', function (done) {
-        testSubject.open(function (err) {
-          if (err) done(err);
-          else {
-            testSubject.getFeedbackReceiver(function (err, receiver) {
-              if (err) done(err);
-              var EventEmitter = require('events');
-              assert.instanceOf(receiver, EventEmitter);
-              done();
-            });
-          }
+        testSubject.getFeedbackReceiver(function (err, receiver) {
+            if (err) done(err);
+            var EventEmitter = require('events');
+            assert.instanceOf(receiver, EventEmitter);
+            done();
         });
       });
 
