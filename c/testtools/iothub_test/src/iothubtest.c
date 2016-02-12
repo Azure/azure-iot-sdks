@@ -272,12 +272,12 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
     {
         if ( (dvhInfo->iotHubName = (char*)malloc(endName-beginName+1) ) == NULL)
         {
-            LogError("Failure allocating iothubName in RetrieveIotHubClientInfo.\r\n");
+            LogError("Failure allocating iothubName in RetrieveIotHubClientInfo endName: %d beginName: %d.\r\n", endName, beginName);
             result = __LINE__;
         }
         else if ( (dvhInfo->hostName = (char*)malloc(endHost-beginName+1) ) == NULL)
         {
-            LogError("Failure allocating hostName in RetrieveIotHubClientInfo.\r\n");
+            LogError("Failure allocating hostName in RetrieveIotHubClientInfo endHost: %d beginHost: %d.\r\n", endHost, beginName);
             free(dvhInfo->iotHubName);
             result = __LINE__;
         }
@@ -313,12 +313,12 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
     {
         if ( (dvhInfo->partnerName = (char*)malloc(endName+beginName+1) ) == NULL)
         {
-            LogError("Failure allocating partnerName in RetrieveEventHubClientInfo.\r\n");
+            LogError("Failure allocating partnerName in RetrieveEventHubClientInfo endName: %d beginName: %d.\r\n", endName, beginName);
             result = __LINE__;
         }
         else if ( (dvhInfo->partnerHost = (char*)malloc(endHost+beginHost+1) ) == NULL)
         {
-            LogError("Failure allocating partnerHost in RetrieveEventHubClientInfo.\r\n");
+            LogError("Failure allocating partnerHost in RetrieveEventHubClientInfo endHost: %d beginHost: %d.\r\n", endHost, beginHost);
             free(dvhInfo->partnerName);
             result = __LINE__;
         }
