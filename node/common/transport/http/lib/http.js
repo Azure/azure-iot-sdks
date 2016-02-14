@@ -17,13 +17,13 @@ function Http() {
 /**
  * @method              module:azure-iot-http-base.Http.buildRequest
  * @description         Builds an HTTP request object using the parameters supplied by the caller.
- * 
+ *
  * @param {String}      method          The HTTP verb to use (GET, POST, PUT, DELETE...).
  * @param {String}      path            The section of the URI that should be appended after the hostname.
  * @param {Object}      httpHeaders     An object containing the headers that should be used for the request.
  * @param {String}      host            Fully-Qualified Domain Name of the server to which the request should be sent to.
  * @param {Function}    done            The callback to call when a response or an error is received.
- * 
+ *
  * @returns An HTTP request object.
  */
 /*Codes_SRS_NODE_HTTP_05_001: [buildRequest shall accept the following arguments:
@@ -43,7 +43,7 @@ Http.prototype.buildRequest = function (method, path, httpHeaders, host, done) {
   var request = this._https.request(options, function onResponse(response) {
     var responseBody = '';
     response.on('error', function (err) {
-        done(err);
+      done(err);
     });
     response.on('data', function onResponseData(chunk) {
       responseBody += chunk;
@@ -69,10 +69,10 @@ Http.prototype.buildRequest = function (method, path, httpHeaders, host, done) {
 /**
  * @method              module:azure-iot-http-base.Http.toMessage
  * @description         Transforms the body of an HTTP response into a {@link module:azure-iot-common.Message} that can be treated by the client.
- * 
+ *
  * @param {Object}      response          The HTTP verb to use (GET, POST, PUT, DELETE...).
  * @param {Object}      body            The section of the URI that should be appended after the hostname.
- * 
+ *
  * @returns {module:azure-iot-common.Message} A Message object.
  */
 Http.prototype.toMessage = function toMessage(response, body) {
@@ -103,7 +103,7 @@ Http.prototype.toMessage = function toMessage(response, body) {
       else if (item.toLowerCase() === "etag") {
         // Need to strip the quotes from the string
         var len = response.headers[item].length;
-        msg.lockToken = response.headers[item].substring(1, len-1);
+        msg.lockToken = response.headers[item].substring(1, len - 1);
       }
     }
   }
