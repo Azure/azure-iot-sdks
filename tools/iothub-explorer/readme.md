@@ -3,6 +3,7 @@ A sample CLI tool to manage device clients using the Azure IoT Hub service SDK. 
 
 [![npm version](https://badge.fury.io/js/iothub-explorer.svg)](https://badge.fury.io/js/iothub-explorer)
 
+<a name="install"/>
 ## Installing iothub-explorer
 
 > Note: This tool requires Node.js version 4.x or higher for all features to work.
@@ -19,6 +20,7 @@ You can use the following command to get additional help about all the iothub-ex
 $ iothub-explorer help
 ```
 
+<a name="identityregistry"/>
 ## Working with the device identity registry
 
 Supply your IoT Hub connection-string once using the **login** command. This means you do not need to supply the connection-string for subsequent commands for the duration of the session (defaults to one hour):
@@ -63,6 +65,7 @@ To delete a device from the device identity registry in your IoT Hub, use the fo
 $ iothub-explorer delete existing-device
 ```
 
+<a name="devices"/>
 ## Working with devices
 
 Use the following command to monitor the device-to-cloud messages from a device:

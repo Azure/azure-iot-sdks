@@ -76,7 +76,6 @@ apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip
 static const char* connectionString = "[device connection string]";
 ```
 - Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
-- The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
 - Run the `./build.sh` script in the **c/build_all/arduino** directory.   
 
 <a name="deploy"/>
@@ -115,13 +114,11 @@ You might get an error message at this step(return code 127), but the certificat
 ## Run the sample
 
 - Run the sample **/tmp/simplesample_http**
-- Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_http** application.
-- See "Send cloud-to-device messages" in the document [How to use Device Explorer for IoT Hub devices][device-explorer] for instructions on sending messages with the **DeviceExplorer** utility.
+- See [Manage IoT Hub][lnk-manage-iothub] for information about the tools you can use to monitor the messages your device sends to your IoT hub and to send commands to your devices.
 
 ***Note: To send a command to the device from iothub-explorer or DeviceExplorer, the command should be like {"Name":"TurnFanOff", "Parameters":{}}***
 
 [setup-devbox-linux]: devbox_setup.md
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
-[setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[setup-iothub]: ../setup_iothub.md
+[lnk-manage-iothub]: ../manage_iot_hub.md
 
