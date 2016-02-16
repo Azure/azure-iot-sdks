@@ -11,11 +11,11 @@
     <description>Microsoft Azure IoTHub Client</description>
     <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
     <summary>This nuget package contains common interface shared between AMQP, MQTT and HTTP transports to IoTHub</summary>
-    <releaseNotes>initial version</releaseNotes>
+    <releaseNotes/>
     <copyright>Copyright 2015</copyright>
     <tags>Microsoft Azure IoT Native x86 x64 native package IoTHubClient</tags>
     <dependencies>
-        <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.0"/>
+        <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.2"/>
     </dependencies>
   </metadata>
   <files>
