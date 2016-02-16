@@ -1,31 +1,31 @@
 {
     "c": {
-        "device": "1.0.0"
+        "device": "1.0.1"
     },
     "c_nuget": {
-        "device": "1.0.0"
+        "device": "1.0.1"
     },
     "csharp": {
-        "device": "1.0.1",
-        "service": "1.0.0"
+        "device": "1.0.2",
+        "service": "1.0.1"
     },
     "java": {
-        "device": "1.0.0",
-        "service": "1.0.0"
+        "device": "1.0.1",
+        "service": "1.0.1"
     },
     "node": {
-        "common": "1.0.0",
-        "amqp-base": "1.0.0",
-        "http-base": "1.0.0",
-        "mqtt-base": "1.0.0",
-        "device": "1.0.0",
-        "device-amqp": "1.0.0",
-        "device-amqp-ws": "1.0.0",
-        "device-http": "1.0.0",
-        "device-mqtt": "1.0.0",
-        "service": "1.0.0"
+        "common": "1.0.1",
+        "amqp-base": "1.0.1",
+        "http-base": "1.0.1",
+        "mqtt-base": "1.0.1",
+        "device": "1.0.1",
+        "device-amqp": "1.0.1",
+        "device-amqp-ws": "1.0.1",
+        "device-http": "1.0.1",
+        "device-mqtt": "1.0.1",
+        "service": "1.0.1"
     },
     "iothub-explorer": "1.0.0",
     "device-explorer": "1.0.0",
-    "github-release": "v1.0.0"
+    "github-release": "v1.0.1"
 }
