@@ -6,8 +6,8 @@ This "Getting Started" document shows you how to setup OpenJDK and run the sampl
 
 Before you get started, you should:
 
-- [Setup your IoT Hub][setup-iothub]
-- Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
+- [Setup your IoT hub][lnk-setup-iot-hub]
+- [Provision your device and get its credentials][lnk-manage-iot-hub]
 - Use the [Azure IoT Java Application Development guides][java-dev-guides] to build example Java applications (e.g. send-event.java).
 - Ensure the module is flashed with [Toradex V2.5 Linux image or newer][toradex_image_update].
 
@@ -78,5 +78,6 @@ The documentation can be found [here](https://azure.github.io/azure-iot-sdks/jav
 [create-from-scratch]: how_to_build_a_java_app_from_scratch.md
 [java-dev-guides]: https://github.com/Azure/azure-iot-sdks/blob/master/java/device/readme.md
 [setup-iothub]: ../../../doc/setup_iothub.md
+[lnk-manage-iot-hub]: ../../../doc/manage_iot_hub.md
 [device-explorer]: ../../../tools/DeviceExplorer/devdoc/how_to_use_device_explorer.md
 [toradex_image_update]: http://developer.toradex.com/knowledge-base/how-to-setup-environment-for-embedded-linux-application-development#Linux_Image_Update

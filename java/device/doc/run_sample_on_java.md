@@ -6,8 +6,8 @@ This "Getting Started" document shows you how to build and run any of the sample
 
 Before you get started, you should:
 - [Prepare your development environment][devbox-setup]
-- [Setup your IoT Hub][setup-iothub]
-- Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
+- [Setup your IoT hub][lnk-setup-iot-hub]
+- [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 ## Build and run the samples
 
@@ -53,5 +53,8 @@ The documentation can be found [here](https://azure.github.io/azure-iot-sdks/jav
 
 [create-from-scratch]: https://azure.microsoft.com/documentation/articles/iot-hub-java-java-getstarted/
 [devbox-setup]: devbox_setup.md
-[setup-iothub]: ../../../doc/setup_iothub.md
 [device-explorer]: ../../../tools/DeviceExplorer/devdoc/how_to_use_device_explorer.md
+
+[setup-iothub]: ../../../doc/setup_iothub.md
+[lnk-manage-iot-hub]: ../../../doc/manage_iot_hub.md
+

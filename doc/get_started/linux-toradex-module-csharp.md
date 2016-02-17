@@ -30,8 +30,8 @@ This document describes how to how to setup Mono and run the **Device Client HTT
 
 You should have the following items ready before beginning the process:
 
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 -   [Build DeviceClientHttpsSample C# sample application][run_sample_on_desktop_windows]
 -   Ensure the module is flashed with [Toradex V2.5 Linux image or newer][toradex_image_update].
 
@@ -64,8 +64,11 @@ You should have the following items ready before beginning the process:
     mono DeviceClientHttpsSample.exe
     ```
 
-3. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **Device Client HTTPS Sample** application.
 
+3.   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the **Device Client HTTPS Sample** application and how to send cloud-to-device messages to the **Device Client HTTPS Sample** application.
 
 [run_sample_on_desktop_windows]: https://github.com/Azure/azure-iot-sdks/blob/master/csharp/device/doc/run_sample_on_desktop_windows.md
 [toradex_image_update]: http://developer.toradex.com/knowledge-base/how-to-setup-environment-for-embedded-linux-application-development#Linux_Image_Update
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

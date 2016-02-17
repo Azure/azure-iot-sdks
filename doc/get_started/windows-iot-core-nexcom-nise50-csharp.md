@@ -34,14 +34,8 @@ You should have the following items ready before beginning the process:
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
 -   NISE50 device.
 -   [Azure SDK for .NET](http://go.microsoft.com/fwlink/p/?linkid=618715&clcid=0x409)
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-
-#### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-#### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 #### Install Visual Studio 2015 and Tools
 
@@ -127,3 +121,6 @@ This section walks you through building, deploying and validating the IoT Client
 -   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool](https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc).
 
 -   You should be able to see the message received in the device console window after following DeviceExplorer usage document.
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
