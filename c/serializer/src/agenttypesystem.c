@@ -8,6 +8,7 @@
 #include "gballoc.h"
 
 #include "agenttypesystem.h"
+#include <inttypes.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4756) /* Known warning for INFINITY */
@@ -3107,7 +3108,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 
                 strLength = strlen(source);
 
-                if ((sscanf(pos, "%lu", &uint32Value) != 1) ||
+                if ((sscanf(pos, SCNd32, &uint32Value) != 1) ||
                     (strLength > 11) ||
                     ((uint32Value > 2147483648UL) && isNegative) ||
                     ((uint32Value > 2147483647UL) && (!isNegative)))
