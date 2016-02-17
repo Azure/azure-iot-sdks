@@ -11,7 +11,7 @@ The following describes how to build and run the **simplesample_amqp** applicati
 ## Before you begin
 Before you begin you will need to create and configure an IoT hub to connect to.
   1. [Set up your IoT Hub][setup-iothub].
-  1. With your IoT hub configured and running in Azure, follow the instructions in [Connecting your device to an IoT hub][provision-device].
+  1. With your IoT hub configured and running in Azure, follow the instructions in [Manage IoT hub][provision-device].
   1. Make note of the Connection String for your device from the previous step.
 
   > Note: You can skip this step if you just want to build the sample application without running it.
@@ -143,4 +143,4 @@ We first need to update the credentials in the sample AMPQ app to match those of
 [img2]: ./media/edison02.png
 
 [setup-iothub]: ../setup_iothub.md
-[provision-device]: ../../tools/iothub-explorer/doc/provision_device.md
+[provision-device]: ../manage_iot_hub.md
