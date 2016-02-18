@@ -13,7 +13,7 @@ You can leverage the power of the Windows platform and Visual Studio to create i
 Before you get started, you should:
 
 - [Setup your IoT Hub][setup-iothub]
-- Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
+- Configure your device in IoT Hub. <br/>See the document [Manage IoT Hub][device-explorer].
 
 ## Setting Up You Device
 
@@ -173,7 +173,7 @@ Now set the breakpoint at the `await` statement and start the application. When 
 
 Congratulations! You have successfully received your string from Azure IoT Hub.
 
-[device-explorer]: ../../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[device-explorer]: ../../../doc/manage_iot_hub.md
 [setup-iothub]: ../../../doc/setup_iothub.md
 [hello-sample]: http://ms-iot.github.io/content/win10/samples/HelloWorld.htm
 [iot-dev-center]: https://dev.windows.com/iot

@@ -6,8 +6,8 @@ This "Getting Started" document shows you how to run the **simple_sample_http.js
 
 Before you get started, you should:
 
-- [Set up your IoT hub][setup-iothub].
-- Configure your device in IoT Hub. <br/>See the section "Configure IoT Hub connection" in the document [How to use Device Explorer][device-explorer].
+- [Setup your IoT hub][lnk-setup-iot-hub]
+- [Provision your device and get its credentials][lnk-manage-iot-hub]
 - Ensure the module is flashed with [Toradex V2.5 Linux image or newer][toradex_image_update].
 
 ## Configure Node.js on Toradex module with Linux
@@ -57,3 +57,6 @@ Before you get started, you should:
 [device-explorer]: ../../../tools/DeviceExplorer/devdoc/how_to_use_device_explorer.md
 [toradex_image_update]: http://developer.toradex.com/knowledge-base/how-to-setup-environment-for-embedded-linux-application-development#Linux_Image_Update
 [node-sample-apps]: https://github.com/Azure/azure-iot-sdks/tree/master/node/device/samples
+
+[setup-iothub]: ../../../doc/setup_iothub.md
+[lnk-manage-iot-hub]: ../../../doc/manage_iot_hub.md

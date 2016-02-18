@@ -145,7 +145,7 @@ Replace the  existing **main** method with the following code. This code:
 - Opens the **DeviceClient** to enable it to send device-to-cloud messages and receive cloud-to-device messages.
 - Sends ten sample messages to your IoT hub.
 
-> Note: Replace `<your device connection string>` with a valid device connection string from the [DeviceExplorer][device-explorer] tool.
+> Note: Replace `<your device connection string>` with a valid device connection string. See [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 ```
 public static void main( String[] args ) throws IOException, URISyntaxException
