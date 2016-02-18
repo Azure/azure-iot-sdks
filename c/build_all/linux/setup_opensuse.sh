@@ -12,7 +12,7 @@ repo_name_from_uri()
 }
 
 scriptdir=$(cd "$(dirname "$0")" && pwd)
-deps="git make cmake gcc java-1_8_0-openjdk-devel libuuid-devel libcurl-devel swig doxygen gcc-c++ libopenssl-devel"
+deps=" make cmake gcc git libuuid-devel libcurl-devel swig doxygen gcc-c++ libopenssl-devel"
 repo="https://github.com/Azure/azure-iot-sdks.git"
 repo_name=$(repo_name_from_uri $repo)
 cred=~/cred.$$
