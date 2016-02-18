@@ -400,10 +400,18 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
 
     public void shutdown(){
 		this.linkFlow = false;
-        this.sender.close();
-        this.receiver.close();
-        this.session.close();
-        this.connection.close();
+        if (this.sender != null) {
+            this.sender.close();
+        }
+        if (this.receiver != null) {
+            this.receiver.close();
+        }
+        if (this.session != null) {
+            this.session.close();
+        }
+        if (this.connection != null) {
+            this.connection.close();
+        }
     }
 
     /**

@@ -7,9 +7,10 @@ This document contains both general FAQs about the Microsoft Azure IoT device SD
 - [Using Visual Studio 2013](#vs2013)
 - [Line-endings in repository zip archive](#lineendings)
 
-**Microsoft Azure IoT device SDK for C**
+**Microsoft Azure IoT device SDK for C FAQs**
 
 - [Installing CMake manually](#cmake)
+- [Using the IoT Hub c-client libraries in C++](#cpp)
 
 **Microsoft Azure IoT device SDK for .NET FAQs**
 
@@ -60,6 +61,10 @@ Options: [defaults in brackets after descriptions]
 
 Make sure that the directory where you install CMake is on your path by exporting it. Alternatively, if you use the option `--prefix=/usr` when you install CMake it replaces your current installation.
 
+<a name="cpp"/>
+## Using the IoT Hub c-client libraries in C++
+
+Using the IoT Hub c-client code from C++ is no different than using it from c. Create your C++ project, then reference the client library as you normally would in c++, or install the package via the appropriate package manager based on your platform.
 
 <a name="uwpsupport"/>
 ## UWP support for Microsoft.Azure.Devices.Client

@@ -122,6 +122,7 @@ static int publishMqttMessage(PMQTTTRANSPORT_HANDLE_DATA transportState, MQTT_ME
             (void)tickcounter_get_current_ms(g_msgTickCounter, &mqttMsgEntry->msgPublishTime);
             result = 0;
         }
+        mqttmessage_destroy(mqttMsg);
     }
     return result;
 }
@@ -248,7 +249,7 @@ static void MqttOpCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_
 const XIO_HANDLE getIoTransportProvider(const char* fqdn, int port)
 {
     TLSIO_CONFIG tls_io_config = { fqdn, port };
-	const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
+    const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
     return (void*)xio_create(io_interface_description, &tls_io_config, NULL/*defaultPrintLogFunction*/);
 }
 

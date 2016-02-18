@@ -90,8 +90,7 @@ else if (command === 'login' && !connString) {
   }
 }
 
-if (!connString)
-{
+if (!connString) {
   var loc = configLoc();
   try {
     sas = fs.readFileSync(loc.dir + '/' + loc.file, 'utf8');
@@ -149,7 +148,7 @@ else if (command === 'create') {
     // 'create' command expects either deviceId or JSON device description
     info = (arg1.charAt(0) !== '{') ? { "deviceId": arg1 } : JSON.parse(arg1);
   }
-  catch(e) {
+  catch (e) {
     if (e instanceof SyntaxError) inputError('Device information isn\'t valid JSON');
     else throw e;
   }
@@ -192,17 +191,17 @@ else if (command === 'monitor-events') {
   var startTime = Date.now();
 
   var ehClient = new EventHubClient(connString, 'messages/events/');
-  ehClient.GetPartitionIds().then(function(partitionIds) {
-    partitionIds.forEach(function(partitionId) {
-      ehClient.CreateReceiver('$Default', partitionId).then(function(receiver) {
-          // start receiving
-        receiver.StartReceive(startTime).then(function() {
-          receiver.on('error', function(error) {
+  ehClient.GetPartitionIds().then(function (partitionIds) {
+    partitionIds.forEach(function (partitionId) {
+      ehClient.CreateReceiver('$Default', partitionId).then(function (receiver) {
+        // start receiving
+        receiver.StartReceive(startTime).then(function () {
+          receiver.on('error', function (error) {
             serviceError(error.description);
           });
-          receiver.on('eventReceived', function(eventData) {
+          receiver.on('eventReceived', function (eventData) {
             if ((eventData.SystemProperties['iothub-connection-device-id'] === arg1) &&
-                (eventData.SystemProperties['x-opt-enqueued-time'] >= startTime)) {
+              (eventData.SystemProperties['x-opt-enqueued-time'] >= startTime)) {
               console.log('Event received: ');
               console.log(eventData.Bytes);
               console.log('');
@@ -228,55 +227,55 @@ else if (command === 'send') {
   }
 
   var client = connString ? Client.fromConnectionString(connString) : Client.fromSharedAccessSignature(sas.toString());
-  client.open(function (err){
-      if (err) {
-        inputError('Could not open the connection to the service: ' + err.message);
-      } else {
-        client.send(deviceId, message, function (err) {
-          if (err) serviceError(err);
-          else {
-            if (!parsed.raw) {
-              var id = '';
-              if (parsed.ack && parsed.ack !== 'none') {
-                id = ' (id: ' + message.messageId + ')';
-              }
-              console.log(colorsTmpl('\n{green}Message sent{/green}' + id));
+  client.open(function (err) {
+    if (err) {
+      inputError('Could not open the connection to the service: ' + err.message);
+    } else {
+      client.send(deviceId, message, function (err) {
+        if (err) serviceError(err);
+        else {
+          if (!parsed.raw) {
+            var id = '';
+            if (parsed.ack && parsed.ack !== 'none') {
+              id = ' (id: ' + message.messageId + ')';
             }
-            client.close();
+            console.log(colorsTmpl('\n{green}Message sent{/green}' + id));
           }
-        });
-      }
+          client.close();
+        }
+      });
+    }
   });
-  
+
 }
 else if (command === 'receive') {
   var client = connString ? Client.fromConnectionString(connString) : Client.fromSharedAccessSignature(sas.toString());
-  client.open(function (err){
+  client.open(function (err) {
     if (err) {
       inputError('Could not open the connection to the service: ' + err.message);
     } else {
       client.getFeedbackReceiver(function (err, receiver) {
         var messageCount = parsed.messages || 0;
         var forever = !parsed.messages;
-      
+
         if (err) serviceError(err);
         if (!parsed.raw) {
           console.log(colorsTmpl('\n{yellow}Waiting for feedback...{/yellow} (Ctrl-C to quit)'));
         }
-      
+
         receiver.on('errorReceived', function (err) { serviceError(err); });
         receiver.on('message', function (feedbackRecords) {
           var output = {
             'iothub-enqueuedtime': feedbackRecords.data[0].enqueuedTimeUtc,
             body: feedbackRecords.data[0].description
           };
-      
+
           var rendered = parsed.raw ?
             JSON.stringify(output) :
             '\nFeedback message\n' + prettyjson.render(output);
-          
+
           console.log(rendered);
-      
+
           if (!forever && --messageCount === 0) process.exit(0);
         });
       });
@@ -373,7 +372,7 @@ function printDevice(device) {
 
   var result = [filtered];
   if (parsed['connection-string']) {
-    result.push({connectionString: connectionString(device)});
+    result.push({ connectionString: connectionString(device) });
   }
 
   var output = parsed.raw ?

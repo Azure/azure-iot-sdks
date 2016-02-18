@@ -28,10 +28,11 @@ const char* TEST_EVENT_DATA_FMT = "{\"data\":\"%.24s\",\"id\":\"%d\"}";
 const char* TEST_MESSAGE_DATA_FMT = "{\"notifyData\":\"%.24s\",\"id\":\"%d\"}";
 
 static size_t g_iotHubTestId = 0;
+static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
 #define IOTHUB_COUNTER_MAX           10
 #define IOTHUB_TIMEOUT_SEC           1000
-#define MAX_CLOUD_TRAVEL_TIME           60.0
+#define MAX_CLOUD_TRAVEL_TIME        60.0
 
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -221,10 +222,14 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         ASSERT_ARE_EQUAL(int, 0, platform_init());
         INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         platform_init();
+        g_iothubAcctInfo = IoTHubAccount_Init(true);
+        ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
+        IoTHubAccount_deinit(g_iothubAcctInfo);
+        // Need a double deinit
         platform_deinit();
         DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
         platform_deinit();
@@ -239,21 +244,19 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
     {
     }
 
-#if 0
     TEST_FUNCTION(IoTHub_AMQP_SendEvent_E2ETests)
     {
-#ifdef FALSE
+#if 0
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         IOTHUB_MESSAGE_HANDLE msgHandle;
 
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName();
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix();
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
+        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
+        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
+        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
+        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
         iotHubConfig.protocol = AMQP_Protocol;
-        iotHubConfig.io_transport_provider_callback = NULL;
 
         EXPECTED_SEND_DATA* sendData = EventData_Create();
         ASSERT_IS_NOT_NULL(sendData);
@@ -285,31 +288,31 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         {
             // Just go on here
         }
-        ASSERT_IS_TRUE(sendData->dataWasRecv); // was received by the callback...
+        ASSERT_IS_TRUE_WITH_MSG(sendData->dataWasRecv, "Failure sending data to Iothub"); // was received by the callback...
         IoTHubClient_Destroy(iotHubClientHandle);
 
         {
-            IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(), IoTHubAccount_GetIoTHubConnString(), IoTHubAccount_GetDeviceId(), IoTHubAccount_GetDeviceKey(), IoTHubAccount_GetEventhubListenName(), IoTHubAccount_GetEventhubAccessKey(), IoTHubAccount_GetSharedAccessSignature(), IoTHubAccount_GetEventhubConsumerGroup() );
+            IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo) );
             ASSERT_IS_NOT_NULL(iotHubTestHandle);
 
-            IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(), sendData);
+            IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData);
             ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, result);
 
             IoTHubTest_Deinit(iotHubTestHandle);
         }
 
         // assert
-        ASSERT_IS_TRUE(sendData->wasFound); // was found is written by the callback...
+        ASSERT_IS_TRUE_WITH_MSG(sendData->wasFound, "Failure retrieving data that was sent to eventhub"); // was found is written by the callback...
 
         // cleanup
         IoTHubMessage_Destroy(msgHandle);
         EventData_Destroy(sendData);
-#endif // 0
+#endif
     }
 
     TEST_FUNCTION(IoTHub_AMQP_RecvMessage_E2ETest)
     {
-#ifdef FALSE
+#if 0
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
@@ -318,17 +321,16 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         ASSERT_IS_NOT_NULL(notifyData);
 
         // act
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName();
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix();
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
+        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
+        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
+        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
+        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
         iotHubConfig.protocol = AMQP_Protocol;
-        iotHubConfig.io_transport_provider_callback = NULL;
 
-        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(), IoTHubAccount_GetIoTHubConnString(), IoTHubAccount_GetDeviceId(), IoTHubAccount_GetDeviceKey(), IoTHubAccount_GetEventhubListenName(), IoTHubAccount_GetEventhubAccessKey(), IoTHubAccount_GetSharedAccessSignature(), IoTHubAccount_GetEventhubConsumerGroup());
+        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
         ASSERT_IS_NOT_NULL(iotHubTestHandle);
 
-        IOTHUB_TEST_CLIENT_RESULT testResult = IoTHubTest_SendMessage(iotHubTestHandle, notifyData->toBeSend, notifyData->toBeSendSize);
+        IOTHUB_TEST_CLIENT_RESULT testResult = IoTHubTest_SendMessage(iotHubTestHandle, (const unsigned char*)notifyData->toBeSend, notifyData->toBeSendSize);
         ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, testResult);
 
         IoTHubTest_Deinit(iotHubTestHandle);
@@ -353,67 +355,12 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         }
 
         // assert
-        ASSERT_IS_TRUE(notifyData->wasFound); // was found is written by the callback...
+        ASSERT_IS_TRUE_WITH_MSG(notifyData->wasFound, "Failure retrieving data from C2D"); // was found is written by the callback...
 
         // cleanup
         MessageData_Destroy(notifyData);
         IoTHubClient_Destroy(iotHubClientHandle);
-#endif // 0
-    }
-
-    TEST_FUNCTION(IoTHub_AMQP_null_RecvMessage_E2ETest)
-    {
-        // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
-        IOTHUB_CLIENT_HANDLE iotHubClientHandle;
-
-        EXPECTED_RECEIVE_DATA* notifyData = NullMessageData_Create();
-        ASSERT_IS_NOT_NULL(notifyData);
-
-        // act
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName();
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix();
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
-        iotHubConfig.protocol = AMQP_Protocol;
-        iotHubConfig.io_transport_provider_callback = NULL;
-
-        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(), IoTHubAccount_GetIoTHubConnString(), IoTHubAccount_GetDeviceId(), IoTHubAccount_GetDeviceKey(), IoTHubAccount_GetEventhubListenName(), IoTHubAccount_GetEventhubAccessKey(), IoTHubAccount_GetSharedAccessSignature(), IoTHubAccount_GetEventhubConsumerGroup());
-        ASSERT_IS_NOT_NULL(iotHubTestHandle);
-
-        IOTHUB_TEST_CLIENT_RESULT testResult = IoTHubTest_SendMessage(iotHubTestHandle, notifyData->toBeSend, notifyData->toBeSendSize);
-        ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, testResult);
-
-        IoTHubTest_Deinit(iotHubTestHandle);
-
-        iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
-        ASSERT_IS_NOT_NULL(iotHubClientHandle);
-
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
-        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
-
-        //time_t beginOperation, nowTime;
-        //beginOperation = time(NULL);
-        //while (
-        //    (
-        //    (nowTime = time(NULL)),
-        //    (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
-        //    ) &&
-        //    (!notifyData->wasFound) //condition box
-        //    )
-        //{
-        //    //just go on;
-        //}
-
-        // assert
-        // Since sending a NULL message is technically against protocol we should never find the message
-        // we just need to make sure we don't crash on a NULL message
-        //ASSERT_IS_TRUE(notifyData->wasFound); // was found is written by the callback...
-
-        // cleanup
-        MessageData_Destroy(notifyData);
-        IoTHubClient_Destroy(iotHubClientHandle);
-    }
 #endif
+    }
 END_TEST_SUITE(iothubclient_amqp_e2etests)
  

@@ -6,35 +6,35 @@
 /**
  * @class EventData
  * @classdesc Constructs a {@linkcode EventData} object.
- * @param {String}  bytes    The event payload as a byte array. 
+ * @param {String}  bytes    The event payload as a byte array.
  */
 function EventData(bytes, systemProperties) {
   Object.defineProperties(this, {
-    'PartitionKey':{
+    'PartitionKey': {
       value: "",
       writable: false
     },
-    'Bytes':{
+    'Bytes': {
       value: bytes,
       writable: false
     },
-    'EnqueuedTimeUtc':{
+    'EnqueuedTimeUtc': {
       value: null,
       writable: false
     },
-    'Offset':{
+    'Offset': {
       value: "",
       writable: false
     },
-    'Properties':{
+    'Properties': {
       value: null,
       writable: true
     },
-    'SequenceNumber':{
+    'SequenceNumber': {
       value: 0,
       writable: false
     },
-    'SystemProperties':{
+    'SystemProperties': {
       value: systemProperties,
       writable: false
     }
