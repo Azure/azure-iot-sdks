@@ -18,7 +18,7 @@ public class IotHubConnectionStringBuilderTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_001: [The function shall throw IllegalArgumentException if the input string is empty or null]
     // Assert
     @Test (expected = IllegalArgumentException.class)
-    public void createConnectiionString_input_null() throws Exception
+    public void createConnectionString_input_null() throws Exception
     {
         // Arrange
         String connectionString = null;
@@ -29,7 +29,7 @@ public class IotHubConnectionStringBuilderTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_001: [The function shall throw IllegalArgumentException if the input string is empty or null]
     // Assert
     @Test (expected = IllegalArgumentException.class)
-    public void createConnectiionString_input_empty() throws Exception
+    public void createConnectionString_input_empty() throws Exception
     {
         // Arrange
         String connectionString = "";
@@ -455,6 +455,7 @@ public class IotHubConnectionStringBuilderTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+
         // Assert
         new Expectations()
         {
@@ -631,4 +632,3 @@ public class IotHubConnectionStringBuilderTest
         assertEquals(null, iotHubConnectionString.getSharedAccessKey());
     }
 }
-

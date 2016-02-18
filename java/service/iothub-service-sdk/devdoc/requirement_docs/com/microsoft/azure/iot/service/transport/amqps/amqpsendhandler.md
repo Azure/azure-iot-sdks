@@ -73,6 +73,8 @@ public void onConnectionInit(Event event);
 
 **SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_015: [** The event handler shall open the Connection, the Session and the Sender object **]**
 
+**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_15_023: [** The Sender object shall have the properties set to service client version identifier.**]**
+
 ### onLinkInit
 
 ```java

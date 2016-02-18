@@ -67,6 +67,8 @@ public void onConnectionInit(Event event);
 
 **SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_014: [** The event handler shall open the Connection, the Session and the Receiver object **]**
 
+**SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_15_017: [** The Receiver object shall have the properties set to service client version identifier.**]**
+
 ### onLinkInit
 
 ```java

@@ -3,13 +3,14 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.iot.service.sdk;
+package tests.integration.com.microsoft.azure.iot.service.sdk;
 
 import com.microsoft.azure.iot.service.exceptions.IotHubException;
-import mockit.integration.junit4.JMockit;
+import com.microsoft.azure.iot.service.sdk.Device;
+import com.microsoft.azure.iot.service.sdk.RegistryManager;
+import com.microsoft.azure.iot.service.sdk.Tools;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.Map;
@@ -17,8 +18,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(JMockit.class)
-public class RegistryManagerE2ETest
+public class RegistryManagerIT
 {
     private static String connectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String connectionString = "";

@@ -10,6 +10,7 @@ import mockit.Expectations;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
 import org.apache.qpid.proton.Proton;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -24,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.EnumSet;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -152,6 +154,7 @@ public class AmqpReceiveHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_012: [The event handler shall create a Session (Proton) object from the connection]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_013: [The event handler shall create a Receiver (Proton) object and set the protocol tag on it to a predefined constant]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_014: [The event handler shall open the Connection, the Session and the Receiver object]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_15_017: [The Receiver object shall have the properties set to service client version identifier.]
     @Test
     public void onConnectionInit_call_flow_and_init_ok()
     {
@@ -173,6 +176,7 @@ public class AmqpReceiveHandlerTest
                 connection.open();
                 session.open();
                 receiver.open();
+                receiver.setProperties((Map<Symbol, Object>) any);
             }
         };
         // Act
@@ -333,6 +337,24 @@ public class AmqpReceiveHandlerTest
             { }
 
             @Override
+            public Map<Symbol, Object> getProperties()
+            {
+                return null;
+            }
+
+            @Override
+            public void setProperties(Map<Symbol, Object> map)
+            {
+
+            }
+
+            @Override
+            public Map<Symbol, Object> getRemoteProperties()
+            {
+                return null;
+            }
+
+            @Override
             public int drained()
             { return 0; }
 
@@ -400,14 +422,38 @@ public class AmqpReceiveHandlerTest
         event = new Event()
         {
 
+            @Override
+            public EventType getEventType()
+            {
+                return null;
+            }
+
             @Override public Event.Type getType()
             { throw new UnsupportedOperationException(exceptionMessage); }
 
             @Override public Object getContext()
             { throw new UnsupportedOperationException(exceptionMessage); }
 
+            @Override
+            public Handler getRootHandler()
+            {
+                return null;
+            }
+
             @Override public void dispatch(Handler hndlr) throws HandlerException
             { throw new UnsupportedOperationException(exceptionMessage); }
+
+            @Override
+            public void redispatch(EventType eventType, Handler handler) throws HandlerException
+            {
+
+            }
+
+            @Override
+            public void delegate() throws HandlerException
+            {
+
+            }
 
             @Override public Connection getConnection()
             { return connection; }
@@ -418,6 +464,18 @@ public class AmqpReceiveHandlerTest
             @Override
             public Link getLink()
             { return receiver; }
+
+            @Override
+            public Sender getSender()
+            {
+                return null;
+            }
+
+            @Override
+            public Receiver getReceiver()
+            {
+                return null;
+            }
 
             @Override
             public Delivery getDelivery()
@@ -541,6 +599,12 @@ public class AmqpReceiveHandlerTest
             @Override
             public DeliveryState getDefaultDeliveryState()
             { return null; }
+
+            @Override
+            public void setMessageFormat(int i)
+            {
+
+            }
 
             @Override
             public Record attachments()

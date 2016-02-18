@@ -11,6 +11,7 @@ import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
@@ -19,7 +20,6 @@ import org.apache.qpid.proton.amqp.transport.Source;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.message.MessageError;
-import org.apache.qpid.proton.message.MessageFormat;
 import org.apache.qpid.proton.messenger.impl.Address;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
@@ -254,6 +254,7 @@ public class AmqpSendHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_012: [The event handler shall create a Session (Proton) object from the connection]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_013: [The event handler shall create a Sender (Proton) object and set the protocol tag on it to a predefined constant]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_014: [The event handler shall open the Connection, the Session and the Sender object]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_15_023: [The Sender object shall have the properties set to service client version identifier.]
     @Test
     public void onConnectionInit_creates_Session_and_open_Connection()
     {
@@ -274,6 +275,7 @@ public class AmqpSendHandlerTest
                 connection.open();
                 session.open();
                 sender.open();
+                sender.setProperties((Map<Symbol, Object>) any);
             }
         };
         // Act
@@ -602,28 +604,6 @@ public class AmqpSendHandlerTest
             }
 
             @Override
-            public void load(Object o)
-            { }
-
-            @Override
-            public Object save()
-            { return null; }
-
-            @Override
-            public String toAMQPFormat(Object o)
-            { return null; }
-
-            @Override
-            public Object parseAMQPFormat(String s)
-            { return null; }
-
-            @Override
-            public void setMessageFormat(MessageFormat messageFormat)
-            { } @Override
-            public MessageFormat getMessageFormat()
-            { return null; }
-
-            @Override
             public void clear()
             { }
 
@@ -787,6 +767,24 @@ public class AmqpSendHandlerTest
             { }
 
             @Override
+            public Map<Symbol, Object> getProperties()
+            {
+                return null;
+            }
+
+            @Override
+            public void setProperties(Map<Symbol, Object> map)
+            {
+
+            }
+
+            @Override
+            public Map<Symbol, Object> getRemoteProperties()
+            {
+                return null;
+            }
+
+            @Override
             public int drained()
             { return 0; }
 
@@ -810,14 +808,38 @@ public class AmqpSendHandlerTest
         event = new Event()
         {
 
+            @Override
+            public EventType getEventType()
+            {
+                return null;
+            }
+
             @Override public Event.Type getType()
             { throw new UnsupportedOperationException(exceptionMessage); }
 
             @Override public Object getContext()
             { throw new UnsupportedOperationException(exceptionMessage); }
 
+            @Override
+            public Handler getRootHandler()
+            {
+                return null;
+            }
+
             @Override public void dispatch(Handler hndlr) throws HandlerException
             { throw new UnsupportedOperationException(exceptionMessage); }
+
+            @Override
+            public void redispatch(EventType eventType, Handler handler) throws HandlerException
+            {
+
+            }
+
+            @Override
+            public void delegate() throws HandlerException
+            {
+
+            }
 
             @Override public Connection getConnection()
             { return connection; }
@@ -828,6 +850,18 @@ public class AmqpSendHandlerTest
             @Override
             public Link getLink()
             { return sender; }
+
+            @Override
+            public Sender getSender()
+            {
+                return null;
+            }
+
+            @Override
+            public Receiver getReceiver()
+            {
+                return null;
+            }
 
             @Override
             public Delivery getDelivery()

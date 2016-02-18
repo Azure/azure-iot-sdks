@@ -3,9 +3,10 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.iot.service.sdk;
+package tests.integration.com.microsoft.azure.iot.service.sdk;
 
 import com.microsoft.azure.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.iot.service.sdk.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
 
-public class ServiceClientE2ETest
+public class ServiceClientIT
 {
     private static String connectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String connectionString = "";
