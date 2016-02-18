@@ -4,7 +4,7 @@ How to have a running the remote monitoring sample on Ubuntu 14.04 LTS
 2. Once the virtual machine has been created, SSH into it (putty is a nice ssh tool on windows). Notice that the only user name available at this time is "azureuser"
 3. The following are packages needed: cmake, uuid-dev, libcurl4-openssl-dev, g++. They can all be installed with one command:
 
-sudo apt-get install git cmake uuid-dev libcurl4-openssl-dev g++
+sudo apt-get install git cmake libcurl4-openssl-dev build-essential
 
 4. Once these packages have been installed, clone the repository by using
 

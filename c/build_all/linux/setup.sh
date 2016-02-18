@@ -9,7 +9,7 @@ repo_name_from_uri()
 }
 
 scriptdir=$(cd "$(dirname "$0")" && pwd)
-deps="curl libcurl4-openssl-dev uuid-dev git uuid g++ make cmake libssl-dev"
+deps="curl build-essential libcurl4-openssl-dev git cmake libssl-dev"
 repo="https://github.com/Azure/azure-iot-sdks.git"
 repo_name=$(repo_name_from_uri $repo)
 
