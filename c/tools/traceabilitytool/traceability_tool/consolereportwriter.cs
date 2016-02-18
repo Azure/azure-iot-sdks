@@ -54,9 +54,11 @@ namespace TraceabilityTool
             }
 
             // Count all requirements errors.
-            errorCount += ReportGenerator.missingCodeCoverage.Count;
+            int totalMissingCode = ReportGenerator.missingCodeCoverage.Count;
+            int totalMissingTest = ReportGenerator.missingTestCoverage.Count;
+            errorCount += totalMissingCode;
             errorCount += ReportGenerator.invalidRequirements.Count;
-            errorCount += ReportGenerator.missingTestCoverage.Count;
+            errorCount += totalMissingTest;
 
             int newRequirementCount = 0;
             // for each requirements documents that has missing code requirements 
@@ -84,6 +86,12 @@ namespace TraceabilityTool
                 }
             }
             errorCount -= newRequirementCount;
+
+            // Not caught by above: code can be 100% covered but test 0% and vice-versa.
+            if (totalMissingCode != totalMissingTest)
+            {
+                errorCount += Math.Abs(totalMissingTest - totalMissingCode);
+            }
 
             sb.AppendLine("Total invalid requirements found in code and tests," + ReportGenerator.invalidRequirements.Count.ToString());
             sb.AppendLine("Total unimplemented requirements," + ReportGenerator.missingCodeCoverage.Count.ToString());
