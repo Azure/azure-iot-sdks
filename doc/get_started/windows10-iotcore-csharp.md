@@ -48,7 +48,7 @@ First of all, you need to set up your device.
 
 ## Install Visual Studio 2015 and Tools
 
-To create Windows IoT Core solutions, you will need to install [Visual Studio 2015](https://www.visualstudio.com/en-us/products/vs-2015-product-editions.aspx). You can install any edition of Visual Studio, including the free Community edition.
+To create Windows IoT Core solutions, you will need to install [Visual Studio 2015](https://www.visualstudio.com/products/vs-2015-product-editions.aspx). You can install any edition of Visual Studio, including the free Community edition.
 
 Make sure to select the **Universal Windows App Development Tools**, the component required for writing apps Windows 10:
 
@@ -193,7 +193,7 @@ Now set the breakpoint at the `await` statement and start the application. When 
 
 Congratulations! You have successfully received your string from Azure IoT Hub.
 
-[device-explorer]: <https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>
+[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
 [hello-sample]: http://ms-iot.github.io/content/win10/samples/HelloWorld.htm
 [iot-dev-center]: https://dev.windows.com/iot
 [lnk-setup-iot-hub]: ../setup_iothub.md
