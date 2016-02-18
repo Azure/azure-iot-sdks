@@ -48,6 +48,8 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportHttp_SetOption, /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       */
     IoTHubTransportHttp_Create, /*pfIoTHubTransport_Create IoTHubTransport_Create;                                                  */
     IoTHubTransportHttp_Destroy, /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;                                                */
+	IoTHubTransportHttp_Register, /* pfIotHubTransport_Register IoTHubTransport_Register; */
+	IoTHubTransportHttp_Unregister, /* pfIotHubTransport_Unregister IoTHubTransport_Unegister; */
     IoTHubTransportHttp_Subscribe, /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;                                            */
     IoTHubTransportHttp_Unsubscribe, /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;                                        */
     IoTHubTransportHttp_DoWork, /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork; */
@@ -78,6 +80,15 @@ typedef struct HTTPTRANSPORT_HANDLE_DATA_TAG
     DLIST_ENTRY eventConfirmations; /*holds items for event confirmations*/
 }HTTPTRANSPORT_HANDLE_DATA;
 
+IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
+{
+	return (IOTHUB_DEVICE_HANDLE)handle;
+}
+
+void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
+{
+	return;
+}
 
 /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_003: [Otherwise IoTHubTransportHttp_Create shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/events?api-version=2016-02-03".]*/
 static void destroy_eventHTTPrelativePath(HTTPTRANSPORT_HANDLE_DATA* handleData)

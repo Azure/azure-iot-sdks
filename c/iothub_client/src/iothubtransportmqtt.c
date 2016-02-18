@@ -859,10 +859,22 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_HANDLE handle, cons
     return result;
 }
 
+IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
+{
+	return (IOTHUB_DEVICE_HANDLE)handle;
+}
+
+void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
+{
+	return;
+}
+
 TRANSPORT_PROVIDER myfunc = {
     IoTHubTransportMqtt_SetOption,
     IoTHubTransportMqtt_Create, 
     IoTHubTransportMqtt_Destroy, 
+	IoTHubTransportMqtt_Register,
+	IoTHubTransportMqtt_Unregister,
     IoTHubTransportMqtt_Subscribe, 
     IoTHubTransportMqtt_Unsubscribe, 
     IoTHubTransportMqtt_DoWork, 

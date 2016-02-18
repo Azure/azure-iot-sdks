@@ -1450,10 +1450,22 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_HANDLE handl
     return result;
 }
 
+static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQ_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
+{
+	return (IOTHUB_DEVICE_HANDLE)handle;
+}
+
+static void IoTHubTransportAMQ_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
+{
+	return;
+}
+
 static TRANSPORT_PROVIDER thisTransportProvider = {
     IoTHubTransportAMQP_SetOption, 
     IoTHubTransportAMQP_Create, 
     IoTHubTransportAMQP_Destroy, 
+	IoTHubTransportAMQ_Register,
+	IoTHubTransportAMQ_Unregister,
     IoTHubTransportAMQP_Subscribe, 
     IoTHubTransportAMQP_Unsubscribe, 
     IoTHubTransportAMQP_DoWork, 

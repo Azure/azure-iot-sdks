@@ -192,6 +192,12 @@ public:
     MOCK_STATIC_METHOD_1(, void, FAKE_IoTHubTransport_Destroy, TRANSPORT_HANDLE, handle)
     MOCK_VOID_METHOD_END()
 
+		MOCK_STATIC_METHOD_4(, IOTHUB_DEVICE_HANDLE, FAKE_IoTHubTransport_Register, TRANSPORT_HANDLE, handle, const char*, deviceId, const char*, deviceKey, PDLIST_ENTRY, waitingToSend)
+		MOCK_METHOD_END(IOTHUB_DEVICE_HANDLE, (IOTHUB_DEVICE_HANDLE)handle)
+
+		MOCK_STATIC_METHOD_1(, void, FAKE_IoTHubTransport_Unregister, IOTHUB_DEVICE_HANDLE, handle)
+		MOCK_VOID_METHOD_END()
+
     MOCK_STATIC_METHOD_1(, int, FAKE_IoTHubTransport_Subscribe, TRANSPORT_HANDLE, handle)
     MOCK_METHOD_END(int, 0)
 
@@ -269,6 +275,8 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, gballoc_free, void*, 
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientLLMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_HANDLE, handle, const char*, optionName, const void*, value);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , TRANSPORT_HANDLE, FAKE_IoTHubTransport_Create,const IOTHUBTRANSPORT_CONFIG*, config);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_Destroy, TRANSPORT_HANDLE, handle);
+DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientLLMocks, , IOTHUB_DEVICE_HANDLE, FAKE_IoTHubTransport_Register, TRANSPORT_HANDLE, handle, const char*, deviceId, const char*, deviceKey, PDLIST_ENTRY, waitingToSend);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_Unregister, IOTHUB_DEVICE_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , int, FAKE_IoTHubTransport_Subscribe, TRANSPORT_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_Unsubscribe, TRANSPORT_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_DoWork, TRANSPORT_HANDLE, handle, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle);
@@ -301,6 +309,8 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_SetOption,     /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       */
     FAKE_IoTHubTransport_Create,        /*pfIoTHubTransport_Create IoTHubTransport_Create;              */
     FAKE_IoTHubTransport_Destroy,       /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;            */
+	FAKE_IoTHubTransport_Register,		/* pfIotHubTransport_Register IoTHubTransport_Register;         */
+	FAKE_IoTHubTransport_Unregister,    /* pfIotHubTransport_Unregister IoTHubTransport_Unegister;      */
     FAKE_IoTHubTransport_Subscribe,     /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;        */
     FAKE_IoTHubTransport_Unsubscribe,   /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;    */
     FAKE_IoTHubTransport_DoWork,        /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;              */
