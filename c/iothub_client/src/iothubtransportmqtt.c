@@ -19,9 +19,6 @@
 #include "sastoken.h"
 #include "tickcounter.h"
 
-#include "tlsio_schannel.h"
-#include "tlsio_wolfssl.h"
-#include "tlsio_openssl.h"
 #include "tlsio.h"
 #include "platform.h"
 

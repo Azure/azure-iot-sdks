@@ -9,18 +9,12 @@
 #include "threadapi.h"
 #include "crt_abstractions.h"
 #include "iothubtransportmqtt.h"
-#if _WIN32
-#include "tlsio_schannel.h"
-#else
-#ifdef MBED_BUILD_TIMESTAMP
-#include "tlsio_wolfssl.h"
-#else
-#include "tlsio_openssl.h"
-#endif
-#endif
 #include "platform.h"
 
-#include "tlsio.h"
+#ifdef MBED_BUILD_TIMESTAMP
+#include "certs.h"
+#endif // MBED_BUILD_TIMESTAMP
+
 
 /*String containing Hostname, Device Id & Device Key in the format:             */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
@@ -39,24 +33,6 @@ typedef struct EVENT_INSTANCE_TAG
     int messageTrackingId;  // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
 
-const void* io_transport_provider(const char* fqdn, int port)
-{
-    const IO_INTERFACE_DESCRIPTION* io_interface_description;
-
-#ifdef _WIN32
-    TLSIO_CONFIG tls_io_config = { fqdn, port };
-    io_interface_description = tlsio_schannel_get_interface_description();
-#else
-    #ifdef MBED_BUILD_TIMESTAMP
-        TLSIO_CONFIG tls_io_config = { fqdn, port };
-        io_interface_description = tlsio_wolfssl_get_interface_description();
-    #else
-        TLSIO_CONFIG tls_io_config = { fqdn, port };
-        io_interface_description = tlsio_openssl_get_interface_description();
-    #endif
-#endif
-    return (void*)xio_create(io_interface_description, &tls_io_config, NULL);
-}
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
@@ -125,14 +101,14 @@ void iothub_client_sample_mqtt_run(void)
     callbackCounter = 0;
     int receiveContext = 0;
 
-    (void)printf("Starting the IoTHub client sample MQTT...\r\n");
-
     if (platform_init() != 0)
     {
-        (void)printf("ERROR: platform_init fails!\r\n");
+        (void)printf("Failed to initialize the platform.\r\n");
     }
     else
     {
+        (void)printf("Starting the IoTHub client sample MQTT...\r\n");
+
         if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
         {
             (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
@@ -141,6 +117,14 @@ void iothub_client_sample_mqtt_run(void)
         {
             bool traceOn = true;
             IoTHubClient_LL_SetOption(iotHubClientHandle, "logtrace", &traceOn);
+
+#ifdef MBED_BUILD_TIMESTAMP
+            // For mbed add the certificate information
+            if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+            {
+                printf("failure to set option \"TrustedCerts\"\r\n");
+            }
+#endif // MBED_BUILD_TIMESTAMP
 
             /* Setting Message call back, so we can receive Commands. */
             if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
