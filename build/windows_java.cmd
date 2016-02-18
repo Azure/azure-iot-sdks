@@ -9,12 +9,12 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- Java Device Client --
 cd %build-root%\java\device
-call mvn verify
+call mvn verify -DskipITs=false
 if errorlevel 1 goto :eof
 cd %build-root%
 
 REM -- Java Service Client --
 cd %build-root%\java\service
-call mvn verify
+call mvn verify -DskipITs=false
 if errorlevel 1 goto :eof
 cd %build-root%
