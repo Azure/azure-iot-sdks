@@ -19,7 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class MqttIotHubConnection implements MqttCallback
 {
     /** The MQTT connection lock. */
-    protected static final Object MQTT_CONNECTION_LOCK = new Object();
+    protected final Object MQTT_CONNECTION_LOCK = new Object();
 
     private MqttAsyncClient asyncClient;
 

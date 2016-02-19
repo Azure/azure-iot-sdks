@@ -14,11 +14,14 @@ import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 public class MqttTransportTest {
@@ -32,7 +35,7 @@ public class MqttTransportTest {
     // Tests_SRS_MQTTTRANSPORT_15_003: [The function shall establish an MQTT connection
     // with IoT Hub given in the configuration.]
     @Test
-    public void openOpensMqttConnection() throws IOException
+    public void openOpensMqttConnection() throws IOException, NoSuchFieldException, IllegalAccessException
     {
         new NonStrictExpectations()
         {
@@ -52,6 +55,14 @@ public class MqttTransportTest {
                 expectedConnection.open();
             }
         };
+
+        Field sendMessagesLock = transport.getClass().getDeclaredField("sendMessagesLock");
+        sendMessagesLock.setAccessible(true);
+        assertNotNull(sendMessagesLock.get(transport));
+
+        Field handleMessageLock = transport.getClass().getDeclaredField("handleMessageLock");
+        handleMessageLock.setAccessible(true);
+        assertNotNull(handleMessageLock.get(transport));
     }
 
     // SRS_MQTTTRANSPORT_15_004: [If the MQTT connection is already open, the function shall do nothing.]
