@@ -921,18 +921,43 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , void, test_iothubclien
 
 /* This cleanup list is needed so that we can cleanup the waiting to send list so that the tests do not leak.
 This is needed due to the fact that we populate this list for tests, rather than recording/performing calls if we would have a regular function interface */
-void cleanupList(PDLIST_ENTRY list)
+static void cleanupList(PDLIST_ENTRY list)
 {
     PDLIST_ENTRY curr_entry = list;
-    while (!DList_IsListEmpty(curr_entry))
+    while (!DList_IsListEmpty(list))
     {
         PDLIST_ENTRY next_entry = curr_entry->Flink;
-        DList_RemoveEntryList(curr_entry);
-        curr_entry = next_entry;
+        DList_RemoveEntryList(next_entry);
+        gballoc_free(containingRecord(next_entry, IOTHUB_MESSAGE_LIST, entry));
     }
 }
 
-void setExpectedCallsForTransportCreateUpTo(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, int maximumStepToSet)
+static void addTestEvents(PDLIST_ENTRY waitingToSend, int numberOfEvents, bool setCallback)
+{
+    while (numberOfEvents-- > 0)
+    {
+        IOTHUB_MESSAGE_LIST* iml = (IOTHUB_MESSAGE_LIST*)gballoc_malloc(sizeof(IOTHUB_MESSAGE_LIST));
+
+        if (iml == NULL)
+        {
+            LogError("Test failure: addTestEvents() failed allocating IOTHUB_MESSAGE_LIST (%i).\r\n", numberOfEvents);
+        }
+        else
+        {
+            iml->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
+
+            if (setCallback)
+            {
+                iml->context = (void*)numberOfEvents;
+                iml->callback = test_iothubclient_send_confirmation_callback;
+            }
+
+            DList_InsertTailList(waitingToSend, &(iml->entry));
+        }
+    }
+}
+
+static void setExpectedCallsForTransportCreateUpTo(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, int maximumStepToSet)
 {
     int step;
     for (step = 0; step <= maximumStepToSet; step++)
@@ -981,7 +1006,7 @@ void setExpectedCallsForTransportCreateUpTo(CIoTHubTransportAMQPMocks& mocks, IO
     }
 }
 
-void setExpectedCleanupCallsForTransportCreateUpTo(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, int maximumStepToCleanup)
+static void setExpectedCleanupCallsForTransportCreateUpTo(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, int maximumStepToCleanup)
 {
     int step;
     for (step = maximumStepToCleanup; step >= 0; step--)
@@ -1017,12 +1042,12 @@ void setExpectedCleanupCallsForTransportCreateUpTo(CIoTHubTransportAMQPMocks& mo
     }
 }
 
-void setExpectedCallsForSASTokenExpiryCheck(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
+static void setExpectedCallsForSASTokenExpiryCheck(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
 {
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
 }
 
-void setExpectedCallsForCbsAuthentication(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
+static void setExpectedCallsForCbsAuthentication(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
 {
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0));
@@ -1032,12 +1057,12 @@ void setExpectedCallsForCbsAuthentication(CIoTHubTransportAMQPMocks& mocks, IOTH
     EXPECTED_CALL(mocks, STRING_delete(NULL));
 }
 
-void setExpectedCallsForCbsAuthTimeoutCheck(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
+static void setExpectedCallsForCbsAuthTimeoutCheck(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
 {
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
 }
 
-void setExpectedCallsForCreateMessageReceiver(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+static void setExpectedCallsForCreateMessageReceiver(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
 {
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn(TEST_MESSAGERECEIVER_SOURCE);
@@ -1059,14 +1084,14 @@ void setExpectedCallsForCreateMessageReceiver(CIoTHubTransportAMQPMocks& mocks, 
     STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
 }
 
-void setExpectedCallsForDestroyMessageReceiver(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+static void setExpectedCallsForDestroyMessageReceiver(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
 {
     STRICT_EXPECTED_CALL(mocks, messagereceiver_close(TEST_MESSAGE_RECEIVER));
     STRICT_EXPECTED_CALL(mocks, messagereceiver_destroy(TEST_MESSAGE_RECEIVER));
     STRICT_EXPECTED_CALL(mocks, link_destroy(TEST_MESSAGERECEIVER_LINK));
 }
 
-void setExpectedCallsForCreateEventSender(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+static void setExpectedCallsForCreateEventSender(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
 {
     STRICT_EXPECTED_CALL(mocks, messaging_create_source(TEST_MESSAGE_SENDER_SOURCE_ADDRESS)).SetReturn(TEST_MESSAGESENDER_SOURCE);
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
@@ -1087,18 +1112,18 @@ void setExpectedCallsForCreateEventSender(CIoTHubTransportAMQPMocks& mocks, IOTH
     EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
 }
 
-void setExpectedCallsForDestroyEventSender(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+static void setExpectedCallsForDestroyEventSender(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
 {
     STRICT_EXPECTED_CALL(mocks, messagesender_destroy(TEST_MESSAGE_SENDER));
     STRICT_EXPECTED_CALL(mocks, link_destroy(TEST_MESSAGESENDER_LINK));
 }
 
-void setExpectedCallsForSendPendingEvents_SingleEvent(CIoTHubTransportAMQPMocks& mocks, IOTHUBMESSAGE_CONTENT_TYPE message_type, time_t current_time)
+static void setExpectedCallsForSendPendingEvents_SingleEvent(CIoTHubTransportAMQPMocks& mocks, IOTHUBMESSAGE_CONTENT_TYPE message_type, time_t current_time)
 {
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(message_type);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -1128,7 +1153,7 @@ void setExpectedCallsForSendPendingEvents_SingleEvent(CIoTHubTransportAMQPMocks&
     STRICT_EXPECTED_CALL(mocks, message_destroy(TEST_EVENT_MESSAGE_HANDLE));
 }
 
-void setExpectedCallsForSendPendingEvents(CIoTHubTransportAMQPMocks& mocks, IOTHUBMESSAGE_CONTENT_TYPE message_type, time_t current_time, int numberOfEvents)
+static void setExpectedCallsForSendPendingEvents(CIoTHubTransportAMQPMocks& mocks, IOTHUBMESSAGE_CONTENT_TYPE message_type, time_t current_time, int numberOfEvents)
 {
     while (numberOfEvents-- > 0)
     {
@@ -1138,21 +1163,21 @@ void setExpectedCallsForSendPendingEvents(CIoTHubTransportAMQPMocks& mocks, IOTH
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 }
 
-void setExpectedCallsForConnectionDoWork(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+static void setExpectedCallsForConnectionDoWork(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
 {
     EXPECTED_CALL(mocks, connection_dowork(NULL));
 }
 
-void setExpectedCallsForHandleEventSendTimeout(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
+static void setExpectedCallsForHandleEventSendTimeout(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, time_t current_time)
 {
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
 }
 
-void setExpectedCallsForRollEventsBackToWaitList(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
+static void setExpectedCallsForRollEventsBackToWaitList(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config)
 {
 }
 
-void setExpectedCallsForTransportDestroy(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, bool isConnectionInitialized, bool destroyIOtransport, size_t numberOfEventsInProgress)
+static void setExpectedCallsForTransportDestroy(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, bool isConnectionInitialized, bool destroyIOtransport, size_t numberOfEventsInProgress)
 {
     if (isConnectionInitialized)
     {
@@ -1189,7 +1214,7 @@ void setExpectedCallsForTransportDestroy(CIoTHubTransportAMQPMocks& mocks, IOTHU
     EXPECTED_CALL(mocks, gballoc_free(NULL));
 }
 
-void setExpectedCallsForTransportDoWorkUpTo(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, int maximumStepToSet, int messageReceiverCreation)
+static void setExpectedCallsForTransportDoWorkUpTo(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, int maximumStepToSet, int messageReceiverCreation)
 {
 	int step;
 	for (step = 0; step <= maximumStepToSet; step++)
@@ -1261,7 +1286,7 @@ void setExpectedCallsForTransportDoWorkUpTo(CIoTHubTransportAMQPMocks& mocks, IO
 	}
 }
 
-void setExpectedCallsForConnectionDestroyUpTo(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, int maximumStepToSet)
+static void setExpectedCallsForConnectionDestroyUpTo(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, int maximumStepToSet)
 {
 	int step;
 	for (step = maximumStepToSet; step >= 0; step--)
@@ -1309,30 +1334,7 @@ static void setupSuccessfulDoWork(TRANSPORT_HANDLE transport, CIoTHubTransportAM
     mocks.ResetAllCalls();
 }
 
-static void addTestEvents(PDLIST_ENTRY waitingToSend, int numberOfEvents, bool setCallback)
-{
-    while (numberOfEvents-- > 0)
-    {
-        IOTHUB_MESSAGE_LIST* iml = (IOTHUB_MESSAGE_LIST*)gballoc_malloc(sizeof(IOTHUB_MESSAGE_LIST));
 
-        if (iml == NULL)
-        {
-            LogError("Test failure: addTestEvents() failed allocating IOTHUB_MESSAGE_LIST (%i).\r\n", numberOfEvents);
-        }
-        else
-        {
-            iml->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
-
-            if (setCallback)
-            {
-                iml->context = (void*)numberOfEvents;
-                iml->callback = test_iothubclient_send_confirmation_callback;
-            }
-
-            DList_InsertTailList(waitingToSend, &(iml->entry));
-        }
-    }
-}
 
 static void resetTestSuiteState()
 {
@@ -1344,7 +1346,7 @@ static void resetTestSuiteState()
 
 static time_t addSecondsToTime(time_t reference_time, size_t seconds_to_add)
 {
-    time_t result = NULL;
+    time_t result = 0;
 
     tm cal_time = *localtime(&reference_time);
     cal_time.tm_sec += seconds_to_add;
@@ -1404,7 +1406,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 
     resetTestSuiteState();
 }
-
 
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_005: [If parameter config (or its fields) is NULL then IoTHubTransportAMQP_Create shall fail and return NULL.] 
 TEST_FUNCTION(AMQP_Create_with_null_config_fails)
@@ -1646,12 +1647,12 @@ TEST_FUNCTION(AMQP_Create_devicesPath_malloc_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    char* devicesPath = TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID;
+    const char* devicesPath = TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID;
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_IOTHUB_FQDN);
     EXPECTED_CALL(mocks, STRING_c_str(0));
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(strlen(devicesPath) + 1)).SetReturn((char*)NULL);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(strlen(devicesPath) + 1)).SetFailReturn((char*)NULL);
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_IOTHUB_FQDN);
 
     // act
@@ -1676,13 +1677,13 @@ TEST_FUNCTION(AMQP_Create_devicesPath_STRING_construct_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    char* devicesPath = TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID;
+    const char* devicesPath = TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID;
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_IOTHUB_FQDN);
     EXPECTED_CALL(mocks, STRING_c_str(0));
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(strlen(devicesPath) + 1));
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(devicesPath)).SetReturn(TEST_NULL_STRING_HANDLE);
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(devicesPath)).SetFailReturn(TEST_NULL_STRING_HANDLE);
     EXPECTED_CALL(mocks, gballoc_free(0));
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_IOTHUB_FQDN);
     
@@ -1708,12 +1709,12 @@ TEST_FUNCTION(AMQP_Create_targetAddress_malloc_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    char* targetAddress = "amqps://" TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/events";
+    const char* targetAddress = "amqps://" TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/events";
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_DEVICES_PATH);
     EXPECTED_CALL(mocks, STRING_c_str(0));
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(strlen(targetAddress) + 1)).SetReturn((char*)NULL);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(strlen(targetAddress) + 1)).SetFailReturn((char*)NULL);
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_DEVICES_PATH);
 
     // act
@@ -1738,13 +1739,13 @@ TEST_FUNCTION(AMQP_Create_targetAddress_STRING_construct_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    char* targetAddress = "amqps://" TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/events";
+    const char* targetAddress = "amqps://" TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/events";
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_DEVICES_PATH);
     EXPECTED_CALL(mocks, STRING_c_str(0));
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(strlen(targetAddress) + 1));
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(targetAddress)).SetReturn(TEST_NULL_STRING_HANDLE);
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(targetAddress)).SetFailReturn(TEST_NULL_STRING_HANDLE);
     EXPECTED_CALL(mocks, gballoc_free(0));
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_DEVICES_PATH);
 
@@ -1770,12 +1771,12 @@ TEST_FUNCTION(AMQP_Create_receiveAddress_malloc_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    char* receiveAddress = "amqps://"  TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/devicebound";
+    const char* receiveAddress = "amqps://"  TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/devicebound";
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_TARGET_ADDRESS);
     EXPECTED_CALL(mocks, STRING_c_str(0));
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(strlen(receiveAddress) + 1)).SetReturn((char*)NULL);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(strlen(receiveAddress) + 1)).SetFailReturn((char*)NULL);
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_TARGET_ADDRESS);
 
     // act
@@ -1800,13 +1801,13 @@ TEST_FUNCTION(AMQP_Create_receiveAddress_STRING_construct_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    char* receiveAddress = "amqps://"  TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/devicebound";
+    const char* receiveAddress = "amqps://"  TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/devicebound";
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_TARGET_ADDRESS);
     EXPECTED_CALL(mocks, STRING_c_str(0));
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(strlen(receiveAddress) + 1));
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(receiveAddress)).SetReturn(TEST_NULL_STRING_HANDLE);
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(receiveAddress)).SetFailReturn(TEST_NULL_STRING_HANDLE);
     EXPECTED_CALL(mocks, gballoc_free(0));
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_TARGET_ADDRESS);
 
@@ -1834,7 +1835,7 @@ TEST_FUNCTION(AMQP_Create_sasTokenKeyName_allocation_fails)
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_RECEIVE_ADDRESS);
-    STRICT_EXPECTED_CALL(mocks, STRING_new()).SetReturn(TEST_NULL_STRING_HANDLE);
+    STRICT_EXPECTED_CALL(mocks, STRING_new()).SetFailReturn(TEST_NULL_STRING_HANDLE);
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_RECEIVE_ADDRESS);
 
     // act
@@ -1861,7 +1862,7 @@ TEST_FUNCTION(AMQP_Create_deviceKey_allocation_fails)
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_SASTOKEN_KEYNAME);
-    STRICT_EXPECTED_CALL(mocks, STRING_new()).SetReturn(TEST_NULL_STRING_HANDLE);
+    STRICT_EXPECTED_CALL(mocks, STRING_new()).SetFailReturn(TEST_NULL_STRING_HANDLE);
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_SASTOKEN_KEYNAME);
 
     // act
@@ -2219,7 +2220,7 @@ TEST_FUNCTION(AMQP_DoWork_SASToken_create_fails)
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_OPEN_CBS, DOWORK_MESSAGERECEIVER_NONE);
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
-    EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0)).SetReturn((STRING_HANDLE)NULL);
+    EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0)).SetFailReturn((STRING_HANDLE)NULL);
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
@@ -2468,7 +2469,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_fails)
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn(TEST_MESSAGESENDER_TARGET);
     EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGESENDER_LINK);
-    EXPECTED_CALL(mocks, link_set_max_message_size(NULL, NULL));
+    EXPECTED_CALL(mocks, link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     EXPECTED_CALL(mocks, amqpvalue_create_map()).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
     EXPECTED_CALL(mocks, amqpvalue_create_symbol(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
     EXPECTED_CALL(mocks, amqpvalue_create_string(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
@@ -2524,7 +2525,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_open_fails)
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn(TEST_MESSAGESENDER_TARGET);
     EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGESENDER_LINK);
-    EXPECTED_CALL(mocks, link_set_max_message_size(NULL, NULL));
+    EXPECTED_CALL(mocks, link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     EXPECTED_CALL(mocks, amqpvalue_create_map()).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
     EXPECTED_CALL(mocks, amqpvalue_create_symbol(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
     EXPECTED_CALL(mocks, amqpvalue_create_string(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
@@ -2777,7 +2778,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_create_fails)
     EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn(TEST_MESSAGERECEIVER_TARGET);
     EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGERECEIVER_LINK);
     STRICT_EXPECTED_CALL(mocks, link_set_rcv_settle_mode(TEST_MESSAGERECEIVER_LINK, receiver_settle_mode_first));
-    EXPECTED_CALL(mocks, link_set_max_message_size(NULL, NULL));
+    EXPECTED_CALL(mocks, link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     EXPECTED_CALL(mocks, amqpvalue_create_map()).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
     EXPECTED_CALL(mocks, amqpvalue_create_symbol(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
     EXPECTED_CALL(mocks, amqpvalue_create_string(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
@@ -2837,7 +2838,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_open_fails)
     EXPECTED_CALL(mocks, messaging_create_target(NULL)).SetReturn(TEST_MESSAGERECEIVER_TARGET);
     EXPECTED_CALL(mocks, link_create(NULL, NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGERECEIVER_LINK);
     STRICT_EXPECTED_CALL(mocks, link_set_rcv_settle_mode(TEST_MESSAGERECEIVER_LINK, receiver_settle_mode_first));
-    EXPECTED_CALL(mocks, link_set_max_message_size(NULL, NULL));
+    EXPECTED_CALL(mocks, link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     EXPECTED_CALL(mocks, amqpvalue_create_map()).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
     EXPECTED_CALL(mocks, amqpvalue_create_symbol(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
     EXPECTED_CALL(mocks, amqpvalue_create_string(NULL)).IgnoreArgument(1).SetReturn(TEST_AMQP_VALUE_TEST_HANDLE);
@@ -2896,7 +2897,7 @@ TEST_FUNCTION(AMQP_DoWork_expired_SASToken_fails)
     setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
     setExpectedCallsForSASTokenExpiryCheck(mocks, &config, expiration_time);
     EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
-    EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0)).SetReturn((STRING_HANDLE)NULL);
+    EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0)).SetFailReturn((STRING_HANDLE)NULL);
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
@@ -2957,6 +2958,7 @@ TEST_FUNCTION(AMQP_DoWork_succeeds_when_2_waiting_to_send_messages_are_in_the_li
     transport_interface->IoTHubTransport_Destroy(transport);
     cleanupList(config.waitingToSend);
 }
+
 
 // Codes_SRS_IOTHUBTRANSPORTAMQP_09_041: [IoTHubTransportAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] 
 // Codes_SRS_IOTHUBTRANSPORTAMQP_09_042: [IoTHubTransportAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.]
@@ -3253,7 +3255,7 @@ TEST_FUNCTION(AMQP_DoWork_send_one_message_succeeds)
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -3315,7 +3317,7 @@ TEST_FUNCTION(when_getting_the_properties_map_for_a_message_to_be_sent_fails_AMQ
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -3376,7 +3378,7 @@ TEST_FUNCTION(when_getting_the_internals_for_the_properties_map_for_a_message_to
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -3447,7 +3449,7 @@ TEST_FUNCTION(AMQP_DoWork_encodes_two_properties_on_an_IoTHub_Message_before_giv
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -3527,7 +3529,7 @@ TEST_FUNCTION(when_creating_the_property_map_fails_AMQP_DoWork_completes_the_mes
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -3595,7 +3597,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_1st_property_key_fails_AMQP_
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -3666,7 +3668,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_1st_property_value_fails_AMQ
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -3740,7 +3742,7 @@ TEST_FUNCTION(when_setting_the_value_for_the_1st_property_fails_AMQP_DoWork_comp
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -3817,7 +3819,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_for_key_of_the_2nd_property_
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -3895,7 +3897,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_for_value_of_the_2nd_propert
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -3975,7 +3977,7 @@ TEST_FUNCTION(when_setting_the_2nd_property_on_the_uAMQP_map_fails_AMQP_DoWork_c
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -4059,7 +4061,7 @@ TEST_FUNCTION(when_setting_the_message_properties_fails_AMQP_DoWork_completes_th
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_BYTEARRAY);
 
-    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
