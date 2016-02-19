@@ -162,6 +162,10 @@ This section walks you through building, deploying and validating the IoT Client
 
         nano azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http.c
 
+    **For MQTT protocol:**
+
+        nano azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt.c
+
 -   This launches a console-based text editor. Scroll down to the
     connection information.
 
@@ -245,7 +249,11 @@ section. These will be needed in [Step 4](#Step-4-2-Share)
 
     **If using HTTP protocol:** Run sample *iothub\_client\_sample\_http*
 
-        ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/iothub_client_sample_http
+        ~/cmake/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
+
+    **If using MQTT protocol:** Run sample *iothub\_client\_sample\_mqtt*
+
+        ~/cmake/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt
 
 4.  Verify that the confirmation messages show an OK. If not, then you may have
     incorrectly copied the device hub connection information.
@@ -255,6 +263,9 @@ section. These will be needed in [Step 4](#Step-4-2-Share)
 
     **If using HTTP protocol:**
     ![SampleHTTP\_result\_terminal](images/3_3_1_03.png)
+
+    **If using MQTT protocol:**
+    ![SampleMQTT\_result\_terminal](images/3_3_1_09.png)
 
 5.  DeviceExplorer should show that IoT Hub has successfully received data sent
     by sample test.
@@ -266,6 +277,10 @@ section. These will be needed in [Step 4](#Step-4-2-Share)
     **If using HTTP protocol:**
     
     ![SampleHTTP\_result\_DeviceExplorer](images/3_3_1_05.png)
+
+    **If using MQTT protocol:**
+    
+    ![SampleMQTT\_result\_DeviceExplorer](images/3_3_1_10.png)
 
 ### 3.3.2 Receive messages from IoT Hub
 
@@ -286,6 +301,9 @@ section. These will be needed in [Step 4](#Step-4-2-Share)
 
     **If using HTTP protocol:**
     ![MessageSend\_terminal](images/3_3_1_08.png)
+
+    **If using MQTT protocol:**
+    ![MessageSend\_terminal](images/3_3_1_11.png)
 
 <a name="Step-4-Package_Share"></a>
 # Step 4: Package and Share

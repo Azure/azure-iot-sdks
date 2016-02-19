@@ -30,8 +30,7 @@ For information on how to use this library refer to the documents below:
 
 - [Prepare your development environment to use the Azure IoT device SDK for C](doc/devbox_setup.md)
 - [Setup IoT Hub](../doc/setup_iothub.md)
-- [Provision devices](../tools/iothub-explorer/doc/provision_device.md)
-- [Using the DeviceExplorer application to tests IoT Hub device connectivity](../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
+- [Provision and manage devices](../doc/manage_iot_hub.md)
 - [Azure IoT device SDK for C  tutorial](https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/)
 - [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
 - [How to port the C libraries to other OS platforms](doc/porting_guide.md)

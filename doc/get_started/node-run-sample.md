@@ -51,11 +51,11 @@ You should have the following items ready before beginning the process:
 
 - Get the following sample files from https://github.com/Azure/azure-iot-sdks/node/device/samples
     - **package.json**
-    - **simple_sample_http.js**
+    - **simple_sample_device.js**
 
 - Place the files in the folder of your choice on the target machine/device
 
-- Open the file **simple_sample_http.js** in a text editor.
+- Open the file **simple_sample_device.js** in a text editor.
 
 - Locate the following code in the file:
 
@@ -75,10 +75,13 @@ You should have the following items ready before beginning the process:
 
     ```
     npm install
-    node .
+    node simple_sample_device.js
     ```
 
 - The sample application will send messages to your IoT hub, and the **iothub-explorer** utility will display the messages as your IoT hub receives them.
+
+# Experimenting with various transport protocols
+The same sample can be used to test AMQP, AMQP over Websockets, HTTP and MQTT. In order to change the transport, uncomment whichever you want to evaluate in the `require` calls on top of the sample code and pass it to the call to Client.fromConnectionString() when creating the client.
 
 # Debugging the samples (and/or your code)
 [Visual Studio Code](https://code.visualstudio.com/) provides an excellent environment to write and debug Node.js code:
