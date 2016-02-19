@@ -20,7 +20,7 @@ var client = Client.fromConnectionString(connectionString, Amqp);
 
 var connectCallback = function (err) {
   if (err) {
-    console.err('Could not connect: ' + err.message);
+    console.error('Could not connect: ' + err.message);
   } else {
     console.log('Client connected');
     client.on('message', function (msg) {
