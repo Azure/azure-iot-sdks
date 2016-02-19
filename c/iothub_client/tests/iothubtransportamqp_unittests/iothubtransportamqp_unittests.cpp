@@ -429,12 +429,7 @@ public:
 
     MOCK_STATIC_METHOD_4(, STRING_HANDLE, SASToken_Create, STRING_HANDLE, key, STRING_HANDLE, scope, STRING_HANDLE, keyName, size_t, expiry)
         test_latest_SASToken_expiry_time = expiry;
-        STRING_HANDLE sasToken = BASEIMPLEMENTATION::STRING_construct(TEST_SAS_TOKEN);
-        if (sasToken == NULL)
-        {
-            LogError("Test failure: failed creating STRING instance for SASToken_create\r\n");
-        }
-    MOCK_METHOD_END(STRING_HANDLE, sasToken);
+    MOCK_METHOD_END(STRING_HANDLE, BASEIMPLEMENTATION::STRING_construct(TEST_SAS_TOKEN));
 
     // xio.h
     MOCK_STATIC_METHOD_3(, XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, io_create_parameters, LOGGER_LOG, logger_log)
@@ -923,10 +918,9 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , void, test_iothubclien
 This is needed due to the fact that we populate this list for tests, rather than recording/performing calls if we would have a regular function interface */
 static void cleanupList(PDLIST_ENTRY list)
 {
-    PDLIST_ENTRY curr_entry = list;
     while (!DList_IsListEmpty(list))
     {
-        PDLIST_ENTRY next_entry = curr_entry->Flink;
+        PDLIST_ENTRY next_entry = list->Flink;
         DList_RemoveEntryList(next_entry);
         gballoc_free(containingRecord(next_entry, IOTHUB_MESSAGE_LIST, entry));
     }
@@ -1444,8 +1438,10 @@ TEST_FUNCTION(AMQP_Create_with_config_null_field2_fails)
     // arrange
     IOTHUBTRANSPORT_CONFIG config;
     TRANSPORT_PROVIDER* transport_interface;
+    IOTHUB_CLIENT_CONFIG client_config;
 
     config.waitingToSend = NULL;
+    config.upperConfig = &client_config;
     transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     // act
@@ -2220,7 +2216,7 @@ TEST_FUNCTION(AMQP_DoWork_SASToken_create_fails)
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_OPEN_CBS, DOWORK_MESSAGERECEIVER_NONE);
     STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
-    EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0)).SetFailReturn((STRING_HANDLE)NULL);
+    EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0)).SetReturn((STRING_HANDLE)NULL);
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
@@ -2897,7 +2893,7 @@ TEST_FUNCTION(AMQP_DoWork_expired_SASToken_fails)
     setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
     setExpectedCallsForSASTokenExpiryCheck(mocks, &config, expiration_time);
     EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
-    EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0)).SetFailReturn((STRING_HANDLE)NULL);
+    EXPECTED_CALL(mocks, SASToken_Create(NULL, NULL, NULL, 0)).SetReturn((STRING_HANDLE)NULL);
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     setExpectedCallsForHandleEventSendTimeout(mocks, &config, current_time);
