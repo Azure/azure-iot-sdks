@@ -160,7 +160,7 @@ linkSharedUtil(iothub_client)
 
 add_subdirectory(samples)
 
-if(NOT IN_OPENWRT)
+if(${build_tests} AND (NOT IN_OPENWRT))
 # Disable tests for OpenWRT
 add_subdirectory(tests)
 endif()

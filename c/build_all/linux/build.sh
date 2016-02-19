@@ -13,6 +13,7 @@ build_amqp=ON
 build_http=ON
 build_mqtt=ON
 skip_unittests=OFF
+build_tests=ON
 
 usage ()
 {
@@ -23,6 +24,7 @@ usage ()
     echo " --skip-e2e-tests              skip the running of end-to-end tests (e2e tests are run by default)"
     echo " --skip-unittests              skip the running of unit tests (unit tests are run by default)"
 	echo " --run-longhaul-tests          run long haul tests (long haul tests are not run by default)"
+    echo " --no-tests                    skip the building all tests"
     echo ""
     echo " --no-amqp                     do no build AMQP transport and samples"
     echo " --no-http                     do no build HTTP transport and samples"
@@ -55,6 +57,10 @@ process_args ()
               "--skip-e2e-tests" ) run_e2e_tests=OFF;;
 			  "--skip-unittests" ) skip_unittests=ON;;
               "--run-longhaul-tests" ) run_longhaul_tests=ON;;
+              "--no-tests" ) build_tests=OFF
+			run_e2e_tests=OFF
+			run_longhaul_tests=OFF
+			skip_unittests=ON;;
               "--no-amqp" ) build_amqp=OFF;;
               "--no-http" ) build_http=OFF;;
               "--no-mqtt" ) build_mqtt=OFF;;
@@ -76,7 +82,7 @@ process_args $*
 rm -r -f ~/cmake
 mkdir ~/cmake
 pushd ~/cmake
-cmake $toolchainfile -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Dskip_unittests:BOOL=$skip_unittests $build_root
+cmake $toolchainfile -DcompileOption_C:STRING="$extracloptions" -Dbuild_tests:BOOL=$build_tests -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Dskip_unittests:BOOL=$skip_unittests $build_root
 make --jobs=$(nproc)
 ctest -C "Debug" -V
 popd

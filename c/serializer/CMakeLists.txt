@@ -64,7 +64,7 @@ serializer ${serializer_c_files} ${serializer_h_files}
 
 add_subdirectory(samples)
 
-if(NOT IN_OPENWRT)
+if(${build_tests} AND (NOT IN_OPENWRT))
 # Disable tests and samples for OpenWRT
 add_subdirectory(tests)
 endif()
