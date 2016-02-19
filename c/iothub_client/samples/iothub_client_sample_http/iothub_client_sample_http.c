@@ -16,6 +16,7 @@
 #include "iothub_message.h"
 #include "crt_abstractions.h"
 #include "iothubtransporthttp.h"
+#include "platform.h"
 #endif
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -104,89 +105,97 @@ void iothub_client_sample_http_run(void)
 
     callbackCounter = 0;
 
-    (void)printf("Starting the IoTHub client sample HTTP...\r\n");
-
-    if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol)) == NULL)
+    if (platform_init() != 0)
     {
-        (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
+        printf("Failed to initialize the platform.\r\n");
     }
     else
     {
-        unsigned int timeout = 241000;
-        // Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
-        // Note that for scalabilty, the default value of minimumPollingTime
-        // is 25 minutes. For more information, see:
-        // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
-        unsigned int minimumPollingTime = 9; 
-        if (IoTHubClient_LL_SetOption(iotHubClientHandle, "timeout", &timeout) != IOTHUB_CLIENT_OK)
-        {
-            printf("failure to set option \"timeout\"\r\n");
-        }
+        (void)printf("Starting the IoTHub client sample HTTP...\r\n");
 
-        if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
+        if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol)) == NULL)
         {
-            printf("failure to set option \"MinimumPollingTime\"\r\n");
-        }
-
-#ifdef MBED_BUILD_TIMESTAMP
-        // For mbed add the certificate information
-        if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
-        {
-            printf("failure to set option \"TrustedCerts\"\r\n");
-        }
-#endif // MBED_BUILD_TIMESTAMP
-
-        /* Setting Message call back, so we can receive Commands. */
-        if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
-        {
-            (void)printf("ERROR: IoTHubClient_LL_SetMessageCallback..........FAILED!\r\n");
+            (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
         }
         else
         {
-			int i;
-
-            (void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
-
-            /* Now that we are ready to receive commands, let's send some messages */
-            for (i = 0; i < MESSAGE_COUNT; i++)
+            unsigned int timeout = 241000;
+            // Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
+            // Note that for scalabilty, the default value of minimumPollingTime
+            // is 25 minutes. For more information, see:
+            // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
+            unsigned int minimumPollingTime = 9;
+            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "timeout", &timeout) != IOTHUB_CLIENT_OK)
             {
-                sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"myFirstDevice\",\"windSpeed\": %.2f}", avgWindSpeed + (rand() % 4 + 2));
-                if ((messages[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
+                printf("failure to set option \"timeout\"\r\n");
+            }
+
+            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
+            {
+                printf("failure to set option \"MinimumPollingTime\"\r\n");
+            }
+
+#ifdef MBED_BUILD_TIMESTAMP
+            // For mbed add the certificate information
+            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+            {
+                printf("failure to set option \"TrustedCerts\"\r\n");
+            }
+#endif // MBED_BUILD_TIMESTAMP
+
+            /* Setting Message call back, so we can receive Commands. */
+            if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
+            {
+                (void)printf("ERROR: IoTHubClient_LL_SetMessageCallback..........FAILED!\r\n");
+            }
+            else
+            {
+                int i;
+
+                (void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
+
+                /* Now that we are ready to receive commands, let's send some messages */
+                for (i = 0; i < MESSAGE_COUNT; i++)
                 {
-                    (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
-                }
-                else
-                {
-					MAP_HANDLE propMap;
-
-                    messages[i].messageTrackingId = i;
-
-                    propMap = IoTHubMessage_Properties(messages[i].messageHandle);
-                    sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
-                    if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                    sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"myFirstDevice\",\"windSpeed\": %.2f}", avgWindSpeed + (rand() % 4 + 2));
+                    if ((messages[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
                     {
-                        (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
-                    }
-
-                    if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[i].messageHandle, SendConfirmationCallback, &messages[i]) != IOTHUB_CLIENT_OK)
-                    {
-                        (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
+                        (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
                     }
                     else
                     {
-                        (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub.\r\n", i);
+                        MAP_HANDLE propMap;
+
+                        messages[i].messageTrackingId = i;
+
+                        propMap = IoTHubMessage_Properties(messages[i].messageHandle);
+                        sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
+                        if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                        {
+                            (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
+                        }
+
+                        if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[i].messageHandle, SendConfirmationCallback, &messages[i]) != IOTHUB_CLIENT_OK)
+                        {
+                            (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
+                        }
+                        else
+                        {
+                            (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub.\r\n", i);
+                        }
+
                     }
-                    
                 }
             }
-        }
 
-        /* Wait for Commands. */
-        while (1)
-        {
-            IoTHubClient_LL_DoWork(iotHubClientHandle);
-        }
+            /* Wait for Commands. */
+            while (1)
+            {
+                IoTHubClient_LL_DoWork(iotHubClientHandle);
+            }
 
-        IoTHubClient_LL_Destroy(iotHubClientHandle);
+            IoTHubClient_LL_Destroy(iotHubClientHandle);
+        }
+        platform_deinit();
     }
 }

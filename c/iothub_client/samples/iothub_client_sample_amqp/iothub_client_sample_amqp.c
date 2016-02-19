@@ -115,65 +115,74 @@ void iothub_client_sample_amqp_run(void)
     int receiveContext = 0;
 
     (void)printf("Starting the IoTHub client sample AMQP...\r\n");
-    
-    if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol)) == NULL)
+
+    if (platform_init() != 0)
     {
-        (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
+        printf("Failed to initialize the platform.\r\n");
     }
     else
     {
-#ifdef MBED_BUILD_TIMESTAMP
-        // For mbed add the certificate information
-        if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+        if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol)) == NULL)
         {
-            printf("failure to set option \"TrustedCerts\"\r\n");
-        }
-#endif // MBED_BUILD_TIMESTAMP
-
-        /* Setting Message call back, so we can receive Commands. */
-        if (IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
-        {
-            (void)printf("ERROR: IoTHubClient_SetMessageCallback..........FAILED!\r\n");
+            (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
         }
         else
         {
-            (void)printf("IoTHubClient_SetMessageCallback...successful.\r\n");
 
-            /* Now that we are ready to receive commands, let's send some messages */
-            for (size_t i = 0; i < MESSAGE_COUNT; i++)
+#ifdef MBED_BUILD_TIMESTAMP
+            // For mbed add the certificate information
+            if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
-                sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f}", avgWindSpeed+(rand()%4+2) );
-                if ((messages[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
-                {
-                    (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
-                }
-                else
-                {
-                    messages[i].messageTrackingId = i;
-                    
-                    MAP_HANDLE propMap = IoTHubMessage_Properties(messages[i].messageHandle);
-                    sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
-                    if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
-                    {
-                        (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
-                    }
+                printf("failure to set option \"TrustedCerts\"\r\n");
+            }
+#endif // MBED_BUILD_TIMESTAMP
 
-                    if (IoTHubClient_SendEventAsync(iotHubClientHandle, messages[i].messageHandle, SendConfirmationCallback, &messages[i]) != IOTHUB_CLIENT_OK)
+            /* Setting Message call back, so we can receive Commands. */
+            if (IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
+            {
+                (void)printf("ERROR: IoTHubClient_SetMessageCallback..........FAILED!\r\n");
+            }
+            else
+            {
+                (void)printf("IoTHubClient_SetMessageCallback...successful.\r\n");
+
+                /* Now that we are ready to receive commands, let's send some messages */
+                for (size_t i = 0; i < MESSAGE_COUNT; i++)
+                {
+                    sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f}", avgWindSpeed + (rand() % 4 + 2));
+                    if ((messages[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
                     {
-                        (void)printf("ERROR: IoTHubClient_SendEventAsync..........FAILED!\r\n");
+                        (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
                     }
                     else
                     {
-                        (void)printf("IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.\r\n");
+                        messages[i].messageTrackingId = i;
+
+                        MAP_HANDLE propMap = IoTHubMessage_Properties(messages[i].messageHandle);
+                        sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
+                        if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                        {
+                            (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
+                        }
+
+                        if (IoTHubClient_SendEventAsync(iotHubClientHandle, messages[i].messageHandle, SendConfirmationCallback, &messages[i]) != IOTHUB_CLIENT_OK)
+                        {
+                            (void)printf("ERROR: IoTHubClient_SendEventAsync..........FAILED!\r\n");
+                        }
+                        else
+                        {
+                            (void)printf("IoTHubClient_SendEventAsync accepted data for transmission to IoT Hub.\r\n");
+                        }
                     }
                 }
+
+                /* Wait for Commands. */
+                (void)printf("Press any key to exit the application. \r\n");
+                (void)getchar();
             }
 
-            /* Wait for Commands. */
-            (void)printf("Press any key to exit the application. \r\n");
-            (void)getchar();
+            IoTHubClient_Destroy(iotHubClientHandle);
         }
-        
-        IoTHubClient_Destroy(iotHubClientHandle);
+        platform_deinit();
     }
 }

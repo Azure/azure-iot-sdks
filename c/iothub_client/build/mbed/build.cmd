@@ -20,6 +20,9 @@ if not %errorlevel%==0 exit /b %errorlevel%
 call :compile iothub_client_sample_http %build-root%\samples\iothub_client_sample_http\mbed
 if not %errorlevel%==0 exit /b %errorlevel%
 
+call :compile iothub_client_sample_mqtt %build-root%\samples\iothub_client_sample_mqtt\mbed
+if not %errorlevel%==0 exit /b %errorlevel%
+
 rem -----------------------------------------------------------------------------
 rem -- build iothub longhaul tests
 rem -----------------------------------------------------------------------------

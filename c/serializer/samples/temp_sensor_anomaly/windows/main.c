@@ -8,6 +8,7 @@
 #include "schemaserializer.h"
 #include "threadapi.h"
 #include "iothub_client_ll.h"
+#include "platform.h"
 
 static const char* connectionString = "[device connection string]";
 static const char* deviceId = "[deviceName]"; /*must match the one on connectionString*/
@@ -114,77 +115,117 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
 
 int main(void)
 {
-    /* initialize the IoTHubClient */
-    if (serializer_init(NULL) != SERIALIZER_OK)
+    if (platform_init() != 0)
     {
-        (void)printf("Failed on serializer_init\r\n");
+        printf("Failed to initialize the platfrom.\r\n");
     }
     else
     {
-        IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
-
-        if (iotHubClientHandle == NULL)
+        /* initialize the IoTHubClient */
+        if (serializer_init(NULL) != SERIALIZER_OK)
         {
-            (void)printf("Failed on IoTHubClient_Create\r\n");
+            (void)printf("Failed on serializer_init\r\n");
         }
         else
         {
-            FrdmDevice* frdmDevice;
-            // Because it can poll "after 9 seconds" polls will happen 
-            // effectively at ~10 seconds.
-            // Note that for scalabilty, the default value of minimumPollingTime
-            // is 25 minutes. For more information, see:
-            // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
-            unsigned int minimumPollingTime = 9;
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
-            {
-                printf("failure to set option \"MinimumPollingTime\"\r\n");
-            }
+            IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
 
-            frdmDevice = CREATE_MODEL_INSTANCE(Contoso, FrdmDevice, true);
-            if (frdmDevice == NULL)
+            if (iotHubClientHandle == NULL)
             {
-                (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");
+                (void)printf("Failed on IoTHubClient_Create\r\n");
             }
             else
             {
-                if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, IoTHubMessage, frdmDevice) != IOTHUB_CLIENT_OK)
+                FrdmDevice* frdmDevice;
+                // Because it can poll "after 9 seconds" polls will happen 
+                // effectively at ~10 seconds.
+                // Note that for scalabilty, the default value of minimumPollingTime
+                // is 25 minutes. For more information, see:
+                // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
+                unsigned int minimumPollingTime = 9;
+                if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
                 {
-                    printf("unable to IoTHubClient_SetMessageCallback\r\n");
+                    printf("failure to set option \"MinimumPollingTime\"\r\n");
+                }
+
+                frdmDevice = CREATE_MODEL_INSTANCE(Contoso, FrdmDevice, true);
+                if (frdmDevice == NULL)
+                {
+                    (void)printf("Failed on CREATE_MODEL_INSTANCE\r\n");
                 }
                 else
                 {
-                    STRING_HANDLE commandsMetadata;
-
-                    /* send the device info upon startup so that the cloud app knows
-                    what commands are available and the fact that the device is up */
-                    frdmDevice->ObjectType = "DeviceInfo-HW";
-                    frdmDevice->ObjectName = "An ALARM device";
-                    frdmDevice->Version = "1.0";
-                    frdmDevice->SystemProperties.DeviceID = (char*)deviceId;
-                    frdmDevice->SystemProperties.Enabled = true;
-
-                    /* build the description of the commands on the device */
-                    commandsMetadata = STRING_new();
-                    if (commandsMetadata == NULL)
+                    if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, IoTHubMessage, frdmDevice) != IOTHUB_CLIENT_OK)
                     {
-                        (void)printf("Failed on creating string for commands metadata\r\n");
+                        printf("unable to IoTHubClient_SetMessageCallback\r\n");
                     }
                     else
                     {
-                        /* Serialize the commands metadata as a JSON string before sending */
-                        if (SchemaSerializer_SerializeCommandMetadata(GET_MODEL_HANDLE(Contoso, FrdmDevice), commandsMetadata) != SCHEMA_SERIALIZER_OK)
+                        STRING_HANDLE commandsMetadata;
+
+                        /* send the device info upon startup so that the cloud app knows
+                        what commands are available and the fact that the device is up */
+                        frdmDevice->ObjectType = "DeviceInfo-HW";
+                        frdmDevice->ObjectName = "An ALARM device";
+                        frdmDevice->Version = "1.0";
+                        frdmDevice->SystemProperties.DeviceID = (char*)deviceId;
+                        frdmDevice->SystemProperties.Enabled = true;
+
+                        /* build the description of the commands on the device */
+                        commandsMetadata = STRING_new();
+                        if (commandsMetadata == NULL)
                         {
-                            (void)printf("Failed serializing commands metadata\r\n");
+                            (void)printf("Failed on creating string for commands metadata\r\n");
                         }
                         else
                         {
+                            /* Serialize the commands metadata as a JSON string before sending */
+                            if (SchemaSerializer_SerializeCommandMetadata(GET_MODEL_HANDLE(Contoso, FrdmDevice), commandsMetadata) != SCHEMA_SERIALIZER_OK)
+                            {
+                                (void)printf("Failed serializing commands metadata\r\n");
+                            }
+                            else
+                            {
+                                unsigned char* destination;
+                                size_t size;
+                                frdmDevice->Commands = (char*)STRING_c_str(commandsMetadata);
+
+                                /* Send the device information and commands metadata to the cloud */
+                                if (SERIALIZE(&destination, &size, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->SystemProperties, frdmDevice->Version, frdmDevice->Commands) != IOT_AGENT_OK)
+                                {
+                                    (void)printf("Failed serializing commands metadata\r\n");
+                                }
+                                else
+                                {
+                                    sendMessage(iotHubClientHandle, destination, size);
+                                }
+                            }
+
+                            STRING_delete(commandsMetadata);
+                        }
+
+                        frdmDevice->ObjectName = (ascii_char_ptr)deviceId;
+                        frdmDevice->ObjectType = "SensorTagEvent";
+                        frdmDevice->Version = "1.0";
+                        frdmDevice->TargetAlarmDevice = (ascii_char_ptr)deviceId;
+
+                        while (1)
+                        {
+                            unsigned int x = 0;
+
                             unsigned char* destination;
                             size_t size;
-                            frdmDevice->Commands = (char*)STRING_c_str(commandsMetadata);
 
-                            /* Send the device information and commands metadata to the cloud */
-                            if (SERIALIZE(&destination, &size, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->SystemProperties, frdmDevice->Version, frdmDevice->Commands) != IOT_AGENT_OK)
+                            while (x < 2)
+                            {
+                                /* schedule IoTHubClient to send events/receive commands */
+                                IoTHubClient_LL_DoWork(iotHubClientHandle);
+                                x++;
+                            }
+
+                            frdmDevice->temp = ((float)38.0 * 9 / 5) + 32;
+
+                            if (SERIALIZE(&destination, &size, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->Version, frdmDevice->TargetAlarmDevice, frdmDevice->temp) != IOT_AGENT_OK)
                             {
                                 (void)printf("Failed serializing commands metadata\r\n");
                             }
@@ -193,46 +234,15 @@ int main(void)
                                 sendMessage(iotHubClientHandle, destination, size);
                             }
                         }
-
-                        STRING_delete(commandsMetadata);
                     }
 
-                    frdmDevice->ObjectName = (ascii_char_ptr)deviceId;
-                    frdmDevice->ObjectType = "SensorTagEvent";
-                    frdmDevice->Version = "1.0";
-                    frdmDevice->TargetAlarmDevice = (ascii_char_ptr)deviceId;
-
-                    while (1)
-                    {
-                        unsigned int x = 0;
-
-                        unsigned char* destination;
-                        size_t size;
-
-                        while (x < 2)
-                        {
-                            /* schedule IoTHubClient to send events/receive commands */
-                            IoTHubClient_LL_DoWork(iotHubClientHandle);
-                            x++;
-                        }
-
-                        frdmDevice->temp = ((float)38.0 * 9 / 5) + 32;
-
-                        if(SERIALIZE(&destination, &size, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->Version, frdmDevice->TargetAlarmDevice, frdmDevice->temp) != IOT_AGENT_OK)
-                        {
-                            (void)printf("Failed serializing commands metadata\r\n");
-                        }
-                        else
-                        {
-                            sendMessage(iotHubClientHandle, destination, size);
-                        }
-                    }
+                    DESTROY_MODEL_INSTANCE(frdmDevice);
                 }
-
-                DESTROY_MODEL_INSTANCE(frdmDevice);
+                IoTHubClient_LL_Destroy(iotHubClientHandle);
             }
-            IoTHubClient_LL_Destroy(iotHubClientHandle);
+            serializer_deinit();
         }
-        serializer_deinit();
+        platform_deinit();
     }
+    return 0;
 }
