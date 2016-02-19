@@ -68,3 +68,6 @@ if(${build_tests} AND (NOT IN_OPENWRT))
 # Disable tests and samples for OpenWRT
 add_subdirectory(tests)
 endif()
+
+# explicit linking math lib may be necessary when cross-compiling
+target_link_libraries(serializer m)
