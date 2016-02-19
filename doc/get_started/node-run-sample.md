@@ -31,7 +31,7 @@ This document describes how to build and run the **simple_sample_http.js** Node.
 You should have the following items ready before beginning the process:
 -   Computer with Git client installed and access to the
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
--   [Prepare your development environment](https://github.com/Azure/azure-iot-sdks/blob/master/csharp/device/doc/devbox_setup.md).
+-   [Prepare your development environment](https://github.com/Azure/azure-iot-sdks/blob/master/doc/get_started/node-devbox-setup.md).
 -   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
 -   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
 
@@ -44,7 +44,7 @@ You should have the following items ready before beginning the process:
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
 
--   Make sure desktop is ready as per instructions given on [Prepare your development environment][setup-devbox].
+-   Make sure desktop is ready as per instructions given on [Prepare your development environment](https://github.com/Azure/azure-iot-sdks/blob/master/doc/get_started/node-devbox-setup.md).
 
 <a name="Build"></a>
 # Step 3: Build and Run the sample
