@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+install_root="$HOME"
 build_root=$(cd "$(dirname "$0")/.." && pwd)
 cd $build_root
 
@@ -35,9 +36,14 @@ checkExists gawk
 # -----------------------------------------------------------------------------
 # -- Run the ./setup.sh script to install the OpenWRT SDK
 # -----------------------------------------------------------------------------
-echo ---------- Installing OpenWRT SDK by executing ./setup.sh script ----------
-cd $build_root/c/build_all/arduino
-printf 'y\ny\n' | ./setup.sh
+if [ ! -d "$install_root/openwrt/sdk" ];
+then
+   echo ---------- Installing OpenWRT SDK by executing ./setup.sh script ----------
+   cd $build_root/c/build_all/arduino
+   printf 'y\ny\n' | ./setup.sh
+else
+   echo ---------- OpenWRT SDK is already installed ----------
+fi
 
 # -----------------------------------------------------------------------------
 # -- Modify c/serializer/samples/simplesample_http/simplesample_http.c
