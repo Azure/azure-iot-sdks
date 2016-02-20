@@ -572,7 +572,6 @@ LIST_ITEM_HANDLE get_perDeviceDataItem(IOTHUB_DEVICE_HANDLE deviceHandle)
 		}
 		else
 		{
-			LIST_ITEM_HANDLE listItem;
 			listItem = list_find(handleData->perDeviceList, findDeviceHandle, deviceHandle);
 			if (listItem == NULL)
 			{
