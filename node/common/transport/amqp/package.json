@@ -12,17 +12,19 @@
   },
   "devDependencies": {
     "chai": "^3.3.0",
+    "istanbul": "^0.4.2",
     "jshint": "^2.8.0",
     "mocha": "^2.3.3"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",
-    "unittest-min": "mocha --reporter dot test/_*_test.js",
-    "alltest-min": "mocha --reporter dot test/_*_test*.js",
-    "unittest": "mocha --reporter spec test/_*_test.js",
-    "alltest": "mocha --reporter spec test/_*_test*.js",
-    "ci": "npm -s run lint && npm -s run alltest-min",
-    "test": "npm -s run lint && npm -s run unittest"
+    "unittest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/_*_test.js",
+    "alltest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/_*_test*.js",
+    "unittest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test.js",
+    "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test*.js",
+    "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
+    "test": "npm -s run lint && npm -s run unittest",
+    "check-cover":  "istanbul check-coverage --statements 91 --branches 69 --functions 84 --lines 90"
   },
   "engines": {
     "node": "0.12.x || 4.x.x || 5.x.x"
