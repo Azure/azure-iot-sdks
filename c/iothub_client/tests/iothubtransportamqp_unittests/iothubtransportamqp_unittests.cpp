@@ -4116,4 +4116,241 @@ TEST_FUNCTION(when_setting_the_message_properties_fails_AMQP_DoWork_completes_th
     cleanupList(config.waitingToSend);
 }
 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_003: [IoTHubTransportAMQ_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
+TEST_FUNCTION(AMQP_Register_transport_success_returns_transport)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	mocks.ResetAllCalls();
+
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+
+	// assert
+	ASSERT_IS_NOT_NULL(devHandle);
+	ASSERT_ARE_EQUAL(void_ptr, transport, devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+TEST_FUNCTION(AMQP_Register_transport_deviceKey_mismatch_returns_null)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	mocks.ResetAllCalls();
+
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, "this is a different device key", &wts);
+
+	// assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+TEST_FUNCTION(AMQP_Register_transport_deviceId_mismatch_returns_null)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	mocks.ResetAllCalls();
+
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, "not the right devId", TEST_DEVICE_KEY, &wts);
+
+	// assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+TEST_FUNCTION(AMQP_Register_transport_deviceId_null_returns_null)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, NULL, TEST_DEVICE_KEY, &wts);
+
+	// assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_returns_null)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, NULL, &wts);
+
+	// assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+TEST_FUNCTION(AMQP_Register_transport_wts_null_returns_null)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, "not the right devId", TEST_DEVICE_KEY, NULL);
+
+	// assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQ_Register shall return NULL if the TRANSPORT_HANDLE is NULL.] 
+TEST_FUNCTION(AMQP_Register_transport_null_returns_null)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+
+	TRANSPORT_HANDLE transport = NULL;
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+
+	// assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	cleanupList(&wts);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_004: [IoTHubTransportAMQ_Unregister shall return.] 
+TEST_FUNCTION(AMQP_Unregister_transport_success)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+
+	mocks.ResetAllCalls();
+
+	// act
+	transport_interface->IoTHubTransport_Unregister(devHandle);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
 END_TEST_SUITE(iothubtransportamqp_unittests)

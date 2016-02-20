@@ -2329,4 +2329,192 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         //cleanup
         IoTHubTransportMqtt_Destroy(handle);
     }
+
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
+	TEST_FUNCTION(IoTHubTransportMqtt_Register_succeeds_returns_transport)
+	{
+		// arrange
+		CIoTHubTransportMqttMocks mocks;
+		IOTHUBTRANSPORT_CONFIG config = { 0 };
+		SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+		auto handle = IoTHubTransportMqtt_Create(&config);
+		mocks.ResetAllCalls();
+
+		EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+		EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+
+		// act
+		auto devHandle = IoTHubTransportMqtt_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, config.waitingToSend);
+
+		// assert
+		ASSERT_IS_NOT_NULL(devHandle);
+		ASSERT_ARE_EQUAL(void_ptr, handle, devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		//cleanup
+		IoTHubTransportMqtt_Destroy(handle);
+	}
+
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_003: [ IoTHubTransportMqtt_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportMqtt_Create.]
+	TEST_FUNCTION(IoTHubTransportMqtt_Register_deviceKey_mismatch_returns_null)
+	{
+		// arrange
+		CIoTHubTransportMqttMocks mocks;
+		IOTHUBTRANSPORT_CONFIG config = { 0 };
+		SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+		auto handle = IoTHubTransportMqtt_Create(&config);
+		mocks.ResetAllCalls();
+
+		EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+		EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+
+		// act
+		auto devHandle = IoTHubTransportMqtt_Register(handle, TEST_DEVICE_ID, "not the right device key", config.waitingToSend);
+
+		// assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		//cleanup
+		IoTHubTransportMqtt_Destroy(handle);
+	}
+
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_003: [ IoTHubTransportMqtt_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportMqtt_Create.]
+	TEST_FUNCTION(IoTHubTransportMqtt_Register_deviceid_mismatch_returns_null)
+	{
+		// arrange
+		CIoTHubTransportMqttMocks mocks;
+		IOTHUBTRANSPORT_CONFIG config = { 0 };
+		SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+		auto handle = IoTHubTransportMqtt_Create(&config);
+		mocks.ResetAllCalls();
+
+		EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+
+		// act
+		auto devHandle = IoTHubTransportMqtt_Register(handle, "not a good id after all", TEST_DEVICE_KEY, config.waitingToSend);
+
+		// assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		//cleanup
+		IoTHubTransportMqtt_Destroy(handle);
+	}
+
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_002: [ IoTHubTransportMqtt_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.]
+	TEST_FUNCTION(IoTHubTransportMqtt_Register_wts_null_returns_null)
+	{
+		// arrange
+		CIoTHubTransportMqttMocks mocks;
+		IOTHUBTRANSPORT_CONFIG config = { 0 };
+		SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+		auto handle = IoTHubTransportMqtt_Create(&config);
+		mocks.ResetAllCalls();
+
+		// act
+		auto devHandle = IoTHubTransportMqtt_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL);
+
+		// assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		//cleanup
+		IoTHubTransportMqtt_Destroy(handle);
+	}
+
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_002: [ IoTHubTransportMqtt_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.]
+	TEST_FUNCTION(IoTHubTransportMqtt_Register_devicekey_null_returns_null)
+	{
+		// arrange
+		CIoTHubTransportMqttMocks mocks;
+		IOTHUBTRANSPORT_CONFIG config = { 0 };
+		SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+		auto handle = IoTHubTransportMqtt_Create(&config);
+		mocks.ResetAllCalls();
+
+
+		// act
+		auto devHandle = IoTHubTransportMqtt_Register(handle, TEST_DEVICE_ID, NULL, config.waitingToSend);
+
+		// assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		//cleanup
+		IoTHubTransportMqtt_Destroy(handle);
+	}
+
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_002: [ IoTHubTransportMqtt_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.]
+	TEST_FUNCTION(IoTHubTransportMqtt_Register_devicename_null_returns_null)
+	{
+		// arrange
+		CIoTHubTransportMqttMocks mocks;
+		IOTHUBTRANSPORT_CONFIG config = { 0 };
+		SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+		auto handle = IoTHubTransportMqtt_Create(&config);
+		mocks.ResetAllCalls();
+
+		// act
+		auto devHandle = IoTHubTransportMqtt_Register(handle, NULL, TEST_DEVICE_KEY, config.waitingToSend);
+
+		// assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		//cleanup
+		IoTHubTransportMqtt_Destroy(handle);
+	}
+
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransportMqtt_Register shall return NULL if the TRANSPORT_HANDLE is NULL.]
+	TEST_FUNCTION(IoTHubTransportMqtt_Register_transport_null_returns_null)
+	{
+		// arrange
+		CIoTHubTransportMqttMocks mocks;
+		IOTHUBTRANSPORT_CONFIG config = { 0 };
+		SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+		auto handle = IoTHubTransportMqtt_Create(&config);
+		mocks.ResetAllCalls();
+
+		// act
+		auto devHandle = IoTHubTransportMqtt_Register(NULL, TEST_DEVICE_ID, TEST_DEVICE_KEY, config.waitingToSend);
+
+		// assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		//cleanup
+		IoTHubTransportMqtt_Destroy(handle);
+	}
+
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_005: [ IoTHubTransportMqtt_Unregister shall return. ]
+	TEST_FUNCTION(IoTHubTransportMqtt_Unregister_succeeds)
+	{
+		// arrange
+		CIoTHubTransportMqttMocks mocks;
+		IOTHUBTRANSPORT_CONFIG config = { 0 };
+		SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+		auto handle = IoTHubTransportMqtt_Create(&config);
+		auto devHandle = IoTHubTransportMqtt_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, config.waitingToSend);
+
+		mocks.ResetAllCalls();
+
+
+		// act
+		IoTHubTransportMqtt_Unregister(devHandle);
+
+		// assert
+		mocks.AssertActualAndExpectedCalls();
+
+		//cleanup
+		IoTHubTransportMqtt_Destroy(handle);
+	}
 END_TEST_SUITE(iothubtransportmqtt)

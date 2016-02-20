@@ -1318,7 +1318,7 @@ static void IoTHubTransportAMQP_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL
     }
 }
 
-static int IoTHubTransportAMQP_Subscribe(TRANSPORT_HANDLE handle)
+static int IoTHubTransportAMQP_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 {
     int result;
     
@@ -1339,7 +1339,7 @@ static int IoTHubTransportAMQP_Subscribe(TRANSPORT_HANDLE handle)
     return result;
 }
 
-static void IoTHubTransportAMQP_Unsubscribe(TRANSPORT_HANDLE handle)
+static void IoTHubTransportAMQP_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 {
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_039: [IoTHubTransportAMQP_Unsubscribe shall fail if the transport handle parameter received is NULL.] 
     if (handle == NULL)
@@ -1354,7 +1354,7 @@ static void IoTHubTransportAMQP_Unsubscribe(TRANSPORT_HANDLE handle)
     }
 }
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetSendStatus(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
+static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -1450,11 +1450,41 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_HANDLE handl
     return result;
 }
 
+
+
 static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQ_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
 {
-	return (IOTHUB_DEVICE_HANDLE)handle;
+	IOTHUB_DEVICE_HANDLE result;
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQ_Register shall return NULL if the TRANSPORT_HANDLE is NULL.]
+	if ((handle ==NULL) || (deviceId == NULL) || (deviceKey == NULL) || (waitingToSend == NULL))
+	{
+		result = NULL;
+	}
+	else
+	{
+		AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)handle;
+		
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_002: [IoTHubTransportAMQ_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.] 
+		if (strstr(STRING_c_str(transport_state->devicesPath), deviceId) == NULL)
+		{
+			result = NULL;
+		}
+		else if (strcmp(STRING_c_str(transport_state->deviceKey), deviceKey) != 0)
+		{
+			result = NULL;
+		}
+		else
+		{
+			// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_003: [IoTHubTransportAMQ_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
+			result = (IOTHUB_DEVICE_HANDLE)handle;
+		}
+	}
+
+	return result;
 }
 
+// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_004: [IoTHubTransportAMQ_Unregister shall return.] 
 static void IoTHubTransportAMQ_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 {
 	return;

@@ -113,6 +113,27 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
     const char* protocolGatewayHostName;
 } IOTHUB_CLIENT_CONFIG;
 
+/** @brief	This struct captures IoTHub client device configuration. */
+typedef struct IOTHUB_CLIENT_DEVICE_CONFIG_TAG
+{
+	/** @brief A function pointer that is passed into the @c IoTHubClientCreate.
+	*	A function definition for AMQP, @c DeviceClientProvideAmqpResources,
+	*	is defined in the include @c iothubtransportamqp.h.  A function
+	*	definition for HTTP, @c DeviceClientProvideHttpResources, is defined
+	*	in the include @c iothubtransporthttp.h */
+	IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
+
+	/** @brief a transport handle implementing the protocol */
+	void * transportHandle;
+
+	/** @brief	A string that identifies the device. */
+	const char* deviceId;
+
+	/** @brief	The device key used to authenticate the device. */
+	const char* deviceKey;
+
+} IOTHUB_CLIENT_DEVICE_CONFIG;
+
 /**
  * @brief	Creates a IoT Hub client for communication with an existing
  * 			IoT Hub using the specified connection string parameter.
@@ -143,6 +164,20 @@ extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const 
  * 			invoking other functions for IoT Hub client and @c NULL on failure.
  */
 extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* config);
+
+/**
+* @brief	Creates a IoT Hub client for communication with an existing IoT
+* 			Hub using an existing transport.
+*
+* @param	config	Pointer to an @c IOTHUB_CLIENT_DEVICE_CONFIG structure
+*
+*			The API *allows* sharing of a connection across multiple
+*			devices. This is a blocking call.
+*
+* @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
+* 			invoking other functions for IoT Hub client and @c NULL on failure.
+*/
+IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(IOTHUB_CLIENT_DEVICE_CONFIG * config);
 
 /**
  * @brief	Disposes of resources allocated by the IoT Hub client. This is a
