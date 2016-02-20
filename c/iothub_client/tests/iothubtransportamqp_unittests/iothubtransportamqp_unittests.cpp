@@ -3332,7 +3332,10 @@ TEST_FUNCTION(when_getting_the_properties_map_for_a_message_to_be_sent_fails_AMQ
     STRICT_EXPECTED_CALL(mocks, test_iothubclient_send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, (void*)0x00));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
+    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 
     // act
@@ -3398,7 +3401,10 @@ TEST_FUNCTION(when_getting_the_internals_for_the_properties_map_for_a_message_to
     STRICT_EXPECTED_CALL(mocks, test_iothubclient_send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, (void*)0x00));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
+    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 
     // act
@@ -3551,7 +3557,10 @@ TEST_FUNCTION(when_creating_the_property_map_fails_AMQP_DoWork_completes_the_mes
     STRICT_EXPECTED_CALL(mocks, test_iothubclient_send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, (void*)0x00));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
+    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 
     // act
@@ -3622,7 +3631,10 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_1st_property_key_fails_AMQP_
     STRICT_EXPECTED_CALL(mocks, test_iothubclient_send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, (void*)0x00));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
+    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 
     // act
@@ -3696,7 +3708,10 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_1st_property_value_fails_AMQ
     STRICT_EXPECTED_CALL(mocks, test_iothubclient_send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, (void*)0x00));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
+    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 
     // act
@@ -3773,7 +3788,10 @@ TEST_FUNCTION(when_setting_the_value_for_the_1st_property_fails_AMQP_DoWork_comp
     STRICT_EXPECTED_CALL(mocks, test_iothubclient_send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, (void*)0x00));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
+    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 
     // act
@@ -3851,7 +3869,10 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_for_key_of_the_2nd_property_
     STRICT_EXPECTED_CALL(mocks, test_iothubclient_send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, (void*)0x00));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
+    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 
     // act
@@ -3932,7 +3953,10 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_for_value_of_the_2nd_propert
     STRICT_EXPECTED_CALL(mocks, test_iothubclient_send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, (void*)0x00));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
+    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 
     // act
@@ -4015,7 +4039,10 @@ TEST_FUNCTION(when_setting_the_2nd_property_on_the_uAMQP_map_fails_AMQP_DoWork_c
     STRICT_EXPECTED_CALL(mocks, test_iothubclient_send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, (void*)0x00));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
+    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 
     // act
@@ -4100,7 +4127,11 @@ TEST_FUNCTION(when_setting_the_message_properties_fails_AMQP_DoWork_completes_th
     STRICT_EXPECTED_CALL(mocks, test_iothubclient_send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, (void*)0x00));
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
+    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+
     EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG)).SetReturn(1);
 
     // act
