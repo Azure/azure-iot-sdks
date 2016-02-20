@@ -113,7 +113,9 @@ Use the **master** branch to ensure you fetch the latest release version.
 
 This script uses **cmake** to make a folder called "cmake" in your home directory and generates a makefile. The script then builds the solution and runs the tests.
 
-> Note: you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
+> Note: Every time you run `build.sh`, it deletes and then recreates the "cmake" folder in your home directory.
+
+> Note: You will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
 
 <a name="windowsce"/>
 ## Set up a Windows Embedded Compact 2013 development environment

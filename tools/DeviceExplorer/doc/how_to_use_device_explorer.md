@@ -153,4 +153,4 @@ Run your sample application. Device Explorer should now show that the IoT hub ha
 [protocol-gateway]: https://github.com/Azure/azure-iot-protocol-gateway
 [lnk-devguide]: https://azure.microsoft.com/documentation/articles/iot-hub-devguide/
 [what-is-iot-hub]: https://azure.microsoft.com/documentation/articles/iot-hub-what-is-iot-hub/
-[iothub-explorer]: ../../iothub-explorer/doc/provision_device.md
+[iothub-explorer]: ../../iothub-explorer/readme.md
