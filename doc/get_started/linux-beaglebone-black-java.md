@@ -185,8 +185,8 @@ Install the prerequisite packages by issuing the following commands from the ter
     -   `{connection string}`: Your device connection string
     -   `{number of requests to send}`: Number of messages you want to send to IoT Hub
 
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to see the data your device is sending.
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool] (https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
+-   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document][lnk-device-explorer] to see the data your device is sending.
+-   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool] [lnk-iothub-explorer]
 
 <a name="Step_3_2_2"/>
 ### 3.2.2 Receive messages from IoT Hub
@@ -209,9 +209,11 @@ Install the prerequisite packages by issuing the following commands from the ter
     -   `{connection string}`: Your device connection string
     -   `{number of requests to send}`: Number of messages you want to send to IoT Hub
 
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) for instructions on sending messages to device.
+-   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document][lnk-device-explorer] for instructions on sending messages to device.
 
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool](https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
+-   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer]
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
+[lnk-device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[lnk-iothub-explorer]: ../../tools/iothub-explorer/readme.md

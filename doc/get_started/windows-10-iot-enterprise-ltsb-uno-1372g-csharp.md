@@ -32,15 +32,15 @@ This document provides step-by-step guidance on how to connect an UNO-1372G devi
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub
     private repository.
 -   UNO-1372G.
--   Install any version of [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx).
--   Install [Microsoft Azure SDK](http://www.microsoft.com/en-us/download/details.aspx?id=48178).
+-   Install any version of [Visual Studio 2015](https://www.visualstudio.com/downloads/download-visual-studio-vs.aspx).
+-   Install [Microsoft Azure SDK](http://www.microsoft.com/download/details.aspx?id=48178).
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="Step-2:-PrepareDevice"></a>
 # Step 2: Prepare your Device
 ##  Install Windows 10 IoT Enterprise LTSB on UNO-1372G
--   Create a bootable USB Drive. Please follow this guide on how to create a bootable drive (<https://www.microsoft.com/en-us/download/windows-usb-dvd-download-tool>).
+-   Create a bootable USB Drive. Please follow this guide on how to create a bootable drive (<https://www.microsoft.com/download/windows-usb-dvd-download-tool>).
 -   Insert the bootable USB Drive from the previous step into your UNO-1372G. Turn on your UNO-1372Gdevice and press the **Delete** key.
 -   Change the BIOS Boot option filter to **UEFI and Legacy**.
 -   Change the **Boot Option Priorities** to boot from your USB Drive.

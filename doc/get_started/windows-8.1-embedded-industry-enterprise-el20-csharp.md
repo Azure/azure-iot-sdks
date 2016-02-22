@@ -32,15 +32,15 @@ This document provides step-by-step guidance on how to connect an EL20 device ru
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub
     private repository.
 -   EL20 device.
--   Install any version of [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx).
--   Install [Microsoft Azure SDK](http://www.microsoft.com/en-us/download/details.aspx?id=48178).
+-   Install any version of [Visual Studio 2015](https://www.visualstudio.com/downloads/download-visual-studio-vs.aspx).
+-   Install [Microsoft Azure SDK](http://www.microsoft.com/download/details.aspx?id=48178).
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="Step-2:-PrepareDevice"></a>
 # Step 2: Prepare your Device
 ##  Install Windows 8.1 Embedded Industry Enterprise on EL20
--   Create a bootable USB Drive. Please follow this guide on how to create a bootable drive (<https://www.microsoft.com/en-us/download/windows-usb-dvd-download-tool>).
+-   Create a bootable USB Drive. Please follow this guide on how to create a bootable drive (<https://www.microsoft.com/download/windows-usb-dvd-download-tool>).
 -   Insert the bootable USB Drive from the previous step into your EL20. Turn on your EL20 device and press the **Delete** key.
 -   Change the BIOS Boot option filter to **UEFI and Legacy**.
 -   Change the **Boot Option Priorities** to boot from your USB Drive.

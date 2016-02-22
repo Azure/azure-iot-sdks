@@ -131,8 +131,8 @@ We first need to update the credentials in the sample AMPQ app to match those of
     ```
 
 
-[IntelEdisonGettingStarted]: https://software.intel.com/en-us/iot/library/edison-getting-started
-[IntelEdisonSerialConnection]: https://software.intel.com/en-us/setting-up-serial-terminal-intel-edison-board
+[IntelEdisonGettingStarted]: https://software.intel.com/iot/library/edison-getting-started
+[IntelEdisonSerialConnection]: https://software.intel.com/setting-up-serial-terminal-intel-edison-board
 [yocto]: http://www.yoctoproject.org/docs/latest/adt-manual/adt-manual.html
 [vi]: https://www.cs.colostate.edu/helpdocs/vi.html
 [filezilla]: https://filezilla-project.org
