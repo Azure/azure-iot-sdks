@@ -17,7 +17,7 @@ minimumPollingTime = 9
 receiveContext = 0
 avgWindSpeed = 10.0
 message_count = 5
-#messageHandle = [c_void_p] * message_count 
+messageHandle = [None] * message_count 
 
 connectionString = "HostName=mregen-python-ne-iothub.azure-devices.net;DeviceId=test;SharedAccessKey=/TKAG9mKQvzcKYS23QKDnp9L0a2ptBPQ0Da6CVGN8h0="
 msgTxt =  "{\"deviceId\": \"myFirstDevice\",\"windSpeed\": %.2f}"
@@ -29,13 +29,6 @@ class IotHubError(Exception):
         self.value = value
     def __str__(self):
         return repr(self.value)
-
-# create objects for calls in IotHub dll
-IOTHUB_CLIENT_OK = 0
-IOTHUB_MESSAGE_OK = 0
-IOTHUBMESSAGE_ACCEPTED = 0
-MAP_OK = 0
-NULL = 0
 
 def ReceiveMessageCallback( message, counter):
     size = c_int(0)
@@ -72,7 +65,7 @@ def iothub_client_sample_http_run():
 
     # iothub prep code 
     iotHubClient = IoTHubClient.CreateFromConnectionString(connectionString, Protocol)
-    if iotHubClient==None:
+    if iotHubClient == None:
        raise IotHubError("ERROR: iotHubClient is None!")
 
     if Protocol == transport_provider.http:
@@ -89,27 +82,29 @@ def iothub_client_sample_http_run():
     #    raise IotHubError("ERROR: IoTHubClient_LL_SetMessageCallback..........FAILED!")
 
     # iothub send a few messages
-    for i in xrange(0, 0):#message_count):
+    for i in xrange(0, message_count):
         msgTxtFormatted = msgTxt % (avgWindSpeed + (random.random() * 4 + 2))
-        messageHandle[i] = IoTHubMessage_CreateFromString(c_char_p(msgTxtFormatted))
-        if messageHandle[i] == NULL:
+        messageHandle[i] = IoTHubMessage.CreateFromString(msgTxtFormatted)
+        if messageHandle[i] == None:
             raise IotHubError("ERROR: iotHubMessageHandle is NULL!");
-        propMap = IoTHubMessage_Properties(messageHandle[i])
+        propMap = messageHandle[i].Properties()
         propText = "PropMsg_%d" % i
-        result = Map_AddOrUpdate( propMap, c_char_p("PropName"), c_char_p(propText))
-        if result != MAP_OK:
+        result = propMap.AddOrUpdate( "PropName", propText)
+        if result != map_result.ok:
             raise IotHubError("ERROR: Map_AddOrUpdate Failed!");
-        result = iotHubClient.SendEventAsync(messageHandle[i], send_callback, i)
-        if result != IOTHUB_CLIENT_OK:
+        #result = iotHubClient.SendEventAsync(messageHandle[i], send_callback, i)
+        if result != iothub_client_result.ok:
             raise IotHubError("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!")
         else:
-            print ("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub." % i);
+            print ("IoTHubClient_SendEventAsync accepted message [%d] for transmission to IoT Hub." % i);
 
-    #result = iotHubClient.GetSendStatus()
+    # todo
+    #iotHubClientStatus = IOTHUB_CLIENT_STATUS_TAG.idle
+    #result = iotHubClient.GetSendStatus(iotHubClientStatus)
+
     # Wait for Commands 
     m = 0
     while m < 100: # *0.1s = 1000s
-        #IoTHubClient_LL_DoWork(iotHubClientHandle)
         sleep(0.1) # sleep 100ms
         m = m + 1
 
