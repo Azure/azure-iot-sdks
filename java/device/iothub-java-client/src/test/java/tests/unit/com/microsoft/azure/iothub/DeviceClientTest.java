@@ -218,7 +218,7 @@ public class DeviceClientTest
         };
     }
 
-    // Tests_SRS_DEVICECLIENT_11_023: [The function shall schedule send tasks to run every 5000 milliseconds.]
+    // Tests_SRS_DEVICECLIENT_11_023: [The function shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.]
     @Test
     public void openStartsSendTask(
             @Mocked final ScheduledExecutorService mockScheduler,
@@ -246,7 +246,7 @@ public class DeviceClientTest
         };
     }
 
-    // Tests_SRS_DEVICECLIENT_11_024: [The function shall schedule receive tasks to run every 5000 milliseconds.]
+    // Tests_SRS_DEVICECLIENT_11_024: [The function shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.]
     @Test
     public void openStartsReceiveTask(
             @Mocked final ScheduledExecutorService mockScheduler,
