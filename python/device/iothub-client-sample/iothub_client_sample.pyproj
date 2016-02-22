@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>dedbf980-c354-49ac-98a0-bf3b0fe7c032</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>iothub_client_sample.py</StartupFile>
+    <StartupFile>iothub_client_boost.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -27,6 +27,7 @@
     <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\2.7" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="iothub_client_boost.py" />
     <Compile Include="iothub_client_sample.py" />
   </ItemGroup>
   <PropertyGroup>
