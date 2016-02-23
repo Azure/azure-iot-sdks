@@ -870,7 +870,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_HANDLE handle, const
 		MQTTTRANSPORT_HANDLE_DATA* transportState = (MQTTTRANSPORT_HANDLE_DATA*)handle;
 
 		// Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_003: [ IoTHubTransportMqtt_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportMqtt_Create.]
-		if (strstr(STRING_c_str(transportState->device_id), deviceId) == NULL)
+		if (strcmp(STRING_c_str(transportState->device_id), deviceId) != 0)
 		{
 			result = NULL;
 		}

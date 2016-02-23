@@ -110,7 +110,7 @@ static bool create_eventHTTPrelativePath(HTTPTRANSPORT_PERDEVICE_DATA* handleDat
 	bool result;
 	STRING_HANDLE urlEncodedDeviceId = NULL;
 	handleData->eventHTTPrelativePath = STRING_construct("/devices/");
-	if (handleData == NULL || handleData->eventHTTPrelativePath == NULL)
+	if (handleData->eventHTTPrelativePath == NULL)
 	{
 		result = false;
 	}
@@ -144,7 +144,7 @@ static bool create_messageHTTPrelativePath(HTTPTRANSPORT_PERDEVICE_DATA* handleD
 {
 	bool result;
 	handleData->messageHTTPrelativePath = STRING_construct("/devices/");
-	if (handleData == NULL || handleData->messageHTTPrelativePath == NULL)
+	if (handleData->messageHTTPrelativePath == NULL)
 	{
 		result = false;
 	}
@@ -183,7 +183,7 @@ static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleD
 {
 	bool result;
 	handleData->eventHTTPrequestHeaders = HTTPHeaders_Alloc();
-	if (handleData == NULL || handleData->eventHTTPrequestHeaders == NULL)
+	if (handleData->eventHTTPrequestHeaders == NULL)
 	{
 		result = false;
 	}
@@ -503,8 +503,9 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const
 			bool was_messageHTTPrequestHeaders_ok = was_eventHTTPrequestHeaders_ok && create_messageHTTPrequestHeaders(deviceListElement);
 			bool was_abandonHTTPrelativePathBegin_ok = was_messageHTTPrequestHeaders_ok && create_abandonHTTPrelativePathBegin(deviceListElement, deviceId);
 			bool was_sasObject_ok = was_abandonHTTPrelativePathBegin_ok && create_deviceSASObject(deviceListElement, handleData->hostName, deviceId, deviceKey);
+			bool was_list_add_ok = was_sasObject_ok && (list_add(handleData->perDeviceList, deviceListElement) != NULL);
 
-			if (was_sasObject_ok)
+			if (was_list_add_ok)
 			{
 				deviceListElement->DoWork_PullMessage = false;
 				deviceListElement->isFirstPoll = true;
@@ -512,11 +513,11 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const
 				deviceListElement->deviceHandle = (IOTHUB_DEVICE_HANDLE)result;
 				DList_InitializeListHead(&(deviceListElement->eventConfirmations));
 				result->transportHandle = handle;
-				list_add(handleData->perDeviceList, deviceListElement);
 				//TODO: figure out how to handle round robin.
 			}
 			else
 			{
+				if (was_sasObject_ok) destroy_SASObject(deviceListElement);
 				if (was_abandonHTTPrelativePathBegin_ok) destroy_abandonHTTPrelativePathBegin(deviceListElement);
 				if (was_messageHTTPrelativePath_ok) destroy_messageHTTPrelativePath(deviceListElement);
 				if (was_eventHTTPrequestHeaders_ok) destroy_eventHTTPrequestHeaders(deviceListElement);
@@ -551,7 +552,7 @@ void destroy_perDeviceData(HTTPTRANSPORT_PERDEVICE_DATA * perDeviceItem)
 	}
 }
 
-LIST_ITEM_HANDLE get_perDeviceDataItem(IOTHUB_DEVICE_HANDLE deviceHandle)
+static LIST_ITEM_HANDLE get_perDeviceDataItem(IOTHUB_DEVICE_HANDLE deviceHandle)
 {
 	HTTPDEVICE_HANDLE_DATA* deviceHandleData = (HTTPDEVICE_HANDLE_DATA*)deviceHandle;
 	LIST_ITEM_HANDLE listItem;
@@ -610,8 +611,8 @@ void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 
 			destroy_perDeviceData(perDeviceItem);
 			list_remove(handleData->perDeviceList, listItem);
-			free(listItem);
 			free(perDeviceItem);
+			free(deviceHandle);
 		}
 	}
 
@@ -796,8 +797,10 @@ void IoTHubTransportHttp_Destroy(TRANSPORT_HANDLE handle)
 			if (perDeviceItem != NULL)
 			{
 				LogInfo("Warning: destroying registered device [%s]", STRING_c_str(perDeviceItem->deviceId));
+				IOTHUB_DEVICE_HANDLE devHandle = perDeviceItem->deviceHandle;
 				destroy_perDeviceData(perDeviceItem);
 				free(perDeviceItem);
+				free(devHandle);
 			}
 		}
 

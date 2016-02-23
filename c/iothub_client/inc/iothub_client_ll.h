@@ -177,7 +177,7 @@ extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG
 * @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
 * 			invoking other functions for IoT Hub client and @c NULL on failure.
 */
-IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(IOTHUB_CLIENT_DEVICE_CONFIG * config);
+extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_DEVICE_CONFIG * config);
 
 /**
  * @brief	Disposes of resources allocated by the IoT Hub client. This is a
