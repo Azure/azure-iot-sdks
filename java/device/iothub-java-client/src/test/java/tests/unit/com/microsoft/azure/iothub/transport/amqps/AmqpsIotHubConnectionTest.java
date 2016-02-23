@@ -12,6 +12,7 @@ import com.microsoft.azure.iothub.net.IotHubUri;
 import com.microsoft.azure.iothub.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.iothub.transport.amqps.AmqpsIotHubConnectionBaseHandler;
 import com.microsoft.azure.iothub.transport.amqps.AmqpsMessage;
+import com.microsoft.azure.iothub.transport.amqps.IotHubReactor;
 import mockit.*;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.BaseHandler;
@@ -326,7 +327,7 @@ public class AmqpsIotHubConnectionTest {
         connection.open();
         connection.close();
 
-        Reactor actualReactor = Deencapsulation.getField(connection, "reactor");
+        IotHubReactor actualReactor = Deencapsulation.getField(connection, "iotHubReactor");
         AmqpsIotHubConnectionBaseHandler actualHandler = Deencapsulation.getField(connection, "amqpsHandler");
         assertNull(actualReactor);
         assertNull(actualHandler);
