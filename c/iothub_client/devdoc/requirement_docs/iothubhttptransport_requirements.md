@@ -243,7 +243,7 @@ MultiDevTransportHttp shall perform the following actions on each device:
 **SRS_TRANSPORTMULTITHTTP_17_077: [** The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".  **]**      
 **SRS_TRANSPORTMULTITHTTP_17_078: [** Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value". **]**      
 **SRS_TRANSPORTMULTITHTTP_17_079: [** If any HTTP header operation fails, `_DoWork` shall advance to the next action.  **]**   
-**SRS_TRANSPORTMULTITHTTP_17_080: [** `IoTHubTransportHttp_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest2` passing the following parameters **]**   
+**SRS_TRANSPORTMULTITHTTP_17_080: [** `IoTHubTransportHttp_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest` passing the following parameters **]**   
 - requestType: POST    
 - relativePath: the event relative path constructed by `IoTHubTransportHttp_Register` API    
 - requestHttpHeadersHandle: the HTTP headers containing the application properties    
@@ -267,8 +267,8 @@ MultiDevTransportHttp shall perform the following actions on each device:
 - responseHeadearsHandle: a new instance of HTTP headers   
 - responseContent: a new instance of buffer **]**   
 
-**SRS_TRANSPORTMULTITHTTP_17_085: [** If the call to `HTTPAPIEX_SAS_ExecuteRequest2` did not executed successfully or building any part of the prerequisites of the call fails, then `_DoWork` shall advance to the next action in this description. **]**    
-**SRS_TRANSPORTMULTITHTTP_17_086: [** If the `HTTPAPIEX_SAS_ExecuteRequest2` executed successfully then status code shall be examined. Any status code different than 200 causes `_DoWork` to advance to the next action.  **]**   
+**SRS_TRANSPORTMULTITHTTP_17_085: [** If the call to `HTTPAPIEX_SAS_ExecuteRequest` did not executed successfully or building any part of the prerequisites of the call fails, then `_DoWork` shall advance to the next action in this description. **]**    
+**SRS_TRANSPORTMULTITHTTP_17_086: [** If the `HTTPAPIEX_SAS_ExecuteRequest` executed successfully then status code shall be examined. Any status code different than 200 causes `_DoWork` to advance to the next action.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_087: [** If status code is 200, then `_DoWork` shall make a copy of the value of the "ETag" http header. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_088: [** If no such header is found or is invalid, then `_DoWork` shall advance to the next action.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_089: [** `_DoWork` shall assemble an `IOTHUBMESSAGE_HANDLE` from the received HTTP content (using the responseContent buffer). **]**   
@@ -282,7 +282,7 @@ MultiDevTransportHttp shall perform the following actions on each device:
 
 #### Abandoning a message. 
 
-**SRS_TRANSPORTMULTITHTTP_17_097: [** `_DoWork` shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:   
+**SRS_TRANSPORTMULTITHTTP_17_097: [** `_DoWork` shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:   
 - requestType: POST
 - relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon" + APIVERSION
 - requestHttpHeadersHandle: an HTTP headers instance containing the following   
@@ -293,7 +293,7 @@ MultiDevTransportHttp shall perform the following actions on each device:
 - responseHeadearsHandle: `NULL`
 - responseContent: `NULL` **]**
 
-**SRS_TRANSPORTMULTITHTTP_17_098: [** Abandoning the message is considered successful if the `HTTPAPIEX_SAS_ExecuteRequest2` doesn't fail and the statusCode is 204. **]**
+**SRS_TRANSPORTMULTITHTTP_17_098: [** Abandoning the message is considered successful if the `HTTPAPIEX_SAS_ExecuteRequest` doesn't fail and the statusCode is 204. **]**
 
 #### Accepting a message. 
 
@@ -355,7 +355,8 @@ return;
 	extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE deviceHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
 ```
 
-**SRS_TRANSPORTMULTITHTTP_17_111: [** `IoTHubTransportHttp_GetSendStatus` shall return `IOTHUB_CLIENT_INVALID_ARG` if called with `NULL` parameter. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_111: [** `IoTHubTransportHttp_GetSendStatus` shall return `IOTHUB_CLIENT_INVALID_ARG` if called with `NULL` parameter. **]**
+`IoTHubTransportHttp_GetSendStatus` shall return `IOTHUB_CLIENT_INVALID_ARG` if called with `NULL` `iotHubClientStatus` parameter.   
 **SRS_TRANSPORTMULTITHTTP_17_138: [** `IoTHubTransportHttp_GetSendStatus` shall locate `deviceHandle` in the transport device list by calling `list_find_if`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_139: [** If the device structure is not found, then this function shall fail and return with  `IOTHUB_CLIENT_INVALID_ARG`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_112: [** `IoTHubTransportHttp_GetSendStatus` shall return `IOTHUB_CLIENT_OK` and status `IOTHUB_CLIENT_SEND_STATUS_IDLE` if there are currently no event items to be sent or being sent. **]**   

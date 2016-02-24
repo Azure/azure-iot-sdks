@@ -160,7 +160,7 @@ static bool create_messageHTTPrelativePath(HTTPTRANSPORT_PERDEVICE_DATA* handleD
 			(STRING_concat(handleData->messageHTTPrelativePath, MESSAGE_ENDPOINT_HTTP API_VERSION) == 0)
 			))
 		{
-			/*Codes*SRS_TRANSPORTMULTITHTTP_17_020: [ If creating the message HTTP relative path fails, then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_020: [ If creating the message HTTP relative path fails, then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
 			result = false;
 			destroy_messageHTTPrelativePath(handleData);
 		}
@@ -557,6 +557,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const
 				if (was_create_deviceId_ok) destroy_deviceId(deviceListElement);
 				if (was_create_deviceKey_ok) destroy_deviceKey(deviceListElement);
 				if (was_deviceListElement_ok) free(deviceListElement);
+				/*Codes_SRS_TRANSPORTMULTITHTTP_17_039: [ If the allocating the device handle fails then IoTHubTransportHttp_Register shall fail and return NULL. ] */
 				if (was_resultCreated_ok) free(result);
 				result = NULL;
 			}
@@ -679,6 +680,7 @@ static bool create_hostName(HTTPTRANSPORT_HANDLE_DATA* handleData, const IOTHUBT
         if ((STRING_concat(handleData->hostName, ".") != 0) ||
             (STRING_concat(handleData->hostName, config->upperConfig->iotHubSuffix) != 0))
         {
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_006: [ If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL. ] */
             destroy_hostName(handleData);
             result = false;
         }
@@ -714,6 +716,7 @@ static bool create_httpApiExHandle(HTTPTRANSPORT_HANDLE_DATA* handleData, const 
 		handleData->httpApiExHandle = HTTPAPIEX_Create(STRING_c_str(handleData->hostName));
 		if (handleData->httpApiExHandle == NULL)
 		{
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_008: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubTransportHttp_Create shall fail and return NULL. ] */
 			result = false;
 		}
 		else
@@ -746,6 +749,7 @@ bool create_perDeviceList(HTTPTRANSPORT_HANDLE_DATA* handleData)
 		handleData->perDeviceList = list_create();
 		if (handleData == NULL || handleData->perDeviceList == NULL)
 		{
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_010: [ If creating the list fails, then IoTHubTransportHttp_Create shall fail and return NULL. ]*/
 			result = false;
 		}
 		else
@@ -827,11 +831,13 @@ TRANSPORT_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config
 
 void IoTHubTransportHttp_Destroy(TRANSPORT_HANDLE handle)
 {
+	/*Codes_SRS_TRANSPORTMULTITHTTP_17_012: [ IoTHubTransportHttp_Destroy shall do nothing is handle is NULL. ]*/
     if (handle != NULL)
     {
 		HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
 		LIST_ITEM_HANDLE listItem;
 
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_013: [ Otherwise, IoTHubTransportHttp_Destroy shall free all the resources currently in use. ]*/
 		for (listItem = list_get_head_item(handleData->perDeviceList);
 			 listItem != NULL;
 			 listItem = list_get_next_item(listItem))
@@ -859,16 +865,18 @@ int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
     int result;
     if (handle == NULL)
     {
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_103: [ If parameter deviceHandle is NULL then IoTHubTransportHttp_Subscribe shall fail and return a non-zero value. ]*/
         LogError("invalid arg passed to IoTHubTransportHttp_Subscribe\r\n");
         result = __LINE__;
     }
     else
     {
-
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_104: [ IoTHubTransportHttp_Subscribe shall locate deviceHandle in the transport device list by calling list_find_if. ]*/
 		LIST_ITEM_HANDLE listItem = get_perDeviceDataItem(handle);
 
 		if (listItem == NULL)
 		{
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_105: [ If the device structure is not found, then this function shall fail and return a non-zero value. ]*/
 			LogError("did not find device in transport handle");
 			result = __LINE__;
 		}
@@ -884,6 +892,7 @@ int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 			}
 			else
 			{
+				/*Codes_SRS_TRANSPORTMULTITHTTP_17_106: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should execute HTTP requests. ]*/
 				perDeviceItem->DoWork_PullMessage = true;
 			}
 		}
@@ -894,14 +903,18 @@ int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 
 void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 {
+	/*Codes_SRS_TRANSPORTMULTITHTTP_17_107: [ If parameter deviceHandle is NULL then IoTHubTransportHttp_Unsubscribe shall fail do nothing. ]*/
     if (handle != NULL)
     {
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_108: [ IoTHubTransportHttp_Unsubscribe shall locate deviceHandle in the transport device list by calling list_find_if. ]*/
 		LIST_ITEM_HANDLE listItem = get_perDeviceDataItem(handle);
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_109: [ If the device structure is not found, then this function shall fail and do nothing. ]*/
 		if (listItem != NULL)
 		{
 			HTTPTRANSPORT_PERDEVICE_DATA * perDeviceItem = (HTTPTRANSPORT_PERDEVICE_DATA *)list_item_get_value(listItem);
 			if (perDeviceItem != NULL)
 			{
+				/*Codes_SRS_TRANSPORTMULTITHTTP_17_110: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should not execute HTTP requests. ]*/
 				perDeviceItem->DoWork_PullMessage = false;
 			}
 		}
@@ -926,14 +939,14 @@ static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* pro
 
         if (count == 0)
         {
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_076: [If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload*/
+            /*Codes_SRS_TRANSPORTMULTITHTTP_17_064: [If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload*/
             /*no properties - do nothing with existing*/
             result = 0;
             *propertiesMessageSizeContribution = 0;
         }
         else
         {
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_075: [If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2*/
+            /*Codes_SRS_TRANSPORTMULTITHTTP_17_058: [If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2*/
             if (STRING_concat(existing, ",\"properties\":") != 0)
             {
                 /*go ahead and return it*/
@@ -952,7 +965,7 @@ static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* pro
                 *propertiesMessageSizeContribution = 0;
                 for (i = 0;i < count;i++)
                 {
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_120: [Every property name shall add to the message size the length of the property name + the length of the property value + 16 bytes.] */
+                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_063: [Every property name shall add to the message size the length of the property name + the length of the property value + 16 bytes.] */
                     *propertiesMessageSizeContribution += (strlen(keys[i]) + strlen(values[i]) + MAXIMUM_PROPERTY_OVERHEAD);
                 }
                 result = 0;
@@ -1063,7 +1076,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
                     else
                     {
                         /*all is fine... */
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_119: [The message size is computed from the length of the payload + 384.] */
+                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_062: [The message size is computed from the length of the payload + 384.] */
                         *messageSizeContribution = size + MAXIMUM_PAYLOAD_OVERHEAD + propertiesSize;
                     }
                     STRING_delete(encoded);
@@ -1072,7 +1085,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
         }
         break;
     }
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_113: [If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false}] */
+    /*Codes_SRS_TRANSPORTMULTITHTTP_17_057: [If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false}] */
     case IOTHUBMESSAGE_STRING:
     {
         result = STRING_construct("{\"body\":");
@@ -1115,7 +1128,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
                     else
                     {
                         /*result has the intended content*/
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_119: [The message size is computed from the length of the payload + 384.] */
+                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_062: [The message size is computed from the length of the payload + 384.] */
                         *messageSizeContribution = strlen(source) + MAXIMUM_PAYLOAD_OVERHEAD + propertiesSize;
                     }
                     STRING_delete(asJson);
@@ -1143,7 +1156,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
 DEFINE_ENUM(MAKE_PAYLOAD_RESULT, MAKE_PAYLOAD_RESULT_VALUES);
 
 /*this function assembles several {"body":"base64 encoding of the message content"," base64Encoded": true} into 1 payload*/
-/*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_070: [IoTHubTransportHttp_DoWork shall build the following string:[{"body":"base64 encoding of the message1 content"},{"body":"base64 encoding of the message2 content"}...]]*/
+/*Codes_SRS_TRANSPORTMULTITHTTP_17_056: [IoTHubTransportHttp_DoWork shall build the following string:[{"body":"base64 encoding of the message1 content"},{"body":"base64 encoding of the message2 content"}...]]*/
 static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_PERDEVICE_DATA* deviceData, STRING_HANDLE* payload)
 {
     MAKE_PAYLOAD_RESULT result;
@@ -1168,7 +1181,7 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_PERDEVICE_DATA* deviceData,
             if (isFirst)
             {
                 isFirst = false;
-                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.]*/
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_067: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.]*/
                 if (temp == NULL) /*first item failed to create, nothing to send*/
                 {
                     result = MAKE_PAYLOAD_ERROR;
@@ -1178,8 +1191,8 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_PERDEVICE_DATA* deviceData,
                 }
                 else
                 {
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_071: [If the oldest message in waitingToSend causes the message size to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_FAILED.]*/
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_118: [The message size shall be limited to 255KB - 1 byte.]*/
+                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_065: [If the oldest message in waitingToSend causes the message size to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_FAILED.]*/
+                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_061: [The message size shall be limited to 255KB - 1 byte.]*/
                     if (messageSize > MAXIMUM_MESSAGE_SIZE)
                     {
                         PDLIST_ENTRY head = DList_RemoveHeadList(deviceData->waitingToSend); /*actually this is the same as "actual", but now it is removed*/
@@ -1193,7 +1206,7 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_PERDEVICE_DATA* deviceData,
                     {
                         if (STRING_concat_with_STRING(*payload, temp) != 0)
                         {
-                            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.]*/
+                            /*Codes_SRS_TRANSPORTMULTITHTTP_17_067: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.]*/
                             result = MAKE_PAYLOAD_ERROR;
                             STRING_delete(*payload);
                             *payload = NULL;
@@ -1216,7 +1229,7 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_PERDEVICE_DATA* deviceData,
                 if (temp == NULL)
                 {
                     /*there are multiple payloads encoded, the last one had an internal error, just go with those - closing the payload happens "after the loop"*/
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_072: [If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload.]*/
+                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_066: [If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload.]*/
                     result = MAKE_PAYLOAD_OK;
                     keepGoing = false;
                 }
@@ -1225,14 +1238,14 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_PERDEVICE_DATA* deviceData,
                     if (allMessagesSize + messageSize > MAXIMUM_MESSAGE_SIZE)
                     {
                         /*this item doesn't make it to the payload, but the payload is valid so far*/
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_072: [If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload.]*/
+                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_066: [If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload.]*/
                         result = MAKE_PAYLOAD_OK;
                         keepGoing = false;
                     }
                     else if (STRING_concat_with_STRING(*payload, temp) != 0)
                     {
                         /*should still send what there is so far...*/
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_072: [If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload.]*/
+                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_066: [If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload.]*/
                         result = MAKE_PAYLOAD_OK;
                         keepGoing = false;
                     }
@@ -1274,33 +1287,33 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
 
     if (DList_IsListEmpty(deviceData->waitingToSend))
     {
-        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_019: [If the list is empty then IoTHubTransportHttp_DoWork shall proceed to the following action.] */
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_060: [If the list is empty then IoTHubTransportHttp_DoWork shall proceed to the following action.] */
     }
     else
     {
-        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_101: [If option SetBatching is true then _Dowork shall send batched event message as specced below.] */
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_053: [If option SetBatching is true then _Dowork shall send batched event message as specced below.] */
         if (handleData->doBatchedTransfers)
         {
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_102: [Request HTTP headers shall have the value of "Content-Type" created or updated to "application/vnd.microsoft.iothub.json" by a call to HTTPHeaders_ReplaceHeaderNameValuePair.] */
+            /*Codes_SRS_TRANSPORTMULTITHTTP_17_054: [Request HTTP headers shall have the value of "Content-Type" created or updated to "application/vnd.microsoft.iothub.json" by a call to HTTPHeaders_ReplaceHeaderNameValuePair.] */
             if (HTTPHeaders_ReplaceHeaderNameValuePair(deviceData->eventHTTPrequestHeaders, CONTENT_TYPE, APPLICATION_VND_MICROSOFT_IOTHUB_JSON) != HTTP_HEADERS_OK)
             {
-                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_103: [If updating Content-Type fails for any reason, then _DoWork shall advance to the next action.] */
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_055: [If updating Content-Type fails for any reason, then _DoWork shall advance to the next action.] */
                 LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair\r\n");
             }
             else
             {
-                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_018: [It shall inspect the "waitingToSend" DLIST passed in config structure.] */
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_059: [It shall inspect the "waitingToSend" DLIST passed in config structure.] */
                 STRING_HANDLE payload;
                 switch (makePayload(deviceData, &payload))
                 {
                 case MAKE_PAYLOAD_OK:
                 {
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_031: [Once a final payload has been obtained, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters:] */
+                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_068: [Once a final payload has been obtained, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters:] */
                     BUFFER_HANDLE temp = BUFFER_new();
                     if (temp == NULL)
                     {
                         LogError("unable to BUFFER_new\r\n");
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.]*/
+                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_067: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.]*/
                         reversePutListBackIn(&(deviceData->eventConfirmations), deviceData->waitingToSend);
                     }
                     else
@@ -1309,7 +1322,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                         {
                             LogError("unable to BUFFER_build\r\n");
                             //items go back to waitingToSend
-                            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.]*/
+                            /*Codes_SRS_TRANSPORTMULTITHTTP_17_067: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.]*/
                             reversePutListBackIn(&(deviceData->eventConfirmations), deviceData->waitingToSend);
                         }
                         else
@@ -1330,20 +1343,20 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                             {
                                 LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
                                 //items go back to waitingToSend
-                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_065: [if HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
+                                /*Codes_SRS_TRANSPORTMULTITHTTP_17_069: [if HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
                                 reversePutListBackIn(&(deviceData->eventConfirmations), deviceData->waitingToSend);
                             }
                             else
                             {
                                 if (statusCode < 300)
                                 {
-                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_067: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list containing all the items batched, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCESS. The batched items shall be removed from waitingToSend.] */
+                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_070: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list containing all the items batched, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCESS. The batched items shall be removed from waitingToSend.] */
                                     IoTHubClient_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_BATCHSTATE_SUCCESS);
                                 }
                                 else
                                 {
                                     //items go back to waitingToSend
-                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_065: [if HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
+                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_069: [if HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
                                     LogError("unexpected HTTP status code (%u)\r\n", statusCode);
                                     reversePutListBackIn(&(deviceData->eventConfirmations), deviceData->waitingToSend);
                                 }
@@ -1385,7 +1398,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
             IOTHUB_MESSAGE_LIST* message = containingRecord(deviceData->waitingToSend->Flink, IOTHUB_MESSAGE_LIST, entry);
             IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message->messageHandle);
 
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_122: [The message size is computed from the length of the payload + 384.]*/
+            /*Codes_SRS_TRANSPORTMULTITHTTP_17_073: [The message size is computed from the length of the payload + 384.]*/
             if (!(
                 (((contentType == IOTHUBMESSAGE_BYTEARRAY) && 
                     (IoTHubMessage_GetByteArray(message->messageHandle, &messageContent, &originalMessageSize)==IOTHUB_MESSAGE_OK)) ? (messageSize= originalMessageSize + MAXIMUM_PAYLOAD_OVERHEAD, 1): 0)
@@ -1404,8 +1417,8 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
             }
             else
             {
-                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_109: [If the oldest message in waitingToSend causes the message to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_FAILED.]*/
-                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_121: [The message size shall be limited to 255KB -1 bytes.] */
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_075: [If the oldest message in waitingToSend causes the message to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_FAILED.]*/
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_072: [The message size shall be limited to 255KB -1 bytes.] */
                 if (messageSize > MAXIMUM_MESSAGE_SIZE)
                 {
                     PDLIST_ENTRY head = DList_RemoveHeadList(deviceData->waitingToSend); /*actually this is the same as "actual", but now it is removed*/
@@ -1414,32 +1427,32 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                 }
                 else
                 {
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_104: [If option SetBatching is false then _Dowork shall send individual event message as specced below.] */
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_105: [A clone of the event HTTP request headers shall be created.]*/
+                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_071: [If option SetBatching is false then _Dowork shall send individual event message as specced below.] */
+                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_076: [A clone of the event HTTP request headers shall be created.]*/
                     HTTP_HEADERS_HANDLE clonedEventHTTPrequestHeaders = HTTPHeaders_Clone(deviceData->eventHTTPrequestHeaders);
                     if (clonedEventHTTPrequestHeaders == NULL)
                     {
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
                         LogError("HTTPHeaders_Clone failed\r\n");
                     }
                     else
                     {
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_106: [The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".] */
+                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_077: [The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".] */
                         if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, CONTENT_TYPE, APPLICATION_OCTET_STREAM) != HTTP_HEADERS_OK)
                         {
-                            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+                            /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
                             LogError("HTTPHeaders_ReplaceHeaderNameValuePair failed\r\n");
                         }
                         else
                         {
-                            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_107: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */
+                            /*Codes_SRS_TRANSPORTMULTITHTTP_17_078: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */
                             MAP_HANDLE map = IoTHubMessage_Properties(message->messageHandle);
                             const char*const* keys;
                             const char*const* values;
                             size_t count;
                             if (Map_GetInternals(map, &keys, &values, &count) != MAP_OK)
                             {
-                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+                                /*Codes_SRS_TRANSPORTMULTITHTTP_17_078: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
                                 LogError("unable to Map_GetInternals\r\n");
                             }
                             else
@@ -1451,11 +1464,11 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                 
                                 for (i = 0; (i < count) && goOn; i++)
                                 {
-                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_123: [Every property name shall add  to the message size the length of the property name + the length of the property value + 16 bytes.] */
+                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_074: [Every property name shall add  to the message size the length of the property name + the length of the property value + 16 bytes.] */
                                     messageSize += (strlen(values[i]) + strlen(keys[i]) + MAXIMUM_PROPERTY_OVERHEAD);
                                     if (messageSize > MAXIMUM_MESSAGE_SIZE)
                                     {
-                                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_121: [The message size shall be limited to 255KB -1 bytes.] */
+                                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_072: [The message size shall be limited to 255KB -1 bytes.] */
                                         PDLIST_ENTRY head = DList_RemoveHeadList(deviceData->waitingToSend); /*actually this is the same as "actual", but now it is removed*/
                                         DList_InsertTailList(&(deviceData->eventConfirmations), head);
                                         IoTHubClient_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_BATCHSTATE_FAILED); /*takes care of emptying the list too*/
@@ -1466,7 +1479,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                         STRING_HANDLE temp = STRING_construct(IOTHUB_APP_PREFIX);
                                         if (temp == NULL)
                                         {
-                                            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+                                            /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
                                             LogError("unable to STRING_construct\r\n");
                                             goOn = false;
                                         }
@@ -1474,7 +1487,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                         {
                                             if (STRING_concat(temp, keys[i]) != 0)
                                             {
-                                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+                                                /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
                                                 LogError("unable to STRING_concat\r\n");
                                                 goOn = false;
                                             }
@@ -1482,7 +1495,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                             {
                                                 if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, STRING_c_str(temp), values[i]) != HTTP_HEADERS_OK)
                                                 {
-                                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+                                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
                                                     LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair\r\n");
                                                     goOn = false;
                                                 }
@@ -1515,11 +1528,11 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
 
                                 if (!goOn)
                                 {
-                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
                                 }
                                 else
                                 {
-                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
+                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_080: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
                                     BUFFER_HANDLE toBeSend = BUFFER_new();
                                     if (toBeSend == NULL)
                                     {
@@ -1553,14 +1566,14 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                             {
                                                 if (statusCode < 300)
                                                 {
-                                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
+                                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_082: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
                                                     PDLIST_ENTRY justSent = DList_RemoveHeadList(deviceData->waitingToSend); /*actually this is the same as "actual", but now it is removed*/
                                                     DList_InsertTailList(&(deviceData->eventConfirmations), justSent);
                                                     IoTHubClient_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_BATCHSTATE_SUCCESS); /*takes care of emptying the list too*/
                                                 }
                                                 else
                                                 {
-                                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_111: [If HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
+                                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_081: [If HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
                                                     LogError("unexpected HTTP status code (%u)\r\n", statusCode);
                                                 }
                                             }
@@ -1586,7 +1599,7 @@ DEFINE_ENUM(ACTION, ACTION_VALUES);
 
 static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData, const char* ETag, ACTION action)
 {
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_050: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+    /*Codes_SRS_TRANSPORTMULTITHTTP_17_097: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
 -requestType: POST
 -relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-02-03" 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
@@ -1596,7 +1609,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 - statusCode: a pointer to unsigned int which might be examined for logging
 - responseHeadearsHandle: NULL
 - responseContent: NULL]*/
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_051: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+    /*Codes_SRS_TRANSPORTMULTITHTTP_17_099: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
 -requestType: DELETE
 -relativePath: abandon relative path begin + value of ETag + "?api-version=2016-02-03" 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
@@ -1606,7 +1619,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 - statusCode: a pointer to unsigned int which might be used by logging
 - responseHeadearsHandle: NULL
 - responseContent: NULL]*/
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_077: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+    /*Codes_SRS_TRANSPORTMULTITHTTP_17_101: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
 -requestType: DELETE
 -relativePath: abandon relative path begin + value of ETag +"?api-version=2016-02-03" + "&reject"
 - requestHttpHeadersHandle: an HTTP headers instance containing the following
@@ -1620,9 +1633,9 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
     STRING_HANDLE fullAbandonRelativePath = STRING_clone(deviceData->abandonHTTPrelativePathBegin);
     if (fullAbandonRelativePath == NULL)
     {
-        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
-        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
         LogError("unable to STRING_clone\r\n");
     }
     else
@@ -1630,10 +1643,10 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
         STRING_HANDLE ETagUnquoted = STRING_construct_n(ETag + 1, strlen(ETag) - 2); /*skip first character which is '"' and the last one (which is also '"')*/
         if (ETagUnquoted == NULL)
         {
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-            LogError("unable to STRING_construct_n\r\n");
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+			LogError("unable to STRING_construct_n\r\n");
         }
         else
         {
@@ -1642,20 +1655,20 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                 (STRING_concat(fullAbandonRelativePath, (action == ABANDON) ? "/abandon" API_VERSION : ((action == REJECT) ? API_VERSION "&reject" : API_VERSION)) == 0)
                 ))
             {
-                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
-                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                LogError("unable to STRING_concat\r\n");
+				/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
+				/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+				/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+				LogError("unable to STRING_concat\r\n");
             }
             else
             {
                 HTTP_HEADERS_HANDLE abandonRequestHttpHeaders = HTTPHeaders_Alloc();
                 if (abandonRequestHttpHeaders == NULL)
                 {
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                    LogError("unable to HTTPHeaders_Alloc\r\n");
+					/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
+					/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+					/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+					LogError("unable to HTTPHeaders_Alloc\r\n");
                 }
                 else
                 {
@@ -1664,10 +1677,10 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                         (HTTPHeaders_AddHeaderNameValuePair(abandonRequestHttpHeaders, "If-Match", ETag) == HTTP_HEADERS_OK)
                         ))
                     {
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                        LogError("unable to HTTPHeaders_AddHeaderNameValuePair\r\n");
+						/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
+						/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+						/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+						LogError("unable to HTTPHeaders_AddHeaderNameValuePair\r\n");
                     }
                     else
                     {
@@ -1684,26 +1697,26 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                             NULL                                                /*- responseContent: NULL]                                                                                                 */
                             ) != HTTPAPIEX_OK)
                         {
-                            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
-                            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                            LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
+							/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
+							/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+							/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+							LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
                         }
                         else
                         {
                             if (statusCode != 204)
                             {
-                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
-                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                                LogError("unexpected status code returned %u (was expecting 204)\r\n", statusCode);
+								/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
+								/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+								/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+								LogError("unexpected status code returned %u (was expecting 204)\r\n", statusCode);
                             }
                             else
                             {
-                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
-                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                                /*all is fine*/
+								/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
+								/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+								/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+								/*all is fine*/
                             }
                         }
                     }
@@ -1718,12 +1731,12 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 
 static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVICE_DATA* deviceData, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_057: [If flag DoWork_PullMessage is set to false then _DoWork shall advance to the next action.] */
+    /*Codes_SRS_TRANSPORTMULTITHTTP_17_083: [ If device is not subscribed then _DoWork shall advance to the next action. ] */
     if (deviceData->DoWork_PullMessage)
     {
-        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_116: [After client creation, the first GET shall be allowed no matter what the value of GetMinimumPollingTime.] */
-        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_117: [If time is not available then all calls shall be treated as if they are the first one.] */
-        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_115: [A GET request that happens earlier than GetMinimumPollingTime shall be ignored.] */
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_123: [After client creation, the first GET shall be allowed no matter what the value of GetMinimumPollingTime.] */
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_124: [If time is not available then all calls shall be treated as if they are the first one.] */
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_122: [A GET request that happens earlier than GetMinimumPollingTime shall be ignored.] */
         time_t timeNow = get_time(NULL);
         bool isPollingAllowed = deviceData->isFirstPoll || (timeNow == (time_t)(-1)) || (get_difftime(timeNow, deviceData->lastPollTime) > handleData->getMinimumPollingTime);
         if (isPollingAllowed)
@@ -1731,7 +1744,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
         HTTP_HEADERS_HANDLE responseHTTPHeaders = HTTPHeaders_Alloc();
         if (responseHTTPHeaders == NULL)
         {
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
+            /*Codes_SRS_TRANSPORTMULTITHTTP_17_085: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
             LogError("unable to HTTPHeaders_Alloc\r\n");
         }
         else
@@ -1739,13 +1752,13 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
             BUFFER_HANDLE responseContent = BUFFER_new();
             if (responseContent == NULL)
             {
-                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_085: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
                 LogError("unable to BUFFER_new\r\n");
             }
             else
             {
                 unsigned int statusCode;
-                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_036: [Otherwise, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_084: [Otherwise, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters
 requestType: GET
 relativePath: the message HTTP relative path
 requestHttpHeadersHandle: message HTTP request headers created by _Create
@@ -1767,7 +1780,7 @@ responseContent: a new instance of buffer]
                     ) 
                     != HTTPAPIEX_OK)
                 {
-                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
+                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_085: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
                     LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
                 }
                 else
@@ -1784,19 +1797,19 @@ responseContent: a new instance of buffer]
                         }
                     if (statusCode == 204)
                     {
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_038: [If the HTTPAPIEX_SAS_ExecuteRequest executed successfully then status code shall be examined. Any status code different than 200 causes _DoWork to advance to the next action.] */
+                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_086: [If the HTTPAPIEX_SAS_ExecuteRequest executed successfully then status code shall be examined. Any status code different than 200 causes _DoWork to advance to the next action.] */
                         /*this is an expected status code, means "no commands", but logging that creates panic*/
 
                         /*do nothing, advance to next action*/
                     }
                     else if (statusCode != 200)
                     {
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_038: [If the HTTPAPIEX_SAS_ExecuteRequest executed successfully then status code shall be examined. Any status code different than 200 causes _DoWork to advance to the next action.] */
+                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_086: [If the HTTPAPIEX_SAS_ExecuteRequest executed successfully then status code shall be examined. Any status code different than 200 causes _DoWork to advance to the next action.] */
                         LogError("expected status code was 200, but actually was received %u... moving on\r\n", statusCode);
                     }
                     else
                     {
-                        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_039: [If status code is 200, then _DoWork shall make a copy of the value of the "ETag" http header.]*/
+                        /*Codes_SRS_TRANSPORTMULTITHTTP_17_087: [If status code is 200, then _DoWork shall make a copy of the value of the "ETag" http header.]*/
                         const char* etagValue = HTTPHeaders_FindHeaderValue(responseHTTPHeaders, "ETag");
                         if (etagValue == NULL)
                         {
@@ -1804,7 +1817,7 @@ responseContent: a new instance of buffer]
                         }
                         else
                         {
-                            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_040: [If no such header is found or is invalid, then _DoWork shall advance to the next action.]*/
+                            /*Codes_SRS_TRANSPORTMULTITHTTP_17_088: [If no such header is found or is invalid, then _DoWork shall advance to the next action.]*/
                             size_t etagsize = strlen(etagValue);
                             if (
                                 (etagsize < 2) ||
@@ -1816,18 +1829,18 @@ responseContent: a new instance of buffer]
                             }
                             else
                             {
-                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_041: [_DoWork shall assemble an IOTHUBMESSAGE_HANDLE from the received HTTP content (using the responseContent buffer).] */
+                                /*Codes_SRS_TRANSPORTMULTITHTTP_17_089: [_DoWork shall assemble an IOTHUBMESSAGE_HANDLE from the received HTTP content (using the responseContent buffer).] */
                                 IOTHUB_MESSAGE_HANDLE receivedMessage = IoTHubMessage_CreateFromByteArray(BUFFER_u_char(responseContent), BUFFER_length(responseContent));
                                 if (receivedMessage == NULL)
                                 {
-                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_042: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.]*/
+                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_092: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.]*/
                                     LogError("unable to IoTHubMessage_CreateFromByteArray, trying to abandon the message... \r\n");
                                     abandonOrAcceptMessage(handleData, deviceData, etagValue, ABANDON);
                                 }
                                 else
                                 {
-                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.]*/
-                                    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_07_008: [The HTTP header of iothub-messageid shall be set in the MessageId.]*/
+                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_090: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.]*/
+                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_091: [The HTTP header of iothub-messageid shall be set in the MessageId.]*/
                                     size_t nHeaders;
                                     if (HTTPHeaders_GetHeaderCount(responseHTTPHeaders, &nHeaders) != HTTP_HEADERS_OK)
                                     {
@@ -1898,21 +1911,21 @@ responseContent: a new instance of buffer]
                                         }
                                         else
                                         {
-                                            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_043: [Otherwise, _DoWork shall call IoTHubClient_LL_MessageCallback with parameters handle = iotHubClientHandle and message = newly created message.]*/
+                                            /*Codes_SRS_TRANSPORTMULTITHTTP_17_093: [Otherwise, _DoWork shall call IoTHubClient_LL_MessageCallback with parameters handle = iotHubClientHandle and message = newly created message.]*/
                                             IOTHUBMESSAGE_DISPOSITION_RESULT messageResult = IoTHubClient_LL_MessageCallback(iotHubClientHandle, receivedMessage);
                                             if (messageResult == IOTHUBMESSAGE_ACCEPTED)
                                             {
-                                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_044: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ACCEPTED then _DoWork shall "accept" the message.]*/
+                                                /*Codes_SRS_TRANSPORTMULTITHTTP_17_094: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ACCEPTED then _DoWork shall "accept" the message.]*/
                                                 abandonOrAcceptMessage(handleData, deviceData, etagValue, ACCEPT);
                                             }
                                             else if (messageResult == IOTHUBMESSAGE_REJECTED)
                                             {
-                                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.]*/
+                                                /*Codes_SRS_TRANSPORTMULTITHTTP_17_095: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.]*/
                                                 abandonOrAcceptMessage(handleData, deviceData, etagValue, REJECT);
                                             }
                                             else
                                             {
-                                                /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_079: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ABANDONED then _DoWork shall "abandon" the message.] */
+                                                /*Codes_SRS_TRANSPORTMULTITHTTP_17_096: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ABANDONED then _DoWork shall "abandon" the message.] */
                                                 abandonOrAcceptMessage(handleData, deviceData, etagValue, ABANDON);
                                             }
                                         }
@@ -1939,11 +1952,16 @@ responseContent: a new instance of buffer]
 
 void IoTHubTransportHttp_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
+	/*Codes_SRS_TRANSPORTMULTITHTTP_17_049: [ If handle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
+	/*Codes_SRS_TRANSPORTMULTITHTTP_17_140: [ If iotHubClientHandle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
     if ((handle != NULL) && (iotHubClientHandle != NULL))
     {
 		HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
 		LIST_ITEM_HANDLE listItem;
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_052: [ IoTHubTransportHttp_DoWork shall perform a round-robin loop through every deviceHandle in the transport device list. ]*/
 		// not round robin
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_050: [ IoTHubTransportHttp_DoWork shall call loop through the device list. ] */
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_051: [ IF the list is empty, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
 		for (listItem = list_get_head_item(handleData->perDeviceList); 
 			 listItem != NULL; 
 			 listItem = list_get_next_item(listItem))
@@ -1964,9 +1982,9 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE hand
 {
     IOTHUB_CLIENT_RESULT result;
 
-    /* Codes_SRS_IOTHUBTRANSPORTTHTTP_09_001: [IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter] */
     if (handle == NULL)
     {
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_111: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter. ]*/
         result = IOTHUB_CLIENT_INVALID_ARG;
         LogError("Invalid handle to IoTHubClient HTTP transport instance.\r\n");
     }
@@ -1977,9 +1995,11 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE hand
     }
     else
     {
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_138: [ IoTHubTransportHttp_GetSendStatus shall locate deviceHandle in the transport device list by calling list_find_if. ]*/
 		LIST_ITEM_HANDLE listItem = get_perDeviceDataItem(handle);
 		if (listItem == NULL)
 		{
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_139: [ If the device structure is not found, then this function shall fail and return with IOTHUB_CLIENT_INVALID_ARG. ]*/
 			result = IOTHUB_CLIENT_INVALID_ARG;
 			LogError("Device not found in transport list.\r\n");
 		}
@@ -1993,12 +2013,12 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE hand
 			}
 			else
 			{
-				/* Codes_SRS_IOTHUBTRANSPORTTHTTP_09_002: [IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent] */
+				/* Codes_SRS_TRANSPORTMULTITHTTP_17_113: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent. ] */
 				if (!DList_IsListEmpty(deviceData->waitingToSend))
 				{
 					*iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
 				}
-				/* Codes_SRS_IOTHUBTRANSPORTTHTTP_09_003: [IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent] */
+				/* Codes_SRS_TRANSPORTMULTITHTTP_17_112: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent. ] */
 				else
 				{
 					*iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
@@ -2014,9 +2034,9 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE hand
 IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_HANDLE handle, const char* option, const void* value)
 {
     IOTHUB_CLIENT_RESULT result;
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_080: [If handle parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_081: [If option parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_082: [If value parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
+    /*Codes_SRS_TRANSPORTMULTITHTTP_17_114: [If handle parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
+    /*Codes_SRS_TRANSPORTMULTITHTTP_17_115: [If option parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
+    /*Codes_SRS_TRANSPORTMULTITHTTP_17_116: [If value parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
     if (
         (handle == NULL) ||
         (option == NULL) ||
@@ -2029,14 +2049,14 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_HANDLE handle, cons
     else
     {
         HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
-        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_097: ["Batching"] */
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_120: ["Batching"] */
         if (strcmp("Batching", option) == 0)
         {
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_083: [If optionName is an option handled by IoTHubTransportHttp then it shall be set.] */
+            /*Codes_SRS_TRANSPORTMULTITHTTP_17_117: [If optionName is an option handled by IoTHubTransportHttp then it shall be set.] */
             handleData->doBatchedTransfers = *(bool*)value;
             result = IOTHUB_CLIENT_OK;
         }
-        /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_114: ["MinimumPollingTime"] */
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_121: ["MinimumPollingTime"] */
         else if (strcmp("MinimumPollingTime", option) == 0)
         {
             handleData->getMinimumPollingTime = *(unsigned int*)value;
@@ -2044,9 +2064,12 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_HANDLE handle, cons
         }
         else
         {
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_084: [Otherwise, IoTHubTransport_Http shall call HTTPAPIEX_SetOption with the same parameters and return the translated code.] */
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_126: [ "TrustedCerts"] */
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_127: [ NULL shall be allowed. ]*/
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_129: [ This option shall passed down to the lower layer by calling HTTPAPIEX_SetOption. ]*/
+            /*Codes_SRS_TRANSPORTMULTITHTTP_17_118: [Otherwise, IoTHubTransport_Http shall call HTTPAPIEX_SetOption with the same parameters and return the translated code.] */
             HTTPAPIEX_RESULT HTTPAPIEX_result = HTTPAPIEX_SetOption(handleData->httpApiExHandle, option, value);
-            /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_086: [The following table translates HTTPAPIEX return codes to IOTHUB_CLIENT_RESULT return codes:] */
+            /*Codes_SRS_TRANSPORTMULTITHTTP_17_119: [The following table translates HTTPAPIEX return codes to IOTHUB_CLIENT_RESULT return codes:] */
             if (HTTPAPIEX_result == HTTPAPIEX_OK)
             {
                 result = IOTHUB_CLIENT_OK;

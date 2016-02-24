@@ -2293,6 +2293,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 	}
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_029: [ If the clone fails then IoTHubTransportHttp_Register shall fail and return NULL. ] 
 	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_2)
 	{
 		///arrange
@@ -2331,6 +2332,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 	}
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_141: [ If the STRING_concat fails, then it shall fail and return NULL. ]
 	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_3)
 	{
 		///arrange
@@ -2373,6 +2375,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 	}
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_032: [ If the STRING_concat_with_STRING fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
 	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_4)
 	{
 		///arrange
@@ -2417,6 +2420,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 	}
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_034: [ If the STRING_construct fails then IoTHubTransportHttp_Register shall fail and return NULL. ] 
 	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_5)
 	{
 		///arrange
@@ -2462,6 +2466,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 	}
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_035: [ The keyName is shortened to zero length, if that fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
 	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_6)
 	{
 		///arrange
@@ -2564,6 +2569,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 	}
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_025: [ If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_030: [ IoTHubTransportHttp_Register shall invoke STRING_concat with arguments uriResource and the string "/devices/". ]
 	TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_1)
 	{
 		///arrange
@@ -2607,6 +2613,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 	}
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_025: [ If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_032: [ If the STRING_concat_with_STRING fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
 	TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_2)
 	{
 		///arrange
@@ -2680,6 +2687,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 	}
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_025: [ If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_027: [ If the encode fails then IoTHubTransportHttp_Register shall fail and return NULL. ] 
 	TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_4)
 	{
 		///arrange
@@ -3685,6 +3693,84 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
 		///cleanup
 		IoTHubTransportHttp_Destroy(handle);
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_014: [ If parameter deviceId is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_deviceId_null_returns_null)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, NULL, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_015: [ If parameter deviceKey is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_returns_null)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, NULL, TEST_CONFIG.waitingToSend);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_016: [ If parameter waitingToSend is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_wts_null_returns_null)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+
+	}
+	TEST_FUNCTION(IoTHubTransportHttp_Register_handle_null_returns_null)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(NULL, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+
 	}
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_044: [ If deviceHandle is NULL, then IoTHubTransportHttp_Unregister shall do nothing. ]
@@ -9599,6 +9685,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
     }
 
     //Tests_SRS_TRANSPORTMULTITHTTP_17_064: [ If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_059: [ It shall inspect the "waitingToSend" DLIST passed in config structure. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_properties_succeeds)
     {
         ///arrange
@@ -10004,7 +10091,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 #define TEST_2_ITEM_STRING "[{\"body\":\"MTIzNDU2\",\"properties\":{" TEST_RED_KEY_STRING_WITH_IOTHUBAPP ":" TEST_RED_VALUE_STRING "}},{\"body\":\"MTIzNDU2Nw==\",\"properties\":{" TEST_BLUE_KEY_STRING_WITH_IOTHUBAPP ":" TEST_BLUE_VALUE_STRING "," TEST_YELLOW_KEY_STRING_WITH_IOTHUBAPP ":" TEST_YELLOW_VALUE_STRING "}}]"
 #define TEST_1_ITEM_STRING "[{\"body\":\"MTIzNDU2\",\"properties\":{" TEST_RED_KEY_STRING_WITH_IOTHUBAPP ":" TEST_RED_VALUE_STRING "}}]"
 
-    //Test_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items) 
     {
         ///arrange
@@ -10035,7 +10122,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 #define THRESHOLD2 17
 #define THRESHOLD3 7 /*below 7, STRING_concat would fail not in producing properties*/
 
-	//Test_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
 	TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_THRESHOLD1_succeeds)
     {
         for (size_t i = THRESHOLD1 + 1; i > THRESHOLD1; i--)
@@ -10075,7 +10162,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         }
     }
 
-	//Test_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
 	TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_send_only_1_when_properties_for_second_fail)
     {
         for (size_t i = THRESHOLD1; i > THRESHOLD2; i--)
@@ -10115,7 +10202,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         }
     }
 
-	//Test_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
 	TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_send_nothing)
     {
         for (size_t i = THRESHOLD2; i > THRESHOLD3; i--)
@@ -10151,7 +10238,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         }
     }
 
-    //Tests_RS_TRANSPORTMULTITHTTP_17_114: [ If handle parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_114: [ If handle parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]
     TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_handle_fails)
     {
         ///arrange
@@ -11865,7 +11952,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    //Tests_SRS_TRANSPORTMULTITHTTP_17_081: [ If HTTPAPIEX_SAS_ExecuteRequest2 fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried). ]
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_069: [ If HTTPAPIEX_SAS_ExecuteRequest2 fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried). ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_httpStatusCode_is_not_succeess)
     {
         ///arrange
