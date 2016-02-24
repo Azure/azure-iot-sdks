@@ -28,7 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="iothub_client_boost.py" />
-    <Compile Include="iothub_client_sample.py" />
+    <Compile Include="iothub_client_ctypes.py" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -15,7 +15,9 @@ messageHandle = [c_void_p] * message_count
 IOTHUBCALLBACK = CFUNCTYPE(c_int, c_void_p, POINTER(c_int))
 SENDCALLBACK = CFUNCTYPE(c_int, c_uint, c_uint)
 
-connectionString = "HostName=mregen-python-ne-iothub.azure-devices.net;DeviceId=test;SharedAccessKey=/TKAG9mKQvzcKYS23QKDnp9L0a2ptBPQ0Da6CVGN8h0="
+# String containing Hostname, Device Id & Device Key in the format:
+# "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
+connectionString = "[device connection string]"
 msgTxt =  "{\"deviceId\": \"myFirstDevice\",\"windSpeed\": %.2f}"
 
 # IotHub error exception
@@ -25,7 +27,7 @@ class IotHubError(Exception):
     def __str__(self):
         return repr(self.value)
 
-# load dll
+# load dll (copy libraries to the same directory as this sample)
 iothub = cdll.LoadLibrary("iothub_client_python")
 
 # create objects for calls in IotHub dll
