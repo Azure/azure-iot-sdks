@@ -323,7 +323,7 @@ public class RegistryManager
      * Update device with forceUpdate input parameter
      *
      * @param device The device object containing updated data
-     * @param forceUpdate True is the update has to be forced regardless if the device state
+     * @param forceUpdate True if the update has to be forced regardless of the device state
      * @return The updated device object
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed

@@ -4,6 +4,17 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
 
+#making a nice global variable to know if we are on linux or not.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(LINUX TRUE)
+	#on Linux, enable valgrind
+	#these commands (MEMORYCHECK...) need to apear BEFORE include(CTest) or they will not have any effect
+	find_program(MEMORYCHECK_COMMAND valgrind)	
+	set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full --error-exitcode=1")
+endif()
+
+include (CTest)
+
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
@@ -52,19 +63,19 @@ function(linkUAMQP whatExecutableIsBuilding)
 
         target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ws2_32 secur32)
 
-		if(${use_openssl} OR ${use_wsio})
-			target_link_libraries(${whatExecutableIsBuilding} $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
-		
-			file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-			file(COPY $ENV{OpenSSLDir}/bin/ssleay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-		endif()
-	else()
-		target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ssl crypto)
-	endif()
-	
-	if(${use_wsio})
-		target_link_libraries(${whatExecutableIsBuilding} websockets)
-	endif()
+        if(${use_openssl} OR ${use_wsio})
+            target_link_libraries(${whatExecutableIsBuilding} $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
+        
+            file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+            file(COPY $ENV{OpenSSLDir}/bin/ssleay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+        endif()
+    else()
+        target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ssl crypto)
+    endif()
+    
+    if(${use_wsio})
+        target_link_libraries(${whatExecutableIsBuilding} websockets)
+    endif()
 endfunction(linkUAMQP)
 
 function(includeMqtt)
@@ -191,18 +202,18 @@ function(build_test_artifacts whatIsBuilding use_gballoc)
     
     if(${use_gballoc})
         add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-    else()	
+    else()
     endif()
     
     #setting #defines
     if(WIN32)
-        add_definitions(-D_CRT_SECURE_NO_WARNINGS)		
+        add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     else()
     endif()
     
     #setting includes
     set(sharedutil_include_directories ${MICROMOCK_INC_FOLDER} ${TESTRUNNERSWITCHER_INC_FOLDER} ${CTEST_INC_FOLDER} ${SAL_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER} ${SHARED_UTIL_SRC_FOLDER})
-    if(WIN32)				
+    if(WIN32)
     else()
         include_directories(${sharedutil_include_directories})
     endif()
@@ -243,8 +254,9 @@ else()
 endif()
 
 if(${run_e2e_tests})
-    add_subdirectory(common)
+    add_subdirectory(testtools)
 endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
+

@@ -1,0 +1,5 @@
+..\..\..\certs\certs.h
+..\..\..\certs\certs.c
+iothub_client_sample_mqtt.h
+iothub_client_sample_mqtt.c
+mbed\main.cpp

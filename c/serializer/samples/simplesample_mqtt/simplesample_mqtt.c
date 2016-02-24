@@ -129,7 +129,7 @@ void simplesample_mqtt_run(void)
 {
     if (platform_init() != 0)
     {
-        (void)printf("Failed on serializer_init\r\n");
+        (void)printf("Failed to initialize platform.\r\n");
     }
     else
     {

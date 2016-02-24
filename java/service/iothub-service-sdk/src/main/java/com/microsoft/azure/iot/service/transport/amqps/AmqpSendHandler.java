@@ -7,8 +7,10 @@ package com.microsoft.azure.iot.service.transport.amqps;
 
 import com.microsoft.azure.iot.service.sdk.Message;
 import com.microsoft.azure.iot.service.sdk.Tools;
+import com.microsoft.azure.iot.service.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.messenger.impl.Address;
@@ -25,7 +27,7 @@ import java.util.Map;
  * Maintains the layers of AMQP protocol (Link, Session, Connection, Transport)
  * Creates and sets SASL authentication for transport
  */
-class AmqpSendHandler extends BaseHandler
+public class AmqpSendHandler extends BaseHandler
 {
     public static final String SEND_TAG = "sender";
     public static final String SEND_PORT = ":5671";
@@ -45,7 +47,7 @@ class AmqpSendHandler extends BaseHandler
      * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      */
-    AmqpSendHandler(String hostName, String userName, String sasToken) 
+    public AmqpSendHandler(String hostName, String userName, String sasToken)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
         if (Tools.isNullOrEmpty(hostName))
@@ -187,7 +189,11 @@ class AmqpSendHandler extends BaseHandler
         // doesn't have a handler, the events go to the reactor.
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_014: [The event handler shall create a Sender (Proton) object and set the protocol tag on it to a predefined constant]
+        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_15_023: [The Sender object shall have the properties set to service client version identifier.]
+        Map<Symbol, Object> properties = new HashMap<>();
+        properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
         Sender snd = ssn.sender(SEND_TAG);
+        snd.setProperties(properties);
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_015: [The event handler shall open the Connection, the Session and the Sender object]
         conn.open();

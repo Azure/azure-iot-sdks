@@ -11,7 +11,9 @@
 #include "crt_abstractions.h"
 #include "iothubtransportamqp_websockets.h"
 
-#include "..\..\..\certs\certs.h"
+#ifdef MBED_BUILD_TIMESTAMP
+#include "certs.h"
+#endif // MBED_BUILD_TIMESTAMP
 
 static const char* connectionString = "[IoT Hub Device Connection String]";
 static int callbackCounter;
@@ -130,13 +132,17 @@ void iothub_client_sample_amqp_websockets_run(void)
     else if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, AMQP_Protocol_over_WebSocketsTls)) == NULL)
     {
         (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
+        platform_deinit();
     }
     else
     {
-        if (IoTHubClient_SetOption(iotHubClientHandle, "trusted_certificates", certificates) != IOTHUB_CLIENT_OK)
+#ifdef MBED_BUILD_TIMESTAMP
+        // For mbed add the certificate information
+        if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
         {
-            printf("failure to set option \"trusted_certificates\"\r\n");
+            printf("failure to set option \"TrustedCerts\"\r\n");
         }
+#endif // MBED_BUILD_TIMESTAMP
 
         /* Setting Message call back, so we can receive Commands. */
         if (IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
@@ -183,5 +189,6 @@ void iothub_client_sample_amqp_websockets_run(void)
         }
         
         IoTHubClient_Destroy(iotHubClientHandle);
+        platform_deinit();
     }
 }

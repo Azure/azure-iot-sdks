@@ -114,6 +114,8 @@ public void onConnectionInit(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_028: [**The event handler shall create a Receiver and Sender (Proton) object and set the protocol tag on them to a predefined constant.**]**
 
+**SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_15_054: [**The Receiver and Sender objects shall have the properties set to device client version identifier.**]**
+
 **SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_029: [**The event handler shall open the Connection, Session, Sender, and Receiver objects.**]**
 
 

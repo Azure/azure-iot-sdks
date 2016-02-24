@@ -1487,6 +1487,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG))
             .IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(mocks, mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
 
         // act
         IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -1536,6 +1537,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG))
             .IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(mocks, mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
 
         // act
         IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -1629,6 +1631,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG))
             .IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(mocks, mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
 
         // act
         IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -1798,6 +1801,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
             .IgnoreArgument(2);
         EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
         EXPECTED_CALL(mocks, gballoc_free(NULL));
+        STRICT_EXPECTED_CALL(mocks, mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
 
         // act
         IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);

@@ -8,6 +8,7 @@
 #include "gballoc.h"
 
 #include "agenttypesystem.h"
+#include <inttypes.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4756) /* Known warning for INFINITY */
@@ -17,12 +18,17 @@
 
 #include <float.h>
 #include <math.h>
+#include <limits.h>
+
+/*if ULLONG_MAX is defined by limits.h for whatever reasons... */
+#ifndef ULLONG_MAX
+#define ULLONG_MAX 18446744073709551615
+#endif
+
 #include "crt_abstractions.h"
 
 #include "jsonencoder.h"
 #include "multitree.h"
-
-#include "agenttime.h"
 
 #include "iot_logging.h"
 
@@ -2953,6 +2959,93 @@ static void fill_tm_yday_and_tm_wday(struct tm* source)
     /*the function shall count days */
 }
 
+/*the following function does the same as  sscanf(pos2, ":%02d", &sec)*/
+/*this function only exists because of optimizing valgrind time, otherwise sscanf would be just as good*/
+static int sscanf2d(const char *pos2, int* sec)
+{
+    int result;
+    size_t position = 1;
+    if (
+        (pos2[0] == ':') &&
+        (scanAndReadNDigitsInt(pos2, strlen(pos2), &position, sec, 2) == 0)
+        )
+    {
+        result = 1;
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
+    
+}
+
+/*the following function does the same as  (sscanf(pos2, ".%llu", &fractionalSeconds) != 1)*/
+static int sscanfllu(const char*pos2, unsigned long long* fractionalSeconds)
+{
+    int result;
+
+    if (pos2[0] != '.')
+    {
+        /*doesn't start with '.' error out*/
+        result = 0;
+    }
+    else
+    {
+        size_t index=1;
+        *fractionalSeconds = 0;
+        bool error = true;
+        while (IS_DIGIT(pos2[index]))
+        {
+            if ((ULLONG_MAX - (pos2[index]-'0'))/10 < *fractionalSeconds)
+            {
+                /*overflow... */
+                error = true;
+                break;
+            }
+            else
+            {
+                *fractionalSeconds = *fractionalSeconds * 10 + (pos2[index] - '0');
+                error = false;
+            }
+            index++;
+        }
+
+        if (error)
+        {
+            result = 0; /*return 0 fields converted*/
+        }
+        else
+        {
+            result = 1; /*1 field converted*/
+        }
+    }
+    return result;
+}
+
+/*the below function replaces sscanf(pos2, "%03d:%02d\"", &hourOffset, &minOffset)*/
+/*return 2 if success*/
+
+static int sscanf3d2d(const char* pos2, int* hourOffset, int* minOffset)
+{
+    size_t position = 0;
+    int result;
+    if (
+        (scanAndReadNDigitsInt(pos2, strlen(pos2), &position, hourOffset, 2) == 0) &&
+        (pos2 += position, pos2[0] == ':') &&
+        (scanAndReadNDigitsInt(pos2, strlen(pos2), &position, minOffset, 2) == 0)
+        )
+    {
+        result = 2;
+    }
+    else
+    {
+        result = 0;
+    }
+    return result;
+}
+
 AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGENT_DATA_TYPE_TYPE type, AGENT_DATA_TYPE* agentData)
 {
 
@@ -3107,7 +3200,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 
                 strLength = strlen(source);
 
-                if ((sscanf(pos, "%lu", &uint32Value) != 1) ||
+                if ((sscanf(pos, "%" SCNu32, &uint32Value) != 1) ||
                     (strLength > 11) ||
                     ((uint32Value > 2147483648UL) && isNegative) ||
                     ((uint32Value > 2147483647UL) && (!isNegative)))
@@ -3303,7 +3396,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                             pos2 += 3;
                             if (*pos2 == ':')
                             {
-                                if (sscanf(pos2, ":%02d", &sec) != 1)
+                                if (sscanf2d(pos2, &sec) != 1)
                                 {
                                     pos2 = NULL;
                                 }
@@ -3316,7 +3409,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                             if ((pos2 != NULL) &&
                                 (*pos2 == '.'))
                             {
-                                if (sscanf(pos2, ".%llu", &fractionalSeconds) != 1)
+                                if (sscanfllu(pos2, &fractionalSeconds) != 1)
                                 {
                                     pos2 = NULL;
                                 }

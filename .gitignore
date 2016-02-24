@@ -193,6 +193,7 @@ java/**/*dependency-reduced-pom.xml
 **/.settings/
 **/node_modules/
 **/.idea/
+**/coverage/
 
 # VS Code stuff
 **/typings/**

@@ -27,11 +27,7 @@ import java.util.concurrent.TimeoutException;
 public final class AmqpsIotHubConnection extends BaseHandler {
     private static final int DEFAULT_DELIVERY_WAIT_TIME_SECONDS = 5;
 
-    //==============================================================================
-    //Reactor Variables
-    //==============================================================================
-    /** The Proton-J Reactor object. */
-    private Reactor reactor;
+    private IotHubReactor iotHubReactor;
 
     /** Future that gets completed once the reactor is ready to begin sending and receiving */
     protected CompletableFuture<Boolean> reactorReady;
@@ -43,7 +39,7 @@ public final class AmqpsIotHubConnection extends BaseHandler {
     } ReactorState state;
 
     /** Semaphore to restrict multiple calls to asynchronously run the Reactor. */
-    private static Semaphore reactorSemaphore = new Semaphore(1);
+    private Semaphore reactorSemaphore = new Semaphore(1);
 
     //==============================================================================
     //Connection Variables
@@ -427,7 +423,7 @@ public final class AmqpsIotHubConnection extends BaseHandler {
      * Invalidates the {@link Reactor} member variable.
      */
     protected void freeReactor(){
-        this.reactor = null;
+        this.iotHubReactor = null;
     }
 
     /**
@@ -504,11 +500,12 @@ public final class AmqpsIotHubConnection extends BaseHandler {
         reactorSemaphore.acquire();
 
         if(this.amqpsHandler != null) {
-            this.reactor = Proton.reactor(this);
+            Reactor reactor = Proton.reactor(this);
+            IotHubReactor iotHubReactor = new IotHubReactor(reactor);
 
             new Thread(() -> {
                 try {
-                    reactor.run();
+                    iotHubReactor.run();
 
                     //Closing here should be okay. The reactor will only stop running if the connection is remotely
                     //or locally closed. The transport will attempt to receive/send a message and will get an exception

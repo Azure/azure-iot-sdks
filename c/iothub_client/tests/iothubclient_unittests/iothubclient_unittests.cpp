@@ -115,7 +115,6 @@ public:
     MOCK_STATIC_METHOD_1(, void, ThreadAPI_Sleep, unsigned int, milliseconds)
         if ((howManyDoWorkCalls > 0) && (howManyDoWorkCalls == doWorkCallCount))
         {
-            //IoTHubClient_Destroy(current_iothub_client);
             *(sig_atomic_t*)(((char*)threadFuncArg) + IoTHubClient_ThreadTerminationOffset) = 1; /*tell the thread to stop*/
         }
     MOCK_VOID_METHOD_END();
@@ -1132,7 +1131,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
         // act
         threadFunc(threadFuncArg);
-        
+
         // assert
         mocks.AssertActualAndExpectedCalls();
         

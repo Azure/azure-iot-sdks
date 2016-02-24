@@ -19,7 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class MqttIotHubConnection implements MqttCallback
 {
     /** The MQTT connection lock. */
-    protected static final Object MQTT_CONNECTION_LOCK = new Object();
+    protected final Object MQTT_CONNECTION_LOCK = new Object();
 
     private MqttAsyncClient asyncClient;
 
@@ -29,13 +29,19 @@ public class MqttIotHubConnection implements MqttCallback
     }
 
     protected final DeviceClientConfig config;
-    private Queue<Message> receivedMessagesQueue  = new LinkedBlockingQueue<>();
     protected ConnectionState state = ConnectionState.CLOSED;
+
+    // paho mqtt only supports 10 messages in flight at the same time
+    private static final int maxInFlightCount = 10;
+
+    private Queue<Message> receivedMessagesQueue  = new LinkedBlockingQueue<>();
 
     private String publishTopic;
     private String subscribeTopic;
     private MqttConnectOptions connectionOptions = new MqttConnectOptions();
     private String iotHubUserName;
+
+    private int inFlightCount = 0;
 
     //mqtt connection options
     private static final int keepAliveInterval = 20;
@@ -202,15 +208,21 @@ public class MqttIotHubConnection implements MqttCallback
 
             try
             {
+                inFlightCount++;
+                while (inFlightCount >= maxInFlightCount)
+                {
+                    Thread.sleep(10);
+                }
+
                 MqttMessage mqttMessage = new MqttMessage(message.getBytes());
                 mqttMessage.setQos(qos);
 
                 IMqttDeliveryToken publishToken = asyncClient.publish(publishTopic, mqttMessage);
-                publishToken.waitForCompletion();
+
             }
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_012: [If the message was not successfully
             // received by the service, the function shall return status code ERROR.]
-            catch(MqttException e)
+            catch(Exception e)
             {
                 result = IotHubStatusCode.ERROR;
             }
@@ -308,7 +320,7 @@ public class MqttIotHubConnection implements MqttCallback
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
     {
-        //there is no need for anything here, since we already call waitForCompletion after publishing a message.
+        inFlightCount--;
     }
 
     private void connect(MqttConnectOptions connectionOptions) throws MqttException
