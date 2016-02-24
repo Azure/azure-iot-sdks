@@ -2,12 +2,13 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import random
-import os
 from time import sleep
-import sys
 
+# for debugging in VS2015 it is convenient 
+# to let the path point to the Debug build
+# of the iothub import library
+import sys
 path = sys.path
-mods = sys.modules
 sys.path += ["./Debug"]
 
 from iothub import *
@@ -17,11 +18,12 @@ minimumPollingTime = 9
 receiveContext = 0
 avgWindSpeed = 10.0
 message_count = 5
-messageHandle = [None] * message_count 
 
-connectionString = "HostName=mregen-python-ne-iothub.azure-devices.net;DeviceId=test;SharedAccessKey=/TKAG9mKQvzcKYS23QKDnp9L0a2ptBPQ0Da6CVGN8h0="
+# String containing Hostname, Device Id & Device Key in the format:
+# "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
+connectionString = "[device connection string]"
 msgTxt =  "{\"deviceId\": \"myFirstDevice\",\"windSpeed\": %.2f}"
-Protocol = transport_provider.amqp
+Protocol = iothub_transport_provider.amqp
 
 # IotHub error exception
 class IotHubError(Exception):
@@ -31,44 +33,35 @@ class IotHubError(Exception):
         return repr(self.value)
 
 def ReceiveMessageCallback( message, counter):
-    size = c_int(0)
-    buffer = c_char_p()
-    result = IoTHubMessage_GetByteArray(message, byref(buffer), byref(size))
-    if result != IOTHUB_MESSAGE_OK:
+    buffer = message.GetByteArray()
+    if buffer == None:
         print ("unable to retrieve the message data")
     else:
-        print ("Received Message [%d] with Data: <<<%s>>> & Size=%d" % (counter.contents.value, buffer.value[:size.value], size.value))
-    mapProperties = IoTHubMessage_Properties(message);
-    propertyCount = c_int(0)
-    if mapProperties != NULL:
-        keys = c_void_p()
-        values = c_void_p()
-        result = Map_GetInternals(mapProperties, byref(keys), byref(values), byref(propertyCount))
-        if (result == MAP_OK) & (propertyCount.value > 0):
-            print ("propertyCount: %d" % propertyCount.value)
-            keyArray = c_char_p_array(propertyCount.value).from_address(keys.value)
-            valArray = c_char_p_array(propertyCount.value).from_address(values.value)
-            for i in xrange(0,propertyCount.value):
-                print ("(%s,%s)" % (keyArray[i].value, valArray[i].value))
-    counter.contents.value += 1
-    return IOTHUBMESSAGE_ACCEPTED
+        size = len(buffer)
+        print ("Received Message [%d] with Data: <<<%s>>> & Size=%d" % (counter, buffer[:size], size))
+    mapProperties = message.Properties();
+    propertyCount = 0
+    if mapProperties != None:
+        keyValuePair = mapProperties.GetInternals()
+        propertyCount = len(keyValuePair)
+        if (propertyCount > 0):
+            print ("propertyCount: %d" % propertyCount)
+            print (str(keyValuePair))
+    counter += 1
+    return iothubmessage_disposition_result.accepted
 
-def SendConfirmationCallback( result, messageId):
-    print ("Confirmation received for message tracking id = %d with result = %d" % (messageId, result))
-    return IoTHubMessage_Destroy(messageHandle[messageId]);
+def SendConfirmationCallback( message, result, userContext):
+    print ("Confirmation[%d] received for message with result = %d" % (userContext, result))
+    return message.Destroy()
 
 def iothub_client_sample_http_run():
-
-    # callbacks for c dll
-    #message_callback = cast(IOTHUBCALLBACK(ReceiveMessageCallback), c_void_p)
-    #send_callback = cast(SENDCALLBACK(SendConfirmationCallback), c_void_p)
 
     # iothub prep code 
     iotHubClient = IoTHubClient.CreateFromConnectionString(connectionString, Protocol)
     if iotHubClient == None:
        raise IotHubError("ERROR: iotHubClient is None!")
 
-    if Protocol == transport_provider.http:
+    if Protocol == iothub_transport_provider.http:
         result = iotHubClient.SetOption( "timeout", timeout)
         if result != iothub_client_result.ok:
             print "failure to set option \"timeout\""
@@ -77,44 +70,42 @@ def iothub_client_sample_http_run():
         if result != iothub_client_result.ok:
             print "failure to set option \"MinimumPollingTime\""
 
-    #result = iotHubClient.SetMessageCallback( message_callback, receiveContext);
-    #if result != IOTHUB_CLIENT_OK:
-    #    raise IotHubError("ERROR: IoTHubClient_LL_SetMessageCallback..........FAILED!")
+    result = iotHubClient.SetMessageCallback( ReceiveMessageCallback, receiveContext);
+    if result != iothub_client_result.ok:
+        raise IotHubError("ERROR: SetMessageCallback..........FAILED!")
 
     # iothub send a few messages
     for i in xrange(0, message_count):
         msgTxtFormatted = msgTxt % (avgWindSpeed + (random.random() * 4 + 2))
-        messageHandle[i] = IoTHubMessage.CreateFromString(msgTxtFormatted)
-        if messageHandle[i] == None:
+        message = IoTHubMessage.CreateFromString(msgTxtFormatted)
+        if message == None:
             raise IotHubError("ERROR: iotHubMessageHandle is NULL!");
-        propMap = messageHandle[i].Properties()
+        propMap = message.Properties()
         propText = "PropMsg_%d" % i
         result = propMap.AddOrUpdate( "PropName", propText)
         if result != map_result.ok:
-            raise IotHubError("ERROR: Map_AddOrUpdate Failed!");
-        #result = iotHubClient.SendEventAsync(messageHandle[i], send_callback, i)
+            raise IotHubError("ERROR: AddOrUpdate Failed!");
+        result = iotHubClient.SendEventAsync(message, SendConfirmationCallback, i)
         if result != iothub_client_result.ok:
-            raise IotHubError("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!")
+            raise IotHubError("ERROR: SendEventAsync..........FAILED!")
         else:
             print ("IoTHubClient_SendEventAsync accepted message [%d] for transmission to IoT Hub." % i);
 
-    # todo
-    #iotHubClientStatus = IOTHUB_CLIENT_STATUS_TAG.idle
-    #result = iotHubClient.GetSendStatus(iotHubClientStatus)
-
     # Wait for Commands 
     m = 0
-    while m < 100: # *0.1s = 1000s
-        sleep(0.1) # sleep 100ms
+    while m < 1000: # *0.1s = 1000s
+        sleep(0.1)  # sleep 100ms
+        # todo: workaround until C wrapper works with thread safe iothub APIs
+        iotHubClient.DoWork();
         m = m + 1
 
     # done!
     iotHubClient.Destroy()
 
 # default is AMQP, uncomment next line for HTTP
-Protocol = transport_provider.http
+# Protocol = iothub_transport_provider.http
 
-if Protocol == transport_provider.amqp:
+if Protocol == iothub_transport_provider.amqp:
     print "Starting the IoTHub client sample AMQP..."
 else:
     print "Starting the IoTHub client sample HTTP..."
