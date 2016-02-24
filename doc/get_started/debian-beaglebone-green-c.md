@@ -98,13 +98,13 @@ You should have the following items ready before beginning the process:
 
         ~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp
 
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to see the data your device is sending.
+-   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/readme.md) to see the data your device is sending.
 
 -   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool] (https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
 
 ## 3.3 Receive messages from IoT Hub
 
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) for instructions on sending messages to device.
+-   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/readme.md) for instructions on sending messages to device.
 
 -   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool] (https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
 

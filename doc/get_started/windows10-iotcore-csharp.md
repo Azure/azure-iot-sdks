@@ -193,7 +193,7 @@ Now set the breakpoint at the `await` statement and start the application. When 
 
 Congratulations! You have successfully received your string from Azure IoT Hub.
 
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[device-explorer]: ../../tools/DeviceExplorer/readme.md
 [hello-sample]: http://ms-iot.github.io/content/win10/samples/HelloWorld.htm
 [iot-dev-center]: https://dev.windows.com/iot
 [lnk-setup-iot-hub]: ../setup_iothub.md

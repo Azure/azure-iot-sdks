@@ -117,4 +117,4 @@ For further information about using the Device Explorer tool to perform tasks su
 [lnk-iothub-explorer-identity]: ../tools/iothub-explorer/readme.md#identityregistry
 [lnk-iothub-explorer-devices]: ../tools/iothub-explorer/readme.md#devices
 [lnk-releasepage]: https://github.com/Azure/azure-iot-sdks/releases
-[lnk-device-explorer-docs]: ../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[lnk-device-explorer-docs]: ../tools/DeviceExplorer/readme.md

@@ -53,7 +53,7 @@ Before you get started, you should:
 
    The sample application will send messages to your IoT hub and the Device Explorer utility will display the messages as your IoT hub receives them.
 
-[device-explorer]: ../../tools/DeviceExplorer/devdoc/how_to_use_device_explorer.md
+[device-explorer]: ../../tools/DeviceExplorer/readme.md
 [toradex_image_update]: http://developer.toradex.com/knowledge-base/how-to-setup-environment-for-embedded-linux-application-development#Linux_Image_Update
 [node-sample-apps]: https://github.com/Azure/azure-iot-sdks/tree/master/node/device/samples
 
