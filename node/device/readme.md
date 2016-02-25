@@ -11,10 +11,10 @@ Use the device SDK to:
 
 ## Application development guides
 For more information on how to use this library refer to the documents below:
-- [Prepare your node.js development environment](doc/devbox_setup.md)
+- [Prepare your node.js development environment](../../doc/get_started/node-devbox-setup.md)
 - [Setup IoT Hub](../../doc/setup_iothub.md)
 - [Provision devices](../../doc/manage_iot_hub.md)
-- [Run a node.js sample application](doc/run_sample.md)
+- [Run a node.js sample application](../../doc/get_started/node-run-sample.md)
 - [Node API reference](http://azure.github.io/azure-iot-sdks/node/api_reference/azure-iot-device/1.0.1/index.html)
 - [Debugging with Visual Studio Code](../../doc/get_started/node-debug-vscode.md)
 
@@ -25,10 +25,6 @@ Device SDK subfolders under **node/device**:
 ### /core
 
 Protocol-independent device SDK package.
-
-### /doc
-
-How-to guides and other information.
 
 ### /samples
 

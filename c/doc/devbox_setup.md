@@ -164,6 +164,6 @@ This repository contains various C sample applications that illustrate how to us
 
 [visual-studio]: https://www.visualstudio.com/
 [readme]: ../readme.md
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[device-explorer]: ../../tools/DeviceExplorer/readme.md
 [toradex-CE8-sdk]:http://docs.toradex.com/102578
 [application-builder]:http://www.microsoft.com/en-us/download/details.aspx?id=38819
