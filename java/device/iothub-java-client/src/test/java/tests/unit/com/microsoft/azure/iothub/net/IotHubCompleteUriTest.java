@@ -24,7 +24,7 @@ public class IotHubCompleteUriTest
 
     @Mocked IotHubUri mockIotHubUri;
 
-    // Tests_SRS_IOTHUBCOMPLETEURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]?api-version=2015-08-15-preview".]
+    // Tests_SRS_IOTHUBCOMPLETEURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]?api-version=2016-02-03".]
     @Test
     public void constructorConstructsIotHubUriCorrectly()
             throws URISyntaxException
@@ -44,7 +44,7 @@ public class IotHubCompleteUriTest
         };
     }
 
-    // Tests_SRS_IOTHUBCOMPLETEURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]?api-version=2015-08-15-preview".]
+    // Tests_SRS_IOTHUBCOMPLETEURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]?api-version=2016-02-03".]
     @Test
     public void toStringIsCorrect() throws URISyntaxException
     {

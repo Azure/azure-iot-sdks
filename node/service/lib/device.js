@@ -3,12 +3,12 @@
 
 'use strict';
 
-var SymmetricKey = function(symmetricKeyInfo) {
+var SymmetricKey = function (symmetricKeyInfo) {
   var symmKeys = symmetricKeyInfo;
-    Object.defineProperties(this, {
-    'primaryKey':{
+  Object.defineProperties(this, {
+    'primaryKey': {
       enumerable: true,
-      get: function() {
+      get: function () {
         var primaryKey;
         if (symmKeys) {
           primaryKey = symmKeys.primaryKey;
@@ -18,7 +18,7 @@ var SymmetricKey = function(symmetricKeyInfo) {
     },
     'secondaryKey': {
       enumerable: true,
-      get: function() {
+      get: function () {
         var secondaryKey;
         if (symmKeys) {
           secondaryKey = symmKeys.secondaryKey;
@@ -29,12 +29,11 @@ var SymmetricKey = function(symmetricKeyInfo) {
   });
 };
 
-var AuthenticationMechanism = function(authInfo)
-{
+var AuthenticationMechanism = function (authInfo) {
   Object.defineProperties(this, {
-    'SymmetricKey':{
+    'SymmetricKey': {
       enumerable: true,
-      get: function() {
+      get: function () {
         var symmKeys;
         if (authInfo) {
           if (authInfo.symmetricKey) {
@@ -109,39 +108,39 @@ module.exports = function Device(jsonData) {
   }
 
   Object.defineProperties(this, {
-    'deviceId':{
+    'deviceId': {
       enumerable: true,
-      get: function() {
+      get: function () {
         return body.deviceId;
       },
-      set: function(value) {
+      set: function (value) {
         body.deviceId = value;
       }
     },
     'generationId': {
       enumerable: true,
-      get: function() {
+      get: function () {
         return body.generationId;
       },
     },
     'etag': {
       enumerable: true,
-      get: function() {
+      get: function () {
         return body.etag;
       }
     },
     'connectionState': {
       enumerable: true,
-      get: function() {
+      get: function () {
         return body.connectionState;
       }
     },
     'status': {
       enumerable: true,
-      get: function() {
+      get: function () {
         return body.status;
       },
-      set: function(value) {
+      set: function (value) {
         if (value.toLowerCase() !== 'enabled' && value.toLowerCase() !== 'disabled') {
           throw new RangeError('status is neither Enabled or Disabled');
         }
@@ -150,34 +149,34 @@ module.exports = function Device(jsonData) {
     },
     'statusReason': {
       enumerable: true,
-      get: function() {
+      get: function () {
         return body.statusReason;
       },
-      set: function(value) {
+      set: function (value) {
         body.statusReason = value;
       }
     },
     'connectionStateUpdatedTime': {
       enumerable: true,
-      get: function() {
+      get: function () {
         return body.connectionStateUpdatedTime;
       }
     },
     'statusUpdatedTime': {
       enumerable: true,
-      get: function() {
+      get: function () {
         return body.statusUpdatedTime;
       }
     },
     'lastActivityTime': {
       enumerable: true,
-      get: function() {
+      get: function () {
         return body.lastActivityTime;
       }
     },
     'cloudToDeviceMessageCount': {
       enumerable: true,
-      get: function() {
+      get: function () {
         return body.cloudToDeviceMessageCount;
       }
     }
@@ -185,7 +184,7 @@ module.exports = function Device(jsonData) {
 
   Object.defineProperty(this, 'authentication', {
     enumerable: true,
-    get: function() {
+    get: function () {
       var key;
       if (body.authentication) {
         key = new AuthenticationMechanism(body.authentication);

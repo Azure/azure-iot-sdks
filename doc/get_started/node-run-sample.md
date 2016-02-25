@@ -32,14 +32,8 @@ You should have the following items ready before beginning the process:
 -   Computer with Git client installed and access to the
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
 -   [Prepare your development environment](https://github.com/Azure/azure-iot-sdks/blob/master/csharp/device/doc/devbox_setup.md).
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-
-#### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-#### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -51,11 +45,11 @@ You should have the following items ready before beginning the process:
 
 - Get the following sample files from https://github.com/Azure/azure-iot-sdks/node/device/samples
     - **package.json**
-    - **simple_sample_http.js**
+    - **simple_sample_device.js**
 
 - Place the files in the folder of your choice on the target machine/device
 
-- Open the file **simple_sample_http.js** in a text editor.
+- Open the file **simple_sample_device.js** in a text editor.
 
 - Locate the following code in the file:
 
@@ -75,11 +69,17 @@ You should have the following items ready before beginning the process:
 
     ```
     npm install
-    node .
+    node simple_sample_device.js
     ```
 
 - The sample application will send messages to your IoT hub, and the **iothub-explorer** utility will display the messages as your IoT hub receives them.
 
+# Experimenting with various transport protocols
+The same sample can be used to test AMQP, AMQP over Websockets, HTTP and MQTT. In order to change the transport, uncomment whichever you want to evaluate in the `require` calls on top of the sample code and pass it to the call to Client.fromConnectionString() when creating the client.
+
 # Debugging the samples (and/or your code)
 [Visual Studio Code](https://code.visualstudio.com/) provides an excellent environment to write and debug Node.js code:
 - [Debugging with Visual Studio Code](../../doc/get_started/node-debug-vscode.md)
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

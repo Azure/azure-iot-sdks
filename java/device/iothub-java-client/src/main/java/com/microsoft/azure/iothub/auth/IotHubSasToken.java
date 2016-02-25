@@ -64,8 +64,6 @@ public final class IotHubSasToken
      * Constructor. Generates a valid SAS token from the client configuration.
      *
      * @param config the DeviceClientConfig
-     *
-     * @return a SAS token that authenticates the device to the IoT Hub.
      */
     public IotHubSasToken(DeviceClientConfig config)
     {

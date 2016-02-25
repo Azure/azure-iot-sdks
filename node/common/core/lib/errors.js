@@ -6,7 +6,7 @@
 /**
  * @class       module:azure-iot-common.ArgumentError
  * @classdesc   Error thrown when an argument is invalid.
- * 
+ *
  * @augments {Error}
  */
 function ArgumentError(message) {
@@ -22,7 +22,7 @@ ArgumentError.prototype.name = 'ArgumentError';
 /**
  * @class       module:azure-iot-common.DeviceMaximumQueueDepthExceededError
  * @classdesc   Error thrown when the message queue for a device is full.
- * 
+ *
  * @augments {Error}
  */
 function DeviceMaximumQueueDepthExceededError(message) {
@@ -38,7 +38,7 @@ DeviceMaximumQueueDepthExceededError.prototype.name = 'DeviceMaximumQueueDepthEx
 /**
  * @class       module:azure-iot-common.DeviceNotFoundError
  * @classdesc   Error thrown when a device cannot be found in the IoT Hub instance registry.
- * 
+ *
  * @augments {Error}
  */
 function DeviceNotFoundError(message) {
@@ -54,7 +54,7 @@ DeviceNotFoundError.prototype.name = 'DeviceNotFoundError';
 /**
  * @class       module:azure-iot-common.FormatError
  * @classdesc   Error thrown when a string that is supposed to have a specific formatting is not formatted properly.
- * 
+ *
  * @augments {Error}
  */
 function FormatError(message) {
@@ -70,7 +70,7 @@ FormatError.prototype.name = 'FormatError';
 /**
  * @class       module:azure-iot-common.UnauthorizedError
  * @classdesc   Error thrown when the connection parameters are wrong and the server refused the connection.
- * 
+ *
  * @augments {Error}
  */
 function UnauthorizedError(message) {
@@ -84,9 +84,9 @@ UnauthorizedError.prototype.constructor = UnauthorizedError;
 UnauthorizedError.prototype.name = 'UnauthorizedError';
 
 function NotImplementedError(message) {
-    this.message = message;
-    this.stack = (new Error()).stack;
-    Error.call(this, message);
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
 }
 
 NotImplementedError.prototype = Object.create(Error.prototype);
@@ -94,9 +94,9 @@ NotImplementedError.prototype.constructor = NotImplementedError;
 NotImplementedError.prototype.name = 'NotImplementedError';
 
 function NotConnectedError(message) {
-    this.message = message;
-    this.stack = (new Error()).stack;
-    Error.call(this, message);
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
 }
 
 NotConnectedError.prototype = Object.create(Error.prototype);

@@ -16,17 +16,6 @@ rem ----------------------------------------------------------------------------
 rem -- check prerequisites
 rem -----------------------------------------------------------------------------
 
-rem // some of our projects expect PROTON_PATH to be defined
-if not defined PROTON_PATH (
-    set PROTON_PATH=%~d0\proton
-)
-
-if not exist %PROTON_PATH% (
-    echo ERROR: PROTON_PATH must point to the root of your QPID Proton installation, but
-    echo "%PROTON_PATH%" does not exist. Exiting...
-    exit /b 1
-)
-
 rem -----------------------------------------------------------------------------
 rem -- parse script arguments
 rem -----------------------------------------------------------------------------
@@ -35,11 +24,13 @@ rem // default build options
 set build-clean=0
 set build-config=
 set build-platform=Win32
+set CMAKE_use_wsio=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
 if "%1" equ "--config" goto arg-build-config
 if "%1" equ "--platform" goto arg-build-platform
+if "%1" equ "--use-websockets" goto arg-use-websockets
 call :usage && exit /b 1
 
 :arg-build-config
@@ -54,6 +45,11 @@ if "%1" equ "" call :usage && exit /b 1
 set build-platform=%1
 goto args-continue
 
+:arg-use-websockets
+shift
+set CMAKE_use_wsio=ON
+goto args-continue
+
 :args-continue
 shift
 goto args-loop
@@ -64,6 +60,10 @@ set cmake-output=cmake_%build-platform%
 rem -----------------------------------------------------------------------------
 rem -- build with CMAKE
 rem -----------------------------------------------------------------------------
+
+if %CMAKE_use_wsio% == ON (
+	echo WebSockets support only available for x86 platform.
+)
 
 echo CMAKE Output Path: %USERPROFILE%\%cmake-output%
 
@@ -77,7 +77,7 @@ pushd %USERPROFILE%\%cmake-output%
 
 if %build-platform% == Win32 (
 	echo ***Running CMAKE for Win32***
-	cmake %build-root%
+	cmake %build-root% -Duse_wsio:BOOL=%CMAKE_use_wsio%
 	if not %errorlevel%==0 exit /b %errorlevel%	
 ) else (
 	echo ***Running CMAKE for Win64***

@@ -7,9 +7,10 @@ This document contains both general FAQs about the Microsoft Azure IoT device SD
 - [Using Visual Studio 2013](#vs2013)
 - [Line-endings in repository zip archive](#lineendings)
 
-**Microsoft Azure IoT device SDK for C**
+**Microsoft Azure IoT device SDK for C FAQs**
 
 - [Installing CMake manually](#cmake)
+- [Using the IoT Hub c-client libraries in C++](#cpp)
 
 **Microsoft Azure IoT device SDK for .NET FAQs**
 
@@ -21,6 +22,11 @@ This document contains both general FAQs about the Microsoft Azure IoT device SD
 
 - [Error when using AMQP on Raspberry Pi2](#javapi2error)
 - [qpid-jms build fails](#qpidjmsbuildfail)
+
+**Microsoft Azure IoT SDK for Node.js FAQs**
+
+- [Using promises instead of callbacks with the device client](#nodepromisify)
+- [Why not use Typescript instead of Javascript?](#whyunotypescript)
 
 <a name="vs2013"/>
 ## Using Visual Studio 2013
@@ -34,7 +40,7 @@ Note: You can download the free Community edition of Visual Studio 2015 [here](h
 3. Expand **Configuration Properties**, and then select **General**.
 4. Change the **Platform Toolset** to **Visual Studio 2013 (v120)**, then click **OK**.
 
-   ![][1]
+  ![][1]
 
 <a name="lineendings"/>
 ## Line-endings in repository zip archive
@@ -60,6 +66,10 @@ Options: [defaults in brackets after descriptions]
 
 Make sure that the directory where you install CMake is on your path by exporting it. Alternatively, if you use the option `--prefix=/usr` when you install CMake it replaces your current installation.
 
+<a name="cpp"/>
+## Using the IoT Hub c-client libraries in C++
+
+Using the IoT Hub c-client code from C++ is no different than using it from c. Create your C++ project, then reference the client library as you normally would in c++, or install the package via the appropriate package manager based on your platform.
 
 <a name="uwpsupport"/>
 ## UWP support for Microsoft.Azure.Devices.Client
@@ -159,10 +169,32 @@ For more information, see http://maven.apache.org/surefire/maven-surefire-plugin
 <a name="qpidjmsbuildfail"/>
 ## qpid-jms build fails
 
-If you get a build error when you try to [build qpid-jms](../java/device/doc/devbox_setup.md), then you should set the following  variable in your environment before you run `mvn install`.
+If you get a build error when you try to [build qpid-jms](get_started/java-devbox-setup.md), then you should set the following  variable in your environment before you run `mvn install`.
 
 Windows: `set _JAVA_OPTIONS=-Xmx512M`
 
 Linux: `export _JAVA_OPTIONS=-Xmx512M`
 
 [1]: media/platformtoolset.png
+
+<a name="nodepromisify"/>
+## Using promises instead of callbacks with the device client
+Currently the device client asynchronous functions follow the callback pattern rather than returning promises. If you wish to use the SDK with promises instead of callbacks, it's extremely easy though, using the bluebird library to "promisify" the device client class.
+
+```javascript
+var Promise = require('bluebird'); 
+var client = Promise.promisifyAll(Client.fromConnectionString(connectionString, Amqp));
+```
+
+And there you have it. All the existing functions of the client still exist, and the promise-returning equivalent has been created and has the same name with `Async` appended to it. In other words:
+- `client.open(callback)` becomes `client.openAsync().then(...).catch(...)`
+- `client.send(message, callback)` becomes `client.sendAsync(message).then(...).catch(...)`
+- `client.complete(message, callback)` becomes `client.completeAsync(message).then(...).catch(...)`
+- etc.
+
+Events are unchanged, so you still subscribe to those the way you would with the un-promisified client.
+
+<a name="whyunotypescript" />
+## Why not use typescript instead of javascript for the SDK?
+At the time when the SDK development was started, pure javascript felt like a better choice in order to make contributions as easy as possible for any node developer, whether or not he or she was aware and proficient with typescript. 
+We regularly reevaluate this decision as we move forward and you are most welcome to provide feedback or contribute by opening issues or pull-requests and help us decide what to do in the future.

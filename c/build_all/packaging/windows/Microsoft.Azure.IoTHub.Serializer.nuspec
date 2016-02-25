@@ -1,7 +1,7 @@
 <?xml version="1.0"?><package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Microsoft.Azure.IoTHub.Serializer</id>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
     <title>Microsoft Azure IoTHub Serializer</title>
     <authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
@@ -11,11 +11,11 @@
     <description>Microsoft Azure IoTHub Serializer</description>
     <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
     <summary>This nuget package contains a serializer library for IoTHub</summary>
-    <releaseNotes>initial version</releaseNotes>
+    <releaseNotes/>
     <copyright>Copyright 2015</copyright>
     <tags>Microsoft Azure IoT Native x86 x64 native package</tags>
     <dependencies>
-          <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.0"/>
+          <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.2"/>
     </dependencies>
   </metadata>
     <files>

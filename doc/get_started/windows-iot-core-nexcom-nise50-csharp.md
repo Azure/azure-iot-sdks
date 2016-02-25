@@ -34,18 +34,12 @@ You should have the following items ready before beginning the process:
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
 -   NISE50 device.
 -   [Azure SDK for .NET](http://go.microsoft.com/fwlink/p/?linkid=618715&clcid=0x409)
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-
-#### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-#### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 #### Install Visual Studio 2015 and Tools
 
--   To create Windows IoT Core solutions, you will need to install [Visual Studio 2015](https://www.visualstudio.com/en-us/products/vs-2015-product-editions.aspx). You can install any edition of Visual Studio, including the free Community edition.
+-   To create Windows IoT Core solutions, you will need to install [Visual Studio 2015](https://www.visualstudio.com/products/vs-2015-product-editions.aspx). You can install any edition of Visual Studio, including the free Community edition.
 
     Make sure to select the **Universal Windows App Development Tools**, the component required for writing apps Windows 10:
 
@@ -112,9 +106,9 @@ This section walks you through building, deploying and validating the IoT Client
 
 ### 3.3.1 Send Device Events to IoT Hub
 
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to see the data your device is sending.
+-   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document][lnk-device-explorer] to see the data your device is sending.
 
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool](https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc).
+-   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer].
      
 -   In Visual Studio, from **Solution Explorer**, right-click the **UWPSample(Universal Windows)** project, click **Debug &minus;&gt; Start new instance** to build and run the sample. 
        
@@ -122,8 +116,13 @@ This section walks you through building, deploying and validating the IoT Client
 
 ### 3.3.2 Receive messages from IoT Hub
 
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) for instructions on sending messages to device.
+-   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document][lnk-device-explorer] for instructions on sending messages to device.
 
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool](https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc).
+-   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer].
 
 -   You should be able to see the message received in the device console window after following DeviceExplorer usage document.
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
+[lnk-device-explorer]: ../../tools/DeviceExplorer/readme.md
+[lnk-iothub-explorer]: ../../tools/iothub-explorer/readme.md

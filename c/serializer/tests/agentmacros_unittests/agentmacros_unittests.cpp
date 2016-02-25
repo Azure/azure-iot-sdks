@@ -344,11 +344,11 @@ namespace
     template<class EdmType>
     AGENT_DATA_TYPE StructWithOneFieldAsAgentDataType_(AGENT_DATA_TYPE_TYPE fieldtype, const char* fieldName, EdmType fieldValue)
     {
-        AGENT_DATA_TYPE* value = new AGENT_DATA_TYPE;
+        AGENT_DATA_TYPE* value = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE));
         value->type = fieldtype;
         *(EdmType*)&value->value.edmInt32 = fieldValue;
 
-        COMPLEX_TYPE_FIELD_TYPE* field = new COMPLEX_TYPE_FIELD_TYPE; // { fieldName, value };
+        COMPLEX_TYPE_FIELD_TYPE* field = (COMPLEX_TYPE_FIELD_TYPE*)malloc(sizeof(COMPLEX_TYPE_FIELD_TYPE)); // { fieldName, value };
         field->fieldName = fieldName;
         field->value = value;
 
@@ -367,7 +367,7 @@ namespace
         ComplexAgentDataTypeWithOneField(AGENT_DATA_TYPE_TYPE fieldtype, const char* fieldName, EdmType fieldValue)
             : data_(StructWithOneFieldAsAgentDataType_(fieldtype, fieldName, fieldValue))
         {}
-        ~ComplexAgentDataTypeWithOneField()
+        virtual ~ComplexAgentDataTypeWithOneField()
         {
             free(data_.value.edmComplexType.fields->value);
             free(data_.value.edmComplexType.fields);

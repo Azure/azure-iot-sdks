@@ -27,13 +27,13 @@ var Properties = function () {
  * string `'iothub-app-'` to the key before adding it to the collection.
  */
 /* Code_SRS_NODE_IOTHUB_PROPERTIES_07_003: [The getData function shall return a string representation of the body of the message.] */
-Properties.prototype.add = function(itemKey, itemValue) {
+Properties.prototype.add = function (itemKey, itemValue) {
   /* Code_SRS_NODE_IOTHUB_PROPERTIES_07_004: [If itemKey contains any of the reserved key names then the add function will return false] */
   if (itemKey === 'Authorization' || itemKey === 'iothub-to') {
     return false;
   }
   else {
-    var objProperty = {key:'iothub-app-'+itemKey, value:itemValue};
+    var objProperty = { key: 'iothub-app-' + itemKey, value: itemValue };
     this.propertyList.push(objProperty);
     return true;
   }
@@ -46,9 +46,9 @@ Properties.prototype.add = function(itemKey, itemValue) {
  *                    corresponding to the key and value of the property.
  */
 /* Code_SRS_NODE_IOTHUB_PROPERTIES_07_001: [if the supplied index is greater or equal to zero and the is less than property map length then it shall return the property object.] */
-Properties.prototype.getItem = function(index) {
+Properties.prototype.getItem = function (index) {
   if (index >= 0 && index < this.propertyList.length)
-      return this.propertyList[index];
+    return this.propertyList[index];
   return undefined;
 };
 
@@ -56,7 +56,7 @@ Properties.prototype.getItem = function(index) {
  * Returns the number of items in the collection.
  */
 /* Code_SRS_NODE_IOTHUB_PROPERTIES_07_002: [Properties.Count shall return the number of items in the Properties map.] */
-Properties.prototype.count = function() {
+Properties.prototype.count = function () {
   return this.propertyList.length;
 };
 

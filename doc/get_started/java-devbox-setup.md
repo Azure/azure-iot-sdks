@@ -138,7 +138,7 @@ In your main pom.xml file, add the Azure IoT Device SDK as a dependency using yo
 <dependency>
     <groupId>com.microsoft.azure.iothub-java-client</groupId>
     <artifactId>iothub-java-client</artifactId>
-    <version>1.0.0-preview.7</version>
+    <version>1.0.0</version>
 	<!--This is the current version number as of the writing of this document. Yours may be different.-->
 </dependency>
 ```

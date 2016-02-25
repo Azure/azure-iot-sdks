@@ -35,16 +35,8 @@ You should have the following items ready before beginning the process:
 - One of the following:
   - [Arduiono or Genuino MKR1000](https://www.arduino.cc/en/Main/ArduinoMKR1000)
   - [Arduino or Genuino Zero board](https://www.arduino.cc/en/Main/ArduinoBoardZero) and [Arduino or Genuino WiFi Shield 101](https://www.arduino.cc/en/Main/ArduinoWiFiShield101).
-- Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
-- [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-
-### Create a device on IoT Hub
-- With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-### Write down device credentials
-- Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-Note: You can skip this step if you just want to build the sample application without running it.
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="Step-2-PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -76,7 +68,7 @@ This section shows you how to set up a development environment for the Azure IoT
    static const char* connectionString = "[device connection string]";
    ```
 6. Replace "[device connection string]" with the device connection string you noted [earlier](#Step-1-Prerequisites). Save the changes.
-7. The section "Send events" in the document [How to use Device Explorer](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
+
 8. Press the ```Verify``` button in the Arduino IDE to build the sample sketch.  
 
 <a name="deploy"/>
@@ -91,5 +83,8 @@ This section shows you how to set up a development environment for the Azure IoT
 ## Run the sample
 
 1. Follow the steps from the [deploy](#deploy) section.
-2. Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_http** application.
-3. See "Send cloud-to-device messages" in the document [How to use Device Explorer for IoT Hub devices](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) for instructions on sending messages with the **DeviceExplorer** utility.
+
+7.   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the **simplesample_http** application and how to send cloud-to-device messages to the **simplesample_http** application.
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

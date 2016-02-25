@@ -33,14 +33,8 @@ You should have the following items ready before beginning the process:
 -   Computer with Git client installed and access to the
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
 -   Ankaa device.
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-
-### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="Step-2-PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -107,13 +101,7 @@ Run the following commands in the terminal window connected to your Ankaa device
 
 -   Replace the above placeholder with device connection string you obtained in [Step 1](#Step-1-Prerequisites) and save the changes.
 
--   On the board, run the following command to build and install Apache Proton library:
-
-        sudo ./azure-iot-sdks/c/build_all/linux/build_proton.sh --install /usr
-        chmod +x ./azure-iot-sdks/c/build_all/linux/build_paho.sh
-        ./azure-iot-sdks/c/build_all/linux/build_paho.sh
-
--   Assuming everything went OK on the build_proton.sh, you can now build the SDK samples using the following command:
+-   Build the SDK samples using the following command:
 
         sudo ./azure-iot-sdks/c/build_all/linux/build.sh
 
@@ -129,15 +117,15 @@ Run the following commands in the terminal window connected to your Ankaa device
 
         ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/iothub_client_sample_http
 
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to see the data your device is sending.
+-   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document][lnk-device-explorer] to see the data your device is sending.
 
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool](https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
+-   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer]
 
 ## 3.3 Receive messages from IoT Hub
 
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) for instructions on sending messages to device.
+-   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document][lnk-device-explorer] for instructions on sending messages to device.
 
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool](https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
+-   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer]
 
 <a name="tips"></a>
 # Tips
@@ -145,3 +133,9 @@ Run the following commands in the terminal window connected to your Ankaa device
 - If you just want to build iothub\_client, go to the cmake output directory and navigate to the iothub_client/samples folder then run the following command:
 
 		make -f Makefile all
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
+
+[lnk-device-explorer]: ../../tools/DeviceExplorer/readme.md
+[lnk-iothub-explorer]: ../../tools/iothub-explorer/readme.md

@@ -3,7 +3,8 @@
 
 'use strict';
 
-var clientFromConnectionString = require('azure-iot-device-http').clientFromConnectionString;
+var Protocol = require('azure-iot-device-http').Http;
+var Client = require('azure-iot-device').Client;
 var ConnectionString = require('azure-iot-device').ConnectionString;
 var Message = require('azure-iot-device').Message;
 
@@ -18,7 +19,7 @@ var humidity = 50;
 var externalTemperature = 55;
 
 // Create IoT Hub client
-var client = clientFromConnectionString(connectionString);
+var client = Client.fromConnectionString(connectionString, Protocol);
 
 // Helper function to print results for an operation
 function printErrorFor(op) {
@@ -30,49 +31,6 @@ function printErrorFor(op) {
 // Helper function to generate random number between min and max
 function generateRandomIncrement() {
   return ((Math.random() * 2) - 1);
-}
-
-// function to send event data
-function sendEventData() {
-  temperature += generateRandomIncrement();
-  externalTemperature += generateRandomIncrement();
-  humidity += generateRandomIncrement();
-
-  var data = JSON.stringify({
-    'DeviceID': deviceId,
-    'Temperature': temperature,
-    'Humidity': humidity,
-    'ExternalTemperature': externalTemperature
-  });
-
-  console.log('Sending device event data:\n' + data);
-  client.sendEvent(new Message(data), printErrorFor('send event'));
-}
-
-// function to wait on messages
-var isWaiting = false;
-function waitForMessages() {
-  isWaiting = true;
-  client.receive(function (err, msg, res) {
-    printErrorFor('receive')(err, res);
-    if (!err && res.statusCode !== 204) {
-      console.log('receive data: ' + msg.getData());
-      try {
-        var command = JSON.parse(msg.getData());
-        if (command.Name === 'SetTemperature') {
-          temperature = command.Parameters.Temperature;
-          console.log('New temperature set to :' + temperature + 'F');
-        }
-
-        client.complete(msg, printErrorFor('complete'));
-      }
-      catch (err) {
-        printErrorFor('parse received message')(err);
-        client.reject(msg, printErrorFor('reject'));
-      }
-    }
-    isWaiting = false;
-  });
 }
 
 // Send device meta data
@@ -112,13 +70,52 @@ var deviceMetaData = {
     }]
 };
 
-console.log('Sending device metadata:\n' + JSON.stringify(deviceMetaData));
-client.sendEvent(new Message(JSON.stringify(deviceMetaData)), printErrorFor('send metadata'));
+client.open(function (err, result) {
+  if (err) {
+    printErrorFor('open')(err);
+  } else {
+    console.log('Sending device metadata:\n' + JSON.stringify(deviceMetaData));
+    client.sendEvent(new Message(JSON.stringify(deviceMetaData)), printErrorFor('send metadata'));
 
-// start event data send routing
-setInterval(sendEventData, 1000);
+    client.on('message', function (msg) {
+      console.log('receive data: ' + msg.getData());
 
-// Start messages listener
-setInterval(function () {
-  if (!isWaiting) waitForMessages();
-}, 200);
+      try {
+        var command = JSON.parse(msg.getData());
+        if (command.Name === 'SetTemperature') {
+          temperature = command.Parameters.Temperature;
+          console.log('New temperature set to :' + temperature + 'F');
+        }
+
+        client.complete(msg, printErrorFor('complete'));
+      }
+      catch (err) {
+        printErrorFor('parse received message')(err);
+        client.reject(msg, printErrorFor('reject'));
+      }
+    });
+
+    // start event data send routing
+    var sendInterval = setInterval(function () {
+      temperature += generateRandomIncrement();
+      externalTemperature += generateRandomIncrement();
+      humidity += generateRandomIncrement();
+
+      var data = JSON.stringify({
+        'DeviceID': deviceId,
+        'Temperature': temperature,
+        'Humidity': humidity,
+        'ExternalTemperature': externalTemperature
+      });
+
+      console.log('Sending device event data:\n' + data);
+      client.sendEvent(new Message(data), printErrorFor('send event'));
+    }, 1000);
+
+    client.on('error', function (err) {
+      printErrorFor('client')(err);
+      if (sendInterval) clearInterval(sendInterval);
+      client.close();
+    });
+  }
+});

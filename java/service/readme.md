@@ -11,8 +11,8 @@ The Microsoft Azure IoT Service SDK for Java facilitates building applications t
 For more information on how to use this library refer to the documents below:
 - [Setup your development environment][devbox-setup]
 - [Setup IoT Hub](../../doc/setup_iothub.md)
-- [Provision devices](../../c/doc/provision_device.md)
-- [Using the DeviceExplorer application to test IoT Hub device connectivity](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
+- [Provision devices](../../doc/manage_iot_hub.md)
+- [Test IoT Hub device connectivity](../../doc/manage_iot_hub.md)
 - [Run the Java sample][run-java-sample]
 - [Java API reference](http://azure.github.io/azure-iot-sdks/java/service/api_reference/index.html)
 

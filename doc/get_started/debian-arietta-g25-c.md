@@ -62,12 +62,8 @@ You should have the following items ready, before beginning the process:
 	  - A micro SD Card of 4,8,16 or 32 GByte class 4 or higher preinstalled with Debian Linux
 	  - A micro USB data cable
 	  - A 5 Volt DC power supply. You need a power supply only when you are using the Arietta in stand alone mode o with a WiFi or Ethernet adapter. Be careful that whatever power supply you use, it must output at least 5V; insufficient power will cause your Arietta to behave in strange ways. The power can be provided via the micro usb connector or via the J4 pads.
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-#### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-#### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]. Note that this tutorial assumes you are using the Device Explorer tool described in [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -175,36 +171,7 @@ A Linux PC is required.
 	Replace connection string with string which you noted in [Step 1](#Prerequisites).Save your changes by pressing Ctrl+O and when nano prompts you to save it as the same file, just press ENTER. Press Ctrl+X to exit nano.
 
 
-- Azure IoT Hub SDK depends on Apache Qpid Proton AMQP/HTTP to integrate with the IoT Hub. Run the following command to build/install Apache Proton.
-
-	Open the file:
-
-		nano ./azure-iot-sdks/c/build_all/linux/build_proton.sh
-
-	Find the following rows
-
-		make
-		make install
-
-	Replace with
-
-		free && sync && echo 3 > /proc/sys/vm/drop_caches && free
-		make -j 5
-		free && sync && echo 3 > /proc/sys/vm/drop_caches && free
-		make -j 5 install
-
-	Save your changes by pressing Ctrl+O and when nano prompts you to save it as the same file, just press ENTER. Press Ctrl+X to exit nano.
-
-
-	Execute the following command
-
-		free && sync && echo 3 > /proc/sys/vm/drop_caches && free
-		./azure-iot-sdks/c/build_all/linux/build_proton.sh --install /usr
-		chmod +x ./azure-iot-sdks/c/build_all/linux/build_paho.sh
-		free && sync && echo 3 > /proc/sys/vm/drop_caches && free
-		./azure-iot-sdks/c/build_all/linux/build_paho.sh
-
-	Assuming everything went OK with the build_proton.sh and build_paho.sh, proceed to set the environment variables.
+- Set the environment variables.
 
 ####Set the Environment Variables####
 
@@ -303,7 +270,8 @@ In this section you will run the Azure IoT client SDK samples of communication b
     **If using HTTP protocol:**
     ![MessageSend\_terminal](https://github.com/Azure/azure-iot-sdks/raw/master/doc/iotcertification/iot_certification_linux_c/images/3_3_1_08.png)
 
-
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
 
 
 

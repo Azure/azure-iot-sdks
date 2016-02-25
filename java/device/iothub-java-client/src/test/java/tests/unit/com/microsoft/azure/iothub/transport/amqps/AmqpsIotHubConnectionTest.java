@@ -302,7 +302,6 @@ public class AmqpsIotHubConnectionTest {
 
         new Verifications() {
             {
-                mockReactor.run(); times = 1;
                 mockHandler.getLinkCredit(); times = 1;
                 future.complete(new Boolean(true)); times = 1;
             }
