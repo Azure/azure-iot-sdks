@@ -31,7 +31,7 @@ This document describes how to build and run the **simple_sample_http.js** Node.
 You should have the following items ready before beginning the process:
 -   Computer with Git client installed and access to the
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
--   [Prepare your development environment](https://github.com/Azure/azure-iot-sdks/blob/master/csharp/device/doc/devbox_setup.md).
+-   [Prepare your development environment][setup-devbox].
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
@@ -83,3 +83,4 @@ The same sample can be used to test AMQP, AMQP over Websockets, HTTP and MQTT. I
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
+[setup-devbox]: node-devbox-setup.md
