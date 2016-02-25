@@ -124,5 +124,5 @@ This section walks you through building, deploying and validating the IoT Client
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
-[lnk-device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
+[lnk-device-explorer]: ../../tools/DeviceExplorer/readme.md
 [lnk-iothub-explorer]: ../../tools/iothub-explorer/readme.md

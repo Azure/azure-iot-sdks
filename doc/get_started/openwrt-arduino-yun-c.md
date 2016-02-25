@@ -31,9 +31,9 @@ The following document describes the process of connecting an Arduino Yun system
 You should have the following items ready before beginning the process:
 -   Computer with a Git client installed so that you can access the azure-iot-sdks code on GitHub.
   - Arduino Yun board.
-  - Ubuntu x86 machine (for cross compiling)
--   [Setup your IoT hub][lnk-setup-iot-hub]
--   [Provision your device and get its credentials][lnk-manage-iot-hub]
+  - Ubuntu x86 machine (for cross compiling) 
+-   [Setup your IoT hub](../setup_iothub.md) 
+-   [Provision your device and get its credentials](../manage_iot_hub.md)
 
 <a name="Step-2-PrepareDevice"></a>
 # Step 2: Prepare your Device

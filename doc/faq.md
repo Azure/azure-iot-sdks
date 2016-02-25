@@ -169,7 +169,7 @@ For more information, see http://maven.apache.org/surefire/maven-surefire-plugin
 <a name="qpidjmsbuildfail"/>
 ## qpid-jms build fails
 
-If you get a build error when you try to [build qpid-jms](../java/device/doc/devbox_setup.md), then you should set the following  variable in your environment before you run `mvn install`.
+If you get a build error when you try to [build qpid-jms](get_started/java-devbox-setup.md), then you should set the following  variable in your environment before you run `mvn install`.
 
 Windows: `set _JAVA_OPTIONS=-Xmx512M`
 

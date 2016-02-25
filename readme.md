@@ -13,10 +13,10 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 
 This repository contains the following IoT device SDKs:
 
-- [Azure IoT device SDK for .NET](csharp/device/readme.md)
 - [Azure IoT device SDK for C](c/readme.md)
 - [Azure IoT device SDK for Node.js](node/device/core/readme.md)
 - [Azure IoT device SDK for Java](java/device/readme.md)
+- [Azure IoT device SDK for .NET](csharp/device/readme.md)
 
 Each language SDK includes sample code and documentation in addition to the library code.
 
@@ -69,4 +69,4 @@ This folder contains the following documents that are relevant to all the langua
 
 This folder contains tools you will find useful when you are working with IoT Hub and the device SDKs.
 - [iothub-explorer](tools/iothub-explorer/readme.md): describes how to use the iothub-explorer node.js tool to provision a device for use in IoT Hub, monitor the messages from the device, and send commands to the device.
-- [Device Explorer](tools/DeviceExplorer/doc/how_to_use_device_explorer.md): this tool enables you to perform operations such as manage the devices registered to an IoT hub, view device-to-cloud messages sent to an IoT hub, and send cloud-to-device messages from an IoT hub. Note this tool only runs on Windows.
+- [Device Explorer](tools/DeviceExplorer/readme.md): this tool enables you to perform operations such as manage the devices registered to an IoT hub, view device-to-cloud messages sent to an IoT hub, and send cloud-to-device messages from an IoT hub. Note this tool only runs on Windows.
