@@ -43,7 +43,7 @@ You should have the following items ready before beginning the process:
 <a name="Build"></a>
 # Step 3: Build and Run the sample
 
-- Get the following sample files from https://github.com/Azure/azure-iot-sdks/node/device/samples
+- Get the following sample files from https://github.com/Azure/azure-iot-sdks/tree/master/node/device/samples
     - **package.json**
     - **simple_sample_device.js**
 
