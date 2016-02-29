@@ -73,7 +73,7 @@ To run DeviceExplorer tool, use following configuration string as described in
     
 
 **Steps:**
-1.  Click [here](<https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/readme.md>) to download and install DeviceExplorer
+1.  Click [here](<https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) to download and install DeviceExplorer
 
 2.  Add connection information under the Configuration tab and click the **Update** button.
 
@@ -217,24 +217,7 @@ This section walks you through building, deploying and validating the IoT Client
         Use equivalent commands on the target OS
 
 <a name="Step_3_1_4"/>
-### 3.1.4  Build Qpid JMS
-
-1.  Clone the repository for Qpid JMS.
-    
-        git clone https://github.com/avranju/qpid-jms.git
-
-2.  Install Qpid JMS by executing following commands in sequence:
-
-        cd qpid-jms
-        mvn install | tee Qpid_Build_Logs.txt
-        cd ..
-    
-    ***Note:*** *We have noticed that certain unit tests can fail when running  `mvn install` as given above with the latest version of JDK 8 (1.8.0_60 at the time this document was written). It works fine with older versions however. If this occurs please skip running unit tests using following command:*
-    
-        mvn install -DskipTests
-
-<a name="Step_3_1_5"/>
-### 3.1.5 Build the Azure IoT Device SDK for Java
+### 3.1.4 Build the Azure IoT Device SDK for Java
 
 1.  Download the SDK to the board by issuing the following command in PuTTY:
 
@@ -296,10 +279,10 @@ section. These will be needed in [Step 4](#Step_4_2).*
 5.  Verify that the confirmation messages show an OK. If not, then you may have incorrectly copied the device hub connection information.
 
     **If using AMQP protocol:**  
-    ![Terminal\_AMQP\_send\_event](images/terminal_amqp_send_event.png)
+    ![Terminal\_AMQP\_send\_event](images/terminal_amqp_send_event.PNG)
 
     **If using HTTP protocol:**  
-    ![Terminal\_HTTP\_send\_event](images/terminal_http_send_event.png)
+    ![Terminal\_HTTP\_send\_event](images/terminal_http_send_event.PNG)
 
     **If using MQTT protocol:**  
     ![Terminal\_MQTT\_send\_event](images/terminal_mqtt_send_event.png)
@@ -307,10 +290,10 @@ section. These will be needed in [Step 4](#Step_4_2).*
 6.  DeviceExplorer should show that IoT Hub has successfully received data sent by sample test.
 
     **If using AMQP protocol:**  
-    ![DeviceExplorer\_AMQP\_message\_received](images/device_explorer_amqp_message_received.png)
+    ![DeviceExplorer\_AMQP\_message\_received](images/device_explorer_amqp_message_received.PNG)
 
     **If using HTTP protocol:**  
-    ![DeviceExplorer\_HTTP\_message\_received](images/device_explorer_http_message_received.png)
+    ![DeviceExplorer\_HTTP\_message\_received](images/device_explorer_http_message_received.PNG)
 
     **If using MQTT protocol:**  
     ![DeviceExplorer\_MQTT\_message\_received](images/device_explorer_mqtt_message_received.png)
@@ -324,7 +307,7 @@ section. These will be needed in [Step 4](#Step_4_2).*
 
 3.  Add some text to the Message field, then click Send.
 
-    ![DeviceExplorer\_message\_send](images/device_explorer_message_send.png)
+    ![DeviceExplorer\_message\_send](images/device_explorer_message_send.PNG)
 
 4.  Navigate to the folder containing the executable JAR file for the receive message sample.
 
@@ -353,10 +336,10 @@ section. These will be needed in [Step 4](#Step_4_2).*
 6.  You should be able to see the command received in the console window for the client sample.
 
     **If using AMQP protocol:**  
-    ![Terminal\_AMQP\_message\_received](images/terminal_amqp_message_received.png)
+    ![Terminal\_AMQP\_message\_received](images/terminal_amqp_message_received.PNG)
 
     **If using HTTP protocol:**  
-    ![Terminal\_HTTP\_message\_received](images/terminal_http_message_received.png)
+    ![Terminal\_HTTP\_message\_received](images/terminal_http_message_received.PNG)
 
     **If using MQTT protocol:**  
     ![Terminal\_MQTT\_message\_received](images/terminal_mqtt_message_received.png)

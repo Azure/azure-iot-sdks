@@ -76,7 +76,7 @@ To run DeviceExplorer tool, use following configuration string as described in [
 
 **Steps:**
 
-1.  Click [here](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/readme.md) to download and install DeviceExplorer.
+1.  Click [here](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to download and install DeviceExplorer.
 
 2.  Add connection information under the **Configuration** tab and click the **Update** button.
 

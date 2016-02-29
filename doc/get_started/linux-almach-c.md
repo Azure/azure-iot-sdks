@@ -150,15 +150,11 @@ You can build the azure-iot-sdk and samples directly in Almach or from PC where 
 
         ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
 
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document][lnk-device-explorer] to see the data your device is sending.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer]
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 
 ## 3.4 Receive messages from IoT Hub
 
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document][lnk-device-explorer] for instructions on sending messages to device.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer]
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to send cloud-to-device messages to the application.
 
 <a name="tips"></a>
 # Tips
@@ -172,5 +168,3 @@ You can build the azure-iot-sdk and samples directly in Almach or from PC where 
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
-[lnk-device-explorer]: ../../tools/DeviceExplorer/readme.md
-[lnk-iothub-explorer]: ../../tools/iothub-explorer/readme.md

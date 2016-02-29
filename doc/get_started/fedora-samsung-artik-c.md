@@ -56,7 +56,7 @@ ARTIK supports both Ethernet and WiFi. If you want to use WiFi on your ARTIK, pl
 
         dnf check-update -y
 
-        dnf install libcurl-devel openssl-devel libuuid-devel uuid-devel gcc-c++ make cmake git unzip java-1.7.0-openjdk
+        dnf install libcurl-devel openssl-devel gcc-c++ make cmake git
 
 -   Download the Microsoft Azure IoT Device SDK for C to the board by issuing the following command on the board::
 
@@ -82,7 +82,7 @@ ARTIK supports both Ethernet and WiFi. If you want to use WiFi on your ARTIK, pl
 
         ./azure-iot-sdks/c/build_all/linux/build.sh
 
-## 3.2 Send Device Events to IoT Hub:
+## 3.2 Send Device Events to IoT Hub
 
 -   Run the sample by issuing following command:
 
@@ -94,15 +94,11 @@ ARTIK supports both Ethernet and WiFi. If you want to use WiFi on your ARTIK, pl
 
         ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
 
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document][lnk-device-explorer] to see the data your device is sending.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer]
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 
 ## 3.3 Receive messages from IoT Hub
 
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document][lnk-device-explorer] for instructions on sending messages to device.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer]
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to send cloud-to-device messages to the application.
 
 <a name="tips"></a>
 # Tips
@@ -116,5 +112,3 @@ ARTIK supports both Ethernet and WiFi. If you want to use WiFi on your ARTIK, pl
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
-[lnk-device-explorer]: ../../tools/DeviceExplorer/readme.md
-[lnk-iothub-explorer]: ../../tools/iothub-explorer/readme.md
