@@ -106,23 +106,13 @@ This section walks you through building, deploying and validating the IoT Client
 
 ### 3.3.1 Send Device Events to IoT Hub
 
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document][lnk-device-explorer] to see the data your device is sending.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer].
-     
 -   In Visual Studio, from **Solution Explorer**, right-click the **UWPSample(Universal Windows)** project, click **Debug &minus;&gt; Start new instance** to build and run the sample. 
        
--   You should be able to see the events received in the DeviceExplorer's data tab.
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 
 ### 3.3.2 Receive messages from IoT Hub
 
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document][lnk-device-explorer] for instructions on sending messages to device.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer].
-
--   You should be able to see the message received in the device console window after following DeviceExplorer usage document.
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to send cloud-to-device messages to the application.
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
-[lnk-device-explorer]: ../../tools/DeviceExplorer/readme.md
-[lnk-iothub-explorer]: ../../tools/iothub-explorer/readme.md

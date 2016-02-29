@@ -77,7 +77,7 @@ To run DeviceExplorer tool, use following configuration string as described in
 
 
 **Steps:**
-1.  Click [here](<https://github.com/Azure/azure-iot-sdks/blob/develop/tools/DeviceExplorer/readme.md>) to download and install DeviceExplorer.
+1.  Click [here](<https://github.com/Azure/azure-iot-sdks/blob/develop/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>) to download and install DeviceExplorer.
 
 2.  Add connection information under the Configuration tab and click the **Update** button.
 
@@ -116,26 +116,24 @@ This section walks you through building, deploying and validating the IoT Client
 
         sudo apt-get update
 
-        sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
+        sudo apt-get install -y curl libcurl4-openssl-dev build-essential cmake git
 
     **Fedora**
 
         sudo dnf check-update -y
 
-        sudo dnf install libcurl-devel openssl-devel libuuid-devel uuid-devel gcc-c++ make cmake git unzip java-1.7.0-openjdk
+        sudo dnf install libcurl-devel openssl-devel gcc-c++ make cmake git
 
     **Any Other Linux OS**
 
         Use equivalent commands on the target OS
 
-    ***Note:*** *This setup process requires cmake version 3.0 or higher.* 
+    ***Note:*** *This setup process requires cmake version 2.8.12 or higher.* 
     
     *You can verify the current version installed in your environment using the  following command:*
 
         cmake --version
 
-    *For information about how to upgrade your version of cmake to 3.2 on Ubuntu 14.04, see <http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04>.*
-    
     *This library also requires gcc version 4.9 or higher. You can verify the current version installed in your environment using the following command:*
     
         gcc --version 

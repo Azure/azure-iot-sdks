@@ -61,20 +61,18 @@ Run the following commands in the terminal window connected to your Ankaa device
 -   Install the prerequisite packages for the Microsoft Azure IoT Device SDK for C by issuing the following commands from the command line on your board:
 
         sudo apt-get update
-        sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git
+        sudo apt-get install -y curl libcurl4-openssl-dev build-essential cmake git
 
     If you get errors running sudo, make sure your root password is set as described above.
 
     ***Note:*** *Right-click in a Tera Term terminal window to paste the copied text.*
     
-    ***Note:*** *This setup process requires cmake version 3.0 or higher.* 
+    ***Note:*** *This setup process requires cmake version 2.8.12 or higher.* 
     
     *You can verify the current version installed in your environment using the  following command:*
 
         cmake --version
 
-    *For information about how to upgrade your version of cmake to 3.2 on Ubuntu 14.04, see <http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04>.*
-    
     *This library also requires gcc version 4.9 or higher. You can verify the current version installed in your environment using the following command:*
     
         gcc --version 
@@ -117,15 +115,11 @@ Run the following commands in the terminal window connected to your Ankaa device
 
         ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/iothub_client_sample_http
 
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document][lnk-device-explorer] to see the data your device is sending.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer]
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 
 ## 3.3 Receive messages from IoT Hub
 
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document][lnk-device-explorer] for instructions on sending messages to device.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool][lnk-iothub-explorer]
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to send cloud-to-device messages to the application.
 
 <a name="tips"></a>
 # Tips
@@ -136,6 +130,3 @@ Run the following commands in the terminal window connected to your Ankaa device
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
-
-[lnk-device-explorer]: ../../tools/DeviceExplorer/readme.md
-[lnk-iothub-explorer]: ../../tools/iothub-explorer/readme.md
