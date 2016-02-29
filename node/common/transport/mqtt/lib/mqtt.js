@@ -3,7 +3,6 @@
 
 'use strict';
 
-var mqtt = require('mqtt');
 var MqttReceiver = require('./mqtt_receiver.js');
 var debug = require('debug')('mqtt-common');
 var PackageJson = require('../package.json');
@@ -28,12 +27,15 @@ var results = require('azure-iot-common').results;
  Codes_SRS_NODE_HTTP_12_003: [MqttTransport shall create a configuration structure for underlying MQTT.JS library and store it to a member variable
  Codes_SRS_NODE_HTTP_12_004: [MqttTransport shall return an instance itself
 */
-function Mqtt(config) {
+function Mqtt(config, mqttprovider) {
   if ((!config) ||
     (!config.host) ||
     (!config.deviceId) ||
-    (!config.sharedAccessSignature))
+    (!config.sharedAccessSignature)) {
     throw new ReferenceError('Invalid transport configuration');
+  }
+
+  this.mqttprovider = mqttprovider ? mqttprovider : require('mqtt');
 
   this._receiver = null;
   this._hostName = 'mqtts://' + config.host;
@@ -56,7 +58,6 @@ function Mqtt(config) {
   };
   debug('username: ' + this._options.username);
   debug('hostname: ' + this._hostName);
-  return this;
 }
 
 /**
@@ -67,7 +68,7 @@ function Mqtt(config) {
  */
 /* SRS_NODE_HTTP_12_005: The CONNECT method shall call connect on MQTT.JS  library and return a promise with the result */
 Mqtt.prototype.connect = function (done) {
-  this.client = mqtt.connect(this._hostName, this._options);
+  this.client = this.mqttprovider.connect(this._hostName, this._options);
   if (done) {
     var errCallback = function (error) {
       done(error);
@@ -90,7 +91,6 @@ Mqtt.prototype.connect = function (done) {
     this.client.on('connect', function (connack) {
       debug('Device is connected');
       debug('CONNACK: ' + JSON.stringify(connack));
-      this.client.removeListener('error', errCallback);
       done(null, connack);
     }.bind(this));
   }
@@ -120,21 +120,18 @@ Mqtt.prototype.disconnect = function (done) {
 /* Codes_SRS_NODE_HTTP_12_006: The PUBLISH method shall throw ReferenceError “Invalid message” if the message is falsy */
 /* Codes_SRS_NODE_HTTP_12_007: The PUBLISH method shall call publish on MQTT.JS library with the given message */
 Mqtt.prototype.publish = function (message, done) {
-  if (!message)
+  if (!message) {
     throw new ReferenceError('Invalid message');
-
-  if (done) {
-    var errCallback = function (error) {
-      done(error);
-    };
-    this.client.on('error', errCallback);
   }
 
   this.client.publish(this._topic_publish, message.data.toString(), { qos: 1, retain: false }, function (err, puback) {
     if (done) {
-      this.client.removeListener('error', errCallback);
-      debug('PUBACK: ' + JSON.stringify(puback));
-      done(err, new results.MessageEnqueued(puback));
+      if (err) {
+        done(err);
+      } else {
+        debug('PUBACK: ' + JSON.stringify(puback));
+        done(null, new results.MessageEnqueued(puback));
+      }
     }
   }.bind(this));
 };
