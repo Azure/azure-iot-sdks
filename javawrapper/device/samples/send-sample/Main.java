@@ -16,7 +16,7 @@ import com.google.gson.Gson;
 
 public class Main {
 
-	private static String connString = "HostName=javaTest.azure-devices.net;DeviceId=Device1;SharedAccessKey=pXuifS+EUVY7oewL1hGpttpq5r/jmgONjn41xPK5knM=";
+	private static String connString = "copy here your connection string";
 	private static IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 	private static boolean stopThread = false;
 	

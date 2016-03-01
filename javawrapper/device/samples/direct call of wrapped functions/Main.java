@@ -136,7 +136,7 @@ public class Main {
 		}
 	};
 	
-	public static class EVENT_INSTANCE extends Structure //implements Structure.ByReference
+	public static class EVENT_INSTANCE extends Structure 
 	{
 		public IOTHUB_MESSAGE_HANDLE messageHandle;
 		public int messageTrackingId;

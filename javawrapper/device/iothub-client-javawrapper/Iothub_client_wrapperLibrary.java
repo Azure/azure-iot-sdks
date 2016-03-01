@@ -23,7 +23,6 @@ import com.sun.jna.Library;
  */
 import com.sun.jna.ptr.PointerByReference;
 
-//public interface Iothub_client_wrapperLibrary extends StdCallLibrary {
 public interface Iothub_client_wrapperLibrary extends Library{
 	public static final String JNA_LIBRARY_NAME = "iothub_client_dll";
 	public static final NativeLibrary JNA_NATIVE_LIB = NativeLibrary.getInstance(Iothub_client_wrapperLibrary.JNA_LIBRARY_NAME);
@@ -51,7 +50,6 @@ public interface Iothub_client_wrapperLibrary extends Library{
 	/*
 	 * Original signature : IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE, IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*)
 	 */
-	//IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(Pointer iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IotHubEventCallback eventConfirmationCallback, Object userContextCallback);
 	int IoTHubClient_SendEventAsync(Pointer iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IotHubEventCallback eventConfirmationCallback, Pointer userContextCallback);
 	/*
 	 * Original signature : IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE, IOTHUB_CLIENT_STATUS*)

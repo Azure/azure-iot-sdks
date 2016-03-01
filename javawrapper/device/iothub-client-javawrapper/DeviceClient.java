@@ -49,7 +49,6 @@ public final class DeviceClient
 		       		"Invalid client protocol specified."); 
 		} 
 
-		//handle = IoTHub.IoTHubClient_CreateFromConnectionString(connString, transport);
 		handle = Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_CreateFromConnectionString(connString, transport);
 	}
 	
