@@ -2630,6 +2630,8 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
 		/*creating message HTTP request headers*/
 		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
 		    .IgnoreArgument(1)
 		    .SetReturn(HTTP_HEADERS_ERROR);
