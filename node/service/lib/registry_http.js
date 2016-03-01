@@ -196,7 +196,8 @@ Http.prototype.importDevicesFromBlob = function (path, importRequest, done) {
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
     'Content-Type': 'application/json; charset=utf-8',
-    'Request-Id': requestId
+    'Request-Id': requestId,
+    'User-Agent': 'azure-iothub/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_IOTHUB_HTTP_16_005: [The importDeviceFromBlob method shall construct an HTTP request using information supplied by the caller, as follows:
@@ -234,7 +235,8 @@ Http.prototype.exportDevicesToBlob = function (path, exportRequest, done) {
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
     'Content-Type': 'application/json; charset=utf-8',
-    'Request-Id': requestId
+    'Request-Id': requestId,
+    'User-Agent': 'azure-iothub/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_IOTHUB_HTTP_16_004: [The exportDevicesToBlob method shall construct an HTTP request using information supplied by the caller, as follows:
@@ -271,7 +273,8 @@ Http.prototype.listJobs = function (path, done) {
   var requestId = uuid.v4();
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
-    'Request-Id': requestId
+    'Request-Id': requestId,
+    'User-Agent': 'azure-iothub/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_IOTHUB_HTTP_16_002: [The listJobs method shall construct an HTTP request using information supplied by the caller, as follows:
@@ -304,7 +307,8 @@ Http.prototype.getJob = function (path, done) {
   var requestId = uuid.v4();
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
-    'Request-Id': requestId
+    'Request-Id': requestId,
+    'User-Agent': 'azure-iothub/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_IOTHUB_HTTP_16_003: [The getJob method shall construct an HTTP request using information supplied by the caller, as follows:
@@ -337,7 +341,8 @@ Http.prototype.cancelJob = function (path, done) {
   var requestId = uuid.v4();
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
-    'Request-Id': requestId
+    'Request-Id': requestId,
+    'User-Agent': 'azure-iothub/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_IOTHUB_HTTP_16_001: [The cancelJob method shall construct an HTTP request using information supplied by the caller as follows:

@@ -6,13 +6,18 @@ package tests.unit.com.microsoft.azure.iothub.auth;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertTrue;
 
+import com.microsoft.azure.iothub.AzureHubType;
+import com.microsoft.azure.iothub.DeviceClientConfig;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.auth.Signature;
 
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
+
+import java.net.URISyntaxException;
 
 /** Unit tests for IotHubSasToken. */
 public class IotHubSasTokenTest
@@ -234,5 +239,39 @@ public class IotHubSasTokenTest
 
         final String expectedSignature = signature;
         assertThat(testSignature, is(expectedSignature));
+    }
+
+    // Tests_SRS_IOTHUBSASTOKEN_11_013: [**The token generated from DeviceClientConfig shall use correct expiry time (seconds rather than milliseconds)]
+    @Test
+    public void constructorSetsExpiryTimeAndHubTypeCorrectly() throws URISyntaxException
+    {
+        String iotHubHostname = "sample-iothub-hostname.net";
+        String deviceId = "sample-device-id";
+        String deviceKey = "sample-device-key";
+
+        long token_valid_secs = DeviceClientConfig.TOKEN_VALID_SECS;
+        long expiryTimeTestErrorRange = 1;
+
+        DeviceClientConfig deviceClientConfig = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+
+        long expiryTimeBaseInSecs = System.currentTimeMillis() / 1000l + token_valid_secs + 1l;
+
+        IotHubSasToken token = new IotHubSasToken(iotHubHostname, deviceId, deviceKey, expiryTimeBaseInSecs);
+
+        String tokenStr = token.toString();
+        // extract the value assigned to se.
+        int expiryTimeKeyIdx = tokenStr.indexOf("se=");
+        int expiryTimeStartIdx = expiryTimeKeyIdx + 3;
+        int expiryTimeEndIdx = tokenStr.indexOf("&", expiryTimeStartIdx);
+        if (expiryTimeEndIdx == -1)
+        {
+            expiryTimeEndIdx = tokenStr.length();
+        }
+        String testExpiryTimeStr = tokenStr.substring(expiryTimeStartIdx, expiryTimeEndIdx);
+        long expiryTimeInSecs = Long.valueOf(testExpiryTimeStr);
+
+        assertTrue(expiryTimeBaseInSecs <= expiryTimeInSecs && expiryTimeInSecs <= (expiryTimeBaseInSecs + expiryTimeTestErrorRange));
+        assertTrue(deviceClientConfig.targetHubType == AzureHubType.IoTHub);
+        assertTrue(token.appendSknValue = true);
     }
 }

@@ -30,7 +30,7 @@ public final class SignatureHelper
 public static byte[] buildRawSignature(String resourceUri, long expiryTime);
 ```
 
-**SRS_SIGNATUREHELPER_11_001: [**The function shall initialize the message being encoded as `"<resourceUri>\n<expiryTime>"`.**]**
+**SRS_SIGNATUREHELPER_11_001: [**The function shall initialize the message being encoded as `"<scope>\n<expiryTime>"`.**]**
 
 **SRS_SIGNATUREHELPER_11_002: [**The function shall decode the message using the charset UTF-8.**]**
 
