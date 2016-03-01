@@ -8,6 +8,7 @@ package com.microsoft.azure.iothub.transport.amqps;
 import com.microsoft.azure.iothub.DeviceClientConfig;
 import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
+import com.microsoft.azure.iothub.net.IotHubUri;
 import com.microsoft.azure.iothub.transport.TransportUtils;
 import org.apache.qpid.proton.*;
 import org.apache.qpid.proton.engine.BaseHandler;
@@ -37,7 +38,7 @@ public final class AmqpsIotHubConnection extends BaseHandler {
     protected CompletableFuture<Boolean> reactorReady;
 
     /** The state of the Reactor. */
-    private enum ReactorState
+    public enum ReactorState
     {
         OPEN, CLOSED
     } ReactorState state;
@@ -120,7 +121,10 @@ public final class AmqpsIotHubConnection extends BaseHandler {
         String iotHubUser = deviceId + "@sas." + iotHubName;
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_003: [The constructor shall create a new SAS token and copy all input parameters to private member variables.]
-        IotHubSasToken sasToken = new IotHubSasToken(this.config);
+        IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
+                this.config.getDeviceId(),
+                this.config.getDeviceKey(),
+                System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_006: [The constructor shall initialize a new private map for messages that are in progress.]
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_007: [The constructor shall initialize new private Futures for the status of the Connection and Reactor.]
@@ -161,7 +165,11 @@ public final class AmqpsIotHubConnection extends BaseHandler {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_011: [If the AMQPS connection is already open, the function shall do nothing.]
         if(this.state != ReactorState.OPEN) {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_008: [The function shall initialize it’s AmqpsIotHubConnectionBaseHandler using the saved host name, user name, device ID and sas token.]
-            IotHubSasToken sasToken = new IotHubSasToken(this.config);
+            IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
+                    this.config.getDeviceId(),
+                    this.config.getDeviceKey(),
+                    System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
+
             this.amqpsHandler = new AmqpsIotHubConnectionBaseHandler(this.hostName,
                     this.userName, sasToken.toString(), this.deviceID, this);
 
@@ -220,25 +228,16 @@ public final class AmqpsIotHubConnection extends BaseHandler {
      * @throws IOException if the {@link AmqpsIotHubConnectionBaseHandler} has not been initialized.
      */
     public Message consumeMessage() throws IOException {
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_017: [If the AMQPS Connection is closed, the function shall throw an IllegalStateException.]
-        if(this.state == ReactorState.CLOSED){
-            throw new IllegalStateException("The AMQPS IotHub Connection is currently closed. Call open() before attempting to consume a message.");
-        }
-        if(this.amqpsHandler!=null) {
-            Message m = null;
+        Message message = null;
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_019: [The function shall attempt to remove a message from the queue.]
-            if (this.receivedMessageQueue.size() > 0)
-            {
-                m = this.receivedMessageQueue.remove();
-                this.lastMessage = (AmqpsMessage)m;
-            }
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_020: [The function shall return the message if one was pulled from the queue, otherwise it shall return null.]
-            return m;
-        } else {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_018: [If the AmqpsIotHubConnectionBaseHandler has not been initialized, the function shall throw a new IOException.]
-            throw new IOException("The Handler has not been initialized. Ensure that the AmqpsIotHubConnection is in an OPEN state by calling open().");
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_019: [The function shall attempt to remove a message from the queue.]
+        if (this.receivedMessageQueue.size() > 0)
+        {
+            message = this.receivedMessageQueue.remove();
+            this.lastMessage = (AmqpsMessage) message;
         }
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_020: [The function shall return the message if one was pulled from the queue, otherwise it shall return null.]
+        return message;
     }
 
     /**

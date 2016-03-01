@@ -20,7 +20,6 @@ import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.Reactor;
 import org.junit.Test;
 
-import java.awt.peer.ComponentPeer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -362,32 +361,9 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_14_017: [If the AMQPS Connection is closed, the function shall throw an IllegalStateException.]
-    @Test(expected = IllegalStateException.class)
-    public void consumeMessageThrowsIllegalStateExceptionIfClosed() throws IOException {
-        baseExpectations();
-
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
-        connection.consumeMessage();
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_14_018: [If the AmqpsIotHubConnectionBaseHandler has not been initialized, the function shall throw a new IOException.]
-    @Test(expected = IOException.class)
-    public void consumeMessageThrowsIOExceptionIfHandlerNotInitialized(
-            @Mocked CompletableFuture<Boolean> future) throws InterruptedException, ExecutionException, IOException, TimeoutException {
-        baseExpectations();
-        connectionOpenExpectations(future);
-
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
-
-        connection.open();
-        Deencapsulation.setField(connection, "amqpsHandler", null);
-        connection.consumeMessage();
-    }
-
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_019: [The function shall attempt to remove a message from the queue.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_020: [The function shall return the message if one was pulled from the queue, otherwise it shall return null.]
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void consumeMessageAttemptsToRemoveAndPullsSuccessfully(
             @Mocked LinkedBlockingQueue<Message> queue) throws InterruptedException, ExecutionException, IOException
     {
@@ -397,13 +373,14 @@ public class AmqpsIotHubConnectionTest {
             {
                 new LinkedBlockingQueue<>();
                 result = queue;
+                queue.size();
+                result = 1;
                 queue.remove();
-                result = mockMessage;
+                result = mockAmqpsMessage;
             }
         };
 
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
-        Deencapsulation.setField(connection, "amqpsHandler", mockHandler);
         Message consumedMessage = connection.consumeMessage();
 
         assertNotNull(consumedMessage);
@@ -418,30 +395,15 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_019: [The function shall attempt to remove a message from the queue.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_020: [The function shall return the message if one was pulled from the queue, otherwise it shall return null.]
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void consumeMessageAttemptsToRemoveAndPullsUnsuccessfully(
             @Mocked LinkedBlockingQueue<Message> queue) throws InterruptedException, ExecutionException, IOException
     {
         baseExpectations();
-        new NonStrictExpectations()
-        {
-            {
-                new LinkedBlockingQueue<>();
-                result = queue;
-            }
-        };
 
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
-        Deencapsulation.setField(connection, "amqpsHandler", mockHandler);
         Message consumedMessage = connection.consumeMessage();
         assertNull(consumedMessage);
-
-        new Verifications()
-        {
-            {
-                queue.remove();
-            }
-        };
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_021: [If the message result is COMPLETE, ABANDON, or REJECT, the function shall acknowledge the last message with acknowledgement type COMPLETE, ABANDON, or REJECT respectively.]
@@ -635,7 +597,7 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceKey;
                 IotHubUri.getResourceUri(hostName, deviceId);
                 result = resourceUri;
-                new IotHubSasToken((DeviceClientConfig) any);
+                new IotHubSasToken(resourceUri, deviceId, deviceKey, anyLong );
                 result = mockToken;
             }
         };

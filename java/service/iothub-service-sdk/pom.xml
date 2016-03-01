@@ -70,7 +70,7 @@
                 <version>2.10</version>
                 <configuration>
                     <argLine>
-                        -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.18/jmockit-1.18.jar
+                        -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.19/jmockit-1.19.jar
                     </argLine>
                 </configuration>
             </plugin>

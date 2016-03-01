@@ -211,7 +211,7 @@ public class HttpsIotHubConnectionTest
                 result = deviceKey;
                 IotHubUri.getResourceUri(iotHubHostname, deviceId);
                 result = resourceUri;
-                new IotHubSasToken((DeviceClientConfig) any);
+                new IotHubSasToken(resourceUri, deviceId, deviceKey, anyLong);
                 result = mockToken;
                 mockToken.toString();
                 result = tokenStr;
@@ -416,7 +416,7 @@ public class HttpsIotHubConnectionTest
                 result = deviceKey;
                 IotHubUri.getResourceUri(iotHubHostname, deviceId);
                 result = resourceUri;
-                new IotHubSasToken((DeviceClientConfig) any);
+                new IotHubSasToken(resourceUri, deviceId, deviceKey, anyLong);
                 result = mockToken;
                 mockToken.toString();
                 result = tokenStr;
@@ -1017,7 +1017,7 @@ public class HttpsIotHubConnectionTest
                 result = deviceKey;
                 IotHubUri.getResourceUri(iotHubHostname, deviceId);
                 result = resourceUri;
-                new IotHubSasToken((DeviceClientConfig) any);
+                new IotHubSasToken(resourceUri, deviceId, deviceKey, anyLong);
                 result = mockToken;
                 mockToken.toString();
                 result = tokenStr;
