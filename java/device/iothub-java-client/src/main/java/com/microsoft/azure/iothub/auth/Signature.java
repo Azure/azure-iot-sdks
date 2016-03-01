@@ -20,7 +20,7 @@ public final class Signature
      */
     public Signature(String resourceUri, long expiryTime, String deviceKey)
     {
-        // Codes_SRS_SIGNATURE_11_001: [The signature shall be computed from a composition of functions as such: encodeSignatureWebSafe(encodeSignatureUtf8(encodeSignatureBase64(encryptSignatureHmacSha256(buildRawSignature(resourceUri, expiryTime))))).]
+        // Codes_SRS_SIGNATURE_11_001: [The signature shall be computed from a composition of functions as such: encodeSignatureWebSafe(encodeSignatureUtf8(encodeSignatureBase64(encryptSignatureHmacSha256(buildRawSignature(scope, expiryTime))))).]
         byte[] rawSig = SignatureHelper.buildRawSignature(resourceUri,
                 expiryTime);
         // Codes_SRS_SIGNATURE_11_002: [The device key shall be decoded using Base64 before the signature computation begins, excluding buildRawSignature().]

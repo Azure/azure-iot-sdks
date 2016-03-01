@@ -87,10 +87,6 @@ public synchronized void close()
 public Message consumeMessage() throws IOException
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_14_017: [**If the AMQPS Connection is closed, the function shall throw an IllegalStateException.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_14_018: [**If the AmqpsIotHubConnectionBaseHandler has not been initialized, the function shall throw a new IOException.**]**
-
 **SRS_AMQPSIOTHUBCONNECTION_14_019: [**The function shall attempt to remove a message from the queue.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_14_020: [**The function shall return the message if one was pulled from the queue, otherwise it shall return null.**]**

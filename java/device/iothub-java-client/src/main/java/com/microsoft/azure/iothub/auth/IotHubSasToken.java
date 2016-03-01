@@ -3,10 +3,6 @@
 
 package com.microsoft.azure.iothub.auth;
 
-import com.microsoft.azure.iothub.AzureHubType;
-import com.microsoft.azure.iothub.DeviceClientConfig;
-import com.microsoft.azure.iothub.net.IotHubUri;
-
 /** Grants device access to an IoT Hub for the specified amount of time. */
 public final class IotHubSasToken
 {
@@ -27,7 +23,7 @@ public final class IotHubSasToken
      * The URI for a connection from a device to an IoT Hub. Does not include a
      * protocol.
      */
-    protected final String resourceUri;
+    protected final String scope;
 
     public boolean appendSknValue;
 
@@ -35,48 +31,25 @@ public final class IotHubSasToken
      * Constructor. Generates a SAS token that grants access to an IoT Hub for
      * the specified amount of time.
      *
-     * @param resourceUri the resource URI.
-     * @param deviceId the device ID.
-     * @param deviceKey the device key.
+     * @param scope the resource URI.
+     * @param keyName the device ID.
+     * @param key the device key.
      * @param expiryTime the time, as a UNIX timestamp, after which the token
      * will become invalid.
      */
-    public IotHubSasToken(String resourceUri, String deviceId, String deviceKey, long expiryTime)
+    public IotHubSasToken(String scope, String keyName, String key, long expiryTime)
     {
-        // Codes_SRS_IOTHUBSASTOKEN_11_002: [The expiry time shall be the given expiry time, where it is a UNIX timestamp and indicates the time after which the token becomes invalid.]
+        // Tests_SRS_IOTHUBSASTOKEN_11_002: [**The constructor shall save all input parameters to member variables.**]
+        this.scope = scope;
+        this.keyName = keyName;
         this.expiryTime = expiryTime;
 
-        // Codes_SRS_IOTHUBSASTOKEN_11_003: [The key name shall be the device ID.]
-        this.keyName = deviceId;
-
-        // Codes_SRS_IOTHUBSASTOKEN_11_004: [The resource URI shall be the given resource URI.]
-        this.resourceUri = resourceUri;
-
         // Codes_SRS_IOTHUBSASTOKEN_11_005: [The signature shall be correctly computed and set.]
-        Signature sig = new Signature(this.resourceUri, this.expiryTime, deviceKey);
+        Signature sig = new Signature(this.scope, this.expiryTime, key);
         this.signature = sig.toString();
 
         // Codes_SRS_IOTHUBSASTOKEN_08_012: [The skn key value shall be empty if connecting to IoT Hub, or the device Id if connecting to the Event Hub directly]
         this.appendSknValue = true;
-    }
-
-    /**
-     * Constructor. Generates a valid SAS token from the client configuration.
-     *
-     * @param config the DeviceClientConfig
-     */
-    public IotHubSasToken(DeviceClientConfig config)
-    {
-        this(IotHubUri.getResourceUri(config.getIotHubHostname(), config.getDeviceId()),
-                config.getDeviceId(),
-                config.getDeviceKey(),
-                System.currentTimeMillis() / 1000l + config.getTokenValidSecs() + 1l);
-
-        if (config.targetHubType == AzureHubType.IoTHub) {
-            appendSknValue = false;
-        } else if (config.targetHubType == AzureHubType.EventHub) {
-            appendSknValue = true;
-        }
     }
 
     /**
@@ -104,7 +77,7 @@ public final class IotHubSasToken
         }
         
         // Codes_SRS_IOTHUBSASTOKEN_11_001: [The SAS token shall have the format "SharedAccessSignature sig=<signature >&se=<expiryTime>&skn=&sr=<resourceURI>". The params can be in any order.]
-        return String.format(TOKEN_FORMAT, this.signature, this.expiryTime, keyName, this.resourceUri);
+        return String.format(TOKEN_FORMAT, this.signature, this.expiryTime, keyName, this.scope);
     }
 
     protected IotHubSasToken()
@@ -113,6 +86,6 @@ public final class IotHubSasToken
         this.expiryTime = 0l;
         this.keyName = null;
         this.appendSknValue = true;
-        this.resourceUri = null;
+        this.scope = null;
     }
 }
