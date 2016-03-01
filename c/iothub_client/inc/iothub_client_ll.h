@@ -92,10 +92,9 @@ typedef const void*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
 typedef struct IOTHUB_CLIENT_CONFIG_TAG
 {
     /** @brief A function pointer that is passed into the @c IoTHubClientCreate.
-    *	A function definition for AMQP, @c DeviceClientProvideAmqpResources,
-    *	is defined in the include @c iothubtransportamqp.h.  A function
-    *	definition for HTTP, @c DeviceClientProvideHttpResources, is defined
-    *	in the include @c iothubtransporthttp.h */
+    *	A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
+	*   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
+	*   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
 
     /** @brief	A string that identifies the device. */
@@ -117,10 +116,9 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 typedef struct IOTHUB_CLIENT_DEVICE_CONFIG_TAG
 {
 	/** @brief A function pointer that is passed into the @c IoTHubClientCreate.
-	*	A function definition for AMQP, @c DeviceClientProvideAmqpResources,
-	*	is defined in the include @c iothubtransportamqp.h.  A function
-	*	definition for HTTP, @c DeviceClientProvideHttpResources, is defined
-	*	in the include @c iothubtransporthttp.h */
+	*	A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
+	*   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
+	*   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
 	IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
 
 	/** @brief a transport handle implementing the protocol */

@@ -4134,6 +4134,12 @@ TEST_FUNCTION(AMQP_Register_transport_success_returns_transport)
 	mocks.ResetAllCalls();
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
@@ -4142,6 +4148,44 @@ TEST_FUNCTION(AMQP_Register_transport_success_returns_transport)
 	// assert
 	ASSERT_IS_NOT_NULL(devHandle);
 	ASSERT_ARE_EQUAL(void_ptr, transport, devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+TEST_FUNCTION(AMQP_Register_twice_returns_null_second_time)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+	mocks.ResetAllCalls();
+
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle2 = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+
+	// assert
+	ASSERT_IS_NULL(devHandle2);
 	mocks.AssertActualAndExpectedCalls();
 
 	// cleanup
@@ -4166,6 +4210,12 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_mismatch_returns_null)
 	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	mocks.ResetAllCalls();
 
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
@@ -4198,6 +4248,12 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_mismatch_returns_null)
 	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	mocks.ResetAllCalls();
 
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
@@ -4347,6 +4403,46 @@ TEST_FUNCTION(AMQP_Unregister_transport_success)
 	transport_interface->IoTHubTransport_Unregister(devHandle);
 
 	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+TEST_FUNCTION(AMQP_Register_transport_Register_Unregister_Register_success_returns_transport)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+	transport_interface->IoTHubTransport_Unregister(devHandle);
+	mocks.ResetAllCalls();
+
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle2 = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+
+	// assert
+	ASSERT_IS_NOT_NULL(devHandle2);
+	ASSERT_ARE_EQUAL(void_ptr, transport, devHandle2);
 	mocks.AssertActualAndExpectedCalls();
 
 	// cleanup

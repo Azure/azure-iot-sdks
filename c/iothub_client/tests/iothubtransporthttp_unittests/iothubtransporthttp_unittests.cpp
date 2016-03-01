@@ -29,7 +29,7 @@
 #include "httpapiex.h"
 #include "httpapiexsas.h"
 #include "base64.h"
-#include "list.h"
+#include "vector.h"
 
 #define IOTHUB_ACK "iothub-ack"
 #define IOTHUB_ACK_NONE "none"
@@ -65,6 +65,7 @@ namespace BASEIMPLEMENTATION
     #include "base64.c"
     #include "strings.c"
     #include "buffer.c"
+	#include "vector.c"
 };
 
 class RefCountObject
@@ -374,22 +375,15 @@ static size_t whenShallURL_Encode_String_fail;
 static size_t whenShallHTTPHeaders_GetHeader_fail;
 static size_t currentHTTPHeaders_GetHeader_call;
 
-static size_t currentlist_find_call;
-static size_t whenShalllist_find_fail;
+static size_t currentVECTOR_create_call;
+static size_t whenShallVECTOR_create_fail;
 
-static size_t currentlist_create_call;
-static size_t whenShalllist_create_fail;
+static size_t currentVECTOR_push_back_call;
+static size_t whenShallVECTOR_push_back_fail;
 
-static size_t currentlist_add_call;
-static size_t whenShalllist_add_fail;
+static size_t currentVECTOR_find_if_call;
+static size_t whenShallVECTOR_find_if_fail;
 
-typedef struct fake_list_item_tag
-{
-	const void * data;
-} fake_list_item;
-static size_t current_list_index;
-static size_t number_list_elements;
-static fake_list_item fake_list[10];
 
 #define MAXIMUM_MESSAGE_SIZE (255*1024-1)
 #define PAYLOAD_OVERHEAD (384)
@@ -1100,142 +1094,72 @@ public:
     MOCK_STATIC_METHOD_2(, double, get_difftime, time_t, stopTime, time_t, startTime)
     MOCK_METHOD_END(double, stopTime-startTime)
 
-		// list.h
-
-		MOCK_STATIC_METHOD_0(, LIST_HANDLE, list_create)
-		++currentlist_create_call;
-	LIST_HANDLE result1;
-	if (currentlist_create_call == whenShalllist_create_fail)
+	// vector.h
+		MOCK_STATIC_METHOD_1(, VECTOR_HANDLE, VECTOR_create, size_t, elementSize)
+		VECTOR_HANDLE result2;
+	++currentVECTOR_create_call;
+	if ((whenShallVECTOR_create_fail > 0) &&
+		(currentVECTOR_create_call == whenShallVECTOR_create_fail))
 	{
-		result1 = NULL;
+		result2 = NULL;
 	}
 	else
 	{
-		result1 = (LIST_HANDLE)(new RefCountObject());
+		result2 = BASEIMPLEMENTATION::VECTOR_create(elementSize);
 	}
+	MOCK_METHOD_END(VECTOR_HANDLE, result2)
 
-	MOCK_METHOD_END(LIST_HANDLE, result1)
-
-		MOCK_STATIC_METHOD_1(, void, list_destroy, LIST_HANDLE, list)
-		((RefCountObject*)list)->dec_ref();
-	number_list_elements = 0;
+		MOCK_STATIC_METHOD_1(, void, VECTOR_destroy, VECTOR_HANDLE, vector)
+		BASEIMPLEMENTATION::VECTOR_destroy(vector);
 	MOCK_VOID_METHOD_END()
 
-		;
-	MOCK_STATIC_METHOD_2(, LIST_ITEM_HANDLE, list_add, LIST_HANDLE, list, const void*, item)
-		LIST_ITEM_HANDLE result1;
-	++currentlist_add_call;
-	if (currentlist_add_call == whenShalllist_add_fail)
-	{
-		result1 = NULL;
-	}
-	else
-	{
-		if ((list == NULL) ||
-			(item == NULL))
-		{
-			result1 = NULL;
-		}
-		else
-		{
-
-			fake_list[number_list_elements].data = item;
-			number_list_elements++;
-			result1 = (LIST_ITEM_HANDLE)item;
-		}
-	}
-	MOCK_METHOD_END(LIST_ITEM_HANDLE, result1)
-
-		MOCK_STATIC_METHOD_2(, int, list_remove, LIST_HANDLE, list, LIST_ITEM_HANDLE, item)
+		MOCK_STATIC_METHOD_3(, int, VECTOR_push_back, VECTOR_HANDLE, vector, const void*, elements, size_t, numElements)
 		int result2;
-	if ((list == NULL) ||
-		(item == NULL))
+	++currentVECTOR_push_back_call;
+	if ((whenShallVECTOR_push_back_fail > 0) &&
+		(currentVECTOR_push_back_call == whenShallVECTOR_push_back_fail))
 	{
 		result2 = __LINE__;
 	}
 	else
 	{
-		/* do I need anything more compicated here? */
-		number_list_elements--;
-		result2 = 0;
+		result2 = BASEIMPLEMENTATION::VECTOR_push_back(vector, elements, numElements);
 	}
-
 	MOCK_METHOD_END(int, result2)
 
-		MOCK_STATIC_METHOD_1(, LIST_ITEM_HANDLE, list_get_head_item, LIST_HANDLE, list)
-		LIST_ITEM_HANDLE result1;
-	if (list == NULL || number_list_elements == 0)
+		MOCK_STATIC_METHOD_3(, void, VECTOR_erase, VECTOR_HANDLE, vector, void*, elements, size_t, numElements)
+		BASEIMPLEMENTATION::VECTOR_erase(vector, elements, numElements);
+	MOCK_VOID_METHOD_END()
+
+		MOCK_STATIC_METHOD_2(, void*, VECTOR_element, VECTOR_HANDLE, vector, size_t, index)
+		void* result2 = BASEIMPLEMENTATION::VECTOR_element(vector, index);
+	MOCK_METHOD_END(void*, result2)
+
+		MOCK_STATIC_METHOD_1(, void*, VECTOR_front, VECTOR_HANDLE, vector)
+		void* result2 = BASEIMPLEMENTATION::VECTOR_front(vector);
+	MOCK_METHOD_END(void*, result2)
+
+		MOCK_STATIC_METHOD_1(, void*, VECTOR_back, const VECTOR_HANDLE, vector)
+		void* result2 = BASEIMPLEMENTATION::VECTOR_back(vector);
+	MOCK_METHOD_END(void*, result2)
+
+		MOCK_STATIC_METHOD_3(, void*, VECTOR_find_if, VECTOR_HANDLE, vector, PREDICATE_FUNCTION, pred, const void*, value)
+		void* result2;
+	++currentVECTOR_find_if_call;
+	if ((whenShallVECTOR_find_if_fail > 0) &&
+		(currentVECTOR_find_if_call == whenShallVECTOR_find_if_fail))
 	{
-		result1 = NULL;
+		result2 = NULL;
 	}
 	else
 	{
-		current_list_index = 0;
-		result1 = (LIST_ITEM_HANDLE)fake_list[0].data;
+		result2 = BASEIMPLEMENTATION::VECTOR_find_if(vector, pred, value);
 	}
-	MOCK_METHOD_END(LIST_ITEM_HANDLE, result1)
+	MOCK_METHOD_END(void*, result2)
 
-		MOCK_STATIC_METHOD_1(, LIST_ITEM_HANDLE, list_get_next_item, LIST_ITEM_HANDLE, item_handle)
-		LIST_ITEM_HANDLE result1;
-	if (item_handle == NULL)
-	{
-		result1 = NULL;
-	}
-	else
-	{
-		current_list_index++;
-		if (current_list_index > number_list_elements)
-		{
-			result1 = NULL;
-		}
-		else
-		{
-			result1 = (LIST_ITEM_HANDLE)(fake_list[current_list_index].data);
-		}
-	}
-
-	MOCK_METHOD_END(LIST_ITEM_HANDLE, result1)
-
-		MOCK_STATIC_METHOD_3(, LIST_ITEM_HANDLE, list_find, LIST_HANDLE, list, LIST_MATCH_FUNCTION, match_function, const void*, match_context)
-		LIST_ITEM_HANDLE result1;
-	currentlist_find_call++;
-	if (currentlist_find_call == whenShalllist_find_fail)
-	{
-		result1 = NULL;
-	}
-	else
-	{
-		if ((list == NULL) ||
-			(match_function == NULL))
-		{
-			result1 = NULL;
-		}
-		else
-		{
-			result1 = NULL;
-			for (size_t i = 0; i < number_list_elements; i++)
-			{
-				if (match_function((LIST_ITEM_HANDLE)fake_list[i].data, match_context) == true)
-				{
-					result1 = (LIST_ITEM_HANDLE)fake_list[i].data;
-					break;
-				}
-			}
-		}
-	}
-	MOCK_METHOD_END(LIST_ITEM_HANDLE, result1)
-
-		MOCK_STATIC_METHOD_1(, const void*, list_item_get_value, LIST_ITEM_HANDLE, item_handle)
-		const void* result1;
-	if (item_handle == NULL)
-	{
-		result1 = NULL;
-	}
-	else
-	{
-		result1 = item_handle;
-	}
-	MOCK_METHOD_END(const void*, result1)
+		MOCK_STATIC_METHOD_1(, size_t, VECTOR_size, VECTOR_HANDLE, vector)
+		size_t result2 = BASEIMPLEMENTATION::VECTOR_size(vector);
+	MOCK_METHOD_END(size_t, result2)
 
 };
 
@@ -1322,15 +1246,16 @@ DECLARE_GLOBAL_MOCK_METHOD_9(CIoTHubTransportHttpMocks, , HTTPAPIEX_RESULT, HTTP
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , time_t, get_time, time_t*, currentTime);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , double, get_difftime, time_t, stopTime, time_t, startTime);
 
-// list.h
-DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportHttpMocks, , LIST_HANDLE, list_create);
-DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, list_destroy, LIST_HANDLE, list);
-DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , LIST_ITEM_HANDLE, list_add, LIST_HANDLE, list, const void*, item);
-DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , int, list_remove, LIST_HANDLE, list, LIST_ITEM_HANDLE, item_handle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , LIST_ITEM_HANDLE, list_get_head_item, LIST_HANDLE, list);
-DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , LIST_ITEM_HANDLE, list_get_next_item, LIST_ITEM_HANDLE, item_handle);
-DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , LIST_ITEM_HANDLE, list_find, LIST_HANDLE, list, LIST_MATCH_FUNCTION, match_function, const void*, match_context);
-DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , const void*, list_item_get_value, LIST_ITEM_HANDLE, item_handle);
+//vector
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , VECTOR_HANDLE, VECTOR_create, size_t, elementSize);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, VECTOR_destroy, VECTOR_HANDLE, vector);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , int, VECTOR_push_back, VECTOR_HANDLE, vector, const void*, elements, size_t, numElements);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , void, VECTOR_erase, VECTOR_HANDLE, vector, void*, elements, size_t, numElements);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , void*, VECTOR_element, VECTOR_HANDLE, vector, size_t, index);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void*, VECTOR_front, VECTOR_HANDLE, vector);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void*, VECTOR_back, VECTOR_HANDLE, vector);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , void*, VECTOR_find_if, VECTOR_HANDLE, vector, PREDICATE_FUNCTION, pred, const void*, value);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , size_t, VECTOR_size, VECTOR_HANDLE, vector);
 
 extern "C" HTTPAPIEX_RESULT HTTPAPIEX_SAS_ExecuteRequest(HTTPAPIEX_SAS_HANDLE sasHandle, HTTPAPIEX_HANDLE handle, HTTPAPI_REQUEST_TYPE requestType, const char* relativePath, HTTP_HEADERS_HANDLE requestHttpHeadersHandle, BUFFER_HANDLE requestContent, unsigned int* statusCode, HTTP_HEADERS_HANDLE responseHttpHeadersHandle, BUFFER_HANDLE responseContent)
 {
@@ -1383,10 +1308,11 @@ static void setupCreateHappyPathPerDeviceList(CIoTHubTransportHttpMocks &mocks, 
 {
 	(void)mocks;
 
-	STRICT_EXPECTED_CALL(mocks, list_create());
+	STRICT_EXPECTED_CALL(mocks, VECTOR_create(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
 	if (deallocateCreated == true)
 	{
-		STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_destroy(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 	}
 }
@@ -1402,25 +1328,11 @@ static void setupCreateHappyPath(CIoTHubTransportHttpMocks &mocks, bool dealloca
 static void setupRegisterHappyPathNotFoundInList(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
 	(void)mocks;
-	STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_DEVICE_ID))
+	STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_DEVICE_ID))
 		.IgnoreAllArguments();
 }
 
 static void setupRegisterHappyPathAllocHandle(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
-{
-	(void)mocks;
-
-	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-		.IgnoreArgument(1);
-
-	if (deallocateCreated == true)
-	{
-		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);
-	}
-}
-
-static void setupRegisterHappyPathdeviceListElement(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
 	(void)mocks;
 
@@ -1604,7 +1516,7 @@ static void setupRegisterHappyPatheventConfirmations(CIoTHubTransportHttpMocks &
 static void setupRegisterHappyPathDeviceListAdd(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
 	(void)mocks;
-	STRICT_EXPECTED_CALL(mocks, list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+	STRICT_EXPECTED_CALL(mocks, VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG,1))
 		.IgnoreArgument(1).IgnoreArgument(2);
 }
 
@@ -1613,7 +1525,6 @@ static void setupRegisterHappyPath(CIoTHubTransportHttpMocks &mocks, bool deallo
 {
 	setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 	setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-	setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 	setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 	setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 	setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -1654,18 +1565,16 @@ static void setupUnregisterOneDevice(CIoTHubTransportHttpMocks &mocks)
 	//destroy_SASObject(perDeviceItem);
 	STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
 		.IgnoreArgument(1);
-	STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-		.IgnoreArgument(1);
+
 }
 
 static void setupDoWorkLoopOnceForOneDevice(CIoTHubTransportHttpMocks &mocks)
 {
 	(void)mocks;
-	STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+
+	STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
 		.IgnoreArgument(1);
-	STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-		.IgnoreArgument(1);
-	STRICT_EXPECTED_CALL(mocks, list_get_next_item(IGNORED_PTR_ARG))
+	STRICT_EXPECTED_CALL(mocks, VECTOR_element(IGNORED_PTR_ARG, 0))
 		.IgnoreArgument(1);
 }
 
@@ -1823,21 +1732,14 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
        currentURL_Encode_String_call = 0;
        whenShallURL_Encode_String_fail = 0;
 
-		currentlist_find_call = 0;
-		whenShalllist_find_fail = 0;
+	   currentVECTOR_create_call = 0;
+	   whenShallVECTOR_create_fail = 0;
 
-		currentlist_create_call = 0;
-		whenShalllist_create_fail = 0;
+	   currentVECTOR_push_back_call = 0;
+	   whenShallVECTOR_push_back_fail = 0;
 
-		currentlist_add_call = 0;
-		whenShalllist_add_fail = 0;
-
-	   current_list_index = 0;
-	   number_list_elements = 0;
-	   for (int l = 0; l < 10; l++)
-	   {
-		   fake_list[l].data = NULL;
-	   }
+	   currentVECTOR_find_if_call = 0;
+	   whenShallVECTOR_find_if_fail = 0;
 
        last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest = NULL;
     }
@@ -1949,7 +1851,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_005: [ IoTHubTransportHttp_Create shall create an immutable string (further called hostname) containing config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix. ]
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_007: [ IoTHubTransportHttp_Create shall create a HTTPAPIEX_HANDLE by a call to HTTPAPIEX_Create passing for hostName the hostname so far constructed by IoTHubTransportHttp_Create. ]
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_009: [ IoTHubTransportHttp_Create shall call list_create to create a list of registered devices. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_009: [ IoTHubTransportHttp_Create shall call VECTOR_create to create a list of registered devices. ]
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_130: [ IoTHubTransportHttp_Create shall allocate memory for the handle. ]
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_011: [ Otherwise, IoTHubTransportHttp_Create shall succeed and return a non-NULL value. ]
     TEST_FUNCTION(IoTHubTransportHttp_Create_happy_path)
@@ -1978,7 +1880,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		setupCreateHappyPathAlloc(mocks, true);
 		setupCreateHappyPathHostname(mocks, true);
 		setupCreateHappyPathApiExHandle(mocks, true);
-		whenShalllist_create_fail = 1;
+		whenShallVECTOR_create_fail = 1;
 		setupCreateHappyPathPerDeviceList(mocks, false);
 
 		///act
@@ -2131,10 +2033,10 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .IgnoreArgument(1);                                             //STRING_HANDLE hostName;
         STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);                                             //HTTPAPIEX_HANDLE httpApiExHandle;
-		STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);                                             //LIST_HANDLE perDeviceList;
+        STRICT_EXPECTED_CALL(mocks, VECTOR_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);                                             //VECTOR_HANDLE perDeviceList;
         
         STRICT_EXPECTED_CALL(mocks, gballoc_free(handle));
 
@@ -2158,20 +2060,16 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 			.IgnoreArgument(1);                                             //STRING_HANDLE hostName;
 		STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);                                             //HTTPAPIEX_HANDLE httpApiExHandle;
-		STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_element(IGNORED_PTR_ARG,0))
 			.IgnoreArgument(1);
 		setupUnregisterOneDevice(mocks);
-		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(devHandle));
 
-		STRICT_EXPECTED_CALL(mocks, list_get_next_item(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);                                             //LIST_HANDLE perDeviceList;
+
+		STRICT_EXPECTED_CALL(mocks, VECTOR_destroy(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);                                             //VECTOR_HANDLE perDeviceList;
 
 		STRICT_EXPECTED_CALL(mocks, gballoc_free(handle));
 
@@ -2202,7 +2100,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_038: [ Otherwise, IoTHubTransportHttp_Register shall allocate the IOTHUB_DEVICE_HANDLE structure. ]
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_040: [ IoTHubTransportHttp_Register shall put event HTTP relative path, message HTTP relative path, event HTTP request headers, message HTTP request headers, abandonHTTPrelativePathBegin, HTTPAPIEX_SAS_HANDLE, and the device handle into a device structure. ]
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_128: [ IoTHubTransportHttp_Register shall mark this device as unsubscribed. ]
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_041: [ IoTHubTransportHttp_Register shall call list_add to store the new device information. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_041: [ IoTHubTransportHttp_Register shall call VECTOR_push_back to store the new device information. ]
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_043: [ Upon success, IoTHubTransportHttp_Register shall store the transport handle and the waitingToSend queue in the device handle return a non-NULL value. ]
 	TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_success_fun_time)
 	{
@@ -2226,8 +2124,8 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
 	}
 
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_042: [ If the list_add fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
-	TEST_FUNCTION(IoTHubTransportHttp_Register_list_add_fails)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_042: [ If the VECTOR_push_back fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_vector_pushback_fails)
 	{
 		///arrange
 		CIoTHubTransportHttpMocks mocks;
@@ -2237,7 +2135,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2246,7 +2143,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
 		setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
 		setupRegisterHappyPathsasObject(mocks, deallocateCreated);
-		whenShalllist_add_fail = 1;
+		whenShallVECTOR_push_back_fail = 1;
 		setupRegisterHappyPathDeviceListAdd(mocks, deallocateCreated);
 
 		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
@@ -2271,7 +2168,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2304,7 +2200,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2343,7 +2238,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2386,7 +2280,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2431,7 +2324,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2477,7 +2369,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2526,7 +2417,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2580,7 +2470,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2624,7 +2513,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2664,7 +2552,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2698,7 +2585,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2735,7 +2621,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2771,7 +2656,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2803,7 +2687,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2859,7 +2742,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2913,7 +2795,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -2966,7 +2847,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3017,7 +2897,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3067,7 +2946,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3113,7 +2991,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3126,7 +3003,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		    .IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
 		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-		    .IgnoreArgument(1);
+			.IgnoreArgument(1);
 		whenShallSTRING_concat_with_STRING_fail = 3;
 		STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
 		    .IgnoreArgument(1)
@@ -3156,7 +3033,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3197,7 +3073,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3232,7 +3107,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3265,7 +3139,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3307,7 +3180,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3348,7 +3220,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3386,7 +3257,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
@@ -3418,7 +3288,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 
@@ -3460,7 +3329,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 
@@ -3501,17 +3369,12 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 
 		/*creating eventHTTPrelativePath*/
 		whenShallSTRING_construct_fail = 3;
 		STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
-
-		/*the url encoded device id*/
-		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-		    .IgnoreArgument(1);
 
 		///act
 		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
@@ -3535,7 +3398,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 
@@ -3574,7 +3436,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 
 		whenShallSTRING_construct_fail = 2;
@@ -3603,37 +3464,9 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		bool deallocateCreated = true;
 		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-		setupRegisterHappyPathdeviceListElement(mocks, deallocateCreated);
 
 		whenShallSTRING_construct_fail = 1;
 		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
-
-		///act
-		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
-
-		///assert
-		ASSERT_IS_NULL(devHandle);
-		mocks.AssertActualAndExpectedCalls();
-
-		///cleanup
-		IoTHubTransportHttp_Destroy(handle);
-	}
-
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_042: [ If the list_add fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
-	TEST_FUNCTION(IoTHubTransportHttp_Register_deviceList_not_allocated)
-	{
-		///arrange
-		CIoTHubTransportHttpMocks mocks;
-		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-		mocks.ResetAllCalls();
-		currentmalloc_call = 0;
-		bool deallocateCreated = true;
-		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
-		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
-
-		whenShallmalloc_fail = 2;
-		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-			.IgnoreArgument(1);
 
 		///act
 		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
@@ -3680,9 +3513,9 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_DEVICE_ID))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_DEVICE_ID))
 			.IgnoreAllArguments()
-			.SetReturn((LIST_ITEM_HANDLE)0x1);
+			.SetReturn((void_ptr)0x1);
 			
 		///act
 		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
@@ -3754,6 +3587,8 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		IoTHubTransportHttp_Destroy(handle);
 
 	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_142: [ If handle is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
 	TEST_FUNCTION(IoTHubTransportHttp_Register_handle_null_returns_null)
 	{
 		///arrange
@@ -3783,9 +3618,9 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		IoTHubTransportHttp_Unregister(NULL);
 	}
 
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_045: [IoTHubTransportHttp_Unregister shall locate deviceHandle in the transport device list by calling list_find_if.]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_045: [IoTHubTransportHttp_Unregister shall locate deviceHandle in the transport device list by calling VECTOR_find_if.]
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_047 : [IoTHubTransportHttp_Unregister shall free all the resources used in the device structure.]
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_048 : [IoTHubTransportHttp_Unregister shall call list_remove to remove device from devices list.]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_048 : [IoTHubTransportHttp_Unregister shall call VECTOR_erase to remove device from devices list.]
 	TEST_FUNCTION(IoTHubTransportHttp_Unregister_superHappyFunPath)
 	{
 		///arrange
@@ -3796,15 +3631,11 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		mocks.ResetAllCalls();
 
 
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In find function
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In Unregister
 		setupUnregisterOneDevice(mocks);
-		STRICT_EXPECTED_CALL(mocks, list_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_erase(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
 		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
@@ -3831,12 +3662,10 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 		mocks.ResetAllCalls();
 
 
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2)
-			.SetReturn((LIST_ITEM_HANDLE)NULL);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In find function
+			.SetFailReturn((void_ptr)NULL);
 
 
 		///act
@@ -3863,7 +3692,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
     }
 
 
-    //Tests_SRS_TRANSPORTMULTITHTTP_17_104: [ IoTHubTransportHttp_Subscribe shall locate deviceHandle in the transport device list by calling list_find_if. ]
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_104: [ IoTHubTransportHttp_Subscribe shall locate deviceHandle in the transport device list by calling VECTOR_find_if. ]
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_106: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should execute HTTP requests. 
     TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_non_NULL_parameter_succeeds)
     {
@@ -3874,13 +3703,9 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
         mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In find function
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In Subscribe
 
         ///act
         auto result = IoTHubTransportHttp_Subscribe(devHandle);
@@ -3894,36 +3719,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
     }
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_105: [ If the device structure is not found, then this function shall fail and return a non-zero value. ]
-	TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_deviceData_is_NULL_fails)
-	{
-		///arrange
-		CIoTHubTransportHttpMocks mocks;
-		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
-
-		mocks.ResetAllCalls();
-
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
-			.IgnoreArgument(1)
-			.IgnoreArgument(2);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In find function
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1)
-			.SetReturn((const void*) NULL);												// In Subscribe
-
-		///act
-		auto result = IoTHubTransportHttp_Subscribe(devHandle);
-
-		///assert
-		ASSERT_ARE_EQUAL(int, 0, result);
-		mocks.AssertActualAndExpectedCalls();
-
-		///cleanup
-		IoTHubTransportHttp_Destroy(handle);
-	}
-
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_105: [ If the device structure is not found, then this function shall fail and return a non-zero value. ]
 	TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_list_find_fails)
 	{
 		///arrange
@@ -3933,12 +3728,10 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2)
-			.SetReturn((LIST_ITEM_HANDLE)NULL);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);
+			.SetReturn((void_ptr)NULL);
 
 		///act
 		auto result = IoTHubTransportHttp_Subscribe(devHandle);
@@ -3965,7 +3758,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
     }
 
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_108: [IoTHubTransportHttp_Unsubscribe shall locate deviceHandle in the transport device list by calling list_find_if.]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_108: [IoTHubTransportHttp_Unsubscribe shall locate deviceHandle in the transport device list by calling VECTOR_find_if.]
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_110 : [Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should not execute HTTP requests.]
 	TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_non_NULL_parameter_succeeds)
     {
@@ -3976,13 +3769,9 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
         mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In find function
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In Unsubscribe
 
         ///act
         IoTHubTransportHttp_Unsubscribe(devHandle);
@@ -3995,35 +3784,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
     }
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_109 : [If the device structure is not found, then this function shall fail and do nothing.]
-	TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_deviceData_is_NULL_does_nothing)
-	{
-		///arrange
-		CIoTHubTransportHttpMocks mocks;
-		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
-
-		mocks.ResetAllCalls();
-
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
-			.IgnoreArgument(1)
-			.IgnoreArgument(2);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In find function
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1)
-			.SetReturn((const void*)NULL);									// In Unsubscribe
-
-																			///act
-		IoTHubTransportHttp_Unsubscribe(devHandle);
-
-		///assert
-		mocks.AssertActualAndExpectedCalls();
-
-		///cleanup
-		IoTHubTransportHttp_Destroy(handle);
-	}
-
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_109 : [If the device structure is not found, then this function shall fail and do nothing.]
 	TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_device_not_found_does_nothing)
 	{
 		///arrange
@@ -4033,13 +3793,12 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2)
-			.SetReturn((LIST_ITEM_HANDLE)NULL);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);
-																			///act
+			.SetFailReturn((void_ptr)NULL);
+
+		///act
 		IoTHubTransportHttp_Unsubscribe(devHandle);
 
 		///assert
@@ -4089,7 +3848,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
         mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 
         /*no message work because DoWork_PullMessage is set to false by create*/
@@ -9402,7 +9161,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
     }
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_112: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent. ]
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_138: [ IoTHubTransportHttp_GetSendStatus shall locate deviceHandle in the transport device list by calling list_find_if. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_138: [ IoTHubTransportHttp_GetSendStatus shall locate deviceHandle in the transport device list by calling VECTOR_find_if. ]
     TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_empty_waitingToSend_and_empty_eventConfirmations_success)
     {
         // arrange
@@ -9412,13 +9171,9 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
         mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In find function
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In GetSendStatus
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
         
@@ -9438,7 +9193,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
     }
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_113: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent. ]
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_138: [ IoTHubTransportHttp_GetSendStatus shall locate deviceHandle in the transport device list by calling list_find_if. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_138: [ IoTHubTransportHttp_GetSendStatus shall locate deviceHandle in the transport device list by calling VECTOR_find_if. ]
 	TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_waitingToSend_not_empty_success)
     {
         // arrange
@@ -9453,13 +9208,9 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
         mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In find function
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In GetSendStatus
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
         IOTHUB_CLIENT_STATUS status;
@@ -9479,45 +9230,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
     }
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_139: [ If the device structure is not found, then this function shall fail and return with IOTHUB_CLIENT_INVALID_ARG. ]
-	TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_deviceData_is_null_fails)
-	{
-		// arrange
-		CIoTHubTransportHttpMocks mocks;
-		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
-
-		IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(contains3, 1);
-		IOTHUB_MESSAGE_LIST newEntry;
-		newEntry.messageHandle = &newEntry;
-		DList_InsertTailList(&(waitingToSend), &(newEntry.entry));
-
-		mocks.ResetAllCalls();
-
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
-			.IgnoreArgument(1)
-			.IgnoreArgument(2);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In find function
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1)
-			.SetReturn((LIST_ITEM_HANDLE)NULL);												// In GetSendStatus
-
-		IOTHUB_CLIENT_STATUS status;
-
-		// act
-		IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(devHandle, &status);
-
-		// assert
-		ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_ERROR);
-
-		mocks.AssertActualAndExpectedCalls();
-
-		// cleanup
-		IoTHubTransportHttp_Destroy(handle);
-		IoTHubMessage_Destroy(eventMessageHandle);
-	}
-
-	//Tests_SRS_TRANSPORTMULTITHTTP_17_139: [ If the device structure is not found, then this function shall fail and return with IOTHUB_CLIENT_INVALID_ARG. ]
 	TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_deviceData_is_not_found_fails)
 	{
 		// arrange
@@ -9532,12 +9244,10 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, list_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2)
-			.SetReturn((LIST_ITEM_HANDLE)NULL);
-		STRICT_EXPECTED_CALL(mocks, list_item_get_value(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);												// In find function
+			.SetFailReturn((void_ptr)NULL);
 
 		IOTHUB_CLIENT_STATUS status;
 

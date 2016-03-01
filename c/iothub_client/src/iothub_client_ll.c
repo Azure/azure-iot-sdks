@@ -302,7 +302,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
 				if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(handleData->transportHandle, config->deviceId, config->deviceKey, &(handleData->waitingToSend))) == NULL)
 				{
 					/*Codes_SRS_IOTHUBCLIENT_LL_17_009: [If the _Register function fails, this function shall fail and return NULL.]*/
-					LogError("Restistering device in transport failed");
+					LogError("Registering device in transport failed");
 					handleData->IoTHubTransport_Destroy(handleData->transportHandle);
 					free(handleData);
 					result = NULL;

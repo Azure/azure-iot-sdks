@@ -96,7 +96,7 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 **SRS_TRANSPORTMULTITHTTP_17_006: [** If creating the hostname fails then `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_007: [** `IoTHubTransportHttp_Create` shall create a `HTTPAPIEX_HANDLE` by a call to `HTTPAPIEX_Create` passing for `hostName` the hostname so far constructed by `IoTHubTransportHttp_Create`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_008: [** If creating the `HTTPAPIEX_HANDLE` fails then `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_009: [** `IoTHubTransportHttp_Create` shall call `list_create` to create a list of registered devices. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_009: [** `IoTHubTransportHttp_Create` shall call `VECTOR_create` to create a list of registered devices. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_010: [** If creating the list fails, then `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_130: [** `IoTHubTransportHttp_Create` shall allocate memory for the handle. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_131: [** If allocation fails, `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
@@ -117,6 +117,7 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 
 `IoTHubTransportHttp_Register` shall bind an IoT Hub device to a transport handle and return a device handle for subsequent device specific calls to this API.
 
+**SRS_TRANSPORTMULTITHTTP_17_142: [** If `handle` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_014: [** If parameter `deviceId` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_015: [** If parameter `deviceKey` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_016: [** If parameter `waitingToSend` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
@@ -160,8 +161,8 @@ The result of the `STRING_construct` shall be known as key.
 **SRS_TRANSPORTMULTITHTTP_17_039: [** If the allocating the device handle fails then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_040: [** `IoTHubTransportHttp_Register` shall put event HTTP relative path, message HTTP relative path, event HTTP request headers, message HTTP request headers, abandonHTTPrelativePathBegin, HTTPAPIEX_SAS_HANDLE, and the device handle into a device structure. **]**    
 **SRS_TRANSPORTMULTITHTTP_17_128: [** `IoTHubTransportHttp_Register` shall mark this device as unsubscribed. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_041: [** `IoTHubTransportHttp_Register` shall call `list_add` to store the new device information. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_042: [** If the `list_add` fails then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_041: [** `IoTHubTransportHttp_Register` shall call `VECTOR_push_back` to store the new device information. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_042: [** If the `VECTOR_push_back` fails then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
 
 **SRS_TRANSPORTMULTITHTTP_17_043: [** Upon success, `IoTHubTransportHttp_Register` shall store the transport handle and the waitingToSend queue in the device handle return a non-`NULL` value. **]**
 
@@ -175,7 +176,7 @@ The result of the `STRING_construct` shall be known as key.
 **SRS_TRANSPORTMULTITHTTP_17_045: [** `IoTHubTransportHttp_Unregister` shall locate `deviceHandle` in the transport device list by calling `list_find_if`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_046: [** If the device structure is not found, then this function shall fail and do nothing. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_047: [** `IoTHubTransportHttp_Unregister` shall free all the resources used in the device structure. **]**       
-**SRS_TRANSPORTMULTITHTTP_17_048: [** `IoTHubTransportHttp_Unregister` shall call `list_remove` to remove device from devices list. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_048: [** `IoTHubTransportHttp_Unregister` shall call `VECTOR_erase` to remove device from devices list. **]**   
 
 ## IoTHubTransportHttp_DoWork
 ```C
@@ -219,7 +220,7 @@ MultiDevTransportHttp shall perform the following actions on each device:
 
 **SRS_TRANSPORTMULTITHTTP_17_066: [** If at any point during construction of the string there are errors, `IoTHubTransportHttp_DoWork` shall use the so far constructed string as payload. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_067: [** If there is no valid payload, `IoTHubTransportHttp_DoWork` shall advance to the next activity. **]**    
-**SRS_TRANSPORTMULTITHTTP_17_068: [** Once a final payload has been obtained, `IoTHubTransportHttp_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest2` passing the following parameters: **]**   
+**SRS_TRANSPORTMULTITHTTP_17_068: [** Once a final payload has been obtained, `IoTHubTransportHttp_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest` passing the following parameters: **]**   
 - requestType: POST  
 - relativePath: the event relative path constructed by `IoTHubTransportHttp_Register` API   
 - requestHttpHeadersHandle: the request HTTP headers build by  `IoTHubTransportHttp_Register` API    
@@ -228,8 +229,8 @@ MultiDevTransportHttp shall perform the following actions on each device:
 - responseHeadearsHandle: `NULL`   
 - responseContent: `NULL`   
 
-**SRS_TRANSPORTMULTITHTTP_17_069: [** if `HTTPAPIEX_SAS_ExecuteRequest2` fails or the http status code >=300 then `IoTHubTransportHttp_DoWork` shall not do any other action (it is assumed at the next `_DoWork` it shall be retried).  **]**   
-**SRS_TRANSPORTMULTITHTTP_17_070: [** If `HTTPAPIEX_SAS_ExecuteRequest2` does not fail and http status code < 300 then `IoTHubTransportHttp_DoWork` shall call `IoTHubClient_LL_SendComplete`. Parameter `PDLIST_ENTRY` completed shall point to a list containing all the items batched, and parameter `IOTHUB_BATCHSTATE` result shall be set to `IOTHUB_BATCHSTATE_OK`. The batched items shall be removed from `waitingToSend`. **]**
+**SRS_TRANSPORTMULTITHTTP_17_069: [** if `HTTPAPIEX_SAS_ExecuteRequest` fails or the http status code >=300 then `IoTHubTransportHttp_DoWork` shall not do any other action (it is assumed at the next `_DoWork` it shall be retried).  **]**   
+**SRS_TRANSPORTMULTITHTTP_17_070: [** If `HTTPAPIEX_SAS_ExecuteRequest` does not fail and http status code < 300 then `IoTHubTransportHttp_DoWork` shall call `IoTHubClient_LL_SendComplete`. Parameter `PDLIST_ENTRY` completed shall point to a list containing all the items batched, and parameter `IOTHUB_BATCHSTATE` result shall be set to `IOTHUB_BATCHSTATE_OK`. The batched items shall be removed from `waitingToSend`. **]**
 
 #### NonBatched Event
 
@@ -252,13 +253,13 @@ MultiDevTransportHttp shall perform the following actions on each device:
 - responseHeadearsHandle: `NULL`  
 - responseContent: `NULL`  
 
-**SRS_TRANSPORTMULTITHTTP_17_081: [** If `HTTPAPIEX_SAS_ExecuteRequest2` fails or the http status code >=300 then `IoTHubTransportHttp_DoWork` shall not do any other action (it is assumed at the next `_DoWork` it shall be retried). **]** 
-**SRS_TRANSPORTMULTITHTTP_17_082: [** If `HTTPAPIEX_SAS_ExecuteRequest2` does not fail and http status code < 300 then `IoTHubTransportHttp_DoWork` shall call `IoTHubClient_LL_SendComplete`. Parameter `PDLIST_ENTRY` completed shall point to a list the item send, and parameter `IOTHUB_BATCHSTATE` result shall be set to `IOTHUB_BATCHSTATE_SUCCESS`. The item shall be removed from `waitingToSend`.  **]**
+**SRS_TRANSPORTMULTITHTTP_17_081: [** If `HTTPAPIEX_SAS_ExecuteRequest` fails or the http status code >=300 then `IoTHubTransportHttp_DoWork` shall not do any other action (it is assumed at the next `_DoWork` it shall be retried). **]** 
+**SRS_TRANSPORTMULTITHTTP_17_082: [** If `HTTPAPIEX_SAS_ExecuteRequest` does not fail and http status code < 300 then `IoTHubTransportHttp_DoWork` shall call `IoTHubClient_LL_SendComplete`. Parameter `PDLIST_ENTRY` completed shall point to a list the item send, and parameter `IOTHUB_BATCHSTATE` result shall be set to `IOTHUB_BATCHSTATE_SUCCESS`. The item shall be removed from `waitingToSend`.  **]**
 
 ### "ExecuteMessage" action:
 
 **SRS_TRANSPORTMULTITHTTP_17_083: [** If device is not subscribed then `_DoWork` shall advance to the next action.  **]**   
-**SRS_TRANSPORTMULTITHTTP_17_084: [** Otherwise, `IoTHubTransportHttp_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest2` passing the following parameters   
+**SRS_TRANSPORTMULTITHTTP_17_084: [** Otherwise, `IoTHubTransportHttp_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest` passing the following parameters   
 - requestType: GET   
 - relativePath: the message HTTP relative path   
 - requestHttpHeadersHandle: message HTTP request headers created by _Create   
@@ -297,7 +298,7 @@ MultiDevTransportHttp shall perform the following actions on each device:
 
 #### Accepting a message. 
 
-**SRS_TRANSPORTMULTITHTTP_17_099: [** `_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest2` with the following parameters:   
+**SRS_TRANSPORTMULTITHTTP_17_099: [** `_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest` with the following parameters:   
 - requestType: DELETE
 - relativePath: abandon relative path begin + value of ETag + APIVERSION 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following   
@@ -308,11 +309,11 @@ MultiDevTransportHttp shall perform the following actions on each device:
 - responseHeadearsHandle: `NULL`
 - responseContent: `NULL` **]**
 
-**SRS_TRANSPORTMULTITHTTP_17_100: [** Accepting a message is successful when `HTTPAPIEX_SAS_ExecuteRequest2` completes successfully and the status code is 204.  **]**
+**SRS_TRANSPORTMULTITHTTP_17_100: [** Accepting a message is successful when `HTTPAPIEX_SAS_ExecuteRequest` completes successfully and the status code is 204.  **]**
 
 #### Rejecting a message
 
-**SRS_TRANSPORTMULTITHTTP_17_101: [** `_DoWork` shall call HTTPAPIEX_SAS_ExecuteRequest2 with the following parameters:
+**SRS_TRANSPORTMULTITHTTP_17_101: [** `_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest` with the following parameters:
 - requestType: DELETE
 - relativePath: abandon relative path begin + value of ETag +"?reject" + APIVERSION 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following   
@@ -323,7 +324,7 @@ MultiDevTransportHttp shall perform the following actions on each device:
 - responseHeadearsHandle: `NULL`
 - responseContent: `NULL` **]**
 
-**SRS_TRANSPORTMULTITHTTP_17_102: [** Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest2 completes successfully and the status code is 204. **]** 
+**SRS_TRANSPORTMULTITHTTP_17_102: [** Rejecting a message is successful when `HTTPAPIEX_SAS_ExecuteRequest` completes successfully and the status code is 204. **]** 
 
 
 ### "Last action" action: 
