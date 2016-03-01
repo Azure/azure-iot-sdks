@@ -48,17 +48,17 @@ public final class DeviceClient
     }
 
     /**
-     * The default number of milliseconds the transport will wait between
+     * The number of milliseconds the transport will wait between
      * sending out messages.
      */
-    public static final long DEFAULT_SEND_PERIOD_MILLIS = 5000l;
+    public static long SEND_PERIOD_MILLIS = 5000l;
     /**
-     * The default number of milliseconds the transport will wait between
+     * The number of milliseconds the transport will wait between
      * polling for messages.
      */
-    public static final long DEFAULT_RECEIVE_PERIOD_MILLIS_AMQPS = 5000l;
-    public static final long DEFAULT_RECEIVE_PERIOD_MILLIS_MQTT = 5000l;
-    public static final long DEFAULT_RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
+    public static long RECEIVE_PERIOD_MILLIS_AMQPS = 5000l;
+    public static long RECEIVE_PERIOD_MILLIS_MQTT = 5000l;
+    public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     /** The hostname attribute name in a connection string. */
     public static final String HOSTNAME_ATTRIBUTE = "HostName=";
@@ -78,7 +78,7 @@ public final class DeviceClient
 
     protected ScheduledExecutorService taskScheduler;
     protected IotHubClientState state;
-    protected long current_receive_period_millis;
+    protected long RECEIVE_PERIOD_MILLIS;
 
     /**
      * Constructor that takes a connection string as an argument.
@@ -168,12 +168,12 @@ public final class DeviceClient
         // the scheduler waits until each execution is finished before
         // scheduling the next one, so executions of a given task
         // will never overlap.
-        // Codes_SRS_DEVICECLIENT_11_023: [The function shall schedule send tasks to run every 5000 milliseconds.]
+        // Codes_SRS_DEVICECLIENT_11_023: [The function shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.]
         this.taskScheduler.scheduleAtFixedRate(sendTask, 0,
-                DEFAULT_SEND_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
-        // Codes_SRS_DEVICECLIENT_11_024: [The function shall schedule receive tasks to run every 5000 milliseconds.]
+                SEND_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
+        // Codes_SRS_DEVICECLIENT_11_024: [The function shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.]
         this.taskScheduler.scheduleAtFixedRate(receiveTask, 0,
-                current_receive_period_millis, TimeUnit.MILLISECONDS);
+                RECEIVE_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
 
         this.state = IotHubClientState.OPEN;
     }
@@ -323,15 +323,15 @@ public final class DeviceClient
         {
             case HTTPS:
                 this.transport = new HttpsTransport(this.config);
-                current_receive_period_millis = DEFAULT_RECEIVE_PERIOD_MILLIS_HTTPS;
+                RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_HTTPS;
                 break;
             case AMQPS:
                 this.transport = new AmqpsTransport(this.config);
-                current_receive_period_millis = DEFAULT_RECEIVE_PERIOD_MILLIS_AMQPS;
+                RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_AMQPS;
                 break;
             case MQTT:
                 this.transport = new MqttTransport(this.config);
-                current_receive_period_millis = DEFAULT_RECEIVE_PERIOD_MILLIS_MQTT;
+                RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_MQTT;
                 break;
             default:
                 // should never happen.
@@ -386,7 +386,7 @@ public final class DeviceClient
                         // Codes_SRS_DEVICECLIENT_02_004: [Value needs to have type long].
                         if (value instanceof Long)
                         {
-                            this.current_receive_period_millis = (long) value;
+                            this.RECEIVE_PERIOD_MILLIS = (long) value;
                         }
                         else
                         {

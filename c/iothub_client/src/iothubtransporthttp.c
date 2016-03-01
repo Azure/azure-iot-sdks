@@ -78,103 +78,103 @@ typedef struct HTTPTRANSPORT_PERDEVICE_DATA_TAG
 
 	STRING_HANDLE deviceId;
 	STRING_HANDLE deviceKey;
-	STRING_HANDLE eventHTTPrelativePath;
-	STRING_HANDLE messageHTTPrelativePath;
-	HTTP_HEADERS_HANDLE eventHTTPrequestHeaders;
-	HTTP_HEADERS_HANDLE messageHTTPrequestHeaders;
-	STRING_HANDLE abandonHTTPrelativePathBegin;
-	HTTPAPIEX_SAS_HANDLE sasObject;
-	bool DoWork_PullMessage;
-	time_t lastPollTime;
+    STRING_HANDLE eventHTTPrelativePath;
+    STRING_HANDLE messageHTTPrelativePath;
+    HTTP_HEADERS_HANDLE eventHTTPrequestHeaders;
+    HTTP_HEADERS_HANDLE messageHTTPrequestHeaders;
+    STRING_HANDLE abandonHTTPrelativePathBegin;
+    HTTPAPIEX_SAS_HANDLE sasObject;
+    bool DoWork_PullMessage;
+    time_t lastPollTime;
 	bool isFirstPoll;
 
-	PDLIST_ENTRY waitingToSend;
-	DLIST_ENTRY eventConfirmations; /*holds items for event confirmations*/
+    PDLIST_ENTRY waitingToSend;
+    DLIST_ENTRY eventConfirmations; /*holds items for event confirmations*/
 } HTTPTRANSPORT_PERDEVICE_DATA;
 
 static void destroy_eventHTTPrelativePath(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
 {
-	STRING_delete(handleData->eventHTTPrelativePath);
-	handleData->eventHTTPrelativePath = NULL;
+    STRING_delete(handleData->eventHTTPrelativePath);
+    handleData->eventHTTPrelativePath = NULL;
 }
 
 static bool create_eventHTTPrelativePath(HTTPTRANSPORT_PERDEVICE_DATA* handleData, const char * deviceId)
 {
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_017: [ IoTHubTransportHttp_Register shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(deviceId) + "/messages/events" + APIVERSION. ]*/
-	bool result;
+    bool result;
 	STRING_HANDLE urlEncodedDeviceId;
-	handleData->eventHTTPrelativePath = STRING_construct("/devices/");
-	if (handleData->eventHTTPrelativePath == NULL)
-	{
+    handleData->eventHTTPrelativePath = STRING_construct("/devices/");
+    if (handleData->eventHTTPrelativePath == NULL)
+    {
 		LogError("STRING_construct failed.");
-		result = false;
-	}
+        result = false;
+    }
 	else
 	{
 		if (!(
 			((urlEncodedDeviceId = URL_EncodeString(deviceId)) != NULL) &&
-			(STRING_concat_with_STRING(handleData->eventHTTPrelativePath, urlEncodedDeviceId) == 0) &&
-			(STRING_concat(handleData->eventHTTPrelativePath, EVENT_ENDPOINT API_VERSION) == 0)
-			))
-		{
+        (STRING_concat_with_STRING(handleData->eventHTTPrelativePath, urlEncodedDeviceId) == 0) &&
+        (STRING_concat(handleData->eventHTTPrelativePath, EVENT_ENDPOINT API_VERSION) == 0)
+        ))
+    {
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_018: [ If creating the string fail for any reason then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
-			destroy_eventHTTPrelativePath(handleData);
+        destroy_eventHTTPrelativePath(handleData);
 			LogError("Creating HTTP event relative path failed.");
-			result = false;
-		}
-		else
-		{
-			result = true;
-		}
-		STRING_delete(urlEncodedDeviceId);
+        result = false;
+    }
+    else
+    {
+        result = true;
+    }
+    STRING_delete(urlEncodedDeviceId);
 	}
-	return result;
+    return result;
 }
 
 static void destroy_messageHTTPrelativePath(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
 {
-	STRING_delete(handleData->messageHTTPrelativePath);
-	handleData->messageHTTPrelativePath = NULL;
+    STRING_delete(handleData->messageHTTPrelativePath);
+    handleData->messageHTTPrelativePath = NULL;
 }
 
 static bool create_messageHTTPrelativePath(HTTPTRANSPORT_PERDEVICE_DATA* handleData, const char * deviceId)
 {
-	bool result;
-	handleData->messageHTTPrelativePath = STRING_construct("/devices/");
-	if (handleData->messageHTTPrelativePath == NULL)
-	{
+    bool result;
+    handleData->messageHTTPrelativePath = STRING_construct("/devices/");
+    if (handleData->messageHTTPrelativePath == NULL)
+    {
 		LogError("STRING_construct failed.");
-		result = false;
-	}
-	else
-	{
+        result = false;
+    }
+    else
+    {
 		STRING_HANDLE urlEncodedDeviceId;
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_019: [ IoTHubTransportHttp_Register shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(deviceId) + "/messages/devicebound" + APIVERSION. ]*/
-		if (!(
+        if (!(
 			((urlEncodedDeviceId = URL_EncodeString(deviceId)) != NULL) &&
-			(STRING_concat_with_STRING(handleData->messageHTTPrelativePath, urlEncodedDeviceId) == 0) &&
-			(STRING_concat(handleData->messageHTTPrelativePath, MESSAGE_ENDPOINT_HTTP API_VERSION) == 0)
-			))
-		{
+            (STRING_concat_with_STRING(handleData->messageHTTPrelativePath, urlEncodedDeviceId) == 0) &&
+            (STRING_concat(handleData->messageHTTPrelativePath, MESSAGE_ENDPOINT_HTTP API_VERSION) == 0)
+            ))
+        {
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_020: [ If creating the message HTTP relative path fails, then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
 			LogError("Creating HTTP message relative path failed.");
-			result = false;
-			destroy_messageHTTPrelativePath(handleData);
-		}
-		else
-		{
-			result = true;
-		}
-		STRING_delete(urlEncodedDeviceId);
-	}
-
-	return result;
+            result = false;
+            destroy_messageHTTPrelativePath(handleData);
+        }
+        else
+        {
+            result = true;
+        }
+        STRING_delete(urlEncodedDeviceId);
+    }
+    
+    return result;
 }
 
 static void destroy_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
 {
-	HTTPHeaders_Free(handleData->eventHTTPrequestHeaders);
-	handleData->eventHTTPrequestHeaders = NULL;
+    HTTPHeaders_Free(handleData->eventHTTPrequestHeaders);
+    handleData->eventHTTPrequestHeaders = NULL;
 }
 
 static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, const char * deviceId)
@@ -182,207 +182,210 @@ static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleD
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_021: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "event HTTP request headers") consisting of the following fixed field names and values: "iothub-to":"/devices/" + URL_ENCODED(deviceId) + "/messages/events"; "Authorization":""
 "Accept":"application/json"
 "Connection":"Keep-Alive" ]*/
-	bool result;
-	handleData->eventHTTPrequestHeaders = HTTPHeaders_Alloc();
-	if (handleData->eventHTTPrequestHeaders == NULL)
-	{
+    bool result;
+    handleData->eventHTTPrequestHeaders = HTTPHeaders_Alloc();
+    if (handleData->eventHTTPrequestHeaders == NULL)
+    {
 		LogError("HTTPHeaders_Alloc failed.");
-		result = false;
-	}
-	else
-	{
-		STRING_HANDLE temp = STRING_construct("/devices/");
-		if (temp == NULL)
-		{
+        result = false;
+    }
+    else
+    {
+        STRING_HANDLE temp = STRING_construct("/devices/");
+        if (temp == NULL)
+        {
 			LogError("STRING_construct failed.");
-			result = false;
-			destroy_eventHTTPrequestHeaders(handleData);
-		}
-		else
-		{
+            result = false;
+            destroy_eventHTTPrequestHeaders(handleData);
+        }
+        else
+        {
 			STRING_HANDLE urlEncodedDeviceId;
-			if (!(
+            if (!(
 				((urlEncodedDeviceId = URL_EncodeString(deviceId)) != NULL) &&
-				(STRING_concat_with_STRING(temp, urlEncodedDeviceId) == 0) &&
-				(STRING_concat(temp, EVENT_ENDPOINT) == 0)
-				))
-			{
+                (STRING_concat_with_STRING(temp, urlEncodedDeviceId) == 0) &&
+                (STRING_concat(temp, EVENT_ENDPOINT) == 0)
+                ))
+            {
 				LogError("deviceId construction failed.");
-				result = false;
-				destroy_eventHTTPrequestHeaders(handleData);
-			}
-			else
-			{
-				if (!(
-					(HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "iothub-to", STRING_c_str(temp)) == HTTP_HEADERS_OK) &&
-					(HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK) &&
-					(HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Accept", "application/json") == HTTP_HEADERS_OK) &&
-					(HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Connection", "Keep-Alive") == HTTP_HEADERS_OK) &&
-					(HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK)
-					))
-				{
+                result = false;
+                destroy_eventHTTPrequestHeaders(handleData);
+            }
+            else
+            {
+                if (!(
+                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "iothub-to", STRING_c_str(temp)) == HTTP_HEADERS_OK) &&
+                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK) &&
+                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Accept", "application/json") == HTTP_HEADERS_OK) &&
+                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Connection", "Keep-Alive") == HTTP_HEADERS_OK) &&
+                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK)
+                    ))
+                {
 					/*Codes_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.] */
 					LogError("adding header properties failed.");
-					result = false;
-					destroy_eventHTTPrequestHeaders(handleData);
-				}
-				else
-				{
-					result = true;
-				}
-			}
+                    result = false;
+                    destroy_eventHTTPrequestHeaders(handleData);
+                }
+                else
+                {
+                    result = true;
+                }
+            }
 			STRING_delete(urlEncodedDeviceId);
-			STRING_delete(temp);
-		}
-	}
-	return result;
+            STRING_delete(temp);
+        }
+    }
+    return result;
 }
 
 static void destroy_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
-{
-	HTTPHeaders_Free(handleData->messageHTTPrequestHeaders);
-	handleData->messageHTTPrequestHeaders = NULL;
+        {
+    HTTPHeaders_Free(handleData->messageHTTPrequestHeaders);
+    handleData->messageHTTPrequestHeaders = NULL;
 }
 
 static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
 {
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_132: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "message HTTP request headers") consisting of the following fixed field names and values:
 "Authorization": "" ]*/
-	bool result;
-	handleData->messageHTTPrequestHeaders = HTTPHeaders_Alloc();
-	if (handleData->messageHTTPrequestHeaders == NULL)
-	{
+    bool result;
+    handleData->messageHTTPrequestHeaders = HTTPHeaders_Alloc();
+    if (handleData->messageHTTPrequestHeaders == NULL)
+    {
 		LogError("HTTPHeaders_Alloc failed.");
-		result = false;
-	}
-	else
-	{
-		if (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "Authorization", " ") != HTTP_HEADERS_OK)
-		{
+        result = false;
+    }
+    else
+    {
+        if (!(
+            (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK) &&
+            (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK)
+            ))
+        {
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_023: [ If creating message HTTP request headers then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
-			destroy_messageHTTPrequestHeaders(handleData);
+            destroy_messageHTTPrequestHeaders(handleData);
 			LogError("adding header properties failed.");
-			result = false;
-		}
-		else
-		{
-			result = true;
-		}
-	}
-	return result;
+            result = false;
+        }
+        else
+        {
+            result = true;
+        }
+    }
+    return result;
 }
 
 static void destroy_abandonHTTPrelativePathBegin(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
 {
-	STRING_delete(handleData->abandonHTTPrelativePathBegin);
-	handleData->abandonHTTPrelativePathBegin = NULL;
+    STRING_delete(handleData->abandonHTTPrelativePathBegin);
+    handleData->abandonHTTPrelativePathBegin = NULL;
 }
 
 static bool create_abandonHTTPrelativePathBegin(HTTPTRANSPORT_PERDEVICE_DATA* handleData, const char * deviceId)
 {
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_024: [ IoTHubTransportHttp_Register shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin. ]*/
-	bool result;
-	handleData->abandonHTTPrelativePathBegin = STRING_construct("/devices/");
-	if (handleData->abandonHTTPrelativePathBegin == NULL)
-	{
-		result = false;
-	}
-	else
-	{
+    bool result;
+    handleData->abandonHTTPrelativePathBegin = STRING_construct("/devices/");
+    if (handleData->abandonHTTPrelativePathBegin == NULL)
+    {
+        result = false;
+    }
+    else
+    {
 		STRING_HANDLE urlEncodedDeviceId;
-		if (!(
+        if (!(
 			((urlEncodedDeviceId = URL_EncodeString(deviceId)) != NULL) &&
-			(STRING_concat_with_STRING(handleData->abandonHTTPrelativePathBegin, urlEncodedDeviceId) == 0) &&
-			(STRING_concat(handleData->abandonHTTPrelativePathBegin, MESSAGE_ENDPOINT_HTTP_ETAG) == 0)
-			))
-		{
+            (STRING_concat_with_STRING(handleData->abandonHTTPrelativePathBegin, urlEncodedDeviceId) == 0) &&
+            (STRING_concat(handleData->abandonHTTPrelativePathBegin, MESSAGE_ENDPOINT_HTTP_ETAG) == 0)
+            ))
+        {
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_025: [ If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
 			LogError("unable to create abandon path string.\r\n");
-			STRING_delete(handleData->abandonHTTPrelativePathBegin);
-			result = false;
-		}
-		else
-		{
-			result = true;
-		}
-		STRING_delete(urlEncodedDeviceId);
-	}
-	return result;
+            STRING_delete(handleData->abandonHTTPrelativePathBegin);
+            result = false;
+        }
+        else
+        {
+            result = true;
+        }
+        STRING_delete(urlEncodedDeviceId);
+    }
+    return result;
 }
 
 static void destroy_SASObject(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
 {
-	HTTPAPIEX_SAS_Destroy(handleData->sasObject);
-	handleData->sasObject = NULL;
+    HTTPAPIEX_SAS_Destroy(handleData->sasObject);
+    handleData->sasObject = NULL;
 }
 
 static bool create_deviceSASObject(HTTPTRANSPORT_PERDEVICE_DATA* handleData, STRING_HANDLE hostName, const char * deviceId, const char * deviceKey)
 {
-	STRING_HANDLE keyName;
-	bool result;
+    STRING_HANDLE keyName;
+    bool result;
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_026: [IoTHubTransportHttp_Create shall invoke URL_EncodeString with an argument of device id.]*/
 	keyName = URL_EncodeString(deviceId);
-	if (keyName == NULL)
-	{
+    if (keyName == NULL)
+    {
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_027: [If the encode fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
 		LogError("URL_EncodeString keyname failed");
-		result = false;
-	}
-	else
-	{
-		STRING_HANDLE uriResource;
+        result = false;
+    }
+    else
+    {
+        STRING_HANDLE uriResource;
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_028: [IoTHubTransportHttp_Create shall invoke STRING_clone using the previously created hostname.]*/
 		uriResource = STRING_clone(hostName);
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_029: [If the clone fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-		if (uriResource != NULL)
-		{
+        if (uriResource != NULL)
+        {
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_030: [IoTHubTransportHttp_Create shall invoke STRING_concat with arguments uriResource and the string "/devices/".]*/
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_141: [If the concat fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_031: [IoTHubTransportHttp_Create shall invoke STRING_concat_with_STRING with arguments uriResource and keyName.]*/
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_032: [If the STRING_concat_with_STRING fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-			if ((STRING_concat(uriResource, "/devices/") == 0) &&
-				(STRING_concat_with_STRING(uriResource, keyName) == 0))
-			{
+            if ((STRING_concat(uriResource, "/devices/") == 0) &&
+                (STRING_concat_with_STRING(uriResource, keyName) == 0))
+            {
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_033: [IoTHubTransportHttp_Create shall invoke STRING_construct with an argument of config->upperConfig->deviceKey.]*/
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_034: [If the STRING_construct fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
 				STRING_HANDLE key = STRING_construct(deviceKey);
-				if (key != NULL)
-				{
+                if (key != NULL)
+                {
 					/*Codes_SRS_TRANSPORTMULTITHTTP_17_035: [The keyName is shortened to zero length, if that fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-					if (STRING_empty(keyName) != 0)
-					{
-						LogError("Unable to form the device key name for the SAS\r\n");
-						result = false;
-					}
-					else
-					{
+                    if (STRING_empty(keyName) != 0)
+                    {
+                        LogError("Unable to form the device key name for the SAS\r\n");
+                        result = false;
+                    }
+                    else
+                    {
 						/*Codes_SRS_TRANSPORTMULTITHTTP_17_036: [IoTHubTransportHttp_Create shall invoke HTTPAPIEX_SAS_Create with arguments key, uriResource, and zero length keyName.]*/
 						/*Codes_SRS_TRANSPORTMULTITHTTP_17_037: [If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-						handleData->sasObject = HTTPAPIEX_SAS_Create(key, uriResource, keyName);
-						result = (handleData->sasObject != NULL) ? (true) : (false);
-					}
-					STRING_delete(key);
-				}
-				else
-				{
+                        handleData->sasObject = HTTPAPIEX_SAS_Create(key, uriResource, keyName);
+                        result = (handleData->sasObject != NULL) ? (true) : (false);
+                    }
+                    STRING_delete(key);
+                }
+                else
+                {
 					LogError("STRING_construct Key failed");
-					result = false;
-				}
-			}
-			else
-			{
+                    result = false;
+                }
+            }
+            else
+            {
 				LogError("STRING_concat uri resource failed");
-				result = false;
-			}
-			STRING_delete(uriResource);
-		}
-		else
-		{
+                result = false;
+            }
+            STRING_delete(uriResource);
+        }
+        else
+        {
 			LogError("STRING_staticclone uri resource failed");
-			result = false;
-		}
-		STRING_delete(keyName);
-	}
+            result = false;
+        }
+        STRING_delete(keyName);
+    }
 	return result;
 }
 
@@ -457,7 +460,7 @@ static bool findDeviceById(const void* element, const void* value)
 
 	result = (strcmp(STRING_c_str(perDeviceElement->deviceId), deviceId) == 0);
 
-	return result;
+    return result;
 }
 
 IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
@@ -711,13 +714,13 @@ TRANSPORT_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config
     else if (config->upperConfig->iotHubName == NULL)
     {
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields protocol, iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]*/
-		LogError("invalid arg (iotHubName is NULL)\r\n");
+        LogError("invalid arg (iotHubName is NULL)\r\n");
         result = NULL;
     }
     else if (config->upperConfig->iotHubSuffix == NULL)
     {
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields protocol, iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]*/
-		LogError("invalid arg (iotHubSuffix is NULL)\r\n");
+        LogError("invalid arg (iotHubSuffix is NULL)\r\n");
         result = NULL;
     }
     else
@@ -732,19 +735,19 @@ TRANSPORT_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config
         else
         {
 			bool was_hostName_ok = create_hostName(result, config);
-			bool was_httpApiExHandle_ok = was_hostName_ok && create_httpApiExHandle(result, config);
+            bool was_httpApiExHandle_ok = was_hostName_ok && create_httpApiExHandle(result, config);
 			bool was_perDeviceList_ok = was_httpApiExHandle_ok && create_perDeviceList(result);
 
 
             if (was_perDeviceList_ok)
             {
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_011: [ Otherwise, IoTHubTransportHttp_Create shall succeed and return a non-NULL value. ]*/
-				result->doBatchedTransfers = false;
-				result->getMinimumPollingTime = DEFAULT_GETMINIMUMPOLLINGTIME;
+                result->doBatchedTransfers = false;
+                result->getMinimumPollingTime = DEFAULT_GETMINIMUMPOLLINGTIME;
             }
             else
             {
-				if (was_httpApiExHandle_ok) destroy_httpApiExHandle(result);
+                if (was_httpApiExHandle_ok) destroy_httpApiExHandle(result);
 				if (was_hostName_ok) destroy_hostName(result);
 
                 free(result);
@@ -774,10 +777,10 @@ void IoTHubTransportHttp_Destroy(TRANSPORT_HANDLE handle)
 			free(perDeviceItem);
 		}
 
-		destroy_hostName(handle);
-		destroy_httpApiExHandle(handle);
+        destroy_hostName(handle);
+        destroy_httpApiExHandle(handle);
 		destroy_perDeviceList(handle);
-		free(handle);
+        free(handle);
     }
 }
 
@@ -827,11 +830,11 @@ void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 			HTTPTRANSPORT_PERDEVICE_DATA * perDeviceItem = (HTTPTRANSPORT_PERDEVICE_DATA *)(*listItem);
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_110: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should not execute HTTP requests. ]*/
 			perDeviceItem->DoWork_PullMessage = false;
-		}
+    }
 		else
 		{
 			LogError("Device not found to unsuscribe.\r\n");
-		}
+}
     }
 	else
 	{
@@ -1564,7 +1567,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-			LogError("unable to STRING_construct_n\r\n");
+            LogError("unable to STRING_construct_n\r\n");
         }
         else
         {
@@ -1576,7 +1579,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-				LogError("unable to STRING_concat\r\n");
+                LogError("unable to STRING_concat\r\n");
             }
             else
             {
@@ -1586,11 +1589,12 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 					/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 					/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 					/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-					LogError("unable to HTTPHeaders_Alloc\r\n");
+                    LogError("unable to HTTPHeaders_Alloc\r\n");
                 }
                 else
                 {
                     if (!(
+                        (HTTPHeaders_AddHeaderNameValuePair(abandonRequestHttpHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK) &&
                         (HTTPHeaders_AddHeaderNameValuePair(abandonRequestHttpHeaders, "Authorization", " ") == HTTP_HEADERS_OK) &&
                         (HTTPHeaders_AddHeaderNameValuePair(abandonRequestHttpHeaders, "If-Match", ETag) == HTTP_HEADERS_OK)
                         ))
@@ -1598,7 +1602,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 						/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 						/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 						/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-						LogError("unable to HTTPHeaders_AddHeaderNameValuePair\r\n");
+                        LogError("unable to HTTPHeaders_AddHeaderNameValuePair\r\n");
                     }
                     else
                     {
@@ -1618,7 +1622,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 							/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 							/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 							/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-							LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
+                            LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
                         }
                         else
                         {
@@ -1627,14 +1631,14 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-								LogError("unexpected status code returned %u (was expecting 204)\r\n", statusCode);
+                                LogError("unexpected status code returned %u (was expecting 204)\r\n", statusCode);
                             }
                             else
                             {
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-								/*all is fine*/
+                                /*all is fine*/
                             }
                         }
                     }
@@ -1893,7 +1897,7 @@ void IoTHubTransportHttp_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE
 	else
 	{
 		LogError("Invalid Argument NULL call on DoWork.\r\n");
-	}
+    }
 }
 
 IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
@@ -1926,16 +1930,16 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE hand
 			HTTPTRANSPORT_PERDEVICE_DATA* deviceData = (HTTPTRANSPORT_PERDEVICE_DATA*)(*listItem);
 			/* Codes_SRS_TRANSPORTMULTITHTTP_17_113: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent. ] */
 			if (!DList_IsListEmpty(deviceData->waitingToSend))
-			{
-				*iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
-			}
+        {
+            *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+        }
 			/* Codes_SRS_TRANSPORTMULTITHTTP_17_112: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent. ] */
-			else
-			{
-				*iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
-			}
-			result = IOTHUB_CLIENT_OK;
-		}
+        else
+        {
+            *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
+        }
+        result = IOTHUB_CLIENT_OK;
+    }
     }
 
     return result;

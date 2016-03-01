@@ -20,7 +20,7 @@ public class SignatureHelperTest
 {
     protected static Charset UTF8 = StandardCharsets.UTF_8;
 
-    // Tests_SRS_SIGNATUREHELPER_11_001: [The function shall initialize the message being encoded as "<resourceUri>\n<expiryTime>".]
+    // Tests_SRS_SIGNATUREHELPER_11_001: [The function shall initialize the message being encoded as "<scope>\n<expiryTime>".]
     // Tests_SRS_SIGNATUREHELPER_11_002: [The function shall decode the message using the charset UTF-8.]
     @Test
     public void rawSignatureHasCorrectFormat()

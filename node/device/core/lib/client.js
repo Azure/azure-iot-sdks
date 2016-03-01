@@ -143,7 +143,7 @@ Client.fromSharedAccessSignature = function (sharedAccessSignature, Transport) {
   if (!sharedAccessSignature) throw new ReferenceError('sharedAccessSignature is \'' + sharedAccessSignature + '\'');
 
   var sas = SharedAccessSignature.parse(sharedAccessSignature);
-  var uriSegments = sas.sr.split('/')[0];
+  var uriSegments = sas.sr.split('/');
   var config = {
     host: uriSegments[0],
     deviceId: uriSegments[uriSegments.length - 1],
