@@ -62,7 +62,7 @@ PuTTY or WinSCP. For more information, see <https://www.raspberrypi.org/document
 -   Connect your Raspberry Pi to your network using an ethernet cable or by using
 a WiFi dongle on the device.
 -   You need to determine the IP address of your Raspberry Pi in order to connect over the network. For more information, see
-<https://www.raspberrypi.org/documentation/troubleshooting/hardware/networking/ip-address.md>.
+<https://www.raspberrypi.org/documentation/remote-access/ip-address.md>.
 -   Once you see that your board is working, open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine.
 -   Use the IP address from step 4 as the Host name, Port=22, and Connection type=SSH to complete the connection.
 -   When prompted, log in with username **pi**, and password **raspberry**.
@@ -94,8 +94,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
     sudo c/build_all/linux/setup.sh
     ```
 
--   Edit the file ./c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace connection string placeholder with the connection string
-you obtained in the [step](#DeviceConnectionString) above.
+-   Edit the file ./c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace connection string placeholder with the device connection string you obtained when you [provisioned your device](../manage_iot_hub.md#use-the-iothub-explorer-tool-to-provision-a-device).The device connection string should be in this format "`HostName=<iothub-name>.azure-devices.net;DeviceId=<device-name>;SharedAccessKey=<device-key>`".  
 (You can use the console-based text editor **nano** to edit the file):
 
     ```
@@ -126,3 +125,4 @@ This sample application sends simulated sensor data to your IoT Hub.
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
+
