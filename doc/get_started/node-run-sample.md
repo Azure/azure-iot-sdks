@@ -38,7 +38,7 @@ You should have the following items ready before beginning the process:
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
 
--   Make sure desktop is ready as per instructions given on [Prepare your development environment][setup-devbox].
+-   Make sure desktop is ready as per instructions given on [Prepare your development environment][lnk-setup-devbox].
 
 <a name="Build"></a>
 # Step 3: Build and Run the sample
@@ -83,3 +83,4 @@ The same sample can be used to test AMQP, AMQP over Websockets, HTTP and MQTT. I
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
+[lnk-setup-devbox]: node-devbox-setup.md
