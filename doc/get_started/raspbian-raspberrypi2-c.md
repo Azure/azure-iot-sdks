@@ -80,7 +80,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
 -   Download the Azure IoT device SDK to your Raspberry Pi:
 
     ```
-    git clone --recursive https://github.com/Azure/azure-iot-sdks.git --recursive
+    git clone --recursive https://github.com/Azure/azure-iot-sdks.git
     ```
 
 -   Confirm that you now have a copy of the SDK under the directory ./azure-iot-sdks. Then cd to the directory:
