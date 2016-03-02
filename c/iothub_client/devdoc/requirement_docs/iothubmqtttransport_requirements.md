@@ -51,8 +51,9 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle)
 int IoTHubTransportMqtt_Subscribe(TRANSPORT_HANDLE handle)
 ```
 **SRS_IOTHUB_MQTT_TRANSPORT_07_015: [**If parameter handle is NULL than IoTHubTransportMqtt_Subscribe shall return a non-zero value.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_016: [**IoTHubTransportMqtt_Subscribe shall call mqtt_client_subscribe to subscribe to the Message Topic.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_017: [**Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_016: [**IoTHubTransportMqtt_Subscribe shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the Message Topic.**]**
+**SRS_IOTHUB_MQTT_TRANSPORT_07_035: [**If current packet state is not CONNACK, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransportMqtt_Subscribe shall set the packet state to SUBSCRIBE_TYPE.**]**   
+**SRS_IOTHUB_MQTT_TRANSPORT_07_017: [**Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.**]**    
 **SRS_IOTHUB_MQTT_TRANSPORT_07_018: [**On success IoTHubTransportMqtt_Subscribe shall return 0.**]**  
 
 ##IoTHubTransportMqtt_Unsubscribe

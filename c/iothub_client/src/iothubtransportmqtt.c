@@ -60,6 +60,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     uint16_t packetId;
     bool connected;
     bool subscribed;
+    bool receiveMessages;
     bool destroyCalled;
     DLIST_ENTRY waitingForAck;
     PDLIST_ENTRY waitingToSend;
@@ -254,21 +255,28 @@ static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
 {
     int result;
 
-    SUBSCRIBE_PAYLOAD subscribe[] = {
-        { STRING_c_str(transportState->mqttMessageTopic), DELIVER_AT_LEAST_ONCE }
-    };
-    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransportMqtt_Subscribe shall call mqtt_client_subscribe to subscribe to the Message Topic.] */
-    if (mqtt_client_subscribe(transportState->mqttClient, transportState->packetId++, subscribe, 1) != 0)
+    if (transportState->receiveMessages && !transportState->subscribed)
     {
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.] */
-        result = __LINE__;
+        SUBSCRIBE_PAYLOAD subscribe[] = {
+            { STRING_c_str(transportState->mqttMessageTopic), DELIVER_AT_LEAST_ONCE }
+        };
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransportMqtt_Subscribe shall call mqtt_client_subscribe to subscribe to the Message Topic.] */
+        if (mqtt_client_subscribe(transportState->mqttClient, transportState->packetId++, subscribe, 1) != 0)
+        {
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.] */
+            result = __LINE__;
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_018: [On success IoTHubTransportMqtt_Subscribe shall return 0.] */
+            transportState->subscribed = true;
+            transportState->currPacketState = SUBSCRIBE_TYPE;
+            result = 0;
+        }
     }
     else
     {
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_018: [On success IoTHubTransportMqtt_Subscribe shall return 0.] */
-        transportState->subscribed = true;
         transportState->currPacketState = SUBSCRIBE_TYPE;
-        result = 0;
     }
     return result;
 }
@@ -538,6 +546,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 state->destroyCalled = false;
                 state->subscribed = false;
                 state->connected = false;
+                state->receiveMessages = false;
                 state->packetId = 1;
                 state->llClientHandle = NULL;
                 state->xioTransport = NULL;
@@ -661,6 +670,16 @@ int IoTHubTransportMqtt_Subscribe(TRANSPORT_HANDLE handle)
     }
     else
     {
+        /* Code_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransportMqtt_Subscribe shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the Message Topic.] */
+        transportState->receiveMessages = true;
+        /* Code_SRS_IOTHUB_MQTT_TRANSPORT_07_035: [If current packet state is not CONNACT, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransportMqtt_Subscribe shall set the packet state to SUBSCRIBE_TYPE.]*/
+        if (transportState->currPacketState != CONNACK_TYPE && 
+            transportState->currPacketState != CONNECT_TYPE &&
+            transportState->currPacketState != DISCONNECT_TYPE &&
+            transportState->currPacketState != PACKET_TYPE_ERROR)
+        {
+            transportState->currPacketState = SUBSCRIBE_TYPE;
+        }
         result = 0;
     }
     return result;
@@ -676,6 +695,7 @@ void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_HANDLE handle)
         const char* unsubscribe[] = { STRING_c_str(transportState->mqttMessageTopic) };
         (void)mqtt_client_unsubscribe(transportState->mqttClient, transportState->packetId++, unsubscribe, 1);
         transportState->subscribed = false;
+        transportState->receiveMessages = false;
     }
 }
 
@@ -693,7 +713,7 @@ extern void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL
         }
         else
         {
-            if (transportState->currPacketState == CONNACK_TYPE)
+            if (transportState->currPacketState == CONNACK_TYPE || transportState->currPacketState == SUBSCRIBE_TYPE)
             {
                 (void)SubscribeToMqttProtocol(transportState);
             }
@@ -858,20 +878,20 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_HANDLE handle, cons
 
 IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
 {
-	return (IOTHUB_DEVICE_HANDLE)handle;
+    return (IOTHUB_DEVICE_HANDLE)handle;
 }
 
 void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 {
-	return;
+    return;
 }
 
 TRANSPORT_PROVIDER myfunc = {
     IoTHubTransportMqtt_SetOption,
     IoTHubTransportMqtt_Create, 
     IoTHubTransportMqtt_Destroy, 
-	IoTHubTransportMqtt_Register,
-	IoTHubTransportMqtt_Unregister,
+    IoTHubTransportMqtt_Register,
+    IoTHubTransportMqtt_Unregister,
     IoTHubTransportMqtt_Subscribe, 
     IoTHubTransportMqtt_Unsubscribe, 
     IoTHubTransportMqtt_DoWork, 
