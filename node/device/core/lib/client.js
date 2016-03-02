@@ -207,7 +207,7 @@ Client.prototype.updateSharedAccessSignature = function (sharedAccessSignature, 
  */
 Client.prototype.open = function (done) {
   var connectReceiverIfListening = function () {
-    if (this.listenerCount('message') > 0) {
+    if (this.listeners('message').length > 0) {
       debug('Connecting the receiver since there\'s already someone listening on the \'message\' event');
       this._connectReceiver();
     }
