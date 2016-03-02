@@ -11,10 +11,10 @@ import com.sun.jna.ptr.IntByReference;
 import javaWrapper.Iothub_client_wrapperLibrary.AMQP_Protocol;
 import javaWrapper.Iothub_client_wrapperLibrary.HTTP_Protocol;
 import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_CLIENT_HANDLE;
-import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC;
 import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_CLIENT_RESULT;
 import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_MESSAGE_HANDLE;
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubEventCallback;
+import javaWrapper.Iothub_client_wrapperLibrary.IotHubMessageCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.MAP_HANDLE;
 
 
@@ -115,9 +115,9 @@ public class Main {
 		}
 	};
 	
-	static IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC ReceiveMessageCallback = new IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC()
+	static IotHubMessageCallback ReceiveMessageCallback = new IotHubMessageCallback()
 	{
-		public void execute(IOTHUB_MESSAGE_HANDLE message, Pointer userContextCallback)
+		public int execute(IOTHUB_MESSAGE_HANDLE message, Pointer userContextCallback)
 		{
 			IntByReference counter = new IntByReference();
 			String messageRcvd;
@@ -132,6 +132,7 @@ public class Main {
 		    {
 		        System.out.printf("Received Message [%d] with Data: <<<%.*s>>> & Size=%d\r\n", counter.getValue(), messageRcvd.length(), messageRcvd, messageRcvd.length());
 		    }
+			return 0;
 			
 		}
 	};
