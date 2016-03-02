@@ -36,20 +36,7 @@ For information on how to use this library refer to the documents below:
 - [How to port the C libraries to other OS platforms](doc/porting_guide.md)
 - [C API reference](http://azure.github.io/azure-iot-sdks/c/api_reference/index.html)
 
-How to run the sample applications on:
-
-- [BeagleBone Black with Debian OS](../doc/get_started/debian-beaglebone-black-c.md)
-- [BeagleBone Black with Snappy OS](../doc/get_started/debian-beaglebone-black-snappy-c.md)
-- [BeagleBone Green](../doc/get_started/debian-beaglebone-green-c.md)
-- [Desktop Linux](../doc/get_started/linux-desktop-c.md)
-- [Freescale K64F](../doc/get_started/mbed-freescale-k64f-c.md)
-- [RasberryPi 2 with Raspbian OS](../doc/get_started/raspbian-raspberrypi2-c.md)
-- [Desktop Windows](../doc/get_started/windows-desktop-c.md)
-- [TI CC3200](../doc/get_started/ti-rtos-ti-cc3200-c.md)
-- [openSUSE](../doc/get_started/opensuse-desktop-c.md)
-- [Arduino Yun](../doc/get_started/openwrt-arduino-yun-c.md)
-- [Toradex modules with Windows Embedded Compact 2013](../doc/get_started/wince2013-toradex-module-c.md)
-- [Arduino WiFi 101 Shield](../doc/get_started/arduinoide-arduino-wifi101-c.md)
+For guides on how to run the sample applications on supported platforms, check out in this [folder](../doc/get_started/).
 
 ## SDK directory structure
 All C specific resources are located in the **azure-iot-sdks\c** folder. A description of the directories follows:
