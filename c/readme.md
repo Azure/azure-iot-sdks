@@ -34,6 +34,7 @@ For information on how to use this library refer to the documents below:
 - [Azure IoT device SDK for C  tutorial](https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/)
 - [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
 - [How to port the C libraries to other OS platforms](doc/porting_guide.md)
+- [Cross compilation example](doc/SDK_cross_compile_example.md)
 - [C API reference](http://azure.github.io/azure-iot-sdks/c/api_reference/index.html)
 
 For guides on how to run the sample applications on supported platforms, check out in this [folder](../doc/get_started/).
