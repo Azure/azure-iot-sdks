@@ -75,10 +75,10 @@ To learn how to create a Java application that communicates with an IoT hub from
 
 The documentation can be found [here](https://azure.github.io/azure-iot-sdks/java/device/api_reference/index.html).
 
-[java-dev-guides]: ../readme.md
-[setup-iothub]: ../../../doc/setup_iothub.md
-[lnk-manage-iot-hub]: ../../../doc/manage_iot_hub.md
-[device-explorer]: ../../../tools/DeviceExplorer/readme.md
+[java-dev-guides]: ../../java/device/readme.md
+[lnk-setup-iothub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
+[device-explorer]: ../../tools/DeviceExplorer/readme.md
 [how-to-build-a-java-app-from-scratch]: https://azure.microsoft.com/documentation/articles/iot-hub-java-java-getstarted/
 
 [toradex_image_update]: http://developer.toradex.com/knowledge-base/how-to-setup-environment-for-embedded-linux-application-development#Linux_Image_Update
