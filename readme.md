@@ -22,7 +22,7 @@ Each language SDK includes sample code and documentation in addition to the libr
 
 ### OS platforms and hardware compatibility
 
-Azure IoT device SDKs can be used with a broad range of OS platforms and devices. See [OS Platforms and hardware compatibility](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-tested-configurations/).
+Azure IoT device SDKs can be used with a broad range of OS platforms and devices. See [OS Platforms and hardware compatibility](https://azure.microsoft.com/documentation/articles/iot-hub-tested-configurations/).
 
 ## Microsoft Azure IoT service SDKs
 
@@ -34,7 +34,7 @@ The Azure IoT Service SDKs help you to build applications that interact with you
 
 ## Contribution, feedback and issues
 
-If you would like to become an active contributor to this project please follow the instructions provided in the [contribution guideline](contribute.md).
+If you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](contribute.md).
 If you encounter any bugs or have suggestions for new features, please file an issue in the [Issues](https://github.com/Azure/azure-iot-sdks/issues) section of the project.
 
 ## Support
@@ -42,7 +42,7 @@ If you encounter any bugs or have suggestions for new features, please file an i
 If you are having issues using one of the packages or using the Azure IoT Hub service that go beyond simple bug fixes or help requests that would be dealt within the issues section of this project, the Microsoft Customer Support team will try and help out on a best effort basis.
 To engage Microsoft support, you can create a support ticket directly from the [Azure portal](https://ms.portal.azure.com/#blade/Microsoft_Azure_Support/HelpAndSupportBlade).
 Escalated support requests for Azure IoT Hub SDKs development questions will only be available Monday thru Friday during normal coverage hours of 6 a.m. to 6 p.m. PST.
-Here is what you can expect the Microsoft Support to be able to help with:
+Here is what you can expect Microsoft Support to be able to help with:
 * **Client SDKs issues**: If you are trying to compile and run the libraries on a supported platform, the Support team will be able to assist with troubleshooting or questions related to compiler issues and communications to and from the IoT Hub.  They will also try to assist with questions related to porting to an unsupported platform, but will be limited in how much assistance can be provided.  The team will be limited with trouble-shooting the hardware device itself or drivers and or specific properties on that device. 
 * **IoT Hub / Connectivity Issues**: Communication from the device client to the Azure IoT Hub service and communication from the Azure IoT Hub service to the client.  Or any other issues specifically related to the Azure IoT Hub.
 * **Portal Issues**: Issues related to the portal, that includes access, security, dashboard, devices, Alarms, Usage, Settings and Actions.
@@ -63,7 +63,7 @@ This folder contains the following documents that are relevant to all the langua
 - [Set up IoT Hub](doc/setup_iothub.md) describes how to configure your Azure IoT Hub service.
 - [Manage IoT Hub](doc/manage_iot_hub.md) describes how to provision devices in your Azure IoT Hub service.
 - [FAQ](doc/faq.md) contains frequently asked questions about the SDKs and libraries.
-- [OS Platforms and hardware compatibility](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-tested-configurations/) describes the SDK compatibility with different OS platforms as well as specific device configurations.
+- [OS Platforms and hardware compatibility](https://azure.microsoft.com/documentation/articles/iot-hub-tested-configurations/) describes the SDK compatibility with different OS platforms as well as specific device configurations.
 
 ### /tools
 

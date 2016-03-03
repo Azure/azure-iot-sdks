@@ -7,7 +7,7 @@ To add devices to your IoT hub and manage those devices, you can use either of:
 - The cross-platform, command-line [iothub-explorer](#iothub-explorer) tool
 - The Windows-only, graphical [Device Explorer](#device-explorer) tool
 
-Use either of these tools to generate a device specific connection-string that you can copy and paste in the source code of the application running on your device. Both tools are available in this [repository][lnk-this-repo].
+Use either of these tools to generate a device-specific connection string that you can copy and paste in the source code of the application running on your device. Both tools are available in this [repository][lnk-this-repo].
  
 > Note: While IoT Hub supports multiple authentication schemes for devices, both these tools generate a pre-shared key to use for authentication.
 
@@ -32,7 +32,7 @@ To provision a new device:
 
 1. Get the connection string for your IoT hub. See [Set up IoT Hub][setup-iothub] for more details.
 
-2.  Run the following command to register your device with your IoT hub. When you run the command, replace `<iothub-connection-string>` with the IoT Hub connection-string from the previous step and replace `<device-name>` with a name for your device such as **mydevice**.
+2.  Run the following command to register your device with your IoT hub. When you run the command, replace `<iothub-connection-string>` with the IoT Hub connection string from the previous step and replace `<device-name>` with a name for your device such as **mydevice**.
 
 ```
 iothub-explorer <iothub-connection-string> create <device-name> --connection-string
@@ -96,11 +96,11 @@ To register a new device with IoT Hub:
 
     ![][img-getstarted4]
 
-4. Right-click on a selected device to retrieve the connection-string for your device:
+4. Right-click on a selected device to retrieve the connection string for your device:
 
     ![][img-connstr]
   
-5. Select **Copy connection string** to copy the device connection-string to the clipboard. You can now paste this connection-string into the source code of the device application you are working with. The samples in this repository use connection strings in the format `HostName=<iothub-name>.azure-devices.net;DeviceId=<device-name>;SharedAccessKey=<device-key>`.
+5. Select **Copy connection string** to copy the device connection string to the clipboard. You can now paste this connection-string into the source code of the device application you are working with. The samples in this repository use connection strings in the format `HostName=<iothub-name>.azure-devices.net;DeviceId=<device-name>;SharedAccessKey=<device-key>`.
 
 For further information about using the Device Explorer tool to perform tasks such as disabling a device, monitoring a device, and sending commands to a device see [Using the Device Explorer tool][lnk-device-explorer-docs].
 
