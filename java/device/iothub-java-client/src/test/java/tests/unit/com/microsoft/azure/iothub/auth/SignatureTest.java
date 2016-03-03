@@ -19,7 +19,7 @@ public class SignatureTest
 {
     @Mocked SignatureHelper mockSigHelper;
 
-    // Tests_SRS_SIGNATURE_11_001: [The signature shall be computed from a composition of functions as such: convertSignatureHexDigitsToLowercase(encodeSignatureWebSafe(encodeSignatureUtf8(encodeSignatureBase64(encryptSignatureHmacSha256(buildRawSignature(resourceUri, expiryTime)))))).]
+    // Tests_SRS_SIGNATURE_11_001: [The signature shall be computed from a composition of functions as such: convertSignatureHexDigitsToLowercase(encodeSignatureWebSafe(encodeSignatureUtf8(encodeSignatureBase64(encryptSignatureHmacSha256(buildRawSignature(scope, expiryTime)))))).]
     @Test
     public void signatureComputedInOrder()
     {

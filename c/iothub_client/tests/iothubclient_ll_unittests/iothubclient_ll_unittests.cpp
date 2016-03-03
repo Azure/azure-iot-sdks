@@ -96,6 +96,32 @@ static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_NULL_protocol =
     TEST_IOTHUBSUFFIX,      /* const char* iotHubSuffix;                    */
 };
 
+#define FAKE_TRANSPORT_HANDLE (TRANSPORT_HANDLE)0xDEAD
+
+static const IOTHUB_CLIENT_DEVICE_CONFIG TEST_DEVICE_CONFIG =
+{
+	provideFAKE,
+	FAKE_TRANSPORT_HANDLE,
+	TEST_DEVICE_ID,
+	TEST_DEVICE_KEY
+};
+
+static const IOTHUB_CLIENT_DEVICE_CONFIG TEST_DEVICE_CONFIG_null_protocol =
+{
+	NULL,
+	FAKE_TRANSPORT_HANDLE,
+	TEST_DEVICE_ID,
+	TEST_DEVICE_KEY
+};
+
+static const IOTHUB_CLIENT_DEVICE_CONFIG TEST_DEVICE_CONFIG_null_handle =
+{
+	provideFAKE,
+	NULL,
+	TEST_DEVICE_ID,
+	TEST_DEVICE_KEY
+};
+
 static size_t currentmalloc_call;
 static size_t whenShallmalloc_fail;
 static IOTHUB_CLIENT_STATUS currentIotHubClientStatus;
@@ -456,7 +482,10 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .SetReturn((TRANSPORT_HANDLE)0x42);
-        
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+			.IgnoreAllArguments();
+
         ///act
         auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
 
@@ -568,6 +597,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+			.IgnoreAllArguments();
+
 		///act
 		auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
 
@@ -663,6 +695,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 
 		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+			.IgnoreAllArguments();
 
 		///act
 		auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
@@ -1725,9 +1760,40 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         ASSERT_ARE_EQUAL(void_ptr, NULL, result);
     }
 
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_009: [If the _Register function fails, this function shall fail and return NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_Create_fails_when_underlying_transport_register_fails)
+	{
+		///arrange
+		CIoTHubClientLLMocks mocks;
+		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, TEST_CONFIG.deviceId, TEST_CONFIG.deviceKey, IGNORED_PTR_ARG))
+			.IgnoreArgument(1)
+			.IgnoreArgument(4)
+			.SetFailReturn((IOTHUB_DEVICE_HANDLE)NULL);
+
+		///act
+		auto result = IoTHubClient_LL_Create(&TEST_CONFIG);
+
+		///assert
+		ASSERT_ARE_EQUAL(void_ptr, NULL, result);
+	}
+
     /*Tests_SRS_IOTHUBCLIENT_LL_02_004: [Otherwise IoTHubClient_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
     /*Tests_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClient_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
     /*Tests_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.] */
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_008: [IoTHubClient_LL_Create shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.] */
     TEST_FUNCTION(IoTHubClient_LL_Create_suceeds)
     {
         ///arrange
@@ -1742,6 +1808,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .IgnoreArgument(1)
             .SetReturn((TRANSPORT_HANDLE)0x42);
 
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register((TRANSPORT_HANDLE)0x42, TEST_CONFIG.deviceId, TEST_CONFIG.deviceKey, IGNORED_PTR_ARG))
+			.IgnoreArgument(4);
+
         ///act
         auto result = IoTHubClient_LL_Create(&TEST_CONFIG);
 
@@ -1752,6 +1821,112 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         ///cleanup
         IoTHubClient_LL_Destroy(result);
     }
+
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_001: [IoTHubClient_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_null_config_fails)
+	{
+		CIoTHubClientLLMocks mocks;
+
+		auto result = IoTHubClient_LL_CreateWithTransport(NULL);
+
+		ASSERT_IS_NULL(result);
+
+	}
+	
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_001: [IoTHubClient_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_null_protocol_fails)
+	{
+		CIoTHubClientLLMocks mocks;
+
+		auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG_null_protocol);
+
+		ASSERT_IS_NULL(result);
+		
+	}
+	
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_001: [IoTHubClient_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_null_transportHandle_fails)
+	{
+		CIoTHubClientLLMocks mocks;
+
+		auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG_null_handle);
+
+		ASSERT_IS_NULL(result);
+	}
+
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_002: [IoTHubClient_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_LL_HANDLE.] */
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_004: [IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.] */
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_006: [IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_Succeeds)
+	{
+		///arrange
+		CIoTHubClientLLMocks mocks;
+
+		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(TEST_DEVICE_CONFIG.transportHandle, TEST_DEVICE_CONFIG.deviceId, TEST_DEVICE_CONFIG.deviceKey, IGNORED_PTR_ARG))
+			.IgnoreArgument(4);
+
+		///act
+		auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+
+		///assert
+		ASSERT_IS_NOT_NULL(result);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubClient_LL_Destroy(result);
+	}
+
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_007: [If the _Register function fails, this function shall fail and return NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_transport_register_fails_returns_null)
+	{
+		///arrange
+		CIoTHubClientLLMocks mocks;
+
+		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(TEST_DEVICE_CONFIG.transportHandle, TEST_DEVICE_CONFIG.deviceId, TEST_DEVICE_CONFIG.deviceKey, IGNORED_PTR_ARG))
+			.IgnoreArgument(4)
+			.SetFailReturn((IOTHUB_DEVICE_HANDLE)NULL);
+
+		///act
+		auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+
+		///assert
+		ASSERT_IS_NULL(result);
+
+		///cleanup
+	}
+
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_003: [If allocation fails, the function shall fail and return NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_allocation_fails_returns_null)
+	{
+		///arrange
+		CIoTHubClientLLMocks mocks;
+
+		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+			.IgnoreArgument(1)
+			.SetFailReturn((void*)NULL);
+
+		///act
+		auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+
+		///assert
+		ASSERT_IS_NULL(result);
+
+		///cleanup
+	}
 
     /*Tests_SRS_IOTHUBCLIENT_LL_02_009: [IoTHubClient_LL_Destroy shall do nothing if parameter iotHubClientHandle is NULL.] */
     TEST_FUNCTION(IoTHubClient_LL_Destroy_with_NULL_succeeds)
@@ -1765,7 +1940,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         ///assert -uMock does it
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_LL_02_010: [IoTHubClient_LL_Destroy it shall call the underlaying layer's _Destroy function and shall free the resources allocated by IoTHubClient (if any).] */
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_010: [If iotHubClientHandle was not created by IoTHubClient_LL_CreateWithTransport, IoTHubClient_LL_Destroy  shall call the underlaying layer's _Destroy function.] */
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_010: [IoTHubClient_LL_Destroy  shall call the underlaying layer's _Unregister function] */
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_011: [IoTHubClient_LL_Destroy  shall free the resources allocated by IoTHubClient (if any).] */
     TEST_FUNCTION(IoTHubClient_LL_Destroys_the_underlying_transport_succeeds)
     {
         ///arrange
@@ -1773,6 +1950,8 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         auto handle = IoTHubClient_LL_Create(&TEST_CONFIG);
         mocks.ResetAllCalls();
 
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Unregister(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
@@ -1786,6 +1965,28 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 
         ///assert -uMock does it
     }
+
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_005: [IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.] */
+	TEST_FUNCTION(IoTHubClient_LL_Destroys_unregisters_but_does_not_destroy_transport_succeeds)
+	{
+		///arrange
+		CIoTHubClientLLMocks mocks;
+		auto handle = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+		mocks.ResetAllCalls();
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Unregister(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		///act
+		IoTHubClient_LL_Destroy(handle);
+
+		///assert -uMock does it
+	}
 
     /*Tests_SRS_IOTHUBCLIENT_LL_02_011: [IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle or eventMessageHandle is NULL.]*/
     TEST_FUNCTION(IoTHubClient_LL_SendEventAsync_with_NULL_iotHubClientHandle_fails)
@@ -1883,7 +2084,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         IoTHubClient_LL_SendEventAsync(handle, messageHandle, eventConfirmationCallback, (void*)1);
         mocks.ResetAllCalls();
 
-        STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Unregister(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*IOTHUBCLIENT*/
             .IgnoreArgument(1);

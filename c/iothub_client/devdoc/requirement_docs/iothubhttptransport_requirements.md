@@ -91,13 +91,15 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 
 **SRS_TRANSPORTMULTITHTTP_17_001: [**If parameter `config` is `NULL`, then `IoTHubTransportHttp_Create` shall return `NULL`.**]**   
 **SRS_TRANSPORTMULTITHTTP_17_002: [** If field `transportConfig` is `NULL`, then `IoTHubTransportHttp_Create` shall return `NULL`. **]**  
-**SRS_TRANSPORTMULTITHTTP_17_003: [** If fields `iotHubName` or `iotHubSuffix` in `transportConfig` are NULL, then `IoTHubTransportHttp_Create` shall return `NULL`. **]**    
+**SRS_TRANSPORTMULTITHTTP_17_003: [** If fields `protocol`, `iotHubName` or `iotHubSuffix` in `transportConfig` are NULL, then `IoTHubTransportHttp_Create` shall return `NULL`. **]**    
 **SRS_TRANSPORTMULTITHTTP_17_005: [** `IoTHubTransportHttp_Create` shall create an immutable string (further called hostname) containing `config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_006: [** If creating the hostname fails then `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_007: [** `IoTHubTransportHttp_Create` shall create a `HTTPAPIEX_HANDLE` by a call to `HTTPAPIEX_Create` passing for `hostName` the hostname so far constructed by `IoTHubTransportHttp_Create`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_008: [** If creating the `HTTPAPIEX_HANDLE` fails then `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_009: [** `IoTHubTransportHttp_Create` shall call `VECTOR_create` to create a vector of registered devices. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_010: [** If creating the vector fails, then `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_009: [** `IoTHubTransportHttp_Create` shall call `VECTOR_create` to create a list of registered devices. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_010: [** If creating the list fails, then `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_130: [** `IoTHubTransportHttp_Create` shall allocate memory for the handle. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_131: [** If allocation fails, `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_011: [** Otherwise, `IoTHubTransportHttp_Create` shall succeed and return a non-`NULL` value. **]**
  
 ## IoTHubTransportHttp_Destroy
@@ -115,21 +117,27 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 
 `IoTHubTransportHttp_Register` shall bind an IoT Hub device to a transport handle and return a device handle for subsequent device specific calls to this API.
 
+**SRS_TRANSPORTMULTITHTTP_17_142: [** If `handle` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_014: [** If parameter `deviceId` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_015: [** If parameter `deviceKey` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_016: [** If parameter `waitingToSend` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_017: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/events" + APIVERSION. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_137: [** `IoTHubTransportHttp_Register` shall search the devices list for any device matching name `deviceId`. If `deviceId` is found it shall return NULL. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_133: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "deviceId") from config->deviceConfig->deviceId. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_134: [** If deviceId is not created, then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_135: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "deviceKey") from deviceKey.  **]**   
+**SRS_TRANSPORTMULTITHTTP_17_136: [** If deviceKey is not created, then `IoTHubTransportHttp_Register` shall fail and return `NULL`.   **]**   
+**SRS_TRANSPORTMULTITHTTP_17_017: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(deviceId) + "/messages/events" + APIVERSION. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_018: [** If creating the string fail for any reason then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_019: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/devicebound" + APIVERSION. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_020: [** If creating the message HTTP relative path fails, then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**
+**SRS_TRANSPORTMULTITHTTP_17_019: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(deviceId) + "/messages/devicebound" + APIVERSION. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_020: [** If creating the message HTTP relative path fails, then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_021: [** `IoTHubTransportHttp_Register` shall create a set of HTTP headers (further called "event HTTP request headers") consisting of the following fixed field names and values:
-"iothub-to":"/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/events";
+"iothub-to":"/devices/" + URL_ENCODED(deviceId) + "/messages/events";
 "Authorization":""  
 "Accept":"application/json"  
-"Connection":"Keep-Alive" **]**  
-**SRS_TRANSPORTMULTITHTTP_17_022: [** If creating the event HTTP request headers fails, then `IoTHubTransportHttp_Register` shall fail and return `NULL`.
-`IoTHubTransportHttp_Register` shall create a set of HTTP headers (further called "message HTTP request headers") consisting of the following fixed field names and values:   
-"Authorization": "" **]**   
+"Connection":"Keep-Alive" **]**   
+**SRS_TRANSPORTMULTITHTTP_17_022: [** If creating the event HTTP request headers fails, then `IoTHubTransportHttp_Register` shall fail and return `NULL`.**]**
+**SRS_TRANSPORTMULTITHTTP_17_132: [** `IoTHubTransportHttp_Register` shall create a set of HTTP headers (further called "message HTTP request headers") consisting of the following fixed field names and values:   
+"Authorization": "" **]**    
 **SRS_TRANSPORTMULTITHTTP_17_023: [** If creating message HTTP request headers then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**    
 **SRS_TRANSPORTMULTITHTTP_17_024: [** `IoTHubTransportHttp_Register` shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_025: [** If creating the abandonHTTPrelativePathBegin fails then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
@@ -140,6 +148,7 @@ The result of the `URL_EncodeString` shall be known as `keyName`.
 **SRS_TRANSPORTMULTITHTTP_17_029: [** If the clone fails then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**
 The result of the clone shall be known as uriResouce.   
 **SRS_TRANSPORTMULTITHTTP_17_030: [** `IoTHubTransportHttp_Register` shall invoke STRING_concat with arguments uriResource and the string "/devices/". **]**   
+**SRS_TRANSPORTMULTITHTTP_17_141: [** If the STRING_concat fails, then it shall fail and return NULL. **]**    
 **SRS_TRANSPORTMULTITHTTP_17_031: [** `IoTHubTransportHttp_Register` shall invoke `STRING_concat_with_STRING` with arguments uriResource and `keyName`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_032: [** If the `STRING_concat_with_STRING` fails then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_033: [** `IoTHubTransportHttp_Register` shall invoke `STRING_construct` with an argument of config->deviceConfig->deviceKey. **]**   
@@ -164,7 +173,7 @@ The result of the `STRING_construct` shall be known as key.
 ```
 
 **SRS_TRANSPORTMULTITHTTP_17_044: [** If `deviceHandle` is `NULL`, then `IoTHubTransportHttp_Unregister` shall do nothing. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_045: [** `IoTHubTransportHttp_Unregister` shall locate `deviceHandle` in the transport device list by calling `VECTOR_find_if`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_045: [** `IoTHubTransportHttp_Unregister` shall locate `deviceHandle` in the transport device list by calling `list_find_if`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_046: [** If the device structure is not found, then this function shall fail and do nothing. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_047: [** `IoTHubTransportHttp_Unregister` shall free all the resources used in the device structure. **]**       
 **SRS_TRANSPORTMULTITHTTP_17_048: [** `IoTHubTransportHttp_Unregister` shall call `VECTOR_erase` to remove device from devices list. **]**   
@@ -177,10 +186,11 @@ The result of the `STRING_construct` shall be known as key.
 `IoTHubTransportHttp_DoWork` performs all the work for all devices registered to the iothub HTTP transport. This includes sending event messages, filtering "too big" messages, pulling messages, pushing them to the upper layer and conveying the answer from the upper layer to iothub.  Devices are processed in round-robin scheduling.
 
 **SRS_TRANSPORTMULTITHTTP_17_049: [** If `handle` is `NULL`, then `IoTHubTransportHttp_DoWork` shall do nothing. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_050: [** `IoTHubTransportHttp_DoWork` shall call `VECTOR_size` on the device list. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_051: [** IF the vector is empty, then `IoTHubTransportHttp_DoWork` shall do nothing. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_140: [** If `iotHubClientHandle` is `NULL`, then `IoTHubTransportHttp_DoWork` shall do nothing. **]**
+**SRS_TRANSPORTMULTITHTTP_17_050: [** `IoTHubTransportHttp_DoWork` shall call loop through the device list. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_051: [** IF the list is empty, then `IoTHubTransportHttp_DoWork` shall do nothing. **]**   
 
-**SRS_TRANSPORTMULTITHTTP_17_052: [** `IoTHubTransportHttp_DoWork` shall perform a round-robin loop through every `deviceHandle` in the transport device list by calling `VECTOR_element`. **]**
+**SRS_TRANSPORTMULTITHTTP_17_052: [** `IoTHubTransportHttp_DoWork` shall perform a round-robin loop through every `deviceHandle` in the transport device list. **]**
 
 MultiDevTransportHttp shall perform the following actions on each device:
 
@@ -303,7 +313,7 @@ MultiDevTransportHttp shall perform the following actions on each device:
 
 #### Rejecting a message
 
-**SRS_TRANSPORTMULTITHTTP_17_101: [** `_DoWork` shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+**SRS_TRANSPORTMULTITHTTP_17_101: [** `_DoWork` shall call `HTTPAPIEX_SAS_ExecuteRequest` with the following parameters:
 - requestType: DELETE
 - relativePath: abandon relative path begin + value of ETag +"?reject" + APIVERSION 
 - requestHttpHeadersHandle: an HTTP headers instance containing the following   
@@ -314,7 +324,7 @@ MultiDevTransportHttp shall perform the following actions on each device:
 - responseHeadearsHandle: `NULL`
 - responseContent: `NULL` **]**
 
-**SRS_TRANSPORTMULTITHTTP_17_102: [** Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204. **]** 
+**SRS_TRANSPORTMULTITHTTP_17_102: [** Rejecting a message is successful when `HTTPAPIEX_SAS_ExecuteRequest` completes successfully and the status code is 204. **]** 
 
 
 ### "Last action" action: 
@@ -327,7 +337,7 @@ return;
 ```
 
 **SRS_TRANSPORTMULTITHTTP_17_103: [** If parameter `deviceHandle` is `NULL` then `IoTHubTransportHttp_Subscribe` shall fail and return a non-zero value. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_104: [** `IoTHubTransportHttp_Subscribe` shall locate `deviceHandle` in the transport device list by calling `VECTOR_find_if`. **]**    
+**SRS_TRANSPORTMULTITHTTP_17_104: [** `IoTHubTransportHttp_Subscribe` shall locate `deviceHandle` in the transport device list by calling `list_find_if`. **]**    
 **SRS_TRANSPORTMULTITHTTP_17_105: [** If the device structure is not found, then this function shall fail and return a non-zero value. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_106: [** Otherwise, `IoTHubTransportHttp_Subscribe` shall set the device so that subsequent calls to DoWork should execute HTTP requests. **]**   
 
@@ -337,7 +347,7 @@ return;
 ```
 
 **SRS_TRANSPORTMULTITHTTP_17_107: [** If parameter `deviceHandle` is `NULL` then `IoTHubTransportHttp_Unsubscribe` shall fail do nothing. **]**  
-**SRS_TRANSPORTMULTITHTTP_17_108: [** `IoTHubTransportHttp_Unsubscribe` shall locate `deviceHandle` in the transport device list by calling `VECTOR_find_if`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_108: [** `IoTHubTransportHttp_Unsubscribe` shall locate `deviceHandle` in the transport device list by calling `list_find_if`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_109: [** If the device structure is not found, then this function shall fail and do nothing. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_110: [** Otherwise, `IoTHubTransportHttp_Subscribe` shall set the device so that subsequent calls to DoWork should not execute HTTP requests. **]**   
 
@@ -346,8 +356,11 @@ return;
 	extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE deviceHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
 ```
 
-**SRS_TRANSPORTMULTITHTTP_17_111: [** `IoTHubTransportHttp_GetSendStatus` shall return `IOTHUB_CLIENT_INVALID_ARG` if called with `NULL` parameter. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_112: [** `IoTHubTransportHttp_GetSendStatus` shall return IOTHUB_``CLIENT_OK and status `IOTHUB_CLIENT_SEND_STATUS_IDLE` if there are currently no event items to be sent or being sent. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_111: [** `IoTHubTransportHttp_GetSendStatus` shall return `IOTHUB_CLIENT_INVALID_ARG` if called with `NULL` parameter. **]**
+`IoTHubTransportHttp_GetSendStatus` shall return `IOTHUB_CLIENT_INVALID_ARG` if called with `NULL` `iotHubClientStatus` parameter.   
+**SRS_TRANSPORTMULTITHTTP_17_138: [** `IoTHubTransportHttp_GetSendStatus` shall locate `deviceHandle` in the transport device list by calling `list_find_if`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_139: [** If the device structure is not found, then this function shall fail and return with  `IOTHUB_CLIENT_INVALID_ARG`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_112: [** `IoTHubTransportHttp_GetSendStatus` shall return `IOTHUB_CLIENT_OK` and status `IOTHUB_CLIENT_SEND_STATUS_IDLE` if there are currently no event items to be sent or being sent. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_113: [** `IoTHubTransportHttp_GetSendStatus` shall return `IOTHUB_CLIENT_OK` and status `IOTHUB_CLIENT_SEND_STATUS_BUSY` if there are currently event items to be sent or being sent. **]**   
 
 ## IoTHubTransportHttp_SetOption
@@ -361,7 +374,7 @@ return;
 **SRS_TRANSPORTMULTITHTTP_17_116: [** If value parameter is `NULL` then `IoTHubTransportHttp_SetOption` shall return `IOTHUB_CLIENT_INVALID_ARG`.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_117: [** If `optionName` is an option handled by `IoTHubTransportHttp` then it shall be set.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_118: [** Otherwise, `IoTHubTransport_Http` shall call `HTTPAPIEX_SetOption` with the same parameters and return the translated code.  **]**   
-**SRS_TRANSPORTMULTITHTTP_17_119: [** The following table translates `HTTPAPIEX` return codes to IOTH``UB_CLIENT_RESULT return codes: **]**       
+**SRS_TRANSPORTMULTITHTTP_17_119: [** The following table translates `HTTPAPIEX` return codes to `IOTHUB_CLIENT_RESULT` return codes: **]**       
 
 | HTTPAPIEX return code	| IOTHUB_CLIENT_RESULT         |
 | --------------------- | ---------------------------- |

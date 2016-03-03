@@ -58,6 +58,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int portNum;
     MQTT_CLIENT_HANDLE mqttClient;
     uint16_t packetId;
+    bool isRegistered;
     bool connected;
     bool subscribed;
     bool receiveMessages;
@@ -257,22 +258,22 @@ static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
 
     if (transportState->receiveMessages && !transportState->subscribed)
     {
-        SUBSCRIBE_PAYLOAD subscribe[] = {
-            { STRING_c_str(transportState->mqttMessageTopic), DELIVER_AT_LEAST_ONCE }
-        };
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransportMqtt_Subscribe shall call mqtt_client_subscribe to subscribe to the Message Topic.] */
-        if (mqtt_client_subscribe(transportState->mqttClient, transportState->packetId++, subscribe, 1) != 0)
-        {
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.] */
-            result = __LINE__;
-        }
-        else
-        {
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_018: [On success IoTHubTransportMqtt_Subscribe shall return 0.] */
-            transportState->subscribed = true;
-            transportState->currPacketState = SUBSCRIBE_TYPE;
-            result = 0;
-        }
+    SUBSCRIBE_PAYLOAD subscribe[] = {
+        { STRING_c_str(transportState->mqttMessageTopic), DELIVER_AT_LEAST_ONCE }
+    };
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransportMqtt_Subscribe shall call mqtt_client_subscribe to subscribe to the Message Topic.] */
+    if (mqtt_client_subscribe(transportState->mqttClient, transportState->packetId++, subscribe, 1) != 0)
+    {
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.] */
+        result = __LINE__;
+    }
+    else
+    {
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_018: [On success IoTHubTransportMqtt_Subscribe shall return 0.] */
+        transportState->subscribed = true;
+        transportState->currPacketState = SUBSCRIBE_TYPE;
+        result = 0;
+    }
     }
     else
     {
@@ -544,6 +545,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_010: [IoTHubTransportMqtt_Create shall allocate memory to save its internal state where all topics, hostname, device_id, device_key, sasTokenSr and client handle shall be saved.] */
                 DList_InitializeListHead(&(state->waitingForAck));
                 state->destroyCalled = false;
+                state->isRegistered = false;
                 state->subscribed = false;
                 state->connected = false;
                 state->receiveMessages = false;
@@ -658,11 +660,10 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle)
     }
 }
 
-int IoTHubTransportMqtt_Subscribe(TRANSPORT_HANDLE handle)
+int IoTHubTransportMqtt_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 {
     int result;
-    PMQTTTRANSPORT_HANDLE_DATA transportState = (PMQTTTRANSPORT_HANDLE_DATA)handle;
-    if (transportState == NULL)
+    if (handle == NULL)
     {
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_015: [If parameter handle is NULL than IoTHubTransportMqtt_Subscribe shall return a non-zero value.] */
         LogError("Invalid handle parameter. NULL.\r\n");
@@ -685,7 +686,7 @@ int IoTHubTransportMqtt_Subscribe(TRANSPORT_HANDLE handle)
     return result;
 }
 
-void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_HANDLE handle)
+void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 {
     PMQTTTRANSPORT_HANDLE_DATA transportState = (PMQTTTRANSPORT_HANDLE_DATA)handle;
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_019: [If parameter handle is NULL then IoTHubTransportMqtt_Unsubscribe shall do nothing.] */
@@ -697,6 +698,10 @@ void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_HANDLE handle)
         transportState->subscribed = false;
         transportState->receiveMessages = false;
     }
+    else
+    {
+        LogError("Invalid argument to unsubscribe (NULL). \r\n");
+}
 }
 
 extern void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
@@ -816,7 +821,7 @@ extern void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL
     }
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
+IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -878,12 +883,55 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_HANDLE handle, cons
 
 IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
 {
-    return (IOTHUB_DEVICE_HANDLE)handle;
+    IOTHUB_DEVICE_HANDLE result;
+    // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransportMqtt_Register shall return NULL if the TRANSPORT_HANDLE is NULL.]
+    // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_002: [ IoTHubTransportMqtt_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.]
+    if ((handle == NULL) || (deviceId == NULL) || (deviceKey == NULL) || (waitingToSend == NULL))
+    {
+        result = NULL;
+    }
+    else
+    {
+        MQTTTRANSPORT_HANDLE_DATA* transportState = (MQTTTRANSPORT_HANDLE_DATA*)handle;
+
+        // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_003: [ IoTHubTransportMqtt_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportMqtt_Create.]
+        if (strcmp(STRING_c_str(transportState->device_id), deviceId) != 0)
+        {
+            result = NULL;
+        }
+        else if (strcmp(STRING_c_str(transportState->device_key), deviceKey) != 0)
+        {
+            result = NULL;
+        }
+        else
+        {
+            if (transportState->isRegistered == true)
+            {
+                LogError("Transport already has device registered by id: [%s]", deviceId);
+                result = NULL;
+            }
+            else
+            {
+                transportState->isRegistered = true;
+                // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
+                result = (IOTHUB_DEVICE_HANDLE)handle;
+            }
+
+        }
+    }
+
+    return result;
 }
 
+// Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_005: [ IoTHubTransportMqtt_Unregister shall return. ]
 void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 {
-    return;
+    if (deviceHandle != NULL)
+    {
+        MQTTTRANSPORT_HANDLE_DATA* transportState = (MQTTTRANSPORT_HANDLE_DATA*)deviceHandle;
+
+        transportState->isRegistered = false;
+    }
 }
 
 TRANSPORT_PROVIDER myfunc = {

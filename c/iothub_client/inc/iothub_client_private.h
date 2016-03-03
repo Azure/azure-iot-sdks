@@ -71,7 +71,7 @@ pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       \
 pfIoTHubTransport_Create IoTHubTransport_Create;             \
 pfIoTHubTransport_Destroy IoTHubTransport_Destroy;           \
 pfIotHubTransport_Register IoTHubTransport_Register;         \
-pfIotHubTransport_Unregister IoTHubTransport_Unegister;      \
+pfIotHubTransport_Unregister IoTHubTransport_Unregister;      \
 pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;       \
 pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;   \
 pfIoTHubTransport_DoWork IoTHubTransport_DoWork;             \

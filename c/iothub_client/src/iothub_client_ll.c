@@ -25,6 +25,8 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
 {
     DLIST_ENTRY waitingToSend;
     TRANSPORT_HANDLE transportHandle;
+	bool isSharedTransport;
+	IOTHUB_DEVICE_HANDLE deviceHandle;
     TRANSPORT_PROVIDER_FIELDS;
     IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback;
     void* messageUserContextCallback;
@@ -241,6 +243,19 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
     return result;
 }
 
+static void setTransportProtocol(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, TRANSPORT_PROVIDER* protocol)
+{
+	handleData->IoTHubTransport_SetOption = protocol->IoTHubTransport_SetOption;
+	handleData->IoTHubTransport_Create = protocol->IoTHubTransport_Create;
+	handleData->IoTHubTransport_Destroy = protocol->IoTHubTransport_Destroy;
+	handleData->IoTHubTransport_Register = protocol->IoTHubTransport_Register;
+	handleData->IoTHubTransport_Unregister = protocol->IoTHubTransport_Unregister;
+	handleData->IoTHubTransport_Subscribe = protocol->IoTHubTransport_Subscribe;
+	handleData->IoTHubTransport_Unsubscribe = protocol->IoTHubTransport_Unsubscribe;
+	handleData->IoTHubTransport_DoWork = protocol->IoTHubTransport_DoWork;
+	handleData->IoTHubTransport_GetSendStatus = protocol->IoTHubTransport_GetSendStatus;
+
+}
 
 IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* config)
 {
@@ -267,13 +282,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
             /*Codes_SRS_IOTHUBCLIENT_LL_02_004: [Otherwise IoTHubClient_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
             IOTHUBTRANSPORT_CONFIG lowerLayerConfig;
             DList_InitializeListHead(&(handleData->waitingToSend));
-            handleData->IoTHubTransport_SetOption = ((TRANSPORT_PROVIDER*)config->protocol())->IoTHubTransport_SetOption;
-            handleData->IoTHubTransport_Create = ((TRANSPORT_PROVIDER*)config->protocol())->IoTHubTransport_Create;
-            handleData->IoTHubTransport_Destroy = ((TRANSPORT_PROVIDER*)config->protocol())->IoTHubTransport_Destroy;
-            handleData->IoTHubTransport_Subscribe = ((TRANSPORT_PROVIDER*)config->protocol())->IoTHubTransport_Subscribe;
-            handleData->IoTHubTransport_Unsubscribe = ((TRANSPORT_PROVIDER*)config->protocol())->IoTHubTransport_Unsubscribe;
-            handleData->IoTHubTransport_DoWork = ((TRANSPORT_PROVIDER*)config->protocol())->IoTHubTransport_DoWork;
-            handleData->IoTHubTransport_GetSendStatus = ((TRANSPORT_PROVIDER*)config->protocol())->IoTHubTransport_GetSendStatus;
+			setTransportProtocol(handleData, (TRANSPORT_PROVIDER*)config->protocol());
             handleData->messageCallback = NULL;
             handleData->messageUserContextCallback = NULL;
             handleData->lastMessageReceiveTime = INDEFINITE_TIME;
@@ -289,13 +298,78 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
             }
             else
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.] */
-                result = handleData;
+				/*Codes_SRS_IOTHUBCLIENT_LL_17_008: [IoTHubClient_LL_Create shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.] */
+				if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(handleData->transportHandle, config->deviceId, config->deviceKey, &(handleData->waitingToSend))) == NULL)
+				{
+					/*Codes_SRS_IOTHUBCLIENT_LL_17_009: [If the _Register function fails, this function shall fail and return NULL.]*/
+					LogError("Registering device in transport failed");
+					handleData->IoTHubTransport_Destroy(handleData->transportHandle);
+					free(handleData);
+					result = NULL;
+				}
+				else
+				{
+					/*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.] */
+					handleData->isSharedTransport = false;
+					result = handleData;
+				}
             }
         }
     }
 
     return result;
+}
+
+IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_DEVICE_CONFIG * config)
+{
+	IOTHUB_CLIENT_LL_HANDLE result;
+	/*Codes_SRS_IOTHUBCLIENT_LL_17_001: [IoTHubClient_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.]*/
+	if (
+		(config == NULL) ||
+		(config->protocol == NULL) ||
+		(config->transportHandle == NULL)
+		)
+	{
+		result = NULL;
+		LogError("invalid configuration (NULL detected)\r\n");
+	}
+	else
+	{
+		/*Codes_SRS_IOTHUBCLIENT_LL_17_002: [IoTHubClient_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_LL_HANDLE.]*/
+		IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)malloc(sizeof(IOTHUB_CLIENT_LL_HANDLE_DATA));
+		if (handleData == NULL)
+		{
+			/*Codes_SRS_IOTHUBCLIENT_LL_17_003: [If allocation fails, the function shall fail and return NULL.] */
+			LogError("malloc failed\r\n");
+			result = NULL;
+		}
+		else
+		{
+			/*Codes_SRS_IOTHUBCLIENT_LL_17_004: [IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
+			DList_InitializeListHead(&(handleData->waitingToSend));
+			setTransportProtocol(handleData, (TRANSPORT_PROVIDER*)config->protocol());
+			handleData->messageCallback = NULL;
+			handleData->messageUserContextCallback = NULL;
+			handleData->lastMessageReceiveTime = INDEFINITE_TIME;
+			handleData->transportHandle = config->transportHandle;
+			/*Codes_SRS_IOTHUBCLIENT_LL_17_006: [IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.]*/
+			if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(config->transportHandle, config->deviceId, config->deviceKey, &(handleData->waitingToSend))) == NULL)
+			{
+				/*Codes_SRS_IOTHUBCLIENT_LL_17_007: [If the _Register function fails, this function shall fail and return NULL.]*/
+				LogError("Registering device in transport failed");
+				free(handleData);
+				result = NULL;
+			}
+			else
+			{
+				/*Codes_SRS_IOTHUBCLIENT_LL_17_005: [IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.]*/
+				handleData->isSharedTransport = true;
+				result = handleData;
+			}
+		}
+	}
+
+	return result;
 }
 
 void IoTHubClient_LL_Destroy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
@@ -304,9 +378,14 @@ void IoTHubClient_LL_Destroy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
     if (iotHubClientHandle != NULL)
     {
         PDLIST_ENTRY unsend;
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_010: [IoTHubClient_LL_Destroy it shall call the underlaying layer's _Destroy function and shall free the resources allocated by IoTHubClient (if any).] */
+		/*Codes_SRS_IOTHUBCLIENT_LL_17_010: [IoTHubClient_LL_Destroy  shall call the underlaying layer's _Unregister function] */
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
-        handleData->IoTHubTransport_Destroy(handleData->transportHandle);
+		handleData->IoTHubTransport_Unregister(handleData->deviceHandle);
+		if (handleData->isSharedTransport == false)
+		{
+			/*Codes_SRS_IOTHUBCLIENT_LL_02_010: [If iotHubClientHandle was not created by IoTHubClient_LL_CreateWithTransport, IoTHubClient_LL_Destroy  shall call the underlaying layer's _Destroy function.] */
+			handleData->IoTHubTransport_Destroy(handleData->transportHandle);
+		}
         /*if any, remove the items currently not send*/
         while ((unsend = DList_RemoveHeadList(&(handleData->waitingToSend))) != &(handleData->waitingToSend))
         {
@@ -319,6 +398,7 @@ void IoTHubClient_LL_Destroy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
             IoTHubMessage_Destroy(temp->messageHandle);
             free(temp);
         }
+		/*Codes_SRS_IOTHUBCLIENT_LL_17_011: [IoTHubClient_LL_Destroy  shall free the resources allocated by IoTHubClient (if any).] */
         free(handleData);
     }
 }
@@ -385,7 +465,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE 
         if (messageCallback == NULL)
         {
             /*Codes_SRS_IOTHUBCLIENT_LL_02_019: [If parameter messageCallback is NULL then IoTHubClient_LL_SetMessageCallback shall call the underlying layer's _Unsubscribe function and return IOTHUB_CLIENT_OK.] */
-            handleData->IoTHubTransport_Unsubscribe(handleData->transportHandle);
+            handleData->IoTHubTransport_Unsubscribe(handleData->deviceHandle);
             handleData->messageCallback = NULL;
             handleData->messageUserContextCallback = NULL;
             result = IOTHUB_CLIENT_OK;
@@ -393,7 +473,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE 
         else
         {
             /*Codes_SRS_IOTHUBCLIENT_LL_02_017: [If parameter messageCallback is non-NULL then IoTHubClient_LL_SetMessageCallback shall call the underlying layer's _Subscribe function.]*/
-            if (handleData->IoTHubTransport_Subscribe(handleData->transportHandle) == 0)
+            if (handleData->IoTHubTransport_Subscribe(handleData->deviceHandle) == 0)
             {
                 handleData->messageCallback = messageCallback;
                 handleData->messageUserContextCallback = userContextCallback;
@@ -438,7 +518,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetSendStatus(IOTHUB_CLIENT_LL_HANDLE iotHu
 
         /* Codes_SRS_IOTHUBCLIENT_09_008: [IoTHubClient_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there is currently no items to be sent] */
         /* Codes_SRS_IOTHUBCLIENT_09_009: [IoTHubClient_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently items to be sent] */
-        result = handleData->IoTHubTransport_GetSendStatus(handleData->transportHandle, iotHubClientStatus);
+        result = handleData->IoTHubTransport_GetSendStatus(handleData->deviceHandle, iotHubClientStatus);
     }
 
     return result;

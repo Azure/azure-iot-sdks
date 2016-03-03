@@ -139,6 +139,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
           } else {
             assert.instanceOf(dev, Device);
             assert.equal(deviceInfo.deviceId, dev.deviceId);
+            assert.notEqual(deviceInfo, dev);
             done();
           }
         });
