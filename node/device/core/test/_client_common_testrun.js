@@ -9,7 +9,7 @@ var util = require('util');
 
 var Client = require('../lib/client.js');
 var Message = require('azure-iot-common').Message;
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 
@@ -24,7 +24,7 @@ function badConfigTests(opName, badConnStrings, Transport, requestFn) {
   }
 
   function expectNotFoundError(err) {
-    assert.include(err.message, 'getaddrinfo ENOTFOUND bad');
+    assert.include(err.message, 'getaddrinfo ENOTFOUND');
   }
 
   function expect401Response(err) {
@@ -296,7 +296,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
 
         client.on('message', function () { });
         client.on('message', function () { });
-        assert.equal(receiver.listenerCount('message'), 1, 'receiver.on was not called once.');
+        assert.equal(receiver.listeners('message').length, 1, 'receiver.on was not called once.');
       });
 
       /*Tests_SRS_NODE_DEVICE_CLIENT_16_005: [The client shall stop listening for messages from the service whenever the last listener unsubscribes from the ‘message’ event.]*/
