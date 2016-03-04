@@ -177,28 +177,6 @@ extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetCorrelationId(IOTHUB_MESSAGE_HANDL
  */
 extern void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 
-/**
-* @brief    Records the time when the message has been delivered to SendEventAsync function.
-            This function is intended to be called only by the client code, and not user code.
-*
-* @param   iotHubMessageHandle Handle to the message.
-* @param   time - time as returned by time C function
-*
-* @return  Returns IOTHUB_MESSAGE_OK if the messageId was set successfully
-*          or an error code otherwise.
-*/
-extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetSendEventAsyncTime(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, time_t time);
-
-/**
-* @brief    Returns the time when the message has been delivered to _SendEventAsync function
-            This function is intended to be called only by the client code, and not user code.
-*
-* @param   iotHubMessageHandle Handle to the message.
-*
-* @return  NULL if there was an error, or a const pointer to the stored time_t.
-*/
-extern const time_t* IoTHubMessage_GetSendEventAsyncTime(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
-
 #ifdef __cplusplus
 }
 #endif

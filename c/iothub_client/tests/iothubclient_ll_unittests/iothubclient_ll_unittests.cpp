@@ -20,6 +20,8 @@
 #include "string_tokenizer.h"
 #include "strings.h"
 
+#include "tickcounter.h"
+
 extern "C" int gballoc_init(void);
 extern "C" void gballoc_deinit(void);
 extern "C" void* gballoc_malloc(size_t size);
@@ -284,7 +286,18 @@ public:
 
     /* Version Mocks */
     MOCK_STATIC_METHOD_0(, const char*, IoTHubClient_GetVersionString)
-    MOCK_METHOD_END(const char*, nullptr)
+    MOCK_METHOD_END(const char*, (const char*) NULL)
+
+    MOCK_STATIC_METHOD_0(, TICK_COUNTER_HANDLE, tickcounter_create);
+        TICK_COUNTER_HANDLE result2 = (TICK_COUNTER_HANDLE )BASEIMPLEMENTATION::gballoc_malloc(1);
+    MOCK_METHOD_END(TICK_COUNTER_HANDLE, result2)
+
+    MOCK_STATIC_METHOD_1(, void, tickcounter_destroy, TICK_COUNTER_HANDLE, tick_counter);
+        BASEIMPLEMENTATION::gballoc_free(tick_counter);
+    MOCK_VOID_METHOD_END()
+
+    MOCK_STATIC_METHOD_2(, int, tickcounter_get_current_ms, TICK_COUNTER_HANDLE, tick_counter, uint64_t*, current_ms);
+    MOCK_METHOD_END(int, 0)
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, DList_InitializeListHead, PDLIST_ENTRY, listHead);
@@ -329,6 +342,10 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientLLMocks, , int, STRING_TOKENIZER_get_n
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, STRING_TOKENIZER_destroy, STRING_TOKENIZER_HANDLE, handle);
 
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubClientLLMocks, , const char*, IoTHubClient_GetVersionString);
+
+DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubClientLLMocks, ,TICK_COUNTER_HANDLE, tickcounter_create);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, tickcounter_destroy, TICK_COUNTER_HANDLE, tick_counter);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , int, tickcounter_get_current_ms, TICK_COUNTER_HANDLE, tick_counter, uint64_t*, current_ms);
 
 static TRANSPORT_PROVIDER FAKE_transport_provider =
 {
@@ -476,6 +493,8 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+
         STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -590,6 +609,7 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
 		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
@@ -689,6 +709,7 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
 		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
@@ -844,7 +865,11 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 
         /* underlying IoTHubClient_LL_Create call */
-        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORE))
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
@@ -1724,8 +1749,29 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         ///arrange
         CIoTHubClientLLMocks mocks;
         whenShallmalloc_fail = 1;
-        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORE))
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
+
+        ///act
+        auto result = IoTHubClient_LL_Create(&TEST_CONFIG);
+
+        ///assert
+        ASSERT_ARE_EQUAL(void_ptr, NULL, result);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_046: [ If creating the TICK_COUNTER_HANDLE fails then IoTHubClient_LL_Create shall fail and return NULL. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_Create_fails_when_tick_counter_create_fails)
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create())
+            .SetFailReturn((TICK_COUNTER_HANDLE)NULL);
 
         ///act
         auto result = IoTHubClient_LL_Create(&TEST_CONFIG);
@@ -1746,6 +1792,10 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
         STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -1770,6 +1820,10 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
 		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 
@@ -1790,6 +1844,7 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 		ASSERT_ARE_EQUAL(void_ptr, NULL, result);
 	}
 
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_045: [ Otherwise IoTHubClient_LL_Create shall create a new TICK_COUNTER_HANDLE ]*/
     /*Tests_SRS_IOTHUBCLIENT_LL_02_004: [Otherwise IoTHubClient_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
     /*Tests_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClient_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
     /*Tests_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.] */
@@ -1800,6 +1855,8 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         CIoTHubClientLLMocks mocks;
         STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
         STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -1865,6 +1922,8 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
 			.IgnoreArgument(1);
 
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+
 		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 
@@ -1892,6 +1951,10 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
 
 		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
@@ -1954,6 +2017,10 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 			.IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -1976,6 +2043,10 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 
 		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Unregister(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
 		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 
@@ -2095,6 +2166,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, eventConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, (void*)1));
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*IOTHUBMESSAGE*/
@@ -2268,6 +2342,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 
         STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, handle))
             .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*_DoWork will ask "what's the time"*/
+            .IgnoreAllArguments();
 
         ///act
         IoTHubClient_LL_DoWork(handle);
