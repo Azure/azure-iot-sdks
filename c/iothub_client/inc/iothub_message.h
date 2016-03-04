@@ -199,24 +199,6 @@ extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetSendEventAsyncTime(IOTHUB_MESSAGE_
 */
 extern const time_t* IoTHubMessage_GetSendEventAsyncTime(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
 
-/**
-* @brief    Returns the value of "messageTimeout" option
-*
-* @param   iotHubMessageHandle Handle to the message.
-*
-* @return  NULL if there was an error, or a const pointer to the stored uint64_t
-*/
-extern const uint64_t* IoTHubMessage_GetMessageTimeout(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
-
-/**
-* @brief    Records the value of "messageTimeout" option
-*
-* @param   iotHubMessageHandle Handle to the message.
-*
-* @return  IOTHUB_MESSAGE_OK if there was no error, or an error code.
-*/
-extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageTimeout(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, uint64_t messageTimeout);
-
 #ifdef __cplusplus
 }
 #endif
