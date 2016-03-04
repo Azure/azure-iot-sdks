@@ -106,7 +106,7 @@ function transportSpecificTests(opts) {
       it('FeedbackReceiver inherits EventEmitter', function (done) {
         testSubject.getFeedbackReceiver(function (err, receiver) {
             if (err) done(err);
-            var EventEmitter = require('events');
+            var EventEmitter = require('events').EventEmitter;
             assert.instanceOf(receiver, EventEmitter);
             done();
         });

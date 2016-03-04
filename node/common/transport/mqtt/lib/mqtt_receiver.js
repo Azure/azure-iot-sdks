@@ -3,7 +3,7 @@
 
 'use strict';
 
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var debug = require('debug')('mqtt-common');
 var Message = require('azure-iot-common').Message;
@@ -36,7 +36,7 @@ function MqttReceiver(mqttClient, topic_subscribe) {
 
   this.on('removeListener', function () {
     // stop listening for AMQP events if our consumers stop listening for our events
-    if (self._listenersInitialized && self.listenerCount('message') === 0) {
+    if (self._listenersInitialized && self.listeners('message').length === 0) {
       debug('Stopped listening for messages');
       self._removeListeners();
     }

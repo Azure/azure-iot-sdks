@@ -8,7 +8,7 @@ var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var ConnectionString = require('./connection_string.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var debug = require('debug')('azure-iot-device.Client');
 
@@ -41,7 +41,7 @@ var Client = function (transport, connStr) {
   this._receiver = null;
 
   this.on('removeListener', function (eventName) {
-    if (this._receiver && eventName === 'message' && this.listenerCount('message') === 0) {
+    if (this._receiver && eventName === 'message' && this.listeners('message').length === 0) {
       this._disconnectReceiver();
     }
   });

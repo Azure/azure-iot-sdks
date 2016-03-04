@@ -27,7 +27,7 @@ function badConfigTests(opName, badConnStrings, Transport, requestFn) {
 
   /*Tests_SRS_NODE_IOTHUB_HTTP_05_007: [If any registry operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
   function expectNotFoundError(err) {
-    assert.include(err.message, 'getaddrinfo ENOTFOUND bad');
+    assert.include(err.message, 'getaddrinfo ENOTFOUND');
   }
 
   /*Tests_SRS_NODE_IOTHUB_HTTP_05_008: [When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
