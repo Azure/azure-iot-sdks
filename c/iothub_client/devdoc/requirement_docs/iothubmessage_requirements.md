@@ -1,7 +1,5 @@
 #IoTHubMessage Requirements
 
-
- 
 ##Overview
 The IoTHub_Message component is encapsulating one message that can be transferred by an IoT hub client.
 References
@@ -154,33 +152,3 @@ SRS_IOTHUBMESSAGE_07_019: **[**If the IOTHUB_MESSAGE_HANDLE correlationId is not
 SRS_IOTHUBMESSAGE_07_020: **[**If the allocation or the copying of the correlationId fails, then IoTHubMessage_SetCorrelationId shall return IOTHUB_MESSAGE_ERROR.**]** 
 SRS_IOTHUBMESSAGE_07_021: **[**IoTHubMessage_SetCorrelationId finishes successfully it shall return IOTHUB_MESSAGE_OK.**]** 
 
-##IoTHubMessage_SetSendEventAsyncTime
-```c
-extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetSendEventAsyncTime(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, time_t time);
-```
-**SRS_IOTHUBMESSAGE_02_034: [** If `iotHubMessageHandle` is `NULL` then `IoTHubMessage_SetSendEventAsyncTime` shall fail and return IOTHUB_MESSAGE_INVALID_ARG. **]**
-**SRS_IOTHUBMESSAGE_02_035: [** If time is (time_t)(-1) then `IoTHubMessage_SetSendEventAsyncTime` shall fail and return IOTHUB_MESSAGE_INVALID_ARG. **]**
-**SRS_IOTHUBMESSAGE_02_036: [** Otherwise, `IoTHubMessage_SetSendEventAsyncTime` shall succeed record the time and return IOTHUB_MESSAGE_OK. **]**
-
-##IoTHubMessage_GetSendEventAsyncTime
-```c
-extern const time_t* IoTHubMessage_GetSendEventAsyncTime(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
-```
-**SRS_IOTHUBMESSAGE_02_037: [** If `iotHubMessageHandle` is `NULL` then IoTHubMessage_GetSendEventAsyncTime shall fail and return `NULL`. **]**
-**SRS_IOTHUBMESSAGE_02_038: [** If `IoTHubMessage_SetSendEventAsyncTime` ever succeeded then `IoTHubMessage_GetSendEventAsyncTime` shall return a pointer to the stored time. **]**
-**SRS_IOTHUBMESSAGE_02_039: [** If `IoTHubMessage_SetSendEventAsyncTime` was never called or it never succeeded then `IoTHubMessage_GetSendEventAsyncTime` shall fail and return `NULL`. **]**
-
-##IoTHubMessage_GetMessageTimeout
-```c
-const uint64_t* IoTHubMessage_GetMessageTimeout(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle);
-```
-**SRS_IOTHUBMESSAGE_02_040: [** If `iotHubMessageHandle` is `NULL` then `IoTHubMessage_GetMessageTimeout` shall fail and return `NULL`. **]**
-**SRS_IOTHUBMESSAGE_02_041: [** If `IoTHubMessage_SetMessageTimeout` was never called or `IoTHubMessage_SetMessageTimeout` never succeeded then `IoTHubMessage_GetMessageTimeout` shall return a pointer to an uint64 having value 0. **]** 
-**SRS_IOTHUBMESSAGE_02_042: [** Otherwise, `IoTHubMessage_GetMessageTimeout` shall succeed and return a pointer to the stored messageTimeout option. **]**
-
-##IoTHubMessage_SetMessageTimeout
-```c
-extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageTimeout(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, uint64_t messageTimeout);
-```
-**SRS_IOTHUBMESSAGE_02_043: [** If `iotHubMessageHandle` is NULL then `IoTHubMessage_SetMessageTimeout` shall fail and return IOTHUB_MESSAGE_INVALID_ARG. **]**
-**SRS_IOTHUBMESSAGE_02_044: [** Otherwise, `IoTHubMessage_SetMessageTimeout` shall record the messageTimeout option value, succeed and return IOTHUB_MESSAGE_OK. **]**
