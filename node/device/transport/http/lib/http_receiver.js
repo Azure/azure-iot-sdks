@@ -3,7 +3,7 @@
 
 'use strict';
 
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var endpoint = require('azure-iot-common').endpoint;
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
@@ -53,7 +53,7 @@ function HttpReceiver(config, httpHelper) {
 
 
   this.on('removeListener', function () {
-    if (this._receiverStarted && this.listenerCount('message') === 0) {
+    if (this._receiverStarted && this.listeners('message').length === 0) {
       this._stopReceiver();
     }
   }.bind(this));

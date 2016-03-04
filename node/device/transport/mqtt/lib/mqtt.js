@@ -6,7 +6,7 @@
 var Base = require('azure-iot-mqtt-base').Mqtt;
 var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
 /**

@@ -4,7 +4,7 @@
 'use strict';
 
 var assert = require('chai').assert;
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var AmqpReceiver = require('../lib/amqp_receiver.js');
 var Message = require('azure-iot-common').Message;
 
