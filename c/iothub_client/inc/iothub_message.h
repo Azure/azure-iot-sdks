@@ -217,7 +217,6 @@ extern const uint64_t* IoTHubMessage_GetMessageTimeout(IOTHUB_MESSAGE_HANDLE iot
 */
 extern IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageTimeout(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, uint64_t messageTimeout);
 
-extern IOTHUB
 #ifdef __cplusplus
 }
 #endif
