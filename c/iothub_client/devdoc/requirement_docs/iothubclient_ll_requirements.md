@@ -113,6 +113,8 @@ extern  IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(IOTHUB_CLIEN
 **SRS_IOTHUBCLIENT_LL_17_001: [**IoTHubClient_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.**]** 
 **SRS_IOTHUBCLIENT_LL_17_002: [**IoTHubClient_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_LL_HANDLE.**]** 
 **SRS_IOTHUBCLIENT_LL_17_003: [**If allocation fails, the function shall fail and return NULL.**]** 
+**SRS_IOTHUBCLIENT_LL_02_047: [** IoTHubClient_LL_CreateWithTransport shall create a TICK_COUNTER_HANDLE. **]**
+**SRS_IOTHUBCLIENT_LL_02_048: [** If creating the handle fails, then IoTHubClient_LL_CreateWithTransport shall fail and return NULL **]**
 **SRS_IOTHUBCLIENT_LL_17_004: [**IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.**]** 
 **SRS_IOTHUBCLIENT_LL_17_005: [**IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.**]** 
 **SRS_IOTHUBCLIENT_LL_17_006: [**IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.**]** 
@@ -208,8 +210,7 @@ IoTHubClient_LL_SetOption sets the runtime option "optionName" to the value poin
 **SRS_IOTHUBCLIENT_LL_02_038: [**Otherwise, IoTHubClient_LL shall call the function _SetOption of the underlying transport and return what that function is returning.**]** 
 
 Options currently handled by IoTHubClient_LL: 
--	**SRS_IOTHUBCLIENT_LL_02_039: [** "messageTimeout" - once `IoTHubClient_LL_SendEventAsync` is called the message shall timeout after *value miliseconds. Value is a pointer to a uint64. **]**
-    **SRS_IOTHUBCLIENT_LL_02_040: [** If the message has been confirmed already then the timeout shall not be called. **]**
+-	**SRS_IOTHUBCLIENT_LL_02_039: [** "messageTimeout" - once `IoTHubClient_LL_SendEventAsync` is called the message shall timeout after `*value` miliseconds. Value is a pointer to a uint64. **]**
     **SRS_IOTHUBCLIENT_LL_02_041: [** If more than *value miliseconds have passed since the call to `IoTHubClient_LL_SendEventAsync` then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. **]**
     **SRS_IOTHUBCLIENT_LL_02_042: [** By default, messages shall not timeout. **]** 
     **SRS_IOTHUBCLIENT_LL_02_043: [** Calling `IoTHubClient_LL_SetOption` with *value set to "0" shall disable the timeout mechanism for all new messages. **]**

@@ -325,6 +325,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
                     {
                         /*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.] */
                         handleData->isSharedTransport = false;
+                        /*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
                         handleData->currentMessageTimeout = 0; 
                         result = handleData;
                     }
@@ -376,6 +377,8 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
 			    handleData->messageUserContextCallback = NULL;
 			    handleData->lastMessageReceiveTime = INDEFINITE_TIME;
 			    handleData->transportHandle = config->transportHandle;
+                /*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
+                handleData->currentMessageTimeout = 0;
 			    /*Codes_SRS_IOTHUBCLIENT_LL_17_006: [IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.]*/
 			    if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(config->transportHandle, config->deviceId, config->deviceKey, &(handleData->waitingToSend))) == NULL)
 			    {
@@ -430,6 +433,34 @@ void IoTHubClient_LL_Destroy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
     }
 }
 
+/*Codes_SRS_IOTHUBCLIENT_LL_02_044: [ Messages already delivered to IoTHubClient_LL shall not have their timeouts modified by a new call to IoTHubClient_LL_SetOption. ]*/
+/*returns 0 on success, any other value is error*/
+static int attach_ms_timesOutAfter(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, IOTHUB_MESSAGE_LIST *newEntry)
+{
+    int result;
+    /*Codes_SRS_IOTHUBCLIENT_LL_02_043: [ Calling IoTHubClient_LL_SetOption with value set to "0" shall disable the timeout mechanism for all new messages. ]*/
+    if (handleData->currentMessageTimeout == 0)
+    {
+        newEntry->ms_timesOutAfter = 0; /*do not timeout*/
+        result = 0;
+    }
+    else
+    {
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+        if (tickcounter_get_current_ms(handleData->tickCounter, &newEntry->ms_timesOutAfter) != 0)
+        {
+            result = __LINE__;
+            LogError("unable to get the current relative tickcount");
+        }
+        else
+        {
+            newEntry->ms_timesOutAfter += handleData->currentMessageTimeout;
+            result = 0;
+        }
+    }
+    return result;
+}
+
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -454,44 +485,33 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
         }
         else
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_013: [IoTHubClient_SendEventAsync shall add the DLIST waitingToSend a new record cloning the information from eventMessageHandle, eventConfirmationCallback, userContextCallback.]*/
-            if ((newEntry->messageHandle = IoTHubMessage_Clone(eventMessageHandle)) == NULL)
+            IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
+           
+            if (attach_ms_timesOutAfter(handleData, newEntry) != 0)
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information fails for any reason, IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
                 result = IOTHUB_CLIENT_ERROR;
-                free(newEntry);
                 LOG_ERROR;
+                free(newEntry);
             }
             else
             {
-                IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_013: [IoTHubClient_SendEventAsync shall add the DLIST waitingToSend a new record cloning the information from eventMessageHandle, eventConfirmationCallback, userContextCallback.]*/
-                newEntry->callback = eventConfirmationCallback;
-                newEntry->context = userContextCallback;
-                if (handleData->currentMessageTimeout == 0)
+                if ((newEntry->messageHandle = IoTHubMessage_Clone(eventMessageHandle)) == NULL)
                 {
-                    newEntry->ms_timesOutAfter = 0; /*do not timeout*/
-                    DList_InsertTailList(&(handleData->waitingToSend), &(newEntry->entry));
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_015: [Otherwise IoTHubClient_LL_SendEventAsync shall succeed and return IOTHUB_CLIENT_OK.] */
-                    result = IOTHUB_CLIENT_OK;
+                    /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information fails for any reason, IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
+                    result = IOTHUB_CLIENT_ERROR;
+                    free(newEntry);
+                    LOG_ERROR;
                 }
                 else
                 {
-                    if (tickcounter_get_current_ms(handleData->tickCounter, &newEntry->ms_timesOutAfter) != 0)
-                    {
-                        result = IOTHUB_CLIENT_ERROR;
-                        LogError("unable to get the current relative tickcount");
-                        IoTHubMessage_Destroy(newEntry->messageHandle);
-                        free(newEntry);
-                        LOG_ERROR;
-                    }
-                    else
-                    {
-                        newEntry->ms_timesOutAfter += handleData->currentMessageTimeout;
-                        DList_InsertTailList(&(handleData->waitingToSend), &(newEntry->entry));
-                        /*Codes_SRS_IOTHUBCLIENT_LL_02_015: [Otherwise IoTHubClient_LL_SendEventAsync shall succeed and return IOTHUB_CLIENT_OK.] */
-                        result = IOTHUB_CLIENT_OK;
-                    }
+                    IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
+                    /*Codes_SRS_IOTHUBCLIENT_LL_02_013: [IoTHubClient_SendEventAsync shall add the DLIST waitingToSend a new record cloning the information from eventMessageHandle, eventConfirmationCallback, userContextCallback.]*/
+                    newEntry->callback = eventConfirmationCallback;
+                    newEntry->context = userContextCallback;
+                    DList_InsertTailList(&(handleData->waitingToSend), &(newEntry->entry));
+                    /*Codes_SRS_IOTHUBCLIENT_LL_02_015: [Otherwise IoTHubClient_LL_SendEventAsync shall succeed and return IOTHUB_CLIENT_OK.] */
+                    result = IOTHUB_CLIENT_OK;
                 }
             }
         }
@@ -544,25 +564,33 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE 
 static void DoTimeouts(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData)
 {
     uint64_t nowTick;
-    if (tickcounter_get_current_ms(handleData->tickCounter, &nowTick) == 0)
+    if (tickcounter_get_current_ms(handleData->tickCounter, &nowTick) != 0)
     {
-        LogError("unable to get the current ms");
+        LogError("unable to get the current ms, timeouts will not be processed");
     }
     else
     {
-        DLIST_ENTRY* currentItemInWaitingToSend = &handleData->waitingToSend;
-        while (currentItemInWaitingToSend->Flink != &(handleData->waitingToSend)) /*while we are not at the end of the list*/
+        DLIST_ENTRY* currentItemInWaitingToSend = handleData->waitingToSend.Flink;
+        while (currentItemInWaitingToSend != &(handleData->waitingToSend)) /*while we are not at the end of the list*/
         {
             IOTHUB_MESSAGE_LIST* fullEntry = containingRecord(currentItemInWaitingToSend, IOTHUB_MESSAGE_LIST, entry);
-            if (fullEntry->ms_timesOutAfter < nowTick)
+            /*Codes_SRS_IOTHUBCLIENT_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClient_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
+            if ((fullEntry->ms_timesOutAfter!=0) && (fullEntry->ms_timesOutAfter < nowTick))
             {
+                PDLIST_ENTRY theNext = currentItemInWaitingToSend->Flink; /*need to save the next item, because the below operations are destructive*/
                 DList_RemoveEntryList(currentItemInWaitingToSend);
                 if (fullEntry->callback != NULL)
                 {
                     fullEntry->callback(IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, fullEntry->context);
                 }
+                IoTHubMessage_Destroy(fullEntry->messageHandle); /*because it has been cloned*/
+                free(fullEntry);
+                currentItemInWaitingToSend = theNext;
             }
-            currentItemInWaitingToSend = currentItemInWaitingToSend->Flink;
+            else
+            {
+                currentItemInWaitingToSend = currentItemInWaitingToSend->Flink;
+            }
         }
     }
 }
@@ -713,9 +741,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
     {
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
 
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
         if (strcmp(optionName, "messageTimeout") == 0)
         {
             /*this is an option handled by IoTHubClient_LL*/
+            /*Codes_SRS_IOTHUBCLIENT_LL_02_043: [ Calling IoTHubClient_LL_SetOption with value set to "0" shall disable the timeout mechanism for all new messages. ]*/
             handleData->currentMessageTimeout = *(const uint64_t*)value;
             result = IOTHUB_CLIENT_OK;
         }

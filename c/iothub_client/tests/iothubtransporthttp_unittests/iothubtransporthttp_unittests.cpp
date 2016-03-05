@@ -1308,7 +1308,7 @@ static void setupCreateHappyPathPerDeviceList(CIoTHubTransportHttpMocks &mocks, 
 {
 	(void)mocks;
 
-	STRICT_EXPECTED_CALL(mocks, VECTOR_create(IGNORED_PTR_ARG))
+	STRICT_EXPECTED_CALL(mocks, VECTOR_create(IGNORED_NUM_ARG))
 		.IgnoreArgument(1);
 	if (deallocateCreated == true)
 	{

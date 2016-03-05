@@ -4164,7 +4164,7 @@ TEST_FUNCTION(AMQP_Register_transport_success_returns_transport)
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
@@ -4203,7 +4203,7 @@ TEST_FUNCTION(AMQP_Register_twice_returns_null_second_time)
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
@@ -4241,7 +4241,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_mismatch_returns_null)
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
@@ -4279,7 +4279,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_mismatch_returns_null)
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
@@ -4459,7 +4459,7 @@ TEST_FUNCTION(AMQP_Register_transport_Register_Unregister_Register_success_retur
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
