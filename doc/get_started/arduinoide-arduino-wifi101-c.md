@@ -38,6 +38,9 @@ You should have the following items ready before beginning the process:
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
+#### IMPORTANT NOTE
+The sample won't run on older 8-bit AVR-based Arduinos (like the UNO or Mega 2560). A modern 32-bit ARM Cortex M0+ MCU is required (e.g. Atmel’s SAMD21 MCU).
+
 <a name="Step-2-PrepareDevice"></a>
 # Step 2: Prepare your Device
 
