@@ -73,7 +73,7 @@ EventHubReceiver.prototype.StartReceiveFromOffset = function (startOffset) {
     self.amqpClient.createReceiver(self.endpoint).then(function (amqpReceiver) {
       amqpReceiver.on('message', function (message) {
         var eventData = new EventData(message.body, message.annotations.value);
-        self.emit(EventHubReceiver.MessageReceived, eventData);
+        self.emit(EventHubReceiver.EventReceived, eventData);
       });
       amqpReceiver.on('errorReceived', function (rx_err) {
         self.emit(EventHubReceiver.Error, rx_err);
