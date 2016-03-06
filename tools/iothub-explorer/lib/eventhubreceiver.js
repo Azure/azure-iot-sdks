@@ -65,7 +65,7 @@ EventHubReceiver.prototype.StartReceive = function (startTime) {
  */
 EventHubReceiver.prototype.StartReceiveFromOffset = function (startOffset) {
   if (startOffset !== null) {
-    console.log('Listening on endpoint ' + this.endpoint + ' start offset: ' + startTime);
+    console.log('Listening on endpoint ' + this.endpoint + ' start offset: ' + startOffset);
   }
 
   var self = this;
