@@ -102,7 +102,7 @@ client.open(function (err, result) {
       humidity += generateRandomIncrement();
 
       var data = JSON.stringify({
-        'DeviceID': deviceId,
+        'DeviceId': deviceId,
         'Temperature': temperature,
         'Humidity': humidity,
         'ExternalTemperature': externalTemperature
