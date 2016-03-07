@@ -23,7 +23,7 @@ The library code:
 * Avoids compiler extensions.
 * Exposes a platform abstraction layer to isolate OS dependencies (threading and mutual exclusion mechanisms, communications protocol e.g. HTTP). Refer to [porting guide](doc/porting_guide.md) for more information.
 
-Azure IoT device SDK for C can be used with a broad range of OS platforms and devices. For a list of tested configurations [click here](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-tested-configurations/).
+Azure IoT device SDK for C can be used with a broad range of OS platforms and devices. For a list of tested configurations [click here](https://azure.microsoft.com/documentation/articles/iot-hub-tested-configurations/).
 
 ## Application development guides
 For information on how to use this library refer to the documents below:
