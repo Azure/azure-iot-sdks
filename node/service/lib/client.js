@@ -77,10 +77,11 @@ Client.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
 
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_006: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a new instance of the default transport (azure-iothub.Transport).]*/
   var sas = SharedAccessSignature.parse(value);
+  var decodedUri = decodeURIComponent(sas.sr);
 
   var config = {
-    hubName: sas.sr.split('.', 1)[0],
-    host: sas.sr,
+    hubName: decodedUri.split('.', 1)[0],
+    host: decodedUri,
     keyName: sas.skn,
     sharedAccessSignature: sas.toString()
   };

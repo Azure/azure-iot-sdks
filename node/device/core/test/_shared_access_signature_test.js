@@ -22,7 +22,7 @@ describe('SharedAccessSignature', function () {
     key - key
     expiry - expiry]*/
     it('creates a shared access signature', function () {
-      var expect = 'SharedAccessSignature sr=host/devices/device&sig=cYyu26VeeH%2Boy96wrcS2I5guVNSzKNeenQIBvUAguD4%3D&se=12345';
+      var expect = 'SharedAccessSignature sr=host%2Fdevices%2Fdevice&sig=wM3XiP6gD960IxP7J5WHqnxQHEcWC6YaQCtoMT%2BkKHc%3D&se=12345';
       var sas = SharedAccessSignature.create('host', 'device', 'key', 12345);
       assert.equal(expect, sas.toString());
     });

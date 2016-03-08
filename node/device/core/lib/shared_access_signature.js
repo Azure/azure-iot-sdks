@@ -9,9 +9,9 @@ var encodeUriComponentStrict = require('azure-iot-common').encodeUriComponentStr
 module.exports = {
   create: function create(host, deviceId, key, expiry) {
     /*Codes_SRS_NODE_DEVICE_SAS_05_004: [<urlEncodedDeviceId> shall be the URL-encoded value of deviceId.]*/
-    var uri = host + '/devices/' + encodeUriComponentStrict(deviceId);
+    var uri = encodeUriComponentStrict(host + '/devices/' + deviceId);
     /*Codes_SRS_NODE_DEVICE_SAS_05_003: [The create method shall return the result of calling azure-iot-common.SharedAccessSignature.create with following arguments:
-    resourceUri - host + '/devices/' + <urlEncodedDeviceId>
+    resourceUri - host + '%2Fdevices%2F' + <urlEncodedDeviceId>
     keyName - null
     key - key
     expiry - expiry]*/
