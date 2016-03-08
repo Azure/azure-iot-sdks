@@ -3481,7 +3481,7 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
         (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)TEST_DEVICEMESSAGE_HANDLE);
 
-        uint64_t zero = 2;
+        uint64_t zero = 0;
         (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &zero); /*essentially no timeout*/
         (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)(TEST_DEVICEMESSAGE_HANDLE_2));
 
