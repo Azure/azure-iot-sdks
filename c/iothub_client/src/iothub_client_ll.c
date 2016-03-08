@@ -377,8 +377,6 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
 			    handleData->messageUserContextCallback = NULL;
 			    handleData->lastMessageReceiveTime = INDEFINITE_TIME;
 			    handleData->transportHandle = config->transportHandle;
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
-                handleData->currentMessageTimeout = 0;
 			    /*Codes_SRS_IOTHUBCLIENT_LL_17_006: [IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.]*/
 			    if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(config->transportHandle, config->deviceId, config->deviceKey, &(handleData->waitingToSend))) == NULL)
 			    {
@@ -392,6 +390,8 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
 			    {
 				    /*Codes_SRS_IOTHUBCLIENT_LL_17_005: [IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.]*/
 				    handleData->isSharedTransport = true;
+                    /*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
+                    handleData->currentMessageTimeout = 0;
 				    result = handleData;
 			    }
             }

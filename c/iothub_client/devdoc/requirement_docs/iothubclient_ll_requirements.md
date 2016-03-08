@@ -210,7 +210,7 @@ IoTHubClient_LL_SetOption sets the runtime option "optionName" to the value poin
 **SRS_IOTHUBCLIENT_LL_02_038: [**Otherwise, IoTHubClient_LL shall call the function _SetOption of the underlying transport and return what that function is returning.**]** 
 
 Options currently handled by IoTHubClient_LL: 
--	**SRS_IOTHUBCLIENT_LL_02_039: [** "messageTimeout" - once `IoTHubClient_LL_SendEventAsync` is called the message shall timeout after `*value` miliseconds. Value is a pointer to a uint64. **]**
+-	**SRS_IOTHUBCLIENT_LL_02_039: [** "messageTimeout" - once `IoTHubClient_LL_SendEventAsync` is called the message shall timeout after `*value` miliseconds. value is a pointer to a uint64. **]**
     **SRS_IOTHUBCLIENT_LL_02_041: [** If more than *value miliseconds have passed since the call to `IoTHubClient_LL_SendEventAsync` then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. **]**
     **SRS_IOTHUBCLIENT_LL_02_042: [** By default, messages shall not timeout. **]** 
     **SRS_IOTHUBCLIENT_LL_02_043: [** Calling `IoTHubClient_LL_SetOption` with *value set to "0" shall disable the timeout mechanism for all new messages. **]**
