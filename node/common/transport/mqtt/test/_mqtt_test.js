@@ -7,6 +7,8 @@ var assert = require('chai').assert;
 
 var Mqtt = require('../lib/mqtt.js');
 var PackageJson = require('../package.json');
+var fakemqtt = require('./_fake_mqtt.js');
+var Message = require('azure-iot-common').Message;
 
 describe('Mqtt', function () {
   describe('#constructor', function () {
@@ -95,6 +97,46 @@ describe('Mqtt', function () {
         assert.throws(function () {
           transport.publish(message);
         }, ReferenceError, 'Invalid message');
+      });
+    });
+
+    it('calls publish on the MQTT library', function(done) {
+      var config = {
+        host: "host.name",
+        deviceId: "deviceId",
+        sharedAccessSignature: "sasToken"
+      };
+
+      var transport = new Mqtt(config, fakemqtt);
+      transport.connect(function () {
+        transport.client.publishShouldSucceed(true);
+        transport.publish(new Message('message'), function(err, result) {
+          if(err) {
+            done (err);
+          } else {
+            assert.equal(result.constructor.name, 'MessageEnqueued');
+            done();
+          }
+        });
+      });
+    });
+
+    // Publish errors are handled with a callback, so 'error' should be subscribed only once when connecting, to get link errors.
+    it('does not subscribe to the error event', function (done) {
+      var config = {
+        host: "host.name",
+        deviceId: "deviceId",
+        sharedAccessSignature: "sasToken"
+      };
+
+      var transport = new Mqtt(config, fakemqtt);
+      transport.connect(function () {
+        assert.equal(transport.client.listeners('error').length, 1);
+        transport.client.publishShouldSucceed(false);
+        transport.publish(new Message('message'), function() {
+          assert.equal(transport.client.listeners('error').length, 1);
+          done();
+        });
       });
     });
   });
