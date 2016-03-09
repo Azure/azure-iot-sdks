@@ -4172,7 +4172,7 @@ TEST_FUNCTION(AMQP_Register_transport_success_returns_transport)
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NOT_NULL(devHandle);
@@ -4198,7 +4198,7 @@ TEST_FUNCTION(AMQP_Register_twice_returns_null_second_time)
 	time_t current_time = time(NULL);
 
 	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 	mocks.ResetAllCalls();
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
@@ -4211,7 +4211,7 @@ TEST_FUNCTION(AMQP_Register_twice_returns_null_second_time)
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle2 = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle2 = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle2);
@@ -4249,7 +4249,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_mismatch_returns_null)
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, "this is a different device key", &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, "this is a different device key", TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -4286,7 +4286,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_mismatch_returns_null)
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, "not the right devId", TEST_DEVICE_KEY, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, "not the right devId", TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -4315,7 +4315,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_null_returns_null)
 	mocks.ResetAllCalls();
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, NULL, TEST_DEVICE_KEY, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, NULL, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -4344,7 +4344,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_returns_null)
 	mocks.ResetAllCalls();
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, NULL, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, NULL, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -4373,7 +4373,7 @@ TEST_FUNCTION(AMQP_Register_transport_wts_null_returns_null)
 	mocks.ResetAllCalls();
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, "not the right devId", TEST_DEVICE_KEY, NULL);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, "not the right devId", TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, NULL);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -4398,7 +4398,7 @@ TEST_FUNCTION(AMQP_Register_transport_null_returns_null)
 	mocks.ResetAllCalls();
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -4424,7 +4424,7 @@ TEST_FUNCTION(AMQP_Unregister_transport_success)
 
 	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	mocks.ResetAllCalls();
 
@@ -4453,7 +4453,7 @@ TEST_FUNCTION(AMQP_Register_transport_Register_Unregister_Register_success_retur
 	time_t current_time = time(NULL);
 
 	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 	transport_interface->IoTHubTransport_Unregister(devHandle);
 	mocks.ResetAllCalls();
 
@@ -4467,7 +4467,7 @@ TEST_FUNCTION(AMQP_Register_transport_Register_Unregister_Register_success_retur
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle2 = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle2 = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NOT_NULL(devHandle2);

@@ -12,7 +12,7 @@ The Http Transport is a transport mechanismism to connect the IoT Hub to multipl
  
 ## Exposed API
 
-```C
+```c
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -29,15 +29,15 @@ extern "C"
     extern TRANSPORT_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config);
     extern void IoTHubTransportHttp_Destroy(TRANSPORT_HANDLE handle);
 
-	extern IOTHUB_IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend);
-	extern void IoTHubTransportHttp_Unregister(IOTHUB_IOTHUB_DEVICE_HANDLE deviceHandle);
+	extern IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
+	extern void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
 
-    extern int IoTHubTransportHttp_Subscribe(IOTHUB_IOTHUB_DEVICE_HANDLE handle);
-    extern void IoTHubTransportHttp_Unsubscribe(IOTHUB_IOTHUB_DEVICE_HANDLE handle);
+    extern int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle);
+    extern void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE handle);
 
     extern void IoTHubTransportHttp_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
 
-    extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
+    extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
     extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_HANDLE handle, const char* optionName, const void* value);
     
     extern const void* HTTP_Protocol(void);
@@ -51,7 +51,7 @@ extern "C"
 
 ## Relevant parts of API from iothub_client_private.h:
 
-```C
+```c
 typedef struct IOTHUBTRANSPORT_CONFIG_TAG
 {
     const IOTHUB_CLIENT_CONFIG* upperConfig;
@@ -63,13 +63,13 @@ IoTHubClient_LL_SendComplete (PDLIST_ENTRY completed, IOTHUB_BATCHSTATE result);
 extern int IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_MESSAGE_HANDLE message);
  
 typedef void* TRANSPORT_HANDLE;
-typedef void* IOTHUB_IOTHUB_DEVICE_HANDLE;
+typedef void* IOTHUB_DEVICE_HANDLE;
 
 
 ```
 
 ## Relevant parts of API from iothub_client_ll.h
-```C
+```c
 typedef struct IOTHUB_CLIENT_CONFIG_TAG
 {
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
@@ -82,7 +82,7 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 ```
 
 ## IoTHubTransportHttp_Create
-```C
+```c
 	extern TRANSPORT_HANDLE IoTHubTransportHttp_Create(const IOTHUB_CLIENT_TRANSPORT_CONFIG* config);
 ```
 
@@ -103,7 +103,7 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 **SRS_TRANSPORTMULTITHTTP_17_011: [** Otherwise, `IoTHubTransportHttp_Create` shall succeed and return a non-`NULL` value. **]**
  
 ## IoTHubTransportHttp_Destroy
-```C
+```c
 	extern void IoTHubTransportHttp_Destroy(TRANSPORT_HANDLE handle);
 ```
 
@@ -111,8 +111,8 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 **SRS_TRANSPORTMULTITHTTP_17_013: [** Otherwise, `IoTHubTransportHttp_Destroy` shall free all the resources currently in use. **]**
 
 ## IoTHubTransportHttp_Register
-```C
-	extern IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend);
+```c
+	extern IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
 ```
 
 `IoTHubTransportHttp_Register` shall bind an IoT Hub device to a transport handle and return a device handle for subsequent device specific calls to this API.
@@ -120,6 +120,7 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 **SRS_TRANSPORTMULTITHTTP_17_142: [** If `handle` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_014: [** If parameter `deviceId` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_015: [** If parameter `deviceKey` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_143: [** If parameter `iotHubClientHandle` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_016: [** If parameter `waitingToSend` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_137: [** `IoTHubTransportHttp_Register` shall search the devices list for any device matching name `deviceId`. If `deviceId` is found it shall return NULL. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_133: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "deviceId") from config->deviceConfig->deviceId. **]**   
@@ -164,11 +165,11 @@ The result of the `STRING_construct` shall be known as key.
 **SRS_TRANSPORTMULTITHTTP_17_041: [** `IoTHubTransportHttp_Register` shall call `VECTOR_push_back` to store the new device information. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_042: [** If the `VECTOR_push_back` fails then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
 
-**SRS_TRANSPORTMULTITHTTP_17_043: [** Upon success, `IoTHubTransportHttp_Register` shall store the transport handle and the waitingToSend queue in the device handle return a non-`NULL` value. **]**
+**SRS_TRANSPORTMULTITHTTP_17_043: [** Upon success, `IoTHubTransportHttp_Register` shall store the transport handle, iotHubClientHandle, and the waitingToSend queue in the device handle return a non-`NULL` value. **]**
 
 
 ## IoTHubTransportHttp_Unregister
-```C
+```c
 	extern void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
 ```
 
@@ -179,7 +180,7 @@ The result of the `STRING_construct` shall be known as key.
 **SRS_TRANSPORTMULTITHTTP_17_048: [** `IoTHubTransportHttp_Unregister` shall call `VECTOR_erase` to remove device from devices list. **]**   
 
 ## IoTHubTransportHttp_DoWork
-```C
+```c
 	void IoTHubTransportHttp_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
 ```
 
@@ -190,7 +191,7 @@ The result of the `STRING_construct` shall be known as key.
 **SRS_TRANSPORTMULTITHTTP_17_050: [** `IoTHubTransportHttp_DoWork` shall call loop through the device list. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_051: [** IF the list is empty, then `IoTHubTransportHttp_DoWork` shall do nothing. **]**   
 
-**SRS_TRANSPORTMULTITHTTP_17_052: [** `IoTHubTransportHttp_DoWork` shall perform a round-robin loop through every `deviceHandle` in the transport device list. **]**
+**SRS_TRANSPORTMULTITHTTP_17_052: [** `IoTHubTransportHttp_DoWork` shall perform a round-robin loop through every `deviceHandle` in the transport device list, using the iotHubClientHandle field saved in the `IOTHUB_DEVICE_HANDLE`. **]**
 
 MultiDevTransportHttp shall perform the following actions on each device:
 
@@ -332,7 +333,7 @@ return;
 
 
 ## IoTHubTransportHttp_Subscribe
-```C
+```c
 	extern SUBSCRIBE_RESULT IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE deviceHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback, void* context);
 ```
 
@@ -342,17 +343,17 @@ return;
 **SRS_TRANSPORTMULTITHTTP_17_106: [** Otherwise, `IoTHubTransportHttp_Subscribe` shall set the device so that subsequent calls to DoWork should execute HTTP requests. **]**   
 
 ## IoTHubTransportHttp_Unsubscribe
-```C
+```c
 	extern void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE deviceHandle);
 ```
 
 **SRS_TRANSPORTMULTITHTTP_17_107: [** If parameter `deviceHandle` is `NULL` then `IoTHubTransportHttp_Unsubscribe` shall fail do nothing. **]**  
 **SRS_TRANSPORTMULTITHTTP_17_108: [** `IoTHubTransportHttp_Unsubscribe` shall locate `deviceHandle` in the transport device list by calling `list_find_if`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_109: [** If the device structure is not found, then this function shall fail and do nothing. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_110: [** Otherwise, `IoTHubTransportHttp_Subscribe` shall set the device so that subsequent calls to DoWork should not execute HTTP requests. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_110: [** Otherwise, `IoTHubTransportHttp_Subscribe` shall set the device so that subsequent calls to DoWork shall not execute HTTP requests. **]**   
 
 ## IoTHubTransportHttp_GetSendStatus
-```C
+```c
 	extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE deviceHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
 ```
 
@@ -364,7 +365,7 @@ return;
 **SRS_TRANSPORTMULTITHTTP_17_113: [** `IoTHubTransportHttp_GetSendStatus` shall return `IOTHUB_CLIENT_OK` and status `IOTHUB_CLIENT_SEND_STATUS_BUSY` if there are currently event items to be sent or being sent. **]**   
 
 ## IoTHubTransportHttp_SetOption
-```C
+```c
     extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_HANDLE handle, const char *optionName, const void* value);
 ```
 `IoTHubTransportHttp_SetOption` sets the runtime option "optionName" to the value pointed to by value. 
@@ -394,7 +395,7 @@ Options currently handled by IoTHubTransportHttp:
 | **SRS_TRANSPORTMULTITHTTP_17_126: [** "TrustedCerts"**]**        | Char\*        | `NULL`	         | Sets a string that should be used as trusted certificates by the transport, freeing any previous TrustedCerts option value.   **SRS_TRANSPORTMULTITHTTP_17_127: [** `NULL` shall be allowed. **]**  **SRS_TRANSPORTMULTITHTTP_17_129: [** This option shall passed down to the lower layer by calling `HTTPAPIEX_SetOption`. **]**|
 
 ## HTTPMulti_Protocol
-```C
+```c
     extern const void* HTTPMulti_Protocol(void);
 ```
 
