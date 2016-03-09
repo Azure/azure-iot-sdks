@@ -51,6 +51,7 @@ typedef struct IOTHUB_MESSAGE_LIST_TAG
     IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;
     void* context; 
     DLIST_ENTRY entry;
+    uint64_t ms_timesOutAfter; /* a value of "0" means "no timeout", if the IOTHUBCLIENT_LL's handle tickcounter > msTimesOutAfer then the message shall timeout*/
 }IOTHUB_MESSAGE_LIST;
 
 typedef void* TRANSPORT_HANDLE;
@@ -71,7 +72,7 @@ pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       \
 pfIoTHubTransport_Create IoTHubTransport_Create;             \
 pfIoTHubTransport_Destroy IoTHubTransport_Destroy;           \
 pfIotHubTransport_Register IoTHubTransport_Register;         \
-pfIotHubTransport_Unregister IoTHubTransport_Unegister;      \
+pfIotHubTransport_Unregister IoTHubTransport_Unregister;      \
 pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;       \
 pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;   \
 pfIoTHubTransport_DoWork IoTHubTransport_DoWork;             \

@@ -5,7 +5,7 @@
 
 var assert = require('chai').assert;
 var sinon = require('sinon');
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var MqttReceiver = require('../lib/mqtt_receiver.js');
 

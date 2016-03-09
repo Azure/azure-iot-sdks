@@ -14,10 +14,14 @@
 
 #ifdef __cplusplus
 #include <cstddef>
+#include <ctime>
+#include <cstdint>
 extern "C" 
 {
 #else
 #include <stddef.h>
+#include <time.h>
+#include <stdint.h>
 #endif
 
 #define IOTHUB_MESSAGE_RESULT_VALUES         \

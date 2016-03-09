@@ -21,6 +21,7 @@ describe('Http', function () {
       this.reject = sinon.spy();
       this.abandon = sinon.spy();
       this.setOptions = sinon.spy();
+      this.updateSharedAccessSignature = sinon.spy();
     };
 
     receiver = new DummyReceiver();
@@ -69,6 +70,38 @@ describe('Http', function () {
     it('calls the receiver `abandon` method', function () {
       transport.abandon(testMessage, testCallback);
       assert(receiver.abandon.calledWith(testMessage, testCallback));
+    });
+  });
+
+  describe('#updateSharedAccessSignature', function() {
+    /*Codes_SRS_NODE_DEVICE_HTTP_16_006: [The updateSharedAccessSignature method shall save the new shared access signature given as a parameter to its configuration.] */
+    /*Codes_SRS_NODE_DEVICE_HTTP_16_007: [The updateSharedAccessSignature method shall call the `done` callback with a null error object and a SharedAccessSignatureUpdated object as a result, indicating that the client does not need to reestablish the transport connection.] */
+    it('updates its configuration object with the new shared access signature', function(done) {
+      var transportWithoutReceiver = new Http({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sas: 'sas.key' });
+      var newSas = 'newsas';
+      transportWithoutReceiver.updateSharedAccessSignature(newSas, function(err, result) {
+        if(err) {
+          done(err);
+        } else {
+          assert.equal(result.constructor.name, 'SharedAccessSignatureUpdated');
+          assert.equal(transportWithoutReceiver._config.sharedAccessSignature,newSas);
+          done();
+        }
+      });
+    });
+
+    /*Tests_SRS_NODE_DEVICE_HTTP_16_008: [The updateSharedAccessSignature method shall call the `updateSharedAccessSignature` method of the current receiver object if it exists.] */
+    it('updates the receiver configuration with the new shared access signature', function(done) {
+      var newSas = 'newsas';
+      transport.updateSharedAccessSignature(newSas, function(err, result) {
+        if (err) {
+          done (err);
+        } else {
+          assert.equal(result.constructor.name, 'SharedAccessSignatureUpdated');
+          assert(receiver.updateSharedAccessSignature.calledWith(newSas));
+          done();
+        }
+      });
     });
   });
 });

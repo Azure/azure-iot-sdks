@@ -86,8 +86,19 @@ describe('Client', function () {
       assert.instanceOf(client, Client);
     });
 
-    it('create a correct config', function () {
+    it('create a correct config when sr is not URI-encoded', function () {
       var sharedAccessSignature = '"SharedAccessSignature sr=hubName.azure-devices.net/devices/deviceId&sig=s1gn4tur3&se=1454204843"';
+      var DummyTransport = function (config) {
+        assert.strictEqual(config.host, 'hubName.azure-devices.net');
+        assert.strictEqual(config.deviceId, 'deviceId');
+        assert.strictEqual(config.hubName, 'hubName');
+        assert.strictEqual(config.sharedAccessSignature, sharedAccessSignature);
+      };
+      Client.fromSharedAccessSignature(sharedAccessSignature, DummyTransport);
+    });
+
+    it('create a correct config when sr is URI-encoded', function () {
+      var sharedAccessSignature = '"SharedAccessSignature sr=hubName.azure-devices.net%2Fdevices%2FdeviceId&sig=s1gn4tur3&se=1454204843"';
       var DummyTransport = function (config) {
         assert.strictEqual(config.host, 'hubName.azure-devices.net');
         assert.strictEqual(config.deviceId, 'deviceId');

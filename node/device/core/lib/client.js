@@ -8,7 +8,7 @@ var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var ConnectionString = require('./connection_string.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var debug = require('debug')('azure-iot-device.Client');
 
@@ -41,7 +41,7 @@ var Client = function (transport, connStr) {
   this._receiver = null;
 
   this.on('removeListener', function (eventName) {
-    if (this._receiver && eventName === 'message' && this.listenerCount('message') === 0) {
+    if (this._receiver && eventName === 'message' && this.listeners('message').length === 0) {
       this._disconnectReceiver();
     }
   });
@@ -143,7 +143,8 @@ Client.fromSharedAccessSignature = function (sharedAccessSignature, Transport) {
   if (!sharedAccessSignature) throw new ReferenceError('sharedAccessSignature is \'' + sharedAccessSignature + '\'');
 
   var sas = SharedAccessSignature.parse(sharedAccessSignature);
-  var uriSegments = sas.sr.split('/');
+  var decodedUri = decodeURIComponent(sas.sr);
+  var uriSegments = decodedUri.split('/');
   var config = {
     host: uriSegments[0],
     deviceId: uriSegments[uriSegments.length - 1],
@@ -207,7 +208,7 @@ Client.prototype.updateSharedAccessSignature = function (sharedAccessSignature, 
  */
 Client.prototype.open = function (done) {
   var connectReceiverIfListening = function () {
-    if (this.listenerCount('message') > 0) {
+    if (this.listeners('message').length > 0) {
       debug('Connecting the receiver since there\'s already someone listening on the \'message\' event');
       this._connectReceiver();
     }

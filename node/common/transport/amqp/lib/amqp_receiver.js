@@ -3,7 +3,7 @@
 
 'use strict';
 
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var Message = require('azure-iot-common').Message;
 var results = require('azure-iot-common').results;
@@ -31,7 +31,7 @@ function AmqpReceiver(amqpReceiver) {
 
   this.on('removeListener', function () {
     // stop listening for AMQP events if our consumers stop listening for our events
-    if (self._listenersInitialized && self.listenerCount('message') === 0) {
+    if (self._listenersInitialized && self.listeners('message').length === 0) {
       self._removeAmqpReceiverListeners();
     }
   });

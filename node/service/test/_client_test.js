@@ -44,13 +44,21 @@ describe('Client', function () {
   });
 
   describe('#fromSharedAccessSignature', function () {
-    var token = 'SharedAccessSignature sr=audience&sig=signature&se=expiry&skn=keyname';
+    var token = 'SharedAccessSignature sr=hubName.azure-devices.net&sig=signature&skn=keyname&se=expiry';
 
     /*Tests_SRS_NODE_IOTHUB_CLIENT_05_005: [The fromSharedAccessSignature method shall throw ReferenceError if the value argument is falsy.]*/
     it('throws when value is falsy', function () {
       assert.throws(function () {
         return Client.fromSharedAccessSignature();
       }, ReferenceError, 'value is \'undefined\'');
+    });
+
+    it('correctly populates the config structure', function() {
+      var client = Client.fromSharedAccessSignature(token);
+      assert.equal(client._transport._config.hubName, 'hubName');
+      assert.equal(client._transport._config.host, 'hubName.azure-devices.net');
+      assert.equal(client._transport._config.keyName, 'keyname');
+      assert.equal(client._transport._config.sharedAccessSignature, token);
     });
 
     /*Tests_SRS_NODE_IOTHUB_CLIENT_05_006: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a new instance of the default transport (azure-iothub.Transport).]*/

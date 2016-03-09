@@ -29,6 +29,8 @@ var debug = require('debug')('amqp-common');
         A string containing the version of the SDK used for telemetry purposes] */
 function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
   var autoSettleMode = autoSettleMessages ? amqp10.Constants.receiverSettleMode.autoSettle : amqp10.Constants.receiverSettleMode.settleOnDisposition;
+  // node-amqp10 has an automatic reconnection/link re-attach feature that is enabled by default.
+  // In our case we want to control the reconnection flow ourselves, so we need to disable it.
   this._amqp = new amqp10.Client(amqp10.Policy.merge({
     senderLink: {
       attach: {
@@ -47,6 +49,10 @@ function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
           'com.microsoft:client-version': sdkVersionString
         },
         receiverSettleMode: autoSettleMode,
+      },
+      reattach: {
+        retries: 0,
+        forever: false
       }
     },
     // reconnections will be handled at the client level, not the transport level.

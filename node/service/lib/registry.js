@@ -112,12 +112,10 @@ Registry.prototype.create = function (deviceInfo, done) {
     this._transport.createDevice(path, deviceInfo, function (err, body, response) {
       /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_002: [When the create method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
       if (err) {
-        deviceInfo = null;
+        done(err, null, response);
+      } else {
+        done(err, new Device(body), response);
       }
-      else if (body) {
-        deviceInfo = new Device(body);
-      }
-      done(err, deviceInfo, response);
     });
   }
 };

@@ -766,7 +766,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventForMaxDrainTime(IOTHUB_TEST_H
     return IoTHubTest_ListenForRecentEvent(devhubHandle, msgCallback, partitionCount, context, MAX_DRAIN_TIME);
 }
 
-static void on_message_send_complete(const void* context, MESSAGE_SEND_RESULT send_result)
+static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_result)
 {
     MESSAGE_SEND_STATE* message_send_state = (MESSAGE_SEND_STATE*)context;
     if (send_result == MESSAGE_SEND_OK)

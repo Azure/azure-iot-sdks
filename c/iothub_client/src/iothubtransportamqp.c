@@ -131,6 +131,8 @@ typedef struct AMQP_TRANSPORT_STATE_TAG
 	CBS_STATE cbs_state;
 	// Time when the current SAS token was created, in seconds since epoch.
 	size_t current_sas_token_create_time;
+	// Mark if device is registered in transport (only one device per transport).
+	bool isRegistered;
 } AMQP_TRANSPORT_INSTANCE;
 
 // This structure is used to track an event being sent and the time it was sent.
@@ -1108,6 +1110,7 @@ static TRANSPORT_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG*
             transport_state->session = NULL;
             transport_state->tls_io = NULL;
 			transport_state->tls_io_transport_provider = getTLSIOTransport;
+			transport_state->isRegistered = false;
 
             transport_state->waitingToSend = config->waitingToSend;
             DList_InitializeListHead(&transport_state->inProgress);
@@ -1318,7 +1321,7 @@ static void IoTHubTransportAMQP_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL
     }
 }
 
-static int IoTHubTransportAMQP_Subscribe(TRANSPORT_HANDLE handle)
+static int IoTHubTransportAMQP_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 {
     int result;
     
@@ -1339,7 +1342,7 @@ static int IoTHubTransportAMQP_Subscribe(TRANSPORT_HANDLE handle)
     return result;
 }
 
-static void IoTHubTransportAMQP_Unsubscribe(TRANSPORT_HANDLE handle)
+static void IoTHubTransportAMQP_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 {
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_039: [IoTHubTransportAMQP_Unsubscribe shall fail if the transport handle parameter received is NULL.] 
     if (handle == NULL)
@@ -1354,7 +1357,7 @@ static void IoTHubTransportAMQP_Unsubscribe(TRANSPORT_HANDLE handle)
     }
 }
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetSendStatus(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
+static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -1450,14 +1453,70 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_HANDLE handl
     return result;
 }
 
+
+
 static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQ_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
 {
-	return (IOTHUB_DEVICE_HANDLE)handle;
+	IOTHUB_DEVICE_HANDLE result;
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQ_Register shall return NULL if the TRANSPORT_HANDLE is NULL.]
+	if ((handle ==NULL) || (deviceId == NULL) || (deviceKey == NULL) || (waitingToSend == NULL))
+	{
+		result = NULL;
+	}
+	else
+	{
+		AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)handle;
+
+		STRING_HANDLE devicesPath = concat3Params(STRING_c_str(transport_state->iotHubHostFqdn), "/devices/", deviceId);
+		if (devicesPath == NULL)
+		{
+			LogError("Could not create a comparison string");
+			result = NULL;
+		}
+		else
+		{
+			// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_002: [IoTHubTransportAMQ_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.] 
+			if (strcmp(STRING_c_str(transport_state->devicesPath), STRING_c_str(devicesPath)) != 0)
+			{
+				LogError("Attemping to add new device to AMQP transport, not allowed.");
+				result = NULL;
+			}
+			else if (strcmp(STRING_c_str(transport_state->deviceKey), deviceKey) != 0)
+			{
+				LogError("Attemping to add new device to AMQP transport, not allowed.");
+				result = NULL;
+			}
+			else
+			{
+				if (transport_state->isRegistered == true)
+				{
+					LogError("Transport already has device registered by id: [%s]", deviceId);
+					result = NULL;
+				}
+				else
+				{
+					transport_state->isRegistered = true;
+					// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_003: [IoTHubTransportAMQ_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
+					result = (IOTHUB_DEVICE_HANDLE)handle;
+				}
+			}
+			STRING_delete(devicesPath);
+		}
+	}
+
+	return result;
 }
 
+// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_004: [IoTHubTransportAMQ_Unregister shall return.] 
 static void IoTHubTransportAMQ_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 {
-	return;
+	if (deviceHandle != NULL)
+	{
+		AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)deviceHandle;
+
+		transport_state->isRegistered = false;
+	}
 }
 
 static TRANSPORT_PROVIDER thisTransportProvider = {

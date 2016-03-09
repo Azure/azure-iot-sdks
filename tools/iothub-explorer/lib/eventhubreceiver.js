@@ -65,7 +65,7 @@ EventHubReceiver.prototype.StartReceive = function (startTime) {
  */
 EventHubReceiver.prototype.StartReceiveFromOffset = function (startOffset) {
   if (startOffset !== null) {
-    console.log('Listening on endpoint ' + this.endpoint + ' start offset: ' + startTime);
+    console.log('Listening on endpoint ' + this.endpoint + ' start offset: ' + startOffset);
   }
 
   var self = this;
@@ -73,7 +73,7 @@ EventHubReceiver.prototype.StartReceiveFromOffset = function (startOffset) {
     self.amqpClient.createReceiver(self.endpoint).then(function (amqpReceiver) {
       amqpReceiver.on('message', function (message) {
         var eventData = new EventData(message.body, message.annotations.value);
-        self.emit(EventHubReceiver.MessageReceived, eventData);
+        self.emit(EventHubReceiver.EventReceived, eventData);
       });
       amqpReceiver.on('errorReceived', function (rx_err) {
         self.emit(EventHubReceiver.Error, rx_err);
