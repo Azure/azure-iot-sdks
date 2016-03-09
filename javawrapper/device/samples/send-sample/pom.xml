@@ -1,7 +1,7 @@
   <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>javaWrapper.samples</groupId>
-  <artifactId>sendEvent</artifactId>
+  <artifactId>sendEvents</artifactId>
   <version>1.0.1</version>
   <dependencies>
     <dependency>
@@ -27,7 +27,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>../../iothub-client-javawrapper</source>
+                <source>../../iothub_client_javawrapper</source>
               </sources>
             </configuration>
           </execution>
@@ -51,7 +51,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>javaWrapper.SendEvent</mainClass>
+              <mainClass>javaWrapper.SendEvents</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

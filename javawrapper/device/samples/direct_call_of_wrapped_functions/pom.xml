@@ -27,7 +27,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>../../iothub-client-javawrapper</source>
+                <source>../../iothub_client_javawrapper</source>
               </sources>
             </configuration>
           </execution>
