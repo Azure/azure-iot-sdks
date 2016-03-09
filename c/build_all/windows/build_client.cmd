@@ -31,6 +31,7 @@ if "%1" equ "" goto args-done
 if "%1" equ "--config" goto arg-build-config
 if "%1" equ "--platform" goto arg-build-platform
 if "%1" equ "--use-websockets" goto arg-use-websockets
+if "%1" equ "--build-javawrapper" goto arg-build-javawrapper
 call :usage && exit /b 1
 
 :arg-build-config
@@ -49,6 +50,12 @@ goto args-continue
 shift
 set CMAKE_use_wsio=ON
 goto args-continue
+
+:arg-build-javawrapper
+shift 
+set CMAKE_build_javawrapper=ON 
+goto args-continue 
+
 
 :args-continue
 shift
@@ -77,7 +84,7 @@ pushd %USERPROFILE%\%cmake-output%
 
 if %build-platform% == Win32 (
 	echo ***Running CMAKE for Win32***
-	cmake %build-root% -Duse_wsio:BOOL=%CMAKE_use_wsio%
+	cmake %build-root% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper%
 	if not %errorlevel%==0 exit /b %errorlevel%	
 ) else (
 	echo ***Running CMAKE for Win64***
