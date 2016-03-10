@@ -22,16 +22,6 @@
 #include "iot_logging.h"
 #include "platform.h"
 
-#if _WIN32
-#include "tlsio_schannel.h"
-#else
-#ifdef MBED_BUILD_TIMESTAMP
-#include "tlsio_wolfssl.h"
-#else
-#include "tlsio_openssl.h"
-#endif
-#endif
-
 #include "tlsio.h"
 
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
@@ -41,6 +31,7 @@ const char* TEST_EVENT_DATA_FMT = "{\"data\":\"%.24s\",\"id\":\"%d\"}";
 const char* TEST_MESSAGE_DATA_FMT = "{\"notifyData\":\"%.24s\",\"id\":\"%d\"}";
 
 static size_t g_iotHubTestId = 0;
+static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
 #define IOTHUB_COUNTER_MAX          10
 #define IOTHUB_TIMEOUT_SEC          1000
@@ -60,7 +51,7 @@ typedef struct EXPECTED_SEND_DATA_TAG
 
 typedef struct EXPECTED_RECEIVE_DATA_TAG
 {
-    const char* toBeSend;
+    const unsigned char* toBeSend;
     size_t toBeSendSize;
     const char* data;
     size_t dataSize;
@@ -162,8 +153,8 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
                 result->data = tempString;
                 result->dataSize = strlen(result->data);
                 result->wasFound = false;
-                result->toBeSend = tempString;
-                result->toBeSendSize = strlen(result->toBeSend);
+                result->toBeSend = (const unsigned char*)tempString;
+                result->toBeSendSize = strlen(tempString);
             }
         }
         return result;
@@ -235,10 +226,13 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
     {
         INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         platform_init();
+        g_iothubAcctInfo = IoTHubAccount_Init(true);
+        ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
+        IoTHubAccount_deinit(g_iothubAcctInfo);
         DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
         platform_deinit();
     }
@@ -251,19 +245,19 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     {
     }
-#if 0
-    // Will enable as soon as it's ready
+
     TEST_FUNCTION(IoTHub_MQTT_SendEvent_E2ETests)
     {
+#if 0
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig;
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         IOTHUB_MESSAGE_HANDLE msgHandle;
 
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName();
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix();
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
+        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
+        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
+        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
+        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
         iotHubConfig.protocol = MQTT_Protocol;
 
         EXPECTED_SEND_DATA* sendData = EventData_Create();
@@ -302,11 +296,11 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         IoTHubClient_Destroy(iotHubClientHandle);
 
         {
-            IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(), IoTHubAccount_GetIoTHubConnString(), IoTHubAccount_GetDeviceId(), IoTHubAccount_GetDeviceKey(), IoTHubAccount_GetEventhubListenName(), IoTHubAccount_GetEventhubAccessKey(), IoTHubAccount_GetSharedAccessSignature(), IoTHubAccount_GetEventhubConsumerGroup());
-            ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle, "Problem Initializing IoTHub Test.");
+            IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
+            ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle, "Failure Initializing IoTHub Test.");
 
-            IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(), sendData);
-            ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, result);
+            IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData);
+            ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, result, "Failure Listening for event");
 
             IoTHubTest_Deinit(iotHubTestHandle);
         }
@@ -317,10 +311,12 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         // cleanup
         IoTHubMessage_Destroy(msgHandle);
         EventData_Destroy(sendData);
+#endif
     }
 
     TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest)
     {
+#if 0
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig;
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
@@ -329,10 +325,10 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         ASSERT_IS_NOT_NULL_WITH_MSG(notifyData, "Error creating Notify Data.");
 
         // act
-        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName();
-        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix();
-        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId();
-        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey();
+        iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
+        iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
+        iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
+        iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
         iotHubConfig.protocol = MQTT_Protocol;
 
         iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
@@ -345,7 +341,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
         ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
 
-        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(), IoTHubAccount_GetIoTHubConnString(), IoTHubAccount_GetDeviceId(), IoTHubAccount_GetDeviceKey(), IoTHubAccount_GetEventhubListenName(), IoTHubAccount_GetEventhubAccessKey(), IoTHubAccount_GetSharedAccessSignature(), IoTHubAccount_GetEventhubConsumerGroup());
+        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
         ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle, "Error Creating IotHubTest.");
 
         IOTHUB_TEST_CLIENT_RESULT testResult = IoTHubTest_SendMessage(iotHubTestHandle, notifyData->toBeSend, notifyData->toBeSendSize);
@@ -370,6 +366,6 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         // cleanup
         MessageData_Destroy(notifyData);
         IoTHubClient_Destroy(iotHubClientHandle);
-    }
 #endif
+    }
 END_TEST_SUITE(iothubclient_mqtt_e2etests)

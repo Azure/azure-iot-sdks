@@ -5,8 +5,10 @@
 
 package com.microsoft.azure.iothub.transport.amqps;
 
+import com.microsoft.azure.iothub.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
@@ -17,6 +19,8 @@ import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 
 import java.nio.BufferOverflowException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -73,6 +77,8 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
     private final String sendEndpoint;
     /** The Receiver endpoint created from the {@link #RECEIVE_ENDPOINT_FORMAT}. */
     private final String receiveEndpoint;
+    /** Version identifier key */
+    private static final String versionIdentifierKey = "com.microsoft:client-version";
 
     //==============================================================================
     //Class Variables
@@ -260,8 +266,14 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
         Session ssn = conn.session();
 
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_028: [The event handler shall create a Receiver and Sender (Proton) object and set the protocol tag on them to a predefined constant.]
+        Map<Symbol, Object> properties = new HashMap<>();
+        properties.put(Symbol.getSymbol(versionIdentifierKey), TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion);
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_15_054: [The Receiver and Sender objects shall have the properties set to client version identifier.]
         this.receiver = ssn.receiver(RECEIVE_TAG);
+        this.receiver.setProperties(properties);
         this.sender = ssn.sender(SEND_TAG);
+        this.sender.setProperties(properties);
         this.session = ssn;
         this.connection = conn;
 
@@ -400,10 +412,18 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
 
     public void shutdown(){
 		this.linkFlow = false;
-        this.sender.close();
-        this.receiver.close();
-        this.session.close();
-        this.connection.close();
+        if (this.sender != null) {
+            this.sender.close();
+        }
+        if (this.receiver != null) {
+            this.receiver.close();
+        }
+        if (this.session != null) {
+            this.session.close();
+        }
+        if (this.connection != null) {
+            this.connection.close();
+        }
     }
 
     /**

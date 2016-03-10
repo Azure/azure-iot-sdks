@@ -324,7 +324,7 @@ public class Device
      *
      * @param forceUpdate - Boolean controlling if the update should be forced or not
      */
-    protected void setForceUpdate(Boolean forceUpdate)
+    public void setForceUpdate(Boolean forceUpdate)
     {
         if (forceUpdate == null)
         {

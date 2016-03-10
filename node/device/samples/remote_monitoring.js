@@ -76,10 +76,10 @@ client.open(function (err, result) {
   } else {
     console.log('Sending device metadata:\n' + JSON.stringify(deviceMetaData));
     client.sendEvent(new Message(JSON.stringify(deviceMetaData)), printErrorFor('send metadata'));
-  
+
     client.on('message', function (msg) {
-      console.log('receive data: ' + msg.getData());   
-        
+      console.log('receive data: ' + msg.getData());
+
       try {
         var command = JSON.parse(msg.getData());
         if (command.Name === 'SetTemperature') {
@@ -94,9 +94,9 @@ client.open(function (err, result) {
         client.reject(msg, printErrorFor('reject'));
       }
     });
-    
+
     // start event data send routing
-    var sendInterval = setInterval(function() {
+    var sendInterval = setInterval(function () {
       temperature += generateRandomIncrement();
       externalTemperature += generateRandomIncrement();
       humidity += generateRandomIncrement();
@@ -110,8 +110,8 @@ client.open(function (err, result) {
 
       console.log('Sending device event data:\n' + data);
       client.sendEvent(new Message(data), printErrorFor('send event'));
-    }, 1000); 
-    
+    }, 1000);
+
     client.on('error', function (err) {
       printErrorFor('client')(err);
       if (sendInterval) clearInterval(sendInterval);

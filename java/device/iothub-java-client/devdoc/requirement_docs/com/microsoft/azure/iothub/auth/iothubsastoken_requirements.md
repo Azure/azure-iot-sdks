@@ -22,20 +22,15 @@ public final class IotHubSasToken
 ### IotHubSasToken
 
 ```java
-public IotHubSasToken(String resourceUri, String deviceId, String deviceKey, long expiryTime);
+public IotHubSasToken(String scope, String keyName, String key, long expiryTime);
 ```
     
 **SRS_IOTHUBSASTOKEN_11_001: [**The SAS token shall have the format `SharedAccessSignature sig=<signature >&se=<expiryTime>&skn=&sr=<resourceURI>`. The params can be in any order.**]**
 Note: the ‘skn’ attribute must be an empty string for connecting to IoT Hub.
 
-**SRS_IOTHUBSASTOKEN_11_002: [**The expiry time shall be the given expiry time, where it is a UNIX timestamp and indicates the time after which the token becomes invalid.**]**
-
-**SRS_IOTHUBSASTOKEN_11_003: [**The key name shall be the device ID.**]**
-
-**SRS_IOTHUBSASTOKEN_11_004: [**The resource URI shall be the given resource URI.**]**
+**SRS_IOTHUBSASTOKEN_11_002: [**The constructor shall save all input parameters to member variables.**]**
 
 **SRS_IOTHUBSASTOKEN_11_005: [**The signature shall be correctly computed and set.**]**
-
 
 ### toString
 

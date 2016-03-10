@@ -13,8 +13,8 @@ var util = require('util');
  * @classdesc Constructs an {@linkcode EventHubReceiver} object
  */
 var EventHubReceiver = function (amqpClient, endpoint) {
-	this.amqpClient = amqpClient;
-	this.endpoint = endpoint;
+  this.amqpClient = amqpClient;
+  this.endpoint = endpoint;
 };
 
 util.inherits(EventHubReceiver, EventEmitter);
@@ -26,8 +26,8 @@ EventHubReceiver.EventReceived = 'eventReceived';
 EventHubReceiver.Error = 'error';
 
 /* Notes: 	StartReceive shall handle retries
- *			onError shall be emitted after the retries have been exhausted 
- *			EventHubReceiver shall support redirect 
+ *			onError shall be emitted after the retries have been exhausted
+ *			EventHubReceiver shall support redirect
  */
 
 /**
@@ -35,27 +35,27 @@ EventHubReceiver.Error = 'error';
  * receiving events from the event hub for the specified partition.
  * @param   startTime    The startTime to use as filter for the events being received.
  */
-EventHubReceiver.prototype.StartReceive = function(startTime) {
-	if (startTime !== null) {
-		console.log('Listening on endpoint ' + this.endpoint + ' start time: ' + startTime);
-	}
-	
-	var rxName = 'eventhubclient-rx';
-	var rxOptions = { attach: { target: { address: rxName } } };
-	
-	var self = this;
-	return new Promise(function(resolve) {
-		self.amqpClient.createReceiver(self.endpoint, rxOptions).then(function (amqpReceiver) {
-			amqpReceiver.on('message', function (message) {
-				var eventData = new EventData(message.body, message.annotations.value);
-				self.emit(EventHubReceiver.EventReceived, eventData);
-			});
-			amqpReceiver.on('errorReceived', function(rx_err) {
-				self.emit(EventHubReceiver.Error, rx_err);
-			});
-		});
-		resolve();
-	});
+EventHubReceiver.prototype.StartReceive = function (startTime) {
+  if (startTime !== null) {
+    console.log('Listening on endpoint ' + this.endpoint + ' start time: ' + startTime);
+  }
+
+  var rxName = 'eventhubclient-rx';
+  var rxOptions = { attach: { target: { address: rxName } } };
+
+  var self = this;
+  return new Promise(function (resolve) {
+    self.amqpClient.createReceiver(self.endpoint, rxOptions).then(function (amqpReceiver) {
+      amqpReceiver.on('message', function (message) {
+        var eventData = new EventData(message.body, message.annotations.value);
+        self.emit(EventHubReceiver.EventReceived, eventData);
+      });
+      amqpReceiver.on('errorReceived', function (rx_err) {
+        self.emit(EventHubReceiver.Error, rx_err);
+      });
+    });
+    resolve();
+  });
 };
 
 /**
@@ -63,24 +63,24 @@ EventHubReceiver.prototype.StartReceive = function(startTime) {
  * receiving events from the event hub, while filtering events starting at a certian offset.
  * @param   startOffset    The start offset to use as filter for the events being received.
  */
-EventHubReceiver.prototype.StartReceiveFromOffset = function(startOffset) {
-	if (startOffset !== null) {
-		console.log('Listening on endpoint ' + this.endpoint + ' start offset: ' + startTime);
-	}
+EventHubReceiver.prototype.StartReceiveFromOffset = function (startOffset) {
+  if (startOffset !== null) {
+    console.log('Listening on endpoint ' + this.endpoint + ' start offset: ' + startOffset);
+  }
 
-	var self = this;
-	return new Promise(function(resolve) {
-		self.amqpClient.createReceiver(self.endpoint).then(function (amqpReceiver) {
-			amqpReceiver.on('message', function (message) {
-				var eventData = new EventData(message.body, message.annotations.value);
-				self.emit(EventHubReceiver.MessageReceived, eventData);
-			});
-			amqpReceiver.on('errorReceived', function(rx_err) {
-				self.emit(EventHubReceiver.Error, rx_err);
-			});
-		});
-		resolve();
-	});
+  var self = this;
+  return new Promise(function (resolve) {
+    self.amqpClient.createReceiver(self.endpoint).then(function (amqpReceiver) {
+      amqpReceiver.on('message', function (message) {
+        var eventData = new EventData(message.body, message.annotations.value);
+        self.emit(EventHubReceiver.EventReceived, eventData);
+      });
+      amqpReceiver.on('errorReceived', function (rx_err) {
+        self.emit(EventHubReceiver.Error, rx_err);
+      });
+    });
+    resolve();
+  });
 };
 
 module.exports = EventHubReceiver;

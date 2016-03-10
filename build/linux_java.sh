@@ -7,11 +7,11 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 # -- Java Device Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/java/device
-mvn verify
+mvn verify -DskipITs=false
 [ $? -eq 0 ] || exit $?
 
 # -- Java Service Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/java/service
-mvn verify
+mvn verify -DskipITs=false
 [ $? -eq 0 ] || exit $?

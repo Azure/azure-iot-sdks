@@ -19,9 +19,6 @@
 #include "sastoken.h"
 #include "tickcounter.h"
 
-#include "tlsio_schannel.h"
-#include "tlsio_wolfssl.h"
-#include "tlsio_openssl.h"
 #include "tlsio.h"
 #include "platform.h"
 
@@ -61,8 +58,10 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int portNum;
     MQTT_CLIENT_HANDLE mqttClient;
     uint16_t packetId;
+    bool isRegistered;
     bool connected;
     bool subscribed;
+    bool receiveMessages;
     bool destroyCalled;
     DLIST_ENTRY waitingForAck;
     PDLIST_ENTRY waitingToSend;
@@ -122,6 +121,7 @@ static int publishMqttMessage(PMQTTTRANSPORT_HANDLE_DATA transportState, MQTT_ME
             (void)tickcounter_get_current_ms(g_msgTickCounter, &mqttMsgEntry->msgPublishTime);
             result = 0;
         }
+        mqttmessage_destroy(mqttMsg);
     }
     return result;
 }
@@ -248,7 +248,7 @@ static void MqttOpCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_
 const XIO_HANDLE getIoTransportProvider(const char* fqdn, int port)
 {
     TLSIO_CONFIG tls_io_config = { fqdn, port };
-	const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
+    const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
     return (void*)xio_create(io_interface_description, &tls_io_config, NULL/*defaultPrintLogFunction*/);
 }
 
@@ -256,6 +256,8 @@ static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
 {
     int result;
 
+    if (transportState->receiveMessages && !transportState->subscribed)
+    {
     SUBSCRIBE_PAYLOAD subscribe[] = {
         { STRING_c_str(transportState->mqttMessageTopic), DELIVER_AT_LEAST_ONCE }
     };
@@ -271,6 +273,11 @@ static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
         transportState->subscribed = true;
         transportState->currPacketState = SUBSCRIBE_TYPE;
         result = 0;
+    }
+    }
+    else
+    {
+        transportState->currPacketState = SUBSCRIBE_TYPE;
     }
     return result;
 }
@@ -538,8 +545,10 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_010: [IoTHubTransportMqtt_Create shall allocate memory to save its internal state where all topics, hostname, device_id, device_key, sasTokenSr and client handle shall be saved.] */
                 DList_InitializeListHead(&(state->waitingForAck));
                 state->destroyCalled = false;
+                state->isRegistered = false;
                 state->subscribed = false;
                 state->connected = false;
+                state->receiveMessages = false;
                 state->packetId = 1;
                 state->llClientHandle = NULL;
                 state->xioTransport = NULL;
@@ -651,7 +660,7 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle)
     }
 }
 
-int IoTHubTransportMqtt_Subscribe(TRANSPORT_HANDLE handle)
+int IoTHubTransportMqtt_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 {
     int result;
     PMQTTTRANSPORT_HANDLE_DATA transportState = (PMQTTTRANSPORT_HANDLE_DATA)handle;
@@ -663,12 +672,22 @@ int IoTHubTransportMqtt_Subscribe(TRANSPORT_HANDLE handle)
     }
     else
     {
+        /* Code_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransportMqtt_Subscribe shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the Message Topic.] */
+        transportState->receiveMessages = true;
+        /* Code_SRS_IOTHUB_MQTT_TRANSPORT_07_035: [If current packet state is not CONNACT, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransportMqtt_Subscribe shall set the packet state to SUBSCRIBE_TYPE.]*/
+        if (transportState->currPacketState != CONNACK_TYPE && 
+            transportState->currPacketState != CONNECT_TYPE &&
+            transportState->currPacketState != DISCONNECT_TYPE &&
+            transportState->currPacketState != PACKET_TYPE_ERROR)
+        {
+            transportState->currPacketState = SUBSCRIBE_TYPE;
+        }
         result = 0;
     }
     return result;
 }
 
-void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_HANDLE handle)
+void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 {
     PMQTTTRANSPORT_HANDLE_DATA transportState = (PMQTTTRANSPORT_HANDLE_DATA)handle;
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_019: [If parameter handle is NULL then IoTHubTransportMqtt_Unsubscribe shall do nothing.] */
@@ -678,7 +697,12 @@ void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_HANDLE handle)
         const char* unsubscribe[] = { STRING_c_str(transportState->mqttMessageTopic) };
         (void)mqtt_client_unsubscribe(transportState->mqttClient, transportState->packetId++, unsubscribe, 1);
         transportState->subscribed = false;
+        transportState->receiveMessages = false;
     }
+    else
+    {
+        LogError("Invalid argument to unsubscribe (NULL). \r\n");
+}
 }
 
 extern void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
@@ -695,7 +719,7 @@ extern void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL
         }
         else
         {
-            if (transportState->currPacketState == CONNACK_TYPE)
+            if (transportState->currPacketState == CONNACK_TYPE || transportState->currPacketState == SUBSCRIBE_TYPE)
             {
                 (void)SubscribeToMqttProtocol(transportState);
             }
@@ -798,7 +822,7 @@ extern void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL
     }
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
+IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -858,10 +882,65 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_HANDLE handle, cons
     return result;
 }
 
+IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
+{
+    IOTHUB_DEVICE_HANDLE result;
+    // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransportMqtt_Register shall return NULL if the TRANSPORT_HANDLE is NULL.]
+    // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_002: [ IoTHubTransportMqtt_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.]
+    if ((handle == NULL) || (deviceId == NULL) || (deviceKey == NULL) || (waitingToSend == NULL))
+    {
+        result = NULL;
+    }
+    else
+    {
+        MQTTTRANSPORT_HANDLE_DATA* transportState = (MQTTTRANSPORT_HANDLE_DATA*)handle;
+
+        // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_003: [ IoTHubTransportMqtt_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportMqtt_Create.]
+        if (strcmp(STRING_c_str(transportState->device_id), deviceId) != 0)
+        {
+            result = NULL;
+        }
+        else if (strcmp(STRING_c_str(transportState->device_key), deviceKey) != 0)
+        {
+            result = NULL;
+        }
+        else
+        {
+            if (transportState->isRegistered == true)
+            {
+                LogError("Transport already has device registered by id: [%s]", deviceId);
+                result = NULL;
+            }
+            else
+            {
+                transportState->isRegistered = true;
+                // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
+                result = (IOTHUB_DEVICE_HANDLE)handle;
+            }
+
+        }
+    }
+
+    return result;
+}
+
+// Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_005: [ IoTHubTransportMqtt_Unregister shall return. ]
+void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
+{
+    if (deviceHandle != NULL)
+    {
+        MQTTTRANSPORT_HANDLE_DATA* transportState = (MQTTTRANSPORT_HANDLE_DATA*)deviceHandle;
+
+        transportState->isRegistered = false;
+    }
+}
+
 TRANSPORT_PROVIDER myfunc = {
     IoTHubTransportMqtt_SetOption,
     IoTHubTransportMqtt_Create, 
     IoTHubTransportMqtt_Destroy, 
+    IoTHubTransportMqtt_Register,
+    IoTHubTransportMqtt_Unregister,
     IoTHubTransportMqtt_Subscribe, 
     IoTHubTransportMqtt_Unsubscribe, 
     IoTHubTransportMqtt_DoWork, 

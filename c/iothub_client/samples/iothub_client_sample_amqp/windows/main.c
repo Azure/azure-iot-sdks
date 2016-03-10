@@ -5,6 +5,6 @@
 
 int main(void)
 {
-    iothub_client_sample_amqp_run();
+	iothub_client_sample_amqp_run();
     return 0;
 }

@@ -131,7 +131,7 @@ void simplesample_amqp_run(void)
 {
     if (platform_init() != 0)
     {
-        (void)printf("Failed on serializer_init\r\n");
+        printf("Failed to initialize the platform.\r\n");
     }
     else
     {

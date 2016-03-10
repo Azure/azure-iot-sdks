@@ -14,6 +14,7 @@ import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
@@ -25,6 +26,7 @@ import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.junit.Test;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -621,6 +623,7 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_027: [The event handler shall create a Session (Proton) object from the connection.]
     // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_028: [The event handler shall create a Receiver and Sender (Proton) object and set the protocol tag on them to a predefined constant.]
     // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_029: [The event handler shall open the Connection, Session, Sender, and Receiver objects.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_15_054: [ The Receiver and Sender objects shall have the properties set to client version identifier.]
     @Test
     public void onConnectionInitCreatesSession(){
         final String hostName = "test.host.name";
@@ -645,6 +648,8 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
                 mockSession.open();
                 mockReceiver.open();
                 mockSender.open();
+                mockSender.setProperties((Map<Symbol, Object>) any);
+                mockReceiver.setProperties((Map<Symbol, Object>) any);
             }
         };
     }

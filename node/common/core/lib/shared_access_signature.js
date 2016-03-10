@@ -24,14 +24,14 @@ function SharedAccessSignature() {
 /**
  * @method          module:azure-iot-common.SharedAccessSignature.create
  * @description     Instantiate a SharedAccessSignature token with the given parameters.
- * 
+ *
  * @param {String}  resourceUri     the resource URI to encode into the token.
  * @param {String}  keyName         an identifier associated with the key.
  * @param {String}  key             a base64-encoded key value.
  * @param {String}  expiry          an integer value representing the number of seconds since the epoch 00:00:00 UTC on 1 January 1970.
- * 
+ *
  * @throws {ReferenceError}         Will be thrown if one of the arguments is falsy.
- * 
+ *
  * @returns {SharedAccessSignature} A shared access signature token.
  */
 /*Codes_SRS_NODE_COMMON_SAS_05_008: [The create method shall accept four arguments:
@@ -72,12 +72,12 @@ SharedAccessSignature.create = function create(resourceUri, keyName, key, expiry
 /**
  * @method          module:azure-iot-common.SharedAccessSignature.parse
  * @description     Instantiate a SharedAccessSignature token from a string.
- * 
+ *
  * @param {String}  source          the string to parse in order to create the SharedAccessSignature token.
  * @param {Array}   requiredFields  an array of fields that we expect to find in the source string.
- * 
+ *
  * @throws {FormatError}            Will be thrown if the source string is malformed.
- * 
+ *
  * @returns {SharedAccessSignature} A shared access signature token.
  */
 SharedAccessSignature.parse = function parse(source, requiredFields) {
@@ -115,12 +115,12 @@ SharedAccessSignature.parse = function parse(source, requiredFields) {
 /**
  * @method          module:azure-iot-common.SharedAccessSignature#toString
  * @description     Formats a SharedAccessSignatureObject into a properly formatted string.
- * 
+ *
  * @returns {String} A properly formatted shared access signature token.
  */
 SharedAccessSignature.prototype.toString = function () {
   /*Codes_SRS_NODE_COMMON_SAS_05_019: [The toString method shall return a shared-access signature token of the form:
-  SharedAccessSignature sr=<resourceUri>&sig=<urlEncodedSignature>&se=<expiry>&skn=<urlEncodedKeyName>]*/
+  SharedAccessSignature sr=<url-encoded resourceUri>&sig=<urlEncodedSignature>&se=<expiry>&skn=<urlEncodedKeyName>]*/
   var sas = 'SharedAccessSignature ';
   ['sr', 'sig', 'skn', 'se'].forEach(function (key) {
     /*Codes_SRS_NODE_COMMON_SAS_05_020: [The skn segment is not part of the returned string if the skn property is not defined.]*/

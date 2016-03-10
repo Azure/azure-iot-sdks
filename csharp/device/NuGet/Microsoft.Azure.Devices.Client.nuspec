@@ -21,8 +21,8 @@
                 <dependency id="Microsoft.Azure.Amqp" version="1.0.0" />
             </group>
             <group targetFramework="net45" >
-                <dependency id="DotNetty.Codecs.Mqtt-signed" version="0.2.2" />
-                <dependency id="DotNetty.Handlers-signed" version="0.2.2" />
+                <dependency id="DotNetty.Codecs.Mqtt-signed" version="0.2.3" />
+                <dependency id="DotNetty.Handlers-signed" version="0.2.3" />
             </group>
         </dependencies>
     </metadata>

@@ -5,12 +5,17 @@
 
 package com.microsoft.azure.iot.service.transport.amqps;
 
+import com.microsoft.azure.iot.service.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class to override
@@ -19,7 +24,7 @@ import org.apache.qpid.proton.reactor.Handshaker;
  * Maintains the layers of AMQP protocol (Link, Session, Connection, Transport)
  * Creates and sets SASL authentication for transport
  */
-class AmqpFeedbackReceivedHandler extends BaseHandler
+public class AmqpFeedbackReceivedHandler extends BaseHandler
 {
     public static final String RECEIVE_TAG = "receiver";
     public static final String SEND_PORT = ":5671";
@@ -39,7 +44,7 @@ class AmqpFeedbackReceivedHandler extends BaseHandler
      * @param sasToken The SAS token string
      * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
      */
-    AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
+    public AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
         this.hostName = hostName + SEND_PORT;
@@ -140,7 +145,11 @@ class AmqpFeedbackReceivedHandler extends BaseHandler
         // doesn't have a handler, the events go to the reactor.
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_013: [The event handler shall create a Receiver (Proton) object and set the protocol tag on it to a predefined constant]
+        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_15_017: [The Receiver object shall have the properties set to service client version identifier.]
+        Map<Symbol, Object> properties = new HashMap<>();
+        properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
         Receiver receiver = ssn.receiver(RECEIVE_TAG);
+        receiver.setProperties(properties);
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_014: [The event handler shall open the Connection, the Session and the Receiver object]
         conn.open();

@@ -11,8 +11,10 @@ Allows a single logical or physical device to connect to an IoT Hub.
 ```java
 public final class DeviceClient
 {
-    public static final long DEFAULT_SEND_PERIOD_MILLIS = 5000;
-    public static final long DEFAULT_RECEIVE_PERIOD_MILLIS = 5000;
+    public static long SEND_PERIOD_MILLIS = 5000l;
+    public static long RECEIVE_PERIOD_MILLIS = 5000l;
+    public static long RECEIVE_PERIOD_MILLIS_MQTT = 5000l;
+    public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException;
     public DeviceClient(String iotHubHostname, String deviceId, String deviceKey, IotHubClientProtocol protocol) throws URISyntaxException;
@@ -62,9 +64,9 @@ public void open();
 
 **SRS_DEVICECLIENT_11_035: [**The function shall open the transport to communicate with an IoT Hub.**]**
 
-**SRS_DEVICECLIENT_11_023: [**The function shall schedule send tasks to run every 5000 milliseconds.**]**
+**SRS_DEVICECLIENT_11_023: [**The function shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.**]**
 
-**SRS_DEVICECLIENT_11_024: [**The function shall schedule receive tasks to run every 5000 milliseconds.**]**
+**SRS_DEVICECLIENT_11_024: [**The function shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.**]**
 
 **SRS_DEVICECLIENT_11_028: [**If the client is already open, the function shall do nothing.**]**
 

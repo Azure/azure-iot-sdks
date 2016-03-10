@@ -6,6 +6,8 @@
 #include <crtdbg.h>
 #endif
 
+
+
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
@@ -19,6 +21,8 @@
 
 #include "string_tokenizer.h"
 #include "strings.h"
+
+#include "tickcounter.h"
 
 extern "C" int gballoc_init(void);
 extern "C" void gballoc_deinit(void);
@@ -70,6 +74,7 @@ static bool checkProtocolGatewayIsNull;
 #define TEST_PROTOCOL_GATEWAY_HOST_NAME_TOKEN "GatewayHostName"
 
 #define TEST_DEVICEMESSAGE_HANDLE (IOTHUB_MESSAGE_HANDLE)0x52
+#define TEST_DEVICEMESSAGE_HANDLE_2 (IOTHUB_MESSAGE_HANDLE)0x53
 #define TEST_IOTHUB_CLIENT_LL_HANDLE    (IOTHUB_CLIENT_LL_HANDLE)0x4242
 
 #define TEST_STRING_HANDLE (STRING_HANDLE)0x46
@@ -94,6 +99,32 @@ static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_NULL_protocol =
     TEST_DEVICE_KEY,        /* const char* deviceKey;                       */
     TEST_IOTHUBNAME,        /* const char* iotHubName;                      */
     TEST_IOTHUBSUFFIX,      /* const char* iotHubSuffix;                    */
+};
+
+#define FAKE_TRANSPORT_HANDLE (TRANSPORT_HANDLE)0xDEAD
+
+static const IOTHUB_CLIENT_DEVICE_CONFIG TEST_DEVICE_CONFIG =
+{
+	provideFAKE,
+	FAKE_TRANSPORT_HANDLE,
+	TEST_DEVICE_ID,
+	TEST_DEVICE_KEY
+};
+
+static const IOTHUB_CLIENT_DEVICE_CONFIG TEST_DEVICE_CONFIG_null_protocol =
+{
+	NULL,
+	FAKE_TRANSPORT_HANDLE,
+	TEST_DEVICE_ID,
+	TEST_DEVICE_KEY
+};
+
+static const IOTHUB_CLIENT_DEVICE_CONFIG TEST_DEVICE_CONFIG_null_handle =
+{
+	provideFAKE,
+	NULL,
+	TEST_DEVICE_ID,
+	TEST_DEVICE_KEY
 };
 
 static size_t currentmalloc_call;
@@ -192,6 +223,12 @@ public:
     MOCK_STATIC_METHOD_1(, void, FAKE_IoTHubTransport_Destroy, TRANSPORT_HANDLE, handle)
     MOCK_VOID_METHOD_END()
 
+		MOCK_STATIC_METHOD_4(, IOTHUB_DEVICE_HANDLE, FAKE_IoTHubTransport_Register, TRANSPORT_HANDLE, handle, const char*, deviceId, const char*, deviceKey, PDLIST_ENTRY, waitingToSend)
+		MOCK_METHOD_END(IOTHUB_DEVICE_HANDLE, (IOTHUB_DEVICE_HANDLE)handle)
+
+		MOCK_STATIC_METHOD_1(, void, FAKE_IoTHubTransport_Unregister, IOTHUB_DEVICE_HANDLE, handle)
+		MOCK_VOID_METHOD_END()
+
     MOCK_STATIC_METHOD_1(, int, FAKE_IoTHubTransport_Subscribe, TRANSPORT_HANDLE, handle)
     MOCK_METHOD_END(int, 0)
 
@@ -252,7 +289,18 @@ public:
 
     /* Version Mocks */
     MOCK_STATIC_METHOD_0(, const char*, IoTHubClient_GetVersionString)
-    MOCK_METHOD_END(const char*, nullptr)
+    MOCK_METHOD_END(const char*, (const char*) NULL)
+
+    MOCK_STATIC_METHOD_0(, TICK_COUNTER_HANDLE, tickcounter_create);
+        TICK_COUNTER_HANDLE result2 = (TICK_COUNTER_HANDLE )BASEIMPLEMENTATION::gballoc_malloc(1);
+    MOCK_METHOD_END(TICK_COUNTER_HANDLE, result2)
+
+    MOCK_STATIC_METHOD_1(, void, tickcounter_destroy, TICK_COUNTER_HANDLE, tick_counter);
+        BASEIMPLEMENTATION::gballoc_free(tick_counter);
+    MOCK_VOID_METHOD_END()
+
+    MOCK_STATIC_METHOD_2(, int, tickcounter_get_current_ms, TICK_COUNTER_HANDLE, tick_counter, uint64_t*, current_ms);
+    MOCK_METHOD_END(int, 0)
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, DList_InitializeListHead, PDLIST_ENTRY, listHead);
@@ -269,6 +317,8 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, gballoc_free, void*, 
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientLLMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_HANDLE, handle, const char*, optionName, const void*, value);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , TRANSPORT_HANDLE, FAKE_IoTHubTransport_Create,const IOTHUBTRANSPORT_CONFIG*, config);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_Destroy, TRANSPORT_HANDLE, handle);
+DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientLLMocks, , IOTHUB_DEVICE_HANDLE, FAKE_IoTHubTransport_Register, TRANSPORT_HANDLE, handle, const char*, deviceId, const char*, deviceKey, PDLIST_ENTRY, waitingToSend);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_Unregister, IOTHUB_DEVICE_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , int, FAKE_IoTHubTransport_Subscribe, TRANSPORT_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_Unsubscribe, TRANSPORT_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_DoWork, TRANSPORT_HANDLE, handle, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle);
@@ -296,11 +346,17 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, STRING_TOKENIZER_dest
 
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubClientLLMocks, , const char*, IoTHubClient_GetVersionString);
 
+DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubClientLLMocks, ,TICK_COUNTER_HANDLE, tickcounter_create);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, tickcounter_destroy, TICK_COUNTER_HANDLE, tick_counter);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , int, tickcounter_get_current_ms, TICK_COUNTER_HANDLE, tick_counter, uint64_t*, current_ms);
+
 static TRANSPORT_PROVIDER FAKE_transport_provider =
 {
     FAKE_IoTHubTransport_SetOption,     /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       */
     FAKE_IoTHubTransport_Create,        /*pfIoTHubTransport_Create IoTHubTransport_Create;              */
     FAKE_IoTHubTransport_Destroy,       /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;            */
+	FAKE_IoTHubTransport_Register,		/* pfIotHubTransport_Register IoTHubTransport_Register;         */
+	FAKE_IoTHubTransport_Unregister,    /* pfIotHubTransport_Unregister IoTHubTransport_Unegister;      */
     FAKE_IoTHubTransport_Subscribe,     /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;        */
     FAKE_IoTHubTransport_Unsubscribe,   /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;    */
     FAKE_IoTHubTransport_DoWork,        /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;              */
@@ -440,13 +496,18 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+
         STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .SetReturn((TRANSPORT_HANDLE)0x42);
-        
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+			.IgnoreAllArguments();
+
         ///act
         auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
 
@@ -551,12 +612,16 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
 		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 
 		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+			.IgnoreAllArguments();
 
 		///act
 		auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
@@ -647,12 +712,16 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
 		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 
 		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+			.IgnoreAllArguments();
 
 		///act
 		auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
@@ -799,7 +868,11 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 
         /* underlying IoTHubClient_LL_Create call */
-        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORE))
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
@@ -1679,8 +1752,29 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         ///arrange
         CIoTHubClientLLMocks mocks;
         whenShallmalloc_fail = 1;
-        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORE))
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
+
+        ///act
+        auto result = IoTHubClient_LL_Create(&TEST_CONFIG);
+
+        ///assert
+        ASSERT_ARE_EQUAL(void_ptr, NULL, result);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_046: [ If creating the TICK_COUNTER_HANDLE fails then IoTHubClient_LL_Create shall fail and return NULL. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_Create_fails_when_tick_counter_create_fails)
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create())
+            .SetFailReturn((TICK_COUNTER_HANDLE)NULL);
 
         ///act
         auto result = IoTHubClient_LL_Create(&TEST_CONFIG);
@@ -1701,6 +1795,10 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
         STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -1715,9 +1813,45 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         ASSERT_ARE_EQUAL(void_ptr, NULL, result);
     }
 
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_009: [If the _Register function fails, this function shall fail and return NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_Create_fails_when_underlying_transport_register_fails)
+	{
+		///arrange
+		CIoTHubClientLLMocks mocks;
+		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, TEST_CONFIG.deviceId, TEST_CONFIG.deviceKey, IGNORED_PTR_ARG))
+			.IgnoreArgument(1)
+			.IgnoreArgument(4)
+			.SetFailReturn((IOTHUB_DEVICE_HANDLE)NULL);
+
+		///act
+		auto result = IoTHubClient_LL_Create(&TEST_CONFIG);
+
+		///assert
+		ASSERT_ARE_EQUAL(void_ptr, NULL, result);
+	}
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_045: [ Otherwise IoTHubClient_LL_Create shall create a new TICK_COUNTER_HANDLE ]*/
     /*Tests_SRS_IOTHUBCLIENT_LL_02_004: [Otherwise IoTHubClient_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
     /*Tests_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClient_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
     /*Tests_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.] */
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_008: [IoTHubClient_LL_Create shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.] */
     TEST_FUNCTION(IoTHubClient_LL_Create_suceeds)
     {
         ///arrange
@@ -1725,12 +1859,17 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
 
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+
         STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .SetReturn((TRANSPORT_HANDLE)0x42);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register((TRANSPORT_HANDLE)0x42, TEST_CONFIG.deviceId, TEST_CONFIG.deviceKey, IGNORED_PTR_ARG))
+			.IgnoreArgument(4);
 
         ///act
         auto result = IoTHubClient_LL_Create(&TEST_CONFIG);
@@ -1742,6 +1881,142 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         ///cleanup
         IoTHubClient_LL_Destroy(result);
     }
+
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_001: [IoTHubClient_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_null_config_fails)
+	{
+		CIoTHubClientLLMocks mocks;
+
+		auto result = IoTHubClient_LL_CreateWithTransport(NULL);
+
+		ASSERT_IS_NULL(result);
+
+	}
+	
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_001: [IoTHubClient_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_null_protocol_fails)
+	{
+		CIoTHubClientLLMocks mocks;
+
+		auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG_null_protocol);
+
+		ASSERT_IS_NULL(result);
+		
+	}
+	
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_001: [IoTHubClient_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_null_transportHandle_fails)
+	{
+		CIoTHubClientLLMocks mocks;
+
+		auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG_null_handle);
+
+		ASSERT_IS_NULL(result);
+	}
+
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_002: [IoTHubClient_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_LL_HANDLE.] */
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_047: [ IoTHubClient_LL_CreateWithTransport shall create a TICK_COUNTER_HANDLE. ]*/
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_004: [IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.] */
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_006: [IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_Succeeds)
+	{
+		///arrange
+		CIoTHubClientLLMocks mocks;
+
+		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+			.IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+
+		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(TEST_DEVICE_CONFIG.transportHandle, TEST_DEVICE_CONFIG.deviceId, TEST_DEVICE_CONFIG.deviceKey, IGNORED_PTR_ARG))
+			.IgnoreArgument(4);
+
+		///act
+		auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+
+		///assert
+		ASSERT_IS_NOT_NULL(result);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubClient_LL_Destroy(result);
+	}
+
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_007: [If the _Register function fails, this function shall fail and return NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_transport_register_fails_returns_null)
+	{
+		///arrange
+		CIoTHubClientLLMocks mocks;
+
+		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(TEST_DEVICE_CONFIG.transportHandle, TEST_DEVICE_CONFIG.deviceId, TEST_DEVICE_CONFIG.deviceKey, IGNORED_PTR_ARG))
+			.IgnoreArgument(4)
+			.SetFailReturn((IOTHUB_DEVICE_HANDLE)NULL);
+
+		///act
+		auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+
+		///assert
+		ASSERT_IS_NULL(result);
+
+		///cleanup
+	}
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_048: [ If creating the handle fails, then IoTHubClient_LL_CreateWithTransport shall fail and return NULL ]*/
+    TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_tick_counter_fails_returns_null)
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_create())
+            .SetFailReturn((TICK_COUNTER_HANDLE)NULL);
+
+        ///act
+        auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///cleanup
+    }
+
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_003: [If allocation fails, the function shall fail and return NULL.]*/
+	TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_allocation_fails_returns_null)
+	{
+		///arrange
+		CIoTHubClientLLMocks mocks;
+
+		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+			.IgnoreArgument(1)
+			.SetFailReturn((void*)NULL);
+
+		///act
+		auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+
+		///assert
+		ASSERT_IS_NULL(result);
+
+		///cleanup
+	}
 
     /*Tests_SRS_IOTHUBCLIENT_LL_02_009: [IoTHubClient_LL_Destroy shall do nothing if parameter iotHubClientHandle is NULL.] */
     TEST_FUNCTION(IoTHubClient_LL_Destroy_with_NULL_succeeds)
@@ -1755,7 +2030,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         ///assert -uMock does it
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_LL_02_010: [IoTHubClient_LL_Destroy it shall call the underlaying layer's _Destroy function and shall free the resources allocated by IoTHubClient (if any).] */
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_010: [If iotHubClientHandle was not created by IoTHubClient_LL_CreateWithTransport, IoTHubClient_LL_Destroy  shall call the underlaying layer's _Destroy function.] */
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_010: [IoTHubClient_LL_Destroy  shall call the underlaying layer's _Unregister function] */
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_011: [IoTHubClient_LL_Destroy  shall free the resources allocated by IoTHubClient (if any).] */
     TEST_FUNCTION(IoTHubClient_LL_Destroys_the_underlying_transport_succeeds)
     {
         ///arrange
@@ -1763,8 +2040,14 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         auto handle = IoTHubClient_LL_Create(&TEST_CONFIG);
         mocks.ResetAllCalls();
 
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Unregister(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -1776,6 +2059,32 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 
         ///assert -uMock does it
     }
+
+	/*Tests_SRS_IOTHUBCLIENT_LL_17_005: [IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.] */
+	TEST_FUNCTION(IoTHubClient_LL_Destroys_unregisters_but_does_not_destroy_transport_succeeds)
+	{
+		///arrange
+		CIoTHubClientLLMocks mocks;
+		auto handle = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+		mocks.ResetAllCalls();
+
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Unregister(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		STRICT_EXPECTED_CALL(mocks, DList_RemoveHeadList(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		///act
+		IoTHubClient_LL_Destroy(handle);
+
+		///assert -uMock does it
+	}
 
     /*Tests_SRS_IOTHUBCLIENT_LL_02_011: [IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle or eventMessageHandle is NULL.]*/
     TEST_FUNCTION(IoTHubClient_LL_SendEventAsync_with_NULL_iotHubClientHandle_fails)
@@ -1873,7 +2182,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         IoTHubClient_LL_SendEventAsync(handle, messageHandle, eventConfirmationCallback, (void*)1);
         mocks.ResetAllCalls();
 
-        STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Unregister(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*IOTHUBCLIENT*/
             .IgnoreArgument(1);
@@ -1882,6 +2193,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, eventConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, (void*)1));
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*IOTHUBMESSAGE*/
@@ -1911,10 +2225,40 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because _Clone fails below*/
             .IgnoreArgument(1);
 
-
         STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Clone(IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .SetReturn((IOTHUB_MESSAGE_HANDLE)NULL);
+
+        ///act
+        auto result = IoTHubClient_LL_SendEventAsync(handle, messageHandle, eventConfirmationCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information fails for any reason, IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.]*/
+    TEST_FUNCTION(IoTHubClient_LL_SendEventAsync_fails_when_current_ms_cannot_be_obtained)
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        auto handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        uint64_t thisIsNotZero = 312984751;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &thisIsNotZero); /*this forces _SendEventAsync to query the currentTime. If that fails, _SendEvent should fail as well*/
+        auto messageHandle = (IOTHUB_MESSAGE_HANDLE)1;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because _Clone fails below*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments()
+            .SetFailReturn(__LINE__);
 
         ///act
         auto result = IoTHubClient_LL_SendEventAsync(handle, messageHandle, eventConfirmationCallback, (void*)1);
@@ -2055,6 +2399,9 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
 
         STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, handle))
             .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*_DoWork will ask "what's the time"*/
+            .IgnoreAllArguments();
 
         ///act
         IoTHubClient_LL_DoWork(handle);
@@ -2749,5 +3096,475 @@ BEGIN_TEST_SUITE(iothubclient_ll_unittests)
         IoTHubClient_LL_Destroy(handle);
 
     }
+    
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_messageTimeout_to_zero_after_Create_succeeds)
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        mocks.ResetAllCalls();
+
+        ///act
+        uint64_t zero = 0;
+        auto result = IoTHubClient_LL_SetOption(handle, "messageTimeout", &zero);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_messageTimeout_to_one_after_Create_succeeds)
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        mocks.ResetAllCalls();
+
+        ///act
+        uint64_t one = 1;
+        auto result = IoTHubClient_LL_SetOption(handle, "messageTimeout", &one);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_messageTimeout_can_be_reverted_back_to_zero_succeeds)
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        uint64_t one = 1;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &one);
+        mocks.ResetAllCalls();
+
+        ///act
+        uint64_t zero = 0;
+        auto result = IoTHubClient_LL_SetOption(handle, "messageTimeout", &zero);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClient_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_messageTimeout_calls_timeout_callback)
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        uint64_t one = 1;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &one);
+
+        /*send 1 messages that will expire*/
+        /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
+        "the message has been received at time=10*/
+        uint64_t ten = 10;
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)TEST_DEVICEMESSAGE_HANDLE);
+        mocks.ResetAllCalls();
+
+        /*we don't care what happens in the Transport, so let's ignore all those calls*/
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllCalls();
+
+        uint64_t twelve = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout*/
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &twelve, sizeof(twelve));
+        
+        STRICT_EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG)) /*this is removing the item from waitingToSend*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, eventConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, (void*)TEST_DEVICEMESSAGE_HANDLE)); /*calling the callback*/
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG)) /*destroying the message clone*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*destroying the IOTHUB_MESSAGE_LIST*/
+            .IgnoreArgument(1);
+
+        ///act
+        IoTHubClient_LL_DoWork(handle);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_defaults_to_zero)
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+
+        /*send 1 messages that will expire*/
+        /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
+        "the message has been received at time=10*/
+        uint64_t ten = 10;
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)TEST_DEVICEMESSAGE_HANDLE);
+        mocks.ResetAllCalls();
+
+        /*we don't care what happens in the Transport, so let's ignore all those calls*/
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllCalls();
+
+        uint64_t twelve = 12; /*12 > 10 (receive time) + 1 (timeout) => would result in timeout, except the fact that messageTimeout option has never been set, therefore no timeout shall be called*/
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &twelve, sizeof(twelve));
+
+        ///act
+        IoTHubClient_LL_DoWork(handle);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_messageTimeout_only_removes_the_message_if_it_has_NULL_callback)
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        uint64_t one = 1;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &one);
+
+        /*send 1 messages that will expire*/
+        /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
+        "the message has been received at time=10*/
+        uint64_t ten = 10;
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, NULL, NULL); /*this is a message with a NULL callback*/
+        mocks.ResetAllCalls();
+
+        /*we don't care what happens in the Transport, so let's ignore all those calls*/
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllCalls();
+
+        uint64_t twelve = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout*/
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &twelve, sizeof(twelve));
+
+        STRICT_EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG)) /*this is removing the item from waitingToSend*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG)) /*destroying the message clone*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*destroying the IOTHUB_MESSAGE_LIST*/
+            .IgnoreArgument(1);
+
+        ///act
+        IoTHubClient_LL_DoWork(handle);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClient_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_messageTimeout_when_exactly_on_the_edge_does_not_call_the_callback) /*because "more"*/
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        uint64_t one = 1;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &one);
+
+        /*send 1 messages that will expire*/
+        /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
+        "the message has been received at time=10*/
+        uint64_t ten = 10;
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)TEST_DEVICEMESSAGE_HANDLE);
+        mocks.ResetAllCalls();
+
+        /*we don't care what happens in the Transport, so let's ignore all those calls*/
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllCalls();
+
+        uint64_t eleven = 11; /*11 = 10 (receive time) + 1 (timeout) => NO timeout*/
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &eleven, sizeof(eleven));
+
+        ///act
+        IoTHubClient_LL_DoWork(handle);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClient_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_2_messages_with_timeouts_at_11_and_12_calls_1_timeout) /*test wants to see that message that did not timeout yet do not have their callbacks called*/
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        uint64_t one = 1;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &one);
+
+        /*send 2 messages that will expire at 12 and 13, both of these messages are send at time=10*/
+        /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
+        "the message has been received at time=10*/
+        uint64_t ten = 10;
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)TEST_DEVICEMESSAGE_HANDLE);
+
+        uint64_t two = 2;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &two);
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)(TEST_DEVICEMESSAGE_HANDLE_2 ));
+
+        mocks.ResetAllCalls();
+
+        /*we don't care what happens in the Transport, so let's ignore all those calls*/
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllCalls();
+
+        uint64_t twelve = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout!!!*/
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &twelve, sizeof(twelve));
+
+        STRICT_EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG)) /*this is removing the item from waitingToSend*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, eventConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, (void*)TEST_DEVICEMESSAGE_HANDLE)); /*calling the callback*/
+        STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG)) /*destroying the message clone*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*destroying the IOTHUB_MESSAGE_LIST*/
+            .IgnoreArgument(1);
+
+        /*because we're at time = 12 in this test, the second message is untouched*/
+
+        ///act
+        IoTHubClient_LL_DoWork(handle);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClient_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_044: [ Messages already delivered to IoTHubClient_LL shall not have their timeouts modified by a new call to IoTHubClient_LL_SetOption. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_2_messages_with_timeouts_at_11_and_12_calls_2_timeouts) /*test wants to see that message that did not timeout yet do not have their callbacks called*/
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        uint64_t one = 1;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &one);
+
+        /*send 2 messages that will expire at 12 and 13, both of these messages are send at time=10*/
+        /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
+        "the message has been received at time=10*/
+        uint64_t ten = 10;
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)TEST_DEVICEMESSAGE_HANDLE);
+
+        uint64_t two = 2;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &two);
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)(TEST_DEVICEMESSAGE_HANDLE_2));
+
+        mocks.ResetAllCalls();
+
+        /*we don't care what happens in the Transport, so let's ignore all those calls*/
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllCalls();
+
+        {/*this scope happen in the first _DoWork call*/
+            uint64_t timeIsNow = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout!!!*/
+            STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .CopyOutArgumentBuffer(2, &timeIsNow, sizeof(timeIsNow));
+
+            STRICT_EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG)) /*this is removing the item from waitingToSend*/
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, eventConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, (void*)TEST_DEVICEMESSAGE_HANDLE)); /*calling the callback*/
+            STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG)) /*destroying the message clone*/
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*destroying the IOTHUB_MESSAGE_LIST*/
+                .IgnoreArgument(1);
+        }
+
+        {/*this scope happen in the second _DoWork call*/
+            uint64_t timeIsNow = 13; /*13 > 10 (receive time) + 2 (timeout) => timeout!!!*/
+            STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .CopyOutArgumentBuffer(2, &timeIsNow, sizeof(timeIsNow));
+
+            STRICT_EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG)) /*this is removing the item from waitingToSend*/
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, eventConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, (void*)(TEST_DEVICEMESSAGE_HANDLE_2))); /*calling the callback*/
+            STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG)) /*destroying the message clone*/
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*destroying the IOTHUB_MESSAGE_LIST*/
+                .IgnoreArgument(1);
+        }
+
+        /*because we're at time = 13 in this test, the second message times out too*/
+
+        ///act
+        IoTHubClient_LL_DoWork(handle);
+        IoTHubClient_LL_DoWork(handle);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClient_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_043: [ Calling IoTHubClient_LL_SetOption with value set to "0" shall disable the timeout mechanism for all new messages. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_044: [ Messages already delivered to IoTHubClient_LL shall not have their timeouts modified by a new call to IoTHubClient_LL_SetOption. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_2_messages_one_with_timeout_one_without_call_1_callback) /*test wants to see that message that did not timeout yet do not have their callbacks called*/
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        uint64_t one = 1;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &one);
+
+        /*send 2 messages that will expire at 12 and 13, both of these messages are send at time=10*/
+        /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
+        "the message has been received at time=10*/
+        uint64_t ten = 10;
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)TEST_DEVICEMESSAGE_HANDLE);
+
+        uint64_t zero = 0;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &zero); /*essentially no timeout*/
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)(TEST_DEVICEMESSAGE_HANDLE_2));
+
+        mocks.ResetAllCalls();
+
+        /*we don't care what happens in the Transport, so let's ignore all those calls*/
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllCalls();
+
+        {/*this scope happen in the first _DoWork call*/
+            uint64_t timeIsNow = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout!!!*/
+            STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .CopyOutArgumentBuffer(2, &timeIsNow, sizeof(timeIsNow));
+
+            STRICT_EXPECTED_CALL(mocks, DList_RemoveEntryList(IGNORED_PTR_ARG)) /*this is removing the item from waitingToSend*/
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, eventConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, (void*)TEST_DEVICEMESSAGE_HANDLE)); /*calling the callback*/
+            STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(IGNORED_PTR_ARG)) /*destroying the message clone*/
+                .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*destroying the IOTHUB_MESSAGE_LIST*/
+                .IgnoreArgument(1);
+        }
+
+        {/*this scope happen in the second _DoWork call*/
+            uint64_t timeIsNow = 999999999999999ULL; /*some very big number*/
+            STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .CopyOutArgumentBuffer(2, &timeIsNow, sizeof(timeIsNow));
+        }
+
+        ///act
+        IoTHubClient_LL_DoWork(handle);
+        IoTHubClient_LL_DoWork(handle);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClient_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_SetOption_messageTimeout_when_tickcounter_fails_in_do_work_no_timeout_callbacks_are_called) /*test wants to see that message that did not timeout yet do not have their callbacks called*/
+    {
+        ///arrange
+        CIoTHubClientLLMocks mocks;
+        IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+        uint64_t one = 1;
+        (void)IoTHubClient_LL_SetOption(handle, "messageTimeout", &one);
+
+        /*send 2 messages that will expire at 12 and 13, both of these messages are send at time=10*/
+        /*because sending messages stamps the message's timeout, the call to tickcounter_get_current_ms needs to be here, so the test can says
+        "the message has been received at time=10*/
+        uint64_t ten = 10;
+        STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .CopyOutArgumentBuffer(2, &ten, sizeof(ten));
+        (void)IoTHubClient_LL_SendEventAsync(handle, TEST_DEVICEMESSAGE_HANDLE, eventConfirmationCallback, (void*)TEST_DEVICEMESSAGE_HANDLE);
+
+        mocks.ResetAllCalls();
+
+        /*we don't care what happens in the Transport, so let's ignore all those calls*/
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllCalls();
+
+        {/*this scope happen in the _DoWork call*/
+            uint64_t timeIsNow = 12; /*12 > 10 (receive time) + 1 (timeout) => timeout!!! (well - normally - but here the code doesn't call any callbacks because time cannot be obtained*/
+            STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument(1)
+                .CopyOutArgumentBuffer(2, &timeIsNow, sizeof(timeIsNow))
+                .SetFailReturn(__LINE__);
+        }
+
+        ///act
+        IoTHubClient_LL_DoWork(handle);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_LL_Destroy(handle);
+    }
+
 END_TEST_SUITE(iothubclient_ll_unittests)
 

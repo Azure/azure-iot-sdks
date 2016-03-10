@@ -29,6 +29,7 @@
 #include "httpapiex.h"
 #include "httpapiexsas.h"
 #include "base64.h"
+#include "vector.h"
 
 #define IOTHUB_ACK "iothub-ack"
 #define IOTHUB_ACK_NONE "none"
@@ -64,6 +65,31 @@ namespace BASEIMPLEMENTATION
     #include "base64.c"
     #include "strings.c"
     #include "buffer.c"
+	#include "vector.c"
+};
+
+class RefCountObject
+{
+private:
+	size_t ref_count;
+
+public:
+	RefCountObject() : ref_count(1)
+	{
+	}
+
+	size_t inc_ref()
+	{
+		return ++ref_count;
+	}
+
+	void dec_ref()
+	{
+		if (--ref_count == 0)
+		{
+			delete this;
+		}
+	}
 };
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
@@ -106,12 +132,6 @@ static IOTHUBTRANSPORT_CONFIG TEST_CONFIG =
     &waitingToSend
 };
 
-static IOTHUBTRANSPORT_CONFIG TEST_CONFIG_NULL_WAITING_TO_SEND =
-{
-    &TEST_CONFIG_IOTHUBCLIENT_CONFIG,
-    NULL
-};
-
 static IOTHUBTRANSPORT_CONFIG TEST_CONFIG_NULL_CONFIG =
 {
     NULL,
@@ -130,21 +150,6 @@ static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_PROTOCOL 
 static IOTHUBTRANSPORT_CONFIG TEST_CONFIG_NULL_PROTOCOL =
 {
     &TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_PROTOCOL,
-    (PDLIST_ENTRY)0x1
-};
-
-static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_DEVICE_ID =
-{
-    HTTP_Protocol,                              /*IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;  */
-    NULL,                                       /*const char* deviceId;                       */
-    TEST_DEVICE_KEY,                            /*const char* deviceKey;                      */
-    TEST_IOTHUB_NAME,                           /*const char* iotHubName;                     */
-    TEST_IOTHUB_SUFFIX                          /* const char* iotHubSuffix;                    */
-};
-
-static IOTHUBTRANSPORT_CONFIG TEST_CONFIG_NULL_DEVICE_ID =
-{
-    &TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_DEVICE_ID,
     (PDLIST_ENTRY)0x1
 };
 
@@ -175,21 +180,6 @@ static IOTHUBTRANSPORT_CONFIG TEST_CONFIG_NULL_IOTHUB_NAME =
 static IOTHUBTRANSPORT_CONFIG TEST_CONFIG_NULL_IOTHUB_SUFFIX =
 {
     &TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_IOTHUB_SUFFIX,
-    (PDLIST_ENTRY)0x1
-};
-
-static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_DEVICE_KEY =
-{
-    HTTP_Protocol,                                  /*IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;  */
-    TEST_DEVICE_ID,                                 /*const char* deviceId;                       */
-    NULL,                                           /*const char* deviceKey;                      */
-    TEST_IOTHUB_NAME,                               /*const char* iotHubName;                     */
-    TEST_IOTHUB_SUFFIX                              /* const char* iotHubSuffix;                    */
-};
-
-static IOTHUBTRANSPORT_CONFIG TEST_CONFIG_NULL_DEVICE_KEY =
-{
-    &TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_DEVICE_KEY,
     (PDLIST_ENTRY)0x1
 };
 
@@ -384,6 +374,16 @@ static size_t whenShallURL_Encode_String_fail;
 
 static size_t whenShallHTTPHeaders_GetHeader_fail;
 static size_t currentHTTPHeaders_GetHeader_call;
+
+static size_t currentVECTOR_create_call;
+static size_t whenShallVECTOR_create_fail;
+
+static size_t currentVECTOR_push_back_call;
+static size_t whenShallVECTOR_push_back_fail;
+
+static size_t currentVECTOR_find_if_call;
+static size_t whenShallVECTOR_find_if_fail;
+
 
 #define MAXIMUM_MESSAGE_SIZE (255*1024-1)
 #define PAYLOAD_OVERHEAD (384)
@@ -1080,12 +1080,12 @@ public:
         free(handle);
     MOCK_VOID_METHOD_END()
 
-    MOCK_STATIC_METHOD_9(, HTTPAPIEX_RESULT, HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_SAS_HANDLE, sasHandle, HTTPAPIEX_HANDLE, handle, HTTPAPI_REQUEST_TYPE, requestType, const char*, relativePath, HTTP_HEADERS_HANDLE, requestHttpHeadersHandle, BUFFER_HANDLE, requestContent, unsigned int*, statusCode, HTTP_HEADERS_HANDLE, responseHttpHeadersHandle, BUFFER_HANDLE, responseContent)
-    if (last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest != NULL)
-    {
-        BASEIMPLEMENTATION::BUFFER_delete(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest);
-    }
-    last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest = BASEIMPLEMENTATION::BUFFER_clone(requestContent);
+    MOCK_STATIC_METHOD_9(, HTTPAPIEX_RESULT, HTTPAPIEX_SAS_ExecuteRequest2, HTTPAPIEX_SAS_HANDLE, sasHandle, HTTPAPIEX_HANDLE, handle, HTTPAPI_REQUEST_TYPE, requestType, const char*, relativePath, HTTP_HEADERS_HANDLE, requestHttpHeadersHandle, BUFFER_HANDLE, requestContent, unsigned int*, statusCode, HTTP_HEADERS_HANDLE, responseHttpHeadersHandle, BUFFER_HANDLE, responseContent)
+        if (last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest != NULL)
+        {
+            BASEIMPLEMENTATION::BUFFER_delete(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest);
+        }
+        last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest = BASEIMPLEMENTATION::BUFFER_clone(requestContent);
     MOCK_METHOD_END(HTTPAPIEX_RESULT, HTTPAPIEX_OK)
 
     MOCK_STATIC_METHOD_1(, time_t, get_time, time_t*, currentTime)
@@ -1093,6 +1093,74 @@ public:
 
     MOCK_STATIC_METHOD_2(, double, get_difftime, time_t, stopTime, time_t, startTime)
     MOCK_METHOD_END(double, stopTime-startTime)
+
+	// vector.h
+		MOCK_STATIC_METHOD_1(, VECTOR_HANDLE, VECTOR_create, size_t, elementSize)
+		VECTOR_HANDLE result2;
+	++currentVECTOR_create_call;
+	if ((whenShallVECTOR_create_fail > 0) &&
+		(currentVECTOR_create_call == whenShallVECTOR_create_fail))
+	{
+		result2 = NULL;
+	}
+	else
+	{
+		result2 = BASEIMPLEMENTATION::VECTOR_create(elementSize);
+	}
+	MOCK_METHOD_END(VECTOR_HANDLE, result2)
+
+		MOCK_STATIC_METHOD_1(, void, VECTOR_destroy, VECTOR_HANDLE, vector)
+		BASEIMPLEMENTATION::VECTOR_destroy(vector);
+	MOCK_VOID_METHOD_END()
+
+		MOCK_STATIC_METHOD_3(, int, VECTOR_push_back, VECTOR_HANDLE, vector, const void*, elements, size_t, numElements)
+		int result2;
+	++currentVECTOR_push_back_call;
+	if ((whenShallVECTOR_push_back_fail > 0) &&
+		(currentVECTOR_push_back_call == whenShallVECTOR_push_back_fail))
+	{
+		result2 = __LINE__;
+	}
+	else
+	{
+		result2 = BASEIMPLEMENTATION::VECTOR_push_back(vector, elements, numElements);
+	}
+	MOCK_METHOD_END(int, result2)
+
+		MOCK_STATIC_METHOD_3(, void, VECTOR_erase, VECTOR_HANDLE, vector, void*, elements, size_t, numElements)
+		BASEIMPLEMENTATION::VECTOR_erase(vector, elements, numElements);
+	MOCK_VOID_METHOD_END()
+
+		MOCK_STATIC_METHOD_2(, void*, VECTOR_element, VECTOR_HANDLE, vector, size_t, index)
+		void* result2 = BASEIMPLEMENTATION::VECTOR_element(vector, index);
+	MOCK_METHOD_END(void*, result2)
+
+		MOCK_STATIC_METHOD_1(, void*, VECTOR_front, VECTOR_HANDLE, vector)
+		void* result2 = BASEIMPLEMENTATION::VECTOR_front(vector);
+	MOCK_METHOD_END(void*, result2)
+
+		MOCK_STATIC_METHOD_1(, void*, VECTOR_back, const VECTOR_HANDLE, vector)
+		void* result2 = BASEIMPLEMENTATION::VECTOR_back(vector);
+	MOCK_METHOD_END(void*, result2)
+
+		MOCK_STATIC_METHOD_3(, void*, VECTOR_find_if, VECTOR_HANDLE, vector, PREDICATE_FUNCTION, pred, const void*, value)
+		void* result2;
+	++currentVECTOR_find_if_call;
+	if ((whenShallVECTOR_find_if_fail > 0) &&
+		(currentVECTOR_find_if_call == whenShallVECTOR_find_if_fail))
+	{
+		result2 = NULL;
+	}
+	else
+	{
+		result2 = BASEIMPLEMENTATION::VECTOR_find_if(vector, pred, value);
+	}
+	MOCK_METHOD_END(void*, result2)
+
+		MOCK_STATIC_METHOD_1(, size_t, VECTOR_size, VECTOR_HANDLE, vector)
+		size_t result2 = BASEIMPLEMENTATION::VECTOR_size(vector);
+	MOCK_METHOD_END(size_t, result2)
+
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, DList_InitializeListHead, PDLIST_ENTRY, listHead);
@@ -1173,14 +1241,32 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , STRING_HANDLE, URL_Enc
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , HTTPAPIEX_SAS_HANDLE, HTTPAPIEX_SAS_Create, STRING_HANDLE, key, STRING_HANDLE, uriResource, STRING_HANDLE, keyName);
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, HTTPAPIEX_SAS_Destroy, HTTPAPIEX_SAS_HANDLE, handle);
-DECLARE_GLOBAL_MOCK_METHOD_9(CIoTHubTransportHttpMocks, , HTTPAPIEX_RESULT, HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_SAS_HANDLE, sasHandle, HTTPAPIEX_HANDLE, handle, HTTPAPI_REQUEST_TYPE, requestType, const char*, relativePath, HTTP_HEADERS_HANDLE, requestHttpHeadersHandle, BUFFER_HANDLE, requestContent, unsigned int*, statusCode, HTTP_HEADERS_HANDLE, responseHttpHeadersHandle, BUFFER_HANDLE, responseContent);
+DECLARE_GLOBAL_MOCK_METHOD_9(CIoTHubTransportHttpMocks, , HTTPAPIEX_RESULT, HTTPAPIEX_SAS_ExecuteRequest2, HTTPAPIEX_SAS_HANDLE, sasHandle, HTTPAPIEX_HANDLE, handle, HTTPAPI_REQUEST_TYPE, requestType, const char*, relativePath, HTTP_HEADERS_HANDLE, requestHttpHeadersHandle, BUFFER_HANDLE, requestContent, unsigned int*, statusCode, HTTP_HEADERS_HANDLE, responseHttpHeadersHandle, BUFFER_HANDLE, responseContent);
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , time_t, get_time, time_t*, currentTime);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , double, get_difftime, time_t, stopTime, time_t, startTime);
 
-static void setupInitHappyPathUpThroughEventHTTPRelativePath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+//vector
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , VECTOR_HANDLE, VECTOR_create, size_t, elementSize);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, VECTOR_destroy, VECTOR_HANDLE, vector);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , int, VECTOR_push_back, VECTOR_HANDLE, vector, const void*, elements, size_t, numElements);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , void, VECTOR_erase, VECTOR_HANDLE, vector, void*, elements, size_t, numElements);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportHttpMocks, , void*, VECTOR_element, VECTOR_HANDLE, vector, size_t, index);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void*, VECTOR_front, VECTOR_HANDLE, vector);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void*, VECTOR_back, VECTOR_HANDLE, vector);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportHttpMocks, , void*, VECTOR_find_if, VECTOR_HANDLE, vector, PREDICATE_FUNCTION, pred, const void*, value);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , size_t, VECTOR_size, VECTOR_HANDLE, vector);
+
+extern "C" HTTPAPIEX_RESULT HTTPAPIEX_SAS_ExecuteRequest(HTTPAPIEX_SAS_HANDLE sasHandle, HTTPAPIEX_HANDLE handle, HTTPAPI_REQUEST_TYPE requestType, const char* relativePath, HTTP_HEADERS_HANDLE requestHttpHeadersHandle, BUFFER_HANDLE requestContent, unsigned int* statusCode, HTTP_HEADERS_HANDLE responseHttpHeadersHandle, BUFFER_HANDLE responseContent)
+{
+    *statusCode = 204;
+    return HTTPAPIEX_SAS_ExecuteRequest2(sasHandle, handle, requestType, relativePath, requestHttpHeadersHandle, requestContent, statusCode, responseHttpHeadersHandle, responseContent);
+}
+
+static void setupCreateHappyPathAlloc(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
     (void)mocks;
+
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
@@ -1189,7 +1275,102 @@ static void setupInitHappyPathUpThroughEventHTTPRelativePath(CIoTHubTransportHtt
         STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
     }
+}
+static void setupCreateHappyPathHostname(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	(void)mocks;
 
+	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+	STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "."))
+		.IgnoreArgument(1);
+	STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, TEST_IOTHUB_SUFFIX))
+		.IgnoreArgument(1);
+	if (deallocateCreated == true)
+	{
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+	}
+}
+static void setupCreateHappyPathApiExHandle(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	(void)mocks;
+	STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Create(TEST_IOTHUB_NAME "." TEST_IOTHUB_SUFFIX))
+		.IgnoreArgument(1);
+	if (deallocateCreated == true)
+	{
+		STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+	}
+}
+static void setupCreateHappyPathPerDeviceList(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	(void)mocks;
+
+	STRICT_EXPECTED_CALL(mocks, VECTOR_create(IGNORED_NUM_ARG))
+		.IgnoreArgument(1);
+	if (deallocateCreated == true)
+	{
+		STRICT_EXPECTED_CALL(mocks, VECTOR_destroy(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+	}
+}
+
+static void setupCreateHappyPath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	setupCreateHappyPathAlloc(mocks, deallocateCreated);
+	setupCreateHappyPathHostname(mocks, deallocateCreated);
+	setupCreateHappyPathApiExHandle(mocks, deallocateCreated);
+	setupCreateHappyPathPerDeviceList(mocks, deallocateCreated);
+}
+
+static void setupRegisterHappyPathNotFoundInList(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	(void)mocks;
+	STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_DEVICE_ID))
+		.IgnoreAllArguments();
+}
+
+static void setupRegisterHappyPathAllocHandle(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	(void)mocks;
+
+	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+		.IgnoreArgument(1);
+
+	if (deallocateCreated == true)
+	{
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+	}
+}
+
+static void setupRegisterHappyPathcreate_deviceId(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	(void)mocks;
+	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
+	if (deallocateCreated == true)
+	{
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+	}
+}
+
+static void setupRegisterHappyPathcreate_deviceKey(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	(void)mocks;
+	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
+	if (deallocateCreated == true)
+	{
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+	}
+}
+
+static void setupRegisterHappyPatheventHTTPrelativePath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	(void)mocks;
     /*creating eventHTTPrelativePath*/
     STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
     STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
@@ -1206,13 +1387,11 @@ static void setupInitHappyPathUpThroughEventHTTPRelativePath(CIoTHubTransportHtt
     /*the url encoded device id*/
     STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-
 }
 
-static void setupInitHappyPathUpThroughMessageHTTPRelativePath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathmessageHTTPrelativePath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
     (void)mocks;
-    setupInitHappyPathUpThroughEventHTTPRelativePath(mocks, deallocateCreated);
     STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
     STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
     STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -1228,13 +1407,11 @@ static void setupInitHappyPathUpThroughMessageHTTPRelativePath(CIoTHubTransportH
     /*the url encoded device id*/
     STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-
 }
 
-static void setupInitHappyPathUpThroughEventHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPatheventHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
     (void)mocks;
-    setupInitHappyPathUpThroughMessageHTTPRelativePath(mocks, deallocateCreated);
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
     STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
@@ -1264,48 +1441,14 @@ static void setupInitHappyPathUpThroughEventHTTPrequestHeaders(CIoTHubTransportH
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
     }
-
 }
 
-static void setupInitHappyPathUpThroughHostName(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathmessageHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
     (void)mocks;
-
-    setupInitHappyPathUpThroughEventHTTPrequestHeaders(mocks, deallocateCreated);
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-    STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "."))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, TEST_IOTHUB_SUFFIX))
-        .IgnoreArgument(1);
-    if (deallocateCreated == true)
-    {
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-    }
-}
-
-static void setupInitHappyPathUpThroughHttpApiExHandle(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
-{
-    (void)mocks;
-
-    setupInitHappyPathUpThroughHostName(mocks, deallocateCreated);
-    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Create(TEST_IOTHUB_NAME "." TEST_IOTHUB_SUFFIX))
-        .IgnoreArgument(1);
-    if (deallocateCreated == true)
-    {
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-    }
-}
-
-static void setupInitHappyPathUpThroughMessageHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
-{
-    (void)mocks;
-
-    setupInitHappyPathUpThroughHttpApiExHandle(mocks,deallocateCreated);
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+        .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
     if (deallocateCreated == true)
@@ -1315,11 +1458,9 @@ static void setupInitHappyPathUpThroughMessageHTTPrequestHeaders(CIoTHubTranspor
     }
 }
 
-static void setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathabandonHTTPrelativePathBegin(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
     (void)mocks;
-
-    setupInitHappyPathUpThroughMessageHTTPrequestHeaders(mocks, deallocateCreated);
     STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
     STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
     STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -1335,15 +1476,11 @@ static void setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(CIoTHubTrans
     }
     STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-
 }
 
-static void setupInitHappyPathUpThroughCreateSASObject(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathsasObject(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
     (void)mocks;
-
-    setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(mocks, deallocateCreated);
-
     STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
     STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
         .IgnoreArgument(1);
@@ -1370,8 +1507,137 @@ static void setupInitHappyPathUpThroughCreateSASObject(CIoTHubTransportHttpMocks
         STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
     }
+}
+
+static void setupRegisterHappyPatheventConfirmations(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	(void)mocks;
+	STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
+}
+
+static void setupRegisterHappyPathDeviceListAdd(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	(void)mocks;
+	STRICT_EXPECTED_CALL(mocks, VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG,1))
+		.IgnoreArgument(1).IgnoreArgument(2);
+}
+
+
+static void setupRegisterHappyPath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+	setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+	setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+	setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+	setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+	setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+	setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+	setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+	setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+	setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
+	setupRegisterHappyPathsasObject(mocks, deallocateCreated);
+	setupRegisterHappyPathDeviceListAdd(mocks, deallocateCreated);
+	setupRegisterHappyPatheventConfirmations(mocks, deallocateCreated);
+}
+
+
+static void setupUnregisterOneDevice(CIoTHubTransportHttpMocks &mocks)
+{
+	(void)mocks;
+	//destroy_deviceId(perDeviceItem);
+	STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	//destroy_deviceKey(perDeviceItem);
+	STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	//destroy_eventHTTPrelativePath(perDeviceItem);
+	STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	//destroy_messageHTTPrelativePath(perDeviceItem);
+	STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	//destroy_eventHTTPrequestHeaders(perDeviceItem);
+	STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	//destroy_messageHTTPrequestHeaders(perDeviceItem);
+	STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	//destroy_abandonHTTPrelativePathBegin(perDeviceItem);
+	STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	//destroy_SASObject(perDeviceItem);
+	STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
 
 }
+
+static void setupDoWorkLoopOnceForOneDevice(CIoTHubTransportHttpMocks &mocks)
+{
+	(void)mocks;
+
+	STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	STRICT_EXPECTED_CALL(mocks, VECTOR_element(IGNORED_PTR_ARG, 0))
+		.IgnoreArgument(1);
+}
+
+//
+//static void setupInitHappyPathUpThroughHostName(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+//{
+//    (void)mocks;
+//
+//    setupInitHappyPathUpThroughEventHTTPrequestHeaders(mocks, deallocateCreated);
+//    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+//    STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "."))
+//        .IgnoreArgument(1);
+//    STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, TEST_IOTHUB_SUFFIX))
+//        .IgnoreArgument(1);
+//    if (deallocateCreated == true)
+//    {
+//        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+//            .IgnoreArgument(1);
+//    }
+//}
+//
+//static void setupInitHappyPathUpThroughHttpApiExHandle(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+//{
+//    (void)mocks;
+//
+//    setupInitHappyPathUpThroughHostName(mocks, deallocateCreated);
+//    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+//        .IgnoreArgument(1);
+//    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Create(TEST_IOTHUB_NAME "." TEST_IOTHUB_SUFFIX))
+//        .IgnoreArgument(1);
+//    if (deallocateCreated == true)
+//    {
+//        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+//            .IgnoreArgument(1);
+//    }
+//}
+//
+//
+//static void setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+//{
+//    (void)mocks;
+//
+//    setupInitHappyPathUpThroughMessageHTTPrequestHeaders(mocks, deallocateCreated);
+//    STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
+//    STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
+//    STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+//        .IgnoreArgument(1)
+//        .IgnoreArgument(2);
+//    STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, MESSAGE_ENDPOINT_HTTP_ETAG))
+//        .IgnoreArgument(1);
+//
+//    if (deallocateCreated == true)
+//    {
+//        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+//            .IgnoreArgument(1);
+//    }
+//    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+//        .IgnoreArgument(1);
+//
+//}
+//
 
 BEGIN_TEST_SUITE(iothubtransporthttp)
 
@@ -1468,6 +1734,15 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
        currentURL_Encode_String_call = 0;
        whenShallURL_Encode_String_fail = 0;
 
+	   currentVECTOR_create_call = 0;
+	   whenShallVECTOR_create_fail = 0;
+
+	   currentVECTOR_push_back_call = 0;
+	   whenShallVECTOR_push_back_fail = 0;
+
+	   currentVECTOR_find_if_call = 0;
+	   whenShallVECTOR_find_if_fail = 0;
+
        last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest = NULL;
     }
 
@@ -1486,35 +1761,35 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
     // Testing the values of constants allows me to use them throughout the unit tests (e.g., when setting expectations on mocks) without fear of missing a bug.
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_003: [Otherwise IoTHubTransportHttp_Create shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENDCODED(config->upperConfig->deviceId) + "/messages/events?api-version=2016-02-03".]*/
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_017: [ IoTHubTransportHttp_Register shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/events" + APIVERSION. ]
     TEST_FUNCTION(IotHubTransportHttp_EVENT_ENDPOINT_constant_is_expected_value)
     {
         ASSERT_ARE_EQUAL(char_ptr, "/messages/events", EVENT_ENDPOINT);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2016-02-03".]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_061: [Otherwise, IoTHubTransportHttp_Create shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_019: [ IoTHubTransportHttp_Register shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/devicebound" + APIVERSION. ]
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_024: [ IoTHubTransportHttp_Register shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin. ]/
     TEST_FUNCTION(IotHubTransportHttp_MESSAGE_ENDPOINT_HTTP_constant_is_expected_value)
     {
         ASSERT_ARE_EQUAL(char_ptr, "/messages/devicebound", MESSAGE_ENDPOINT_HTTP);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2016-02-03".]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_061: [Otherwise, IoTHubTransportHttp_Create shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_019: [ IoTHubTransportHttp_Register shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/devicebound" + APIVERSION. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_024: [ IoTHubTransportHttp_Register shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin. ]/
     TEST_FUNCTION(IotHubTransportHttp_MESSAGE_ENDPOINT_HTTP_ETAG_constant_is_expected_value)
     {
         ASSERT_ARE_EQUAL(char_ptr, "/messages/devicebound/", MESSAGE_ENDPOINT_HTTP_ETAG);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_003: [Otherwise IoTHubTransportHttp_Create shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/events?api-version=2016-02-03".]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2016-02-03".]*/
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_017: [ IoTHubTransportHttp_Register shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/events" + APIVERSION. ]
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_019: [ IoTHubTransportHttp_Register shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/devicebound" + APIVERSION. ]
     TEST_FUNCTION(IotHubTransportHttp_API_VERSION_constant_is_expected_value)
     {
         ASSERT_ARE_EQUAL(char_ptr, "?api-version=2016-02-03", API_VERSION);
     }
 
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_001: [If parameter config is NULL then IoTHubTransportHttp_Create shall fail and return NULL.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_001: [If parameter config is NULL, then IoTHubTransportHttp_Create shall return NULL.]
     TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_parameter_fails)
     {
         // arrange
@@ -1527,7 +1802,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_002: [IoTHubTransportHttp_Create shall fail and return NULL if any fields of the config structure are NULL.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_002: [ If field transportConfig is NULL, then IoTHubTransportHttp_Create shall return NULL. 
     TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_config_parameter_fails)
     {
         // arrange
@@ -1539,19 +1814,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         ASSERT_IS_NULL(result);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_002: [IoTHubTransportHttp_Create shall fail and return NULL if any fields of the config structure are NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_waitingToSend_fails)
-    {
-        // arrange
-
-        // act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_WAITING_TO_SEND);
-
-        // assert
-        ASSERT_IS_NULL(result);
-    }
-
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_002: [IoTHubTransportHttp_Create shall fail and return NULL if any fields of the config structure are NULL.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]
     TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_protocol_parameter_fails)
     {
         // arrange
@@ -1563,31 +1826,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         ASSERT_IS_NULL(result);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_002: [IoTHubTransportHttp_Create shall fail and return NULL if any fields of the config structure are NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_device_id_fails)
-    {
-        // arrange
-
-        // act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_DEVICE_ID);
-
-        // assert
-        ASSERT_IS_NULL(result);
-    }
-
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_002: [IoTHubTransportHttp_Create shall fail and return NULL if any fields of the config structure are NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_device_key_fails)
-    {
-        // arrange
-
-        // act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG_NULL_DEVICE_KEY);
-
-        // assert
-        ASSERT_IS_NULL(result);
-    }
-
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_002: [IoTHubTransportHttp_Create shall fail and return NULL if any fields of the config structure are NULL.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]
     TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_iothub_name_fails)
     {
         // arrange
@@ -1599,7 +1838,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         ASSERT_IS_NULL(result);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_002: [IoTHubTransportHttp_Create shall fail and return NULL if any fields of the config structure are NULL.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]
     TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_iothub_suffix_fails)
     {
         // arrange
@@ -1612,30 +1851,17 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
     }
 
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_003: [Otherwise IoTHubTransportHttp_Create shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/events?api-version=2016-02-03".]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_034: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/devicebound?api-version=2016-02-03".]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_005: [Otherwise, IoTHubTransportHttp_Create shall create a set of HTTP headers (further on called "event HTTP request headers") consisting of the following fixed field names and values:
-"iothub-to":"/devices/" + URL_ENCODED(config->upperConfig->deviceId) + "/messages/events";
-"Authorization":""
-"Content-Type":"application/vnd.microsoft.iothub.json"
-"Accept":"application/json"
-"Connection":"Keep-Alive"]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_007: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called hostname) containing config->upperConfig->iotHubName + config->upperConfig->iotHubSuffix.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_009: [Otherwise, IoTHubTransportHttp_Create shall create a HTTPAPIEX_HANDLE by a call to HTTPAPIEX_Create passing for hostName the hostname so far constructed by IoTHubTransportHttp_Create.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_059: [Otherwise, IoTHubTransportHttp_Create shall create a set of HTTP headers (further on called "message HTTP request headers") consisting of the following fixed field names and values:
-"Authorization": ""]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_061: [Otherwise, IoTHubTransportHttp_Create shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_011: [Otherwise, IoTHubTransportHttp_Create shall set a flag called "DoWork_PullMessage" to false, succeed and return a non-NULL value.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_011: [IoTHubTransportHttp_Create shall invoke HTTPAPIEX_SAS_Create with arguments key, uriResource, and keyName.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_005: [ IoTHubTransportHttp_Create shall create an immutable string (further called hostname) containing config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_007: [ IoTHubTransportHttp_Create shall create a HTTPAPIEX_HANDLE by a call to HTTPAPIEX_Create passing for hostName the hostname so far constructed by IoTHubTransportHttp_Create. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_009: [ IoTHubTransportHttp_Create shall call VECTOR_create to create a list of registered devices. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_130: [ IoTHubTransportHttp_Create shall allocate memory for the handle. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_011: [ Otherwise, IoTHubTransportHttp_Create shall succeed and return a non-NULL value. ]
     TEST_FUNCTION(IoTHubTransportHttp_Create_happy_path)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
 
-        setupInitHappyPathUpThroughCreateSASObject(mocks, false);
-
-        STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
+		setupCreateHappyPath(mocks, false);
 
         ///act
         auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
@@ -1648,27 +1874,91 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         IoTHubTransportHttp_Destroy(result);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_062: [If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Create shall fail and return NULL] */
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_abandonHTTPrelativePathBegin_fails_1)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_010: [ If creating the list fails, then IoTHubTransportHttp_Create shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_perDeviceList_fails)
     {
-        ///arrange
+		CIoTHubTransportHttpMocks mocks;
+
+		setupCreateHappyPathAlloc(mocks, true);
+		setupCreateHappyPathHostname(mocks, true);
+		setupCreateHappyPathApiExHandle(mocks, true);
+		whenShallVECTOR_create_fail = 1;
+		setupCreateHappyPathPerDeviceList(mocks, false);
+
+		///act
+		auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+		///assert
+        ASSERT_IS_NULL(result);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+    }
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_008: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubTransportHttp_Create shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_ApiExCreate_fails)
+    {
+		CIoTHubTransportHttpMocks mocks;
+
+		setupCreateHappyPathAlloc(mocks, true);
+		setupCreateHappyPathHostname(mocks, true);
+		/*creating httpApiExHandle*/
+		STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Create(TEST_IOTHUB_NAME "." TEST_IOTHUB_SUFFIX))
+			.IgnoreArgument(1)
+			.SetReturn((HTTPAPIEX_HANDLE)NULL);
+
+
+		///act
+		auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+		///assert
+        ASSERT_IS_NULL(result);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+    }
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_006: [ If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_hostname_fails_1)
+    {
         CIoTHubTransportHttpMocks mocks;
 
-        setupInitHappyPathUpThroughMessageHTTPrequestHeaders(mocks,true);
+		setupCreateHappyPathAlloc(mocks, true);
+		/*Creating hostName*/
+		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+		whenShallSTRING_concat_fail = 2;
+		STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "."))
+            .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, TEST_IOTHUB_SUFFIX))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
 
-        /*creating abandonHTTPrelativePathBegin*/
-        STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
-        STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
-        STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument(1)
-            .IgnoreArgument(2);
-        STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, MESSAGE_ENDPOINT_HTTP_ETAG))
-            .IgnoreArgument(1)
-            .SetReturn(1);
+        ///act
+        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+        ///assert
+		ASSERT_IS_NULL(result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+    }
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_006: [ If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_hostname_fails_2)
+    {
+        CIoTHubTransportHttpMocks mocks;
+
+		setupCreateHappyPathAlloc(mocks, true);
+		/*Creating hostName*/
+		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+		whenShallSTRING_concat_fail = 1;
+		STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "."))
+			.IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*url encoded device id*/
-            .IgnoreArgument(1);
 
         ///act
         auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
@@ -1678,119 +1968,247 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         mocks.AssertActualAndExpectedCalls();
 
         ///cleanup
-        IoTHubTransportHttp_Destroy(result);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_062: [If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Create shall fail and return NULL] */
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_abandonHTTPrelativePathBegin_fails_2)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_006: [ If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_hostname_fails_3)
+    {
+        CIoTHubTransportHttpMocks mocks;
+
+		setupCreateHappyPathAlloc(mocks, true);
+		/*Creating hostName*/
+		whenShallSTRING_construct_fail = 1;
+
+		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+
+        ///act
+        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+    }
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_131: [ If allocation fails, IoTHubTransportHttp_Create shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_Alloc_fails)
+    {
+        CIoTHubTransportHttpMocks mocks;
+
+		whenShallmalloc_fail = 1;
+		STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+			.IgnoreArgument(1);
+
+        ///act
+        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+    }
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_012: [ IoTHubTransportHttp_Destroy shall do nothing is handle is NULL. ]
+    TEST_FUNCTION(IoTHubTransportHttp_Destroy_with_NULL_handle_does_nothing)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
 
-        setupInitHappyPathUpThroughMessageHTTPrequestHeaders(mocks,true);
+        ///act
+        IoTHubTransportHttp_Destroy(NULL);
 
-        /*creating abandonHTTPrelativePathBegin*/
-        STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
-        STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
-        STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .SetReturn(1);
+        ///assert - uMock
+
+    }
+
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_013: [ Otherwise, IoTHubTransportHttp_Destroy shall free all the resources currently in use. ]
+    TEST_FUNCTION(IoTHubTransportHttp_Destroy_succeeds_NoRegistered_devices)
+    {
+        ///arrange
+        CIoTHubTransportHttpMocks mocks;
+        auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+        mocks.ResetAllCalls();
+
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);                                             //STRING_HANDLE hostName;
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);                                             //HTTPAPIEX_HANDLE httpApiExHandle;
+		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*url encoded device id*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, VECTOR_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);                                             //VECTOR_HANDLE perDeviceList;
+        
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(handle));
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+        IoTHubTransportHttp_Destroy(handle);
 
         ///assert
-        ASSERT_IS_NULL(result);
+
+    }
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_013: [ Otherwise, IoTHubTransportHttp_Destroy shall free all the resources currently in use. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Destroy_succeeds_One_Registered_device)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+		mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);                                             //STRING_HANDLE hostName;
+		STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);                                             //HTTPAPIEX_HANDLE httpApiExHandle;
+		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, VECTOR_element(IGNORED_PTR_ARG,0))
+			.IgnoreArgument(1);
+		setupUnregisterOneDevice(mocks);
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(devHandle));
+
+
+		STRICT_EXPECTED_CALL(mocks, VECTOR_destroy(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);                                             //VECTOR_HANDLE perDeviceList;
+
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(handle));
+
+        ///act
+		IoTHubTransportHttp_Destroy(handle);
+
+		///assert
+
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_133: [ IoTHubTransportHttp_Register shall create an immutable string (further called "deviceId") from config->deviceConfig->deviceId. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_135: [ IoTHubTransportHttp_Register shall create an immutable string (further called "deviceKey") from deviceKey. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_017: [ IoTHubTransportHttp_Register shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/events" + APIVERSION. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_017: [ IoTHubTransportHttp_Register shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/events" + APIVERSION. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_021: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "event HTTP request headers") consisting of the following fixed field names and values: "iothub-to":"/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/events"; "Authorization":""
+		//"Accept":"application/json"
+		//"Connection" : "Keep-Alive" ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_132: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "message HTTP request headers") consisting of the following fixed field names and values:
+		//"Authorization": "" ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_024: [ IoTHubTransportHttp_Register shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_026: [ IoTHubTransportHttp_Register shall invoke URL_EncodeString with an argument of device id. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_028: [ IoTHubTransportHttp_Register shall invoke STRING_clone using the previously created hostname. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_030: [ IoTHubTransportHttp_Register shall invoke STRING_concat with arguments uriResource and the string "/devices/". ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_031: [ IoTHubTransportHttp_Register shall invoke STRING_concat_with_STRING with arguments uriResource and keyName. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_033: [ IoTHubTransportHttp_Register shall invoke STRING_construct with an argument of config->deviceConfig->deviceKey. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_035: [ The keyName is shortened to zero length, if that fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_036: [ IoTHubTransportHttp_Register shall invoke HTTPAPIEX_SAS_Create with arguments key, uriResource, and keyName. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_038: [ Otherwise, IoTHubTransportHttp_Register shall allocate the IOTHUB_DEVICE_HANDLE structure. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_040: [ IoTHubTransportHttp_Register shall put event HTTP relative path, message HTTP relative path, event HTTP request headers, message HTTP request headers, abandonHTTPrelativePathBegin, HTTPAPIEX_SAS_HANDLE, and the device handle into a device structure. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_128: [ IoTHubTransportHttp_Register shall mark this device as unsubscribed. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_041: [ IoTHubTransportHttp_Register shall call VECTOR_push_back to store the new device information. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_043: [ Upon success, IoTHubTransportHttp_Register shall store the transport handle and the waitingToSend queue in the device handle return a non-NULL value. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_success_fun_time)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		setupRegisterHappyPath(mocks, false);
+
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+		
+		///assert
+
+		ASSERT_IS_NOT_NULL(devHandle);
+		ASSERT_ARE_NOT_EQUAL(void_ptr, handle, devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_042: [ If the VECTOR_push_back fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_vector_pushback_fails)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
+		setupRegisterHappyPathsasObject(mocks, deallocateCreated);
+		whenShallVECTOR_push_back_fail = 1;
+		setupRegisterHappyPathDeviceListAdd(mocks, deallocateCreated);
+
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+        ///assert
+
+		ASSERT_IS_NULL(devHandle);
         mocks.AssertActualAndExpectedCalls();
 
         ///cleanup
-        IoTHubTransportHttp_Destroy(result);
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_062: [If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Create shall fail and return NULL] */
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_abandonHTTPrelativePathBegin_fails_3)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_1)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughMessageHTTPrequestHeaders(mocks,true);
-
-        /*creating abandonHTTPrelativePathBegin*/
-        whenShallSTRING_construct_fail = 5;
-        STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
-
-        ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
-
-        ///assert
-        ASSERT_IS_NULL(result);
-        mocks.AssertActualAndExpectedCalls();
-
-        ///cleanup
-        IoTHubTransportHttp_Destroy(result);
-    }
-
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_062: [If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Create shall fail and return NULL] */
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_abandonHTTPrelativePathBegin_fails_4)
-    {
-        ///arrange
-        CIoTHubTransportHttpMocks mocks;
-
-        setupInitHappyPathUpThroughMessageHTTPrequestHeaders(mocks,true);
-
-        /*creating abandonHTTPrelativePathBegin*/
-        STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
         STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID)).SetReturn((STRING_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
         mocks.AssertActualAndExpectedCalls();
 
         ///cleanup
-        IoTHubTransportHttp_Destroy(result);
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_002: [If the encode fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_createSASObject_fails_1)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_029: [ If the clone fails then IoTHubTransportHttp_Register shall fail and return NULL. ] 
+	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(mocks, true);
-        STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID)).SetReturn((STRING_HANDLE)NULL);
-
-        ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
-
-        ///assert
-        ASSERT_IS_NULL(result);
-        mocks.AssertActualAndExpectedCalls();
-
-        ///cleanup
-        IoTHubTransportHttp_Destroy(result);
-
-    }
-
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_001: [IoTHubTransportHttp_Create shall invoke URL_EncodeString with an argument of device id.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_004: [If the clone fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_createSASObject_fails_2)
-    {
-        ///arrange
-        CIoTHubTransportHttpMocks mocks;
-
-        setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(mocks, true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
         STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
             .IgnoreArgument(1);
@@ -1799,25 +2217,36 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
         mocks.AssertActualAndExpectedCalls();
 
         ///cleanup
-        IoTHubTransportHttp_Destroy(result);
+		IoTHubTransportHttp_Destroy(handle);
 
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_003: [IoTHubTransportHttp_Create shall invoke STRING_clone using the previously created hostname.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_006: [If the concat fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_createSASObject_fails_3)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_141: [ If the STRING_concat fails, then it shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_3)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(mocks, true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
         STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
             .IgnoreArgument(1);
@@ -1831,25 +2260,35 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
         mocks.AssertActualAndExpectedCalls();
 
         ///cleanup
-        IoTHubTransportHttp_Destroy(result);
-
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_005: [IoTHubTransportHttp_Create shall invoke STRING_concat with arguments uriResource and the string "/devices/".]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_008: [If the STRING_concat_with_STRING fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_createSASObject_fails_4)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_032: [ If the STRING_concat_with_STRING fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_4)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(mocks, true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
         STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
             .IgnoreArgument(1);
@@ -1865,25 +2304,35 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .SetReturn(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
         mocks.AssertActualAndExpectedCalls();
 
         ///cleanup
-        IoTHubTransportHttp_Destroy(result);
-
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_007: [IoTHubTransportHttp_Create shall invoke STRING_concat_with_STRING with arguments uriResource and keyName.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_010: [If the STRING_construct fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_createSASObject_fails_5)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_034: [ If the STRING_construct fails then IoTHubTransportHttp_Register shall fail and return NULL. ] 
+	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_5)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(mocks, true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
         STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
             .IgnoreArgument(1);
@@ -1896,29 +2345,39 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
-        whenShallSTRING_construct_fail = 6;
+		whenShallSTRING_construct_fail = 8;
         STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
         mocks.AssertActualAndExpectedCalls();
 
         ///cleanup
-        IoTHubTransportHttp_Destroy(result);
-
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_009: [IoTHubTransportHttp_Create shall invoke STRING_construct with an argument of config->upperConfig->deviceKey.]*/
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_06_013: [The keyName is shortened to zero length, if that fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_createSASObject_fails_6)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_035: [ The keyName is shortened to zero length, if that fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_6)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(mocks, true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
         STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
             .IgnoreArgument(1);
@@ -1939,24 +2398,34 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .SetReturn(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
         mocks.AssertActualAndExpectedCalls();
 
         ///cleanup
-        IoTHubTransportHttp_Destroy(result);
-
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_06_012: [If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-    TEST_FUNCTION(IoTHubTransportHttp_fails_when_createSASObject_fails_7)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_037: [ If the HTTPAPIEX_SAS_Create fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_7)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughAbandonHTTPrelativePathBegin(mocks, true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
         STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
             .IgnoreArgument(1);
@@ -1981,132 +2450,251 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .SetReturn((HTTPAPIEX_SAS_HANDLE)NULL);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
         mocks.AssertActualAndExpectedCalls();
 
         ///cleanup
-        IoTHubTransportHttp_Destroy(result);
-
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_060: [If creating message HTTP request headers then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_messageHTTPrequestheaders_fails_1)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_025: [ If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_030: [ IoTHubTransportHttp_Register shall invoke STRING_concat with arguments uriResource and the string "/devices/". ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_1)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughHttpApiExHandle(mocks,true);
-
-        /*creating message HTTP request headers*/
-        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
-        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		/*creating abandonHTTPrelativePathBegin*/
+		STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
+		STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
+		STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+		    .IgnoreArgument(1)
+		    .IgnoreArgument(2);
+		STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, MESSAGE_ENDPOINT_HTTP_ETAG))
             .IgnoreArgument(1)
-            .SetReturn(HTTP_HEADERS_ERROR);
-        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+		    .SetReturn(1);
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		    .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*url encoded device id*/
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_060: [If creating message HTTP request headers then IoTHubTransportHttp_Create shall fail and return NULL.]*/
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_messageHTTPrequestheaders_fails_2)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_025: [ If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_032: [ If the STRING_concat_with_STRING fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughHttpApiExHandle(mocks,true);
-
-        /*creating message HTTP request headers*/
-        whenShallHTTPHeaders_Alloc_fail = 2;
-        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
+		STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
+		STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+		    .IgnoreArgument(1)
+		    .IgnoreArgument(2)
+		    .SetReturn(1);
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		    .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*url encoded device id*/
+		    .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_010: [If creating the HTTPAPIEX_HANDLE fails then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_HTTPAPIEX_Create_Fails)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_025: [ If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_3)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughHostName(mocks,true);
-
-        /*creating httpApiExHandle*/
-        STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Create(TEST_IOTHUB_NAME "." TEST_IOTHUB_SUFFIX))
-            .IgnoreArgument(1)
-            .SetReturn((HTTPAPIEX_HANDLE) NULL);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		/*creating abandonHTTPrelativePathBegin*/
+		whenShallSTRING_construct_fail = 7;
+		STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_008: [If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_hostName_Fails_1)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_025: [ If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_027: [ If the encode fails then IoTHubTransportHttp_Register shall fail and return NULL. ] 
+	TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_4)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughEventHTTPrequestHeaders(mocks,true);
-
-        /*Creating hostName*/
-        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
-        whenShallSTRING_concat_fail = 5;
-        STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "."))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, TEST_IOTHUB_SUFFIX))
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+		/*creating abandonHTTPrelativePathBegin*/
+		STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
+		STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID)).SetReturn((STRING_HANDLE)NULL);
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_008: [If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_hostName_Fails_2)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_023: [ If creating message HTTP request headers then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_1)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughEventHTTPrequestHeaders(mocks,true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		/*creating message HTTP request headers*/
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+		    .IgnoreArgument(1)
+		    .SetReturn(HTTP_HEADERS_ERROR);
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+		    .IgnoreArgument(1);
 
-        /*Creating hostName*/
-        whenShallSTRING_construct_fail = 4;
-        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_NAME));
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_023: [ If creating message HTTP request headers then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_2)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
+		/*creating message HTTP request headers*/
+		whenShallHTTPHeaders_Alloc_fail = 2;
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_006: [If creating the event HTTP request headers fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrequestHeaders_fails_1)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_1)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
-        setupInitHappyPathUpThroughMessageHTTPRelativePath(mocks,true);
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
         /*creating eventHTTPrequestHeaders*/
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
@@ -2129,26 +2717,39 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Accept", "application/json"))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Connection", "Keep-Alive"))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
             .IgnoreArgument(1)
             .SetReturn(HTTP_HEADERS_ERROR);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_006: [If creating the event HTTP request headers fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrequestHeaders_fails_2)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughMessageHTTPRelativePath(mocks,true);
-
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
         /*creating eventHTTPrequestHeaders*/
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
@@ -2169,25 +2770,39 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Accept", "application/json"))
+		    .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Connection", "Keep-Alive"))
             .IgnoreArgument(1)
             .SetReturn(HTTP_HEADERS_ERROR);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_006: [If creating the event HTTP request headers fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrequestHeaders_fails_4)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_3)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughMessageHTTPRelativePath(mocks,true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
 
         /*creating eventHTTPrequestHeaders*/
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
@@ -2207,25 +2822,39 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-to", "/devices/"  TEST_DEVICE_ID  EVENT_ENDPOINT))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+		    .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Accept", "application/json"))
             .IgnoreArgument(1)
             .SetReturn(HTTP_HEADERS_ERROR);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_006: [If creating the event HTTP request headers fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrequestHeaders_fails_5)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_4)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughMessageHTTPRelativePath(mocks,true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
 
         /*creating eventHTTPrequestHeaders*/
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
@@ -2238,26 +2867,44 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
-        whenShallSTRING_concat_fail = 3;
         STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, EVENT_ENDPOINT))
             .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+		    .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-to", "/devices/"  TEST_DEVICE_ID  EVENT_ENDPOINT))
+		    .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+		    .IgnoreArgument(1)
+		    .SetReturn(HTTP_HEADERS_ERROR);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_006: [If creating the event HTTP request headers fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrequestHeaders_fails_6)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_5)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughMessageHTTPRelativePath(mocks,true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
 
         /*creating eventHTTPrequestHeaders*/
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
@@ -2267,68 +2914,133 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        whenShallSTRING_concat_with_STRING_fail = 3;
         STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
+		STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, EVENT_ENDPOINT))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-to", "/devices/"  TEST_DEVICE_ID  EVENT_ENDPOINT))
+			.IgnoreArgument(1)
+			.SetReturn(HTTP_HEADERS_ERROR);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_006: [If creating the event HTTP request headers fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrequestHeaders_fails_7)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_6)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+		currentSTRING_concat_call = 0;
 
-        setupInitHappyPathUpThroughMessageHTTPRelativePath(mocks,true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
 
         /*creating eventHTTPrequestHeaders*/
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
-        whenShallSTRING_construct_fail = 3;
         STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		    .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		    .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+		    .IgnoreArgument(1)
+		    .IgnoreArgument(2);
+		whenShallSTRING_concat_fail = 3;
+		STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, EVENT_ENDPOINT))
+		    .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_006: [If creating the event HTTP request headers fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrequestHeaders_fails_8)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_7)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+		currentSTRING_concat_with_STRING_call = 0;
 
-        setupInitHappyPathUpThroughMessageHTTPRelativePath(mocks,true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
 
         /*creating eventHTTPrequestHeaders*/
-        whenShallHTTPHeaders_Alloc_fail = 1;
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+		STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		    .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+		whenShallSTRING_concat_with_STRING_fail = 3;
+		STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+		    .IgnoreArgument(1)
+		    .IgnoreArgument(2);
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+		    .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_006: [If creating the event HTTP request headers fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrequestHeaders_fails_9)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_8)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughMessageHTTPRelativePath(mocks,true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
 
         /*creating eventHTTPrequestHeaders*/
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
@@ -2339,23 +3051,101 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_9)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+		currentSTRING_construct_call = 0;
+
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+
+		/*creating eventHTTPrequestHeaders*/
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+		whenShallSTRING_construct_fail = 5;
+		STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_022: [ If creating the event HTTP request headers fails, then IoTHubTransportHttp_Register shall fail and return NULL.]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_10)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+		setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+
+		/*creating eventHTTPrequestHeaders*/
+		whenShallHTTPHeaders_Alloc_fail = 1;
+		STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
+
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_035: [If creating the message HTTP relative path fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_messageHTTPrelativePath_fails_1)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_020: [ If creating the message HTTP relative path fails, then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_1)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+		currentSTRING_concat_call = 0;
 
-        setupInitHappyPathUpThroughEventHTTPRelativePath(mocks,true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
 
         /*creating messageHTTPrelativePath*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
@@ -2373,19 +3163,31 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_035: [If creating the message HTTP relative path fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_messageHTTPrelativePath_fails_2)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_020: [ If creating the message HTTP relative path fails, then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughEventHTTPRelativePath(mocks,true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+
 
         /*creating messageHTTPrelativePath*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
@@ -2401,66 +3203,97 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_035: [If creating the message HTTP relative path fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_messageHTTPrelativePath_fails_3)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_020: [ If creating the message HTTP relative path fails, then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_3)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        setupInitHappyPathUpThroughEventHTTPRelativePath(mocks,true);
-
-        /*creating messageHTTPrelativePath*/
-        whenShallSTRING_construct_fail = 2;
-        STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
-
-        ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
-
-        ///assert
-        ASSERT_IS_NULL(result);
-    }
-
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_035: [If creating the message HTTP relative path fails, then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_messageHTTPrelativePath_fails_4)
-    {
-        ///arrange
-        CIoTHubTransportHttpMocks mocks;
-
-        setupInitHappyPathUpThroughEventHTTPRelativePath(mocks,true);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
 
         /*creating messageHTTPrelativePath*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
-        whenShallURL_Encode_String_fail = 2;
-        STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        /*the url encoded device id*/
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
+		whenShallURL_Encode_String_fail = 2;
+		STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		    .IgnoreArgument(1);
+		/*the url encoded device id*/
+		STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+		    .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_004: [If creating the string fail for any reason then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrelativePath_fails_1)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_020: [ If creating the message HTTP relative path fails, then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_4)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+		currentSTRING_construct_call = 0;
 
-        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+		setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+
+        /*creating messageHTTPrelativePath*/
+		whenShallSTRING_construct_fail = 4;
+        STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
+
+        ///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+        ///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+    }
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_018: [ If creating the string fail for any reason then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_1)
+    {
+        ///arrange
+        CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+		currentSTRING_concat_call = 0;
+
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 
         /*creating eventHTTPrelativePath*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
@@ -2479,22 +3312,29 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_004: [If creating the string fail for any reason then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrelativePath_fails_2)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_018: [ If creating the string fail for any reason then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 
         /*creating eventHTTPrelativePath*/
         STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
@@ -2511,48 +3351,59 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_004: [If creating the string fail for any reason then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrelativePath_fails_3)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_018: [ If creating the string fail for any reason then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_3)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+		currentSTRING_construct_call = 0;
 
-        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 
         /*creating eventHTTPrelativePath*/
-        whenShallSTRING_construct_fail = 1;
+		whenShallSTRING_construct_fail = 3;
         STRICT_EXPECTED_CALL(mocks, STRING_construct("/devices/"));
 
-        /*the url encoded device id*/
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_004: [If creating the string fail for any reason then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_creating_eventHTTPrelativePath_fails_4)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_018: [ If creating the string fail for any reason then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_4)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
-        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
 
         /*creating eventHTTPrelativePath*/
         whenShallURL_Encode_String_fail = 1;
@@ -2567,75 +3418,271 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_008: [If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Create_fails_when_malloc_fails_1)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_136: [ If deviceKey is not created, then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceKey_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+		currentSTRING_construct_call = 0;
+
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+		setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+
+		whenShallSTRING_construct_fail = 2;
+		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
+
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_134: [ If deviceId is not created, then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceId_fails)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+		currentSTRING_construct_call = 0;
+
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+		setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+
+		whenShallSTRING_construct_fail = 1;
+		STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
+
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_039: [ If the allocating the device handle fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_deviceHandle_not_allocated)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+		currentmalloc_call = 0;
+		bool deallocateCreated = true;
+		setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
 
         whenShallmalloc_fail = 1;
         STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
 
         ///act
-        auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ///assert
-        ASSERT_IS_NULL(result);
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_012: [IoTHubTransportHttp_Destroy shall do nothing if parameter handle is NULL.]*/
-    TEST_FUNCTION(IoTHubTransportHttp_Destroy_with_NULL_handle_does_nothing)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_137: [ IoTHubTransportHttp_Register shall search the devices list for any device matching name deviceId. If deviceId is found it shall return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_deviceFoundInList_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_DEVICE_ID))
+			.IgnoreAllArguments()
+			.SetReturn((void_ptr)0x1);
+			
         ///act
-        IoTHubTransportHttp_Destroy(NULL);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
-        ///assert - uMock
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_013: [Otherwise IoTHubTransportHttp_Destroy shall free all the resources currently in use.] */
-    TEST_FUNCTION(IoTHubTransportHttp_Destroy_succeeds)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_014: [ If parameter deviceId is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_deviceId_null_returns_null)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
         mocks.ResetAllCalls();
 
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);                                             //STRING_HANDLE eventHTTPrelativePath;
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);                                             //STRING_HANDLE messageHTTPrelativePath;
-        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);                                             //HTTP_HEADERS_HANDLE eventHTTPrequestHeaders;
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);                                             //STRING_HANDLE hostName;
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);                                             //HTTPAPIEX_HANDLE httpApiExHandle;
-        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);                                             //HTTP_HEADERS_HANDLE messageHTTPrequestHeaders;
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);                                             //STRING_HANDLE abandonHTTPrelativePathBegin;
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);                                             //SAS object
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, NULL, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
         
-        STRICT_EXPECTED_CALL(mocks, gballoc_free(handle));
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_015: [ If parameter deviceKey is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_returns_null)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
 
         ///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, NULL, TEST_CONFIG.waitingToSend);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
         IoTHubTransportHttp_Destroy(handle);
 
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_016: [ If parameter waitingToSend is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_wts_null_returns_null)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL);
+
         ///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_014: [If parameter handle is NULL then IoTHubTransportHttp_Subscribe shall fail and return a non-zero value.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_142: [ If handle is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Register_handle_null_returns_null)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		///act
+		auto devHandle = IoTHubTransportHttp_Register(NULL, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		///assert
+		ASSERT_IS_NULL(devHandle);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_044: [ If deviceHandle is NULL, then IoTHubTransportHttp_Unregister shall do nothing. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Unregister_null_does_nothing)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+
+		///act
+		IoTHubTransportHttp_Unregister(NULL);
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_045: [IoTHubTransportHttp_Unregister shall locate deviceHandle in the transport device list by calling VECTOR_find_if.]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_047 : [IoTHubTransportHttp_Unregister shall free all the resources used in the device structure.]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_048 : [IoTHubTransportHttp_Unregister shall call VECTOR_erase to remove device from devices list.]
+	TEST_FUNCTION(IoTHubTransportHttp_Unregister_superHappyFunPath)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		mocks.ResetAllCalls();
+
+
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2);
+		setupUnregisterOneDevice(mocks);
+		STRICT_EXPECTED_CALL(mocks, VECTOR_erase(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2);
+		STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		///act
+		IoTHubTransportHttp_Unregister(devHandle);
+
+		///assert
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+	}
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_046 : [If the device structure is not found, then this function shall fail and do nothing.]
+	TEST_FUNCTION(IoTHubTransportHttp_Unregister_DeviceNotFound_fails)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		mocks.ResetAllCalls();
+
+
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2)
+			.SetFailReturn((void_ptr)NULL);
+
+
+		///act
+		IoTHubTransportHttp_Unregister(devHandle);
+
+		///assert
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+	}
+
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_103: [ If parameter deviceHandle is NULL then IoTHubTransportHttp_Subscribe shall fail and return a non-zero value. ]
     TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_NULL_parameter_fails)
     {
         ///arrange
@@ -2649,16 +3696,23 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
     }
 
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_056: [Otherwise, IoTHubTransportHttp_Subscribe shall set the flag called DoWork_PullMessages to true and succeed.]*/
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_104: [ IoTHubTransportHttp_Subscribe shall locate deviceHandle in the transport device list by calling VECTOR_find_if. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_106: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should execute HTTP requests. 
     TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_non_NULL_parameter_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
 
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2);
+
         ///act
-        auto result = IoTHubTransportHttp_Subscribe(handle);
+        auto result = IoTHubTransportHttp_Subscribe(devHandle);
 
         ///assert
         ASSERT_ARE_EQUAL(int, 0, result);
@@ -2668,7 +3722,33 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_016: [If parameter handle is NULL then IoTHubTransportHttp_Unsubscribe shall do nothing.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_105: [ If the device structure is not found, then this function shall fail and return a non-zero value. ]
+	TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_list_find_fails)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		mocks.ResetAllCalls();
+
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2)
+			.SetReturn((void_ptr)NULL);
+
+		///act
+		auto result = IoTHubTransportHttp_Subscribe(devHandle);
+
+		///assert
+		ASSERT_ARE_EQUAL(int, 0, result);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+	}
+
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_107: [ If parameter deviceHandle is NULL then IoTHubTransportHttp_Unsubscribe shall fail do nothing. ]
     TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_NULL_parameter_succeeds) /*does nothing*/
     {
         ///arrange
@@ -2682,16 +3762,23 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_058: [Otherwise it shall set the flag DoWork_PullMessage to false.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_108: [IoTHubTransportHttp_Unsubscribe shall locate deviceHandle in the transport device list by calling VECTOR_find_if.]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_110 : [Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should not execute HTTP requests.]
     TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_non_NULL_parameter_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
 
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2);
+
         ///act
-        IoTHubTransportHttp_Unsubscribe(handle);
+        IoTHubTransportHttp_Unsubscribe(devHandle);
 
         ///assert
         mocks.AssertActualAndExpectedCalls();
@@ -2700,7 +3787,32 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_017: [If parameter handle is NULL or parameter iotHubClientHandle then IoTHubTransportHttp_DoWork shall immeditely return.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_109 : [If the device structure is not found, then this function shall fail and do nothing.]
+	TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_device_not_found_does_nothing)
+	{
+		///arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		mocks.ResetAllCalls();
+
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2)
+			.SetFailReturn((void_ptr)NULL);
+
+		///act
+		IoTHubTransportHttp_Unsubscribe(devHandle);
+
+		///assert
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransportHttp_Destroy(handle);
+	}
+
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_049: [ If handle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_NULL_handle_does_nothing)
     {
         ///arrange
@@ -2713,7 +3825,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         mocks.AssertActualAndExpectedCalls();
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_017: [If parameter handle is NULL or parameter iotHubClientHandle then IoTHubTransportHttp_DoWork shall immeditely return.]*/
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_140: [ If iotHubClientHandle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_NULL_iotHubClientHandle_does_nothing)
     {
         ///arrange
@@ -2731,15 +3843,43 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_018: [It shall inspect the "waitingToSend" DLIST passed in config structure.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_019: [If the list is empty then IoTHubTransportHttp_DoWork shall proceed to the following action.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_057: [If flag DoWork_PullMessage is set to false then _DoWork shall advance to the next action.] */
-    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_no_service_messages)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_050: [ IoTHubTransportHttp_DoWork shall call loop through the device list. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_051: [IF the list is empty, then IoTHubTransportHttp_DoWork shall do nothing.]
+    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_no_devices)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
         mocks.ResetAllCalls();
+
+		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+        /*no message work because DoWork_PullMessage is set to false by create*/
+
+        ///act
+        IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+        ///assert
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubTransportHttp_Destroy(handle);
+    }
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_052: [IoTHubTransportHttp_DoWork shall perform a round - robin loop through every deviceHandle in the transport device list.]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_060: [ If the list is empty then IoTHubTransportHttp_DoWork shall proceed to the following action. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_083: [ If device is not subscribed then _DoWork shall advance to the next action. ]
+    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_no_service_messages)
+    {
+        ///arrange
+        CIoTHubTransportHttpMocks mocks;
+        auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+        mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -2755,44 +3895,32 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_036: [Otherwise, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters
-requestType: GET
-relativePath: the message HTTP relative path
-requestHttpHeadersHandle: message HTTP request headers created by _Create
-requestContent: NULL
-statusCode: a pointer to unsigned int which shall be later examined
-responseHeadearsHandle: a new instance of HTTP headers
-responseContent: a new instance of buffer]
-*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_039: [If status code is 200, then _DoWork shall make a copy of the value of the "ETag" http header.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_041: [_DoWork shall assemble an IOTHUBMESSAGE_HANDLE from the received HTTP content (using the responseContent buffer).]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_043: [Otherwise, _DoWork shall call IoTHubClient_LL_MessageCallback with parameters handle = iotHubClientHandle and message = newly created message.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_044: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ACCEPTED then _DoWork shall "accept" the message.]*/
-    /*Tests_[_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
--requestType: DELETE
--relativePath: abandon relative path begin + value of ETag + "?api-version=2016-02-03" 
-- requestHttpHeadersHandle: an HTTP headers instance containing the following
-    Authorization: " "
-    If-Match: value of ETag
-- requestContent: NULL
-- statusCode: a pointer to unsigned int which might be used by logging
-- responseHeadearsHandle: NULL
-- responseContent: NULL]
-*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_051: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
--requestType: DELETE
--relativePath: abandon relative path begin + value of ETag + "?api-version=2016-02-03" 
-- requestHttpHeadersHandle: an HTTP headers instance containing the following
-    Authorization: " "
-    If-Match: value of ETag
-- requestContent: NULL
-- statusCode: a pointer to unsigned int which might be used by logging
-- responseHeadearsHandle: NULL
-- responseContent: NULL]
-*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_054: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.] */ /*in this case there are 0 such properties*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_116: [After client creation, the first GET shall be allowed no matter what the value of GetMinimumPollingTime.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_084: [ Otherwise, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters
+		//requestType: GET
+		//	relativePath : the message HTTP relative path
+		//	requestHttpHeadersHandle : message HTTP request headers created by _Create
+		//	requestContent : NULL
+		//	statusCode : a pointer to unsigned int which shall be later examined
+		//	responseHeadearsHandle : a new instance of HTTP headers
+		//	responseContent : a new instance of buffer ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_087: [ If status code is 200, then _DoWork shall make a copy of the value of the "ETag" http header. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_089: [ _DoWork shall assemble an IOTHUBMESSAGE_HANDLE from the received HTTP content (using the responseContent buffer). ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_093: [ Otherwise, _DoWork shall call IoTHubClient_LL_MessageCallback with parameters handle = iotHubClientHandle and message = newly created message. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_094: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ACCEPTED then _DoWork shall "accept" the message. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_099: [ _DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+		//
+		//requestType: DELETE
+		//	relativePath : abandon relative path begin + value of ETag + APIVERSION
+		//	requestHttpHeadersHandle : an HTTP headers instance containing the following
+		//	Authorization : " "
+		//	If - Match : value of ETag
+		//	requestContent : NULL
+		//	statusCode : a pointer to unsigned int which might be used by logging
+		//	responseHeadearsHandle : NULL
+		//	responseContent : NULL ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_100: [ Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_090: [ All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_123: [ After client creation, the first GET shall be allowed no matter what the value of GetMinimumPollingTime. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_succeeds)
     {
         ///arrange
@@ -2800,8 +3928,14 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+        (void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -2815,7 +3949,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -2875,6 +4009,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -2883,7 +4019,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -2910,7 +4046,9 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_117: [If time is not available then all calls shall be treated as if they are the first one.] */
+
+
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_124: [ If time is not available then all calls shall be treated as if they are the first one. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_when_time_is_minus_one_succeeds)
     {
         ///arrange
@@ -2918,8 +4056,14 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL))
@@ -2934,7 +4078,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -2994,6 +4138,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -3002,7 +4148,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3029,7 +4175,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_117: [If time is not available then all calls shall be treated as if they are the first one.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_124: [ If time is not available then all calls shall be treated as if they are the first one. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_2_service_message_when_time_is_minus_one_succeeds)
     {
         ///arrange
@@ -3037,10 +4183,15 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+
+
         for (int i = 0;i < 2;i++)
         {
+			setupDoWorkLoopOnceForOneDevice(mocks);
 
             STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
@@ -3056,7 +4207,7 @@ responseContent: a new instance of buffer]
 
             STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
                 .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-            STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+            STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
                 IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
                 IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
                 HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3116,6 +4267,8 @@ responseContent: a new instance of buffer]
             STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
             STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
                 .IgnoreArgument(1);
+            STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+                .IgnoreArgument(1);
             STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
                 .IgnoreArgument(1);
             STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -3124,7 +4277,7 @@ responseContent: a new instance of buffer]
 
             STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
                 .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-            STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+            STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
                 IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
                 IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
                 HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3156,7 +4309,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_114: ["MinimumPollingTime"] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_121: [ "MinimumPollingTime" ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_non_default_minimumPollingTime_succeeds)
     {
         ///arrange
@@ -3167,10 +4320,14 @@ responseContent: a new instance of buffer]
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
 
         (void)IoTHubTransportHttp_SetOption(handle, "MinimumPollingTime", &thisIs20Seconds);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
 
         /*everything below is for the second time this is called*/
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
@@ -3185,7 +4342,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3245,6 +4402,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -3253,7 +4412,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3280,23 +4439,28 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_115: [A GET request that happens earlier than MinimumPollingTime shall be ignored.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_122: [ A GET request that happens earlier than GetMinimumPollingTime shall be ignored. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_later_than_minimumPollingTime_does_nothing_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
         mocks.ResetAllCalls();
 
         /*everything below is for the second time _DoWork this is called*/
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL))
             .SetReturn(TEST_GET_TIME_VALUE + TEST_DEFAULT_GETMINIMUMPOLLINGTIME); /*right on the verge of the time*/
         STRICT_EXPECTED_CALL(mocks, get_difftime(TEST_GET_TIME_VALUE + TEST_DEFAULT_GETMINIMUMPOLLINGTIME, TEST_GET_TIME_VALUE));
+
         ///act
         IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
 
@@ -3307,7 +4471,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_115: [A GET request that happens earlier than GetMinimumPollingTime shall be ignored.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_122: [ A GET request that happens earlier than GetMinimumPollingTime shall be ignored. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_immediately_after_minimumPollingTime_polls_succeeds)
     {
         ///arrange
@@ -3315,11 +4479,15 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         IoTHubTransportHttp_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
         mocks.ResetAllCalls();
 
         /*everything below is for the second time _DoWork this is called*/
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
@@ -3337,7 +4505,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3397,6 +4565,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -3405,7 +4575,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3440,8 +4610,12 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode404 = 404;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -3455,7 +4629,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3514,6 +4688,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -3522,7 +4698,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3556,8 +4732,12 @@ responseContent: a new instance of buffer]
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -3571,7 +4751,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3631,6 +4811,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -3639,7 +4821,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3673,8 +4855,12 @@ responseContent: a new instance of buffer]
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -3688,7 +4874,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3748,6 +4934,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -3771,8 +4959,12 @@ responseContent: a new instance of buffer]
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -3786,7 +4978,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3845,6 +5037,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1)
             .SetReturn(HTTP_HEADERS_ERROR);
@@ -3866,8 +5060,12 @@ responseContent: a new instance of buffer]
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -3881,7 +5079,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -3958,8 +5156,12 @@ responseContent: a new instance of buffer]
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -3973,7 +5175,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4040,15 +5242,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_040: [If no such header is found or is invalid, then _DoWork shall advance to the next action.]*/
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_088: [ If no such header is found or is invalid, then _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_acceptmessage_fails_at_STRING_concat_with_STRING_succeeds_1)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -4062,7 +5268,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4134,8 +5340,12 @@ responseContent: a new instance of buffer]
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -4149,7 +5359,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4216,8 +5426,12 @@ responseContent: a new instance of buffer]
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -4231,7 +5445,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4287,40 +5501,32 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_050: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
--requestType: POST
--relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-02-03" 
-- requestHttpHeadersHandle: an HTTP headers instance containing the following
-    Authorization: " "
-    If-Match: value of ETag
-- requestContent: NULL
-- statusCode: a pointer to unsigned int which might be examined for logging
-- responseHeadearsHandle: NULL
-- responseContent: NULL]*/
-/*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_052: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
-    /*Codes_SRS_IOTHUBTRANSPORTTHTTP_02_077: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
--requestType: DELETE
--relativePath: abandon relative path begin + value of ETag +"?api-version=2016-02-03" + "&reject"
-- requestHttpHeadersHandle: an HTTP headers instance containing the following
-    Authorization: " "
-    If-Match: value of ETag
-- requestContent: NULL
-- statusCode: a pointer to unsigned int which might be used by logging
-- responseHeadearsHandle: NULL
-- responseContent: NULL]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_077: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
--requestType: DELETE
--relativePath: abandon relative path begin + value of ETag +"?reject" + "?api-version=2016-02-03" 
-- requestHttpHeadersHandle: an HTTP headers instance containing the following
-    Authorization: " "
-    If-Match: value of ETag
-- requestContent: NULL
-- statusCode: a pointer to unsigned int which might be used by logging
-- responseHeadearsHandle: NULL
-- responseContent: NULL]
-*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_078: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_097: [ _DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+		//
+		//requestType: POST
+		//	relativePath : abandon relative path begin(as created by _Create) + value of ETag + "/abandon" + APIVERSION
+		//	requestHttpHeadersHandle : an HTTP headers instance containing the following
+		//	Authorization : " "
+		//	If - Match : value of ETag
+		//	requestContent : NULL
+		//	statusCode : a pointer to unsigned int which might be examined for logging
+		//	responseHeadearsHandle : NULL
+		//	responseContent : NULL ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_098: [ Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_101: [ _DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
+		//
+		//requestType: DELETE
+		//	relativePath : abandon relative path begin + value of ETag + APIVERSION
+		//	requestHttpHeadersHandle : an HTTP headers instance containing the following
+		//	Authorization : " "
+		//	If - Match : value of ETag
+		//	requestContent : NULL
+		//	statusCode : a pointer to unsigned int which might be used by logging
+		//	responseHeadearsHandle : NULL
+		//	responseContent : NULL ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_102: [ Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204. ]
+
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_reject_succeeds_1)
     {
         ///arrange
@@ -4328,8 +5534,12 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -4343,7 +5553,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4402,6 +5612,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -4410,7 +5622,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4437,7 +5649,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_abandon_statusCode404_succeeds_1)
     {
         ///arrange
@@ -4445,8 +5657,12 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode404 = 404;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -4460,7 +5676,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4519,6 +5735,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -4527,7 +5745,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4554,16 +5772,20 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
-    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPAPIEX_SAS_ExecuteRequest_fails_succeeds)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
+    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPAPIEX_SAS_ExecuteRequest2_fails_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         unsigned int statusCode404 = 404;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -4577,7 +5799,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4636,6 +5858,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -4644,7 +5868,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4672,15 +5896,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPHeaders_AddHeaderNameValuePair_fails_succeeds_1)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -4694,7 +5922,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4753,6 +5981,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -4770,15 +6000,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPHeaders_AddHeaderNameValuePair_fails_succeeds_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -4792,7 +6026,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4851,6 +6085,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1)
             .SetReturn(HTTP_HEADERS_ERROR);
@@ -4866,15 +6102,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_HTTPHeaders_Alloc_fails_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -4888,7 +6128,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -4957,15 +6197,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_STRING_concat_fails_succeeds_1)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -4979,7 +6223,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5046,15 +6290,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_STRING_concat_with_STRING_fails_succeeds_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5068,7 +6316,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5133,15 +6381,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_STRING_construct_n_fails_succeeds_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5155,7 +6407,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5215,15 +6467,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_074: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_095: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_REJECTED then _DoWork shall "reject" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_STRING_clone_fails_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5237,7 +6493,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5294,7 +6550,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_042: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_092: [ If assembling the message fails in any way, then _DoWork shall "abandon" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_abandons_when_IoTHubMessage_Create_fails)
     {
         ///arrange
@@ -5302,8 +6558,12 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5317,7 +6577,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5367,6 +6627,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -5375,7 +6637,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5402,15 +6664,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
     
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_040: [If no such header is found or is invalid, then _DoWork shall advance to the next action.]*/
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_088: [ If no such header is found or is invalid, then _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_no_ETag_header_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5424,7 +6690,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5457,15 +6723,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_040: [If no such header is found or is invalid, then _DoWork shall advance to the next action.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_088: [ If no such header is found or is invalid, then _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_ETag_zero_characters_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5479,7 +6749,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5512,15 +6782,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_040: [If no such header is found or is invalid, then _DoWork shall advance to the next action.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_088: [ If no such header is found or is invalid, then _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_ETag_1_characters_not_quote_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5534,7 +6808,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5567,15 +6841,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_040: [If no such header is found or is invalid, then _DoWork shall advance to the next action.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_088: [ If no such header is found or is invalid, then _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_ETag_2_characters_last_not_quote_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5589,7 +6867,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5622,15 +6900,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_040: [If no such header is found or is invalid, then _DoWork shall advance to the next action.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_088: [ If no such header is found or is invalid, then _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_ETag_1_characters_quote_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5644,7 +6926,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5677,15 +6959,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_040: [If no such header is found or is invalid, then _DoWork shall advance to the next action.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_088: [ If no such header is found or is invalid, then _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_fails_when_ETag_many_last_not_quote_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5699,7 +6985,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5732,15 +7018,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_038: [If the HTTPAPIEX_SAS_ExecuteRequest executed successfully then status code shall be examined. Any status code different than 200 causes _DoWork to advance to the next action.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_086: [ If the HTTPAPIEX_SAS_ExecuteRequest executed successfully then status code shall be examined. Any status code different than 200 causes _DoWork to advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_top_next_action_when_httpstatus_is_500_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode500 = 500;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5754,7 +7044,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5783,15 +7073,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
-    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_HTTPAPIEX_SAS_ExecuteRequest_fails)
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_085: [ If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description. ]
+    TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_HTTPAPIEX_SAS_ExecuteRequest2_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         unsigned int statusCode200 = 200;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5805,7 +7099,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -5835,14 +7129,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_085: [ If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_BUFFER_new_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -5863,14 +7161,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_037: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_085: [ If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_goes_to_next_action_when_HTTPHeaders_Alloc_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         whenShallHTTPHeaders_Alloc_fail = currentHTTPHeaders_Alloc_call + 1;
@@ -5887,7 +7189,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_069: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_125: [ This function shall return a pointer to a structure of type IOTHUB_TRANSPORT_PROVIDER having the following values for its fields: ]
     TEST_FUNCTION(HTTP_Protocol_succeeds)
     {
         ///arrange
@@ -5899,6 +7201,8 @@ responseContent: a new instance of buffer]
         ASSERT_IS_NOT_NULL(result);
         ASSERT_ARE_EQUAL(void_ptr, (void*)((TRANSPORT_PROVIDER*)result)->IoTHubTransport_Create, (void*)IoTHubTransportHttp_Create);
         ASSERT_ARE_EQUAL(void_ptr, (void*)((TRANSPORT_PROVIDER*)result)->IoTHubTransport_Destroy, (void*)IoTHubTransportHttp_Destroy);
+		ASSERT_ARE_EQUAL(void_ptr, (void*)((TRANSPORT_PROVIDER*)result)->IoTHubTransport_Register, (void*)IoTHubTransportHttp_Register);
+		ASSERT_ARE_EQUAL(void_ptr, (void*)((TRANSPORT_PROVIDER*)result)->IoTHubTransport_Unregister, (void*)IoTHubTransportHttp_Unregister);
         ASSERT_ARE_EQUAL(void_ptr, (void*)((TRANSPORT_PROVIDER*)result)->IoTHubTransport_Subscribe, (void*)IoTHubTransportHttp_Subscribe);
         ASSERT_ARE_EQUAL(void_ptr, (void*)((TRANSPORT_PROVIDER*)result)->IoTHubTransport_Unsubscribe, (void*)IoTHubTransportHttp_Unsubscribe);
         ASSERT_ARE_EQUAL(void_ptr, (void*)((TRANSPORT_PROVIDER*)result)->IoTHubTransport_DoWork, (void*)IoTHubTransportHttp_DoWork);
@@ -5908,21 +7212,25 @@ responseContent: a new instance of buffer]
         ///cleanup
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_070: [IoTHubTransportHttp_DoWork shall build the following string:[{"body":"base64 encoding of the message1 content"},{"body":"base64 encoding of the message2 content"}...]]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_031: [Once a final payload has been obtained, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters:]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_067: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list containing all the items batched, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The batched items shall be removed from waitingToSend.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_076: [If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_102: [Request HTTP headers shall have the value of "Content-Type" created or updated to "application/vnd.microsoft.iothub.json" by a call to HTTPHeaders_ReplaceHeaderNameValuePair.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_101: [If option SetBatching is true then _Dowork shall send batched event message as specced below.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_083: [If optionName is an option handled by IoTHubTransportHttp then it shall be set.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_097: ["SetBatching"] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_056: [ IoTHubTransportHttp_DoWork shall build the following string:[{"body":"base64 encoding of the message1 content"},{"body":"base64 encoding of the message2 content"}...] ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_068: [ Once a final payload has been obtained, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters: ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_070: [ If HTTPAPIEX_SAS_ExecuteRequest2 does not fail and http status code < 300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list containing all the items batched, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_OK. The batched items shall be removed from waitingToSend. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_064: [ If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_054: [ Request HTTP headers shall have the value of "Content-Type" created or updated to "application/vnd.microsoft.iothub.json" by a call to HTTPHeaders_ReplaceHeaderNameValuePair. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_053: [ If option SetBatching is true then _DoWork shall send batched event message as specced below. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_117: [ If optionName is an option handled by IoTHubTransportHttp then it shall be set. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_120: [ "Batching" ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_happy_path_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6004,7 +7312,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -6038,14 +7346,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_065: [if HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_081: [ If HTTPAPIEX_SAS_ExecuteRequest2 fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried). ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_http_status_is_404)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6127,7 +7439,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -6160,14 +7472,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_065: [if HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
-    TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HTTPAPIEX_SAS_ExecuteRequest_fails)
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_081: [ If HTTPAPIEX_SAS_ExecuteRequest2 fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried). ]
+    TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HTTPAPIEX_SAS_ExecuteRequest2_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6249,7 +7565,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -6283,14 +7599,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BUFFER_build_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6387,14 +7707,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
    
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BUFFER_new_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6479,14 +7803,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_with_STRING_fails_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6550,14 +7878,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6615,14 +7947,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it_fails_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6673,14 +8009,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_with_STRING_it_fails_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6727,14 +8067,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_Base64_Encode_Bytes_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6773,14 +8117,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_IoTHubMessage_GetByteArray_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6818,14 +8166,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct_fails_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6857,14 +8209,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_073: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_067: [ If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6887,14 +8243,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_103: [If updating Content-Type fails for any reason, then _DoWork shall advance to the next action.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_055: [ If updating Content-Type fails for any reason, then _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_HTTP_headers_fails_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6914,16 +8274,20 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_071: [If the oldest message in waitingToSend causes the message size to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_FAILED.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_118: [The message size shall be limited to 255KB - 1 byte.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_119: [The message size is computed from the length of the payload + 384.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_065: [ If the oldest message in waitingToSend causes the message size to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_FAILED. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_061: [ The message size shall be limited to 255KB - 1 byte. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_062: [ The message size is computed from the length of the payload + 384. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_bigger_than_256K_path_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message4.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -6992,14 +8356,18 @@ responseContent: a new instance of buffer]
     }
 
     /*this is a test that wants to see that "almost" 255KB message still fits*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_119: [The message size is computed from the length of the payload + 384.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_062: [ The message size is computed from the length of the payload + 384. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_almost255_happy_path_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message5.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -7082,7 +8450,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7116,7 +8484,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_070: [IoTHubTransportHttp_DoWork shall build the following string:[{"body":"base64 encoding of the message1 content"},{"body":"base64 encoding of the message2 content"}...]] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_056: [ IoTHubTransportHttp_DoWork shall build the following string:[{"body":"base64 encoding of the message1 content"},{"body":"base64 encoding of the message2 content"}...] ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succeeds)
     {
         ///arrange
@@ -7124,7 +8492,11 @@ responseContent: a new instance of buffer]
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         DList_InsertTailList(&(waitingToSend), &(message2.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -7250,7 +8622,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7284,7 +8656,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_072: [If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload.]*/
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_066: [ If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_items_fails_the_first_one_still_makes_1_batch_succeeds_1)
     {
         ///arrange
@@ -7292,7 +8664,10 @@ responseContent: a new instance of buffer]
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         DList_InsertTailList(&(waitingToSend), &(message2.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -7407,7 +8782,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7441,7 +8816,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_072: [If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_066: [ If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_items_fails_the_first_one_still_makes_1_batch_succeeds_2)
     {
         ///arrange
@@ -7449,7 +8824,10 @@ responseContent: a new instance of buffer]
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         DList_InsertTailList(&(waitingToSend), &(message2.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -7571,7 +8949,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7605,7 +8983,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_072: [If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_066: [ If at any point during construction of the string there are errors, IoTHubTransportHttp_DoWork shall use the so far constructed string as payload. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_not_fit_256K_makes_1_batch_of_the_first_item_succeeds)
     {
         ///arrange
@@ -7613,7 +8991,10 @@ responseContent: a new instance of buffer]
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         DList_InsertTailList(&(waitingToSend), &(message5.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -7731,7 +9112,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7768,12 +9149,13 @@ responseContent: a new instance of buffer]
 
     /*** IoTHubTransportHttp_GetSendStatus ***/
 
-    /* Tests_SRS_IOTHUBTRANSPORTTHTTP_09_001: [IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_111: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter. ]
     TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_InvalidHandleArgument_fail)
     {
         // arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
         mocks.ResetAllCalls();
 
         IOTHUB_CLIENT_STATUS status;
@@ -7790,16 +9172,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /* Tests_SRS_IOTHUBTRANSPORTTHTTP_09_001: [IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_111: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter. ]
     TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_InvalidStatusArgument_fail)
     {
         // arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
 
         // act
-        IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(handle, NULL);
+        IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(devHandle, NULL);
 
         // assert
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG);
@@ -7810,20 +9194,27 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /* Tests_SRS_IOTHUBTRANSPORTTHTTP_09_002: [IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_112: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_138: [ IoTHubTransportHttp_GetSendStatus shall locate deviceHandle in the transport device list by calling VECTOR_find_if. ]
     TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_empty_waitingToSend_and_empty_eventConfirmations_success)
     {
         // arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
         
         IOTHUB_CLIENT_STATUS status;
 
         // act
-        IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(handle, &status);
+        IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(devHandle, &status);
 
         // assert
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
@@ -7835,12 +9226,14 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /* Tests_SRS_IOTHUBTRANSPORTTHTTP_09_003: [IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_113: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_138: [ IoTHubTransportHttp_GetSendStatus shall locate deviceHandle in the transport device list by calling VECTOR_find_if. ]
     TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_waitingToSend_not_empty_success)
     {
         // arrange
         CIoTHubTransportHttpMocks mocks;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(contains3,1);
         IOTHUB_MESSAGE_LIST newEntry;
@@ -7849,12 +9242,15 @@ responseContent: a new instance of buffer]
 
         mocks.ResetAllCalls();
 
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2);
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
         IOTHUB_CLIENT_STATUS status;
 
         // act
-        IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(handle, &status);
+        IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(devHandle, &status);
 
         // assert
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
@@ -7866,6 +9262,41 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
         IoTHubMessage_Destroy(eventMessageHandle);
     }
+
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_139: [ If the device structure is not found, then this function shall fail and return with IOTHUB_CLIENT_INVALID_ARG. ]
+	TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_deviceData_is_not_found_fails)
+	{
+		// arrange
+		CIoTHubTransportHttpMocks mocks;
+		auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(contains3, 1);
+		IOTHUB_MESSAGE_LIST newEntry;
+		newEntry.messageHandle = &newEntry;
+		DList_InsertTailList(&(waitingToSend), &(newEntry.entry));
+
+		mocks.ResetAllCalls();
+
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2)
+			.SetFailReturn((void_ptr)NULL);
+
+		IOTHUB_CLIENT_STATUS status;
+
+		// act
+		IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(devHandle, &status);
+
+		// assert
+		ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG);
+
+		mocks.AssertActualAndExpectedCalls();
+
+		// cleanup
+		IoTHubTransportHttp_Destroy(handle);
+		IoTHubMessage_Destroy(eventMessageHandle);
+	}
 
     void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *mocks, IOTHUB_MESSAGE_HANDLE messageHandle) /*these are copy pasted from TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items))*/
     {
@@ -7974,7 +9405,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL((*mocks), HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -7997,14 +9428,19 @@ responseContent: a new instance of buffer]
             .IgnoreArgument(2);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_076: [If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload.]*/
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_064: [ If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_059: [ It shall inspect the "waitingToSend" DLIST passed in config structure. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_properties_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         setupIrrelevantMocksForProperties(&mocks, message6.messageHandle);
 
@@ -8045,7 +9481,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_120: [Every property name shall add to the message size the length of the property name + the length of the property value + 16 bytes.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_063: [ Every property name shall add to the message size the length of the property name + the length of the property value + 16 bytes. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_at_maximum_message_size_succeeds)
     {
         /*this test shall use a message that has a payload of MAXIMUM_MESSAGE_SIZE - PAYLOAD_OVERHEAD - PROPERTY_OVERHEAD - 2*/
@@ -8055,7 +9491,11 @@ responseContent: a new instance of buffer]
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message11.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         setupIrrelevantMocksForProperties(&mocks, message11.messageHandle);
 
@@ -8096,7 +9536,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_120: [Every property name shall add to the message size the length of the property name + the length of the property value + 16 bytes.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_063: [ Every property name shall add to the message size the length of the property name + the length of the property value + 16 bytes. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_past_maximum_message_size_fails)
     {
         /*this test shall use a message that has a payload of MAXIMUM_MESSAGE_SIZE - PAYLOAD_OVERHEAD - PROPERTY_OVERHEAD - 2*/
@@ -8106,10 +9546,14 @@ responseContent: a new instance of buffer]
         CNiceCallComparer<CIoTHubTransportHttpMocks>mocks;
         DList_InsertTailList(&(waitingToSend), &(message12.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
 
         ENABLE_BATCHING();
 
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SendComplete(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_BATCHSTATE_FAILED))
             .IgnoreArgument(2);
@@ -8124,14 +9568,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_076: [If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_064: [ If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_fails_when_Map_GetInternals_fails)
     {
         ///arrange
         CNiceCallComparer<CIoTHubTransportHttpMocks> mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
@@ -8268,7 +9716,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL((*mocks), HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -8291,7 +9739,7 @@ responseContent: a new instance of buffer]
             .IgnoreArgument(2);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_076: [If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_064: [ If IoTHubMessage does not have properties, then "properties":{...} shall be missing from the payload. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_with_properties_succeeds)
     {
         ///arrange
@@ -8299,7 +9747,11 @@ responseContent: a new instance of buffer]
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         DList_InsertTailList(&(waitingToSend), &(message7.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         setupIrrelevantMocksForProperties2(&mocks, message6.messageHandle, message7.messageHandle);
 
@@ -8383,7 +9835,7 @@ responseContent: a new instance of buffer]
 #define TEST_2_ITEM_STRING "[{\"body\":\"MTIzNDU2\",\"properties\":{" TEST_RED_KEY_STRING_WITH_IOTHUBAPP ":" TEST_RED_VALUE_STRING "}},{\"body\":\"MTIzNDU2Nw==\",\"properties\":{" TEST_BLUE_KEY_STRING_WITH_IOTHUBAPP ":" TEST_BLUE_VALUE_STRING "," TEST_YELLOW_KEY_STRING_WITH_IOTHUBAPP ":" TEST_YELLOW_VALUE_STRING "}}]"
 #define TEST_1_ITEM_STRING "[{\"body\":\"MTIzNDU2\",\"properties\":{" TEST_RED_KEY_STRING_WITH_IOTHUBAPP ":" TEST_RED_VALUE_STRING "}}]"
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_075: [If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"name1":"value1","name2":"value2"}]*/
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items) 
     {
         ///arrange
@@ -8391,7 +9843,11 @@ responseContent: a new instance of buffer]
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         DList_InsertTailList(&(waitingToSend), &(message7.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         ENABLE_BATCHING();
 
@@ -8410,7 +9866,7 @@ responseContent: a new instance of buffer]
 #define THRESHOLD2 17
 #define THRESHOLD3 7 /*below 7, STRING_concat would fail not in producing properties*/
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_075: [If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"}]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_THRESHOLD1_succeeds)
     {
         for (size_t i = THRESHOLD1 + 1; i > THRESHOLD1; i--)
@@ -8423,7 +9879,11 @@ responseContent: a new instance of buffer]
             DList_InsertTailList(&(waitingToSend), &(message6.entry));
             DList_InsertTailList(&(waitingToSend), &(message7.entry));
             auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+			auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
             mocks.ResetAllCalls();
+
+			setupDoWorkLoopOnceForOneDevice(mocks);
 
             whenShallSTRING_concat_fail = i;
 
@@ -8446,7 +9906,7 @@ responseContent: a new instance of buffer]
         }
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_075: [If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"}]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_send_only_1_when_properties_for_second_fail)
     {
         for (size_t i = THRESHOLD1; i > THRESHOLD2; i--)
@@ -8459,7 +9919,11 @@ responseContent: a new instance of buffer]
             DList_InsertTailList(&(waitingToSend), &(message6.entry));
             DList_InsertTailList(&(waitingToSend), &(message7.entry));
             auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+			auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
             mocks.ResetAllCalls();
+
+			setupDoWorkLoopOnceForOneDevice(mocks);
 
             whenShallSTRING_concat_fail = i;
 
@@ -8482,7 +9946,7 @@ responseContent: a new instance of buffer]
         }
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_075: [If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"}]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_058: [ If IoTHubMessage has properties, then they shall be serialized at the same level as "body" using the following pattern: "properties":{"iothub-app-name1":"value1","iothub-app-name2":"value2"} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_send_nothing)
     {
         for (size_t i = THRESHOLD2; i > THRESHOLD3; i--)
@@ -8518,7 +9982,7 @@ responseContent: a new instance of buffer]
         }
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_080: [If handle parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_114: [ If handle parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]
     TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_handle_fails)
     {
         ///arrange
@@ -8532,7 +9996,7 @@ responseContent: a new instance of buffer]
         ///cleanup
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_081: [If option parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_115: [ If option parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]
     TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_optionName_fails)
     {
         ///arrange
@@ -8551,7 +10015,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_082: [If value parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_116: [ If value parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]
     TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_value_fails)
     {
         ///arrange
@@ -8570,8 +10034,8 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_086: [The following table translates HTTPAPIEX return codes to IOTHUB_CLIENT_RESULT return codes:] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_084: [Otherwise, IoTHubTransport_Http shall call HTTPAPIEX_SetOption with the same parameters and return the translated code.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_119: [ The following table translates HTTPAPIEX return codes to IOTHUB_CLIENT_RESULT return codes: ]
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_118: [ Otherwise, IoTHubTransport_Http shall call HTTPAPIEX_SetOption with the same parameters and return the translated code. ]
     TEST_FUNCTION(IoTHubTransportHttp_SetOption_succeeds_when_HTTPAPIEX_succeeds)
     {
         ///arrange
@@ -8592,8 +10056,8 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_086: [The following table translates HTTPAPIEX return codes to IOTHUB_CLIENT_RESULT return codes:] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_084: [Otherwise, IoTHubTransport_Http shall call HTTPAPIEX_SetOption with the same parameters and return the translated code.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_119: [ The following table translates HTTPAPIEX return codes to IOTHUB_CLIENT_RESULT return codes: ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_118: [ Otherwise, IoTHubTransport_Http shall call HTTPAPIEX_SetOption with the same parameters and return the translated code. ]
     TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_HTTPAPIEX_INVALID_ARG)
     {
         ///arrange
@@ -8615,8 +10079,8 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_086: [The following table translates HTTPAPIEX return codes to IOTHUB_CLIENT_RESULT return codes:] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_084: [Otherwise, IoTHubTransport_Http shall call HTTPAPIEX_SetOption with the same parameters and return the translated code.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_119: [ The following table translates HTTPAPIEX return codes to IOTHUB_CLIENT_RESULT return codes: ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_118: [ Otherwise, IoTHubTransport_Http shall call HTTPAPIEX_SetOption with the same parameters and return the translated code. ]
     TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_HTTPAPIEX_ERROR)
     {
         ///arrange
@@ -8638,8 +10102,8 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_086: [The following table translates HTTPAPIEX return codes to IOTHUB_CLIENT_RESULT return codes:] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_084: [Otherwise, IoTHubTransport_Http shall call HTTPAPIEX_SetOption with the same parameters and return the translated code.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_119: [ The following table translates HTTPAPIEX return codes to IOTHUB_CLIENT_RESULT return codes: ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_118: [ Otherwise, IoTHubTransport_Http shall call HTTPAPIEX_SetOption with the same parameters and return the translated code. ]
     TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_any_other_error)
     {
         ///arrange
@@ -8661,7 +10125,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_079: [If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ABANDONED then _DoWork shall "abandon" the message.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_096: [ If IoTHubClient_LL_MessageCallback returns IOTHUBMESSAGE_ABANDONED then _DoWork shall "abandon" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_abandon_succeeds)
     {
         ///arrange
@@ -8669,8 +10133,12 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -8684,7 +10152,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -8743,6 +10211,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -8750,7 +10220,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -8777,7 +10247,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_090: [ All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_1_property_succeeds)
     {
         ///arrange
@@ -8785,9 +10255,13 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         size_t nHeaders = 1;
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
@@ -8802,7 +10276,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -8877,6 +10351,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -8885,7 +10361,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -8912,7 +10388,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_090: [ All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_succeeds)
     {
         ///arrange
@@ -8920,9 +10396,13 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         size_t nHeaders = 3;
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
@@ -8937,7 +10417,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9025,6 +10505,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -9033,7 +10515,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9060,8 +10542,8 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_042: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_090: [ All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_092: [ If assembling the message fails in any way, then _DoWork shall "abandon" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_when_properties_fails_it_abandons_1)
     {
         ///arrange
@@ -9069,9 +10551,13 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         size_t nHeaders = 3;
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
@@ -9086,7 +10572,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9169,6 +10655,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -9177,7 +10665,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9205,8 +10693,8 @@ responseContent: a new instance of buffer]
     }
 
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_042: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_090: [ All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_092: [ If assembling the message fails in any way, then _DoWork shall "abandon" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_when_properties_fails_it_abandons_2)
     {
         ///arrange
@@ -9214,9 +10702,13 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         size_t nHeaders = 3;
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
@@ -9231,7 +10723,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9311,6 +10803,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -9319,7 +10813,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9346,8 +10840,8 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_042: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_090: [ All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_092: [ If assembling the message fails in any way, then _DoWork shall "abandon" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_when_properties_fails_it_abandons_3)
     {
         ///arrange
@@ -9355,9 +10849,13 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         size_t nHeaders = 3;
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
@@ -9372,7 +10870,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9446,6 +10944,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -9454,7 +10954,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9481,8 +10981,8 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_042: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_090: [ All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_092: [ If assembling the message fails in any way, then _DoWork shall "abandon" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_when_properties_fails_it_abandons_4)
     {
         ///arrange
@@ -9490,9 +10990,13 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         size_t nHeaders = 3;
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
@@ -9507,7 +11011,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9577,6 +11081,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -9585,7 +11091,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9612,8 +11118,8 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_087: [All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_042: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.]*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_090: [ All the HTTP headers of the form iothub-app-name:somecontent shall be transformed in message properties {name, somecontent}. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_092: [ If assembling the message fails in any way, then _DoWork shall "abandon" the message. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and_1_service_message_with_2_property_when_properties_fails_it_abandons_5)
     {
         ///arrange
@@ -9621,9 +11127,13 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         size_t nHeaders = 3;
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
@@ -9638,7 +11148,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9699,6 +11209,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -9707,7 +11219,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -9734,21 +11246,25 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_104: [If option SetBatching is false then _Dowork shall send individual event message as specced below.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_105: [A clone of the event HTTP request headers shall be created.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_106: [The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_107: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */ /*well - this tests that no "phantom" properties are added when there are no properties to add*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_083: [If optionName is an option handled by IoTHubTransportHttp then it shall be set.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_097: ["SetBatching"] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_071: [ If option SetBatching is false then _DoWork shall send individual event message as specced below. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_076: [ A clone of the event HTTP request headers shall be created. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_077: [ The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream". ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_078: [ Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value". ] /*well - this tests that no "phantom" properties are added when there are no properties to add*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_080: [ IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 passing the following parameters ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_082: [ If HTTPAPIEX_SAS_ExecuteRequest2 does not fail and http status code < 300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_117: [ If optionName is an option handled by IoTHubTransportHttp then it shall be set. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_120: [ "Batching" ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatched_happy_path_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message1.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -9783,7 +11299,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -9826,21 +11342,25 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_104: [If option SetBatching is false then _Dowork shall send individual event message as specced below.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_105: [A clone of the event HTTP request headers shall be created.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_106: [The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_107: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */ /*well - this tests that no "phantom" properties are added when there are no properties to add*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_083: [If optionName is an option handled by IoTHubTransportHttp then it shall be set.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_097: ["SetBatching"] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_071: [ If option SetBatching is false then _DoWork shall send individual event message as specced below. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_076: [ A clone of the event HTTP request headers shall be created. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_077: [ The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream". ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_078: [ Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value". ] /*well - this tests that no "phantom" properties are added when there are no properties to add*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_080: [ IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 passing the following parameters ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_082: [ If HTTPAPIEX_SAS_ExecuteRequest2 does not fail and http status code < 300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_117: [ If optionName is an option handled by IoTHubTransportHttp then it shall be set. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_120: [ "Batching" ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_type_unbatched_happy_path_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message10.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -9873,7 +11393,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -9916,14 +11436,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_121: [The message size shall be limited to 255KB -1 bytes.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_072: [ The message size shall be limited to 255KB -1 bytes. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_unbatched_happy_path_at_the_message_limit_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message11.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -9970,7 +11494,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -10013,9 +11537,9 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_121: [The message size shall be limited to 255KB -1 bytes.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_122: [The message size is computed from the length of the payload + 384.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_123: [Every property name shall add  to the message size the length of the property name + the length of the property value + 16 bytes.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_072: [ The message size shall be limited to 255KB -1 bytes. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_073: [ The message size is computed from the length of the payload + 384. ]
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_074: [ Every property name shall add to the message size the length of the property name + the length of the property value + 16 bytes. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_type_unbatched_happy_path_at_the_message_limit_succeeds)
     {
         ///arrange
@@ -10023,7 +11547,12 @@ responseContent: a new instance of buffer]
         DList_InsertTailList(&(waitingToSend), &(message12.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
        
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SendComplete(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IOTHUB_BATCHSTATE_FAILED))
             .IgnoreArgument(2);
 
@@ -10039,21 +11568,25 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_104: [If option SetBatching is false then _Dowork shall send individual event message as specced below.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_105: [A clone of the event HTTP request headers shall be created.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_106: [The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_107: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */ /*well - this tests that no "phantom" properties are added when there are no properties to add*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_083: [If optionName is an option handled by IoTHubTransportHttp then it shall be set.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_097: ["SetBatching"] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_071: [ If option SetBatching is false then _DoWork shall send individual event message as specced below. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_076: [ A clone of the event HTTP request headers shall be created. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_077: [ The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream". ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_078: [ Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value". ] /*well - this tests that no "phantom" properties are added when there are no properties to add*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_080: [ IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 passing the following parameters ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_082: [ If HTTPAPIEX_SAS_ExecuteRequest2 does not fail and http status code < 300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_117: [ If optionName is an option handled by IoTHubTransportHttp then it shall be set. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_120: [ "Batching" ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_type_unbatched_fails_when_getString_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message10.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10073,19 +11606,24 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_104: [If option SetBatching is false then _Dowork shall send individual event message as specced below.] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_105: [A clone of the event HTTP request headers shall be created.]*/
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_106: [The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream".] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_107: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_110: [IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest passing the following parameters] */
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_112: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_071: [ If option SetBatching is false then _DoWork shall send individual event message as specced below. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_076: [ A clone of the event HTTP request headers shall be created. ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_077: [ The cloned HTTP headers shall have the HTTP header "Content-Type" set to "application/octet-stream". ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_078: [ Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value". ] /*well - this tests that no "phantom" properties are added when there are no properties to add*/
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_080: [ IoTHubTransportHttp_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest2 passing the following parameters ]
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_082: [ If HTTPAPIEX_SAS_ExecuteRequest2 does not fail and http status code < 300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_happy_path_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10131,7 +11669,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -10174,14 +11712,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_111: [If HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_069: [ If HTTPAPIEX_SAS_ExecuteRequest2 fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried). ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_httpStatusCode_is_not_succeess)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10227,7 +11769,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -10260,14 +11802,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_111: [If HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_081: [ If HTTPAPIEX_SAS_ExecuteRequest2 fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried). ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_HTTPAPIEXSAS_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10313,7 +11859,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -10347,14 +11893,17 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_079: [ If any HTTP header operation fails, _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_buffer_fails_1)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10414,14 +11963,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_079: [ If any HTTP header operation fails, _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_buffer_fails_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10474,14 +12027,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_079: [ If any HTTP header operation fails, _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_http_headers_fail_1)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10532,14 +12089,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_079: [ If any HTTP header operation fails, _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_http_headers_fail_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10586,14 +12147,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_079: [ If any HTTP header operation fails, _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_http_headers_fail_3)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10636,14 +12201,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_079: [ If any HTTP header operation fails, _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_map_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10680,14 +12249,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_079: [ If any HTTP header operation fails, _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_http_fails_4)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10717,14 +12290,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_079: [ If any HTTP header operation fails, _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_http_fails_5)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10749,14 +12326,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_108: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_079: [ If any HTTP header operation fails, _DoWork shall advance to the next action. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_does_nothing_when_IoTHubMessage_GetByteArray_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10778,14 +12359,19 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_109: [If the oldest message in waitingToSend causes the message to exceed 256K bytes then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_FAILED.] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_075: [ If the oldest message in waitingToSend causes the message to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_FAILED. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_overlimit_calls_SendComplete_with_BATCHSTATE_FAILED)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message9.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10816,14 +12402,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_113: [If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false}] */
+    //Tests_SRS_TRANSPORTMULTITHTTP_17_057: [ If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_happy_path_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message10.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10901,7 +12491,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -10935,14 +12525,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_113: [If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false}] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_057: [ If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_string_concat_fails_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message10.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -10995,14 +12589,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_113: [If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false}] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_057: [ If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_Map_GetInternals_fails_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message10.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -11053,14 +12651,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_113: [If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false}] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_057: [ If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING_concat_fails_it_fails_2)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message10.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -11106,14 +12708,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_113: [If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false}] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_057: [ If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING_concat_with_STRING_fails_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message10.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -11156,14 +12762,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_113: [If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false}] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_057: [ If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING_new_JSON_fails_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message10.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -11201,14 +12811,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_113: [If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false}] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_057: [ If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_IoTHubMessage_GetString_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message10.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -11244,14 +12858,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBTRANSPORTTHTTP_02_113: [If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false}] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_057: [ If a messages to be send has type IOTHUBMESSAGE_STRING, then its serialization shall be {"body":"JSON encoding of the string", "base64Encoded":false} ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING_construct_it_fails)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message10.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -11284,7 +12902,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /* Tests_SRS_IOTHUBTRANSPORTTHTTP_07_008: [The HTTP header of iothub-messageid shall be set in the MessageId.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_091: [ The HTTP header value of iothub-messageid shall be set in the IoTHub_SetMessageId. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
     {
         ///arrange
@@ -11293,8 +12911,12 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -11308,7 +12930,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -11403,6 +13025,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -11410,7 +13034,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -11437,7 +13061,7 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
-    /* Tests_SRS_IOTHUBTRANSPORTTHTTP_07_008: [The HTTP header of iothub-messageid shall be set in the MessageId.] */
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_091: [ The HTTP header value of iothub-messageid shall be set in the IoTHub_SetMessageId. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
     {
         ///arrange
@@ -11446,8 +13070,12 @@ responseContent: a new instance of buffer]
         unsigned int statusCode200 = 200;
         unsigned int statusCode204 = 204;
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        (void)IoTHubTransportHttp_Subscribe(handle);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
+		(void)IoTHubTransportHttp_Subscribe(devHandle);
         mocks.ResetAllCalls();
+		setupDoWorkLoopOnceForOneDevice(mocks);
+
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend)); /*because DoWork for event*/
 
         STRICT_EXPECTED_CALL(mocks, get_time(NULL));
@@ -11461,7 +13089,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -11552,6 +13180,8 @@ responseContent: a new instance of buffer]
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
@@ -11559,7 +13189,7 @@ responseContent: a new instance of buffer]
 
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,
             IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
@@ -11586,13 +13216,18 @@ responseContent: a new instance of buffer]
         IoTHubTransportHttp_Destroy(handle);
     }
 
+	//Tests_SRS_TRANSPORTMULTITHTTP_17_091: [ The HTTP header value of iothub-messageid shall be set in the IoTHub_SetMessageId. ]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
     {
         ///arrange
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -11638,7 +13273,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
@@ -11690,7 +13325,11 @@ responseContent: a new instance of buffer]
         CIoTHubTransportHttpMocks mocks;
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+		auto devHandle = IoTHubTransportHttp_Register(handle, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_CONFIG.waitingToSend);
+
         mocks.ResetAllCalls();
+
+		setupDoWorkLoopOnceForOneDevice(mocks);
 
         STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(&waitingToSend));
 
@@ -11736,7 +13375,7 @@ responseContent: a new instance of buffer]
         /*executing HTTP goodies*/
         STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest(
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_ExecuteRequest2(
             IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
             IGNORED_PTR_ARG,
             HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
