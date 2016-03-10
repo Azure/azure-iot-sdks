@@ -5,8 +5,10 @@ namespace Microsoft.Azure.Devices
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -20,6 +22,8 @@ namespace Microsoft.Azure.Devices
         const string JobsUriFormat = "/jobs{0}?{1}";
         const string StatisticsUriFormat = "/statistics/devices?" + ClientApiVersionHelper.ApiVersionQueryString;
         const string DevicesRequestUriFormat = "/devices/?top={0}&{1}";
+
+        static readonly Regex DeviceIdRegex = new Regex(@"^[A-Za-z0-9\-:.+%_#*?!(),=@;$']{1,128}$", RegexOptions.Compiled | RegexOptions.ECMAScript | RegexOptions.IgnoreCase);
         static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(100);
         
         IHttpClientHelper httpClientHelper;
@@ -73,15 +77,7 @@ namespace Microsoft.Azure.Devices
         {
             this.EnsureInstanceNotClosed();
 
-            if (device == null)
-            {
-                throw new ArgumentNullException("device");
-            }
-
-            if (string.IsNullOrWhiteSpace(device.Id))
-            {
-                throw new ArgumentException(ApiResources.DeviceIdNotSet);
-            }
+            ValidateDeviceId(device);
 
             if (!string.IsNullOrEmpty(device.ETag))
             {
@@ -94,9 +90,43 @@ namespace Microsoft.Azure.Devices
                 device.Authentication = new AuthenticationMechanism();
             }
 
-            ValidateDeviceAuthentication(device);
+            ValidateDeviceAuthentication(device.Authentication);
 
             return this.httpClientHelper.PutAsync(GetRequestUri(device.Id), device, PutOperationType.CreateEntity, null, cancellationToken);
+        }
+
+        public override Task<string[]> AddDevicesAsync(IEnumerable<Device> devices)
+        {
+            return this.AddDevicesAsync(devices, CancellationToken.None);
+        }
+
+        public override Task<string[]> AddDevicesAsync(IEnumerable<Device> devices, CancellationToken cancellationToken)
+        {
+            if (devices == null)
+            {
+                throw new ArgumentNullException("devices");
+            }
+
+            if (!devices.Any())
+            {
+                throw new ArgumentException("devices");
+            }
+
+            var exportImportDeviceList = new List<ExportImportDevice>(devices.Count());
+            foreach (var device in devices)
+            {
+                ValidateDeviceId(device);
+
+                if (!string.IsNullOrEmpty(device.ETag))
+                {
+                    throw new ArgumentException(ApiResources.ETagSetWhileRegisteringDevice);
+                }
+
+                var exportImportDevice = new ExportImportDevice(device, ImportMode.Create);
+                exportImportDeviceList.Add(exportImportDevice);
+            }
+
+            return this.BulkDeviceOperationsAsync(exportImportDeviceList, cancellationToken);
         }
 
         public override Task<Device> UpdateDeviceAsync(Device device)
@@ -118,15 +148,7 @@ namespace Microsoft.Azure.Devices
         {
             this.EnsureInstanceNotClosed();
 
-            if (device == null)
-            {
-                throw new ArgumentNullException("device");
-            }
-
-            if (string.IsNullOrWhiteSpace(device.Id))
-            {
-                throw new ArgumentException(ApiResources.DeviceIdNotSet);
-            }
+            ValidateDeviceId(device);
 
             if (string.IsNullOrWhiteSpace(device.ETag) && !forceUpdate)
             {
@@ -139,7 +161,7 @@ namespace Microsoft.Azure.Devices
                 device.Authentication = new AuthenticationMechanism();
             }
 
-            ValidateDeviceAuthentication(device);
+            ValidateDeviceAuthentication(device.Authentication);
 
             var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
             errorMappingOverrides.Add(HttpStatusCode.PreconditionFailed, async (responseMessage) => new PreconditionFailedException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)));
@@ -152,6 +174,40 @@ namespace Microsoft.Azure.Devices
             PutOperationType operationType = forceUpdate ? PutOperationType.ForceUpdateEntity : PutOperationType.UpdateEntity;
 
             return this.httpClientHelper.PutAsync(GetRequestUri(device.Id), device, operationType, errorMappingOverrides, cancellationToken);
+        }
+
+        public override Task<string[]> UpdateDevicesAsync(IEnumerable<Device> devices)
+        {
+            return this.UpdateDevicesAsync(devices, false, CancellationToken.None);
+        }
+
+        public override Task<string[]> UpdateDevicesAsync(IEnumerable<Device> devices, bool forceUpdate, CancellationToken cancellationToken)
+        {
+            if (devices == null)
+            {
+                throw new ArgumentNullException("devices");
+            }
+
+            if (!devices.Any())
+            {
+                throw new ArgumentException("devices");
+            }
+
+            var exportImportDeviceList = new List<ExportImportDevice>(devices.Count());
+            foreach (var device in devices)
+            {
+                ValidateDeviceId(device);
+
+                if (string.IsNullOrWhiteSpace(device.ETag) && !forceUpdate)
+                {
+                    throw new ArgumentException(ApiResources.ETagNotSetWhileUpdatingDevice);
+                }
+
+                var exportImportDevice = new ExportImportDevice(device, forceUpdate ? ImportMode.Update : ImportMode.UpdateIfMatchETag);
+                exportImportDeviceList.Add(exportImportDevice);
+            }
+
+            return this.BulkDeviceOperationsAsync(exportImportDeviceList, cancellationToken);
         }
 
         public override Task RemoveDeviceAsync(string deviceId)
@@ -182,15 +238,7 @@ namespace Microsoft.Azure.Devices
         {
             this.EnsureInstanceNotClosed();
 
-            if (device == null)
-            {
-                throw new ArgumentNullException("device");
-            }
-
-            if (string.IsNullOrWhiteSpace(device.Id))
-            {
-                throw new ArgumentException(IotHubApiResources.GetString(ApiResources.ParameterCannotBeNullOrWhitespace, "device.Id"));
-            }
+            ValidateDeviceId(device);
 
             if (string.IsNullOrWhiteSpace(device.ETag))
             {
@@ -200,6 +248,39 @@ namespace Microsoft.Azure.Devices
             return this.RemoveDeviceAsync(device.Id, device, cancellationToken);
         }
 
+        public override Task<string[]> RemoveDevicesAsync(IEnumerable<Device> devices)
+        {
+            return this.RemoveDevicesAsync(devices, false, CancellationToken.None);
+        }
+
+        public override Task<string[]> RemoveDevicesAsync(IEnumerable<Device> devices, bool forceDelete, CancellationToken cancellationToken)
+        {
+            if (devices == null)
+            {
+                throw new ArgumentNullException("devices");
+            }
+
+            if (!devices.Any())
+            {
+                throw new ArgumentException("devices");
+            }
+
+            var exportImportDeviceList = new List<ExportImportDevice>(devices.Count());
+            foreach (var device in devices)
+            {
+                ValidateDeviceId(device);
+
+                if (string.IsNullOrWhiteSpace(device.ETag) && !forceDelete)
+                {
+                    throw new ArgumentException(ApiResources.ETagNotSetWhileDeletingDevice);
+                }
+
+                var exportImportDevice = new ExportImportDevice(device, forceDelete ? ImportMode.Delete : ImportMode.DeleteIfMatchETag);
+                exportImportDeviceList.Add(exportImportDevice);
+            }
+
+            return this.BulkDeviceOperationsAsync(exportImportDeviceList, cancellationToken);
+        }
 
         public override Task<RegistryStatistics> GetRegistryStatisticsAsync()
         {
@@ -274,6 +355,33 @@ namespace Microsoft.Azure.Devices
                     this.httpClientHelper = null;
                 }
             }
+        }
+
+        Task<string[]> BulkDeviceOperationsAsync(IEnumerable<ExportImportDevice> devices, CancellationToken cancellationToken)
+        {
+            this.EnsureInstanceNotClosed();
+
+            if (devices == null)
+            {
+                throw new ArgumentNullException("devices");
+            }
+
+            foreach (var device in devices)
+            {
+                // auto generate keys if not specified
+                if (device.Authentication == null)
+                {
+                    device.Authentication = new AuthenticationMechanism();
+                }
+
+                ValidateDeviceAuthentication(device.Authentication);
+            }
+
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
+            errorMappingOverrides.Add(HttpStatusCode.RequestEntityTooLarge, async (responseMessage) => new TooManyDevicesException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)));
+            errorMappingOverrides.Add(HttpStatusCode.BadRequest, async (responseMessage) => new ArgumentException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)));
+
+            return this.httpClientHelper.PostAsync<IEnumerable<ExportImportDevice>, string[]>(GetRequestUri(string.Empty), devices, errorMappingOverrides, null, cancellationToken);
         }
 
         internal override Task ExportRegistryAsync(string storageAccountConnectionString, string containerName)
@@ -472,13 +580,31 @@ namespace Microsoft.Azure.Devices
             return new Uri(StatisticsUriFormat, UriKind.Relative);
         }
 
-        static void ValidateDeviceAuthentication(Device device)
+        static void ValidateDeviceId(Device device)
         {
-            if (device.Authentication.SymmetricKey != null)
+            if (device == null)
+            {
+                throw new ArgumentNullException("device");
+            }
+
+            if (string.IsNullOrWhiteSpace(device.Id))
+            {
+                throw new ArgumentException("device.Id");
+            }
+
+            if (!DeviceIdRegex.IsMatch(device.Id))
+            {
+                throw new ArgumentException(ApiResources.DeviceIdInvalid.FormatInvariant(device.Id));
+            }
+        }
+
+        static void ValidateDeviceAuthentication(AuthenticationMechanism authenticationMechanism)
+        {
+            if (authenticationMechanism.SymmetricKey != null)
             {
                 // either both keys should be specified or neither once should be specified (in which case 
                 // we will create both the keys in the service)
-                if (string.IsNullOrWhiteSpace(device.Authentication.SymmetricKey.PrimaryKey) ^ string.IsNullOrWhiteSpace(device.Authentication.SymmetricKey.SecondaryKey))
+                if (string.IsNullOrWhiteSpace(authenticationMechanism.SymmetricKey.PrimaryKey) ^ string.IsNullOrWhiteSpace(authenticationMechanism.SymmetricKey.SecondaryKey))
                 {
                     throw new ArgumentException(ApiResources.DeviceKeysInvalid);
                 }
