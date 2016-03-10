@@ -52,16 +52,16 @@ And if you are looking for end to end samples that show how to do simple analyti
    - [Simple UWP C++ sample](csharp/device/samples/CppUWPSample): Shows how to connect to IoT Hub and send and receive raw messages in a C++ UWP application.
    - [Simple UWP JS sample](csharp/device/samples/JSSample): Shows how to connect to IoT Hub and send and receive raw messages in a JavaScript UWP application.
    - [Simple UWP C# sample](csharp/device/samples/UWPSample): Shows how to connect to IoT Hub and send and receive raw messages in a C# UWP application.
-   - [Simple .Net Micro Framework 4.3 sample](csharp/device/samples/NETMFDeviceClientHttpSample_43): Shows how to connect to IoT Hub and send and receive raw messages from a device running .Net Micro Framework 4.3.
-   - [Simple .Net Micro Framework 4.2 sample](csharp/device/samples/NETMFDeviceClientHttpSample_42): Shows how to connect to IoT Hub and send and receive raw messages from a device running .Net Micro Framework 4.2.
+   - [Simple .Net Micro Framework 4.3 sample](csharp/device/samples/NetMFDeviceClientHttpSample_43): Shows how to connect to IoT Hub and send and receive raw messages from a device running .Net Micro Framework 4.3.
+   - [Simple .Net Micro Framework 4.2 sample](csharp/device/samples/NetMFDeviceClientHttpSample_42): Shows how to connect to IoT Hub and send and receive raw messages from a device running .Net Micro Framework 4.2.
 - Java device SDK:
    - [Simple send sample](java/device/samples/send-event): Shows how to connect and send messages to IoT Hub, passing the protocol of your choices as a parameter.
-   - [Simple send/receive sample](java/device/samples/send-receive-event): Shows how to connect then send and receive messages to and from IoT Hub, passing the protocol of your choices as a parameter.
+   - [Simple send/receive sample](java/device/samples/send-receive-sample): Shows how to connect then send and receive messages to and from IoT Hub, passing the protocol of your choices as a parameter.
    - [Simple send serialized messages sample](java/device/samples/send-serialized-event): Shows how to connect and send serialized messages to IoT Hub, passing the protocol of your choices as a parameter.
    - [Simple sample handling messages received](java/device/samples/handle-messages): : Shows how to connect to IoT Hub and manage messages received from IoT Hub, passing the protocol of your choices as a parameter.
 - Java service SDK:
-   - [Device manager sample](java/service/samples/device-manager): Shows how to work with the device ID registry of IoT Hub. 
-   - [Service client sample](java/service/samples/device-manager): Shows how to send Cloud to Device messages through IoT Hub. 
+   - [Device manager sample](java/service/samples/device-manager-sample): Shows how to work with the device ID registry of IoT Hub. 
+   - [Service client sample](java/service/samples/service-client-sample): Shows how to send Cloud to Device messages through IoT Hub. 
 - Node device SDK:
    - [Simple device sample](node/device/samples/simple_sample_device.js): Shows how to connect to IoT Hub and send and receive messages using Node.js on a device.
    - [Send batch](node/device/samples/send_batch_http.js): Shows how to connect to IoT Hub and send a batch of messages using Node.js on a device.
