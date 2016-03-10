@@ -19,6 +19,7 @@ This repository contains the following IoT device SDKs:
 - [Azure IoT device SDK for Java](java/device/readme.md)
 
 Each language SDK includes sample code and documentation in addition to the library code.
+The API documentation is [here](http://azure.github.io/azure-iot-sdks/).
 
 ### OS platforms and hardware compatibility
 
