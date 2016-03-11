@@ -47,7 +47,7 @@ cd /d %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200
 
 @echo off
 echo ********** UPDATING %build-root%\c\serializer\samples\simplesample_http\simplesample_http.c **********
-call:DoReplace "[device connection string]" "HostName=TestHCL.azure-devices.net;DeviceId=HclTest;SharedAccessKey=6aw+lV8weIcwRhylNZx36C0x+HzUoq/+ZZA5mC5Svbw=" %build-root%\c\serializer\samples\simplesample_http\simplesample_http.c
+call:DoReplace "[device connection string]" "%DEVICE_CONNECTION_STRING%" %build-root%\c\serializer\samples\simplesample_http\simplesample_http.c
 
 @echo off
 echo ********** UPDATING %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\main.c **********

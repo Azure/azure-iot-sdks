@@ -33,15 +33,8 @@ You should have the following items ready before beginning the process:
 -   [Prepare your development environment][devbox-setup]
 -   Computer with Git client installed and access to the
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
--   [Prepare your development environment](https://github.com/Azure/azure-iot-sdks/blob/master/csharp/device/doc/devbox_setup.md).
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-
-#### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-#### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -85,12 +78,14 @@ If you have successfully [prepared your development environment][devbox-setup] t
 	Note that the double quotes around each argument are required, but the braces '{' and '}' should be removed.
 
 ## Next Steps
-To learn how to create a Java application that communicates with an IoT hub from scratch, see [How to write an Azure IoT client application from scratch with Java on Windows][create-from-scratch].
+To learn how to create a Java application that communicates with an IoT hub from scratch, see [Get started with Azure IoT Hub for Java][how-to-build-a-java-app-from-scratch].
 
 ## Documentation
 
 The documentation can be found [here](https://azure.github.io/azure-iot-sdks/java/device/api_reference/index.html).
 
-[create-from-scratch]: how_to_build_a_java_app_from_scratch.md
 [devbox-setup]: java-devbox-setup.md
-[device-explorer]: <https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md>
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
+[how-to-build-a-java-app-from-scratch]: https://azure.microsoft.com/documentation/articles/iot-hub-java-java-getstarted/

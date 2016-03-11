@@ -1,9 +1,9 @@
 # How to Port the C Libraries to Other Platforms
 
-The purpose of this document is to provide guidance on how to port the C Internet of Things (IoT) client library to platforms not supported out of the box. The document does cover the specifics of any particular platform.
+The purpose of this document is to provide guidance on how to port the C Internet of Things (IoT) client library to platforms not supported out of the box. The document does not cover the specifics of any particular platform.
 
 
-# Table of Content
+# Table of contents
 - [Background](#Background)
 - [Porting steps](#Porting-steps)
 - [HttpApi](#httpapi)
@@ -14,7 +14,7 @@ The purpose of this document is to provide guidance on how to port the C Interne
 <a name="Background"/>
 ## Background
 
-The C IoT client library is written in the C programming language for the purpose of portability to most platforms. However, several components rely on platform-specific resources in order to achieve the functionality required by the C IoT client library.
+The C IoT client library is written in C for the purpose of portability to most platforms. However, several components rely on platform-specific resources in order to achieve the functionality required by the C IoT client library.
 
 The following platform-specific components are required by the IoT client library and must be implemented for all new platforms:
 

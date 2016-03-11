@@ -3,6 +3,7 @@ A sample CLI tool to manage device clients using the Azure IoT Hub service SDK. 
 
 [![npm version](https://badge.fury.io/js/iothub-explorer.svg)](https://badge.fury.io/js/iothub-explorer)
 
+<a name="install"/>
 ## Installing iothub-explorer
 
 > Note: This tool requires Node.js version 4.x or higher for all features to work.
@@ -19,9 +20,10 @@ You can use the following command to get additional help about all the iothub-ex
 $ iothub-explorer help
 ```
 
+<a name="identityregistry"/>
 ## Working with the device identity registry
 
-Supply your IoT Hub connection-string once using the **login** command. This means you do not need to supply the connection-string for subsequent commands for the duration of the session (defaults to one hour):
+Supply your IoT Hub connection string once using the **login** command. This means you do not need to supply the connection string for subsequent commands for the duration of the session (defaults to one hour):
 
 ```shell
 $ iothub-explorer login "HostName=<my-hub>.azure-devices.net;SharedAccessKeyName=<my-policy>;SharedAccessKey=<my-policy-key>"
@@ -31,7 +33,7 @@ Session started, expires Fri Jan 15 2016 17:00:00 GMT-0800 (Pacific Standard Tim
 
 > Note: See [Set up IoT Hub](../../doc/setup_iothubmd) for information about how to retrieve your IoT Hub connection string.
 
-To retrieve information about an already-registered device from the device identity registry in your IoT Hub, including the device connection-string, use the following command:
+To retrieve information about an already-registered device from the device identity registry in your IoT Hub, including the device connection string, use the following command:
 
 ```shell
 $ iothub-explorer get known-device --connection-string
@@ -43,7 +45,7 @@ $ iothub-explorer get known-device --connection-string
   connectionString: HostName=<my-hub>.azure-devices.net;DeviceId=known-device;SharedAccessKey=<known-device-key>
 ```
 
-To register a new device and get its connection-string from the device identity registry in your IoT Hub, use the following command:
+To register a new device and get its connection string from the device identity registry in your IoT Hub, use the following command:
 
 ```shell
 $ iothub-explorer create new-device --connection-string
@@ -63,6 +65,7 @@ To delete a device from the device identity registry in your IoT Hub, use the fo
 $ iothub-explorer delete existing-device
 ```
 
+<a name="devices"/>
 ## Working with devices
 
 Use the following command to monitor the device-to-cloud messages from a device:
@@ -86,9 +89,9 @@ Event received:
 { deviceId: 'myFirstDevice', windSpeed: 11.123057782649994 }
 ```
 
-> Note: The **monitor-events** command requires you to provide the IoT Hub connection-string even if you have created a session using the **login** command.
+> Note: The **monitor-events** command requires you to provide the IoT Hub connection string even if you have created a session using the **login** command.
 
-Use the following commands to send a cloud-to-device command and then wait for the device to respond with an acknowledgemnt:
+Use the following commands to send a cloud-to-device command and then wait for the device to respond with an acknowledgment:
 
 ```shell
 $ iothub-explorer send myFirstDevice MyMessage --ack=full

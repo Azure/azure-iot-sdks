@@ -32,6 +32,7 @@ The Azure IoT Service SDKs help you to build applications that interact with you
 - [Azure IoT service SDK for Node.js](node/service/README.md)
 - [Azure IoT service SDK for Java](java/service/readme.md)
 
+
 ## Samples
 
 Whithin the repository, you can find various types of simple samples that can help you get started.
@@ -70,6 +71,7 @@ And if you are looking for end to end samples that show how to do simple analyti
    - [Registry manager simple sample](node/service/samples/registry_sample.js): Shows how to manage the device ID registry of IoT Hub from a Node.js application.
    - [Bulk Registry sample](node/service/samples/registry_sample.js): Shows how to create a set of device IDs in the device ID registry of IoT Hub in bulk from a Node.js application.
    - [Simple Cloud to Device messaging sample](node/service/samples/send_c2d_message.js) : Shows how to send messages to a device from a Node.js application through IoT Hub.
+
 
 ## Contribution, feedback and issues
 
