@@ -66,73 +66,73 @@ typedef enum CBS_STATE_TAG
 
 typedef struct AMQP_TRANSPORT_STATE_TAG
 {
-	// FQDN of the IoT Hub.
-	STRING_HANDLE iotHubHostFqdn;
-	// AMQP port of the IoT Hub.
-	int iotHubPort;
-	// Certificates to be used by the TLS I/O.
-	char* trusted_certificates;
-	// Key associated to the device to be used.
-	STRING_HANDLE deviceKey;
-	// Address to which the transport will connect to and send events.
-	STRING_HANDLE targetAddress;
-	// Address to which the transport will connect to and receive messages from.
-	STRING_HANDLE messageReceiveAddress;
-	// A component of the SAS token. Currently this must be an empty string.
-	STRING_HANDLE sasTokenKeyName;
-	// Internal parameter that identifies the current logical device within the service.
-	STRING_HANDLE devicesPath;
-	// How long a SAS token created by the transport is valid, in milliseconds.
-	size_t sas_token_lifetime;
-	// Maximum period of time for the transport to wait before refreshing the SAS token it created previously, in milliseconds.
-	size_t sas_token_refresh_time;
-	// Maximum time the transport waits for  uAMQP cbs_put_token() to complete before marking it a failure, in milliseconds.
-	size_t cbs_request_timeout;
-	// Maximum time the transport waits for an event to be sent before marking it a failure, in milliseconds.
-	size_t message_send_timeout;
-	// Maximum time for the connection establishment/retry logic should wait for a connection to succeed, in milliseconds.
-	size_t connection_timeout;
-	// Saved reference to the IoTHub LL Client.
-	IOTHUB_CLIENT_LL_HANDLE iothub_client_handle;
-	
-	// TSL I/O transport.
-	XIO_HANDLE tls_io;
-	// Pointer to the function that creates the TLS I/O (internal use only).
-	TLS_IO_TRANSPORT_PROVIDER tls_io_transport_provider;
-	// AMQP SASL I/O transport created on top of the TLS I/O layer.
-	XIO_HANDLE sasl_io;
-	// AMQP SASL I/O mechanism to be used.
-	SASL_MECHANISM_HANDLE sasl_mechanism;
-	// AMQP connection.
-	CONNECTION_HANDLE connection;
-	// Current AMQP connection state;
-	AMQP_MANAGEMENT_STATE connection_state;
-	// Last time the AMQP connection establishment was initiated.
-	size_t connection_establish_time;
-	// AMQP session.
-	SESSION_HANDLE session;
-	// AMQP link used by the event sender.
-	LINK_HANDLE sender_link;
-	// uAMQP event sender.
-	MESSAGE_SENDER_HANDLE message_sender;
-	// Internal flag that controls if messages should be received or not.
-	bool receive_messages;
-	// AMQP link used by the message receiver.
-	LINK_HANDLE receiver_link;
-	// uAMQP message receiver.
-	MESSAGE_RECEIVER_HANDLE message_receiver;
-	// List with events still pending to be sent. It is provided by the upper layer.
-	PDLIST_ENTRY waitingToSend;
-	// Internal list with the items currently being processed/sent through uAMQP.
-	DLIST_ENTRY inProgress;
-	// Connection instance with the Azure IoT CBS.
-	CBS_HANDLE cbs;
-	// Current state of the CBS connection.
-	CBS_STATE cbs_state;
-	// Time when the current SAS token was created, in seconds since epoch.
-	size_t current_sas_token_create_time;
-	// Mark if device is registered in transport (only one device per transport).
-	bool isRegistered;
+    // FQDN of the IoT Hub.
+    STRING_HANDLE iotHubHostFqdn;
+    // AMQP port of the IoT Hub.
+    int iotHubPort;
+    // Certificates to be used by the TLS I/O.
+    char* trusted_certificates;
+    // Key associated to the device to be used.
+    STRING_HANDLE deviceKey;
+    // Address to which the transport will connect to and send events.
+    STRING_HANDLE targetAddress;
+    // Address to which the transport will connect to and receive messages from.
+    STRING_HANDLE messageReceiveAddress;
+    // A component of the SAS token. Currently this must be an empty string.
+    STRING_HANDLE sasTokenKeyName;
+    // Internal parameter that identifies the current logical device within the service.
+    STRING_HANDLE devicesPath;
+    // How long a SAS token created by the transport is valid, in milliseconds.
+    size_t sas_token_lifetime;
+    // Maximum period of time for the transport to wait before refreshing the SAS token it created previously, in milliseconds.
+    size_t sas_token_refresh_time;
+    // Maximum time the transport waits for  uAMQP cbs_put_token() to complete before marking it a failure, in milliseconds.
+    size_t cbs_request_timeout;
+    // Maximum time the transport waits for an event to be sent before marking it a failure, in milliseconds.
+    size_t message_send_timeout;
+    // Maximum time for the connection establishment/retry logic should wait for a connection to succeed, in milliseconds.
+    size_t connection_timeout;
+    // Saved reference to the IoTHub LL Client.
+    IOTHUB_CLIENT_LL_HANDLE iothub_client_handle;
+    
+    // TSL I/O transport.
+    XIO_HANDLE tls_io;
+    // Pointer to the function that creates the TLS I/O (internal use only).
+    TLS_IO_TRANSPORT_PROVIDER tls_io_transport_provider;
+    // AMQP SASL I/O transport created on top of the TLS I/O layer.
+    XIO_HANDLE sasl_io;
+    // AMQP SASL I/O mechanism to be used.
+    SASL_MECHANISM_HANDLE sasl_mechanism;
+    // AMQP connection.
+    CONNECTION_HANDLE connection;
+    // Current AMQP connection state;
+    AMQP_MANAGEMENT_STATE connection_state;
+    // Last time the AMQP connection establishment was initiated.
+    size_t connection_establish_time;
+    // AMQP session.
+    SESSION_HANDLE session;
+    // AMQP link used by the event sender.
+    LINK_HANDLE sender_link;
+    // uAMQP event sender.
+    MESSAGE_SENDER_HANDLE message_sender;
+    // Internal flag that controls if messages should be received or not.
+    bool receive_messages;
+    // AMQP link used by the message receiver.
+    LINK_HANDLE receiver_link;
+    // uAMQP message receiver.
+    MESSAGE_RECEIVER_HANDLE message_receiver;
+    // List with events still pending to be sent. It is provided by the upper layer.
+    PDLIST_ENTRY waitingToSend;
+    // Internal list with the items currently being processed/sent through uAMQP.
+    DLIST_ENTRY inProgress;
+    // Connection instance with the Azure IoT CBS.
+    CBS_HANDLE cbs;
+    // Current state of the CBS connection.
+    CBS_STATE cbs_state;
+    // Time when the current SAS token was created, in seconds since epoch.
+    size_t current_sas_token_create_time;
+    // Mark if device is registered in transport (only one device per transport).
+    bool isRegistered;
 } AMQP_TRANSPORT_INSTANCE;
 
 // This structure is used to track an event being sent and the time it was sent.
@@ -350,9 +350,9 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
 
 static XIO_HANDLE getTLSIOTransport(const char* fqdn, int port, const char* certificates)
 {
-	TLSIO_CONFIG tls_io_config = { fqdn, port };
-	const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
-	return xio_create(io_interface_description, &tls_io_config, NULL);
+    TLSIO_CONFIG tls_io_config = { fqdn, port };
+    const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
+    return xio_create(io_interface_description, &tls_io_config, NULL);
 }
 
 static void destroyConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
@@ -387,20 +387,23 @@ static void destroyConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
         transport_state->sasl_mechanism = NULL;
     }
 
-	if (transport_state->tls_io != NULL)
-	{
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_034: [IoTHubTransportAMQP_Destroy shall destroy the AMQP TLS I/O transport.]
-		xio_destroy(transport_state->tls_io);
-		transport_state->tls_io = NULL;
-	}
+    if (transport_state->tls_io != NULL)
+    {
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_034: [IoTHubTransportAMQP_Destroy shall destroy the AMQP TLS I/O transport.]
+        xio_destroy(transport_state->tls_io);
+        transport_state->tls_io = NULL;
+    }
 }
 
 static void on_amqp_management_state_changed(void* context, AMQP_MANAGEMENT_STATE new_amqp_management_state, AMQP_MANAGEMENT_STATE previous_amqp_management_state)
 {
-    AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)context;
     (void)previous_amqp_management_state;
-
-    transport_state->connection_state = new_amqp_management_state;
+    AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)context;
+    
+    if (transport_state != NULL)
+    {
+        transport_state->connection_state = new_amqp_management_state;
+    }
 }
 
 static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
@@ -409,11 +412,11 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
 
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_110: [IoTHubTransportAMQP_DoWork shall create the TLS IO using transport_state->io_transport_provider callback function] 
     if (transport_state->tls_io == NULL &&
-		(transport_state->tls_io = transport_state->tls_io_transport_provider(STRING_c_str(transport_state->iotHubHostFqdn), transport_state->iotHubPort, transport_state->trusted_certificates)) == NULL)
+        (transport_state->tls_io = transport_state->tls_io_transport_provider(STRING_c_str(transport_state->iotHubHostFqdn), transport_state->iotHubPort, transport_state->trusted_certificates)) == NULL)
     {
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_136: [If transport_state->io_transport_provider_callback fails, IoTHubTransportAMQP_DoWork shall fail and return immediately]
         result = RESULT_FAILURE;
-		LogError("Failed to obtain a TLS I/O transport layer.\r\n");
+        LogError("Failed to obtain a TLS I/O transport layer.\r\n");
     }
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_056: [IoTHubTransportAMQP_DoWork shall create the SASL mechanism using AMQP's saslmechanism_create() API] 
     else if ((transport_state->sasl_mechanism = saslmechanism_create(saslmssbcbs_get_interface(), NULL)) == NULL)
@@ -1085,7 +1088,7 @@ static TRANSPORT_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG*
         {
             transport_state->iotHubHostFqdn = NULL;
             transport_state->iotHubPort = DEFAULT_IOTHUB_AMQP_PORT;
-			transport_state->trusted_certificates = NULL;
+            transport_state->trusted_certificates = NULL;
             transport_state->deviceKey = NULL;
             transport_state->devicesPath = NULL;
             transport_state->messageReceiveAddress = NULL;
@@ -1109,8 +1112,8 @@ static TRANSPORT_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG*
             transport_state->sender_link = NULL;
             transport_state->session = NULL;
             transport_state->tls_io = NULL;
-			transport_state->tls_io_transport_provider = getTLSIOTransport;
-			transport_state->isRegistered = false;
+            transport_state->tls_io_transport_provider = getTLSIOTransport;
+            transport_state->isRegistered = false;
 
             transport_state->waitingToSend = config->waitingToSend;
             DList_InitializeListHead(&transport_state->inProgress);
@@ -1413,118 +1416,116 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_HANDLE handl
     {
         AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)handle;
 
-		if (strcmp("trusted_certificates", option) == 0)
-		{
-			transport_state->trusted_certificates = (char*)value;
-			result = IOTHUB_CLIENT_OK;
-		}
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_048: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "sas_token_lifetime", returning IOTHUB_CLIENT_OK] 
-		else if (strcmp("sas_token_lifetime", option) == 0)
-		{
-			transport_state->sas_token_lifetime = *((size_t*)value);
-			result = IOTHUB_CLIENT_OK;
-		}
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_049: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "sas_token_refresh_time", returning IOTHUB_CLIENT_OK] 
-		else if (strcmp("sas_token_refresh_time", option) == 0)
-		{
-			transport_state->sas_token_refresh_time = *((size_t*)value);
-			result = IOTHUB_CLIENT_OK;
-		}
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_148: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "cbs_request_timeout", returning IOTHUB_CLIENT_OK] 
-		else if (strcmp("cbs_request_timeout", option) == 0)
-		{
-			transport_state->cbs_request_timeout = *((size_t*)value);
-			result = IOTHUB_CLIENT_OK;
-		}
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_149: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "message_send_timeout", returning IOTHUB_CLIENT_OK]
-		else if (strcmp("message_send_timeout", option) == 0)
-		{
-			transport_state->message_send_timeout = *((size_t*)value);
-			result = IOTHUB_CLIENT_OK;
-		}
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_047: [If optionName is not an option supported then IotHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] 
-		else
-		{
-			result = IOTHUB_CLIENT_INVALID_ARG;
-			LogError("Invalid option (%s) passed to uAMQP transport SetOption()\r\n", option);
-		}
-	}
+        if (strcmp("trusted_certificates", option) == 0)
+        {
+            transport_state->trusted_certificates = (char*)value;
+            result = IOTHUB_CLIENT_OK;
+        }
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_048: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "sas_token_lifetime", returning IOTHUB_CLIENT_OK] 
+        else if (strcmp("sas_token_lifetime", option) == 0)
+        {
+            transport_state->sas_token_lifetime = *((size_t*)value);
+            result = IOTHUB_CLIENT_OK;
+        }
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_049: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "sas_token_refresh_time", returning IOTHUB_CLIENT_OK] 
+        else if (strcmp("sas_token_refresh_time", option) == 0)
+        {
+            transport_state->sas_token_refresh_time = *((size_t*)value);
+            result = IOTHUB_CLIENT_OK;
+        }
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_148: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "cbs_request_timeout", returning IOTHUB_CLIENT_OK] 
+        else if (strcmp("cbs_request_timeout", option) == 0)
+        {
+            transport_state->cbs_request_timeout = *((size_t*)value);
+            result = IOTHUB_CLIENT_OK;
+        }
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_149: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "message_send_timeout", returning IOTHUB_CLIENT_OK]
+        else if (strcmp("message_send_timeout", option) == 0)
+        {
+            transport_state->message_send_timeout = *((size_t*)value);
+            result = IOTHUB_CLIENT_OK;
+        }
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_047: [If optionName is not an option supported then IotHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] 
+        else
+        {
+            result = IOTHUB_CLIENT_INVALID_ARG;
+            LogError("Invalid option (%s) passed to uAMQP transport SetOption()\r\n", option);
+        }
+    }
 
     return result;
 }
 
-
-
 static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQ_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
-	IOTHUB_DEVICE_HANDLE result;
-	// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
-	// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQ_Register shall return NULL if the TRANSPORT_HANDLE is NULL.]
-	if ((handle ==NULL) || (deviceId == NULL) || (deviceKey == NULL) || (waitingToSend == NULL))
-	{
-		result = NULL;
-	}
-	else
-	{
-		AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)handle;
+    IOTHUB_DEVICE_HANDLE result;
+    // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+    // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQ_Register shall return NULL if the TRANSPORT_HANDLE is NULL.]
+    if ((handle ==NULL) || (deviceId == NULL) || (deviceKey == NULL) || (waitingToSend == NULL))
+    {
+        result = NULL;
+    }
+    else
+    {
+        AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)handle;
 
-		STRING_HANDLE devicesPath = concat3Params(STRING_c_str(transport_state->iotHubHostFqdn), "/devices/", deviceId);
-		if (devicesPath == NULL)
-		{
-			LogError("Could not create a comparison string");
-			result = NULL;
-		}
-		else
-		{
-			// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_002: [IoTHubTransportAMQ_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.] 
-			if (strcmp(STRING_c_str(transport_state->devicesPath), STRING_c_str(devicesPath)) != 0)
-			{
-				LogError("Attemping to add new device to AMQP transport, not allowed.");
-				result = NULL;
-			}
-			else if (strcmp(STRING_c_str(transport_state->deviceKey), deviceKey) != 0)
-			{
-				LogError("Attemping to add new device to AMQP transport, not allowed.");
-				result = NULL;
-			}
-			else
-			{
-				if (transport_state->isRegistered == true)
-				{
-					LogError("Transport already has device registered by id: [%s]", deviceId);
-					result = NULL;
-				}
-				else
-				{
-					transport_state->isRegistered = true;
-					// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_003: [IoTHubTransportAMQ_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
-					result = (IOTHUB_DEVICE_HANDLE)handle;
-				}
-			}
-			STRING_delete(devicesPath);
-		}
-	}
+        STRING_HANDLE devicesPath = concat3Params(STRING_c_str(transport_state->iotHubHostFqdn), "/devices/", deviceId);
+        if (devicesPath == NULL)
+        {
+            LogError("Could not create a comparison string");
+            result = NULL;
+        }
+        else
+        {
+            // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_002: [IoTHubTransportAMQ_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.] 
+            if (strcmp(STRING_c_str(transport_state->devicesPath), STRING_c_str(devicesPath)) != 0)
+            {
+                LogError("Attemping to add new device to AMQP transport, not allowed.");
+                result = NULL;
+            }
+            else if (strcmp(STRING_c_str(transport_state->deviceKey), deviceKey) != 0)
+            {
+                LogError("Attemping to add new device to AMQP transport, not allowed.");
+                result = NULL;
+            }
+            else
+            {
+                if (transport_state->isRegistered == true)
+                {
+                    LogError("Transport already has device registered by id: [%s]", deviceId);
+                    result = NULL;
+                }
+                else
+                {
+                    transport_state->isRegistered = true;
+                    // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_003: [IoTHubTransportAMQ_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
+                    result = (IOTHUB_DEVICE_HANDLE)handle;
+                }
+            }
+            STRING_delete(devicesPath);
+        }
+    }
 
-	return result;
+    return result;
 }
 
 // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_004: [IoTHubTransportAMQ_Unregister shall return.] 
 static void IoTHubTransportAMQ_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 {
-	if (deviceHandle != NULL)
-	{
-		AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)deviceHandle;
+    if (deviceHandle != NULL)
+    {
+        AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)deviceHandle;
 
-		transport_state->isRegistered = false;
-	}
+        transport_state->isRegistered = false;
+    }
 }
 
 static TRANSPORT_PROVIDER thisTransportProvider = {
     IoTHubTransportAMQP_SetOption, 
     IoTHubTransportAMQP_Create, 
     IoTHubTransportAMQP_Destroy, 
-	IoTHubTransportAMQ_Register,
-	IoTHubTransportAMQ_Unregister,
+    IoTHubTransportAMQ_Register,
+    IoTHubTransportAMQ_Unregister,
     IoTHubTransportAMQP_Subscribe, 
     IoTHubTransportAMQP_Unsubscribe, 
     IoTHubTransportAMQP_DoWork, 

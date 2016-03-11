@@ -279,7 +279,14 @@ static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
     }
     else
     {
-        transportState->currPacketState = SUBSCRIBE_TYPE;
+        if (transportState->receiveMessages)
+        {
+            transportState->currPacketState = SUBSCRIBE_TYPE;
+        }
+        else
+        {
+            transportState->currPacketState = PUBLISH_TYPE;
+        }
     }
     return result;
 }
