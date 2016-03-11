@@ -55,6 +55,27 @@ namespace Microsoft.Azure.Devices
         public abstract Task<Device> AddDeviceAsync(Device device, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Register a list of new devices with the system
+        /// </summary>
+        /// <param name="devices">
+        /// The Device objects to be registered.
+        /// </param>
+        /// <returns>returns a string array of error messages</returns>
+        public abstract Task<string[]> AddDevicesAsync(IEnumerable<Device> devices);
+
+        /// <summary>
+        /// Register a list of new devices with the system
+        /// </summary>
+        /// <param name="devices">
+        /// The Device objects to be registered.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The token which allows the the operation to be cancelled.
+        /// </param>
+        /// <returns>returns a string array of error messages</returns>
+        public abstract Task<string[]> AddDevicesAsync(IEnumerable<Device> devices, CancellationToken cancellationToken);
+        
+        /// <summary>
         /// Update the mutable fields of the device registration
         /// </summary>
         /// <param name="device">
@@ -103,6 +124,30 @@ namespace Microsoft.Azure.Devices
         public abstract Task<Device> UpdateDeviceAsync(Device device, bool forceUpdate, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Update a list of devices with the system
+        /// </summary>
+        /// <param name="devices">
+        /// The Device objects to be updated.
+        /// </param>
+        /// <returns>returns a string array of error messages</returns>
+        public abstract Task<string[]> UpdateDevicesAsync(IEnumerable<Device> devices);
+
+        /// <summary>
+        /// Update a list of devices with the system
+        /// </summary>
+        /// <param name="devices">
+        /// The Device objects to be updated.
+        /// </param>
+        /// <param name="forceUpdate">
+        /// Forces the device object to be replaced even if it was updated since it was retrieved last time.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The token which allows the the operation to be cancelled.
+        /// </param>
+        /// <returns>returns a string array of error messages</returns>
+        public abstract Task<string[]> UpdateDevicesAsync(IEnumerable<Device> devices, bool forceUpdate, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Deletes a previously registered device from the system.
         /// </summary>
         /// <param name="deviceId">
@@ -139,6 +184,28 @@ namespace Microsoft.Azure.Devices
         /// The token which allows the the operation to be cancelled.
         /// </param>
         public abstract Task RemoveDeviceAsync(Device device, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Deletes a list of previously registered devices from the system.
+        /// </summary>
+        /// <param name="devices">
+        /// The devices being deleted.
+        /// </param>
+        public abstract Task<string[]> RemoveDevicesAsync(IEnumerable<Device> devices);
+
+        /// <summary>
+        /// Deletes a list of previously registered devices from the system.
+        /// </summary>
+        /// <param name="devices">
+        /// The devices being deleted.
+        /// </param>
+        /// <param name="forceDelete">
+        /// Forces the device object to be deleted even if it was updated since it was retrieved last time.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The token which allows the the operation to be cancelled.
+        /// </param>
+        public abstract Task<string[]> RemoveDevicesAsync(IEnumerable<Device> devices, bool forceDelete, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets usage statistics for the Iot Hub.
