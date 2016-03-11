@@ -241,7 +241,12 @@ Http.prototype.abandon = function (message, done) {
 Http.prototype.updateSharedAccessSignature = function (sharedAccessSignature, done) {
   /*Codes_SRS_NODE_DEVICE_HTTP_16_006: [The updateSharedAccessSignature method shall save the new shared access signature given as a parameter to its configuration.] */
   this._config.sharedAccessSignature = sharedAccessSignature;
-  this._receiver.setSharedAccessSignature(sharedAccessSignature);
+
+  /*Codes_SRS_NODE_DEVICE_HTTP_16_008: [The updateSharedAccessSignature method shall call the `updateSharedAccessSignature` method of the current receiver object if it exists.] */
+  if (this._receiver) {
+    this._receiver.updateSharedAccessSignature(sharedAccessSignature);
+  }
+
   /*Codes_SRS_NODE_DEVICE_HTTP_16_007: [The updateSharedAccessSignature method shall call the `done` callback with a null error object and a SharedAccessSignatureUpdated object as a result, indicating that the client does not need to reestablish the transport connection.] */
   done(null, new results.SharedAccessSignatureUpdated(false));
 };

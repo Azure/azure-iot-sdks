@@ -1,7 +1,7 @@
 Source: azure-iot-sdk-c
 Priority: optional
 Maintainer: Azure User <aziotsdklinux@outlook.com>
-Build-Depends: debhelper (>= 9), cmake (>= 3), libcurl4-openssl-dev, curl, azureiot-qpid-proton-dev
+Build-Depends: debhelper (>= 9), cmake (>= 2.8), libssl-dev, libcurl4-openssl-dev, curl, azure-c-shared-util-dev, azure-uamqp-c-dev, azure-umqtt-c-dev
 Standards-Version: 3.9.6
 Section: libs
 Homepage: https://github.com/Azure/azure-iot-sdks.git
@@ -12,13 +12,14 @@ Package: azure-iot-sdk-c-dev
 Section: libdevel
 Architecture: any
 Depends: azure-iot-sdk-c-lib (= ${binary:Version}), ${misc:Depends}
-Description: AzureIoT Apache Qpid-Proton-C Development Package
- Fork of Apache Qpid-Proton-C Library used to developing apps
- to communicate Microsoft Azure IoTHub
+Description: Microsoft Azure IoT device SDK for C Library
+ The Microsoft Azure IoT device libraries for C contain code that
+ facilitates building devices and applications that connect to and
+ are managed by Azure IoT Hub services
 
 Package: azure-iot-sdk-c-lib
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, azureiot-qpid-proton-dev, curl
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Microsoft Azure IoT device SDK for C Library
  The Microsoft Azure IoT device libraries for C contain code that
  facilitates building devices and applications that connect to and

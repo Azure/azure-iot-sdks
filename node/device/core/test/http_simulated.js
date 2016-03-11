@@ -3,7 +3,7 @@
 
 'use strict';
 
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var Message = require('azure-iot-common').Message;
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var SharedAccessSignature = require('../lib/shared_access_signature.js');

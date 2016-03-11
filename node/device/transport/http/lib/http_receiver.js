@@ -3,12 +3,13 @@
 
 'use strict';
 
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var endpoint = require('azure-iot-common').endpoint;
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var cron = require('node-crontab');
 var results = require('azure-iot-common').results;
+var PackageJson = require('../package.json');
 
 var defaultOptions = {
   // 'interval' is a number, expressed in seconds. Default will poll for messages once per second.
@@ -52,7 +53,7 @@ function HttpReceiver(config, httpHelper) {
 
 
   this.on('removeListener', function () {
-    if (this._receiverStarted && this.listenerCount('message') === 0) {
+    if (this._receiverStarted && this.listeners('message').length === 0) {
       this._stopReceiver();
     }
   }.bind(this));
@@ -142,7 +143,8 @@ HttpReceiver.prototype.receive = function () {
   var path = endpoint.messagePath(this._config.deviceId);
   var httpHeaders = {
     'Authorization': this._config.sharedAccessSignature.toString(),
-    'iothub-to': path
+    'iothub-to': path,
+    'User-Agent': 'azure-iot-device/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_017: [If opts.drain is true all messages in the queue should be pulled at once.]*/
@@ -292,7 +294,8 @@ HttpReceiver.prototype._sendFeedback = function (action, message, done) {
   var path = endpoint.feedbackPath(config.deviceId, message.lockToken);
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature.toString(),
-    'If-Match': message.lockToken
+    'If-Match': message.lockToken,
+    'User-Agent': 'azure-iot-device/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_009: [abandon shall construct an HTTP request using information supplied by the caller, as follows:

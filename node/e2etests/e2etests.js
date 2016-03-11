@@ -7,6 +7,9 @@ var deviceSdk = require('azure-iot-device');
 var deviceAmqp = require('azure-iot-device-amqp');
 var deviceHttp = require('azure-iot-device-http');
 var Message = require('azure-iot-common').Message;
+var deviceSas = require('azure-iot-device').SharedAccessSignature;
+var serviceSas = require('azure-iothub').SharedAccessSignature;
+var anHourFromNow = require('azure-iot-common').anHourFromNow;
 
 var EventHubClient = require('./eh/eventhubclient.js');
 
@@ -248,14 +251,67 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName) 
       });
     });
   });
+
+  describe('Using a SAS token over ' + DeviceTransport.name + ':', function() {
+    it('Device can connect and send a message', function(done) {
+      this.timeout(30000);
+      var sas = deviceSas.create(host, deviceName, deviceKey, anHourFromNow()).toString();
+      var client = deviceSdk.Client.fromSharedAccessSignature(sas, DeviceTransport);
+      client.open(function(openErr, openResult) {
+        if(openErr) {
+          done(openErr);
+        } else {
+          assert.equal(openResult.constructor.name, 'Connected');
+          var msg = new Message('foo');
+          client.sendEvent(msg, function(sendErr, sendResult) {
+            if(sendErr) {
+              done(sendErr);
+            } else {
+              assert.equal(sendResult.constructor.name, 'MessageEnqueued');
+              client.close(function(closeErr) {
+                if (closeErr) {
+                  done(closeErr);
+                } else {
+                  done();
+                }
+              });
+            }
+          })
+        }
+      });
+    });
+
+    it('Service can connect', function(done) {
+      this.timeout(30000);
+      var connStr = serviceSdk.ConnectionString.parse(hubConnectionString);
+      var sas = serviceSas.create(connStr.HostName, connStr.SharedAccessKeyName, connStr.SharedAccessKey, anHourFromNow()).toString();
+      var client = serviceSdk.Client.fromSharedAccessSignature(sas);
+      client.open(function(err, result) {
+        if(err) {
+          done(err);
+        } else {
+          assert.equal(result.constructor.name, 'Connected');
+          client.close(function(err) {
+            if (err) {
+              done(err);
+            } else {
+              done();
+            }
+          });
+        }
+      });
+    });
+  });
 };
 
 module.exports = runTests;
 
+var deviceName = process.env.IOTHUB_DEVICE_ID;
+var deviceKey = process.env.IOTHUB_DEVICE_KEY;
 var hubConnectionString = process.env.IOTHUB_CONNECTION_STRING;
 var host = ConnectionString.parse(process.env.IOTHUB_CONNECTION_STRING).HostName;
-var deviceConnectionString = 'HostName=' + host + ';DeviceId=' + process.env.IOTHUB_DEVICE_ID + ';SharedAccessKey=' + process.env.IOTHUB_DEVICE_KEY;
-var deviceName = process.env.IOTHUB_DEVICE_ID;
+var deviceConnectionString = 'HostName=' + host + ';DeviceId=' + deviceName + ';SharedAccessKey=' + deviceKey;
+
 
 runTests(deviceAmqp.Amqp, hubConnectionString, deviceConnectionString, deviceName);
 runTests(deviceHttp.Http, hubConnectionString, deviceConnectionString, deviceName);

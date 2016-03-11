@@ -163,7 +163,9 @@ extern "C"
     *				- @b CURLOPT_VERBOSE - only available for HTTP protocol and only
     *				  when CURL is used. It has the same meaning as CURL's option with the same
     *				  name. @p value is pointer to a long.
-    *
+    *				- @b messageTimeout - the maximum time in milliseconds until a message 
+    *                 is timeouted. The time starts at IoTHubClient_SendEventAsync. By default,
+    *                 messages do not expire. 
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     extern IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
