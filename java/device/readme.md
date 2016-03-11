@@ -17,8 +17,8 @@ The device library consists of a set of reusable components with abstract interf
 For more information on how to use this library refer to the documents below:
 - [Setup your development environment][devbox-setup]
 - [Setup IoT Hub](../../doc/setup_iothub.md)
-- [Provision devices](../../tools/iothub-explorer/doc/provision_device.md)
-- [Using the DeviceExplorer application to test IoT Hub device connectivity](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md)
+- [Provision devices](../../doc/manage_iot_hub.md)
+- [Test IoT Hub device connectivity](../../doc/manage_iot_hub.md)
 - [Run the Java sample][run-java-sample]
 - [How to build an IoTHub Java application from scratch on Windows][how-to-build-a-java-app-from-scratch]
 - [Java API reference](http://azure.github.io/azure-iot-sdks/java/device/api_reference/index.html)
@@ -28,10 +28,6 @@ For more information on how to use this library refer to the documents below:
 
 All of the Java specific resources are located in the **java** folder.
 
-### /doc
-
-This folder contains setup and getting started documents for Java.
-
 ### /iothub-java-client
 
 This folder contains the client library for Java.
@@ -40,5 +36,6 @@ This folder contains the client library for Java.
 
 This folder contains various Java samples that illustrate how to use the client library.
 
-[devbox-setup]: doc/devbox_setup.md
-[run-java-sample]: doc/run_sample_on_java.md
+[devbox-setup]: ../../doc/get_started/java-devbox-setup.md
+[run-java-sample]: ../../doc/get_started/java-run-sample.md
+[how-to-build-a-java-app-from-scratch]: https://azure.microsoft.com/documentation/articles/iot-hub-java-java-getstarted/

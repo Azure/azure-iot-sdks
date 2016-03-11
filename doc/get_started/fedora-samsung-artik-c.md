@@ -35,12 +35,8 @@ You should have the following items ready before beginning the process:
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub
     public repository.
 -   Samsung ARTIK device to certify.
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-#### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-#### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -60,7 +56,7 @@ ARTIK supports both Ethernet and WiFi. If you want to use WiFi on your ARTIK, pl
 
         dnf check-update -y
 
-        dnf install libcurl-devel openssl-devel libuuid-devel uuid-devel gcc-c++ make cmake git unzip java-1.7.0-openjdk
+        dnf install libcurl-devel openssl-devel gcc-c++ make cmake git
 
 -   Download the Microsoft Azure IoT Device SDK for C to the board by issuing the following command on the board::
 
@@ -86,7 +82,7 @@ ARTIK supports both Ethernet and WiFi. If you want to use WiFi on your ARTIK, pl
 
         ./azure-iot-sdks/c/build_all/linux/build.sh
 
-## 3.2 Send Device Events to IoT Hub:
+## 3.2 Send Device Events to IoT Hub
 
 -   Run the sample by issuing following command:
 
@@ -98,15 +94,11 @@ ARTIK supports both Ethernet and WiFi. If you want to use WiFi on your ARTIK, pl
 
         ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
 
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to see the data your device is sending.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool](https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 
 ## 3.3 Receive messages from IoT Hub
 
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) for instructions on sending messages to device.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool](https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to send cloud-to-device messages to the application.
 
 <a name="tips"></a>
 # Tips
@@ -117,3 +109,6 @@ ARTIK supports both Ethernet and WiFi. If you want to use WiFi on your ARTIK, pl
   cd ./c/serializer/build/linux
   make -f makefile.linux all
   ```
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

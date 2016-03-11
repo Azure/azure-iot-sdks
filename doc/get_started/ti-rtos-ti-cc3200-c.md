@@ -29,14 +29,8 @@ This document describes how to connect TI CC3200 device with Azure IoT SDK. This
 - Computer with Git client installed and access to the
   [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
 - [CC3200 Launchpad](http://www.ti.com/tool/cc3200-launchxl)
-- Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
-- [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-#### Create a device on IoT Hub
-- With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-#### Write down device credentials
-- Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-  > Note: You can skip this step if you just want to build the sample application without running it.
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 This procedure assumes you have already installed the Azure IoT SDK on your development machine. These instructions refer to the folder that contains the Azure IoT SDK on your local machine as `<AZURE_INSTALL_DIR>`.
 
@@ -143,3 +137,6 @@ The Device Explorer can be used to monitor the data sent by the application. Und
 ```
 9/17/2015 7:28:28 PM> Data:[{"Temperature":67, "Humidity":42}]
 ```
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

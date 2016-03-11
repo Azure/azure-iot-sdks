@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Devices.Client", "Microsoft.Azure.Devices.Client\Microsoft.Azure.Devices.Client.csproj", "{836B1FB6-70F0-4C7E-AA35-519C2F83AA81}"
 EndProject
@@ -26,6 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{84052DC5
 	ProjectSection(SolutionItems) = preProject
 		NuGet\make_nuget_package.ps1 = NuGet\make_nuget_package.ps1
 		NuGet\Microsoft.Azure.Devices.Client.nuspec = NuGet\Microsoft.Azure.Devices.Client.nuspec
+		NuGet\Microsoft.Azure.Devices.Client.targets = NuGet\Microsoft.Azure.Devices.Client.targets
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Devices.Client.Test", "Microsoft.Azure.Devices.Client\test\Microsoft.Azure.Devices.Api.Test\Microsoft.Azure.Devices.Client.Test.csproj", "{74A0E4B7-4A50-4665-A7A3-A217D06649D3}"

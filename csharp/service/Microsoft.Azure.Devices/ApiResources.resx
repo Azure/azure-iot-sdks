@@ -183,4 +183,7 @@
   <data name="SizeExceedsRemainingBufferSpace" xml:space="preserve">
     <value>The specified size exceeds the remaining buffer space ({0} bytes).</value>
   </data>
+  <data name="DeviceIdInvalid" xml:space="preserve">
+    <value>The device identifier {0} is invalid.</value>
+  </data>
 </root>

@@ -37,16 +37,8 @@ You should have the following items ready before beginning the process:
   - [3GPI](http://www.mechatrax.com/products/3gpi)  
 	  Includes micro SD, mini-USB cable, AC adapter, and 3G antenna.
   - USB-to-Serial cable, such as [TTL-232R-RPI](http://www.ftdichip.com/Products/Cables/RPi.htm).  
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-
-### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-  > Note: You can skip this step if you just want to build the sample application without running it.
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="Step-2-PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -124,3 +116,5 @@ Then cd to the directory:
 
 - Verify that the **Confirmation** messages show an **OK**. If not, then you may have incorrectly pasted the device hub connection information.
 
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
