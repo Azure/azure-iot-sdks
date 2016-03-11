@@ -88,6 +88,7 @@ typedef struct HTTPTRANSPORT_PERDEVICE_DATA_TAG
     time_t lastPollTime;
 	bool isFirstPoll;
 
+	IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
     PDLIST_ENTRY waitingToSend;
     DLIST_ENTRY eventConfirmations; /*holds items for event confirmations*/
 } HTTPTRANSPORT_PERDEVICE_DATA;
@@ -456,14 +457,14 @@ static bool findDeviceById(const void* element, const void* value)
 {
 	bool result;
 	const char* deviceId = (const char *)value;
-	const HTTPTRANSPORT_PERDEVICE_DATA * perDeviceElement = (const HTTPTRANSPORT_PERDEVICE_DATA *)element;
+	const HTTPTRANSPORT_PERDEVICE_DATA * perDeviceElement = *(const HTTPTRANSPORT_PERDEVICE_DATA **)element;
 
 	result = (strcmp(STRING_c_str(perDeviceElement->deviceId), deviceId) == 0);
 
     return result;
 }
 
-IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
+IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
 	HTTPTRANSPORT_PERDEVICE_DATA* result;
 	if (handle == NULL)
@@ -472,11 +473,12 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const
 		LogError("Transport handle is NULL");
 		result = NULL;
 	}
-	else if (deviceId == NULL || deviceKey == NULL || waitingToSend == NULL)
+	else if (deviceId == NULL || deviceKey == NULL || waitingToSend == NULL || iotHubClientHandle == NULL)
 	{
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_015: [ If parameter deviceKey is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_014: [ If parameter deviceId is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_016: [ If parameter waitingToSend is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_143: [ If parameter iotHubClientHandle is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
 		LogError("All parameters must be non-NULL");
 		result = NULL;
 	}
@@ -508,15 +510,15 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const
 
 			if (was_list_add_ok)
 			{
-				/*Codes_SRS_TRANSPORTMULTITHTTP_17_043: [ Upon success, IoTHubTransportHttp_Register shall store the transport handle and the waitingToSend queue in the device handle return a non-NULL value. ]*/
+				/*Codes_SRS_TRANSPORTMULTITHTTP_17_043: [ Upon success, IoTHubTransportHttp_Register shall store the transport handle, iotHubClientHandle, and the waitingToSend queue in the device handle return a non-NULL value. ]*/
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_040: [ IoTHubTransportHttp_Register shall put event HTTP relative path, message HTTP relative path, event HTTP request headers, message HTTP request headers, abandonHTTPrelativePathBegin, HTTPAPIEX_SAS_HANDLE, and the device handle into a device structure. ]*/
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_128: [ IoTHubTransportHttp_Register shall mark this device as unsubscribed. ]*/
 				result->DoWork_PullMessage = false;
 				result->isFirstPoll = true;
+				result->iotHubClientHandle = iotHubClientHandle;
 				result->waitingToSend = waitingToSend;
 				DList_InitializeListHead(&(result->eventConfirmations));
 				result->transportHandle = handle;
-				//TODO: figure out how to handle round robin.
 			}
 			else
 			{
@@ -595,7 +597,6 @@ void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 		{
 			HTTPTRANSPORT_PERDEVICE_DATA * perDeviceItem = (HTTPTRANSPORT_PERDEVICE_DATA *)(*listItem);
 
-			//TODO:  handle round robin.
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_047: [ IoTHubTransportHttp_Unregister shall free all the resources used in the device structure. ]*/
 			destroy_perDeviceData(perDeviceItem);
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_048: [ IoTHubTransportHttp_Unregister shall call list_remove to remove device from devices list. ]*/
@@ -766,10 +767,10 @@ void IoTHubTransportHttp_Destroy(TRANSPORT_HANDLE handle)
 		HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
 		IOTHUB_DEVICE_HANDLE* listItem;
 
-		size_t listSize = VECTOR_size(handleData->perDeviceList);
+		size_t deviceListSize = VECTOR_size(handleData->perDeviceList);
 
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_013: [ Otherwise, IoTHubTransportHttp_Destroy shall free all the resources currently in use. ]*/
-		for (size_t i = 0; i < listSize; i++)
+		for (size_t i = 0; i < deviceListSize; i++)
 		{
 			listItem = VECTOR_element(handleData->perDeviceList, i);
 			HTTPTRANSPORT_PERDEVICE_DATA* perDeviceItem = (HTTPTRANSPORT_PERDEVICE_DATA*)(*listItem);
@@ -828,7 +829,7 @@ void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 		if (listItem != NULL)
 		{
 			HTTPTRANSPORT_PERDEVICE_DATA * perDeviceItem = (HTTPTRANSPORT_PERDEVICE_DATA *)(*listItem);
-			/*Codes_SRS_TRANSPORTMULTITHTTP_17_110: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork should not execute HTTP requests. ]*/
+			/*Codes_SRS_TRANSPORTMULTITHTTP_17_110: [ Otherwise, IoTHubTransportHttp_Subscribe shall set the device so that subsequent calls to DoWork shall not execute HTTP requests. ]*/
 			perDeviceItem->DoWork_PullMessage = false;
     }
 		else
@@ -1876,21 +1877,22 @@ void IoTHubTransportHttp_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE
 {
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_049: [ If handle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_140: [ If iotHubClientHandle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
+
+	(void)iotHubClientHandle; // use the perDevice handle.
     if ((handle != NULL) && (iotHubClientHandle != NULL))
     {
 		HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
 		IOTHUB_DEVICE_HANDLE* listItem;
-		size_t listSize = VECTOR_size(handleData->perDeviceList);
-		/*Codes_SRS_TRANSPORTMULTITHTTP_17_052: [ IoTHubTransportHttp_DoWork shall perform a round-robin loop through every deviceHandle in the transport device list. ]*/
-		// not round robin
+		size_t deviceListSize = VECTOR_size(handleData->perDeviceList);
+		/*Codes_SRS_TRANSPORTMULTITHTTP_17_052: [ IoTHubTransportHttp_DoWork shall perform a round-robin loop through every deviceHandle in the transport device list, using the iotHubClientHandle field saved in the IOTHUB_DEVICE_HANDLE. ]*/
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_050: [ IoTHubTransportHttp_DoWork shall call loop through the device list. ] */
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_051: [ IF the list is empty, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
-		for (size_t i = 0; i < listSize; i++)
+		for (size_t i = 0; i < deviceListSize; i++)
 		{
 			listItem = VECTOR_element(handleData->perDeviceList, i);
-			HTTPTRANSPORT_PERDEVICE_DATA* perDeviceItem = (HTTPTRANSPORT_PERDEVICE_DATA*)(*listItem);
-			DoEvent(handleData, perDeviceItem, iotHubClientHandle);
-			DoMessages(handleData, perDeviceItem, iotHubClientHandle);
+			HTTPTRANSPORT_PERDEVICE_DATA* perDeviceItem = *(HTTPTRANSPORT_PERDEVICE_DATA**)(listItem);
+			DoEvent(handleData, perDeviceItem, perDeviceItem->iotHubClientHandle);
+			DoMessages(handleData, perDeviceItem, perDeviceItem->iotHubClientHandle);
 
 		}
     }
