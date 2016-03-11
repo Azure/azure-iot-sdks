@@ -94,8 +94,8 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 {
     /** @brief A function pointer that is passed into the @c IoTHubClientCreate.
     *	A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
-	*   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
-	*   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
+    *   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
+    *   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
 
     /** @brief	A string that identifies the device. */
@@ -116,20 +116,20 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 /** @brief	This struct captures IoTHub client device configuration. */
 typedef struct IOTHUB_CLIENT_DEVICE_CONFIG_TAG
 {
-	/** @brief A function pointer that is passed into the @c IoTHubClientCreate.
-	*	A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
-	*   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
-	*   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
-	IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
+    /** @brief A function pointer that is passed into the @c IoTHubClientCreate.
+    *	A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
+    *   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
+    *   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
+    IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
 
-	/** @brief a transport handle implementing the protocol */
-	void * transportHandle;
+    /** @brief a transport handle implementing the protocol */
+    void * transportHandle;
 
-	/** @brief	A string that identifies the device. */
-	const char* deviceId;
+    /** @brief	A string that identifies the device. */
+    const char* deviceId;
 
-	/** @brief	The device key used to authenticate the device. */
-	const char* deviceKey;
+    /** @brief	The device key used to authenticate the device. */
+    const char* deviceKey;
 
 } IOTHUB_CLIENT_DEVICE_CONFIG;
 
@@ -298,7 +298,11 @@ extern void IoTHubClient_LL_DoWork(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
  *				- @b CURLOPT_VERBOSE - only available for HTTP protocol and only  
  *				  when CURL is used. It has the same meaning as CURL's option with the same
  *				  name. @p value is pointer to a long.
- * 
+ *              - @b keepalive - available for MQTT protocol.  Integer value that sets the 
+ *                interval in seconds when pings are sent to the server.
+ *              - @b logtrace - available for MQTT protocol.  Boolean value that turns on and
+ *                off the diagnostic logging.
+ *
  * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
  */
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value);

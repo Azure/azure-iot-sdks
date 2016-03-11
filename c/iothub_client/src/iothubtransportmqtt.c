@@ -29,7 +29,7 @@
 
 #define SAS_TOKEN_DEFAULT_LIFETIME  3600
 #define EPOCH_TIME_T_VALUE          0
-#define DEFAULT_MQTT_KEEPALIVE      20
+#define DEFAULT_MQTT_KEEPALIVE      5*60 // 5 min
 #define DEFAULT_PORT_NUMBER         8883
 #define DEFAULT_TEMP_STRING_LEN     256
 #define BUILD_CONFIG_USERNAME       24
@@ -68,6 +68,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     IOTHUB_CLIENT_LL_HANDLE llClientHandle;
     CONTROL_PACKET_TYPE currPacketState;
     XIO_HANDLE xioTransport;
+    int keepAliveValue;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
 typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
@@ -239,6 +240,7 @@ static void MqttOpCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_
             {
                 xio_close(transportData->xioTransport, NULL, NULL);
                 transportData->connected = false;
+                transportData->subscribed = false;
                 transportData->currPacketState = PACKET_TYPE_ERROR;
             }
         }
@@ -258,22 +260,22 @@ static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
 
     if (transportState->receiveMessages && !transportState->subscribed)
     {
-    SUBSCRIBE_PAYLOAD subscribe[] = {
-        { STRING_c_str(transportState->mqttMessageTopic), DELIVER_AT_LEAST_ONCE }
-    };
-    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransportMqtt_Subscribe shall call mqtt_client_subscribe to subscribe to the Message Topic.] */
-    if (mqtt_client_subscribe(transportState->mqttClient, transportState->packetId++, subscribe, 1) != 0)
-    {
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.] */
-        result = __LINE__;
-    }
-    else
-    {
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_018: [On success IoTHubTransportMqtt_Subscribe shall return 0.] */
-        transportState->subscribed = true;
-        transportState->currPacketState = SUBSCRIBE_TYPE;
-        result = 0;
-    }
+        SUBSCRIBE_PAYLOAD subscribe[] = {
+            { STRING_c_str(transportState->mqttMessageTopic), DELIVER_AT_LEAST_ONCE }
+        };
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransportMqtt_Subscribe shall call mqtt_client_subscribe to subscribe to the Message Topic.] */
+        if (mqtt_client_subscribe(transportState->mqttClient, transportState->packetId++, subscribe, 1) != 0)
+        {
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.] */
+            result = __LINE__;
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_018: [On success IoTHubTransportMqtt_Subscribe shall return 0.] */
+            transportState->subscribed = true;
+            transportState->currPacketState = SUBSCRIBE_TYPE;
+            result = 0;
+        }
     }
     else
     {
@@ -377,59 +379,75 @@ static STRING_HANDLE ConstructMessageTopic(const char* deviceId)
     return result;
 }
 
-static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transportState, bool initialConnection)
+static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transportState)
 {
     int result = 0;
-    if (!transportState->connected && !transportState->destroyCalled)
-    {
-        // Construct SAS token
-        size_t secSinceEpoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
-        size_t expiryTime = secSinceEpoch + SAS_TOKEN_DEFAULT_LIFETIME;
 
-        // Not checking the success of this variable, if fail it will fail in the SASToken creation and return false;
-        STRING_HANDLE emptyKeyName = STRING_new();
-        STRING_HANDLE sasToken = SASToken_Create(transportState->device_key, transportState->sasTokenSr, emptyKeyName, expiryTime);
-        if (sasToken == NULL)
+    // Construct SAS token
+    size_t secSinceEpoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
+    size_t expiryTime = secSinceEpoch + SAS_TOKEN_DEFAULT_LIFETIME;
+
+    // Not checking the success of this variable, if fail it will fail in the SASToken creation and return false;
+    STRING_HANDLE emptyKeyName = STRING_new();
+    STRING_HANDLE sasToken = SASToken_Create(transportState->device_key, transportState->sasTokenSr, emptyKeyName, expiryTime);
+    if (sasToken == NULL)
+    {
+        result = __LINE__;
+    }
+    else
+    {
+        MQTT_CLIENT_OPTIONS options = { 0 };
+        options.clientId = (char*)STRING_c_str(transportState->device_id);
+        options.willMessage = NULL;
+        options.username = (char*)STRING_c_str(transportState->configPassedThroughUsername);
+        options.password = (char*)STRING_c_str(sasToken);
+        options.keepAliveInterval = transportState->keepAliveValue;
+        options.useCleanSession = false;
+        options.qualityOfServiceValue = DELIVER_AT_LEAST_ONCE;
+
+        // construct address
+        const char* hostAddress = STRING_c_str(transportState->hostAddress);
+        const char* hostName = strstr(hostAddress, "//");
+        if (hostName == NULL)
         {
+            hostName = hostAddress;
+        }
+        else
+        {
+            // Increment beyond the double backslash
+            hostName += 2;
+        }
+
+        transportState->xioTransport = getIoTransportProvider(hostName, transportState->portNum);
+        if (mqtt_client_connect(transportState->mqttClient, transportState->xioTransport, &options) != 0)
+        {
+            LogError("failure connecting to address %s:%d.\r\n", STRING_c_str(transportState->hostAddress), transportState->portNum);
             result = __LINE__;
         }
         else
         {
-            MQTT_CLIENT_OPTIONS options = { 0 };
-            options.clientId = (char*)STRING_c_str(transportState->device_id);
-            options.willMessage = NULL;
-            options.username = (char*)STRING_c_str(transportState->configPassedThroughUsername);
-            options.password = (char*)STRING_c_str(sasToken);
-            options.keepAliveInterval = DEFAULT_MQTT_KEEPALIVE;
-            options.useCleanSession = false;
-            options.qualityOfServiceValue = DELIVER_AT_LEAST_ONCE;
+            result = 0;
+        }
+        STRING_delete(emptyKeyName);
+        STRING_delete(sasToken);
+    }
+    return result;
+}
 
-            // construct address
-            const char* hostAddress = STRING_c_str(transportState->hostAddress);
-            const char* hostName = strstr(hostAddress, "//");
-            if (hostName == NULL)
-            {
-                hostName = hostAddress;
-            }
-            else
-            {
-                // Increment beyond the double backslash
-                hostName += 2;
-            }
-
-            transportState->xioTransport = getIoTransportProvider(hostName, transportState->portNum);
-            if (mqtt_client_connect(transportState->mqttClient, transportState->xioTransport, &options) != 0)
-            {
-                LogError("failure connecting to address %s:%d.\r\n", STRING_c_str(transportState->hostAddress), transportState->portNum);
-                result = __LINE__;
-            }
-            else
-            {
-                transportState->connected = true;
-                result = 0;
-            }
-            STRING_delete(emptyKeyName);
-            STRING_delete(sasToken);
+static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transportState)
+{
+    int result = 0;
+    if (!transportState->connected && !transportState->destroyCalled)
+    {
+        if (SendMqttConnectMsg(transportState) != 0)
+        {
+            transportState->connected = false;
+            result = __LINE__;
+        }
+        else
+        {
+            transportState->connected = true;
+            result = 0;
         }
     }
     return result;
@@ -555,6 +573,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 state->portNum = DEFAULT_PORT_NUMBER;
                 state->waitingToSend = waitingToSend;
                 state->currPacketState = CONNECT_TYPE;
+                state->keepAliveValue = DEFAULT_MQTT_KEEPALIVE;
             }
         }
     }
@@ -617,6 +636,21 @@ extern TRANSPORT_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG*
     return result;
 }
 
+static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transportState)
+{
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [If the parameter subscribe is true then IoTHubTransportMqtt_Destroy shall call IoTHubTransportMqtt_Unsubscribe.] */
+    if (transportState->subscribed)
+    {
+        IoTHubTransportMqtt_Unsubscribe(transportState);
+    }
+
+    (void)mqtt_client_disconnect(transportState->mqttClient);
+    xio_destroy(transportState->xioTransport);
+
+    transportState->connected = false;
+    transportState->currPacketState = DISCONNECT_TYPE;
+}
+
 void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle)
 {
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [IoTHubTransportMqtt_Destroy shall do nothing if parameter handle is NULL.] */
@@ -625,11 +659,7 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle)
     {
         transportState->destroyCalled = true;
 
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [If the parameter subscribe is true then IoTHubTransportMqtt_Destroy shall call IoTHubTransportMqtt_Unsubscribe.] */
-        if (transportState->subscribed)
-        {
-            IoTHubTransportMqtt_Unsubscribe(handle);
-        }
+        DisconnectFromClient(transportState);
 
         //Empty the Waiting for Ack Messages.
         while (!DList_IsListEmpty(&transportState->waitingForAck))
@@ -640,13 +670,7 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle)
             free(mqttMsgEntry);
         }
 
-        (void)mqtt_client_disconnect(transportState->mqttClient);
-
-        xio_destroy(transportState->xioTransport);
-
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_014: [IoTHubTransportMqtt_Destroy shall free all the resources currently in use.] */
-        transportState->connected = false;
-        transportState->currPacketState = DISCONNECT_TYPE;
         mqtt_client_deinit(transportState->mqttClient);
         STRING_delete(transportState->mqttEventTopic);
         STRING_delete(transportState->mqttMessageTopic);
@@ -702,7 +726,7 @@ void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
     else
     {
         LogError("Invalid argument to unsubscribe (NULL). \r\n");
-}
+    }
 }
 
 extern void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
@@ -713,7 +737,7 @@ extern void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL
     {
         transportState->llClientHandle = iotHubClientHandle;
 
-        if (InitializeConnection(transportState, true) != 0)
+        if (InitializeConnection(transportState) != 0)
         {
             // Don't want to flood the logs with failures here
         }
@@ -865,12 +889,28 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_HANDLE handle, cons
     }
     else
     {
+        MQTTTRANSPORT_HANDLE_DATA* transportState = (MQTTTRANSPORT_HANDLE_DATA*)handle;
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_031: [If the option parameter is set to "logtrace" then the value shall be a bool_ptr and the value will determine if the mqtt client log is on or off.] */
         if (strcmp("logtrace", option) == 0)
         {
-            MQTTTRANSPORT_HANDLE_DATA* transportState = (MQTTTRANSPORT_HANDLE_DATA*)handle;
             bool* traceVal = (bool*)value;
             mqtt_client_set_trace(transportState->mqttClient, *traceVal, *traceVal);
+            result = IOTHUB_CLIENT_OK;
+        }
+        else if (strcmp("keepalive", option) == 0)
+        {
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_036: [If the option parameter is set to "keepalive" then the value shall be a int_ptr and the value will determine the mqtt keepalive time that is set for pings.] */
+            int* keepAliveOption = (int*)value;
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_037 : [If the option parameter is set to supplied int_ptr keepalive is the same value as the existing keepalive then IoTHubTransportMqtt_SetOption shall do nothing.] */
+            if (*keepAliveOption != transportState->keepAliveValue)
+            {
+                transportState->keepAliveValue = *keepAliveOption;
+                if (transportState->connected)
+                {
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_038: [If the client is connected when the keepalive is set then IoTHubTransportMqtt_SetOption shall disconnect and reconnect with the specified keepalive value.] */
+                    DisconnectFromClient(transportState);
+                }
+            }
             result = IOTHUB_CLIENT_OK;
         }
         else
