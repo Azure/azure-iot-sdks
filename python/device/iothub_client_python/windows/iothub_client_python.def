@@ -1,0 +1,74 @@
+; Copyright(c) Microsoft.All rights reserved.
+; Licensed under the MIT license.See LICENSE file in the project root for full license information.
+; IotHub_Client_Python.def : Declares the module parameters.
+; LIBRARY      "IotHub_Client.PYD"
+
+EXPORTS
+;   version.h
+    IoTHubClient_GetVersionString
+;   iothub_client.h
+    IoTHubClient_CreateFromConnectionString
+    IoTHubClient_Create
+    IoTHubClient_Destroy
+    IoTHubClient_SendEventAsync
+    IoTHubClient_GetSendStatus
+    IoTHubClient_SetMessageCallback
+    IoTHubClient_GetLastMessageReceiveTime
+    IoTHubClient_SetOption
+;   iothub_client_ll.h
+    IoTHubClient_LL_CreateFromConnectionString
+    IoTHubClient_LL_Create
+    IoTHubClient_LL_Destroy
+    IoTHubClient_LL_SendEventAsync
+    IoTHubClient_LL_GetSendStatus
+    IoTHubClient_LL_SetMessageCallback
+    IoTHubClient_LL_GetLastMessageReceiveTime
+    IoTHubClient_LL_DoWork
+    IoTHubClient_LL_SetOption
+;   iothub_message.h
+    IoTHubMessage_CreateFromByteArray
+    IoTHubMessage_CreateFromString
+    IoTHubMessage_Clone
+    IoTHubMessage_GetByteArray
+    IoTHubMessage_GetString
+    IoTHubMessage_GetContentType
+    IoTHubMessage_Properties
+    IoTHubMessage_GetMessageId
+    IoTHubMessage_SetMessageId
+    IoTHubMessage_GetCorrelationId
+    IoTHubMessage_SetCorrelationId
+    IoTHubMessage_Destroy
+;   iothubtransporthttp.h
+    IoTHubTransportHttp_Create
+    IoTHubTransportHttp_Destroy
+    IoTHubTransportHttp_Subscribe
+    IoTHubTransportHttp_Unsubscribe
+    IoTHubTransportHttp_DoWork
+    IoTHubTransportHttp_GetSendStatus
+    IoTHubTransportHttp_SetOption
+    HTTP_Protocol
+;   iothubtransportamqp.h
+    AMQP_Protocol
+;   iothubtransportmqtt.h
+    IoTHubTransportMqtt_Create
+    IoTHubTransportMqtt_Destroy
+    IoTHubTransportMqtt_Subscribe
+    IoTHubTransportMqtt_Unsubscribe
+    IoTHubTransportMqtt_DoWork
+    IoTHubTransportMqtt_GetSendStatus
+    IoTHubTransportMqtt_SetOption
+    MQTT_Protocol
+;   map.h (azure-c-shared-utility)
+    Map_Create
+    Map_Destroy
+    Map_Clone
+    Map_Add
+    Map_AddOrUpdate
+    Map_Delete
+    Map_ContainsKey
+    Map_ContainsValue
+    Map_GetValueFromKey
+    Map_GetInternals
+;   platform.h
+    platform_init
+    platform_deinit

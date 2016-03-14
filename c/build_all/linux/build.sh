@@ -13,6 +13,7 @@ build_amqp=ON
 build_http=ON
 build_mqtt=ON
 skip_unittests=OFF
+build_python=OFF
 run_valgrind=
 
 usage ()
@@ -29,6 +30,7 @@ usage ()
     echo " --no-http                     do no build HTTP transport and samples"
     echo " --no-mqtt                     do no build MQTT transport and samples"
     echo " --toolchain-file <file>       pass cmake a toolchain file for cross compiling"
+    echo " --build-python                build Python C wrapper module (requires boost)"
     echo " -rv, --run_valgrind           will execute ctest with valgrind"
     exit 1
 }
@@ -60,6 +62,7 @@ process_args ()
               "--no-amqp" ) build_amqp=OFF;;
               "--no-http" ) build_http=OFF;;
               "--no-mqtt" ) build_mqtt=OFF;;
+              "--build-python" ) build_python=ON;;
               "--toolchain-file" ) save_next_arg=2;;
               "-rv" | "--run_valgrind" ) run_valgrind=1;;
               * ) usage;;
@@ -79,7 +82,7 @@ process_args $*
 rm -r -f ~/cmake
 mkdir ~/cmake
 pushd ~/cmake
-cmake $toolchainfile -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Dskip_unittests:BOOL=$skip_unittests $build_root
+cmake $toolchainfile -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:BOOL=$build_python $build_root
 make --jobs=$(nproc)
 ctest -C "Debug" -V
 
