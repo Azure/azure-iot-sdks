@@ -239,6 +239,7 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         platform_init();
         g_iothubAcctInfo = IoTHubAccount_Init(true);
         ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
+        platform_init();
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
