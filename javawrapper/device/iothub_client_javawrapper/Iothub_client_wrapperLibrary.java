@@ -24,7 +24,7 @@ import com.sun.jna.Library;
 import com.sun.jna.ptr.PointerByReference;
 
 public interface Iothub_client_wrapperLibrary extends Library{
-	public static final String JNA_LIBRARY_NAME = "iothub_client";
+	public static final String JNA_LIBRARY_NAME = "iothub_client_java";
 	public static final NativeLibrary JNA_NATIVE_LIB = NativeLibrary.getInstance(Iothub_client_wrapperLibrary.JNA_LIBRARY_NAME);
 	public static final Iothub_client_wrapperLibrary INSTANCE = (Iothub_client_wrapperLibrary)Native.loadLibrary(Iothub_client_wrapperLibrary.JNA_LIBRARY_NAME, Iothub_client_wrapperLibrary.class);
 	
@@ -133,6 +133,12 @@ public interface Iothub_client_wrapperLibrary extends Library{
 	 * Original signature : void* MQTT_Protocol()
 	 */
 	public Pointer MQTT_Protocol();
+	
+	/*
+	 * Original signature : void* AMQP_Protocol_over_WebSocketsTls()
+	 */
+	public Pointer AMQP_Protocol_over_WebSocketsTls();
+	
 	
 	/*
 	 *				iothub_message.h		
@@ -310,6 +316,13 @@ public interface Iothub_client_wrapperLibrary extends Library{
 		//@Override
         public Pointer execute() {
             return Iothub_client_wrapperLibrary.INSTANCE.MQTT_Protocol();	
+        }
+    }
+	
+	public class AMQP_Protocol_over_WebSocketsTls implements IOTHUB_CLIENT_TRANSPORT_PROVIDER {
+		//@Override
+        public Pointer execute() {
+            return Iothub_client_wrapperLibrary.INSTANCE.AMQP_Protocol_over_WebSocketsTls();	
         }
     }
 	

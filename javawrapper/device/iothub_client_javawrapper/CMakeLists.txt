@@ -15,19 +15,34 @@ endif()
 
 compileAsC99()
 
-set(iothub_client_c_files
+if(${use_wsio})
+	set(iothub_client_c_files
     ../../../c/iothub_client/src/iothub_client.c
     ../../../c/iothub_client/src/iothub_client_ll.c
     ../../../c/iothub_client/src/iothub_message.c
-    ../../../c/iothub_client/src/iothubtransportamqp.c
-#    ../../../c/iothub_client/src/iothubtransportamqp_websockets.c
+    ../../../c/iothub_client/src/iothubtransportamqp_websockets.c
     ../../../c/iothub_client/src/iothubtransporthttp.c
     ../../../c/iothub_client/src/iothubtransportmqtt.c
     ../../../c/iothub_client/src/version.c
-)
+	)
+else()
+	set(iothub_client_c_files
+    ../../../c/iothub_client/src/iothub_client.c
+    ../../../c/iothub_client/src/iothub_client_ll.c
+    ../../../c/iothub_client/src/iothub_message.c
+	../../../c/iothub_client/src/iothubtransportamqp.c
+    ../../../c/iothub_client/src/iothubtransporthttp.c
+    ../../../c/iothub_client/src/iothubtransportmqtt.c
+    ../../../c/iothub_client/src/version.c
+	)
+endif()
 
 if(WIN32)
-    set(iothub_client_c_files ${iothub_client_c_files} ./windows/dllmain.c ./windows/iothub_client_javawrapper.def)
+	if(${use_wsio})
+		set(iothub_client_c_files ${iothub_client_c_files} ./windows/dllmain.c ./windows/iothub_client_javawrapper_websockets.def)
+	else()
+		set(iothub_client_c_files ${iothub_client_c_files} ./windows/dllmain.c ./windows/iothub_client_javawrapper.def)
+	endif()
 else()
     set(iothub_client_c_files ${iothub_client_c_files} ) 
 endif()
@@ -47,6 +62,7 @@ endif()
 if(${use_mqtt})
 	include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
 endif()
+
 include_directories(.)
 
 
@@ -54,7 +70,7 @@ add_library( iothub_client_javawrapper SHARED
 ${iothub_client_c_files} 
 ${iothub_client_h_files})
 
-SET_TARGET_PROPERTIES(iothub_client_javawrapper PROPERTIES OUTPUT_NAME "iothub_client")
+SET_TARGET_PROPERTIES(iothub_client_javawrapper PROPERTIES OUTPUT_NAME "iothub_client_java")
 
 target_link_libraries(  
     iothub_client_javawrapper

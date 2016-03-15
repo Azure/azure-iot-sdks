@@ -48,53 +48,26 @@ public class Map
 		Iothub_client_wrapperLibrary.INSTANCE.Map_Clone(mapHandle);
 	}
 	
-	public void mapAdd(String key, String value)
+	public int mapAdd(String key, String value)
 	{
-		int result = MAP_RESULT.MAP_ERROR;
-		
-		result = Iothub_client_wrapperLibrary.INSTANCE.Map_Add(mapHandle, key, value);
-		
-		if(result != MAP_RESULT.MAP_OK)
-    	{
-    		throw new IllegalArgumentException("Error adding map");
-    	}
+		return Iothub_client_wrapperLibrary.INSTANCE.Map_Add(mapHandle, key, value);
 	}
 	
-	public void mapAddOrUpdate(String key, String value)
+	public int mapAddOrUpdate(String key, String value)
 	{
-		int result = MAP_RESULT.MAP_ERROR;
-		
-		result = Iothub_client_wrapperLibrary.INSTANCE.Map_AddOrUpdate(mapHandle, key, value);
-		
-		if(result != MAP_RESULT.MAP_OK)
-    	{
-    		throw new IllegalArgumentException("Error adding or updating map");
-    	}
+		return Iothub_client_wrapperLibrary.INSTANCE.Map_AddOrUpdate(mapHandle, key, value);
 	}
 	
-	public void mapDelete(String key)
+	public int mapDelete(String key)
 	{
-		int result = MAP_RESULT.MAP_ERROR;
-		
-		result = Iothub_client_wrapperLibrary.INSTANCE.Map_Delete(mapHandle, key);
-		
-		if(result != MAP_RESULT.MAP_OK)
-    	{
-    		throw new IllegalArgumentException("Error deleting map");
-    	}
+		return Iothub_client_wrapperLibrary.INSTANCE.Map_Delete(mapHandle, key);
 	}
 	
-	public void mapContainsValue(String value)
+	public int mapContainsValue(String value)
 	{
-		int result = MAP_RESULT.MAP_ERROR;
 		IntByReference valueExists = null;
 		
-		result = Iothub_client_wrapperLibrary.INSTANCE.Map_ContainsValue(mapHandle, value, valueExists);
-		
-		if(result != MAP_RESULT.MAP_OK)
-    	{
-    		throw new IllegalArgumentException("Error deleting map");
-    	}
+		return Iothub_client_wrapperLibrary.INSTANCE.Map_ContainsValue(mapHandle, value, valueExists);
 	}
 	
 	public String mapGetValueFromKey(String key)

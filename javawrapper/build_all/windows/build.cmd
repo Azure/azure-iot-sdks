@@ -16,21 +16,6 @@ rem ----------------------------------------------------------------------------
 rem -- check prerequisites
 rem -----------------------------------------------------------------------------
 
-rem ensure python.exe exists
-where /q python.exe
-if not !errorlevel! == 0 goto :NeedPython
-
-python python_version_check.py >pyenv.bat
-if not !errorlevel!==0 goto :NeedPython
-call pyenv.bat
-@Echo Using Python found in: %PYTHON_PATH%
-goto :nuget
-
-:NeedPython
-@Echo Azure IoT SDK needs Python 2.7 x86 32bit from 
-@Echo https://www.python.org/download/releases/2.7/ 
-exit /b 1
-
 :nuget
 rem ensure nuget.exe exists
 where /q nuget.exe
@@ -86,40 +71,6 @@ shift
 goto args-loop
 
 :args-done
-
-rem -----------------------------------------------------------------------------
-rem -- restore packages for solutions
-rem -----------------------------------------------------------------------------
-
-set PYTHON_SOLUTION_PATH="%build-root%\device\iothub_client_python\windows"
-set PYTHON_SOLUTION="%PYTHON_SOLUTION_PATH%\iothub_client_python.sln"
-
-call nuget restore -config "%current-path%\NuGet.Config" %PYTHON_SOLUTION%
-
-rem -----------------------------------------------------------------------------
-rem -- clean solutions
-rem -----------------------------------------------------------------------------
-
-if %build-clean%==1 (
-    call nuget restore %PYTHON_SOLUTION%
-    call :clean-a-solution %PYTHON_SOLUTION%
-    if not %errorlevel%==0 exit /b %errorlevel%
-)
-
-rem -----------------------------------------------------------------------------
-rem -- build solutions
-rem -----------------------------------------------------------------------------
-
-call :build-a-solution %PYTHON_SOLUTION%
-if not %errorlevel%==0 exit /b %errorlevel%
-
-rem -----------------------------------------------------------------------------
-rem -- Copy Python library to local installation
-rem -----------------------------------------------------------------------------
-
-@echo Copy iothub_client.pyd to %PYTHON_PATH%\Lib\site-packages\
-copy /Y %PYTHON_SOLUTION_PATH%\%build-config%\iothub_client.pyd %PYTHON_PATH%\Lib\site-packages\ 
-if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -----------------------------------------------------------------------------
 rem -- build done

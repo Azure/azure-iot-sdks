@@ -18,6 +18,16 @@ public class Message
 	private Map map;
 	
 	
+	public Message(IOTHUB_MESSAGE_HANDLE _messageHandle)
+	{
+		if (_messageHandle == null) 
+        {
+            throw new IllegalArgumentException("_messageHandle cannot be 'null'.");
+        }      
+		
+		messageHandle = _messageHandle;
+	}
+	
 	public Message()
 	{
 		
@@ -25,7 +35,8 @@ public class Message
 	
 	public Message(byte[] body) 
     {
-        if (body == null) {
+        if (body == null) 
+        {
             throw new IllegalArgumentException("Message body cannot be 'null'.");
         }      
 
@@ -48,7 +59,9 @@ public class Message
     
 	public IOTHUB_MESSAGE_HANDLE clone()
 	{
-		return Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_Clone(messageHandle);
+		new Message(Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_Clone(messageHandle));
+		
+		return messageHandle;
 	}
     
 	public byte[] getBytes()
@@ -61,7 +74,7 @@ public class Message
 		return Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_Properties(messageHandle);	
 	}
     
-	public void setProperty(String name, String value) 
+	public int setProperty(String name, String value) 
 	{    
 		if (name == null) 
 		{
@@ -76,7 +89,7 @@ public class Message
 		propMap = this.getProperties();
 		map.setMapHandle(propMap);
 		
-		map.mapAddOrUpdate(name, value);
+		return map.mapAddOrUpdate(name, value);
 	}
     
 	public String getMessageId()
@@ -84,16 +97,14 @@ public class Message
 		return Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_GetMessageId(messageHandle);
 	}
     
-	public void setMessageId(String messageId)
+	public int setMessageId(String messageId)
 	{
-		int status = IOTHUB_MESSAGE_RESULT.IOTHUB_MESSAGE_ERROR;
-    	
-		status = Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_SetMessageId(messageHandle, messageId);
-    
-		if (status != IOTHUB_MESSAGE_RESULT.IOTHUB_MESSAGE_OK)
+		if (messageId == null) 
 		{
-			throw new IllegalArgumentException("failure to set Message Id");
-		}	
+			throw new IllegalArgumentException("MessageId value cannot be 'null'.");
+		}
+    	
+		return Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_SetMessageId(messageHandle, messageId);
 	}
     
 	public String getCorrelationId()
@@ -101,20 +112,23 @@ public class Message
 		return Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_GetCorrelationId(messageHandle);
 	}
     
-	public void setCorrelationId(String correlationId)
+	public int setCorrelationId(String correlationId)
 	{
-		int status = IOTHUB_MESSAGE_RESULT.IOTHUB_MESSAGE_ERROR;;
-    	
-		status = Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_SetCorrelationId(messageHandle, correlationId);
-    
-		if (status != IOTHUB_MESSAGE_RESULT.IOTHUB_MESSAGE_OK)
+		if (correlationId == null) 
 		{
-			throw new IllegalArgumentException("failure to set Correlation Id");
-		}	
+			throw new IllegalArgumentException("correlationId value cannot be 'null'.");
+		}
+    	
+		return Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_SetCorrelationId(messageHandle, correlationId);
 	}
     
 	public void destroy(String correlationId)
 	{
+		if (correlationId == null) 
+		{
+			throw new IllegalArgumentException("correlationId value cannot be 'null'.");
+		}
+		
 		Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_Destroy(messageHandle);
 	}
     

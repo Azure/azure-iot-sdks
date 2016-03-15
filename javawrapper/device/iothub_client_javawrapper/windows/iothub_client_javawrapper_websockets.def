@@ -72,3 +72,5 @@ EXPORTS
 ;   platform.h
     platform_init
     platform_deinit
+;   iothubtransportamqp_websockets.h
+	AMQP_Protocol_over_WebSocketsTls

@@ -13,7 +13,7 @@ import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_CLIENT_TRANSPORT_PROVIDER
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubEventCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubMessageCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.MQTT_Protocol;
-
+import javaWrapper.Iothub_client_wrapperLibrary.AMQP_Protocol_over_WebSocketsTls;
 
 public final class DeviceClient 
 {
@@ -22,7 +22,7 @@ public final class DeviceClient
 	
 	public enum IotHubClientProtocol 
 	{ 
-		HTTPS, AMQPS, MQTT 
+		HTTPS, AMQPS, MQTT, AMQP_WEB_SOCKET 
 	} 
 
 	public DeviceClient(String connString, IotHubClientProtocol protocol)
@@ -37,6 +37,9 @@ public final class DeviceClient
 		        break; 
 		    case MQTT: 
 		    	this.transport = new MQTT_Protocol();
+		        break; 
+		    case AMQP_WEB_SOCKET: 
+		    	this.transport = new AMQP_Protocol_over_WebSocketsTls();
 		        break; 
 		    default: 
 		    	// should never happen. 
@@ -57,8 +60,6 @@ public final class DeviceClient
 	            IotHubEventCallback callback,
 	            Pointer object)
 	{
-		int status = IOTHUB_CLIENT_RESULT.IOTHUB_CLIENT_ERROR;
-		
 		if (handle == null)
 		{
 			throw new IllegalStateException(
@@ -66,9 +67,7 @@ public final class DeviceClient
                             + "an IoT Hub client that is closed.");
 		}
 			
-		status = Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_SendEventAsync(handle.getPointer(), message.getMessageHandle(), callback, object);
-		
-		return status;
+		return Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_SendEventAsync(handle.getPointer(), message.getMessageHandle(), callback, object);
 	}
 	
 	public void setMessageCallback(IotHubMessageCallback messageCallback, Pointer userContextCallback)
@@ -78,16 +77,16 @@ public final class DeviceClient
 	
 	public int setOption(String optionName, Object value)
     {
-		int status = IOTHUB_CLIENT_RESULT.IOTHUB_CLIENT_ERROR;
-		
 		if(optionName == null)
         {
             throw new IllegalArgumentException("optionName is null");
         }
-        else
+		
+		if(value == null)
         {
-        	status = Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_SetOption(handle.getPointer(), optionName, value);	
+            throw new IllegalArgumentException("value is null");
         }
-		return status;
+        
+		return Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_SetOption(handle.getPointer(), optionName, value);	
     }
 }

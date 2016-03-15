@@ -10,15 +10,14 @@ import com.sun.jna.ptr.IntByReference;
 
 import javaWrapper.Iothub_client_wrapperLibrary.AMQP_Protocol;
 import javaWrapper.Iothub_client_wrapperLibrary.HTTP_Protocol;
+import javaWrapper.Iothub_client_wrapperLibrary.MQTT_Protocol;
+import javaWrapper.Iothub_client_wrapperLibrary.AMQP_Protocol_over_WebSocketsTls;
 import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_CLIENT_HANDLE;
 import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_CLIENT_RESULT;
 import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_MESSAGE_HANDLE;
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubEventCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubMessageCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.MAP_HANDLE;
-
-
-
 
 
 public class Main {
