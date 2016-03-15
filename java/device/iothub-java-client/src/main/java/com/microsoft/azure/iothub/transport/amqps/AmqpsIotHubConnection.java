@@ -49,8 +49,6 @@ public final class AmqpsIotHubConnection extends BaseHandler {
     private String hostName;
     /** The username string to use SASL authentication. */
     private String userName;
-    /** The SAS token string. */
-    private String sasToken;
     /** The ID for the associated device. */
     private String deviceID;
 
@@ -116,17 +114,11 @@ public final class AmqpsIotHubConnection extends BaseHandler {
         String deviceId = this.config.getDeviceId();
         String iotHubUser = deviceId + "@sas." + iotHubName;
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_003: [The constructor shall create a new SAS token and copy all input parameters to private member variables.]
-        IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                this.config.getDeviceKey(),
-                System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
-
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_006: [The constructor shall initialize a new private map for messages that are in progress.]
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_007: [The constructor shall initialize new private Futures for the status of the Connection and Reactor.]
         this.hostName = iotHubHostname;
         this.userName = iotHubUser;
         this.deviceID = deviceId;
-        this.sasToken = sasToken.toString();
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_004: [The constructor shall set it’s state to CLOSED.]
         this.state = ReactorState.CLOSED;
@@ -158,9 +150,21 @@ public final class AmqpsIotHubConnection extends BaseHandler {
      */
     public void open() throws IOException, InterruptedException, ExecutionException {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_011: [If the AMQPS connection is already open, the function shall do nothing.]
-        if(this.state != ReactorState.OPEN) {
-            this.amqpsHandler = new AmqpsIotHubConnectionBaseHandler(this.hostName,
-                    this.userName, this.sasToken.toString(), this.deviceID, this);
+        if(this.state != ReactorState.OPEN)
+        {
+            IotHubSasToken sasToken = new IotHubSasToken(
+                    IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
+                    this.config.getDeviceKey(),
+                    System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_008: [The function shall initialize its AmqpsIotHubConnectionBaseHandler
+            // using the saved host name, user name, device ID and sas token.]
+            this.amqpsHandler = new AmqpsIotHubConnectionBaseHandler(
+                    this.hostName,
+                    this.userName,
+                    sasToken.toString(),
+                    this.deviceID,
+                    this);
 
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_009: [The function shall open the Amqps connection and trigger the Reactor (Proton) to begin running.]
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_012: [If the AmqpsIotHubConnectionBaseHandler becomes invalidated before the Reactor (Proton) starts, the function shall throw an IOException.]

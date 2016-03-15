@@ -32,9 +32,7 @@ public AmqpsIotHubConnection(DeviceClientConfig config);
 
 **SRS_AMQPSIOTHUBCONNECTION_14_002: [**The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_003: [**The constructor shall create a new SAS token and copy all input parameters to private member variables.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_14_004: [**The constructor shall set it’s state to CLOSED.**]**
+**SRS_AMQPSIOTHUBCONNECTION_14_004: [**The constructor shall set its state to CLOSED.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_14_005: [**The constructor shall initialize a new private queue for received messages.**]**
 
@@ -49,7 +47,7 @@ public AmqpsIotHubConnection(DeviceClientConfig config);
 public void open() throws IOException, InterruptedException, ExecutionException
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_14_008: [**The function shall initialize it’s AmqpsIotHubConnectionBaseHandler using the saved host name, user name, device ID and sas token.**]**
+**SRS_AMQPSIOTHUBCONNECTION_14_008: [**The function shall initialize its AmqpsIotHubConnectionBaseHandler using the saved host name, user name, device ID and sas token.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_14_009: [**The function shall open the Amqps connection and trigger the Reactor (Proton) to begin running.**]**
 
