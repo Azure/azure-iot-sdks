@@ -31,6 +31,9 @@
 
 #include "xio.h"
 
+#include "doublylinkedlist.h"
+
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -132,6 +135,14 @@ typedef struct IOTHUB_CLIENT_DEVICE_CONFIG_TAG
     const char* deviceKey;
 
 } IOTHUB_CLIENT_DEVICE_CONFIG;
+
+/** @brief	This struct captures IoTHub transport configuration. */
+typedef struct IOTHUBTRANSPORT_CONFIG_TAG
+{
+	const IOTHUB_CLIENT_CONFIG* upperConfig;
+	PDLIST_ENTRY waitingToSend;
+}IOTHUBTRANSPORT_CONFIG;
+
 
 /**
  * @brief	Creates a IoT Hub client for communication with an existing
