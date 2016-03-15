@@ -219,9 +219,9 @@ public interface Iothub_client_wrapperLibrary extends Library{
 	public void Map_Destroy(MAP_HANDLE handle);
 	
 	/*
-	 * Original signature : Map_Clone(MAP_HANDLE )
+	 * Original signature : MAP_HANDLE Map_Clone(MAP_HANDLE )
 	 */
-	public void Map_Clone(MAP_HANDLE handle);
+	public MAP_HANDLE Map_Clone(MAP_HANDLE handle);
 	
 	/*
 	 * Original signature : MAP_RESULT Map_Add(MAP_HANDLE , const char* , const char* )

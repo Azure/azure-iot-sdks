@@ -23,6 +23,11 @@ public class Map
 	
 	Map(MAP_HANDLE _mapHandle)
 	{
+		if (_mapHandle == null) 
+        {
+            throw new IllegalArgumentException("_mapHandle cannot be 'null'.");
+        } 
+		
 		mapHandle = _mapHandle;
 	}
 	
@@ -43,9 +48,11 @@ public class Map
 		Iothub_client_wrapperLibrary.INSTANCE.Map_Destroy(mapHandle);
 	}
 	
-	public void mapClone()
+	public MAP_HANDLE mapClone()
 	{
-		Iothub_client_wrapperLibrary.INSTANCE.Map_Clone(mapHandle);
+		new Map(Iothub_client_wrapperLibrary.INSTANCE.Map_Clone(mapHandle));
+		
+		return mapHandle;
 	}
 	
 	public int mapAdd(String key, String value)
