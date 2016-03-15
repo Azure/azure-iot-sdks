@@ -26,19 +26,19 @@ extern "C"
 {
 #endif
 
-    extern TRANSPORT_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config);
-    extern void IoTHubTransportHttp_Destroy(TRANSPORT_HANDLE handle);
+    extern TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config);
+    extern void IoTHubTransportHttp_Destroy(TRANSPORT_LL_HANDLE handle);
 
-	extern IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
+	extern IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
 	extern void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
 
     extern int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle);
     extern void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE handle);
 
-    extern void IoTHubTransportHttp_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
+    extern void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
 
     extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
-    extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_HANDLE handle, const char* optionName, const void* value);
+    extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_LL_HANDLE handle, const char* optionName, const void* value);
     
     extern const void* HTTP_Protocol(void);
 
@@ -62,7 +62,7 @@ extern void
 IoTHubClient_LL_SendComplete (PDLIST_ENTRY completed, IOTHUB_BATCHSTATE result);
 extern int IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_MESSAGE_HANDLE message);
  
-typedef void* TRANSPORT_HANDLE;
+typedef void* TRANSPORT_LL_HANDLE;
 typedef void* IOTHUB_DEVICE_HANDLE;
 
 
@@ -83,10 +83,10 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 
 ## IoTHubTransportHttp_Create
 ```c
-	extern TRANSPORT_HANDLE IoTHubTransportHttp_Create(const IOTHUB_CLIENT_TRANSPORT_CONFIG* config);
+	extern TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUB_CLIENT_TRANSPORT_CONFIG* config);
 ```
 
-`IoTHubTransportHttp_Create` shall create an `TRANSPORT_HANDLE` to be used as the single connection used by multiple devices. This handle will be used by subsequent calls to this module's API.
+`IoTHubTransportHttp_Create` shall create an `TRANSPORT_LL_HANDLE` to be used as the single connection used by multiple devices. This handle will be used by subsequent calls to this module's API.
 
 
 **SRS_TRANSPORTMULTITHTTP_17_001: [**If parameter `config` is `NULL`, then `IoTHubTransportHttp_Create` shall return `NULL`.**]**   
@@ -104,7 +104,7 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
  
 ## IoTHubTransportHttp_Destroy
 ```c
-	extern void IoTHubTransportHttp_Destroy(TRANSPORT_HANDLE handle);
+	extern void IoTHubTransportHttp_Destroy(TRANSPORT_LL_HANDLE handle);
 ```
 
 **SRS_TRANSPORTMULTITHTTP_17_012: [** `IoTHubTransportHttp_Destroy` shall do nothing is handle is `NULL`. **]**   
@@ -112,7 +112,7 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 
 ## IoTHubTransportHttp_Register
 ```c
-	extern IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
+	extern IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
 ```
 
 `IoTHubTransportHttp_Register` shall bind an IoT Hub device to a transport handle and return a device handle for subsequent device specific calls to this API.
@@ -181,7 +181,7 @@ The result of the `STRING_construct` shall be known as key.
 
 ## IoTHubTransportHttp_DoWork
 ```c
-	void IoTHubTransportHttp_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
+	void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
 ```
 
 `IoTHubTransportHttp_DoWork` performs all the work for all devices registered to the iothub HTTP transport. This includes sending event messages, filtering "too big" messages, pulling messages, pushing them to the upper layer and conveying the answer from the upper layer to iothub.  Devices are processed in round-robin scheduling.
@@ -366,7 +366,7 @@ return;
 
 ## IoTHubTransportHttp_SetOption
 ```c
-    extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_HANDLE handle, const char *optionName, const void* value);
+    extern IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_LL_HANDLE handle, const char *optionName, const void* value);
 ```
 `IoTHubTransportHttp_SetOption` sets the runtime option "optionName" to the value pointed to by value. 
 

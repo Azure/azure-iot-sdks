@@ -7,7 +7,7 @@ THe high level IotHubTransport is created to manage the need for having multiple
 Ideally, when a user wants to make multiple IoTHubClient devices use the same connection, the user might create them like this:
 
 ```c
-TRANSPORT_HL_HANDLE  myTransportHandle = IoTHubTransport_HL_Create(HTTPProtocol, "myHubName", "example.com");
+TRANSPORT_HANDLE  myTransportHandle = IoTHubTransport_HL_Create(HTTPProtocol, "myHubName", "example.com");
 IOTHUB_CLIENT_HANDLE myDevice1 = IoTHubClient_CreateWithTransport(myTransportHandle, &config1);
 IOTHUB_CLIENT_HANDLE myDevice2 = IoTHubClient_CreateWithTransport(myTransportHandle, &config2);
 ``` 

@@ -1312,7 +1312,7 @@ static void setExpectedCallsForConnectionDestroyUpTo(CIoTHubTransportAMQPMocks& 
 	}
 }
 
-static void setupSuccessfulDoWork(TRANSPORT_HANDLE transport, CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG& config, time_t current_time)
+static void setupSuccessfulDoWork(TRANSPORT_LL_HANDLE transport, CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG& config, time_t current_time)
 {
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_OPEN_CBS, DOWORK_MESSAGERECEIVER_NONE);
     setExpectedCallsForCbsAuthentication(mocks, &config, current_time);
@@ -1409,7 +1409,7 @@ TEST_FUNCTION(AMQP_Create_with_null_config_fails)
     transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     // act
-    TRANSPORT_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(NULL);
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(NULL);
 
     // assert
     ASSERT_IS_NULL(transportHandle);
@@ -1426,7 +1426,7 @@ TEST_FUNCTION(AMQP_Create_with_config_null_field1_fails)
     transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     // act
-    TRANSPORT_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transportHandle);
@@ -1445,7 +1445,7 @@ TEST_FUNCTION(AMQP_Create_with_config_null_field2_fails)
     transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     // act
-    TRANSPORT_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transportHandle);
@@ -1465,7 +1465,7 @@ TEST_FUNCTION(AMQP_Create_with_config_deviceId_too_long_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     
     // act
-    TRANSPORT_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transportHandle);
@@ -1484,7 +1484,7 @@ TEST_FUNCTION(AMQP_Create_with_config_deviceId_NULL_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     // act
-    TRANSPORT_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transportHandle);
@@ -1503,7 +1503,7 @@ TEST_FUNCTION(AMQP_Create_with_config_deviceKey_NULL_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     // act
-    TRANSPORT_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transportHandle);
@@ -1522,7 +1522,7 @@ TEST_FUNCTION(AMQP_Create_with_config_hubName_NULL_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     // act
-    TRANSPORT_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transportHandle);
@@ -1541,7 +1541,7 @@ TEST_FUNCTION(AMQP_Create_with_config_hubSuffix_NULL_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     // act
-    TRANSPORT_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transportHandle);
@@ -1563,7 +1563,7 @@ TEST_FUNCTION(AMQP_Create_with_config_hubFqdn_too_long_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     // act
-    TRANSPORT_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transportHandle);
@@ -1589,7 +1589,7 @@ TEST_FUNCTION(AMQP_Create_transport_state_allocation_fails)
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)).IgnoreArgument(1);
 
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transport);
@@ -1619,7 +1619,7 @@ TEST_FUNCTION(AMQP_Create_succeeds)
     setExpectedCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_DEVICEKEY);
 
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NOT_NULL(transport);
@@ -1652,7 +1652,7 @@ TEST_FUNCTION(AMQP_Create_devicesPath_malloc_fails)
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_IOTHUB_FQDN);
 
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transport);
@@ -1684,7 +1684,7 @@ TEST_FUNCTION(AMQP_Create_devicesPath_STRING_construct_fails)
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_IOTHUB_FQDN);
     
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transport);
@@ -1714,7 +1714,7 @@ TEST_FUNCTION(AMQP_Create_targetAddress_malloc_fails)
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_DEVICES_PATH);
 
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transport);
@@ -1746,7 +1746,7 @@ TEST_FUNCTION(AMQP_Create_targetAddress_STRING_construct_fails)
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_DEVICES_PATH);
 
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transport);
@@ -1776,7 +1776,7 @@ TEST_FUNCTION(AMQP_Create_receiveAddress_malloc_fails)
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_TARGET_ADDRESS);
 
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transport);
@@ -1808,7 +1808,7 @@ TEST_FUNCTION(AMQP_Create_receiveAddress_STRING_construct_fails)
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_TARGET_ADDRESS);
 
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transport);
@@ -1835,7 +1835,7 @@ TEST_FUNCTION(AMQP_Create_sasTokenKeyName_allocation_fails)
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_RECEIVE_ADDRESS);
 
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transport);
@@ -1862,7 +1862,7 @@ TEST_FUNCTION(AMQP_Create_deviceKey_allocation_fails)
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_SASTOKEN_KEYNAME);
 
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transport);
@@ -1890,7 +1890,7 @@ TEST_FUNCTION(AMQP_Create_deviceKey_copy_fails)
     setExpectedCleanupCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_DEVICEKEY);
 
     // act
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     // assert
     ASSERT_IS_NULL(transport);
@@ -1921,7 +1921,7 @@ TEST_FUNCTION(AMQP_Destroy_succeeds_no_DoWork)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     ASSERT_IS_NOT_NULL(transport);
 
@@ -1972,7 +1972,7 @@ TEST_FUNCTION(AMQP_DoWork_client_handle_NULL_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
 
@@ -2000,7 +2000,7 @@ TEST_FUNCTION(AMQP_DoWork_saslmechanism_create_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_GET_TLS_IO, DOWORK_MESSAGERECEIVER_NONE);
@@ -2035,7 +2035,7 @@ TEST_FUNCTION(AMQP_DoWork_saslio_create_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_SASLIO_GET_INTERFACE, DOWORK_MESSAGERECEIVER_NONE);
@@ -2069,7 +2069,7 @@ TEST_FUNCTION(AMQP_DoWork_connection_create_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_CREATE_SASLIO, DOWORK_MESSAGERECEIVER_NONE);
@@ -2104,7 +2104,7 @@ TEST_FUNCTION(AMQP_DoWork_session_create_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_CREATE_CONNECTION, DOWORK_MESSAGERECEIVER_NONE);
@@ -2141,7 +2141,7 @@ TEST_FUNCTION(AMQP_DoWork_cbs_create_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_OUTGOING_WINDOW, DOWORK_MESSAGERECEIVER_NONE);
@@ -2176,7 +2176,7 @@ TEST_FUNCTION(AMQP_DoWork_cbs_open_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS, DOWORK_MESSAGERECEIVER_NONE);
@@ -2209,7 +2209,7 @@ TEST_FUNCTION(AMQP_DoWork_SASToken_create_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
     size_t expected_expiry_time = (size_t)(difftime(current_time, 0) + TEST_SAS_TOKEN_LIFETIME_MS / 1000);
 
@@ -2245,7 +2245,7 @@ TEST_FUNCTION(AMQP_DoWork_cbs_put_token_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
 
     mocks.ResetAllCalls();
@@ -2283,7 +2283,7 @@ TEST_FUNCTION(AMQP_DoWork_CBS_auth_timeout_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
     time_t expiration_time = addSecondsToTime(current_time, TEST_CBS_REQUEST_TIMEOUT_MS + 1);
 
@@ -2318,7 +2318,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_source_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
     time_t expiration_time = addSecondsToTime(current_time, TEST_CBS_REQUEST_TIMEOUT_MS + 1);
 
@@ -2359,7 +2359,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_target_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
     time_t expiration_time = addSecondsToTime(current_time, TEST_CBS_REQUEST_TIMEOUT_MS + 1);
 
@@ -2403,7 +2403,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_link_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
     time_t expiration_time = addSecondsToTime(current_time, TEST_CBS_REQUEST_TIMEOUT_MS + 1);
 
@@ -2450,7 +2450,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
     time_t expiration_time = addSecondsToTime(current_time, TEST_CBS_REQUEST_TIMEOUT_MS + 1);
 
@@ -2506,7 +2506,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_open_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
     time_t expiration_time = addSecondsToTime(current_time, TEST_CBS_REQUEST_TIMEOUT_MS + 1);
 
@@ -2566,7 +2566,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_source_create_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
     ASSERT_ARE_EQUAL(int, subscribe_result, 0);
 
@@ -2611,7 +2611,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_target_create_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
     ASSERT_ARE_EQUAL(int, subscribe_result, 0);
 
@@ -2658,7 +2658,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_link_create_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
     ASSERT_ARE_EQUAL(int, subscribe_result, 0);
 
@@ -2707,7 +2707,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_settle_mode_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
     ASSERT_ARE_EQUAL(int, subscribe_result, 0);
 
@@ -2758,7 +2758,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_create_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
     ASSERT_ARE_EQUAL(int, subscribe_result, 0);
 
@@ -2818,7 +2818,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_open_fails)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
     ASSERT_ARE_EQUAL(int, subscribe_result, 0);
 
@@ -2881,7 +2881,7 @@ TEST_FUNCTION(AMQP_DoWork_expired_SASToken_fails)
     time_t current_time = time(NULL);
     time_t expiration_time = addSecondsToTime(current_time, (TEST_SAS_TOKEN_LIFETIME_MS/2)/1000 + 1);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
     ASSERT_ARE_EQUAL(int, subscribe_result, 0);
 
@@ -2926,7 +2926,7 @@ TEST_FUNCTION(AMQP_DoWork_succeeds_when_2_waiting_to_send_messages_are_in_the_li
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
     
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     addTestEvents(config.waitingToSend, 2, true);
 
@@ -2971,7 +2971,7 @@ TEST_FUNCTION(AMQP_GetSendStatus_idle_succeeds)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     IOTHUB_CLIENT_STATUS iotHubClientStatus;
 
@@ -3006,7 +3006,7 @@ TEST_FUNCTION(AMQP_GetSendStatus_inProgress_not_empty_succeeds)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     IOTHUB_CLIENT_STATUS iotHubClientStatus;
 
@@ -3041,7 +3041,7 @@ TEST_FUNCTION(AMQP_GetSendStatus_waitingToSend_not_empty_succeeds)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     IOTHUB_CLIENT_STATUS iotHubClientStatus;
 
@@ -3072,7 +3072,7 @@ TEST_FUNCTION(AMQP_Subscribe_NULL_transport_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
 
@@ -3098,7 +3098,7 @@ TEST_FUNCTION(AMQP_Unsubscribe_NULL_transport_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
 
@@ -3124,7 +3124,7 @@ TEST_FUNCTION(AMQP_SetOption_NULL_transport_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
 
@@ -3151,7 +3151,7 @@ TEST_FUNCTION(AMQP_SetOption_NULL_option_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
 
@@ -3179,7 +3179,7 @@ TEST_FUNCTION(AMQP_SetOption_NULL_value_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
 
@@ -3206,7 +3206,7 @@ TEST_FUNCTION(AMQP_SetOption_invalid_option_fails)
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     mocks.ResetAllCalls();
 
@@ -3237,7 +3237,7 @@ TEST_FUNCTION(AMQP_DoWork_send_one_message_succeeds)
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -3299,7 +3299,7 @@ TEST_FUNCTION(when_getting_the_properties_map_for_a_message_to_be_sent_fails_AMQ
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -3363,7 +3363,7 @@ TEST_FUNCTION(when_getting_the_internals_for_the_properties_map_for_a_message_to
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -3437,7 +3437,7 @@ TEST_FUNCTION(AMQP_DoWork_encodes_two_properties_on_an_IoTHub_Message_before_giv
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -3517,7 +3517,7 @@ TEST_FUNCTION(when_creating_the_property_map_fails_AMQP_DoWork_completes_the_mes
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -3588,7 +3588,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_1st_property_key_fails_AMQP_
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -3662,7 +3662,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_1st_property_value_fails_AMQ
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -3739,7 +3739,7 @@ TEST_FUNCTION(when_setting_the_value_for_the_1st_property_fails_AMQP_DoWork_comp
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -3819,7 +3819,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_for_key_of_the_2nd_property_
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -3900,7 +3900,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_for_value_of_the_2nd_propert
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -3983,7 +3983,7 @@ TEST_FUNCTION(when_setting_the_2nd_property_on_the_uAMQP_map_fails_AMQP_DoWork_c
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -4070,7 +4070,7 @@ TEST_FUNCTION(when_setting_the_message_properties_fails_AMQP_DoWork_completes_th
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
-    TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
     setupSuccessfulDoWork(transport, mocks, config, current_time);
 
@@ -4145,7 +4145,7 @@ TEST_FUNCTION(when_setting_the_message_properties_fails_AMQP_DoWork_completes_th
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_003: [IoTHubTransportAMQ_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_003: [IoTHubTransportAMQ_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
 TEST_FUNCTION(AMQP_Register_transport_success_returns_transport)
 {
 	// arrange
@@ -4159,7 +4159,7 @@ TEST_FUNCTION(AMQP_Register_transport_success_returns_transport)
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
-	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	mocks.ResetAllCalls();
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
@@ -4197,7 +4197,7 @@ TEST_FUNCTION(AMQP_Register_twice_returns_null_second_time)
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
-	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 	mocks.ResetAllCalls();
 
@@ -4236,7 +4236,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_mismatch_returns_null)
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
-	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	mocks.ResetAllCalls();
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
@@ -4274,7 +4274,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_mismatch_returns_null)
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
-	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	mocks.ResetAllCalls();
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
@@ -4311,7 +4311,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_null_returns_null)
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
-	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	mocks.ResetAllCalls();
 
 	// act
@@ -4340,7 +4340,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_returns_null)
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
-	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	mocks.ResetAllCalls();
 
 	// act
@@ -4369,7 +4369,7 @@ TEST_FUNCTION(AMQP_Register_transport_wts_null_returns_null)
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
-	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	mocks.ResetAllCalls();
 
 	// act
@@ -4384,7 +4384,7 @@ TEST_FUNCTION(AMQP_Register_transport_wts_null_returns_null)
 	cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQ_Register shall return NULL if the TRANSPORT_HANDLE is NULL.] 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQ_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.] 
 TEST_FUNCTION(AMQP_Register_transport_null_returns_null)
 {
 	// arrange
@@ -4394,7 +4394,7 @@ TEST_FUNCTION(AMQP_Register_transport_null_returns_null)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
-	TRANSPORT_HANDLE transport = NULL;
+	TRANSPORT_LL_HANDLE transport = NULL;
 	mocks.ResetAllCalls();
 
 	// act
@@ -4422,7 +4422,7 @@ TEST_FUNCTION(AMQP_Unregister_transport_success)
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
-	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
 	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
@@ -4452,7 +4452,7 @@ TEST_FUNCTION(AMQP_Register_transport_Register_Unregister_Register_success_retur
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
-	TRANSPORT_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 	transport_interface->IoTHubTransport_Unregister(devHandle);
 	mocks.ResetAllCalls();
