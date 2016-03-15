@@ -598,7 +598,7 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceKey;
                 IotHubUri.getResourceUri(hostName, deviceId);
                 result = resourceUri;
-                new IotHubSasToken(resourceUri, deviceId, deviceKey, anyLong );
+                new IotHubSasToken(resourceUri, deviceKey, anyLong );
                 result = mockToken;
             }
         };

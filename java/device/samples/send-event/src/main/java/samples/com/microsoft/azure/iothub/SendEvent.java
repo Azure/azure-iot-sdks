@@ -129,7 +129,7 @@ public class SendEvent
                 {
                 }
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

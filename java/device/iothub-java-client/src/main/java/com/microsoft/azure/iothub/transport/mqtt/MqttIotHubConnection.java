@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.iothub.transport.mqtt;
 
-import com.microsoft.azure.iothub.AzureHubType;
 import com.microsoft.azure.iothub.DeviceClientConfig;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.Message;
@@ -120,7 +119,6 @@ public class MqttIotHubConnection implements MqttCallback
             try
             {
                 IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                        this.config.getDeviceId(),
                         this.config.getDeviceKey(),
                         System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
 
