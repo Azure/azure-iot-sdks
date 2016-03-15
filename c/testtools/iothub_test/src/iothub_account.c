@@ -167,7 +167,7 @@ static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo)
             }
             else
             {
-                if (sprintf_s(accountInfo->deviceId, len + 1, DEVICE_PREFIX_FMT, &seedValue, tmInfo->tm_hour, tmInfo->tm_min, tmInfo->tm_sec, rand() % MAX_RAND_VALUE) <= 0)
+                if (sprintf_s(accountInfo->deviceId, len + 1, DEVICE_PREFIX_FMT, &tmInfo, tmInfo->tm_hour, tmInfo->tm_min, tmInfo->tm_sec, rand() % MAX_RAND_VALUE) <= 0)
                 {
                     LogError("Failure constructing device ID.\r\n");
                     result = __LINE__;

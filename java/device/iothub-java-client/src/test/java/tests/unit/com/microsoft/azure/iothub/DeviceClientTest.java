@@ -235,7 +235,7 @@ public class DeviceClientTest
         DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
 
-        final long expectedSendPeriodMillis = 5000l;
+        final long expectedSendPeriodMillis = 10l;
         new Verifications()
         {
             {
@@ -262,7 +262,7 @@ public class DeviceClientTest
         DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
 
-        final long expectedReceivePeriodMillis = 5000l;
+        final long expectedReceivePeriodMillis = 10l;
         new Verifications()
         {
             {
