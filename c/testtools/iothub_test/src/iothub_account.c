@@ -342,7 +342,7 @@ static int create_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
 
 static int delete_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
 {
-    int result;
+    int result = 0;
     if (accountInfo->deviceId != NULL)
     {
         BUFFER_HANDLE deleteDevice = sendDeviceRegistryInfo(accountInfo, NULL, HTTPAPI_REQUEST_DELETE);
