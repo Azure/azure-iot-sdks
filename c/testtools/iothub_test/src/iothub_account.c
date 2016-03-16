@@ -17,19 +17,30 @@
 #include "iot_logging.h"
 #include "sastoken.h"
 
+#include "httpapiexsas.h"
+#include "base64.h"
+#include "hmacsha256.h"
+#include "iot_logging.h"
+#include "sastoken.h"
+
 #ifdef MBED_BUILD_TIMESTAMP
 #define MBED_PARAM_MAX_LENGTH 256
 #endif
 
-const char* URL_API_VERSION = "api-version=2016-02-03";
-const char* DEVICE_JSON_FMT = "{ deviceId: \"%s\", Etag: null, State: null, StateReason: null, ConnectionState: null, ConnectionStateUpdatedTime: null, LastActivityTime: null }";
-const char* DEVICE_PREFIX_FMT = "e2eDevice_%d%d%d";
-const char* RELATIVE_PATH_FMT = "/devices/%s?%s";
-const char* SHARED_ACCESS_KEY = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
+static const char* URL_API_VERSION = "api-version=2016-02-03";
+static const char* DEVICE_JSON_FMT = "{\"deviceId\":\"%s\",\"etag\":null,\"connectionState\":\"Disconnected\",\"status\":\"enabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"authentication\":{\"symmetricKey\":{\"primaryKey\":null,\"secondaryKey\":null}}}";
+static const char* DEVICE_PREFIX_FMT = "e2eDevice_%p%d%d%d%d";
+static const char* RELATIVE_PATH_FMT = "/devices/%s?%s";
+static const char* SHARED_ACCESS_KEY = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
 
-const char *DEFAULT_CONSUMER_GROUP = "$Default";
-const int DEFAULT_PARTITION_COUNT = 16;
-#define MAX_LENGTH_OF_UNSIGNED_INT  12
+static const char *DEFAULT_CONSUMER_GROUP = "$Default";
+static const int DEFAULT_PARTITION_COUNT = 16;
+
+static const char* PRIMARY_KEY_FIELD = "\"primaryKey\":\"";
+static const size_t PRIMARY_KEY_FIELD_LEN = 14;
+
+#define MAX_LENGTH_OF_UNSIGNED_INT  6
+#define MAX_LENGTH_OF_TIME_VALUE    12
 #define MAX_RAND_VALUE              10000
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG
@@ -47,18 +58,284 @@ typedef struct IOTHUB_ACCOUNT_INFO_TAG
     char* deviceKey;
 } IOTHUB_ACCOUNT_INFO;
 
-// TODO: This function will query the server using http
+static int parseDeviceJson(IOTHUB_ACCOUNT_INFO* accountInfo, BUFFER_HANDLE jsonBuffer)
+{
+    int result = __LINE__;
+    const char* deviceJson = (const char*)BUFFER_u_char(jsonBuffer);
+    size_t jsonLen = BUFFER_length(jsonBuffer);
+    if (deviceJson != NULL && jsonLen > PRIMARY_KEY_FIELD_LEN)
+    {
+        // Start to the end of the json because the primary key is at the end
+        const char* iterator = deviceJson + jsonLen - PRIMARY_KEY_FIELD_LEN;
+        while (iterator >= deviceJson)
+        {
+            // Once we find the primary key field then copy it into the buffer
+            if (memcmp(iterator, PRIMARY_KEY_FIELD, PRIMARY_KEY_FIELD_LEN) == 0)
+            {
+                // Move to the beginning of the primary key value
+                iterator += PRIMARY_KEY_FIELD_LEN;
+                // Store where we are
+                const char* devKeyMarker = iterator;
+
+                // Now go till we find the quote
+                while (*devKeyMarker != '\"' && devKeyMarker != (deviceJson + jsonLen - PRIMARY_KEY_FIELD_LEN)) { devKeyMarker++; }
+                size_t keyLen = devKeyMarker - iterator;
+
+                // Allocate key
+                accountInfo->deviceKey = (char*)malloc(keyLen + 1);
+                if (accountInfo->deviceKey == NULL)
+                {
+                    LogError("Failure allocating device key.\r\n");
+                    result = __LINE__;
+                }
+                else
+                {
+                    // Copy the data to the key
+                    memcpy(accountInfo->deviceKey, iterator, keyLen);
+                    accountInfo->deviceKey[keyLen] = '\0';
+                    result = 0;
+                }
+                break;
+            }
+            iterator--;
+        }
+    }
+    return result;
+}
+
+static HTTP_HEADERS_HANDLE getContentHeaders(bool appendIfMatch)
+{
+    HTTP_HEADERS_HANDLE httpHeader = HTTPHeaders_Alloc();
+    if (httpHeader != NULL)
+    {
+        if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, "Authorization", " ") != HTTP_HEADERS_OK ||
+            HTTPHeaders_AddHeaderNameValuePair(httpHeader, "User-Agent", "Microsoft.Azure.Devices/1.0.0") != HTTP_HEADERS_OK ||
+            HTTPHeaders_AddHeaderNameValuePair(httpHeader, "Accept", "application/json") != HTTP_HEADERS_OK ||
+            HTTPHeaders_AddHeaderNameValuePair(httpHeader, "Content-Type", "application/json; charset=utf-8") != HTTP_HEADERS_OK)
+        {
+            LogError("Failure adding http headers.\r\n");
+            HTTPHeaders_Free(httpHeader);
+            httpHeader = NULL;
+        }
+        else
+        {
+            if (appendIfMatch)
+            {
+                if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, "If-Match", "*") != HTTP_HEADERS_OK)
+                {
+                    LogError("Failure adding if-Match http headers.\r\n");
+                    HTTPHeaders_Free(httpHeader);
+                    httpHeader = NULL;
+                }
+            }
+        }
+    }
+    return httpHeader;
+}
+
+static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo)
+{
+    int result;
+
+    time_t tmValue = time(NULL);
+    if (tmValue == (time_t)-1)
+    {
+        LogError("time failed.\r\n");
+        result = __LINE__;
+    }
+    else
+    {
+        struct tm* tmInfo = gmtime(&tmValue);
+        if (tmInfo == NULL)
+        {
+            LogError("gmtime failed.\r\n");
+            result = __LINE__;
+        }
+        else
+        {
+            size_t seedValue = tmInfo->tm_hour*tmInfo->tm_min*tmInfo->tm_sec;
+            LogInfo("TimeInfo h:%d m:%d s:%d.\r\n", tmInfo->tm_hour, tmInfo->tm_min, tmInfo->tm_sec);
+            srand((unsigned int)time(NULL));
+
+            // Create pseudo random device Id
+            size_t len = strlen(DEVICE_PREFIX_FMT) + (MAX_LENGTH_OF_UNSIGNED_INT * 2) + MAX_LENGTH_OF_TIME_VALUE+8;
+            accountInfo->deviceId = (char*)malloc(len + 1);
+            if (accountInfo->deviceId == NULL)
+            {
+                LogError("Failure allocating device ID.\r\n");
+                result = __LINE__;
+            }
+            else
+            {
+                if (sprintf_s(accountInfo->deviceId, len + 1, DEVICE_PREFIX_FMT, &tmInfo, tmInfo->tm_hour, tmInfo->tm_min, tmInfo->tm_sec, rand() % MAX_RAND_VALUE) <= 0)
+                {
+                    LogError("Failure constructing device ID.\r\n");
+                    result = __LINE__;
+                }
+                else
+                {
+                    LogInfo("Created Device %s.\r\n", accountInfo->deviceId);
+                    result = 0;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+static BUFFER_HANDLE constructDeviceJson(IOTHUB_ACCOUNT_INFO* accountInfo)
+{
+    BUFFER_HANDLE result;
+
+    size_t len = strlen(DEVICE_JSON_FMT) + strlen(accountInfo->deviceId);
+    char* deviceJson = (char*)malloc(len + 1);
+    if (deviceJson == NULL)
+    {
+        LogError("Failure allocating device Json.\r\n");
+        free(accountInfo->deviceId);
+    }
+    else
+    {
+        int dataLen = sprintf_s(deviceJson, len + 1, DEVICE_JSON_FMT, accountInfo->deviceId);
+        if (dataLen <= 0)
+        {
+            LogError("Failure constructing device Json.\r\n");
+            free(accountInfo->deviceId);
+        }
+        else
+        {
+            result = BUFFER_create(deviceJson, dataLen);
+            if (result == NULL)
+            {
+                LogError("Failure creating Json buffer.\r\n");
+                accountInfo->deviceId = NULL;
+            }
+        }
+        free(deviceJson);
+    }
+    return result;
+}
+
+static BUFFER_HANDLE sendDeviceRegistryInfo(IOTHUB_ACCOUNT_INFO* accountInfo, BUFFER_HANDLE deviceBuffer, HTTPAPI_REQUEST_TYPE requestType)
+{
+    BUFFER_HANDLE result;
+
+    STRING_HANDLE accessKey = STRING_construct(accountInfo->sharedAccessKey);
+    STRING_HANDLE uriResouce = STRING_construct(accountInfo->hostname);
+    STRING_HANDLE keyName = STRING_construct(accountInfo->keyName);
+    if (accessKey != NULL && uriResouce != NULL && keyName != NULL)
+    {
+        HTTPAPIEX_SAS_HANDLE httpHandle = HTTPAPIEX_SAS_Create(accessKey, uriResouce, keyName);
+        if (httpHandle != NULL)
+        {
+            HTTPAPIEX_HANDLE httpExApi = HTTPAPIEX_Create(accountInfo->hostname);
+            if (httpExApi == NULL)
+            {
+                LogError("Failure creating httpApiEx with hostname: %s.\r\n", accountInfo->hostname);
+                result = NULL;
+            }
+            else
+            {
+                char relativePath[256];
+                if (sprintf_s(relativePath, 256, RELATIVE_PATH_FMT, accountInfo->deviceId, URL_API_VERSION) <= 0)
+                {
+                    LogError("Failure creating relative path.\r\n");
+                    result = NULL;
+                }
+                else
+                {
+
+                    unsigned int statusCode = 0;
+
+                    // Send PUT method to url
+                    HTTP_HEADERS_HANDLE httpHeader = getContentHeaders((deviceBuffer == NULL) ? true : false);
+                    if (httpHeader == NULL)
+                    {
+                        result = NULL;
+                    }
+                    else
+                    {
+                        BUFFER_HANDLE responseContent = BUFFER_new();
+                        if (HTTPAPIEX_SAS_ExecuteRequest(httpHandle, httpExApi, requestType, relativePath, httpHeader, deviceBuffer, &statusCode, NULL, responseContent) != HTTPAPIEX_OK)
+                        {
+                            LogError("Failure calling HTTPAPIEX_SAS_ExecuteRequest.\r\n");
+                            result = NULL;
+                        }
+                        else
+                        {
+                            // 409 means the device is already created so we don't need
+                            // to create another one.
+                            if (statusCode != 409 && statusCode > 300)
+                            {
+                                LogError("Http Failure status code %d.\r\n", statusCode);
+                                BUFFER_delete(responseContent);
+                                result = NULL;
+                            }
+                            else
+                            {
+                                result = responseContent;
+                            }
+                        }
+                    }
+                    HTTPHeaders_Free(httpHeader);
+                }
+                HTTPAPIEX_Destroy(httpExApi);
+            }
+            HTTPAPIEX_SAS_Destroy(httpHandle);
+        }
+        else
+        {
+            LogError("Http Failure with HTTPAPIEX_SAS_Create.\r\n");
+            result = NULL;
+        }
+    }
+    STRING_delete(accessKey);
+    STRING_delete(uriResouce);
+    STRING_delete(keyName);
+    return result;
+}
+
 static int create_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
 {
     int result = 0;
-    if (mallocAndStrcpy_s(&accountInfo->deviceId, getenv("IOTHUB_DEVICE_ID")) != 0 ||
-        mallocAndStrcpy_s(&accountInfo->deviceKey, getenv("IOTHUB_DEVICE_KEY")) != 0)
+    if (generateDeviceName(accountInfo) != 0)
     {
-        free(accountInfo->deviceId);
-        free(accountInfo->deviceKey);
-        accountInfo->deviceId = NULL;
-        accountInfo->deviceKey = NULL;
         result = __LINE__;
+    }
+    else
+    {
+        BUFFER_HANDLE deviceJson = constructDeviceJson(accountInfo);
+        if (deviceJson == NULL)
+        {
+            result = __LINE__;
+            free(accountInfo->deviceId);
+            accountInfo->deviceId = NULL;
+        }
+        else
+        {
+            BUFFER_HANDLE deviceResp = sendDeviceRegistryInfo(accountInfo, deviceJson, HTTPAPI_REQUEST_PUT);
+            if (deviceResp != NULL)
+            {
+                if (parseDeviceJson(accountInfo, deviceResp) != 0)
+    {
+                    result = __LINE__;
+        free(accountInfo->deviceId);
+        accountInfo->deviceId = NULL;
+                }
+                else
+                {
+                    result = 0;
+                }
+                BUFFER_delete(deviceResp);
+            }
+            else
+            {
+        result = __LINE__;
+                free(accountInfo->deviceId);
+                accountInfo->deviceId = NULL;
+            }
+            BUFFER_delete(deviceJson);
+        }
     }
     return result;
 }
@@ -66,8 +343,23 @@ static int create_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
 static int delete_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
 {
     int result = 0;
+    if (accountInfo->deviceId != NULL)
+    {
+        BUFFER_HANDLE deleteDevice = sendDeviceRegistryInfo(accountInfo, NULL, HTTPAPI_REQUEST_DELETE);
+        if (deleteDevice == NULL)
+        {
+            LogError("Unable to delete created device %s.\r\n", accountInfo->deviceId);
+            result = __LINE__;
+        }
+        else
+        {
+            BUFFER_delete(deleteDevice);
+            result = 0;
+        }
+
     free(accountInfo->deviceId);
     free(accountInfo->deviceKey);
+    }
     return result;
 }
 
@@ -154,6 +446,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
 
         if (result->connString == NULL || result->eventhubConnString == NULL)
         {
+            LogError("Failure retrieving Connection Strings values.\r\n");
             free(result);
             result = NULL;
         }
@@ -168,7 +461,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
             {
                 if (create_Device(result) != 0)
                 {
-                    free(result);
+                    IoTHubAccount_deinit((IOTHUB_ACCOUNT_INFO_HANDLE)result);
                     result = NULL;
                 }
             }
@@ -327,8 +620,11 @@ const char* IoTHubAccount_GetSharedAccessSignature(IOTHUB_ACCOUNT_INFO_HANDLE ac
     {
         if (acctInfo->sharedAccessToken != NULL)
         {
-            free(acctInfo->sharedAccessToken);
+            // Reuse the sharedAccessToken if it's been created already
+            result = acctInfo->sharedAccessToken;
         }
+        else
+        {
         time_t currentTime = time(NULL);
         size_t expiry_time = (size_t)(currentTime + 3600);
 
@@ -340,6 +636,7 @@ const char* IoTHubAccount_GetSharedAccessSignature(IOTHUB_ACCOUNT_INFO_HANDLE ac
             STRING_HANDLE sasHandle = SASToken_Create(accessKey, iotName, keyName, expiry_time);
             if (sasHandle == NULL)
             {
+
                 result = NULL;
             }
             else
@@ -359,6 +656,7 @@ const char* IoTHubAccount_GetSharedAccessSignature(IOTHUB_ACCOUNT_INFO_HANDLE ac
         STRING_delete(iotName);
         STRING_delete(keyName);
     }
+    }
     else
     {
         result = NULL;
@@ -376,7 +674,7 @@ const char* IoTHubAccount_GetEventhubAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHa
     {
         STRING_HANDLE iothub_connection_string_str;
 
-        if((iothub_connection_string_str = STRING_construct(iothub_connection_string)) != NULL)
+        if ((iothub_connection_string_str = STRING_construct(iothub_connection_string)) != NULL)
         {
             STRING_TOKENIZER_HANDLE tokenizer;
         
@@ -468,3 +766,4 @@ const size_t IoTHubAccount_GetIoTHubPartitionCount(IOTHUB_ACCOUNT_INFO_HANDLE ac
 #endif
     return (size_t)value;
 }
+

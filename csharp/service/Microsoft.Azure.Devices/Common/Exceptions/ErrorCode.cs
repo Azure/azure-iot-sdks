@@ -15,6 +15,10 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
         ArgumentNull = 400005,
         IotHubFormatError = 400006,
         DeviceStorageEntitySerializationError = 400007,
+        BlobContainerValidationError = 400008,
+        ImportWarningExistsError = 400009,
+        InvalidSchemaVersion = 400010,
+        DeviceDefinedMultipleTimes = 400011,
 
         //Unauthorized - 401
         IotHubNotFound = 401001,
@@ -42,6 +46,7 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
 
         //RequestEntityTooLarge - 413
         MessageTooLarge = 413001,
+        TooManyDevices = 413002,
 
         //Throttling Exception 
         ThrottlingException = 429001,

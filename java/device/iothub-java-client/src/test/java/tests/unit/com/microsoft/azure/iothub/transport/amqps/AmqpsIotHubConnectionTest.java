@@ -61,7 +61,6 @@ public class AmqpsIotHubConnectionTest {
     protected Event mockEvent;
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_001: [The constructor shall save the configuration.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_14_003: [The constructor shall create a new SAS token and copy all input parameters to private member variables.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_004: [The constructor shall set it’s state to CLOSED.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_005: [The constructor shall initialize a new private queue for received messages.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_006: [The constructor shall initialize a new private map for messages that are in progress.]
@@ -75,13 +74,11 @@ public class AmqpsIotHubConnectionTest {
         String actualHostName = Deencapsulation.getField(connection, "hostName");
         String actualDeviceId = Deencapsulation.getField(connection, "deviceID");
         String actualUserName = Deencapsulation.getField(connection, "userName");
-        String actualSasToken = Deencapsulation.getField(connection, "sasToken");
         DeviceClientConfig actualConfig = Deencapsulation.getField(connection, "config");
 
         assertEquals(hostName, actualHostName);
         assertEquals(deviceId + "@sas." + hubName, actualUserName);
         assertEquals(deviceId, actualDeviceId);
-        assertEquals(mockToken.toString(), actualSasToken);
         assertEquals(mockConfig, actualConfig);
 
         assertEquals(LinkedBlockingQueue.class, Deencapsulation.getField(connection, "receivedMessageQueue").getClass());
@@ -250,7 +247,7 @@ public class AmqpsIotHubConnectionTest {
         AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig);
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_14_008: [The function shall initialize it’s AmqpsIotHubConnectionBaseHandler using the saved host name, user name, device ID and sas token.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_14_008: [The function shall initialize its AmqpsIotHubConnectionBaseHandler using the saved host name, user name, device ID and sas token.]
     @Test
     public void openInitializesBaseHandler(
             @Mocked CompletableFuture<Boolean> future) throws InterruptedException, ExecutionException, IOException, TimeoutException {
@@ -598,8 +595,8 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceKey;
                 IotHubUri.getResourceUri(hostName, deviceId);
                 result = resourceUri;
-                new IotHubSasToken(resourceUri, deviceId, deviceKey, anyLong );
-                result = mockToken;
+//                new IotHubSasToken(resourceUri, deviceKey, anyLong );
+//                result = mockToken;
             }
         };
     }

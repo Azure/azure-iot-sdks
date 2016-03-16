@@ -106,6 +106,7 @@
     <Compile Include="Common\Amqp\ClientWebSocketTransport.cs" />
     <Compile Include="Common\Amqp\WebSocketConstants.cs" />
     <Compile Include="Common\Exceptions\ErrorCode.cs" />
+    <Compile Include="Common\Exceptions\TooManyDevicesException.cs" />
     <Compile Include="Common\PerfectHash.cs" />
     <Compile Include="AuthenticationMechanism.cs" />
     <Compile Include="AuthenticationMethodFactory.cs" />
@@ -251,7 +252,9 @@
       <LastGenOutput>ApiResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Common\Resources.resx" />
+    <EmbeddedResource Include="Common\Resources.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

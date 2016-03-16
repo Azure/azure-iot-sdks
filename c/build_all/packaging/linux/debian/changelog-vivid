@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0-8) vivid; urgency=low
+azure-iot-sdk-c (0.1.0-10) vivid; urgency=low
 
   * Initial release
 
@@ -14,4 +14,6 @@ azure-iot-sdk-c (0.1.0-8) vivid; urgency=low
 
   * Fix message settlement bug in AMQP Transport (#91bfe82)
 
- -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 20 Oct 2015 17:24:51 +0000
+  * Fixed memory leaks on AMQP and MQTT client transports (#6f6210c)
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 11 Mar 2016 17:24:51 +0000

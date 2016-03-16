@@ -60,15 +60,3 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 rem -- Clean directories
 del /F /Q %client-build-root%\build\tosign
 del /F /Q %client-build-root%\build\signed
-
-rem ******************************
-rem * Sign the native "x64" dlls *
-rem ******************************
-
-rem -- Auto-sign the native "x64" dlls placed in the "tosign" Folder
-csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=401 /d="Signing Azure IoT Native Client binaries"
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-rem -- Clean directories
-del /F /Q %client-build-root%\build\tosign
-del /F /Q %client-build-root%\build\signed
