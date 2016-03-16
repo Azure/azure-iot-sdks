@@ -37,12 +37,8 @@ You should have the following items ready before beginning the process:
 -   [BeagleBone Green](http://beagleboard.org/Green).
 -   USB Mini cable.
 -   Ethernet cable or Wi-Fi dongle
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-#### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-#### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="Step-2-PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -66,9 +62,9 @@ You should have the following items ready before beginning the process:
 
         sudo apt-get update
 
-        sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
+        sudo apt-get install -y curl libcurl4-openssl-dev build-essential cmake git
         
-    ***Note:*** *This setup process requires cmake version 3.0 or higher.* 
+    ***Note:*** *This setup process requires cmake version 2.8.12 or higher.* 
     
     *You can verify the current version installed in your environment using the  following command:*
 
@@ -96,21 +92,13 @@ You should have the following items ready before beginning the process:
 
         sudo ./azure-iot-sdks/c/build_all/linux/build.sh
 
-## 3.2 Send Device Events to IoT Hub:
+## 3.2 Send/Receive messages to/from IoT Hub:
 
 -   Run the sample by issuing following command:
 
         ~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp
 
--   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to see the data your device is sending.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool] (https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
-
-## 3.3 Receive messages from IoT Hub
-
--   On Windows, refer "Send cloud-to-device messages" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) for instructions on sending messages to device.
-
--   If you are running other OS, please use the JavaScript tool [iot-hub explorer tool] (https://github.com/Azure/azure-iot-sdks/tree/master/tools/iothub-explorer/doc)
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application and how to send cloud-to-device messages to the application.
 
 
 <a name="tips"></a>
@@ -120,3 +108,6 @@ You should have the following items ready before beginning the process:
 
       cd ~/cmake/serializer/samples
       make -f Makefile all
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

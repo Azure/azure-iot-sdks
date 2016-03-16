@@ -88,6 +88,15 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The device identifier {0} is invalid..
+        /// </summary>
+        internal static string DeviceIdInvalid {
+            get {
+                return ResourceManager.GetString("DeviceIdInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The id of the device was not set..
         /// </summary>
         internal static string DeviceIdNotSet {

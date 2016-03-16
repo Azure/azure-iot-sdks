@@ -113,8 +113,11 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(TRANSPORT_HANDLE handle, 
 IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_HANDLE handle, const char* optionName, const void* value)
 ```
 **SRS_IOTHUB_MQTT_TRANSPORT_07_021: [**If any parameter is NULL then IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.**]**
-**SRS_IOTHUB_MQTT_TRANSPORT_07_031: [**If the option parameter is set to "logtrace" then the value shall be a bool_ptr and the value will determine if the mqtt client log is on or off.**]**   
+**SRS_IOTHUB_MQTT_TRANSPORT_07_031: [**If the option parameter is set to "logtrace" then the value shall be a bool_ptr and the value will determine if the mqtt client log is on or off.**]**      
 **SRS_IOTHUB_MQTT_TRANSPORT_07_032: [**IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG if the option parameter is not a known option string.**]**   
+**SRS_IOTHUB_MQTT_TRANSPORT_07_036: [**If the option parameter is set to "keepalive" then the value shall be a int_ptr and the value will determine the mqtt keepalive time that is set for pings.**]**
+**SRS_IOTHUB_MQTT_TRANSPORT_07_037: [**If the option parameter is set to supplied int_ptr keepalive is the same value as the existing keepalive then IoTHubTransportMqtt_SetOption shall do nothing.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_038: [**If the client is connected when the keepalive is set then IoTHubTransportMqtt_SetOption shall disconnect and reconnect with the specified keepalive value.**]**
 
 ##MQTT_Protocol
 ```

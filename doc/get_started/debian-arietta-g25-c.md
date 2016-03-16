@@ -62,12 +62,8 @@ You should have the following items ready, before beginning the process:
 	  - A micro SD Card of 4,8,16 or 32 GByte class 4 or higher preinstalled with Debian Linux
 	  - A micro USB data cable
 	  - A 5 Volt DC power supply. You need a power supply only when you are using the Arietta in stand alone mode o with a WiFi or Ethernet adapter. Be careful that whatever power supply you use, it must output at least 5V; insufficient power will cause your Arietta to behave in strange ways. The power can be provided via the micro usb connector or via the J4 pads.
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-#### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-#### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]. Note that this tutorial assumes you are using the Device Explorer tool described in [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -274,7 +270,8 @@ In this section you will run the Azure IoT client SDK samples of communication b
     **If using HTTP protocol:**
     ![MessageSend\_terminal](https://github.com/Azure/azure-iot-sdks/raw/master/doc/iotcertification/iot_certification_linux_c/images/3_3_1_08.png)
 
-
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
 
 
 

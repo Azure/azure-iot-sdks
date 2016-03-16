@@ -65,7 +65,6 @@ public class HttpsIotHubConnection
             IotHubEventUri eventUri = new IotHubEventUri(iotHubHostname, deviceId);
             URL eventUrl = new URL("https://" + eventUri.toString());
             IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceId(),
                     this.config.getDeviceKey(),
                     System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
 
@@ -119,7 +118,6 @@ public class HttpsIotHubConnection
             URL messageUrl = new URL("https://" + messageUri.toString());
 
             IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceId(),
                     this.config.getDeviceKey(),
                     System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
 
@@ -245,7 +243,6 @@ public class HttpsIotHubConnection
             }
 
             IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceId(),
                     this.config.getDeviceKey(),
                     System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
 

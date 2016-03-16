@@ -31,17 +31,9 @@ The following document describes the process of connecting an Arduino Yun system
 You should have the following items ready before beginning the process:
 -   Computer with a Git client installed so that you can access the azure-iot-sdks code on GitHub.
   - Arduino Yun board.
-  - Ubuntu x86 machine (for cross compiling)
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-
-### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-  > Note: You can skip this step if you just want to build the sample application without running it.
+  - Ubuntu x86 machine (for cross compiling) 
+-   [Setup your IoT hub](../setup_iothub.md) 
+-   [Provision your device and get its credentials](../manage_iot_hub.md)
 
 <a name="Step-2-PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -61,7 +53,7 @@ Install dependencies under root/sudo.
 apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre libssl-dev libncurses-dev subversion gawk
 ```
 
-- Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the machine you are using.
+- Clone this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to the machine you are using, being sure to do a recursive clone (git clone --recursive <repo address>).
 - Navigate to the folder **c/build_all/arduino** in your local copy of the repository.
 - Run the `./setup.sh` script to install the OpenWRT SDK and prerequisites. By default, the SDK will be installed at **~/openwrt/sdk**
 - (Optional) Enter 'Y' to build the Azure IoT SDK.
@@ -76,7 +68,6 @@ apt-get install curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip
 static const char* connectionString = "[device connection string]";
 ```
 - Replace "[device connection string]" with the device connection string you noted [earlier](#beforebegin). Save the changes.
-- The section "Send events" in the document [How to use Device Explorer](../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md) describes how to prepare the **DeviceExplorer** tool to receive device-to-cloud messages from the sample application.
 - Run the `./build.sh` script in the **c/build_all/arduino** directory.   
 
 <a name="deploy"/>
@@ -115,13 +106,11 @@ You might get an error message at this step(return code 127), but the certificat
 ## Run the sample
 
 - Run the sample **/tmp/simplesample_http**
-- Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **simplesample_http** application.
-- See "Send cloud-to-device messages" in the document [How to use Device Explorer for IoT Hub devices][device-explorer] for instructions on sending messages with the **DeviceExplorer** utility.
+- See [Manage IoT Hub][lnk-manage-iothub] for information about the tools you can use to monitor the messages your device sends to your IoT hub and to send commands to your devices.
 
 ***Note: To send a command to the device from iothub-explorer or DeviceExplorer, the command should be like {"Name":"TurnFanOff", "Parameters":{}}***
 
-[setup-devbox-linux]: devbox_setup.md
-[device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
-[setup-iothub]: ../../doc/setup_iothub.md
-[provision-device]: ./provision_device.md
+[setup-devbox-linux]: ../../c/doc/devbox_setup.md
+[setup-iothub]: ../setup_iothub.md
+[lnk-manage-iothub]: ../manage_iot_hub.md
 

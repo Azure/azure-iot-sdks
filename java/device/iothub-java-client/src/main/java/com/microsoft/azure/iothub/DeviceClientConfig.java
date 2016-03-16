@@ -32,12 +32,6 @@ public final class DeviceClientConfig
     protected final String deviceKey;
 
     /**
-     * Indicates if the client connection will be towards an IoT Hub or an Event Hub.
-     */
-    // Codes_SRS_DEVICECLIENTCONFIG_08_012: [Configuration shall expose an option to define if client will connect to an IoT Hub or an Event Hub directly]
-    public AzureHubType targetHubType;
-
-    /**
      * The callback to be invoked if a message is received.
      */
     protected MessageCallback messageCallback;
@@ -79,7 +73,6 @@ public final class DeviceClientConfig
         this.iotHubName = iotHubHostname.substring(0, iotHubNameEndIdx);
         this.deviceId = deviceId;
         this.deviceKey = deviceKey;
-        this.targetHubType = AzureHubType.IoTHub;
     }
 
     /**

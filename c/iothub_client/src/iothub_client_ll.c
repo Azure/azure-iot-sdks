@@ -291,47 +291,47 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
             }
             else
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_004: [Otherwise IoTHubClient_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
-                IOTHUBTRANSPORT_CONFIG lowerLayerConfig;
-                DList_InitializeListHead(&(handleData->waitingToSend));
-                setTransportProtocol(handleData, (TRANSPORT_PROVIDER*)config->protocol());
-                handleData->messageCallback = NULL;
-                handleData->messageUserContextCallback = NULL;
-                handleData->lastMessageReceiveTime = INDEFINITE_TIME;
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClient_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
-                lowerLayerConfig.upperConfig = config;
-                lowerLayerConfig.waitingToSend = &(handleData->waitingToSend);
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_007: [If the underlaying layer _Create function fails them IoTHubClient_LL_Create shall fail and return NULL.] */
-                if ((handleData->transportHandle = handleData->IoTHubTransport_Create(&lowerLayerConfig)) == NULL)
-                {
-                    LogError("underlying transport failed\r\n");
+            /*Codes_SRS_IOTHUBCLIENT_LL_02_004: [Otherwise IoTHubClient_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
+            IOTHUBTRANSPORT_CONFIG lowerLayerConfig;
+            DList_InitializeListHead(&(handleData->waitingToSend));
+			setTransportProtocol(handleData, (TRANSPORT_PROVIDER*)config->protocol());
+            handleData->messageCallback = NULL;
+            handleData->messageUserContextCallback = NULL;
+            handleData->lastMessageReceiveTime = INDEFINITE_TIME;
+            /*Codes_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClient_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
+            lowerLayerConfig.upperConfig = config;
+            lowerLayerConfig.waitingToSend = &(handleData->waitingToSend);
+            /*Codes_SRS_IOTHUBCLIENT_LL_02_007: [If the underlaying layer _Create function fails them IoTHubClient_LL_Create shall fail and return NULL.] */
+            if ((handleData->transportHandle = handleData->IoTHubTransport_Create(&lowerLayerConfig)) == NULL)
+            {
+                LogError("underlying transport failed\r\n");
                     tickcounter_destroy(handleData->tickCounter);
-                    free(handleData);
-                    result = NULL;
-                }
-                else
-                {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_17_008: [IoTHubClient_LL_Create shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.] */
-                    if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(handleData->transportHandle, config->deviceId, config->deviceKey, &(handleData->waitingToSend))) == NULL)
-                    {
-                        /*Codes_SRS_IOTHUBCLIENT_LL_17_009: [If the _Register function fails, this function shall fail and return NULL.]*/
-                        LogError("Registering device in transport failed");
-                        handleData->IoTHubTransport_Destroy(handleData->transportHandle);
+                free(handleData);
+                result = NULL;
+            }
+            else
+            {
+				/*Codes_SRS_IOTHUBCLIENT_LL_17_008: [IoTHubClient_LL_Create shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.] */
+				if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(handleData->transportHandle, config->deviceId, config->deviceKey, handleData, &(handleData->waitingToSend))) == NULL)
+				{
+					/*Codes_SRS_IOTHUBCLIENT_LL_17_009: [If the _Register function fails, this function shall fail and return NULL.]*/
+					LogError("Registering device in transport failed");
+					handleData->IoTHubTransport_Destroy(handleData->transportHandle);
                         tickcounter_destroy(handleData->tickCounter);
-                        free(handleData);
-                        result = NULL;
-                    }
-                    else
-                    {
-                        /*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.] */
-                        handleData->isSharedTransport = false;
+					free(handleData);
+					result = NULL;
+				}
+				else
+				{
+					/*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.] */
+					handleData->isSharedTransport = false;
                         /*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
                         handleData->currentMessageTimeout = 0; 
-                        result = handleData;
-                    }
-                }
+					result = handleData;
+				}
             }
         }
+    }
     }
 
     return result;
@@ -370,32 +370,32 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
             }
             else
             {
-			    /*Codes_SRS_IOTHUBCLIENT_LL_17_004: [IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
-			    DList_InitializeListHead(&(handleData->waitingToSend));
-			    setTransportProtocol(handleData, (TRANSPORT_PROVIDER*)config->protocol());
-			    handleData->messageCallback = NULL;
-			    handleData->messageUserContextCallback = NULL;
-			    handleData->lastMessageReceiveTime = INDEFINITE_TIME;
-			    handleData->transportHandle = config->transportHandle;
-			    /*Codes_SRS_IOTHUBCLIENT_LL_17_006: [IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.]*/
-			    if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(config->transportHandle, config->deviceId, config->deviceKey, &(handleData->waitingToSend))) == NULL)
-			    {
-				    /*Codes_SRS_IOTHUBCLIENT_LL_17_007: [If the _Register function fails, this function shall fail and return NULL.]*/
-				    LogError("Registering device in transport failed");
+			/*Codes_SRS_IOTHUBCLIENT_LL_17_004: [IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
+			DList_InitializeListHead(&(handleData->waitingToSend));
+			setTransportProtocol(handleData, (TRANSPORT_PROVIDER*)config->protocol());
+			handleData->messageCallback = NULL;
+			handleData->messageUserContextCallback = NULL;
+			handleData->lastMessageReceiveTime = INDEFINITE_TIME;
+			handleData->transportHandle = config->transportHandle;
+			/*Codes_SRS_IOTHUBCLIENT_LL_17_006: [IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.]*/
+			if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(config->transportHandle, config->deviceId, config->deviceKey, handleData, &(handleData->waitingToSend))) == NULL)
+			{
+				/*Codes_SRS_IOTHUBCLIENT_LL_17_007: [If the _Register function fails, this function shall fail and return NULL.]*/
+				LogError("Registering device in transport failed");
                     tickcounter_destroy(handleData->tickCounter);
-				    free(handleData);
-				    result = NULL;
-			    }
-			    else
-			    {
-				    /*Codes_SRS_IOTHUBCLIENT_LL_17_005: [IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.]*/
-				    handleData->isSharedTransport = true;
+				free(handleData);
+				result = NULL;
+			}
+			else
+			{
+				/*Codes_SRS_IOTHUBCLIENT_LL_17_005: [IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.]*/
+				handleData->isSharedTransport = true;
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
                     handleData->currentMessageTimeout = 0;
-				    result = handleData;
-			    }
-            }
+				result = handleData;
+			}
 		}
+	}
 	}
 
 	return result;
@@ -495,26 +495,26 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
             }
             else
             {
+            /*Codes_SRS_IOTHUBCLIENT_LL_02_013: [IoTHubClient_SendEventAsync shall add the DLIST waitingToSend a new record cloning the information from eventMessageHandle, eventConfirmationCallback, userContextCallback.]*/
+            if ((newEntry->messageHandle = IoTHubMessage_Clone(eventMessageHandle)) == NULL)
+            {
+                /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information fails for any reason, IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
+                result = IOTHUB_CLIENT_ERROR;
+                free(newEntry);
+                LOG_ERROR;
+            }
+            else
+            {
+                IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_013: [IoTHubClient_SendEventAsync shall add the DLIST waitingToSend a new record cloning the information from eventMessageHandle, eventConfirmationCallback, userContextCallback.]*/
-                if ((newEntry->messageHandle = IoTHubMessage_Clone(eventMessageHandle)) == NULL)
-                {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information fails for any reason, IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
-                    result = IOTHUB_CLIENT_ERROR;
-                    free(newEntry);
-                    LOG_ERROR;
-                }
-                else
-                {
-                    IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_013: [IoTHubClient_SendEventAsync shall add the DLIST waitingToSend a new record cloning the information from eventMessageHandle, eventConfirmationCallback, userContextCallback.]*/
-                    newEntry->callback = eventConfirmationCallback;
-                    newEntry->context = userContextCallback;
-                    DList_InsertTailList(&(handleData->waitingToSend), &(newEntry->entry));
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_015: [Otherwise IoTHubClient_LL_SendEventAsync shall succeed and return IOTHUB_CLIENT_OK.] */
-                    result = IOTHUB_CLIENT_OK;
-                }
+                newEntry->callback = eventConfirmationCallback;
+                newEntry->context = userContextCallback;
+                DList_InsertTailList(&(handleData->waitingToSend), &(newEntry->entry));
+                /*Codes_SRS_IOTHUBCLIENT_LL_02_015: [Otherwise IoTHubClient_LL_SendEventAsync shall succeed and return IOTHUB_CLIENT_OK.] */
+                result = IOTHUB_CLIENT_OK;
             }
         }
+    }
     }
     return result; 
 }
@@ -751,13 +751,13 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
         }
         else
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_038: [Otherwise, IoTHubClient_LL shall call the function _SetOption of the underlying transport and return what that function is returning.] */
-            result = handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value);
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_038: [Otherwise, IoTHubClient_LL shall call the function _SetOption of the underlying transport and return what that function is returning.] */
+        result = handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value);
 
-            if (result != IOTHUB_CLIENT_OK)
-            {
-                LogError("underlying transport failed, returned = %s\r\n", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
-            }
+        if (result != IOTHUB_CLIENT_OK)
+        {
+            LogError("underlying transport failed, returned = %s\r\n", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
+        }
         }
     }
     return result;

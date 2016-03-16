@@ -46,17 +46,8 @@ You should have the following items ready before beginning the process:
 	    
 	    You may wish to consider a Starter Kit such as [CanaKit](http://www.amazon.com/CanaKit-Raspberry-Complete-Original-Preloaded/dp/B008XVAVAW/ref=sr_1_4?ie=UTF8&qid=1429516842&sr=8-4&keywords=raspberry+pi) that
 	    includes some of these hardware requirements.
--   Download and install [DeviceExplorer](https://github.com/Azure/azure-iot-sdks/releases/download/2015-11-13/SetupDeviceExplorer.msi).
--   [Set up your IoT hub](https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md).
-
-### Create a device on IoT Hub
--   With your IoT hub configured and running in Azure, follow the instructions in **"Create Device"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-<a name="DeviceConnectionString"></a>
-### Write down device credentials
--   Make note of the Connection String for your device by following the instructions in **"Get device connection string or configuration data"** section of [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md).
-
-  > Note: You can skip this step if you just want to build the sample application without running it.
+-   [Setup your IoT hub][lnk-setup-iot-hub]
+-   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="Step-2-PrepareDevice"></a>
 # Step 2: Prepare your Device
@@ -71,7 +62,7 @@ PuTTY or WinSCP. For more information, see <https://www.raspberrypi.org/document
 -   Connect your Raspberry Pi to your network using an ethernet cable or by using
 a WiFi dongle on the device.
 -   You need to determine the IP address of your Raspberry Pi in order to connect over the network. For more information, see
-<https://www.raspberrypi.org/documentation/troubleshooting/hardware/networking/ip-address.md>.
+<https://www.raspberrypi.org/documentation/remote-access/ip-address.md>.
 -   Once you see that your board is working, open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine.
 -   Use the IP address from step 4 as the Host name, Port=22, and Connection type=SSH to complete the connection.
 -   When prompted, log in with username **pi**, and password **raspberry**.
@@ -89,7 +80,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
 -   Download the Azure IoT device SDK to your Raspberry Pi:
 
     ```
-    git clone --recursive https://github.com/Azure/azure-iot-sdks.git --recursive
+    git clone --recursive https://github.com/Azure/azure-iot-sdks.git
     ```
 
 -   Confirm that you now have a copy of the SDK under the directory ./azure-iot-sdks. Then cd to the directory:
@@ -103,8 +94,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
     sudo c/build_all/linux/setup.sh
     ```
 
--   Edit the file ./c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace connection string placeholder with the connection string
-you obtained in the [step](#DeviceConnectionString) above.
+-   Edit the file ./c/serializer/samples/simplesample_amqp/simplesample_amqp.c and replace connection string placeholder with the device connection string you obtained when you [provisioned your device](../manage_iot_hub.md#use-the-iothub-explorer-tool-to-provision-a-device).The device connection string should be in this format "`HostName=<iothub-name>.azure-devices.net;DeviceId=<device-name>;SharedAccessKey=<device-key>`".  
 (You can use the console-based text editor **nano** to edit the file):
 
     ```
@@ -131,4 +121,8 @@ This sample application sends simulated sensor data to your IoT Hub.
 <a name="tips"/>
 # Tips
 
--   On Windows, you can use the [Device Explorer](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to see the data your device is sending and receiving.
+-   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application and how to send cloud-to-device messages to the application.
+
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
+

@@ -20,27 +20,31 @@ var connectionString = '[IoT Hub device connection string]';
 var client = clientFromConnectionString(connectionString);
 ```
 
-Send an event:
+Create a callback that sends a message and receives messages. When it receives a message it sends an acknowledgement receipt to the server:
 
 ```js
-var msg = new Message('some data from my device');
-client.sendEvent(message, function (err) {
-  if (err) console.log(err.toString());
-});
+var connectCallback = function (err) {
+  if (err) {
+    console.error('Could not connect: ' + err);
+  } else {
+    console.log('Client connected');
+    var message = new Message('some data from my device');
+    client.sendEvent(message, function (err) {
+      if (err) console.log(err.toString());
+    });
+
+    client.on('message', function (msg) { 
+      console.log(msg); 
+      client.complete(msg, function () {
+        console.log('completed');
+      });
+    }); 
+  }
+};
 ```
 
-Receive a message, then acknowledge receipt to the server:
+Open the connection and invoke the callback:
 
 ```js
-client.getReceiver(function (err, rcv) {
-  rcv.on('message', function (msg) {
-    console.log(msg);
-    rcv.complete(msg, function () {
-      console.log('completed');
-    });
-  });
-  rcv.on('errorReceived', function (err) {
-    console.warn(err);
-  });
-});
+client.open(connectCallback);
 ```
