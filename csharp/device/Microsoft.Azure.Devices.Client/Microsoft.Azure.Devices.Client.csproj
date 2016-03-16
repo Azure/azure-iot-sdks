@@ -116,10 +116,14 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AmqpConnectionPoolSettings.cs" />
     <Compile Include="Common\Exceptions\IotHubClientException.cs" />
     <Compile Include="AmqpTransportSettings.cs" />
+    <Compile Include="Common\PerfectHash.cs" />
     <Compile Include="Common\TaskConstants.cs" />
     <Compile Include="Common\TaskUtils.cs" />
+    <Compile Include="IotHubDedicatedConnection.cs" />
+    <Compile Include="IotHubMuxConnection.cs" />
     <Compile Include="Transport\AmqpClientHelper.cs" />
     <Compile Include="Common\UrlEncodedDictionarySerializer.cs" />
     <Compile Include="Common\ActionItem.cs" />

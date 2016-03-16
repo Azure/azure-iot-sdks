@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Devices.Client.Transport
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Threading.Tasks;
@@ -15,8 +16,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
     sealed class AmqpTransportHandler : TransportHandlerBase
     {
-        static readonly IotHubConnectionCache tcpConnectionCache = new IotHubConnectionCache(AccessRights.DeviceConnect);
-        static readonly IotHubConnectionCache wsConnectionCache = new IotHubConnectionCache(AccessRights.DeviceConnect);
+        static readonly ConcurrentDictionary<long, IotHubConnectionCache> tcpConnectionCaches;
+        static readonly ConcurrentDictionary<long, IotHubConnectionCache> wsConnectionCaches;
         readonly string deviceId;
         readonly Client.FaultTolerantAmqpObject<SendingAmqpLink> faultTolerantEventSendingLink;
         readonly Client.FaultTolerantAmqpObject<ReceivingAmqpLink> faultTolerantDeviceBoundReceivingLink;
@@ -26,25 +27,33 @@ namespace Microsoft.Azure.Devices.Client.Transport
         readonly uint prefetchCount;
         readonly TransportType transportType;
         readonly IotHubConnectionString iotHubConnectionString;
+        readonly uint maxNumConnectionPools;
 
         int eventsDeliveryTag;
+
+        static AmqpTransportHandler()
+        {
+            tcpConnectionCaches = new ConcurrentDictionary<long, IotHubConnectionCache>();
+            wsConnectionCaches = new ConcurrentDictionary<long, IotHubConnectionCache>();
+        }
 
         public AmqpTransportHandler(IotHubConnectionString connectionString, AmqpTransportSettings transportSettings)
         {
             this.transportType = transportSettings.GetTransportType();
+            this.maxNumConnectionPools = transportSettings.AmqpConnectionPoolSettings.NumConnectionPools;
+            this.deviceId = connectionString.DeviceId;
             switch (this.transportType)
             {
                 case TransportType.Amqp_Tcp_Only:
-                    this.IotHubConnection = tcpConnectionCache.GetConnection(connectionString, transportSettings);
+                    this.IotHubConnection = this.CreateOrGetConnectionCache(this.deviceId, false).GetConnection(connectionString, transportSettings);
                     break;
                 case TransportType.Amqp_WebSocket_Only:
-                    this.IotHubConnection = wsConnectionCache.GetConnection(connectionString, transportSettings);
+                    this.IotHubConnection = this.CreateOrGetConnectionCache(this.deviceId, true).GetConnection(connectionString, transportSettings);
                     break;
                 default:
                     throw new InvalidOperationException("Invalid Transport Type {0}".FormatInvariant(this.transportType));
             }
             
-            this.deviceId = connectionString.DeviceId;
             this.openTimeout = IotHubConnection.DefaultOpenTimeout;
             this.operationTimeout = IotHubConnection.DefaultOperationTimeout;
             this.DefaultReceiveTimeout = IotHubConnection.DefaultOperationTimeout;
@@ -171,9 +180,9 @@ namespace Microsoft.Azure.Devices.Client.Transport
             switch (this.transportType)
             {
                 case TransportType.Amqp_Tcp_Only:
-                    return tcpConnectionCache.ReleaseConnectionAsync(this.Connection);
+                    return this.CreateOrGetConnectionCache(this.deviceId, false).ReleaseConnectionAsync(this.Connection);
                 case TransportType.Amqp_WebSocket_Only:
-                    return wsConnectionCache.ReleaseConnectionAsync(this.Connection);
+                    return this.CreateOrGetConnectionCache(this.deviceId, true).ReleaseConnectionAsync(this.Connection);
                 default:
                     throw new InvalidOperationException("Invalid Transport Type {0}".FormatInvariant(this.transportType));
             }
@@ -279,6 +288,20 @@ namespace Microsoft.Azure.Devices.Client.Transport
             return this.DisposeMessageAsync(message.LockToken, AmqpConstants.RejectedOutcome);
         }
 
+        IotHubConnectionCache CreateOrGetConnectionCache(string deviceId, bool useWebSocketOnly)
+        {
+            long cacheIndex = PerfectHash.HashToLong(deviceId) % this.maxNumConnectionPools;
+
+            if (useWebSocketOnly)
+            {
+                return wsConnectionCaches.GetOrAdd(cacheIndex, new IotHubConnectionCache(AccessRights.DeviceConnect));
+            }
+            else
+            {
+                return tcpConnectionCaches.GetOrAdd(cacheIndex, new IotHubConnectionCache(AccessRights.DeviceConnect));
+            }
+        }
+
        async Task<Outcome> SendAmqpMessageAsync(AmqpMessage amqpMessage)
        {
             Outcome outcome;
@@ -351,7 +374,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/events", HttpUtility.UrlEncode(this.deviceId));
 
-            return await this.IotHubConnection.CreateSendingLinkAsync(path, this.iotHubConnectionString, this.deviceId, timeout);
+            return await this.IotHubConnection.CreateSendingLinkAsync(path, this.iotHubConnectionString, timeout);
         }
 
         async Task<ReceivingAmqpLink> GetDeviceBoundReceivingLinkAsync()
@@ -369,7 +392,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/deviceBound", HttpUtility.UrlEncode(this.deviceId));
 
-            return await this.IotHubConnection.CreateReceivingLink(path, this.iotHubConnectionString, this.deviceId, timeout, this.prefetchCount);
+            return await this.IotHubConnection.CreateReceivingLinkAsync(path, this.iotHubConnectionString, timeout, this.prefetchCount);
         }
     }
 }

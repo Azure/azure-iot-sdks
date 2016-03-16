@@ -14,11 +14,11 @@ namespace Microsoft.Azure.Devices.Client
         readonly TransportType transportType;
 
         public AmqpTransportSettings(TransportType transportType)
-            : this(transportType, DefaultPrefetchCount)
+            : this(transportType, DefaultPrefetchCount, new AmqpConnectionPoolSettings())
         {
         }
 
-        public AmqpTransportSettings(TransportType transportType, uint prefetchCount)
+        public AmqpTransportSettings(TransportType transportType, uint prefetchCount, AmqpConnectionPoolSettings amqpConnectionPoolSettings)
         {
             if (prefetchCount <= 0)
             {
@@ -38,6 +38,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             this.PrefetchCount = prefetchCount;
+            this.AmqpConnectionPoolSettings = amqpConnectionPoolSettings;
         }
 
         public TransportType GetTransportType()
@@ -46,5 +47,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 
         public uint PrefetchCount { get; set; }
+
+        public AmqpConnectionPoolSettings AmqpConnectionPoolSettings { get; set; }
     }
 }

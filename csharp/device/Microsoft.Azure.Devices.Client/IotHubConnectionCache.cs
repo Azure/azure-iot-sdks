@@ -26,36 +26,24 @@ namespace Microsoft.Azure.Devices.Client
 
         public IotHubConnection GetConnection(IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
         {
-            // Always use connection caching
-                CachedConnection cachedConnection;
-                do
-                {
-                    cachedConnection = this.connections.GetOrAdd(connectionString, new CachedConnection(this, connectionString, this.accessRights, amqpTransportSettings));
-                }
-                while (!cachedConnection.TryAddRef());
+            // Use connection caching for both hub-scope and device-scope connection strings
+            CachedConnection cachedConnection;
+            do
+            {
+                cachedConnection = this.connections.GetOrAdd(connectionString, k => new CachedConnection(this, k, this.accessRights, amqpTransportSettings));
+            }
+            while (!cachedConnection.TryAddRef());
 
-                return cachedConnection.Connection;
-            //}
-
-            //return new IotHubConnection(connectionString, this.accessRights, useWebSocketOnly);
+            return cachedConnection.Connection;
         }
 
-        public async Task ReleaseConnectionAsync(IotHubConnection connection)
+        public Task ReleaseConnectionAsync(IotHubConnection connection)
         {
-            CachedConnection cachedConnection;
-            if (connection.HubScopeConnectionString.SharedAccessKeyName != null &&
-                this.connections.TryGetValue(connection.HubScopeConnectionString, out cachedConnection))
-            {
-                cachedConnection.Release();
-            }
-            else
-            {
-                await connection.CloseAsync();
-            }
+            connection.Release();
+            return TaskHelpers.CompletedTask;
         }
 
         // A comparer used to see if two IotHubConnectionStrings can share a common AmqpConnection between them.
-        // It does not take the "DeviceId" into account.
         class IotHubConnectionCacheStringComparer : IEqualityComparer<IotHubConnectionString>
         {
             public bool Equals(IotHubConnectionString connectionString1, IotHubConnectionString connectionString2)
@@ -71,17 +59,20 @@ namespace Microsoft.Azure.Devices.Client
 
                 if (connectionString1.SharedAccessKeyName != null || connectionString2.SharedAccessKeyName != null)
                 {
-                    return connectionString1.IotHubName == connectionString2.IotHubName
-                           && connectionString1.AmqpEndpoint == connectionString2.AmqpEndpoint
-                           && connectionString1.SharedAccessKey == connectionString2.SharedAccessKeyName
-                           && connectionString1.SharedAccessKeyName == connectionString2.SharedAccessKeyName
-                           && connectionString1.SharedAccessSignature == connectionString2.SharedAccessSignature;
+                    // Hub-Scope connection strings must match fully
+                    return connectionString1.IotHubName == connectionString2.IotHubName &&
+                        connectionString1.AmqpEndpoint == connectionString2.AmqpEndpoint &&
+                        connectionString1.SharedAccessKey == connectionString2.SharedAccessKey &&
+                        connectionString1.SharedAccessKeyName == connectionString2.SharedAccessKeyName &&
+                        connectionString1.SharedAccessSignature == connectionString2.SharedAccessSignature;
                 }
                 else
                 {
-                    return connectionString1.IotHubName == connectionString2.IotHubName
-                           && connectionString1.AmqpEndpoint == connectionString2.AmqpEndpoint;
+                    // device-scope connection strings only need to match on IotHubName and Endpoint
+                    return connectionString1.IotHubName == connectionString2.IotHubName &&
+                        connectionString1.AmqpEndpoint == connectionString2.AmqpEndpoint;
                 }
+
             }
 
             public int GetHashCode(IotHubConnectionString connectionString)
@@ -94,11 +85,11 @@ namespace Microsoft.Azure.Devices.Client
                 if (connectionString.SharedAccessKeyName != null)
                 {
                     return HashCode.CombineHashCodes(
-                    HashCode.SafeGet(connectionString.IotHubName),
-                    HashCode.SafeGet(connectionString.AmqpEndpoint),
-                    HashCode.SafeGet(connectionString.SharedAccessKey),
-                    HashCode.SafeGet(connectionString.SharedAccessKeyName),
-                    HashCode.SafeGet(connectionString.SharedAccessSignature));
+                        HashCode.SafeGet(connectionString.IotHubName),
+                        HashCode.SafeGet(connectionString.AmqpEndpoint),
+                        HashCode.SafeGet(connectionString.SharedAccessKey),
+                        HashCode.SafeGet(connectionString.SharedAccessKeyName),
+                        HashCode.SafeGet(connectionString.SharedAccessSignature));
                 }
                 else
                 {
@@ -109,18 +100,26 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        public class CachedConnection
+        internal class CachedConnection
         {
             readonly IotHubConnectionCache cache;
-            readonly IOThreadTimer idleTimer;
             readonly IotHubConnectionString connectionString;
+            readonly IOThreadTimer idleTimer;
             int referenceCount;
 
             public CachedConnection(IotHubConnectionCache cache, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
             {
                 this.cache = cache;
                 this.connectionString = connectionString;
-                this.Connection = new IotHubConnection(this, connectionString, accessRights, amqpTransportSettings);
+                if (connectionString.SharedAccessKeyName != null)
+                {
+                    this.Connection = new IotHubDedicatedConnection(this, connectionString, accessRights, amqpTransportSettings);
+                }
+                else
+                {
+                    this.Connection = new IotHubMuxConnection(this, connectionString, accessRights, amqpTransportSettings);
+                }
+                
                 this.ThisLock = new object();
                 this.idleTimer = new IOThreadTimer(s => ((CachedConnection)s).IdleTimerCallback(), this, false);
                 this.idleTimer.Set(this.cache.IdleTimeout);

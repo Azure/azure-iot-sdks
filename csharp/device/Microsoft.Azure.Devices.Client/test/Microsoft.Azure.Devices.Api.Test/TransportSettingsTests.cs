@@ -34,7 +34,8 @@ namespace Microsoft.Azure.Devices.Client.Test
         [TestCategory("TransportSettings")]
         public void TransportSettingsTest_TransportType_AmqpTcp_Prefetch_0()
         {
-            var transportSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 0);
+            var amqpConnectionPoolSettings = new AmqpConnectionPoolSettings();
+            var transportSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 0, amqpConnectionPoolSettings);
         }
 
         [TestMethod]
@@ -52,7 +53,8 @@ namespace Microsoft.Azure.Devices.Client.Test
         [TestCategory("TransportSettings")]
         public void TransportSettingsTest_TransportType_Amqp_WebSocket_Tcp()
         {
-            var transportSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 200);
+            var amqpConnectionPoolSettings = new AmqpConnectionPoolSettings();
+            var transportSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 200, amqpConnectionPoolSettings);
             Assert.IsTrue(transportSetting.GetTransportType() == TransportType.Amqp_Tcp_Only, "Should be TransportType.Amqp_Tcp_Only");
             Assert.IsTrue(transportSetting.PrefetchCount == 200, "Should be value of 200");
         }
