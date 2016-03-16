@@ -62,7 +62,7 @@ You should see the following:
 
   ```
   $ opkg install git
-  $ git clone --recursive https://github.com/Azure/azure-iot-suite-sdks.git
+  $ git clone --recursive https://github.com/Azure/azure-iot-sdks.git
   ```
 
 - You may be prompted to add an RSA key to your device, respond with "yes".
