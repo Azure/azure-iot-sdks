@@ -7,16 +7,8 @@ namespace Microsoft.Azure.Devices.Client
     using System.Net;
     using System.Collections.Generic;
     using System.Globalization;
-
-#if WINDOWS_UWP
-    using Windows.Security.Cryptography;
-    using Windows.Security.Cryptography.Core;
-    using System.Runtime.InteropServices.WindowsRuntime;
-    using Windows.Storage.Streams;
-#else
-    using System.Security.Cryptography;
-#endif
     using System.Text;
+    using PCLCrypto;
 
     sealed class SharedAccessSignature : ISharedAccessSignatureCredential
     {
@@ -195,22 +187,15 @@ namespace Microsoft.Azure.Devices.Client
 
         public string ComputeSignature(byte[] key)
         {
-            List<string> fields = new List<string>();
+            var fields = new List<string>();
             fields.Add(this.encodedAudience);
             fields.Add(this.expiry);
             string value = string.Join("\n", fields);
-#if WINDOWS_UWP
-            var algo = MacAlgorithmProvider.OpenAlgorithm(MacAlgorithmNames.HmacSha256);
-            var keyMaterial = key.AsBuffer();
-            var hash = algo.CreateHash(keyMaterial);
-            hash.Append(CryptographicBuffer.ConvertStringToBinary(value, BinaryStringEncoding.Utf8));
-            return CryptographicBuffer.EncodeToBase64String(hash.GetValueAndReset());
-#else
-            using (var hmac = new HMACSHA256(key))
-            {
-                return Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(value)));
-            }
-#endif
+            var algorithm = WinRTCrypto.MacAlgorithmProvider.OpenAlgorithm(MacAlgorithm.HmacSha256);
+            var hash = algorithm.CreateHash(key);
+            hash.Append(Encoding.UTF8.GetBytes(value));
+            var mac = hash.GetValueAndReset();
+            return Convert.ToBase64String(mac);
         }
 
         static IDictionary<string, string> ExtractFieldValues(string sharedAccessSignature)

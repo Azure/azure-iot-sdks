@@ -9,7 +9,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.IO;
     using System.Runtime.Serialization;
     using System.Text;
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Encoding;
     using Microsoft.Azure.Amqp.Framing;
@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
 
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     static class MessageConverter
     {
         public const string LockTokenName = "x-opt-lock-token";

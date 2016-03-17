@@ -11,10 +11,8 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq.Expressions;
-    using System.Text;
     using System.Text.RegularExpressions;
     using System.Net;
-    using Microsoft.Azure.Devices.Client.Extensions;
     using SharedAccessSignatureParser = Microsoft.Azure.Devices.Client.SharedAccessSignature;
 #endif
 
@@ -27,9 +25,13 @@ namespace Microsoft.Azure.Devices.Client
         const char ValuePairSeparator = '=';
         const string HostNameSeparator = ".";
 
-#if !NETMF
+#if !NETMF && !PCL
         static readonly RegexOptions regexOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
+#elif PCL
+        static readonly RegexOptions regexOptions = RegexOptions.IgnoreCase;
+#endif
 
+#if !NETMF
         static readonly string HostNamePropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.HostName)).Body).Member.Name; // todo: replace with nameof()
         static readonly string DeviceIdPropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.DeviceId)).Body).Member.Name; // todo: replace with nameof()
         static readonly string SharedAccessKeyNamePropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.SharedAccessKeyName)).Body).Member.Name; // todo: replace with nameof()

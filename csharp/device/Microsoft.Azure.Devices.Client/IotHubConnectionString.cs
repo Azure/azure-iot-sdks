@@ -6,7 +6,7 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using System.Text;
     using System.Net;
-#if !WINDOWS_UWP &&  !NETMF
+#if !WINDOWS_UWP && !NETMF && !PCL
     using Microsoft.Azure.Amqp;
 #endif
 
@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Devices.Client.Extensions;
 
     sealed class IotHubConnectionString : IAuthorizationHeaderProvider
-#if !WINDOWS_UWP &&  !NETMF
+#if !WINDOWS_UWP && !NETMF && !PCL
         , ICbsTokenProvider
 #endif
     {
@@ -41,7 +41,7 @@ namespace Microsoft.Azure.Devices.Client
             this.SharedAccessSignature = builder.SharedAccessSignature; 
             this.IotHubName = builder.IotHubName;
             this.DeviceId = builder.DeviceId;
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             this.HttpsEndpoint = new UriBuilder("https", builder.HostName).Uri;
 #elif !NETMF
             this.HttpsEndpoint = new UriBuilder(Uri.UriSchemeHttps, builder.HostName).Uri;
@@ -49,7 +49,7 @@ namespace Microsoft.Azure.Devices.Client
             this.HttpsEndpoint = new Uri("https://" + builder.HostName);
 #endif
 
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !NETMF && !PCL
             this.AmqpEndpoint = new UriBuilder(CommonConstants.AmqpsScheme, builder.HostName, AmqpConstants.DefaultSecurePort).Uri;
 #endif
         }
@@ -78,7 +78,7 @@ namespace Microsoft.Azure.Devices.Client
             private set;
         }
 
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !NETMF && !PCL
         public Uri AmqpEndpoint
         {
             get;
@@ -129,7 +129,7 @@ namespace Microsoft.Azure.Devices.Client
             return this.GetPassword();
         }
 
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !NETMF && !PCL
         Task<CbsToken> ICbsTokenProvider.GetTokenAsync(Uri namespaceAddress, string appliesTo, string[] requiredClaims)
         {
             string tokenValue;
@@ -151,7 +151,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         public Uri BuildLinkAddress(string path)
         {
-#if WINDOWS_UWP || NETMF
+#if WINDOWS_UWP || NETMF || PCL
             throw new NotImplementedException();
 #else
             var builder = new UriBuilder(this.AmqpEndpoint)

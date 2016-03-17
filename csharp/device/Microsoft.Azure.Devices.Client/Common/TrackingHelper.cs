@@ -5,7 +5,7 @@ namespace Microsoft.Azure.Devices.Client
 {
     using System;
     using System.Linq;
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     using Microsoft.WindowsAzure.ServiceRuntime;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Devices.Client
             trackingId = Guid.NewGuid().ToString("N");
             if (!String.IsNullOrEmpty(gatewayId))
             {
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
                 if (RoleEnvironment.IsAvailable)
                 {
                     gatewayId = gatewayId.Substring(gatewayId.LastIndexOf("_") + 1);
@@ -62,7 +62,7 @@ namespace Microsoft.Azure.Devices.Client
             return trackingId;
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         public static string GenerateTrackingId(this AmqpException exception)
         {
             return exception.GenerateTrackingId(TrackingHelper.GatewayId, string.Empty, string.Empty);
@@ -102,7 +102,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         public static string GetTrackingId(this AmqpException amqpException)
         {
             Error errorObj = amqpException.Error;

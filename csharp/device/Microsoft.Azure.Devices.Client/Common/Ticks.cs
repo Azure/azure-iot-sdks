@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Devices.Client
     static class Ticks
     {
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         public static long Now
         {
             [Fx.Tag.SecurityNote(Miscellaneous = "Why isn't the SuppressUnmanagedCodeSecurity attribute working in this case?")]

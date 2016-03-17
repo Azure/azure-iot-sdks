@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Devices.Client
     {
         internal static string GetString(string value, params object[] args)
         {
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
             return string.Format(ApiResources.Culture, value, args);
 #else
             return string.Format(value, args);
