@@ -14,7 +14,7 @@ namespace DeviceClientSampleAndroid
     public class MainActivity : Activity
     {
         int count = 1;
-        private const string DeviceConnectionString = "HostName=iot-sdks-test.azure-devices.net;DeviceId=iliesdevice2;SharedAccessKey=+qaxYu4/1W1a+vvYVoBxnU9I6O0BoszP+CHk3wkwnds=";
+        private const string DeviceConnectionString = "<replace>";
         DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Http1);
 
         protected override void OnCreate(Bundle bundle)
