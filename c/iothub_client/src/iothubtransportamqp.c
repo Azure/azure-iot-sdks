@@ -53,7 +53,7 @@
 #define MESSAGE_RECEIVER_MAX_LINK_SIZE 65536
 #define MESSAGE_SENDER_LINK_NAME "sender-link"
 #define MESSAGE_SENDER_SOURCE_ADDRESS "ingress"
-#define MESSAGE_SENDER_MAX_LINK_SIZE 262144
+#define MESSAGE_SENDER_MAX_LINK_SIZE UINT64_MAX
 
 typedef XIO_HANDLE(*TLS_IO_TRANSPORT_PROVIDER)(const char* fqdn, int port, const char* certificates);
 
