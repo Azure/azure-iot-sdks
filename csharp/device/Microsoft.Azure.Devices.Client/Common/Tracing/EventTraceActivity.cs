@@ -46,7 +46,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public static EventTraceActivity CreateFromThread()
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             throw new NotImplementedException();
 #else
             Guid id = Trace.CorrelationManager.ActivityId;

@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     sealed class IotHubConnectionCache
     {
         static readonly TimeSpan DefaultIdleTimeout = TimeSpan.FromMinutes(2);

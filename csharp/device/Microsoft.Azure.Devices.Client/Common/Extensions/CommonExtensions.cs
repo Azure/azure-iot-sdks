@@ -8,10 +8,12 @@ namespace Microsoft.Azure.Devices.Client.Extensions
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+#if !PCL
     using System.Net.Sockets;
+#endif
     using System.Text;
 
-#if !WINDOWS_UWP // Owin NuGet package is not compatible with UAP
+#if !WINDOWS_UWP && !PCL // Owin NuGet package is not compatible with UAP
     using Microsoft.Owin;
 #endif
 
@@ -26,7 +28,11 @@ namespace Microsoft.Azure.Devices.Client.Extensions
         {
             if (value == null)
             {
+#if !PCL
                 throw new ArgumentNullException(nameof(value));
+#else
+                throw new ArgumentNullException(value);
+#endif
             }
 
             if (value.Length == 0)
@@ -109,7 +115,7 @@ namespace Microsoft.Azure.Devices.Client.Extensions
             return iotHubName;
         }
 
-#if !WINDOWS_UWP // Depends on Owin, not supported for UWP
+#if !WINDOWS_UWP && !PCL // Depends on Owin, not supported for UWP
         public static string GetMaskedClientIpAddress(this HttpRequestMessage requestMessage)
         {
             // note that this only works if we are hosted as an OWIN app
@@ -168,26 +174,33 @@ namespace Microsoft.Azure.Devices.Client.Extensions
             return string.IsNullOrWhiteSpace(value);
         }
 
-        public static string RemoveWhitespace(this string value)
-        {
-            return new string(value.Where(c => !char.IsWhiteSpace(c)).ToArray());
-        }
-
         public static int NthIndexOf(this string str, char value, int startIndex, int n)
         {
             if (str == null)
             {
+#if !PCL
                 throw new ArgumentNullException(nameof(str));
+#else
+                throw new ArgumentNullException(str);
+#endif
             }
             if (startIndex < 0 || startIndex >= str.Length)
             {
+#if !PCL
                 throw new ArgumentOutOfRangeException(nameof(startIndex));
+#else
+                throw new ArgumentOutOfRangeException(startIndex.ToString());
+#endif
             }
             if (n <= 0)
             {
+#if !PCL
                 throw new ArgumentOutOfRangeException(nameof(n));
+#else
+                throw new ArgumentOutOfRangeException(n.ToString());
+#endif
             }
-            
+
             int entryIndex = -1;
             int nextSearchStartIndex = startIndex;
             for (int i = 0; i < n; i++)

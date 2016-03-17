@@ -7,10 +7,10 @@ namespace Microsoft.Azure.Devices.Client.Exceptions
     using System.Runtime.Serialization;
     using Microsoft.Azure.Devices.Client.Extensions;
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     [Serializable]
 #endif
-#if !WINDOWS_UWP // Exporting custom exception types is not allowed in WinRT
+#if !WINDOWS_UWP && !PCL // Exporting custom exception types is not allowed in WinRT
     public
 #endif
     sealed class DeviceDisabledException : IotHubException
@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Devices.Client.Exceptions
         {
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         public DeviceDisabledException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

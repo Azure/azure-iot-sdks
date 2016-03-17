@@ -206,7 +206,11 @@ namespace Microsoft.Azure.Devices.Client.Transport
             responseMessage.Headers.TryGetValues(CustomHeaderConstants.MessageId, out messageId);
 
             IEnumerable<string> lockToken;
+#if !PCL
             responseMessage.Headers.TryGetValues(HttpResponseHeader.ETag.ToString(), out lockToken);
+#else
+            responseMessage.Headers.TryGetValues("ETag", out lockToken);
+#endif
 
             IEnumerable<string> enqueuedTime;
             responseMessage.Headers.TryGetValues(CustomHeaderConstants.EnqueuedTime, out enqueuedTime);

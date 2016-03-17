@@ -5,8 +5,6 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
-using Microsoft.Azure.Devices.Client;
-using Microsoft.Azure.Devices.Client.Samples;
 
 namespace Microsoft.Azure.Devices.Client.Samples
 {
@@ -17,7 +15,7 @@ namespace Microsoft.Azure.Devices.Client.Samples
         // String containing Hostname, Device Id & Device Key in one of the following formats:
         //  "HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
         //  "HostName=<iothub_host_name>;CredentialType=SharedAccessSignature;DeviceId=<device_id>;SharedAccessSignature=SharedAccessSignature sr=<iot_host>/devices/<device_id>&sig=<token>&se=<expiry_time>";
-        private const string DeviceConnectionString = "<replace>";
+        private const string DeviceConnectionString = "HostName=iot-sdks-test.azure-devices.net;DeviceId=iliesdevice2;SharedAccessKey=+qaxYu4/1W1a+vvYVoBxnU9I6O0BoszP+CHk3wkwnds=";
 
         public async static Task Start()
         {

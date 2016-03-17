@@ -8,21 +8,24 @@ namespace Microsoft.Azure.Devices.Client
     using System.Threading;
 #if WINDOWS_UWP && !NETMF
     using Windows.Storage.Streams;
-#elif !NETMF
+#elif !NETMF && !PCL
     using Microsoft.Azure.Amqp;
 #endif
 
 #if NETMF
     using System.Collections;
 #else
-    using Microsoft.Azure.Devices.Client.Common.Api;
     using System.Collections.Generic;
+#endif
+
+#if !PCL && !NETMF
+    using Microsoft.Azure.Devices.Client.Common.Api;
 #endif
     using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
 
     // TODO: can we use DateTimeOffset for WinRT as well? With conversion to local time?
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
     using DateTimeT = System.DateTimeOffset;
 #else
     using DateTimeT = System.DateTime;
@@ -32,11 +35,11 @@ namespace Microsoft.Azure.Devices.Client
     /// The data structure represent the message that is used for interacting with IotHub.
     /// </summary>
     public sealed class Message :
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !PCL && !NETMF
         IDisposable, IReadOnlyIndicator
 #elif NETMF
         IDisposable
-#elif WINDOWS_UWP
+#elif WINDOWS_UWP || PCL
         IReadOnlyIndicator
 #endif
     {
@@ -55,7 +58,7 @@ namespace Microsoft.Azure.Devices.Client
         long sizeInBytesCalled;
 #endif
 
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !PCL && !NETMF
         AmqpMessage serializedAmqpMessage;
 #endif
 
@@ -71,7 +74,7 @@ namespace Microsoft.Azure.Devices.Client
             this.Properties = new ReadOnlyDictionary45<string, string>(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), this);
             this.SystemProperties = new ReadOnlyDictionary45<string, object>(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase), this);
             this.InitializeWithStream(Stream.Null, true);
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
             this.serializedAmqpMessage = null;
 #endif
 #endif
@@ -116,7 +119,7 @@ namespace Microsoft.Azure.Devices.Client
             this.ownsBodyStream = true;
         }
 
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !PCL && !NETMF
         /// <summary>
         /// This constructor is only used in the receive path from Amqp path, 
         /// or in Cloning from a Message that has serialized.
@@ -416,7 +419,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         public
 #endif
         Stream BodyStream
@@ -427,7 +430,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !PCL && !NETMF
         internal AmqpMessage SerializedAmqpMessage
         {
             get
@@ -446,64 +449,8 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         internal ArraySegment<byte> DeliveryTag { get; set; }
 #endif
-        /// <summary>
-        /// Makes a clone of the current event data instance.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="ObjectDisposedException">throws if the event data has already been disposed.</exception>
-        public Message Clone()
-        {
-            this.ThrowIfDisposed();
-#if !WINDOWS_UWP && !NETMF
-            if (this.serializedAmqpMessage != null)
-            {
-                return new Message(this.serializedAmqpMessage);
-            }
-#endif
-            var message = new Message();
-            if (this.bodyStream != null)
-            {
-                // The new Message always owns the cloned stream.
-                message = new Message(CloneStream(this.bodyStream))
-                {
-                    ownsBodyStream = true
-                };
-            }
 
-#if NETMF
-            foreach (var systemProperty in this.SystemProperties.Keys)
-            {
-                message.SystemProperties[systemProperty] = this.SystemProperties[systemProperty];
-            }
-
-            foreach (var property in this.Properties.Keys)
-            {
-                message.Properties.Add(property, this.Properties[property]);
-            }
-#else
-            foreach (var systemProperty in this.SystemProperties)
-            {
-                // MessageId would already be there.
-                if (message.SystemProperties.ContainsKey(systemProperty.Key))
-                {
-                    message.SystemProperties[systemProperty.Key] = systemProperty.Value;
-                }
-                else
-                {
-                    message.SystemProperties.Add(systemProperty);
-                }
-            }
-
-            foreach (var property in this.Properties)
-            {
-                message.Properties.Add(property);
-            }
-#endif
-
-            return message;
-        }
-
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         /// <summary>
         /// Dispose the current event data instance
         /// </summary>
@@ -551,7 +498,7 @@ namespace Microsoft.Azure.Devices.Client
                 return new byte[] { };
             }
 
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !PCL && !NETMF
             BufferListStream listStream;
             if ((listStream = this.bodyStream as BufferListStream) != null)
             {
@@ -566,7 +513,7 @@ namespace Microsoft.Azure.Devices.Client
             return ReadFullStream(this.bodyStream);
         }
 
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !PCL && !NETMF
         internal AmqpMessage ToAmqpMessage(bool setBodyCalled = true)
         {
             this.ThrowIfDisposed();
@@ -612,7 +559,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (1 == Interlocked.Exchange(ref this.getBodyCalled, 1))
             {
-#if NETMF
+#if NETMF || PCL
                 throw new InvalidOperationException("The message body cannot be read multiple times. To reuse it store the value after reading.");
 #else
                 throw Fx.Exception.AsError(new InvalidOperationException(ApiResources.MessageBodyConsumed));
@@ -651,46 +598,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         }
 
-        static Stream CloneStream(Stream originalStream)
-        {
-            if (originalStream != null)
-            {
-                MemoryStream memoryStream;
-                if ((memoryStream = originalStream as MemoryStream) != null)
-                {
-                    // Note: memoryStream.GetBuffer() doesn't work
-#if !NETMF
-                    return new MemoryStream(memoryStream.ToArray(), 0, (int)memoryStream.Length, false, true);
-#endif
-                }
-#if !WINDOWS_UWP
-                ICloneable cloneable;
-
-                if ((cloneable = originalStream as ICloneable) != null)
-                {
-                    return (Stream)cloneable.Clone();
-                }
-#endif
-                if (originalStream.Length == 0)
-                {
-                    // This can happen in Stream.Null
-#if NETMF
-                    return null;
-                }
-
-                throw new Exception("Does not support cloning of Stream Type: " + originalStream.GetType());
-#else
-                    return Stream.Null;
-                }
-
-                throw Fx.AssertAndThrow("Does not support cloning of Stream Type: " + originalStream.GetType());
-#endif
-            }
-
-            return null;
-        }
-
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !PCL && !NETMF
         AmqpMessage PopulateAmqpMessageForSend(AmqpMessage message)
         {
             MessageConverter.UpdateAmqpMessageHeadersAndProperties(message, this);
@@ -720,7 +628,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (this.disposed)
             {
-#if NETMF
+#if NETMF || PCL
                 throw new Exception("Message disposed");
 #else
                 throw Fx.Exception.ObjectDisposed(ApiResources.MessageDisposed);
@@ -734,7 +642,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 if (disposing)
                 {
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !PCL && !NETMF
                     if (this.serializedAmqpMessage != null)
                     {
                         // in the receive scenario, this.bodyStream is a reference
