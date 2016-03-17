@@ -16,12 +16,14 @@
 #include "threadapi.h"
 #include "lock.h"
 #include "iot_logging.h"
+#include "condition.h"
 
 typedef struct IOTHUB_CLIENT_INSTANCE_TAG
 {
     IOTHUB_CLIENT_LL_HANDLE IoTHubClientLLHandle;
     THREAD_HANDLE ThreadHandle;
     LOCK_HANDLE LockHandle;
+    COND_HANDLE CondHandle;
     sig_atomic_t StopThread;
 } IOTHUB_CLIENT_INSTANCE;
 
