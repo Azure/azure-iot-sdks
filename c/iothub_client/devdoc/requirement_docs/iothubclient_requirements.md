@@ -85,9 +85,7 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 
 **SRS_IOTHUBCLIENT_01_006: [** That includes destroying the IoTHubClient_LL instance by calling IoTHubClient_LL_Destroy. **]**
 
-**SRS_IOTHUBCLIENT_02_043: [** IoTHubClient_Destroy shall lock the serializing lock. **]**
-
-**SRS_IOTHUBCLIENT_02_044: [** If locking the serializing lock succeeds then the condition variable that signals the working thread termination shall be signaled. **]**
+**SRS_IOTHUBCLIENT_02_043: [** IoTHubClient_Destroy shall lock the serializing lock and signal the worker thread (if any) to end **]**
 
  **SRS_IOTHUBCLIENT_02_045: [** IoTHubClient_Destroy shall unlock the serializing lock. **]**
 
@@ -176,8 +174,6 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotH
 **SRS_IOTHUBCLIENT_01_038: [** The thread shall exit when IoTHubClient_Destroy is called. **]**
 
 **SRS_IOTHUBCLIENT_01_039: [** All calls to IoTHubClient_LL_DoWork shall be protected by the lock created in IotHubClient_Create. **]**
-
-**SRS_IOTHUBCLIENT_02_047: [** If the condition variable is signaled then the thread shall stop calling IoTHubClient_LL_DoWork every 1 ms and return. **]**
 
 **SRS_IOTHUBCLIENT_01_040: [** If acquiring the lock fails, IoTHubClient_LL_DoWork shall not be called. **]**
 
