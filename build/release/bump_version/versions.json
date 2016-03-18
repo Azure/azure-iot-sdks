@@ -7,6 +7,7 @@
     },
     "csharp": {
         "device": "1.0.3",
+		"devicepcl": "1.0.4",
         "service": "1.0.2"
     },
     "java": {

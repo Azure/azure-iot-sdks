@@ -16,6 +16,7 @@ This repository contains the following IoT device SDKs:
 - [Azure IoT device SDK for C](c/readme.md)
 - [Azure IoT device SDK for Node.js](node/device/core/readme.md)
 - [Azure IoT device SDK for Java](java/device/readme.md)
+- [Azure IoT device SDK for Python](python/device/readme.md)
 - [Azure IoT device SDK for .NET](csharp/device/readme.md)
 
 Each language SDK includes sample code and documentation in addition to the library code. The API reference documentation is [here](http://azure.github.io/azure-iot-sdks).

@@ -3,6 +3,7 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
+#if !WINDOWS_UWP && !PCL
     using System;
     using System.Diagnostics;
     using System.Globalization;
@@ -11,7 +12,6 @@ namespace Microsoft.Azure.Devices.Client
     using System.Security;
     using Microsoft.Win32.SafeHandles;
 
-#if !WINDOWS_UWP
     [SecurityCritical]
     sealed class SafeEventLogWriteHandle : SafeHandleZeroOrMinusOneIsInvalid
     {

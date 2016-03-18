@@ -25,6 +25,8 @@ option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (d
 option(skip_unittests "set skip_unittests to ON to skip unittests (default is OFF)[if possible, they are always build]" OFF)
 option(compileOption_C "passes a string to the command line of the C compiler" OFF)
 option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
+option(build_python "builds the Python native iothub_client module" OFF)
+
 
 #Use solution folders. 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -259,4 +261,8 @@ endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
+if(NOT "${build_python}" STREQUAL "OFF")
+    add_subdirectory(../python/device/iothub_client_python python)
+endif()
+
 

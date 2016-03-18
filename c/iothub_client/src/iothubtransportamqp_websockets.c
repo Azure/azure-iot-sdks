@@ -15,7 +15,7 @@ XIO_HANDLE getWebSocketsIOTransport(const char* fqdn, int port, const char* cert
 
 	return xio_create(wsio_get_interface_description(), &ws_io_config, NULL);
 }
-static TRANSPORT_HANDLE IoTHubTransportAMQP_Create_WebSocketsOverTls(const IOTHUBTRANSPORT_CONFIG* config)
+static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create_WebSocketsOverTls(const IOTHUBTRANSPORT_CONFIG* config)
 {
 	AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)IoTHubTransportAMQP_Create(config);
 

@@ -1,7 +1,9 @@
 ﻿{
   "dependencies": {
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
-    "Newtonsoft.Json": "6.0.8"
+    "Newtonsoft.Json": "6.0.8",
+    "PCLCrypto": "1.0.86",
+    "Validation": "2.2.8"
   },
   "frameworks": {
     "uap10.0": {}

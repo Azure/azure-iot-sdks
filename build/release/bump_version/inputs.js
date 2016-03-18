@@ -88,6 +88,14 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
+        "filePath": "csharp/device/Microsoft.Azure.Devices.Client.PCL/Properties/AssemblyInfo.cs",
+        "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
+        "replaceString": function(versions) {
+            return '$1' + versions.csharp.devicepcl + '$2';
+        }
+    },	
+    {
+        "taskType": "regexReplaceTask",
         "filePath": "csharp/device/Microsoft.Azure.Devices.Client.WinRT/Properties/AssemblyInfo.cs",
         "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
         "replaceString": function(versions) {

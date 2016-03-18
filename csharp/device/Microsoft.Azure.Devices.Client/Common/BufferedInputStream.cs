@@ -2,13 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace Microsoft.Azure.Devices.Client
 {
+#if !PCL
     using Microsoft.Azure.Devices.Client.Common;
+#endif
+
     using System;
     using System.IO;
     using System.Threading;
 
     class BufferedInputStream : Stream
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         , ICloneable
 #endif
     {
@@ -96,7 +99,7 @@ namespace Microsoft.Azure.Devices.Client
 
         // Note: this is the old style async model (APM) that we don't need to support. It is not supported in UWP
         // I'm leaving it in place for the code owners to review and decide. ArturL 8/14/15
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         override
 #endif
         public IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -105,7 +108,7 @@ namespace Microsoft.Azure.Devices.Client
             return new CompletedAsyncResultT<int>(this.innerStream.Read(buffer, offset, count), callback, state);
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         override
 #endif
         public int EndRead(IAsyncResult asyncResult)

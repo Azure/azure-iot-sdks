@@ -5,8 +5,6 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
-using Microsoft.Azure.Devices.Client;
-using Microsoft.Azure.Devices.Client.Samples;
 
 namespace Microsoft.Azure.Devices.Client.Samples
 {

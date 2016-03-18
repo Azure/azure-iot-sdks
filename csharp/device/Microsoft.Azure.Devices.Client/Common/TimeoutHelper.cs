@@ -193,7 +193,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         [Fx.Tag.Blocking]
 #endif
         public static bool WaitOne(WaitHandle waitHandle, TimeSpan timeout)

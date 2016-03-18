@@ -11,16 +11,18 @@ namespace Microsoft.Azure.Devices.Client
     using System.Globalization;
     using System.Reflection;
     using System.Runtime.CompilerServices;
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     using System.Runtime.ConstrainedExecution;
 #endif
     using System.Runtime.InteropServices;
     using System.Security;
     using System.Threading;
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     using System.Transactions;
 #endif
+#if !PCL
     using Microsoft.Win32;
+#endif
     using Microsoft.Azure.Devices.Client.Exceptions;
 
     static class Fx
@@ -92,39 +94,7 @@ namespace Microsoft.Azure.Devices.Client
                 return exceptionTrace;
             }
         }
-
-        ////public static DiagnosticTrace Trace
-        ////{
-        ////    get
-        ////    {
-        ////        if (diagnosticTrace == null)
-        ////        {
-        ////            diagnosticTrace = InitializeTracing();
-        ////        }
-
-        ////        return diagnosticTrace;
-        ////    }
-        ////}
-
-        public static byte[] AllocateByteArray(int size)
-        {
-            try
-            {
-                // Safe to catch OOM from this as long as the ONLY thing it does is a simple allocation of a primitive type (no method calls).
-                return new byte[size];
-            }
-            catch (OutOfMemoryException exception)
-            {
-#if WINDOWS_UWP
-                // InsufficientMemoryException does not exit in UWP, fall back to OutOfMemoryException
-                throw Fx.Exception.AsError(new OutOfMemoryException(CommonResources.GetString(CommonResources.BufferAllocationFailed, size), exception));
-#else
-                // Convert OOM into an exception that can be safely handled by higher layers.
-                throw Fx.Exception.AsError(new InsufficientMemoryException(CommonResources.GetString(CommonResources.BufferAllocationFailed, size), exception));
-#endif
-            }
-        }
-
+        
         // Do not call the parameter "message" or else FxCop thinks it should be localized.
         [Conditional("DEBUG")]
         public static void Assert(bool condition, string description)
@@ -179,68 +149,6 @@ namespace Microsoft.Azure.Devices.Client
             throw Fx.Exception.AsError(new FatalException(description));
         }
 
-        public static void AssertAndFailFastService(bool condition, string description)
-        {
-            if (!condition)
-            {
-                AssertAndFailFastService(description);
-            }
-        }
-
-        // This never returns.  The Exception return type lets you write 'throw AssertAndFailFast()' which tells the compiler/tools that
-        // execution stops.
-        [Fx.Tag.SecurityNote(Critical = "Calls into critical method Environment.FailFast",
-            Safe = "The side affect of the app crashing is actually intended here")]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static Exception AssertAndFailFastService(string description)
-        {
-            Fx.Assert(description);
-            string failFastMessage = CommonResources.GetString(CommonResources.FailFastMessage, description);
-
-            // The catch is here to force the finally to run, as finallys don't run until the stack walk gets to a catch.  
-            // The catch makes sure that the finally will run before the stack-walk leaves the frame, but the code inside is impossible to reach.
-            try
-            {
-                try
-                {
-                    ////MessagingClientEtwProvider.Provider.EventWriteFailFastOccurred(description);
-                    Fx.Exception.TraceFailFast(failFastMessage);
-                    // Mark that a FailFast is in progress, so that we can take ourselves out of the NLB if for
-                    // any reason we can't kill ourselves quickly.  Wait 15 seconds so this state gets picked up for sure.
-                    Fx.FailFastInProgress = true;
-#if !WINDOWS_UWP
-                    Thread.Sleep(TimeSpan.FromSeconds(15));
-#endif
-                }
-                finally
-                {
-#if !WINDOWS_UWP
-                    // ########################## NOTE ###########################
-                    // Environment.FailFast does not collect crash dumps when used in Azure services. 
-                    // Environment.FailFast(failFastMessage);
-
-                    // ################## WORKAROUND #############################
-                    // Workaround for the issue above. Throwing an unhandled exception on a separate thread to trigger process crash and crash dump collection
-                    // Throwing FatalException since our service does not morph/eat up fatal exceptions
-                    // We should find the tracking bug in Azure for this issue, and remove the workaround when fixed by Azure
-                    Thread failFastWorkaroundThread = new Thread(delegate()
-                    {
-                        throw new FatalException(failFastMessage);
-                    });
-
-                    failFastWorkaroundThread.Start();
-                    failFastWorkaroundThread.Join();
-#endif
-                }
-            }
-            catch
-            {
-                throw;
-            }
-
-            return null; // we'll never get here since we've just fail-fasted
-        }
-
         internal static bool FailFastInProgress { get; private set; }
 
         public static bool IsFatal(Exception exception)
@@ -249,7 +157,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 // FYI, CallbackException is-a FatalException
                 if (exception is FatalException ||
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
                     exception is OutOfMemoryException ||
 #else
                     (exception is OutOfMemoryException && !(exception is InsufficientMemoryException)) ||
@@ -299,7 +207,7 @@ namespace Microsoft.Azure.Devices.Client
             return false;
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         // If the transaction has aborted then we switch over to a new transaction
         // which we will immediately abort after setting Transaction.Current
         public static TransactionScope CreateTransactionScope(Transaction transaction)
@@ -367,30 +275,15 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
+#if !WINDOWS_UWP && !PCL
         [Fx.Tag.SecurityNote(Critical = "Construct the unsafe object IOCompletionThunk")]
         [SecurityCritical]
         public static IOCompletionCallback ThunkCallback(IOCompletionCallback callback)
         {
             return (new IOCompletionThunk(callback)).ThunkFrame;
         }
-
-#if !WINDOWS_UWP
-        public static TransactionCompletedEventHandler ThunkTransactionEventHandler(TransactionCompletedEventHandler handler)
-        {
-            return (new TransactionEventHandlerThunk(handler)).ThunkFrame;
-        }
 #endif
-
-#if DEBUG
-        internal static bool AssertsFailFast
-        {
-            get
-            {
-                object value;
-                return TryGetDebugSwitch(Fx.AssertsFailFastName, out value) &&
-                    typeof(int).IsAssignableFrom(value.GetType()) && ((int)value) != 0;
-            }
-        }
+        #if DEBUG
 
         internal static Type[] BreakOnExceptionTypes
         {
@@ -421,29 +314,9 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        internal static bool FastDebug
-        {
-            get
-            {
-                if (!Fx.fastDebugRetrieved)
-                {
-                    object value;
-                    if (TryGetDebugSwitch(Fx.FastDebugName, out value))
-                    {
-                        Fx.fastDebugCache = typeof(int).IsAssignableFrom(value.GetType()) && ((int)value) != 0;
-                    }
-
-                    Fx.fastDebugRetrieved = true;
-                    ////MessagingClientEtwProvider.Provider.EventWriteLogAsWarning(string.Format(CultureInfo.InvariantCulture, "AppDomain({0}).Fx.FastDebug={1}", AppDomain.CurrentDomain.FriendlyName, Fx.fastDebugCache.ToString()));
-                }
-
-                return Fx.fastDebugCache;
-            }
-        }
-
         static bool TryGetDebugSwitch(string name, out object value)
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             // No registry access in UWP
             value = null;
             return false;
@@ -472,7 +345,7 @@ namespace Microsoft.Azure.Devices.Client
         [SuppressMessage(FxCop.Category.Design, FxCop.Rule.DoNotCatchGeneralExceptionTypes,
             Justification = "Don't want to hide the exception which is about to crash the process.")]
         [Fx.Tag.SecurityNote(Miscellaneous = "Must not call into PT code as it is called within a CER.")]
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 #endif
         static void TraceExceptionNoThrow(Exception exception)
@@ -495,7 +368,7 @@ namespace Microsoft.Azure.Devices.Client
         [SuppressMessage(FxCop.Category.ReliabilityBasic, FxCop.Rule.IsFatalRule,
             Justification = "Don't want to hide the exception which is about to crash the process.")]
         [Fx.Tag.SecurityNote(Miscellaneous = "Must not call into PT code as it is called within a CER.")]
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 #endif
         static bool HandleAtThreadBase(Exception exception)
@@ -691,6 +564,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif // UNUSED
 
+#if !WINDOWS_UWP && !PCL
         // This can't derive from Thunk since T would be unsafe.
         [Fx.Tag.SecurityNote(Critical = "unsafe object")]
         [SecurityCritical]
@@ -718,9 +592,7 @@ namespace Microsoft.Azure.Devices.Client
                 Safe = "Delegates can be invoked, guaranteed not to call into PT user code from the finally.")]
             void UnhandledExceptionFrame(uint error, uint bytesRead, NativeOverlapped* nativeOverlapped)
             {
-#if !WINDOWS_UWP
                 RuntimeHelpers.PrepareConstrainedRegions();
-#endif
                 try
                 {
                     this.callback(error, bytesRead, nativeOverlapped);
@@ -734,6 +606,7 @@ namespace Microsoft.Azure.Devices.Client
                 }
             }
         }
+#endif
 
 #if UNUSED
         sealed class SendOrPostThunk : Thunk<SendOrPostCallback>
@@ -771,38 +644,6 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif // UNUSED
 
-#if !WINDOWS_UWP
-        sealed class TransactionEventHandlerThunk
-        {
-            readonly TransactionCompletedEventHandler callback;
-
-            public TransactionEventHandlerThunk(TransactionCompletedEventHandler callback)
-            {
-                this.callback = callback;
-            }
-
-            public TransactionCompletedEventHandler ThunkFrame
-            {
-                get
-                {
-                    return new TransactionCompletedEventHandler(UnhandledExceptionFrame);
-                }
-            }
-
-            void UnhandledExceptionFrame(object sender, TransactionEventArgs args)
-            {
-                RuntimeHelpers.PrepareConstrainedRegions();
-                try
-                {
-                    this.callback(sender, args);
-                }
-                catch (Exception exception)
-                {
-                    throw AssertAndFailFastService(exception.ToString());
-                }
-            }
-        }
-#endif
         public static class Tag
         {
             public enum CacheAttrition
@@ -1095,48 +936,6 @@ namespace Microsoft.Azure.Devices.Client
             {
                 public NonThrowingAttribute()
                 {
-                }
-            }
-
-            [SuppressMessage(FxCop.Category.Performance, "CA1813:AvoidUnsealedAttributes",
-                Justification = "This is intended to be an attribute heirarchy. It does not affect product perf.")]
-            [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor,
-                AllowMultiple = true, Inherited = false)]
-            [Conditional("CODE_ANALYSIS")]
-            public class ThrowsAttribute : Attribute
-            {
-                readonly Type exceptionType;
-                readonly string diagnosis;
-
-                public ThrowsAttribute(Type exceptionType, string diagnosis)
-                {
-                    if (exceptionType == null)
-                    {
-                        throw Fx.Exception.ArgumentNull("exceptionType");
-                    }
-                    if (string.IsNullOrEmpty(diagnosis))
-                    {
-                        throw Fx.Exception.ArgumentNullOrEmpty("diagnosis");
-                    }
-
-                    this.exceptionType = exceptionType;
-                    this.diagnosis = diagnosis;
-                }
-
-                public Type ExceptionType
-                {
-                    get
-                    {
-                        return this.exceptionType;
-                    }
-                }
-
-                public string Diagnosis
-                {
-                    get
-                    {
-                        return this.diagnosis;
-                    }
                 }
             }
 
