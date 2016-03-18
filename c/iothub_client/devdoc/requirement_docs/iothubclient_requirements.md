@@ -75,7 +75,7 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* conf
 
 ## IoTHubClient_CreateWithTransport
 ```c
-extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HL_HANDLE transportHandle, const IOTHUB_CLIENT_CONFIG* config);
+extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transportHandle, const IOTHUB_CLIENT_CONFIG* config);
 ```
 
 Create an IoTHubClient using an existing connection.

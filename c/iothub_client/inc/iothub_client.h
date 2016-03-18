@@ -57,11 +57,11 @@ extern "C"
     */
     extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config);
 
-	/**
+    /**
 	* @brief	Creates a IoT Hub client for communication with an existing IoT
 	* 			Hub using the specified parameters.
 	*
-	* @param	transportHandle	TRANSPORT_HL_HANDLE which represents a connection.
+	* @param	transportHandle	TRANSPORT_HANDLE which represents a connection.
 	* @param	config	Pointer to an @c IOTHUB_CLIENT_CONFIG structure
 	*
 	*			The API allows sharing of a connection across multiple
@@ -70,7 +70,7 @@ extern "C"
 	* @return	A non-NULL @c IOTHUB_CLIENT_HANDLE value that is used when
 	* 			invoking other functions for IoT Hub client and @c NULL on failure.
 	*/
-	extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HL_HANDLE transportHandle, const IOTHUB_CLIENT_CONFIG* config);
+	extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transportHandle, const IOTHUB_CLIENT_CONFIG* config);
 
     /**
     * @brief	Disposes of resources allocated by the IoT Hub client. This is a

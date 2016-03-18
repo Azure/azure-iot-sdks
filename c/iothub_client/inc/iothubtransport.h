@@ -4,7 +4,7 @@
 #ifndef IOTHUB_TRANSPORT_H
 #define IOTHUB_TRANSPORT_H
 
-typedef struct TRANSPORT_HL_HANDLE_DATA_TAG* TRANSPORT_HL_HANDLE;
+typedef struct TRANSPORT_HL_HANDLE_DATA_TAG* TRANSPORT_HANDLE;
 
 #include "lock.h"
 #include "crt_abstractions.h"
@@ -16,12 +16,12 @@ extern "C"
 {
 #endif
 
-extern TRANSPORT_HL_HANDLE  IoTHubTransport_HL_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix);
-extern void					IoTHubTransport_HL_Destroy(TRANSPORT_HL_HANDLE transportHlHandle);
-extern LOCK_HANDLE			IoTHubTransport_HL_GetLock(TRANSPORT_HL_HANDLE transportHlHandle);
-extern TRANSPORT_HANDLE		IoTHubTransport_HL_GetLLTransport(TRANSPORT_HL_HANDLE transportHlHandle);
-extern IOTHUB_CLIENT_RESULT IoTHubTransport_HL_StartWorkerThread(TRANSPORT_HL_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
-extern void					IoTHubTransport_HL_EndWorkerThread(TRANSPORT_HL_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
+extern TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix);
+extern void					IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHlHandle);
+extern LOCK_HANDLE			IoTHubTransport_GetLock(TRANSPORT_HANDLE transportHlHandle);
+extern TRANSPORT_LL_HANDLE		IoTHubTransport_GetLLTransport(TRANSPORT_HANDLE transportHlHandle);
+extern IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
+extern void					IoTHubTransport_EndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
 
 #ifdef __cplusplus
 }

@@ -55,7 +55,7 @@ static const char* LOG_TRACE_OPTION = "logtrace";
 static const char* KEEP_ALIVE_OPTION = "keepalive";
 
 static const IOTHUB_CLIENT_LL_HANDLE TEST_IOTHUB_CLIENT_LL_HANDLE = (IOTHUB_CLIENT_LL_HANDLE)0x4343;
-static const TRANSPORT_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_HANDLE)0x4444;
+static const TRANSPORT_LL_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_LL_HANDLE)0x4444;
 static const MQTT_CLIENT_HANDLE TEST_MQTT_CLIENT_HANDLE = (MQTT_CLIENT_HANDLE)0x1122;
 static const PDLIST_ENTRY TEST_PDLIST_ENTRY = (PDLIST_ENTRY)0x1123;
 static const MQTT_MESSAGE_HANDLE TEST_MQTT_MESSAGE_HANDLE = (MQTT_MESSAGE_HANDLE)0x1124;
@@ -1189,7 +1189,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         IOTHUBTRANSPORT_CONFIG config = { 0 };
         SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
-        TRANSPORT_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+        TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
 
         g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
         mocks.ResetAllCalls();
@@ -1223,7 +1223,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         IOTHUBTRANSPORT_CONFIG config = { 0 };
         SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
-        TRANSPORT_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+        TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
 
         g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
         mocks.ResetAllCalls();
@@ -1262,7 +1262,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         suback.qosCount = 1;
         suback.qosReturn = QosValue;
 
-        TRANSPORT_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+        TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
 
         g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
         IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2530,7 +2530,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         IoTHubTransportMqtt_Destroy(handle);
     }
 
-	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
 	TEST_FUNCTION(IoTHubTransportMqtt_Register_succeeds_returns_transport)
 	{
 		// arrange
@@ -2556,7 +2556,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 		IoTHubTransportMqtt_Destroy(handle);
 	}
 
-	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
 	TEST_FUNCTION(IoTHubTransportMqtt_Register_twice_fails_second_time)
 	{
 		// arrange
@@ -2699,7 +2699,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 		IoTHubTransportMqtt_Destroy(handle);
 	}
 
-	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransportMqtt_Register shall return NULL if the TRANSPORT_HANDLE is NULL.]
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransportMqtt_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.]
 	TEST_FUNCTION(IoTHubTransportMqtt_Register_transport_null_returns_null)
 	{
 		// arrange
@@ -2745,7 +2745,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 		IoTHubTransportMqtt_Destroy(handle);
 	}
 
-	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
 	TEST_FUNCTION(IoTHubTransportMqtt_Register_Unregister_Register_returns_handle)
 	{
 		// arrange
