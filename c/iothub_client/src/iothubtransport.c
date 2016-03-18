@@ -19,19 +19,19 @@
 #include "iot_logging.h"
 #include "vector.h"
 
-typedef struct TRANSPORT_HL_HANDLE_DATA_TAG
+typedef struct TRANSPORT_HANDLE_DATA_TAG
 {
-	TRANSPORT_HANDLE transportLLHandle;
+	TRANSPORT_LL_HANDLE transportLLHandle;
     THREAD_HANDLE workerThreadHandle;
     LOCK_HANDLE lockHandle;
     sig_atomic_t stopThread;
 	TRANSPORT_PROVIDER_FIELDS;
 	VECTOR_HANDLE clients;
-} TRANSPORT_HL_HANDLE_DATA;
+} TRANSPORT_HANDLE_DATA;
 
-TRANSPORT_HL_HANDLE  IoTHubTransport_HL_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix)
+TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix)
 {
-	TRANSPORT_HL_HANDLE_DATA * result = malloc(sizeof(TRANSPORT_HL_HANDLE_DATA));
+	TRANSPORT_HANDLE_DATA * result = malloc(sizeof(TRANSPORT_HANDLE_DATA));
 
 	if (protocol == NULL || iotHubName == NULL || iotHubSuffix == NULL)
 	{
@@ -111,7 +111,7 @@ TRANSPORT_HL_HANDLE  IoTHubTransport_HL_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER 
 
 static int transport_worker_thread(void* threadArgument)
 {
-	TRANSPORT_HL_HANDLE_DATA* transportData = (TRANSPORT_HL_HANDLE_DATA*)threadArgument;
+	TRANSPORT_HANDLE_DATA* transportData = (TRANSPORT_HANDLE_DATA*)threadArgument;
 
 	/* Codes_SRS_IOTHUBCLIENT_01_038: [The thread shall exit when IoTHubClient_Destroy is called.] */
 	while (!transportData->stopThread)
@@ -142,7 +142,7 @@ static bool find_by_handle(const void* element, const void* value)
 	return result;
 }
 
-static void start_worker_if_needed(TRANSPORT_HL_HANDLE_DATA * transportData, IOTHUB_CLIENT_HANDLE clientHandle)
+static void start_worker_if_needed(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIENT_HANDLE clientHandle)
 {
 	if (transportData->workerThreadHandle == NULL)
 	{
@@ -162,7 +162,7 @@ static void start_worker_if_needed(TRANSPORT_HL_HANDLE_DATA * transportData, IOT
 	}
 }
 
-static void stop_worker_thread(TRANSPORT_HL_HANDLE_DATA * transportData)
+static void stop_worker_thread(TRANSPORT_HANDLE_DATA * transportData)
 {
 	int res;
 	transportData->stopThread = 1;
@@ -172,7 +172,7 @@ static void stop_worker_thread(TRANSPORT_HL_HANDLE_DATA * transportData)
 	}
 }
 
-static void stop_worker(TRANSPORT_HL_HANDLE_DATA * transportData, IOTHUB_CLIENT_HANDLE clientHandle)
+static void end_worker_thread(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIENT_HANDLE clientHandle)
 {
 	void* element = VECTOR_find_if(transportData->clients, find_by_handle, clientHandle);
 	if (element != NULL)
@@ -189,12 +189,12 @@ static void stop_worker(TRANSPORT_HL_HANDLE_DATA * transportData, IOTHUB_CLIENT_
 	}
 }
 
-void IoTHubTransport_HL_Destroy(TRANSPORT_HL_HANDLE transportHlHandle)
+void IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHlHandle)
 {
 	
 	if (transportHlHandle != NULL)
 	{
-		TRANSPORT_HL_HANDLE_DATA * transportData = (TRANSPORT_HL_HANDLE_DATA*)transportHlHandle;
+		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
 		stop_worker_thread(transportData);
 		Lock_Deinit(transportData->lockHandle);
 		(transportData->IoTHubTransport_Destroy)(transportData->transportLLHandle);
@@ -203,7 +203,7 @@ void IoTHubTransport_HL_Destroy(TRANSPORT_HL_HANDLE transportHlHandle)
 	}
 }
 
-LOCK_HANDLE IoTHubTransport_HL_GetLock(TRANSPORT_HL_HANDLE transportHlHandle)
+LOCK_HANDLE IoTHubTransport_GetLock(TRANSPORT_HANDLE transportHlHandle)
 {
 	LOCK_HANDLE lock;
 	if (transportHlHandle == NULL)
@@ -212,28 +212,28 @@ LOCK_HANDLE IoTHubTransport_HL_GetLock(TRANSPORT_HL_HANDLE transportHlHandle)
 	}
 	else
 	{
-		TRANSPORT_HL_HANDLE_DATA * transportData = (TRANSPORT_HL_HANDLE_DATA*)transportHlHandle;
+		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
 		lock = transportData->lockHandle;
 	}
 	return lock;
 }
 
-TRANSPORT_HANDLE IoTHubTransport_HL_GetLLTransport(TRANSPORT_HL_HANDLE transportHlHandle)
+TRANSPORT_LL_HANDLE IoTHubTransport_GetLLTransport(TRANSPORT_HANDLE transportHlHandle)
 {
-	TRANSPORT_HANDLE llTransport;
+	TRANSPORT_LL_HANDLE llTransport;
 	if (transportHlHandle == NULL)
 	{
 		llTransport = NULL;
 	}
 	else
 	{
-		TRANSPORT_HL_HANDLE_DATA * transportData = (TRANSPORT_HL_HANDLE_DATA*)transportHlHandle;
+		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
 		llTransport = transportData->transportLLHandle;
 	}
 	return llTransport;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransport_HL_StartWorkerThread(TRANSPORT_HL_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle)
+IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle)
 {
 	IOTHUB_CLIENT_RESULT result;
 	if (transportHlHandle == NULL || clientHandle == NULL)
@@ -242,7 +242,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_HL_StartWorkerThread(TRANSPORT_HL_HANDLE tr
 	}
 	else
 	{
-		TRANSPORT_HL_HANDLE_DATA * transportData = (TRANSPORT_HL_HANDLE_DATA*)transportHlHandle;
+		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
 		start_worker_if_needed(transportData, clientHandle);
 		if (transportData->workerThreadHandle == NULL)
 		{
@@ -256,12 +256,12 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_HL_StartWorkerThread(TRANSPORT_HL_HANDLE tr
 	return result;
 }
 
-void IoTHubTransport_HL_EndWorkerThread(TRANSPORT_HL_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle)
+void IoTHubTransport_EndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle)
 {
 	if (!(transportHlHandle == NULL || clientHandle == NULL))
 	{
-		TRANSPORT_HL_HANDLE_DATA * transportData = (TRANSPORT_HL_HANDLE_DATA*)transportHlHandle;
-		stop_worker(transportData, clientHandle);
+		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
+		end_worker_thread(transportData, clientHandle);
 	}
 	
 }
