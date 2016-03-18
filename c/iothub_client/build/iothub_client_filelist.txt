@@ -1,9 +1,0 @@
-..\inc\iothub_client.h
-..\inc\iothub_client_ll.h
-..\inc\iothub_message.h
-..\inc\iothub_client_private.h
-..\src\iothub_client.c
-..\src\iothub_client_ll.c
-..\src\iothub_message.c
-..\inc\iothub_client_version.h
-..\src\version.c

@@ -1,8 +1,8 @@
 set(project_files
-		${CMAKE_CURRENT_SOURCE_DIR}/../../src/*.c 
-		${CMAKE_CURRENT_SOURCE_DIR}/../../inc/*.h
-	)
-
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransportamqp.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransportamqp.c
+		)
+	
 set(common_files 
 	)
 	

@@ -1,5 +1,14 @@
-simplesample_http.h
-simplesample_http.c
-..\..\..\certs\certs.c
-..\..\..\certs\certs.h
-mbed\main.cpp
+set(project_files
+		${CMAKE_CURRENT_SOURCE_DIR}/../mbed/main.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/../*.c 
+		${CMAKE_CURRENT_SOURCE_DIR}/../*.h
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs/certs.h
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs/certs.c
+	)
+
+set(common_files 
+	)
+	
+# Add the paterns of the filenames to be deleted before pushing local update to remote repo.
+set(exclude_files
+	)

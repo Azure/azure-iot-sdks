@@ -2,11 +2,11 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required(VERSION 2.8.11)
-project(mbed_iothub_client_sample_http_bld)
+project(simplesample_mqtt_bld)
 
 ### Data
 set(sdk_base_path ../../../../..)
-set(mbed_repo_name "iothub_client_sample_http_bld")
+set(mbed_repo_name "simplesample_mqtt_bld")
 set(local_repo_path ${CMAKE_CURRENT_BINARY_DIR}/${mbed_repo_name})
 set(compile_mbed_tool ${sdk_base_path}/c/tools/compilembed/bin/debug/compilembed.exe)
 set(mbed_platform "FRDM-K64F")

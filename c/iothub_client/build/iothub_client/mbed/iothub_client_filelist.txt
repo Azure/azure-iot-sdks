@@ -1,0 +1,19 @@
+set(project_files
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_ll.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_message.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_private.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_ll.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_message.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_version.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/version.c
+	)
+	
+set(common_files 
+	)
+	
+# Add the paterns of the filenames to be deleted before pushing local update to remote repo.
+set(exclude_files
+	)
+	

@@ -3,6 +3,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 project(mbed_iothub_client_lib)
+set(HG_COMMIT_MSG "Automatic Build Commit" CACHE STRING "Passed to the mercurial commit")
 
 set(MBED_CMAKE_LIB)
 
@@ -85,9 +86,9 @@ endfunction(cloneMBEDRepository)
 
 
 function(updateMBEDSourceFiles)
-	set(source_file_destination ${local_repo_path}/${target_project_name})
+	set(source_file_destination ${local_repo_path})
 	
-	message(STATUS "Copying SDK common files.")
+	message(STATUS "Copying common files.")
 	foreach(file_item ${common_files})
 		file(GLOB expanded_file_item ${file_item})
 		file(COPY ${expanded_file_item} DESTINATION ${source_file_destination})
@@ -111,8 +112,8 @@ endfunction(updateMBEDSourceFiles)
 
 
 function(pushMBEDRepository)
+	
 	set(mbed_repo_address https://$ENV{MBED_USER}:$ENV{MBED_PWD}@developer.mbed.org/users/$ENV{MBED_USER}/code/${mbed_repo_name}/)
-
 
 	message(STATUS "Commiting changes to local repository.")
 
@@ -121,7 +122,7 @@ function(pushMBEDRepository)
 		message(FATAL_ERROR "Failed adding/removing local changes (error code " ${result_code} ")")
 	endif()
 
-	execute_process(COMMAND hg "commit" "-u" $ENV{MBED_HG_USER} "-m \"Automatic build commit\"" WORKING_DIRECTORY ${local_repo_path} RESULT_VARIABLE result_code)
+	execute_process(COMMAND hg "commit" "-u" $ENV{MBED_HG_USER} "-m ${HG_COMMIT_MSG}" WORKING_DIRECTORY ${local_repo_path} RESULT_VARIABLE result_code)
 	if(NOT ${result_code} EQUAL 0 AND NOT ${result_code} EQUAL 1)
 		message(FATAL_ERROR "Failed commiting changes to local repository (error code " ${result_code} ")")
 	endif()
@@ -150,5 +151,18 @@ function(compileMBEDProject)
 		message(FATAL_ERROR "Failed compiling MBED repository '" ${mbed_repo_name} "' (error code " ${result_code} ")")
 	endif()
 endfunction(compileMBEDProject)
+
+function(releaseMBEDRepository)
+	verifyRequiredParameters()
+	verifyMercurialIsInstalled()
+	cloneMBEDRepository()
+	updateMBEDSourceFiles()
+	pushMBEDRepository()
+endfunction(releaseMBEDRepository)
+
+function(compileMBEDRepository)
+    releaseMBEDRepository()
+	compileMBEDProject()
+endfunction(compileMBEDRepository)
 
 
