@@ -70,9 +70,13 @@ This section shows you how to set up a development environment for the Azure IoT
    ```
    static const char* connectionString = "[device connection string]";
    ```
-6. Replace "[device connection string]" with the device connection string you noted [earlier](#Step-1-Prerequisites). Save the changes.
-
-8. Press the ```Verify``` button in the Arduino IDE to build the sample sketch.  
+6. Replace `[device connection string]` with the device connection string you noted [earlier](#Step-1-Prerequisites). 
+7. Locate the following code in the ```simplesample_http.c```:
+   ```
+   myWeather->DeviceId = "myFirstDevice";
+   ```
+8. Replace `"myFirstDevice"` with the name you gave to the device [earlier](#Step-1-Prerequisites). 
+9. Save the changes. Press the ```Verify``` button in the Arduino IDE to build the sample sketch.  
 
 <a name="deploy"/>
 ## Deploy the sample
