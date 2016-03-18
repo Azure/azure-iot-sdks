@@ -181,12 +181,10 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
         if (iotHubClientInstance->ThreadHandle != NULL)
         {
             int res;
-            int wasThreadTerminateConditionPosted;
             /*Codes_SRS_IOTHUBCLIENT_02_043: [ IoTHubClient_Destroy shall lock the serializing lock and signal the worker thread (if any) to end ]*/
             if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
             {
                 LogError("unable to Lock - - will still proceed to try to end the thread without condition mechanisms");
-                wasThreadTerminateConditionPosted = 0;
             }
             else
             {
