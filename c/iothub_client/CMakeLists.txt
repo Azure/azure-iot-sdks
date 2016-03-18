@@ -21,11 +21,13 @@ set(iothub_client_ll_transport_h_files
 set(iothub_client_c_files
 ./src/iothub_client.c
 ./src/version.c
+./src/iothubtransport.c
 )
 
 set(iothub_client_h_files
 ./inc/iothub_client.h
 ./inc/iothub_client_version.h
+./inc/iothubtransport.h
 )
 
 if(${use_http})
