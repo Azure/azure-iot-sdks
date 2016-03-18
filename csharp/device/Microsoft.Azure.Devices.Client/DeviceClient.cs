@@ -156,7 +156,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString, string deviceId)
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             return CreateFromConnectionString(connectionString, deviceId, TransportType.Http1);    
 #else
             return CreateFromConnectionString(connectionString, deviceId, TransportType.Amqp);
@@ -168,7 +168,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         /// <summary>
         /// Create DeviceClient from the specified connection string using the specified transport type
-        /// (WinRT) Only Http transport is allowed
+        /// (PCL) Only Http transport is allowed
         /// </summary>
         /// <param name="connectionString">Connection string for the IoT hub (including DeviceId)</param>
         /// <param name="transportType">Specifies whether Amqp or Http transport is used</param>
