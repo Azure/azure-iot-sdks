@@ -7,27 +7,27 @@ IoTHubMQTTTransport is the library that enables communications with MQTT message
 ##Exposed API
 
 ```C
-extern TRANSPORT_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config);
-extern void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle);
+extern TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config);
+extern void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle);
 
-extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend);
+extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend);
 extern void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
     
 extern int IoTHubTransportMqtt_Subscribe(IOTHUB_DEVICE_HANDLE handle);
 extern void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle);
 
-extern void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
+extern void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
 
 extern IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
-extern IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_HANDLE handle, const char* optionName, const void* value);
+extern IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE handle, const char* optionName, const void* value);
 extern const void* MQTT_Protocol(void);
 ```
 
 ##IoTHubTransportMqtt_Create
 ```
-TRANSPORT_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config)
+TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config)
 ```
-IoTHubTransportMqtt_Create shall create a TRANSPORT_HANDLE that can be further used in the calls to this module’s APIS.  
+IoTHubTransportMqtt_Create shall create a TRANSPORT_LL_HANDLE that can be further used in the calls to this module’s APIS.  
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_001: [**If parameter config is NULL then IoTHubTransportMqtt_Create shall return NULL.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_002: [**If the parameter config's variables upperConfig or waitingToSend are NULL then IoTHubTransportMqtt_Create shall return NULL.**]**  
@@ -43,7 +43,7 @@ IoTHubTransportMqtt_Create shall create a TRANSPORT_HANDLE that can be further u
 
 ##IoTHubTransportMqtt_Destroy
 ```
-void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle)
+void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle)
 ```
 **SRS_IOTHUB_MQTT_TRANSPORT_07_012: [**IoTHubTransportMqtt_Destroy shall do nothing if parameter handle is NULL.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_013: [**If the parameter subscribe is true then IoTHubTransportMqtt_Destroy shall call IoTHubTransportMqtt_Unsubscribe.**]**  
@@ -51,15 +51,15 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_HANDLE handle)
 
 ## IoTHubTransportMqtt_Register
 ```c
-extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend);
+extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend);
 ```
 
 This function registers a device with the transport.  The MQTT transport only supports a single device established on create, so this function will prevent multiple devices from being registered.
 
-**SRS_IOTHUB_MQTT_TRANSPORT_17_001: [** `IoTHubTransportMqtt_Register` shall return `NULL` if the `TRANSPORT_HANDLE` is `NULL`.**]**   
+**SRS_IOTHUB_MQTT_TRANSPORT_17_001: [** `IoTHubTransportMqtt_Register` shall return `NULL` if the `TRANSPORT_LL_HANDLE` is `NULL`.**]**   
 **SRS_IOTHUB_MQTT_TRANSPORT_17_002: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `deviceId`, `deviceKey` or `waitingToSend` are `NULL`.**]**     
 **SRS_IOTHUB_MQTT_TRANSPORT_17_003: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `deviceId` or `deviceKey` do not match the `deviceId` and `deviceKey` passed in during `IoTHubTransportMqtt_Create`.**]**      
-**SRS_IOTHUB_MQTT_TRANSPORT_17_004: [** `IoTHubTransportMqtt_Register` shall return the `TRANSPORT_HANDLE` as the `IOTHUB_DEVICE_HANDLE`. **]**    
+**SRS_IOTHUB_MQTT_TRANSPORT_17_004: [** `IoTHubTransportMqtt_Register` shall return the `TRANSPORT_LL_HANDLE` as the `IOTHUB_DEVICE_HANDLE`. **]**    
 
 
 ## IoTHubTransportMqtt_Unregister
@@ -73,7 +73,7 @@ This function is intended to remove a device as registered with the transport.  
 
 ##IoTHubTransportMqtt_Subscribe
 ```
-int IoTHubTransportMqtt_Subscribe(TRANSPORT_HANDLE handle)
+int IoTHubTransportMqtt_Subscribe(TRANSPORT_LL_HANDLE handle)
 ```
 **SRS_IOTHUB_MQTT_TRANSPORT_07_015: [**If parameter handle is NULL than IoTHubTransportMqtt_Subscribe shall return a non-zero value.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_016: [**IoTHubTransportMqtt_Subscribe shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the Message Topic.**]**
@@ -83,14 +83,14 @@ int IoTHubTransportMqtt_Subscribe(TRANSPORT_HANDLE handle)
 
 ##IoTHubTransportMqtt_Unsubscribe
 ```
-void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_HANDLE handle)
+void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_LL_HANDLE handle)
 ```
 **SRS_IOTHUB_MQTT_TRANSPORT_07_019: [**If parameter handle is NULL then IoTHubTransportMqtt_Unsubscribe shall do nothing.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_020: [**IoTHubTransportMqtt_Unsubscribe shall call mqtt_client_unsubscribe to unsubscribe the mqtt message topic.**]**  
 
 ##IoTHubTransportMqtt_DoWork
 ```
-void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
+void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 ```
 **SRS_IOTHUB_MQTT_TRANSPORT_07_026: [**IoTHubTransportMqtt_DoWork shall do nothing if parameter handle and/or iotHubClientHandle is NULL.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_027: [**IoTHubTransportMqtt_DoWork shall inspect the “waitingToSend” DLIST passed in config structure.**]**  
@@ -102,7 +102,7 @@ void IoTHubTransportMqtt_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE
 
 ##IoTHubTransportMqtt_GetSendStatus
 ```
-IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
+IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 ```
 **SRS_IOTHUB_MQTT_TRANSPORT_07_023: [**IoTHubTransportMqtt_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_024: [**IoTHubTransportMqtt_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.**]**   
@@ -110,7 +110,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(TRANSPORT_HANDLE handle, 
 
 ##IoTHubTransportMqtt_SetOption
 ```
-IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_HANDLE handle, const char* optionName, const void* value)
+IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE handle, const char* optionName, const void* value)
 ```
 **SRS_IOTHUB_MQTT_TRANSPORT_07_021: [**If any parameter is NULL then IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.**]**
 **SRS_IOTHUB_MQTT_TRANSPORT_07_031: [**If the option parameter is set to "logtrace" then the value shall be a bool_ptr and the value will determine if the mqtt client log is on or off.**]**      
