@@ -85,7 +85,7 @@ You should have the following items ready before beginning the process:
 
 	![][6]
 
--   In PuTTY, click the **Serial** connection type. The device most likely connects at 115200, so enter that value in the **Speed** box. Then click **Open**:
+-   In PuTTY, click the **Serial** connection type. The device most likely connects at 115200, so enter that value in the **Speed** box. Then click **Open**: **NOTE** Try 9600 if unable to communicate with the board.
 
 	![][7]
 
