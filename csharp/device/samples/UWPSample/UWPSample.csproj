@@ -68,7 +68,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NETFX_CORE;WINDOWS_UWP;CODE_ANALYSIS</DefineConstants>
     <NoWarn>;2008</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -138,9 +138,9 @@
     </SDKReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Microsoft.Azure.Devices.Client.WinRT\Microsoft.Azure.Devices.Client.WinRT.csproj">
-      <Project>{e68da0b4-2f93-4850-a6ae-1d87dde7f063}</Project>
-      <Name>Microsoft.Azure.Devices.Client.WinRT</Name>
+    <ProjectReference Include="..\..\Microsoft.Azure.Devices.Client.PCL\Microsoft.Azure.Devices.Client.PCL.csproj">
+      <Project>{4151e5d7-1c3c-4ad9-9e9a-5fa50a1fa332}</Project>
+      <Name>Microsoft.Azure.Devices.Client.PCL</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
