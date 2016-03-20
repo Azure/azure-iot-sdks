@@ -5,6 +5,7 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
+
 #include "gballoc.h"
 
 #include <stdlib.h>
@@ -19,7 +20,7 @@
 #include "iot_logging.h"
 #include "vector.h"
 
-typedef struct TRANSPORT_HANDLE_DATA_TAG
+typedef struct TRANSPORT_HL_HANDLE_DATA_TAG
 {
 	TRANSPORT_LL_HANDLE transportLLHandle;
     THREAD_HANDLE workerThreadHandle;
@@ -31,7 +32,7 @@ typedef struct TRANSPORT_HANDLE_DATA_TAG
 
 TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix)
 {
-	TRANSPORT_HANDLE_DATA * result = malloc(sizeof(TRANSPORT_HANDLE_DATA));
+	TRANSPORT_HANDLE_DATA * result;
 
 	if (protocol == NULL || iotHubName == NULL || iotHubSuffix == NULL)
 	{
@@ -40,6 +41,7 @@ TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
 	}
 	else
 	{
+		result = malloc(sizeof(TRANSPORT_HANDLE_DATA));
 		if (result == NULL)
 		{
 			LogError("Transport handle was not allocated.\r\n");
@@ -152,7 +154,7 @@ static void start_worker_if_needed(TRANSPORT_HANDLE_DATA * transportData, IOTHUB
 			transportData->workerThreadHandle = NULL;
 		}
 	}
-	if (clientHandle != NULL)
+	if (transportData->workerThreadHandle != NULL)
 	{
 		bool addToList = ((VECTOR_size(transportData->clients) == 0) || (VECTOR_find_if(transportData->clients, find_by_handle, clientHandle) == NULL));
 		if (addToList)

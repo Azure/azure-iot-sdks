@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC99()
 set(theseTestsName iothubtransport_unittests)
-
 set(${theseTestsName}_cpp_files
 ${theseTestsName}.cpp
 )
