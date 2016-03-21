@@ -226,7 +226,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
     {
         INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         platform_init();
-        g_iothubAcctInfo = IoTHubAccount_Init(false);
+        g_iothubAcctInfo = IoTHubAccount_Init(true, "mqtt_e2e_tests");
         ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
         platform_init();
     }
@@ -249,7 +249,6 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
     TEST_FUNCTION(IoTHub_MQTT_SendEvent_E2ETests)
     {
-#if 0
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig;
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
@@ -312,7 +311,6 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         // cleanup
         IoTHubMessage_Destroy(msgHandle);
         EventData_Destroy(sendData);
-#endif
     }
 
     TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest)

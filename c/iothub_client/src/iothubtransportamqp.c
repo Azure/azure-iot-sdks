@@ -343,6 +343,7 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
         {
             result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
         }
+        IoTHubMessage_Destroy(iothub_message);
     }
 
     return result;
