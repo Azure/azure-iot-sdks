@@ -315,6 +315,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
     TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest)
     {
+#if 0
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig;
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
@@ -364,5 +365,6 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         // cleanup
         MessageData_Destroy(notifyData);
         IoTHubClient_Destroy(iotHubClientHandle);
+#endif
     }
 END_TEST_SUITE(iothubclient_mqtt_e2etests)
