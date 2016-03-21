@@ -25,7 +25,6 @@ namespace Microsoft.Azure.Devices.Client.Transport
         readonly TimeSpan openTimeout;
         readonly TimeSpan operationTimeout;
         readonly uint prefetchCount;
-        readonly TransportType transportType;
         readonly IotHubConnectionString iotHubConnectionString;
         readonly uint maxNumConnectionPools;
 
@@ -39,10 +38,10 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         public AmqpTransportHandler(IotHubConnectionString connectionString, AmqpTransportSettings transportSettings)
         {
-            this.transportType = transportSettings.GetTransportType();
+            TransportType transportType = transportSettings.GetTransportType();
             this.maxNumConnectionPools = transportSettings.AmqpConnectionPoolSettings.NumConnectionPools;
             this.deviceId = connectionString.DeviceId;
-            switch (this.transportType)
+            switch (transportType)
             {
                 case TransportType.Amqp_Tcp_Only:
                     this.IotHubConnection = this.CreateOrGetConnectionCache(this.deviceId, false).GetConnection(connectionString, transportSettings);
@@ -51,7 +50,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                     this.IotHubConnection = this.CreateOrGetConnectionCache(this.deviceId, true).GetConnection(connectionString, transportSettings);
                     break;
                 default:
-                    throw new InvalidOperationException("Invalid Transport Type {0}".FormatInvariant(this.transportType));
+                    throw new InvalidOperationException("Invalid Transport Type {0}".FormatInvariant(transportType));
             }
             
             this.openTimeout = IotHubConnection.DefaultOpenTimeout;
@@ -177,15 +176,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         protected override Task OnCloseAsync()
         {
             GC.SuppressFinalize(this);
-            switch (this.transportType)
-            {
-                case TransportType.Amqp_Tcp_Only:
-                    return this.CreateOrGetConnectionCache(this.deviceId, false).ReleaseConnectionAsync(this.Connection);
-                case TransportType.Amqp_WebSocket_Only:
-                    return this.CreateOrGetConnectionCache(this.deviceId, true).ReleaseConnectionAsync(this.Connection);
-                default:
-                    throw new InvalidOperationException("Invalid Transport Type {0}".FormatInvariant(this.transportType));
-            }
+            this.IotHubConnection.Release();
+            return TaskHelpers.CompletedTask;
         }
 
         protected async override Task OnSendEventAsync(Message message)

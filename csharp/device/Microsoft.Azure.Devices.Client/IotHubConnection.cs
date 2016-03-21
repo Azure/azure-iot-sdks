@@ -26,32 +26,29 @@ namespace Microsoft.Azure.Devices.Client
         protected static readonly TimeSpan RefreshTokenRetryInterval = TimeSpan.FromSeconds(30);
 
 #if !WINDOWS_UWP
-        protected readonly AccessRights accessRights;
-        protected FaultTolerantAmqpObject<AmqpSession> faultTolerantSession;
-        protected readonly IotHubConnectionString connectionString;
-        protected readonly AmqpTransportSettings amqpTransportSettings;
-        readonly IotHubConnectionCache.CachedConnection cachedConnection;
+
+        protected AccessRights AccessRights { get; }
+
+        protected FaultTolerantAmqpObject<AmqpSession> FaultTolerantSession { get; set; }
+
+        protected AmqpTransportSettings AmqpTransportSettings { get; }
+
+        readonly IotHubConnectionCache.ConnectionReferenceCounter connectionReferenceCounter;
 
         static readonly AmqpVersion AmqpVersion_1_0_0 = new AmqpVersion(1, 0, 0);
         const string DisableServerCertificateValidationKeyName = "Microsoft.Azure.Devices.DisableServerCertificateValidation";
-        readonly static Lazy<bool> DisableServerCertificateValidation = new Lazy<bool>(InitializeDisableServerCertificateValidation);
+        static readonly Lazy<bool> DisableServerCertificateValidation = new Lazy<bool>(InitializeDisableServerCertificateValidation);
 
-        protected IotHubConnection(IotHubConnectionCache.CachedConnection cachedConnection, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
+        protected IotHubConnection(IotHubConnectionCache.ConnectionReferenceCounter connectionReferenceCounter, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
         {
-            this.cachedConnection = cachedConnection;
-            this.connectionString = connectionString;
-            this.accessRights = accessRights;
-            this.amqpTransportSettings = amqpTransportSettings;
+            this.connectionReferenceCounter = connectionReferenceCounter;
+            this.ConnectionString = connectionString;
+            this.AccessRights = accessRights;
+            this.AmqpTransportSettings = amqpTransportSettings;
         }
 
         // In case of device-scope connection strings, this connectionString would represent only one of many devices sharing the connection
-        public IotHubConnectionString ConnectionString
-        {
-            get
-            {
-                return this.connectionString;
-            }
-        }
+        public IotHubConnectionString ConnectionString { get; }
 
         public abstract Task OpenAsync(TimeSpan timeout);
 
@@ -72,9 +69,9 @@ namespace Microsoft.Azure.Devices.Client
 
         public void Release()
         {
-            if (this.cachedConnection != null)
+            if (this.connectionReferenceCounter != null)
             {
-                this.cachedConnection.Release();
+                this.connectionReferenceCounter.RemoveRef();
             }
         }
 
@@ -94,17 +91,16 @@ namespace Microsoft.Azure.Devices.Client
             var timeoutHelper = new TimeoutHelper(timeout);
 
             AmqpSettings amqpSettings = CreateAmqpSettings();
-            TlsTransportSettings tlsTransportSettings = this.CreateTlsTransportSettings();
-
-            var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
             TransportBase transport;
 
-            switch (this.amqpTransportSettings.GetTransportType())
+            switch (this.AmqpTransportSettings.GetTransportType())
             {
                 case TransportType.Amqp_WebSocket_Only:
                     transport = await this.CreateClientWebSocketTransportAsync(timeoutHelper.RemainingTime());
                     break;
                 case TransportType.Amqp_Tcp_Only:
+                    TlsTransportSettings tlsTransportSettings = this.CreateTlsTransportSettings();
+                    var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
                     transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
                     break;
                 default:
@@ -115,7 +111,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 MaxFrameSize = AmqpConstants.DefaultMaxFrameSize,
                 ContainerId = Guid.NewGuid().ToString("N"),
-                HostName = this.connectionString.AmqpEndpoint.Host
+                HostName = this.ConnectionString.AmqpEndpoint.Host
             };
 
             var amqpConnection = new AmqpConnection(transport, amqpSettings, amqpConnectionSettings);
@@ -194,13 +190,13 @@ namespace Microsoft.Azure.Devices.Client
         {
             var tcpTransportSettings = new TcpTransportSettings()
             {
-                Host = this.connectionString.HostName,
-                Port = this.connectionString.AmqpEndpoint.Port
+                Host = this.ConnectionString.HostName,
+                Port = this.ConnectionString.AmqpEndpoint.Port
             };
 
             var tlsTransportSettings = new TlsTransportSettings(tcpTransportSettings)
             {
-                TargetHost = this.connectionString.HostName,
+                TargetHost = this.ConnectionString.HostName,
                 Certificate = null, // TODO: add client cert support
                 CertificateValidationCallback = OnRemoteCertificateValidation
             };

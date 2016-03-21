@@ -19,29 +19,29 @@ namespace Microsoft.Azure.Devices.Client
         readonly ConcurrentDictionary<string, IotHubLinkRefreshTokenTimer> iotHubLinkRefreshTokenTimers; // There can be multiple device-scope connection strings per IotHubConnection instance
         readonly uint maxNumberOfLinks;
 
-        public IotHubMuxConnection(IotHubConnectionCache.CachedConnection cachedConnection, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
-            : base(cachedConnection, connectionString, accessRights, amqpTransportSettings)
+        public IotHubMuxConnection(IotHubConnectionCache.ConnectionReferenceCounter connectionReferenceCounter, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
+            : base(connectionReferenceCounter, connectionString, accessRights, amqpTransportSettings)
         {
-            this.faultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
+            this.FaultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
             this.iotHubLinkRefreshTokenTimers = new ConcurrentDictionary<string, IotHubLinkRefreshTokenTimer>();
-            this.maxNumberOfLinks = amqpTransportSettings.AmqpConnectionPoolSettings.LinksPerConnection;
+            this.maxNumberOfLinks = AmqpConnectionPoolSettings.MaxLinksPerConnection;
         }
 
         public override Task OpenAsync(TimeSpan timeout)
         {
-            return this.faultTolerantSession.GetOrCreateAsync(timeout);
+            return this.FaultTolerantSession.GetOrCreateAsync(timeout);
         }
 
         public override Task CloseAsync()
         {
             this.CancelRefreshTokenTimers();
-            return this.faultTolerantSession.CloseAsync();
+            return this.FaultTolerantSession.CloseAsync();
         }
 
         public override void SafeClose(Exception exception)
         {
             this.CancelRefreshTokenTimers();
-            this.faultTolerantSession.Close();
+            this.FaultTolerantSession.Close();
         }
 
         /**
@@ -56,9 +56,9 @@ namespace Microsoft.Azure.Devices.Client
 
             var timeoutHelper = new TimeoutHelper(timeout);
             AmqpSession session;
-            if (!this.faultTolerantSession.TryGetOpenedObject(out session))
+            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
             {
-                session = await this.faultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
             }
 
             var linkAddress = connectionString.BuildLinkAddress(path);
@@ -94,9 +94,9 @@ namespace Microsoft.Azure.Devices.Client
             var timeoutHelper = new TimeoutHelper(timeout);
 
             AmqpSession session;
-            if (!this.faultTolerantSession.TryGetOpenedObject(out session))
+            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
             {
-                session = await this.faultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
             }
 
             var linkAddress = connectionString.BuildLinkAddress(path);
@@ -133,9 +133,9 @@ namespace Microsoft.Azure.Devices.Client
             var timeoutHelper = new TimeoutHelper(timeout);
 
             AmqpSession session;
-            if (!this.faultTolerantSession.TryGetOpenedObject(out session))
+            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
             {
-                session = await this.faultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
             }
 
             var linkAddress = connectionString.BuildLinkAddress(path);
@@ -251,7 +251,7 @@ namespace Microsoft.Azure.Devices.Client
 
             public async Task SendLinkCbsTokenAsync(TimeSpan timeout)
             {
-                AmqpSession amqpSession = this.connection.faultTolerantSession.Value;
+                AmqpSession amqpSession = this.connection.FaultTolerantSession.Value;
                 if (amqpSession != null && !amqpSession.IsClosing())
                 {
                     var cbsLink = amqpSession.Connection.Extensions.Find<AmqpCbsLink>();
@@ -263,7 +263,7 @@ namespace Microsoft.Azure.Devices.Client
                             this.connectionString.AmqpEndpoint,
                             this.audience,
                             resource,
-                            AccessRightsHelper.AccessRightsToStringArray(this.connection.accessRights),
+                            AccessRightsHelper.AccessRightsToStringArray(this.connection.AccessRights),
                             timeout);
                         this.ScheduleLinkTokenRefresh(expiresAtUtc);
                     }

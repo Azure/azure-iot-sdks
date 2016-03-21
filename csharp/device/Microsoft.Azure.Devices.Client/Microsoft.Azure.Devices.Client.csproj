@@ -122,7 +122,7 @@
     <Compile Include="Common\PerfectHash.cs" />
     <Compile Include="Common\TaskConstants.cs" />
     <Compile Include="Common\TaskUtils.cs" />
-    <Compile Include="IotHubDedicatedConnection.cs" />
+    <Compile Include="IotHubSingleTokenConnection.cs" />
     <Compile Include="IotHubMuxConnection.cs" />
     <Compile Include="Transport\AmqpClientHelper.cs" />
     <Compile Include="Common\UrlEncodedDictionarySerializer.cs" />

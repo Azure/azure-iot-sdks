@@ -11,44 +11,24 @@ namespace Microsoft.Azure.Devices.Client
 
     public sealed class AmqpConnectionPoolSettings
     {
-        public const uint ConnectionTokenLimit = 1000;
-        public const uint MaxNumConnectionPools = 100;
-        const uint DefaultMaxLinksPerConnection = 256;
+        internal const uint MaxNumConnectionPools = ushort.MaxValue;
         const uint DefaultNumConnectionPools = 1;
+        internal const uint MaxLinksPerConnection = 256;
 
         uint maxLinksPerConnection;
         uint numConnectionPools;
 
         public AmqpConnectionPoolSettings()
         {
-            this.maxLinksPerConnection = DefaultMaxLinksPerConnection;
+            this.maxLinksPerConnection = MaxLinksPerConnection;
             this.numConnectionPools = DefaultNumConnectionPools;
-        }
-
-        public uint LinksPerConnection
-        {
-            get { return this.maxLinksPerConnection; }
-
-            set { this.SetLinksPerConnection(value); }
         }
 
         public uint NumConnectionPools
         {
             get { return this.numConnectionPools; }
 
-            set { this.SetLinksPerConnection(value); }
-        }
-
-        void SetLinksPerConnection(uint maxLinks)
-        {
-            if (maxLinks <= ConnectionTokenLimit)
-            {
-                this.maxLinksPerConnection = maxLinks;
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException("maxLinks");
-            }
+            set { this.SetNumberOfConnectionPools(value); }
         }
 
         void SetNumberOfConnectionPools(uint numPools)

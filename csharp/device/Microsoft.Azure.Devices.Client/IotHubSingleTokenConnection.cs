@@ -6,44 +6,43 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Devices.Client.Extensions;
 
-    sealed class IotHubDedicatedConnection : IotHubConnection
+    sealed class IotHubSingleTokenConnection : IotHubConnection
     {
         readonly IOThreadTimer refreshTokenTimer;
 
-        public IotHubDedicatedConnection(IotHubConnectionCache.CachedConnection cachedConnection, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
-            :base(cachedConnection, connectionString, accessRights, amqpTransportSettings)
+        public IotHubSingleTokenConnection(IotHubConnectionCache.ConnectionReferenceCounter connectionReferenceCounter, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
+            :base(connectionReferenceCounter, connectionString, accessRights, amqpTransportSettings)
         {
-            this.faultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
-            this.refreshTokenTimer = new IOThreadTimer(s => ((IotHubDedicatedConnection)s).OnRefreshTokenAsync(), this, false);
+            this.FaultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
+            this.refreshTokenTimer = new IOThreadTimer(s => ((IotHubSingleTokenConnection)s).OnRefreshTokenAsync(), this, false);
         }
 
         public override Task OpenAsync(TimeSpan timeout)
         {
-            return this.faultTolerantSession.GetOrCreateAsync(timeout);
+            return this.FaultTolerantSession.GetOrCreateAsync(timeout);
         }
 
         public override Task CloseAsync()
         {
-            return this.faultTolerantSession.CloseAsync();
+            return this.FaultTolerantSession.CloseAsync();
         }
 
         public override void SafeClose(Exception exception)
         {
-            this.faultTolerantSession.Close();
+            this.FaultTolerantSession.Close();
         }
 
-        public override async Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout)
+        public override async Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString doNotUse, TimeSpan timeout)
         {
-            // parameter connectionString is not used
             var timeoutHelper = new TimeoutHelper(timeout);
 
             AmqpSession session;
-            if (!this.faultTolerantSession.TryGetOpenedObject(out session))
+            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
             {
-                session = await this.faultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
             }
 
-            var linkAddress = this.connectionString.BuildLinkAddress(path);
+            var linkAddress = this.ConnectionString.BuildLinkAddress(path);
 
             var linkSettings = new AmqpLinkSettings()
             {
@@ -65,18 +64,17 @@ namespace Microsoft.Azure.Devices.Client
             return link;
         }
 
-        public override async Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount)
+        public override async Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString doNotUse, TimeSpan timeout, uint prefetchCount)
         {
-            // parameter connectionString is not used
             var timeoutHelper = new TimeoutHelper(timeout);
 
             AmqpSession session;
-            if (!this.faultTolerantSession.TryGetOpenedObject(out session))
+            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
             {
-                session = await this.faultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
             }
 
-            var linkAddress = this.connectionString.BuildLinkAddress(path);
+            var linkAddress = this.ConnectionString.BuildLinkAddress(path);
 
             var linkSettings = new AmqpLinkSettings()
             {
@@ -99,18 +97,17 @@ namespace Microsoft.Azure.Devices.Client
             return link;
         }
 
-        public override async Task<RequestResponseAmqpLink> CreateRequestResponseLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout)
+        public override async Task<RequestResponseAmqpLink> CreateRequestResponseLinkAsync(string path, IotHubConnectionString doNotUse, TimeSpan timeout)
         {
-            // parameter connectionString is not used
             var timeoutHelper = new TimeoutHelper(timeout);
 
             AmqpSession session;
-            if (!this.faultTolerantSession.TryGetOpenedObject(out session))
+            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
             {
-                session = await this.faultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
             }
 
-            var linkAddress = this.connectionString.BuildLinkAddress(path);
+            var linkAddress = this.ConnectionString.BuildLinkAddress(path);
 
             var linkSettings = new AmqpLinkSettings()
             {
@@ -184,14 +181,14 @@ namespace Microsoft.Azure.Devices.Client
                 this.ConnectionString.AmqpEndpoint,
                 audience,
                 resource,
-                AccessRightsHelper.AccessRightsToStringArray(this.accessRights),
+                AccessRightsHelper.AccessRightsToStringArray(this.AccessRights),
                 timeout);
             this.ScheduleTokenRefresh(expiresAtUtc);
         }
 
         async void OnRefreshTokenAsync()
         {
-            AmqpSession amqpSession = this.faultTolerantSession.Value;
+            AmqpSession amqpSession = this.FaultTolerantSession.Value;
             if (amqpSession != null && !amqpSession.IsClosing())
             {
                 var cbsLink = amqpSession.Connection.Extensions.Find<AmqpCbsLink>();
