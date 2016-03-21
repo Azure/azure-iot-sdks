@@ -467,6 +467,10 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
         }
     }
 
+	/*Tests_SRS_IOTHUBTRANSPORT_17_001: [ IoTHubTransport_Create shall return a non-NULL handle on success.] */
+	/*Tests_SRS_IOTHUBTRANSPORT_17_005: [ IoTHubTransport_Create shall create the lower layer transport by calling the protocol's IoTHubTransport_Create function. ]*/
+	/*Tests_SRS_IOTHUBTRANSPORT_17_007: [ IoTHubTransport_Create shall create the transport lock by Calling Lock_Init. */
+	/*Tests_SRS_IOTHUBTRANSPORT_17_038: [ IoTHubTransport_Create shall call VECTOR_Create to make a list of IOTHUB_CLIENT_HANDLE using this transport. ]*/
 	TEST_FUNCTION(IoTHubTransport_Create_success_returns_non_null)
 	{
 		CIotHubTransportMocks mocks;
@@ -491,6 +495,8 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_009: [ IoTHubTransport_Create shall clean up any resources it creates if the function does not succeed. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_039: [ If the Vector creation fails, IoTHubTransport_Create shall return NULL. ]
 	TEST_FUNCTION(IoTHubTransport_Create_vector_create_fails_returns_null)
 	{
 		CIotHubTransportMocks mocks;
@@ -520,6 +526,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_008: [ If the lock creation fails, IoTHubTransport_Create shall return NULL. ]
 	TEST_FUNCTION(IoTHubTransport_Create_lock_init_fails_returns_null)
 	{
 		CIotHubTransportMocks mocks;
@@ -546,6 +553,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_006: [ If the creation of the transport fails, IoTHubTransport_Create shall return NULL. ]
 	TEST_FUNCTION(IoTHubTransport_Create_transport_ll_create_fails_returns_null)
 	{
 		CIotHubTransportMocks mocks;
@@ -569,6 +577,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_040: [ If memory allocation fails, IoTHubTransport_Create shall return NULL. ]
 	TEST_FUNCTION(IoTHubTransport_Create_alloc_fails_returns_null)
 	{
 		CIotHubTransportMocks mocks;
@@ -588,6 +597,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_002: [ If protocol is NULL, this function shall return NULL. ]
 	TEST_FUNCTION(IoTHubTransport_Create_alloc_null_protocol_returns_null)
 	{
 		CIotHubTransportMocks mocks;
@@ -604,6 +614,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_003: [ If iotHubName is NULL, this function shall return NULL. ]
 	TEST_FUNCTION(IoTHubTransport_Create_hubname_null_returns_null)
 	{
 		CIotHubTransportMocks mocks;
@@ -620,6 +631,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_004: [ If iotHubSuffix is NULL, this function shall return NULL. ]
 	TEST_FUNCTION(IoTHubTransport_Create_hubsufix_null_returns_null)
 	{
 		CIotHubTransportMocks mocks;
@@ -636,6 +648,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_010: [ IoTHubTransport_Destroy shall free all resources. ]
 	TEST_FUNCTION(IoTHubTransport_Destroy_success)
 	{
 		CIotHubTransportMocks mocks;
@@ -667,6 +680,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///ablution
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_010: [ IoTHubTransport_Destroy shall free all resources. ]
 	TEST_FUNCTION(IoTHubTransport_Destroy_success_thread_join_fails)
 	{
 		CIotHubTransportMocks mocks;
@@ -699,6 +713,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///ablution
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_033: [ IoTHubTransport_Destroy shall lock the transport lock. ]
 	TEST_FUNCTION(IoTHubTransport_Destroy_success_lock_fails)
 	{
 		CIotHubTransportMocks mocks;
@@ -730,6 +745,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///ablution
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_011: [ IoTHubTransport_Destroy shall do nothing if transportHlHandle is NULL. ]
 	TEST_FUNCTION(IoTHubTransport_Destroy_null_handle_does_nothing)
 	{
 		CIotHubTransportMocks mocks;
@@ -744,6 +760,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///ablution
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_012: [ IoTHubTransport_GetLock shall return a handle to the transport lock. ]
 	TEST_FUNCTION(IoTHubTransport_GetLock_success)
 	{
 		CIotHubTransportMocks mocks;
@@ -762,6 +779,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_013: [ If transportHlHandle is NULL, IoTHubTransport_GetLock shall return NULL. ]
 	TEST_FUNCTION(IoTHubTransport_GetLock_fail)
 	{
 		CIotHubTransportMocks mocks;
@@ -780,6 +798,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_014: [ IoTHubTransport_GetLLTransport shall return a handle to the lower layer transport. ]
 	TEST_FUNCTION(IoTHubTransport_GetLLTransport_success)
 	{
 		CIotHubTransportMocks mocks;
@@ -798,6 +817,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_015: [ If transportHlHandle is NULL, IoTHubTransport_GetLLTransport shall return NULL. ]
 	TEST_FUNCTION(IoTHubTransport_GetLLTransport_fail)
 	{
 		CIotHubTransportMocks mocks;
@@ -816,6 +836,11 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_034: [ IoTHubTransport_StartWorkerThread shall lock the transport lock. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_035: [ IoTHubTransport_StartWorkerThread shall unlock the transport lock. 
+	//Tests_SRS_IOTHUBTRANSPORT_17_018: [ If the worker thread does not exist, IoTHubTransport_StartWorkerThread shall start the thread using ThreadAPI_Create. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_021: [ If handle is not found, then clientHandle shall be added to the list. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_022: [ Upon success, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_OK.]
 	TEST_FUNCTION(IoTHubTransport_StartWorkerThread_success)
 	{
 		CIotHubTransportMocks mocks;
@@ -848,6 +873,8 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_020: [ IoTHubTransport_StartWorkerThread shall search for IoTHubClient clientHandle in the list of IoTHubClient handles. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_022: [ Upon success, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_OK.]
 	TEST_FUNCTION(IoTHubTransport_StartWorkerThread_two_client_success)
 	{
 		CIotHubTransportMocks mocks;
@@ -882,7 +909,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
-
+	//Tests_SRS_IOTHUBTRANSPORT_17_016: [ If transportHlHandle is NULL, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_INVALID_ARG. ]
 	TEST_FUNCTION(IoTHubTransport_StartWorkerThread_null_transport_returns_bad_arg)
 	{
 		CIotHubTransportMocks mocks;
@@ -898,6 +925,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///ablution
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_017: [ If clientHandle is NULL, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_INVALID_ARG. ]
 	TEST_FUNCTION(IoTHubTransport_StartWorkerThread_null_client_returns_bad_arg)
 	{
 		CIotHubTransportMocks mocks;
@@ -918,6 +946,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_019: [ If thread creation fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. ]
 	TEST_FUNCTION(IoTHubTransport_StartWorkerThread_thread_create_fails_returns_error)
 	{
 		CIotHubTransportMocks mocks;
@@ -946,6 +975,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_041: [ If the lock fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. ]
 	TEST_FUNCTION(IoTHubTransport_StartWorkerThread_lock_fails_returns_error)
 	{
 		CIotHubTransportMocks mocks;
@@ -969,6 +999,11 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///ablution
 		IoTHubTransport_Destroy(transportHandle);
 	}
+
+	//Tests_SRS_IOTHUBTRANSPORT_17_026: [ IoTHubTransport_EndWorkerThread shall remove clientHandlehandle from handle list. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_036: [ IoTHubTransport_EndWorkerThread shall lock the transport lock. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_037: [ IoTHubTransport_EndWorkerThread shall unlock the transport lock. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_028: [ The thread shall exit when IoTHubTransport_EndWorkerThread has been called for each clientHandle which invoked IoTHubTransport_StartWorkerThread. ]
 	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_success)
 	{
 		CIotHubTransportMocks mocks;
@@ -1004,6 +1039,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_026: [ IoTHubTransport_EndWorkerThread shall remove clientHandlehandle from handle list. ]
 	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_2_client_success)
 	{
 		CIotHubTransportMocks mocks;
@@ -1039,6 +1075,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_023: [ If transportHlHandle is NULL, IoTHubTransport_EndWorkerThread shall return. ]
 	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_null_transport_does_nothing)
 	{
 		CIotHubTransportMocks mocks;
@@ -1052,6 +1089,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///ablution
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_024: [ If clientHandle is NULL, IoTHubTransport_EndWorkerThread shall return. ]
 	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_null_client_does_nothing)
 	{
 		CIotHubTransportMocks mocks;
@@ -1180,7 +1218,8 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
-
+	//Tests_SRS_IOTHUBTRANSPORT_17_029: [ The thread shall call lower layer transport DoWork every 1 ms. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_030: [ All calls to lower layer transport DoWork shall be protected by the lock created in IoTHubTransport_Create. ]
 	TEST_FUNCTION(IoTHubTransport_worker_thread_runs_every_1_ms)
 	{
 		CIotHubTransportMocks mocks;
@@ -1217,6 +1256,8 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_029: [ The thread shall call lower layer transport DoWork every 1 ms. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_030: [ All calls to lower layer transport DoWork shall be protected by the lock created in IoTHubTransport_Create. 
 	TEST_FUNCTION(IoTHubTransport_worker_thread_runs_two_devices_once)
 	{
 		CIotHubTransportMocks mocks;
@@ -1249,6 +1290,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_031: [ If acquiring the lock fails, lower layer transport DoWork shall not be called. ]
 	TEST_FUNCTION(IoTHubTransport_worker_thread_runs_lock_fails)
 	{
 		CIotHubTransportMocks mocks;

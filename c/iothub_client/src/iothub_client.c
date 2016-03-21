@@ -185,6 +185,7 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
             if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
             {
                 LogError("unable to Lock - - will still proceed to try to end the thread without condition mechanisms");
+				iotHubClientInstance->StopThread = 1;
             }
             else
             {
