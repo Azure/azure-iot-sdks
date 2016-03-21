@@ -30,6 +30,9 @@ typedef struct TRANSPORT_HL_HANDLE_DATA_TAG
 	VECTOR_HANDLE clients;
 } TRANSPORT_HANDLE_DATA;
 
+/* Used for Unit test */
+const size_t IoTHubTransport_ThreadTerminationOffset = offsetof(TRANSPORT_HANDLE_DATA, stopThread);
+
 TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix)
 {
 	TRANSPORT_HANDLE_DATA * result;
@@ -115,19 +118,21 @@ static int transport_worker_thread(void* threadArgument)
 {
 	TRANSPORT_HANDLE_DATA* transportData = (TRANSPORT_HANDLE_DATA*)threadArgument;
 
-	/* Codes_SRS_IOTHUBCLIENT_01_038: [The thread shall exit when IoTHubClient_Destroy is called.] */
-	while (!transportData->stopThread)
+	while (1)
 	{
-		/* Codes_SRS_IOTHUBCLIENT_01_039: [All calls to IoTHubClient_LL_DoWork shall be protected by the lock created in IotHubClient_Create.] */
-		/* Codes_SRS_IOTHUBCLIENT_01_040: [If acquiring the lock fails, IoTHubClient_LL_DoWork shall not be called.] */
 		if (Lock(transportData->lockHandle) == LOCK_OK)
 		{
-			/* Codes_SRS_IOTHUBCLIENT_01_037: [The thread created by IoTHubClient_SendEvent or IoTHubClient_SetMessageCallback shall call IoTHubClient_LL_DoWork every 1 ms.] */
-			(transportData->IoTHubTransport_DoWork)(transportData->transportLLHandle, NULL);
-			/* Codes_SRS_IOTHUBCLIENT_01_039: [All calls to IoTHubClient_LL_DoWork shall be protected by the lock created in IotHubClient_Create.] */
-			Unlock(transportData->lockHandle);
+			if (transportData->stopThread)
+			{
+				(void)Unlock(transportData->lockHandle);
+				break;
+			}
+			else
+			{
+				(transportData->IoTHubTransport_DoWork)(transportData->transportLLHandle, NULL);
+				(void)Unlock(transportData->lockHandle);
+			}
 		}
-
 		ThreadAPI_Sleep(1);
 	}
 
@@ -197,7 +202,16 @@ void IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHlHandle)
 	if (transportHlHandle != NULL)
 	{
 		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
-		stop_worker_thread(transportData);
+		if (Lock(transportData->lockHandle) != LOCK_OK)
+		{
+			LogError("Unable to lock - will still attempt to end thread without thread safety");
+			stop_worker_thread(transportData);
+		}
+		else
+		{
+			stop_worker_thread(transportData);
+			(void)Unlock(transportData->lockHandle);
+		}
 		Lock_Deinit(transportData->lockHandle);
 		(transportData->IoTHubTransport_Destroy)(transportData->transportLLHandle);
 		VECTOR_destroy(transportData->clients);
@@ -245,14 +259,23 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transpor
 	else
 	{
 		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
-		start_worker_if_needed(transportData, clientHandle);
-		if (transportData->workerThreadHandle == NULL)
+		if (Lock(transportData->lockHandle) != LOCK_OK)
 		{
+			LogError("Unable to start thread safely");
 			result = IOTHUB_CLIENT_ERROR;
 		}
 		else
 		{
-			result = IOTHUB_CLIENT_OK;
+			start_worker_if_needed(transportData, clientHandle);
+			if (transportData->workerThreadHandle == NULL)
+			{
+				result = IOTHUB_CLIENT_ERROR;
+			}
+			else
+			{
+				result = IOTHUB_CLIENT_OK;
+			}
+			(void)Unlock(transportData->lockHandle);
 		}
 	}
 	return result;
@@ -263,7 +286,15 @@ void IoTHubTransport_EndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_
 	if (!(transportHlHandle == NULL || clientHandle == NULL))
 	{
 		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
-		end_worker_thread(transportData, clientHandle);
+		if (Lock(transportData->lockHandle) != LOCK_OK)
+		{
+			LogError("Unable to acquire lock - abandoning the attempt to end the thread");
+		}
+		else
+		{
+			end_worker_thread(transportData, clientHandle);
+			(void)Unlock(transportData->lockHandle);
+		}
 	}
 	
 }
