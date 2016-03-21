@@ -88,8 +88,9 @@ ctest -C "Debug" -V
 
 if [[ $run_valgrind == 1 ]] ;
 then
+    export LD_LIBRARY_PATH=/usr/local/ssl/lib
 	ctest -j $(nproc) -D ExperimentalMemCheck -VV
-
+    export LD_LIBRARY_PATH=
 fi
 
 popd
