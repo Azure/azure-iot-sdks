@@ -53,7 +53,8 @@ rem ----------------------------------------------------------------------------
 
 rem // default build options
 set build-clean=0
-set build-config=Debug
+set run-ut=0
+set build-config=Release
 set build-platform=x86
 
 :args-loop
@@ -61,8 +62,9 @@ if "%1" equ "" goto args-done
 if "%1" equ "-c" goto arg-build-clean
 if "%1" equ "--clean" goto arg-build-clean
 if "%1" equ "--config" goto arg-build-config
-rem only x86 supported
-rem if "%1" equ "--platform" goto arg-build-platform
+if "%1" equ "--run-ut" goto arg-build-run-ut
+rem only x86 / 32bit build supported
+if "%1" equ "--platform" goto arg-build-platform
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -79,6 +81,10 @@ goto args-continue
 shift
 if "%1" equ "" call :usage && exit /b 1
 set build-platform=%1
+goto args-continue
+
+:arg-build-run-ut
+set run-ut=1
 goto args-continue
 
 :args-continue
@@ -120,6 +126,20 @@ rem ----------------------------------------------------------------------------
 @echo Copy iothub_client.pyd to %build-root%\device\samples
 copy /Y %PYTHON_SOLUTION_PATH%\%build-config%\iothub_client.pyd  %build-root%\device\samples\ 
 if not %errorlevel%==0 exit /b %errorlevel%
+@echo Copy iothub_client_mock.pyd to %build-root%\device\tests
+copy /Y %PYTHON_SOLUTION_PATH%\%build-config%\iothub_client_mock.pyd  %build-root%\device\tests\ 
+if not %errorlevel%==0 exit /b %errorlevel%
+
+rem -----------------------------------------------------------------------------
+rem -- Python library unit test
+rem -----------------------------------------------------------------------------
+
+if %run-ut%==1 (
+    cd %build-root%\device\tests
+    python iothub_client_ut.py
+    if ERRORLEVEL 1 exit /b 1
+    echo Python unit test PASSED
+)
 
 rem -----------------------------------------------------------------------------
 rem -- build done
@@ -143,11 +163,11 @@ goto :eof
 :usage
 echo build.cmd [options]
 echo options:
-echo  -c, --clean           delete artifacts from previous build before building
-echo  --config ^<value^>      [Debug] build configuration (e.g. Debug, Release)
-echo  --platform ^<value^>    [x86] build platform (e.g. x86, x64, ...)
+echo  -c, --clean             delete artifacts from previous build before building
+echo  --config ^<value^>      [Release] build configuration (e.g. Debug, Release)
+rem echo  --platform ^<value^>    [x86] build platform (e.g. x86, x64, ...)
+echo  --run-ut                run the unit test after build
 goto :eof
-
 
 rem -----------------------------------------------------------------------------
 rem -- helper subroutines
@@ -164,3 +184,4 @@ if "%~4" neq "" set build-platform=%~4
 msbuild /m %build-target% "/p:Configuration=%build-config%;Platform=%build-platform%" %2
 if not %errorlevel%==0 exit /b %errorlevel%
 goto :eof
+

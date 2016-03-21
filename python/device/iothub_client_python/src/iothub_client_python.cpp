@@ -1085,9 +1085,6 @@ BOOST_PYTHON_MODULE(IMPORT_NAME)
         .def("properties", &IoTHubMessage::Properties, return_value_policy<manage_new_object>())
         .add_property("message_id", &IoTHubMessage::GetMessageId, &IoTHubMessage::SetMessageId)
         .add_property("correlation_id", &IoTHubMessage::GetCorrelationId, &IoTHubMessage::SetCorrelationId)
-#ifdef SUPPORT_DESTROY
-        .def("Destroy", &IoTHubMessage::Destroy)
-#endif
         // Python helpers
 #ifdef SUPPORT___STR__
         .def("__str__", &IoTHubMessage::str)
