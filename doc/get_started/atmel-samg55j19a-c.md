@@ -49,9 +49,15 @@ You should have the following items ready before beginning the process:
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
 - This section shows you how to set up a development environment for the Azure IoT device SDK with the SAMG55 and WINC1500 board.
+ - make sure : you should connect a WINC1500 to "EXT1" port on SAMG55 board.
 -  If you need to setup your SAMG55 device, please refer the getting started instructions [here](<http://www.atmel.com/tools/ATSAMG55-XPRO.aspx?tab=documents>) .
 
 ## how to update firmware and Flash the root certificate of the Azure IoT hub host
+-  Step 0. please convert ms.der to ms.cer with following steps on windows pc.
+    -  download ms.der file from [Azure cert](https://github.com/Azure/azure-iot-sdks/tree/master/c/certs)
+    -  open ms.der by double-clinking then you can see a window with title "Certificate"
+    -  select "Details" tab -> click "Copy to File" -> click "Next" button of "Certificate Export Wizard" window
+    -  select "DER encoded binary x.509(.CER)" -> click "Next" button -> enter file name to text field and save it in your pc
 -  Step 1. Open Atmel Studio7 and search for the Firmware Update Project from the ```File -> New -> Example Project...``` menu in Atmel Studio.
 -  Step 2. Select ```SAM G, 32-bit``` from ```Device Family:``` and Type ```winc1500``` to input text field.
 -  Step 3. Select the appropriate ```WINC1500 Firmware Update Project (vxx.x.x)``` project corresponding to your Xplained Pro board and then press OK button to import firmware update project and related documentation. (for example, ```WINC1500 Firmware Update Project(v19.4.4) - SAMG55 Xplained Pro```)
