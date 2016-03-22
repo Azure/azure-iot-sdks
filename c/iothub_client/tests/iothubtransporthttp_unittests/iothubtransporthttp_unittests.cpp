@@ -4036,24 +4036,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         mocks.AssertActualAndExpectedCalls();
     }
 
-    //Tests_SRS_TRANSPORTMULTITHTTP_17_140: [ If iotHubClientHandle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]
-    TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_NULL_iotHubClientHandle_does_nothing)
-    {
-        ///arrange
-        CIoTHubTransportHttpMocks mocks;
-        auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        mocks.ResetAllCalls();
-
-        ///act
-        IoTHubTransportHttp_DoWork(handle, NULL);
-
-        ///assert
-        mocks.AssertActualAndExpectedCalls();
-
-        ///cleanup
-        IoTHubTransportHttp_Destroy(handle);
-    }
-
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_050: [ IoTHubTransportHttp_DoWork shall call loop through the device list. ]
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_051: [IF the list is empty, then IoTHubTransportHttp_DoWork shall do nothing.]
     TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_no_devices)

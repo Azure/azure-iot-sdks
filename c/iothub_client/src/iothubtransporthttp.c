@@ -1879,7 +1879,7 @@ void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HAN
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_140: [ If iotHubClientHandle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
 
 	(void)iotHubClientHandle; // use the perDevice handle.
-    if ((handle != NULL) && (iotHubClientHandle != NULL))
+    if (handle != NULL)
     {
 		HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
 		IOTHUB_DEVICE_HANDLE* listItem;
