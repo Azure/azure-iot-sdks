@@ -450,7 +450,10 @@ public:
     MOCK_STATIC_METHOD_1(, void, xio_dowork, XIO_HANDLE, xio)
     MOCK_VOID_METHOD_END()
 
-    // tlsio_openssl.h
+	MOCK_STATIC_METHOD_3(, int, xio_setoption, XIO_HANDLE, xio, const char*, optionName, const void*, value)
+	MOCK_METHOD_END(int, 0)
+		
+	// tlsio_openssl.h
     MOCK_STATIC_METHOD_0(, int, tlsio_openssl_init)
     MOCK_METHOD_END(int, 0)
 
@@ -778,6 +781,8 @@ DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , int, xio_open, XIO_HAN
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , int, xio_close, XIO_HANDLE, xio, ON_IO_CLOSE_COMPLETE, on_io_close_complete, void*, callback_context);
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , int, xio_send, XIO_HANDLE, xio, const void*, buffer, size_t, size, ON_SEND_COMPLETE, on_send_complete, void*, callback_context);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, xio_dowork, XIO_HANDLE, xio);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , int, xio_setoption, XIO_HANDLE, xio, const char*, optionName, const void*, value);
+
 
 // tlsio_openssl.h
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , int, tlsio_openssl_init);
@@ -3194,8 +3199,8 @@ TEST_FUNCTION(AMQP_SetOption_NULL_value_fails)
     transport_interface->IoTHubTransport_Destroy(transport);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_047: [If optionName is not an option supported then IoTHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
-TEST_FUNCTION(AMQP_SetOption_invalid_option_fails)
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_047: [If the option name does not match one of the options handled by this module, then IoTHubTransportAMQP_SetOption shall get  the handle to the XIO and invoke the xio_setoption passing down the option name and value parameters.] 
+TEST_FUNCTION(AMQP_SetOption_invokes_xio_setoption_succeeds)
 {
     // arrange
     CIoTHubTransportAMQPMocks mocks;
@@ -3207,19 +3212,64 @@ TEST_FUNCTION(AMQP_SetOption_invalid_option_fails)
         TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	const char* SOME_OPTION = "AnOption";
+	const void* SOME_VALUE = (void*)42;
 
     mocks.ResetAllCalls();
 
-    // act
-    IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(transport, "some_invalid_option", TEST_RANDOM_CHAR_SEQ);
+	EXPECTED_CALL(mocks, STRING_c_str(NULL));
+	EXPECTED_CALL(mocks, platform_get_default_tlsio()).SetReturn(TEST_TLS_IO_INTERFACE_DESC);
+	EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL)).SetReturn(TEST_TLS_IO_INTERFACE);
+	STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
+		.IgnoreArgument(1);
+
+	// act
+    IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(transport, SOME_OPTION, SOME_VALUE);
 
     // assert
     mocks.AssertActualAndExpectedCalls();
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG, "IoTHubTransport_SetOption returned unexpected result.");
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
 
     // cleanup
     transport_interface->IoTHubTransport_Destroy(transport);
 }
+
+/* Tests_SRS_IOTHUBTRANSPORTUAMQP_03_001: [If xio_setoption fails, IoTHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_ERROR.] */
+TEST_FUNCTION(AMQP_SetOption_fails_when_xio_setoption_fails)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	const char* SOME_OPTION = "AnOption";
+	const void* SOME_VALUE = (void*)42;
+
+	mocks.ResetAllCalls();
+
+	EXPECTED_CALL(mocks, STRING_c_str(NULL));
+	EXPECTED_CALL(mocks, platform_get_default_tlsio()).SetReturn(TEST_TLS_IO_INTERFACE_DESC);
+	EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL)).SetReturn(TEST_TLS_IO_INTERFACE);
+	STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
+		.IgnoreArgument(1)
+		.SetReturn(42);
+
+	// act
+	IOTHUB_CLIENT_RESULT result = transport_interface->IoTHubTransport_SetOption(transport, SOME_OPTION, SOME_VALUE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+	ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_ERROR);
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
 
 /* Tests_SRS_IOTHUBTRANSPORTUAMQP_01_007: [The IoTHub message properties shall be obtained by calling IoTHubMessage_Properties.] */
 /* Tests_SRS_IOTHUBTRANSPORTUAMQP_01_016: [If the number of properties is 0, no uAMQP map shall be created and no application properties shall be set on the uAMQP message.] */

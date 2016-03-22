@@ -1446,11 +1446,28 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE ha
             transport_state->message_send_timeout = *((size_t*)value);
             result = IOTHUB_CLIENT_OK;
         }
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_047: [If optionName is not an option supported then IotHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] 
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_047: [If the option name does not match one of the options handled by this module, then IoTHubTransportAMQP_SetOption shall get  the handle to the XIO and invoke the xio_setoption passing down the option name and value parameters.] 
         else
-        {
-            result = IOTHUB_CLIENT_INVALID_ARG;
-            LogError("Invalid option (%s) passed to uAMQP transport SetOption()\r\n", option);
+        {			
+			if (transport_state->tls_io == NULL &&
+				(transport_state->tls_io = transport_state->tls_io_transport_provider(STRING_c_str(transport_state->iotHubHostFqdn), transport_state->iotHubPort, transport_state->trusted_certificates)) == NULL)
+			{
+				result = IOTHUB_CLIENT_ERROR;
+				LogError("Failed to obtain a TLS I/O transport layer.\r\n");
+			}
+			else
+			{
+				/* Codes_SRS_IOTHUBTRANSPORTUAMQP_03_001: [If xio_setoption fails, IoTHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_ERROR.] */
+				if (xio_setoption(transport_state->tls_io, option, value) == 0)
+				{
+					result = IOTHUB_CLIENT_OK;
+				}
+				else
+				{
+					result = IOTHUB_CLIENT_ERROR;
+					LogError("Invalid option (%s) passed to uAMQP transport SetOption()\r\n", option);
+				}
+			}			
         }
     }
 
