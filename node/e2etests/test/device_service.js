@@ -64,7 +64,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
         } else {
           deviceClient.on('message', function (msg) {
             debug('Received a message with guid: ' + msg.data);
-            if (msg.data === guid) {
+            if (msg.data.toString() === guid) {
               if (!abandonnedOnce) {
                 debug('Abandon the message with guid ' + msg.data);
                 abandonnedOnce = true;
@@ -114,7 +114,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
         } else {
           deviceClient.on('message', function (msg) {
             debug('Received a message with guid: ' + msg.data);
-            if (msg.data === guid) {
+            if (msg.data.toString() === guid) {
               if (!abandonnedOnce) {
                 debug('Abandon the message with guid ' + msg.data);
                 abandonnedOnce = true;
@@ -197,20 +197,20 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
       });
     });
 
-    it('Device sends a message and it is received by the service', function (done) {
+    it('Device sends a message of maximum size and it is received by the service', function (done) {
       this.timeout(60000);
-      var guid = uuid.v4();
-      debug('GUID for message: ' + guid);
       var startTime = Date.now();
-
+      var bufferSize = 255 * 1024 - 66; // 66 being the current node-amqp10 overhead.
+      var buffer = new Buffer(bufferSize);
+      buffer.fill('a');
       deviceClient.open(function (openErr) {
         if (openErr) {
           done(openErr);
         } else {
-          var message = new Message(guid);
+          var message = new Message(buffer);
           deviceClient.sendEvent(message, function (sendErr) {
             assert.isNull(sendErr);
-            debug('Message with guid ' + guid + ' sent at ' + Date.now());
+            debug('Message sent at ' + Date.now());
           });
         }
       });
@@ -227,7 +227,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
                 if ((eventData.SystemProperties['iothub-connection-device-id'] === deviceName) &&
                   (eventData.SystemProperties['x-opt-enqueued-time'] >= startTime - 5000)) {
                   debug('Event received: ' + eventData.Bytes);
-                  if (eventData.Bytes === guid) {
+                  if (eventData.Bytes.length === bufferSize) {
                     receiver.removeAllListeners();
                     ehClient.close();
                     done();
