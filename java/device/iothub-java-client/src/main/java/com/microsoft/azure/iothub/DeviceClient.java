@@ -326,7 +326,8 @@ public final class DeviceClient
                 RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_HTTPS;
                 break;
             case AMQPS:
-                this.transport = new AmqpsTransport(this.config);
+            case AMQPS_WS:
+                this.transport = new AmqpsTransport(this.config, protocol);
                 RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_AMQPS;
                 break;
             case MQTT:

@@ -41,8 +41,10 @@ public class ServiceClientIT
     }
 
     @Test
-    public void service_client_e2e() throws Exception
+    public void service_client_e2e_ampqs() throws Exception
     {
+        IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
+
         if (Tools.isNullOrEmpty(connectionString))
         {
             throw new IllegalArgumentException("Environment variable is not set: " + connectionStringEnvVarName);
@@ -68,16 +70,67 @@ public class ServiceClientIT
         // Act
 
         // Create service client
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString);
+        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, protocol);
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
         futureOpen.get();
 
         Message message = new Message(content.getBytes());
+
         CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, message);
         completableFuture.get();
 
         Device deviceGetAfter = registryManager.getDevice(deviceId);
+        CompletableFuture<Void> futureClose = serviceClient.closeAsync();
+        futureClose.get();
 
+        registryManager.removeDevice(deviceId);
+
+        // Assert
+        assertEquals(deviceGetBefore.getDeviceId(), deviceGetAfter.getDeviceId());
+        assertEquals(0, deviceGetBefore.getCloudToDeviceMessageCount());
+        assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
+    }
+
+    @Test
+    public void service_client_e2e_amqps_ws() throws Exception
+    {
+        IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS_WS;
+
+        if (Tools.isNullOrEmpty(connectionString))
+        {
+            throw new IllegalArgumentException("Environment variable is not set: " + connectionStringEnvVarName);
+        }
+
+        // Arrange
+
+        // We remove and recreate the device for a clean start
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        try
+        {
+            registryManager.removeDevice(deviceId);
+        } catch (IOException|IotHubException e)
+        {
+        }
+
+        Device deviceAdded = Device.createFromId(deviceId, null, null);
+        registryManager.addDevice(deviceAdded);
+
+        Device deviceGetBefore = registryManager.getDevice(deviceId);
+
+        // Act
+
+        // Create service client
+        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, protocol);
+        CompletableFuture<Void> futureOpen = serviceClient.openAsync();
+        futureOpen.get();
+
+        Message message = new Message(content.getBytes());
+
+        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, message);
+        completableFuture.get();
+
+        Device deviceGetAfter = registryManager.getDevice(deviceId);
         CompletableFuture<Void> futureClose = serviceClient.closeAsync();
         futureClose.get();
 

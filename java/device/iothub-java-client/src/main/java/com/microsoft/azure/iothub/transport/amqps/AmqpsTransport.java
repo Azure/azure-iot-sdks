@@ -9,6 +9,7 @@ import com.microsoft.azure.iothub.MessageCallback;
 import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.IotHubEventCallback;
+import com.microsoft.azure.iothub.IotHubClientProtocol;
 import com.microsoft.azure.iothub.transport.IotHubCallbackPacket;
 import com.microsoft.azure.iothub.transport.IotHubOutboundPacket;
 import com.microsoft.azure.iothub.transport.IotHubTransport;
@@ -51,6 +52,8 @@ public final class AmqpsTransport implements IotHubTransport
 
     protected final DeviceClientConfig config;
 
+    protected final IotHubClientProtocol iotHubClientProtocol;
+
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
@@ -58,7 +61,7 @@ public final class AmqpsTransport implements IotHubTransport
      * @param config configuration parameters for an AMQPS session with an IoT
      * Hub.
      */
-    public AmqpsTransport(DeviceClientConfig config)
+    public AmqpsTransport(DeviceClientConfig config, IotHubClientProtocol iotHubClientProtocol)
     {
         // Codes_SRS_AMQPSTRANSPORT_11_001: [The function shall initialize an empty queue for messages waiting to be sent.]
         this.waitingList = new LinkedBlockingQueue<>();
@@ -67,6 +70,8 @@ public final class AmqpsTransport implements IotHubTransport
         this.config = config;
 
         this.state = AmqpsTransportState.CLOSED;
+
+        this.iotHubClientProtocol = iotHubClientProtocol;
     }
 
     /**
@@ -84,7 +89,7 @@ public final class AmqpsTransport implements IotHubTransport
         }
 
         // Codes_SRS_AMQPSTRANSPORT_11_019: [The function shall open an AMQPS session with the IoT Hub given in the configuration.]
-        this.connection = new AmqpsIotHubConnection(this.config);
+        this.connection = new AmqpsIotHubConnection(this.config, this.iotHubClientProtocol);
         try {
             this.connection.open();
         } catch (Exception e) {

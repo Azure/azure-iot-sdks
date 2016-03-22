@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.iothub.transport.amqps;
 
+import com.microsoft.azure.iothub.IotHubClientProtocol;
 import com.microsoft.azure.iothub.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
@@ -14,6 +15,7 @@ import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
 import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.impl.WebSocketImpl;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
@@ -46,11 +48,18 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
     /** Constant name to assign to the Receiver endpoint */
     public static final String RECEIVE_TAG = "receiver";
     /** AMQPS Port number */
-    public static final int PORT = 5671;
+    public static final int PORT_AMQP = 5671;
+    /** AMQPS Port number */
+    public static final int PORT_WEBSOCKET = 443;
     /** Sender endpoint format */
     public static final String SEND_ENDPOINT_FORMAT = "/devices/%s/messages/events";
     /** Receiver endpoint format */
     public static final String RECEIVE_ENDPOINT_FORMAT = "/devices/%s/messages/devicebound";
+
+    /** WebSocket host name path extension */
+    public static final String WEBSOCKET_PATH = "/$iothub/websocket";
+    /** WebSocket sub-protocol */
+    public static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
 
     //==============================================================================
     //Reactor Variables
@@ -79,6 +88,10 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
     private final String receiveEndpoint;
     /** Version identifier key */
     private static final String versionIdentifierKey = "com.microsoft:client-version";
+    /** Indicates if use AMQP over WEBSOCKET or AMQP */
+    private final IotHubClientProtocol iotHubClientProtocol;
+    /** The address string of the IoT Hub without port */
+    private final String webSocketHostName;
 
     //==============================================================================
     //Class Variables
@@ -104,7 +117,7 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
      * @param deviceID The ID for the associated device.
      * @param parentIotHubConnection The parent {@link AmqpsIotHubConnection} object.
      */
-    public AmqpsIotHubConnectionBaseHandler(String hostName, String userName, String sasToken, String deviceID, AmqpsIotHubConnection parentIotHubConnection){
+    public AmqpsIotHubConnectionBaseHandler(String hostName, String userName, String sasToken, String deviceID, IotHubClientProtocol iotHubClientProtocol, AmqpsIotHubConnection parentIotHubConnection){
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_001: [The constructor shall throw a new IllegalArgumentException if any of the input parameters is null or empty.]
         if(hostName == null || hostName.length() == 0)
         {
@@ -129,7 +142,16 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
 
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_002: [The constructor shall copy all input parameters to private member variables for event processing.]
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_003: [The constructor shall concatenate the host name with the port.]
-        this.hostName = String.format("%s:%d", hostName, PORT);
+        this.iotHubClientProtocol = iotHubClientProtocol;
+        this.webSocketHostName = hostName;
+        if (this.iotHubClientProtocol == IotHubClientProtocol.AMQPS_WS)
+        {
+            this.hostName = String.format("%s:%d", hostName, PORT_WEBSOCKET);
+        }
+        else
+        {
+            this.hostName = String.format("%s:%d", hostName, PORT_AMQP);
+        }
         this.userName = userName;
         this.deviceID = deviceID;
         this.sasToken = sasToken;
@@ -241,6 +263,13 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_023: [The event handler shall get the Transport (Proton) object from the event.]
         Transport transport = event.getConnection().getTransport();
         if(transport != null){
+
+            if (this.iotHubClientProtocol == IotHubClientProtocol.AMQPS_WS)
+            {
+                WebSocketImpl webSocket = (WebSocketImpl) transport.webSocket();
+                webSocket.configure(this.webSocketHostName, WEBSOCKET_PATH, 0, WEBSOCKET_SUB_PROTOCOL, null, null);
+            }
+
             // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_024: [The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.]
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);

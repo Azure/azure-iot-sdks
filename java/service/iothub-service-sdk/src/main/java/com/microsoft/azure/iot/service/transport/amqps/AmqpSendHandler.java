@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.iot.service.transport.amqps;
 
+import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
 import com.microsoft.azure.iot.service.sdk.Message;
 import com.microsoft.azure.iot.service.sdk.Tools;
 import com.microsoft.azure.iot.service.transport.TransportUtils;
@@ -13,6 +14,7 @@ import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.impl.WebSocketImpl;
 import org.apache.qpid.proton.messenger.impl.Address;
 import org.apache.qpid.proton.reactor.Handshaker;
 
@@ -30,15 +32,21 @@ import java.util.Map;
 public class AmqpSendHandler extends BaseHandler
 {
     public static final String SEND_TAG = "sender";
-    public static final String SEND_PORT = ":5671";
+    public static final String SEND_PORT_AMQPS = ":5671";
+    public static final String SEND_PORT_AMQPS_WS = ":443";
     public static final String ENDPOINT = "/messages/devicebound";
     public static final String DEVICE_PATH_FORMAT = "/devices/%s/messages/devicebound";
+    public static final String WEBSOCKET_PATH = "/$iothub/websocket";
+    public static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
 
     protected final String hostName;
     protected final String userName;
     protected final String sasToken;
     protected org.apache.qpid.proton.message.Message protonMessage;
     private int nextTag = 0;
+
+    protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    protected final String webSocketHostName;
 
     /**
      * Constructor to set up connection parameters and initialize handshaker for transport
@@ -47,7 +55,7 @@ public class AmqpSendHandler extends BaseHandler
      * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      */
-    public AmqpSendHandler(String hostName, String userName, String sasToken)
+    public AmqpSendHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
         if (Tools.isNullOrEmpty(hostName))
@@ -63,9 +71,19 @@ public class AmqpSendHandler extends BaseHandler
             throw new IllegalArgumentException("sasToken can not be null or empty");
         }
 
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.webSocketHostName = hostName;
+        if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
+        {
+            this.hostName = hostName + SEND_PORT_AMQPS_WS;
+        }
+        else
+        {
+            this.hostName = hostName + SEND_PORT_AMQPS;
+        }
+
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_002: [The constructor shall copy all input parameters to private member variables for event processing]
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_003: [The constructor shall concatenate the host name with the port]
-        this.hostName = hostName + SEND_PORT;
         this.userName = userName;
         this.sasToken = sasToken;
 
@@ -154,6 +172,11 @@ public class AmqpSendHandler extends BaseHandler
         Transport transport = event.getConnection().getTransport();
         if (transport != null)
         {
+            if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
+            {
+                WebSocketImpl webSocket = (WebSocketImpl)transport.webSocket();
+                webSocket.configure(this.webSocketHostName, WEBSOCKET_PATH, 0, WEBSOCKET_SUB_PROTOCOL, null, null);
+            }
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);
 

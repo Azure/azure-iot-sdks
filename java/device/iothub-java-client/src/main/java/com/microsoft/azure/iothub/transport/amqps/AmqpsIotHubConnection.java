@@ -6,6 +6,7 @@
 package com.microsoft.azure.iothub.transport.amqps;
 
 import com.microsoft.azure.iothub.DeviceClientConfig;
+import com.microsoft.azure.iothub.IotHubClientProtocol;
 import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.net.IotHubUri;
@@ -51,6 +52,8 @@ public final class AmqpsIotHubConnection extends BaseHandler {
     private String userName;
     /** The ID for the associated device. */
     private String deviceID;
+    /** Indicates if use AMQP over WEBSOCKET or AMQP */
+    private final IotHubClientProtocol iotHubClientProtocol;
 
     /** The {@link DeviceClientConfig} for the associated device. */
     protected DeviceClientConfig config;
@@ -84,7 +87,7 @@ public final class AmqpsIotHubConnection extends BaseHandler {
      *
      * @param config The {@link DeviceClientConfig} corresponding to the device associated with this {@link com.microsoft.azure.iothub.DeviceClient}.
      */
-    public AmqpsIotHubConnection(DeviceClientConfig config){
+    public AmqpsIotHubConnection(DeviceClientConfig config, IotHubClientProtocol iotHubClientProtocol){
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_002: [The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.]
         if(config == null){
             throw new IllegalArgumentException("The DeviceClientConfig cannot be null.");
@@ -119,6 +122,7 @@ public final class AmqpsIotHubConnection extends BaseHandler {
         this.hostName = iotHubHostname;
         this.userName = iotHubUser;
         this.deviceID = deviceId;
+        this.iotHubClientProtocol = iotHubClientProtocol;
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_004: [The constructor shall set it’s state to CLOSED.]
         this.state = ReactorState.CLOSED;
@@ -159,12 +163,8 @@ public final class AmqpsIotHubConnection extends BaseHandler {
 
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_008: [The function shall initialize its AmqpsIotHubConnectionBaseHandler
             // using the saved host name, user name, device ID and sas token.]
-            this.amqpsHandler = new AmqpsIotHubConnectionBaseHandler(
-                    this.hostName,
-                    this.userName,
-                    sasToken.toString(),
-                    this.deviceID,
-                    this);
+            this.amqpsHandler = new AmqpsIotHubConnectionBaseHandler(this.hostName,
+                    this.userName, sasToken.toString(), this.deviceID, this.iotHubClientProtocol, this);
 
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_009: [The function shall open the Amqps connection and trigger the Reactor (Proton) to begin running.]
             // Codes_SRS_AMQPSIOTHUBCONNECTION_14_012: [If the AmqpsIotHubConnectionBaseHandler becomes invalidated before the Reactor (Proton) starts, the function shall throw an IOException.]

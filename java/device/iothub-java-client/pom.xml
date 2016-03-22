@@ -20,9 +20,9 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.apache.qpid</groupId>
-            <artifactId>proton-j</artifactId>
-            <version>0.12.0</version>
+            <groupId>com.microsoft.azure.iot</groupId>
+            <artifactId>proton-j-azure-iot</artifactId>
+            <version>0.12.1</version>
             <type>jar</type>
         </dependency>
         <dependency>

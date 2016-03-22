@@ -103,7 +103,7 @@ public class HandleMessages
      * HTTPS transport.
      *
      * @param args args[0] = IoT Hub connection string; args[1] = protocol (one
-     * of 'https', 'amqps' or 'mqtt', optional).
+     * of 'https', 'amqps', 'mqtt' or 'amqps_ws', optional).
      */
     public static void main(String[] args)
             throws IOException, URISyntaxException
@@ -117,7 +117,7 @@ public class HandleMessages
                     "Expected 1 or 2 arguments but received:\n%d. "
                             + "The program should be called with the: "
                             + "following args: "
-                            + "[IoT Hub connection string] (https | amqps | mqtt).\n",
+                            + "[IoT Hub connection string] (https | amqps | mqtt | amqps_ws).\n",
                     args.length);
             return;
         }
@@ -143,13 +143,17 @@ public class HandleMessages
             {
                 protocol = IotHubClientProtocol.MQTT;
             }
+            else if (protocolStr.equals("amqps_ws"))
+            {
+                protocol = IotHubClientProtocol.AMQPS_WS;
+            }
             else
             {
                 System.out.format(
-                        "Expected argument 1 to be one of 'https', 'amqps' or 'mqtt' "
+                        "Expected argument 1 to be one of 'https', 'amqps', 'mqtt' or 'amqps_ws'"
                                 + "but received %s. The program should be "
                                 + "called with the: following args: "
-                                + "[IoT Hub connection string] (https | amqps | mqtt)."
+                                + "[IoT Hub connection string] (https | amqps | mqtt | amqps_ws)."
                                 + "\n",
                         protocolStr);
                 return;
