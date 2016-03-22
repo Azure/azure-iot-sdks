@@ -124,6 +124,7 @@
     <Compile Include="Common\TaskUtils.cs" />
     <Compile Include="IotHubSingleTokenConnection.cs" />
     <Compile Include="IotHubMuxConnection.cs" />
+    <Compile Include="IotHubTokenRefresher.cs" />
     <Compile Include="Transport\AmqpClientHelper.cs" />
     <Compile Include="Common\UrlEncodedDictionarySerializer.cs" />
     <Compile Include="Common\ActionItem.cs" />

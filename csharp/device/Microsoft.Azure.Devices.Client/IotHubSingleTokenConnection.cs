@@ -8,13 +8,12 @@ namespace Microsoft.Azure.Devices.Client
 
     sealed class IotHubSingleTokenConnection : IotHubConnection
     {
-        readonly IOThreadTimer refreshTokenTimer;
+        IotHubTokenRefresher iotHubTokenRefresher;
 
         public IotHubSingleTokenConnection(IotHubConnectionCache.ConnectionReferenceCounter connectionReferenceCounter, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
             :base(connectionReferenceCounter, connectionString, accessRights, amqpTransportSettings)
         {
             this.FaultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
-            this.refreshTokenTimer = new IOThreadTimer(s => ((IotHubSingleTokenConnection)s).OnRefreshTokenAsync(), this, false);
         }
 
         public override Task OpenAsync(TimeSpan timeout)
@@ -97,51 +96,21 @@ namespace Microsoft.Azure.Devices.Client
             return link;
         }
 
-        public override async Task<RequestResponseAmqpLink> CreateRequestResponseLinkAsync(string path, IotHubConnectionString doNotUse, TimeSpan timeout)
-        {
-            var timeoutHelper = new TimeoutHelper(timeout);
-
-            AmqpSession session;
-            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
-            {
-                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
-            }
-
-            var linkAddress = this.ConnectionString.BuildLinkAddress(path);
-
-            var linkSettings = new AmqpLinkSettings()
-            {
-                TotalLinkCredit = 0,
-                AutoSendFlow = false,
-                Source = new Source() { Address = linkAddress.AbsoluteUri },
-                SettleType = SettleMode.SettleOnDispose,
-                LinkName = Guid.NewGuid().ToString("N") // Use a human readable link name to help with debuggin
-            };
-
-            SetLinkSettingsCommonProperties(linkSettings, timeoutHelper.RemainingTime());
-
-            var link = new RequestResponseAmqpLink(session, linkSettings);
-            await OpenLinkAsync(link, timeoutHelper.RemainingTime());
-
-            return link;
-        }
-
         protected override async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout)
         {
-            this.refreshTokenTimer.Cancel();
             var timeoutHelper = new TimeoutHelper(timeout);
 
-            AmqpSession amqpSession = await base.CreateSessionAsync(timeoutHelper.RemainingTime());
+            if (this.iotHubTokenRefresher != null)
+            {
+                this.iotHubTokenRefresher.Cancel();
+                this.iotHubTokenRefresher = null;
+            }
 
-            var cbsLink = amqpSession.Connection.Extensions.Find<AmqpCbsLink>();
-            if (cbsLink != null)
-            {
-                await this.SendCbsTokenAsync(cbsLink, timeoutHelper.RemainingTime());
-            }
-            else
-            {
-                // TODO: This is an error
-            }
+            AmqpSession amqpSession = await base.CreateSessionAsync(timeoutHelper.RemainingTime());
+            this.iotHubTokenRefresher = new IotHubTokenRefresher(this, amqpSession, this.ConnectionString, this.ConnectionString.AmqpEndpoint.AbsoluteUri);
+
+            // Send Cbs token for new connection first
+            await this.iotHubTokenRefresher.SendCbsTokenAsync(timeoutHelper.RemainingTime());
 
             return amqpSession;
         }
@@ -172,57 +141,57 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        async Task SendCbsTokenAsync(AmqpCbsLink cbsLink, TimeSpan timeout)
-        {
-            string audience = this.ConnectionString.AmqpEndpoint.AbsoluteUri;
-            string resource = this.ConnectionString.AmqpEndpoint.AbsoluteUri;
-            var expiresAtUtc = await cbsLink.SendTokenAsync(
-                this.ConnectionString,
-                this.ConnectionString.AmqpEndpoint,
-                audience,
-                resource,
-                AccessRightsHelper.AccessRightsToStringArray(this.AccessRights),
-                timeout);
-            this.ScheduleTokenRefresh(expiresAtUtc);
-        }
+        //async Task SendCbsTokenAsync(AmqpCbsLink cbsLink, TimeSpan timeout)
+        //{
+        //    string audience = this.ConnectionString.AmqpEndpoint.AbsoluteUri;
+        //    string resource = this.ConnectionString.AmqpEndpoint.AbsoluteUri;
+        //    var expiresAtUtc = await cbsLink.SendTokenAsync(
+        //        this.ConnectionString,
+        //        this.ConnectionString.AmqpEndpoint,
+        //        audience,
+        //        resource,
+        //        AccessRightsHelper.AccessRightsToStringArray(this.AccessRights),
+        //        timeout);
+        //    this.ScheduleTokenRefresh(expiresAtUtc);
+        //}
 
-        async void OnRefreshTokenAsync()
-        {
-            AmqpSession amqpSession = this.FaultTolerantSession.Value;
-            if (amqpSession != null && !amqpSession.IsClosing())
-            {
-                var cbsLink = amqpSession.Connection.Extensions.Find<AmqpCbsLink>();
-                if (cbsLink != null)
-                {
-                    try
-                    {
-                        await this.SendCbsTokenAsync(cbsLink, DefaultOperationTimeout);
-                    }
-                    catch (Exception exception)
-                    {
-                        if (Fx.IsFatal(exception))
-                        {
-                            throw;
-                        }
+        //async void OnRefreshTokenAsync()
+        //{
+        //    AmqpSession amqpSession = this.FaultTolerantSession.Value;
+        //    if (amqpSession != null && !amqpSession.IsClosing())
+        //    {
+        //        var cbsLink = amqpSession.Connection.Extensions.Find<AmqpCbsLink>();
+        //        if (cbsLink != null)
+        //        {
+        //            try
+        //            {
+        //                await this.SendCbsTokenAsync(cbsLink, DefaultOperationTimeout);
+        //            }
+        //            catch (Exception exception)
+        //            {
+        //                if (Fx.IsFatal(exception))
+        //                {
+        //                    throw;
+        //                }
 
-                        this.refreshTokenTimer.Set(RefreshTokenRetryInterval);
-                    }
-                }
-            }
-        }
+        //                this.refreshTokenTimer.Set(RefreshTokenRetryInterval);
+        //            }
+        //        }
+        //    }
+        //}
 
-        void ScheduleTokenRefresh(DateTime expiresAtUtc)
-        {
-            if (expiresAtUtc == DateTime.MaxValue)
-            {
-                return;
-            }
+        //void ScheduleTokenRefresh(DateTime expiresAtUtc)
+        //{
+        //    if (expiresAtUtc == DateTime.MaxValue)
+        //    {
+        //        return;
+        //    }
 
-            TimeSpan timeFromNow = expiresAtUtc.Subtract(RefreshTokenBuffer).Subtract(DateTime.UtcNow);
-            if (timeFromNow > TimeSpan.Zero)
-            {
-                this.refreshTokenTimer.Set(timeFromNow);
-            }
-        }
+        //    TimeSpan timeFromNow = expiresAtUtc.Subtract(RefreshTokenBuffer).Subtract(DateTime.UtcNow);
+        //    if (timeFromNow > TimeSpan.Zero)
+        //    {
+        //        this.refreshTokenTimer.Set(timeFromNow);
+        //    }
+        //}
     }
 }

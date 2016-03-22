@@ -6,7 +6,6 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
 
 #if !WINDOWS_UWP
     sealed class IotHubConnectionCache

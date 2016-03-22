@@ -22,12 +22,9 @@ namespace Microsoft.Azure.Devices.Client
     {
         internal static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromMinutes(1);
         internal static readonly TimeSpan DefaultOpenTimeout = TimeSpan.FromMinutes(1);
-        protected static readonly TimeSpan RefreshTokenBuffer = TimeSpan.FromMinutes(2);
-        protected static readonly TimeSpan RefreshTokenRetryInterval = TimeSpan.FromSeconds(30);
-
 #if !WINDOWS_UWP
 
-        protected AccessRights AccessRights { get; }
+        public AccessRights AccessRights { get; }
 
         protected FaultTolerantAmqpObject<AmqpSession> FaultTolerantSession { get; set; }
 
@@ -59,8 +56,6 @@ namespace Microsoft.Azure.Devices.Client
         public abstract Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout);
 
         public abstract Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount);
-
-        public abstract Task<RequestResponseAmqpLink> CreateRequestResponseLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout);
 
         public void CloseLink(AmqpLink link)
         {
