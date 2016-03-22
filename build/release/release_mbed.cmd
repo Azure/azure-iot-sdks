@@ -10,7 +10,7 @@ call release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_client
 @REM call release_mbed_project.cmd azure_uamqp ..\..\c\azure-uamqp-c\build azure_uamqp_filelist.txt
 @REM call release_mbed_project.cmd azure_umqtt ..\..\c\azure-umqtt-c build\mbed\shared-umqtt_filelist.txt
 call release_mbed_project.cmd ..\..\..\c\serializer\build
-@REM call release_mbed_project.cmd azureiot_common ..\..\c\azure-c-shared-utility\c build\mbed\shared-util_filelist.txt
+call release_mbed_project.cmd ..\..\..\c\azure-c-shared-utility\c\build
 call release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_amqp
 call release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_http
 call release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_mqtt
