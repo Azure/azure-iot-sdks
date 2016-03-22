@@ -15,7 +15,7 @@ typedef TRANSPORT_HANDLE_DATA_TAG* TRANSPORT_HANDLE;
 extern TRANSPORT_HANDLE		IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix);
 extern void					IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHlHandle);
 extern LOCK_HANDLE			IoTHubTransport_GetLock(TRANSPORT_HANDLE transportHlHandle);
-extern TRANSPORT_LL_HANDLE		IoTHubTransport_GetLLTransport(TRANSPORT_HANDLE transportHlHandle);
+extern TRANSPORT_LL_HANDLE	IoTHubTransport_GetLLTransport(TRANSPORT_HANDLE transportHlHandle);
 extern IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
 extern void					IoTHubTransport_EndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
 ```
@@ -101,6 +101,8 @@ IoTHubTransport_StartWorkerThread ensures a single thread for all device communi
 **SRS_IOTHUBTRANSPORT_17_020: [** IoTHubTransport_StartWorkerThread shall search for IoTHubClient clientHandle in the list of IoTHubClient handles. **]**
 
 **SRS_IOTHUBTRANSPORT_17_021: [** If handle is not found, then clientHandle shall be added to the list.  **]**
+
+**SRS_IOTHUBTRANSPORT_17_042: [** If Adding to the client list fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. **]**
 
 **SRS_IOTHUBTRANSPORT_17_035: [** IoTHubTransport_StartWorkerThread shall unlock the transport lock. **]**
 

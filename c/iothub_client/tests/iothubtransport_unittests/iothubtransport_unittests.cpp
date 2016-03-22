@@ -471,6 +471,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 	/*Tests_SRS_IOTHUBTRANSPORT_17_005: [ IoTHubTransport_Create shall create the lower layer transport by calling the protocol's IoTHubTransport_Create function. ]*/
 	/*Tests_SRS_IOTHUBTRANSPORT_17_007: [ IoTHubTransport_Create shall create the transport lock by Calling Lock_Init. */
 	/*Tests_SRS_IOTHUBTRANSPORT_17_038: [ IoTHubTransport_Create shall call VECTOR_Create to make a list of IOTHUB_CLIENT_HANDLE using this transport. ]*/
+	//Tests_SRS_IOTHUBTRANSPORT_17_032: [ IoTHubTransport_Create shall allocate memory for the transport data. ]
 	TEST_FUNCTION(IoTHubTransport_Create_success_returns_non_null)
 	{
 		CIotHubTransportMocks mocks;
@@ -490,7 +491,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_IS_NOT_NULL(result);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(result);
 
 	}
@@ -522,7 +523,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		ASSERT_IS_NULL(result);
 
-		///ablution
+		///cleanup
 
 	}
 
@@ -549,7 +550,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		ASSERT_IS_NULL(result);
 
-		///ablution
+		///cleanup
 
 	}
 
@@ -573,7 +574,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		ASSERT_IS_NULL(result);
 
-		///ablution
+		///cleanup
 
 	}
 
@@ -593,7 +594,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		ASSERT_IS_NULL(result);
 
-		///ablution
+		///cleanup
 
 	}
 
@@ -610,7 +611,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		ASSERT_IS_NULL(result);
 
-		///ablution
+		///cleanup
 
 	}
 
@@ -627,7 +628,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		ASSERT_IS_NULL(result);
 
-		///ablution
+		///cleanup
 
 	}
 
@@ -644,7 +645,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		ASSERT_IS_NULL(result);
 
-		///ablution
+		///cleanup
 
 	}
 
@@ -677,7 +678,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		///assert
 
-		///ablution
+		///cleanup
 	}
 
 	//Tests_SRS_IOTHUBTRANSPORT_17_010: [ IoTHubTransport_Destroy shall free all resources. ]
@@ -710,7 +711,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		///assert
 
-		///ablution
+		///cleanup
 	}
 
 	//Tests_SRS_IOTHUBTRANSPORT_17_033: [ IoTHubTransport_Destroy shall lock the transport lock. ]
@@ -742,7 +743,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		///assert
 
-		///ablution
+		///cleanup
 	}
 
 	//Tests_SRS_IOTHUBTRANSPORT_17_011: [ IoTHubTransport_Destroy shall do nothing if transportHlHandle is NULL. ]
@@ -757,7 +758,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		///assert
 
-		///ablution
+		///cleanup
 	}
 
 	//Tests_SRS_IOTHUBTRANSPORT_17_012: [ IoTHubTransport_GetLock shall return a handle to the transport lock. ]
@@ -775,7 +776,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_IS_NOT_NULL(lock);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -794,7 +795,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_IS_NULL(lock);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -813,7 +814,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_IS_NOT_NULL(llTransport);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -832,7 +833,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_IS_NULL(llTransport);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -869,7 +870,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_ARE_EQUAL(int, (int)result, (int)IOTHUB_CLIENT_OK);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -905,7 +906,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_ARE_EQUAL(int, (int)result, (int)IOTHUB_CLIENT_OK);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -922,7 +923,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_ARE_EQUAL(int, (int)result, (int)IOTHUB_CLIENT_INVALID_ARG);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 	}
 
 	//Tests_SRS_IOTHUBTRANSPORT_17_017: [ If clientHandle is NULL, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_INVALID_ARG. ]
@@ -942,7 +943,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_ARE_EQUAL(int, (int)result, (int)IOTHUB_CLIENT_INVALID_ARG);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -971,7 +972,41 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_ARE_EQUAL(int, (int)result, (int)IOTHUB_CLIENT_ERROR);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
+		IoTHubTransport_Destroy(transportHandle);
+	}
+
+	//Tests_SRS_IOTHUBTRANSPORT_17_042: [ If Adding to the client list fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. ]
+	TEST_FUNCTION(IoTHubTransport_StartWorkerThread_Vector_push_back_returns_error)
+	{
+		CIotHubTransportMocks mocks;
+		///arrange
+
+		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
+		mocks.ResetAllCalls();
+
+		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, transportHandle))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2);
+		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2)
+			.SetFailReturn(42);
+		///act
+
+		IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+
+		///assert
+		ASSERT_ARE_EQUAL(int, (int)result, (int)IOTHUB_CLIENT_ERROR);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -996,13 +1031,14 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		ASSERT_ARE_EQUAL(int, (int)result, (int)IOTHUB_CLIENT_ERROR);
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
 	//Tests_SRS_IOTHUBTRANSPORT_17_026: [ IoTHubTransport_EndWorkerThread shall remove clientHandlehandle from handle list. ]
 	//Tests_SRS_IOTHUBTRANSPORT_17_036: [ IoTHubTransport_EndWorkerThread shall lock the transport lock. ]
 	//Tests_SRS_IOTHUBTRANSPORT_17_037: [ IoTHubTransport_EndWorkerThread shall unlock the transport lock. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_027: [ If handle list is empty, IoTHubTransport_EndWorkerThread shall be joined. ]
 	//Tests_SRS_IOTHUBTRANSPORT_17_028: [ The thread shall exit when IoTHubTransport_EndWorkerThread has been called for each clientHandle which invoked IoTHubTransport_StartWorkerThread. ]
 	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_success)
 	{
@@ -1035,7 +1071,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///assert
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -1070,7 +1106,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///assert
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 		IoTHubTransport_Destroy(transportHandle);
 	}
@@ -1086,7 +1122,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		///assert
 
-		///ablution
+		///cleanup
 	}
 
 	//Tests_SRS_IOTHUBTRANSPORT_17_024: [ If clientHandle is NULL, IoTHubTransport_EndWorkerThread shall return. ]
@@ -1100,9 +1136,10 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		///assert
 
-		///ablution
+		///cleanup
 	}
 
+	//Tests_SRS_IOTHUBTRANSPORT_17_025: [If the worker thread does not exist, then IoTHubTransport_EndWorkerThread shall return.]
 	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_end_thread_client_not_found)
 	{
 		CIotHubTransportMocks mocks;
@@ -1125,7 +1162,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///assert
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -1154,7 +1191,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///assert
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 		IoTHubTransport_Destroy(transportHandle);
 	}
@@ -1191,7 +1228,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///assert
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -1214,7 +1251,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///assert
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -1250,7 +1287,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///assert
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 		IoTHubTransport_Destroy(transportHandle);
@@ -1284,7 +1321,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///assert
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 		IoTHubTransport_Destroy(transportHandle);
@@ -1321,7 +1358,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///assert
 		mocks.AssertActualAndExpectedCalls();
 
-		///ablution
+		///cleanup
 		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 

@@ -20,7 +20,7 @@
 #include "iot_logging.h"
 #include "vector.h"
 
-typedef struct TRANSPORT_HL_HANDLE_DATA_TAG
+typedef struct TRANSPORT_HANDLE_DATA_TAG
 {
 	TRANSPORT_LL_HANDLE transportLLHandle;
     THREAD_HANDLE workerThreadHandle;
@@ -42,21 +42,21 @@ TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
 		/*Codes_SRS_IOTHUBTRANSPORT_17_002: [ If protocol is NULL, this function shall return NULL. ]*/
 		/*Codes_SRS_IOTHUBTRANSPORT_17_003: [ If iotHubName is NULL, this function shall return NULL. ]*/
 		/*Codes_SRS_IOTHUBTRANSPORT_17_004: [ If iotHubSuffix is NULL, this function shall return NULL. ]*/
-		LogError("Invalid NULL argument, protocol [%p], name [%p], suffix [%p].\r\n", protocol, iotHubName, iotHubSuffix);
+		LogError("Invalid NULL argument, protocol [%p], name [%p], suffix [%p].", protocol, iotHubName, iotHubSuffix);
 		result = NULL;
 	}
 	else
 	{
 		/*Codes_SRS_IOTHUBTRANSPORT_17_032: [ IoTHubTransport_Create shall allocate memory for the transport data. ]*/
-		result = malloc(sizeof(TRANSPORT_HANDLE_DATA));
+		result = (TRANSPORT_HANDLE_DATA*)malloc(sizeof(TRANSPORT_HANDLE_DATA));
 		if (result == NULL)
 		{
 			/*Codes_SRS_IOTHUBTRANSPORT_17_040: [ If memory allocation fails, IoTHubTransport_Create shall return NULL. ]*/
-			LogError("Transport handle was not allocated.\r\n");
+			LogError("Transport handle was not allocated.");
 		}
 		else
 		{
-			TRANSPORT_PROVIDER * transportProtocol = (TRANSPORT_PROVIDER*)protocol();
+			TRANSPORT_PROVIDER * transportProtocol = (TRANSPORT_PROVIDER*)(protocol());
 			IOTHUB_CLIENT_CONFIG upperConfig;
 			upperConfig.deviceId = NULL;
 			upperConfig.deviceKey = NULL;
@@ -74,7 +74,7 @@ TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
 			if (result->transportLLHandle == NULL)
 			{
 				/*Codes_SRS_IOTHUBTRANSPORT_17_006: [ If the creation of the transport fails, IoTHubTransport_Create shall return NULL. ]*/
-				LogError("Lower Layer transport not created.\r\n");
+				LogError("Lower Layer transport not created.");
 				free(result);
 				result = NULL;
 			}
@@ -85,7 +85,7 @@ TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
 				if (result->lockHandle == NULL)
 				{
 					/*Codes_SRS_IOTHUBTRANSPORT_17_008: [ If the lock creation fails, IoTHubTransport_Create shall return NULL. ]*/
-					LogError("transport Lock not created.\r\n");
+					LogError("transport Lock not created.");
 					transportProtocol->IoTHubTransport_Destroy(result->transportLLHandle);
 					free(result);
 					result = NULL;
@@ -98,7 +98,7 @@ TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
 					{
 						/*Codes_SRS_IOTHUBTRANSPORT_17_039: [ If the Vector creation fails, IoTHubTransport_Create shall return NULL. ]*/
 						/*Codes_SRS_IOTHUBTRANSPORT_17_009: [ IoTHubTransport_Create shall clean up any resources it creates if the function does not succeed. ]*/
-						LogError("clients list not created.\r\n");
+						LogError("clients list not created.");
 						Lock_Deinit(result->lockHandle);
 						transportProtocol->IoTHubTransport_Destroy(result->transportLLHandle);
 						free(result);
@@ -162,12 +162,12 @@ static bool find_by_handle(const void* element, const void* value)
 	/* data stored at element is device handle */
 	const IOTHUB_CLIENT_HANDLE * guess = (const IOTHUB_CLIENT_HANDLE *)element;
 	const IOTHUB_CLIENT_HANDLE match = (const IOTHUB_CLIENT_HANDLE)value;
-	result = (*guess == match) ? true : false;
-	return result;
+	return (*guess == match);
 }
 
-static void start_worker_if_needed(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIENT_HANDLE clientHandle)
+static IOTHUB_CLIENT_RESULT start_worker_if_needed(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIENT_HANDLE clientHandle)
 {
+	IOTHUB_CLIENT_RESULT result;
 	if (transportData->workerThreadHandle == NULL)
 	{
 		/*Codes_SRS_IOTHUBTRANSPORT_17_018: [ If the worker thread does not exist, IoTHubTransport_StartWorkerThread shall start the thread using ThreadAPI_Create. ]*/
@@ -184,19 +184,36 @@ static void start_worker_if_needed(TRANSPORT_HANDLE_DATA * transportData, IOTHUB
 		if (addToList)
 		{
 			/*Codes_SRS_IOTHUBTRANSPORT_17_021: [ If handle is not found, then clientHandle shall be added to the list. ]*/
-			VECTOR_push_back(transportData->clients, &clientHandle, 1);
+			if (VECTOR_push_back(transportData->clients, &clientHandle, 1) != 0)
+			{
+				/*Codes_SRS_IOTHUBTRANSPORT_17_042: [ If Adding to the client list fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. ]*/
+				result = IOTHUB_CLIENT_ERROR;
+			}
+			else
+			{
+				result = IOTHUB_CLIENT_OK;
+			}
+		}
+		else
+		{
+			result = IOTHUB_CLIENT_OK;
 		}
 	}
+	else
+	{
+		result = IOTHUB_CLIENT_ERROR;
+	}
+	return result;
 }
 
 static void stop_worker_thread(TRANSPORT_HANDLE_DATA * transportData)
 {
 	int res;
 	transportData->stopThread = 1;
-	/*SRS_IOTHUBTRANSPORT_17_027: [ If handle list is empty, IoTHubTransport_EndWorkerThread shall be joined. ]*/
+	/*Codes_SRS_IOTHUBTRANSPORT_17_027: [ If handle list is empty, IoTHubTransport_EndWorkerThread shall be joined. ]*/
 	if (ThreadAPI_Join(transportData->workerThreadHandle, &res) != THREADAPI_OK)
 	{
-		LogError("ThreadAPI_Join failed\r\n");
+		LogError("ThreadAPI_Join failed");
 	}
 }
 
@@ -298,17 +315,17 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transpor
 		}
 		else
 		{
-			start_worker_if_needed(transportData, clientHandle);
-			if (transportData->workerThreadHandle == NULL)
+			if ((result = start_worker_if_needed(transportData, clientHandle)) != IOTHUB_CLIENT_OK)
 			{
 				/*Codes_SRS_IOTHUBTRANSPORT_17_019: [ If thread creation fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. */
-				result = IOTHUB_CLIENT_ERROR;
+				LogError("Unable to start thread safely");
 			}
 			else
 			{
 				/*Codes_SRS_IOTHUBTRANSPORT_17_022: [ Upon success, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_OK. ]*/
 				result = IOTHUB_CLIENT_OK;
 			}
+			
 			/*Codes_SRS_IOTHUBTRANSPORT_17_035: [ IoTHubTransport_StartWorkerThread shall unlock the transport lock. ]*/
 			(void)Unlock(transportData->lockHandle);
 		}

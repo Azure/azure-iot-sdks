@@ -4,7 +4,7 @@
 #ifndef IOTHUB_TRANSPORT_H
 #define IOTHUB_TRANSPORT_H
 
-typedef struct TRANSPORT_HL_HANDLE_DATA_TAG* TRANSPORT_HANDLE;
+typedef struct TRANSPORT_HANDLE_DATA_TAG* TRANSPORT_HANDLE;
 
 #include "lock.h"
 #include "crt_abstractions.h"
@@ -16,10 +16,10 @@ extern "C"
 {
 #endif
 
-extern TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix);
+extern TRANSPORT_HANDLE		IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix);
 extern void					IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHlHandle);
 extern LOCK_HANDLE			IoTHubTransport_GetLock(TRANSPORT_HANDLE transportHlHandle);
-extern TRANSPORT_LL_HANDLE		IoTHubTransport_GetLLTransport(TRANSPORT_HANDLE transportHlHandle);
+extern TRANSPORT_LL_HANDLE	IoTHubTransport_GetLLTransport(TRANSPORT_HANDLE transportHlHandle);
 extern IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
 extern void					IoTHubTransport_EndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
 
