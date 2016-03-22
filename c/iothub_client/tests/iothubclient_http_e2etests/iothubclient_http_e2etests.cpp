@@ -43,6 +43,7 @@ typedef struct EXPECTED_SEND_DATA_TAG
     const char* expectedString;
     bool wasFound;
     bool dataWasRecv;
+    LOCK_HANDLE lock;
 } EXPECTED_SEND_DATA;
 
 typedef struct EXPECTED_RECEIVE_DATA_TAG
@@ -52,6 +53,7 @@ typedef struct EXPECTED_RECEIVE_DATA_TAG
     const char* data;
     size_t dataSize;
     bool wasFound;
+    LOCK_HANDLE lock; /*needed to protect this structure*/
 } EXPECTED_RECEIVE_DATA;
 
 static size_t IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_nCalls;
@@ -80,13 +82,21 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)context;
         if (expectedData != NULL)
         {
-            if (
-                (strlen(expectedData->expectedString)== size) && 
-                (memcmp(expectedData->expectedString, data, size) == 0)
-                )
+            if (Lock(expectedData->lock) != LOCK_OK)
             {
-                expectedData->wasFound = true;
-                result = 1;
+                ASSERT_FAIL("unable to lock");
+            }
+            else
+            {
+                if (
+                    (strlen(expectedData->expectedString) == size) &&
+                    (memcmp(expectedData->expectedString, data, size) == 0)
+                    )
+                {
+                    expectedData->wasFound = true;
+                    result = 1;
+                }
+                (void)Unlock(expectedData->lock);
             }
         }
         return result;
@@ -98,39 +108,36 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)userContextCallback;
         if (expectedData != NULL)
         {
-            expectedData->dataWasRecv = true;
+            if (Lock(expectedData->lock) != LOCK_OK)
+            {
+                ASSERT_FAIL("unable to lock");
+            }
+            else
+            {
+                expectedData->dataWasRecv = true;
+                (void)Unlock(expectedData->lock);
+            }
         }
     }
 
     static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE msg, void* userContextCallback)
     {
         EXPECTED_RECEIVE_DATA* notifyData = (EXPECTED_RECEIVE_DATA*)userContextCallback;
-        if (notifyData != NULL)
+        if (Lock(notifyData->lock) != LOCK_OK)
         {
-            const char* buffer;
-            size_t size;
-            IoTHubMessage_GetByteArray(msg, (const unsigned char**)&buffer, &size);
+            ASSERT_FAIL("unable to lock"); /*because the test must absolutely be terminated*/
+        }
+        else
+        {
+            if (notifyData != NULL)
+            {
+                const char* buffer;
+                size_t size;
+                IoTHubMessage_GetByteArray(msg, (const unsigned char**)&buffer, &size);
 
-            if (notifyData->data == NULL)
-            {
-                if (size == 0)
+                if (notifyData->data == NULL)
                 {
-                    notifyData->wasFound = true;
-                }
-                else
-                {
-                    notifyData->wasFound = false;
-                }
-            }
-            else
-            {
-                if (buffer == NULL)
-                {
-                    notifyData->wasFound = false;
-                }
-                else
-                {
-                    if (memcmp(notifyData->data, buffer, size) == 0)
+                    if (size == 0)
                     {
                         notifyData->wasFound = true;
                     }
@@ -139,7 +146,26 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
                         notifyData->wasFound = false;
                     }
                 }
+                else
+                {
+                    if (buffer == NULL)
+                    {
+                        notifyData->wasFound = false;
+                    }
+                    else
+                    {
+                        if (memcmp(notifyData->data, buffer, size) == 0)
+                        {
+                            notifyData->wasFound = true;
+                        }
+                        else
+                        {
+                            notifyData->wasFound = false;
+                        }
+                    }
+                }
             }
+            Unlock(notifyData->lock);
         }
         return IOTHUBMESSAGE_ACCEPTED;
     }
@@ -149,37 +175,33 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         EXPECTED_RECEIVE_DATA* result = (EXPECTED_RECEIVE_DATA*)malloc(sizeof(EXPECTED_RECEIVE_DATA));
         if (result != NULL)
         {
-            char temp[1000];
-            char* tempString;
-            time_t t = time(NULL);
-            sprintf(temp, TEST_MESSAGE_DATA_FMT, ctime(&t), g_iotHubTestId);
-            if ( (tempString = (char*)malloc(strlen(temp) + 1) ) == NULL)
+            if ((result->lock = Lock_Init()) == NULL)
             {
                 free(result);
                 result = NULL;
             }
             else
             {
-                strcpy(tempString, temp);
-                result->data = tempString;
-                result->dataSize = strlen(result->data);
-                result->wasFound = false;
-                result->toBeSend = (const unsigned char*)tempString;
-                result->toBeSendSize = strlen(tempString);
+                char temp[1000];
+                char* tempString;
+                time_t t = time(NULL);
+                sprintf(temp, TEST_MESSAGE_DATA_FMT, ctime(&t), g_iotHubTestId);
+                if ((tempString = (char*)malloc(strlen(temp) + 1)) == NULL)
+                {
+                    (void)Lock_Deinit(result->lock);
+                    free(result);
+                    result = NULL;
+                }
+                else
+                {
+                    strcpy(tempString, temp);
+                    result->data = tempString;
+                    result->dataSize = strlen(result->data);
+                    result->wasFound = false;
+                    result->toBeSend = (const unsigned char*)tempString;
+                    result->toBeSendSize = strlen(tempString);
+                }
             }
-        }
-        return result;
-    }
-    static EXPECTED_RECEIVE_DATA* NullMessageData_Create(void)
-    {
-        EXPECTED_RECEIVE_DATA* result = (EXPECTED_RECEIVE_DATA*)malloc(sizeof(EXPECTED_RECEIVE_DATA));
-        if (result != NULL)
-        {
-            result->data = NULL;
-            result->dataSize = 0;
-            result->wasFound = false;
-            result->toBeSend = NULL;
-            result->toBeSendSize = 0;
         }
         return result;
     }
@@ -188,6 +210,7 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
     {
         if (data != NULL)
         {
+            (void)Lock_Deinit(data->lock);
             if (data->data != NULL)
             {
                 free((void*)data->data);
@@ -201,21 +224,29 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         EXPECTED_SEND_DATA* result = (EXPECTED_SEND_DATA*)malloc(sizeof(EXPECTED_SEND_DATA));
         if (result != NULL)
         {
-            char temp[1000];
-            char* tempString;
-            time_t t = time(NULL);
-            sprintf(temp, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
-            if ( (tempString = (char*)malloc(strlen(temp) + 1) ) == NULL)
+            if ((result->lock = Lock_Init()) == NULL)
             {
-                free(result);
-                result = NULL;
+                ASSERT_FAIL("unable to Lock_Init");
             }
             else
             {
-                strcpy(tempString, temp);
-                result->expectedString = tempString;
-                result->wasFound = false;
-                result->dataWasRecv = false;
+                char temp[1000];
+                char* tempString;
+                time_t t = time(NULL);
+                sprintf(temp, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
+                if ((tempString = (char*)malloc(strlen(temp) + 1)) == NULL)
+                {
+                    Lock_Deinit(result->lock);
+                    free(result);
+                    result = NULL;
+                }
+                else
+                {
+                    strcpy(tempString, temp);
+                    result->expectedString = tempString;
+                    result->wasFound = false;
+                    result->dataWasRecv = false;
+                }
             }
         }
         return result;
@@ -225,6 +256,7 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
     {
         if (data != NULL)
         {
+            (void)Lock_Deinit(data->lock);
             if (data->expectedString != NULL)
             {
                 free((void*)data->expectedString);
@@ -292,14 +324,24 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         time_t beginOperation, nowTime;
         beginOperation = time(NULL);
         while (
-              (
                 (nowTime = time(NULL) ),
                 (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
-              ) &&
-                (!sendData->dataWasRecv) // Condition box
               )
         {
-            // Just go on here
+            if (Lock(sendData->lock) != LOCK_OK)
+            {
+                ASSERT_FAIL("unable to lock");
+            }
+            else
+            {
+                if (sendData->dataWasRecv)
+                {
+                    Unlock(sendData->lock);
+                    break;
+                }
+                Unlock(sendData->lock);
+            }
+            ThreadAPI_Sleep(100);
         }
         ASSERT_IS_TRUE_WITH_MSG(sendData->dataWasRecv, "Failure sending data to IotHub"); // was found is written by the callback...
 
@@ -308,7 +350,7 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
             ASSERT_IS_NOT_NULL(iotHubTestHandle);
 
             IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData);
-            //ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, result);
+            ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, result);
 
             IoTHubTest_Deinit(iotHubTestHandle);
         }
@@ -323,7 +365,7 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         IoTHubClient_Destroy(iotHubClientHandle);
     }
 
-    #if 0
+#if 0
     TEST_FUNCTION(IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched)
     {
         IoTHub_HTTP_LL_CanSend_2000_smallest_messages_batched_nCalls = 0;
@@ -453,23 +495,37 @@ BEGIN_TEST_SUITE(iothubclient_http_e2etests)
         IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
         ASSERT_ARE_EQUAL_WITH_MSG(int, IOTHUB_CLIENT_OK, result, "Failure setting message callback");
 
-        unsigned int minimumPollingTime = 0; /*because it should not wait*/
+        unsigned int minimumPollingTime = 1; /*because it should not wait*/
         if (IoTHubClient_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
         {
             printf("failure to set option \"MinimumPollingTime\"\r\n");
         }
+		
+		
 
         time_t beginOperation, nowTime;
         beginOperation = time(NULL);
         while (
               (
                 (nowTime = time(NULL)),
-                (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
-              ) &&
-                (!notifyData->wasFound) //condition box
+                (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME ) //time box
+              )
               )
         {
-            //just go on;
+            if (Lock(notifyData->lock) != LOCK_OK)
+            {
+                ASSERT_FAIL("unable ot lock");
+            }
+            else
+            {
+                if (notifyData->wasFound)
+                {
+                    (void)Unlock(notifyData->lock);
+                    break;
+                }
+                (void)Unlock(notifyData->lock);
+            }
+            ThreadAPI_Sleep(100);
         }
 
         // assert

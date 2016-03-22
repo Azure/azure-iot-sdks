@@ -69,6 +69,11 @@ static void StartWorkerThreadIfNeeded(IOTHUB_CLIENT_INSTANCE* iotHubClientInstan
         if (ThreadAPI_Create(&iotHubClientInstance->ThreadHandle, ScheduleWork_Thread, iotHubClientInstance) != THREADAPI_OK)
         {
             iotHubClientInstance->ThreadHandle = NULL;
+            LogError("ThreadAPI_Create failed");
+        }
+        else
+        {
+            /*all is fine*/
         }
     }
 }
@@ -321,7 +326,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
         {
             /* Codes_SRS_IOTHUBCLIENT_01_014: [IoTHubClient_SetMessageCallback shall start the worker thread if it was not previously started.] */
             StartWorkerThreadIfNeeded(iotHubClientInstance);
-
             if (iotHubClientInstance->ThreadHandle == NULL)
             {
                 /* Codes_SRS_IOTHUBCLIENT_01_015: [If starting the thread fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR.] */

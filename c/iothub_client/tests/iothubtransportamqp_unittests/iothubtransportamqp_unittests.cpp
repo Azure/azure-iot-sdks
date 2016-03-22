@@ -135,7 +135,7 @@ std::ostream& operator<<(std::ostream& left, const BINARY_DATA bindata)
 #define TEST_PROT_GW_HOSTNAME NULL
 
 #define TEST_IOT_HUB_PORT 5671
-#define TEST_INCOMING_WINDOW_SIZE SIZE_MAX
+#define TEST_INCOMING_WINDOW_SIZE UINT32_MAX
 #define TEST_OUTGOING_WINDOW_SIZE 100
 #define TEST_MESSAGE_RECEIVER_LINK_NAME "receiver-link"
 #define TEST_MESSAGE_RECEIVER_TARGET_ADDRESS "ingress-rx"
@@ -942,7 +942,7 @@ static void addTestEvents(PDLIST_ENTRY waitingToSend, int numberOfEvents, bool s
 
             if (setCallback)
             {
-                iml->context = (void*)numberOfEvents;
+                iml->context = (void*)((intptr_t)numberOfEvents);
                 iml->callback = test_iothubclient_send_confirmation_callback;
             }
 
