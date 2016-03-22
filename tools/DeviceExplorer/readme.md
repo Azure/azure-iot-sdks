@@ -104,13 +104,13 @@ The following steps describe how to use Device Explorer to monitor device-to-clo
 
 ### Obtain the device connection string and setup monitoring
 
-You can use one of the sample applications included in this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to send device-to-cloud events to your IoT Hub. Use Device Explorer to [create a device](#createdevice) and generate a connection string.
+You can use one of the sample applications included in this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to send device-to-cloud events to your IoT Hub. Follow the [step by step tutorial to set up the sample application][sample-application-tutorial]. Use Device Explorer to [create a device](#createdevice) and generate a connection string.
 
 -  You can obtain the IoT Hub connection string from Device Explorer. In the Management tab, right-click on the selected device and select "Copy connection string for selected device". The device connection string is silently copied to the clipboard.
 
 > Note: Device Explorer requires an IoT hub connection string obtained from the Azure portal to enable it to connect to the hub. You can then use Device Explorer to generate device-specific connection strings that enable devices to communicate with the hub.
 
-- Update the device connection string placeholder in the sample application you are using with the connection string from Device Explorer.
+- Update the device connection string placeholder in the application you are using with the connection string from Device Explorer.
 
 -  In the Device Explorer **Data** tab, select the device name you created from the drop-down list of device IDs and leave the other fields with their default values for now.
 
@@ -154,3 +154,4 @@ Run your sample application. Device Explorer should now show that the IoT hub ha
 [lnk-devguide]: https://azure.microsoft.com/documentation/articles/iot-hub-devguide/
 [what-is-iot-hub]: https://azure.microsoft.com/documentation/articles/iot-hub-what-is-iot-hub/
 [iothub-explorer]: ../iothub-explorer/readme.md
+[sample-application-tutorial]: ../../doc/get_started/arduinoide-arduino-wifi101-c.md
