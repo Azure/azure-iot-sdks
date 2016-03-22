@@ -88,26 +88,12 @@ endfunction(cloneMBEDRepository)
 function(updateMBEDSourceFiles)
 	set(source_file_destination ${local_repo_path})
 	
-	message(STATUS "Copying common files.")
-	foreach(file_item ${common_files})
-		file(GLOB expanded_file_item ${file_item})
-		file(COPY ${expanded_file_item} DESTINATION ${source_file_destination})
-	endforeach()
-
 	message(STATUS "Copying target project files.")
-	foreach(file_item ${project_files})
+	foreach(file_item ${mbed_project_files})
 		file(GLOB expanded_file_item ${file_item})
 		file(COPY ${expanded_file_item} DESTINATION ${source_file_destination})
 	endforeach()
 	
-	message(STATUS "Removing excluded files.")
-	foreach(file_item ${exclude_files})
-		file(GLOB expanded_file_item ${source_file_destination}/${file_item})
-		
-		if (NOT "${expanded_file_item}" STREQUAL "")
-			file(REMOVE ${expanded_file_item})
-		endif()
-	endforeach()	
 endfunction(updateMBEDSourceFiles)
 
 

@@ -1,11 +1,4 @@
-set(project_files
+set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransportamqp.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransportamqp.c
 		)
-	
-set(common_files 
-	)
-	
-# Add the paterns of the filenames to be deleted before pushing local update to remote repo.
-set(exclude_files
-	)
