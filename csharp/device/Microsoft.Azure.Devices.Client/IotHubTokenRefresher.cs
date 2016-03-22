@@ -20,9 +20,10 @@ namespace Microsoft.Azure.Devices.Client
         readonly IotHubConnectionString connectionString;
         readonly string audience;
         readonly IOThreadTimer refreshTokenTimer;
+        readonly TimeSpan operationTimeout;
         readonly string[] accessRightsStringArray;
 
-        public IotHubTokenRefresher(IotHubConnection connection, AmqpSession amqpSession, IotHubConnectionString connectionString, string audience)
+        public IotHubTokenRefresher(AmqpSession amqpSession, IotHubConnectionString connectionString, string audience, TimeSpan operationTimeout, AccessRights accessRights)
         {
             if (amqpSession == null)
             {
@@ -33,7 +34,8 @@ namespace Microsoft.Azure.Devices.Client
             this.connectionString = connectionString;
             this.audience = audience;
             this.refreshTokenTimer = new IOThreadTimer(s => ((IotHubTokenRefresher)s).OnLinkRefreshTokenAsync(), this, false);
-            this.accessRightsStringArray = AccessRightsHelper.AccessRightsToStringArray(connection.AccessRights);
+            this.operationTimeout = operationTimeout;
+            this.accessRightsStringArray = AccessRightsHelper.AccessRightsToStringArray(accessRights);
         }
 
         public void Cancel()
@@ -48,12 +50,11 @@ namespace Microsoft.Azure.Devices.Client
                 var cbsLink = this.amqpSession.Connection.Extensions.Find<AmqpCbsLink>();
                 if (cbsLink != null)
                 {
-                    string resource = this.connectionString.AmqpEndpoint.AbsoluteUri;
                     var expiresAtUtc = await cbsLink.SendTokenAsync(
                         this.connectionString,
                         this.connectionString.AmqpEndpoint,
                         this.audience,
-                        resource,
+                        this.connectionString.AmqpEndpoint.AbsoluteUri,
                         this.accessRightsStringArray,
                         timeout);
                     this.ScheduleLinkTokenRefresh(expiresAtUtc);
@@ -83,7 +84,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             try
             {
-                await this.SendCbsTokenAsync(IotHubConnection.DefaultOperationTimeout);
+                await this.SendCbsTokenAsync(this.operationTimeout);
             }
             catch (Exception exception)
             {

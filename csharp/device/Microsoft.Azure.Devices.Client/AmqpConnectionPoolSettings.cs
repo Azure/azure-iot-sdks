@@ -11,17 +11,19 @@ namespace Microsoft.Azure.Devices.Client
 
     public sealed class AmqpConnectionPoolSettings
     {
+        static readonly TimeSpan DefaultCacheIdleTimeout = TimeSpan.FromMinutes(2);
         internal const uint MaxNumConnectionPools = ushort.MaxValue;
+
         const uint DefaultNumConnectionPools = 1;
         internal const uint MaxLinksPerConnection = 256;
 
-        uint maxLinksPerConnection;
         uint numConnectionPools;
+        TimeSpan cacheIdleTimeout;
 
         public AmqpConnectionPoolSettings()
         {
-            this.maxLinksPerConnection = MaxLinksPerConnection;
             this.numConnectionPools = DefaultNumConnectionPools;
+            this.cacheIdleTimeout = DefaultCacheIdleTimeout;
         }
 
         public uint NumConnectionPools
@@ -29,6 +31,13 @@ namespace Microsoft.Azure.Devices.Client
             get { return this.numConnectionPools; }
 
             set { this.SetNumberOfConnectionPools(value); }
+        }
+
+        public TimeSpan CacheIdleTimeout
+        {
+            get { return this.cacheIdleTimeout; }
+
+            set { this.SetCacheIdleTimeout(value); }
         }
 
         void SetNumberOfConnectionPools(uint numPools)
@@ -40,6 +49,18 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
                 throw new ArgumentOutOfRangeException("numPools");
+            }
+        }
+
+        void SetCacheIdleTimeout(TimeSpan cacheIdleTimeout)
+        {
+            if (cacheIdleTimeout > TimeSpan.Zero)
+            {
+                this.cacheIdleTimeout = cacheIdleTimeout;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException("cacheIdleTimeout");
             }
         }
     }

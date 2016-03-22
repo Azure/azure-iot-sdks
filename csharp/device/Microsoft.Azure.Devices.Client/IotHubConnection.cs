@@ -20,11 +20,8 @@ namespace Microsoft.Azure.Devices.Client
 
     abstract class IotHubConnection
     {
-        internal static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromMinutes(1);
-        internal static readonly TimeSpan DefaultOpenTimeout = TimeSpan.FromMinutes(1);
 #if !WINDOWS_UWP
-
-        public AccessRights AccessRights { get; }
+        protected AccessRights AccessRights { get; }
 
         protected FaultTolerantAmqpObject<AmqpSession> FaultTolerantSession { get; set; }
 
@@ -57,6 +54,9 @@ namespace Microsoft.Azure.Devices.Client
 
         public abstract Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount);
 
+        // This number can be volatile for MuxConnections
+        public abstract int GetNumberOfLinks();
+
         public void CloseLink(AmqpLink link)
         {
             link.SafeClose();
@@ -67,6 +67,10 @@ namespace Microsoft.Azure.Devices.Client
             if (this.connectionReferenceCounter != null)
             {
                 this.connectionReferenceCounter.RemoveRef();
+            }
+            else
+            {
+                this.CloseAsync();
             }
         }
 

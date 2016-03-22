@@ -44,6 +44,11 @@ namespace Microsoft.Azure.Devices.Client
             this.FaultTolerantSession.Close();
         }
 
+        public override int GetNumberOfLinks()
+        {
+            return this.iotHubTokenRefreshers.Count;
+        }
+
         /**
          The input connection string can only be a device-scope connection string
         **/
@@ -145,7 +150,13 @@ namespace Microsoft.Azure.Devices.Client
             try
             {
                 // this is a device-scope connection string. We need to send a CBS token for this specific link before opening it.
-                var iotHubLinkTokenRefresher = new IotHubTokenRefresher(this, this.FaultTolerantSession.Value, connectionString, audience);
+                var iotHubLinkTokenRefresher = new IotHubTokenRefresher(
+                    this.FaultTolerantSession.Value, 
+                    connectionString, 
+                    audience, 
+                    this.AmqpTransportSettings.OperationTimeout,
+                    this.AccessRights
+                    );
                 link.SafeAddClosed((s, e) =>
                 {
                     if (this.iotHubTokenRefreshers.TryRemove(link, out iotHubLinkTokenRefresher))

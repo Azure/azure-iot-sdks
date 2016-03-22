@@ -10,21 +10,28 @@ namespace Microsoft.Azure.Devices.Client
 #if !WINDOWS_UWP
     sealed class IotHubConnectionCache
     {
-        static readonly TimeSpan DefaultIdleTimeout = TimeSpan.FromMinutes(2);
         readonly ConcurrentDictionary<IotHubConnectionString, ConnectionReferenceCounter> connections;
         readonly AccessRights accessRights;
 
         public IotHubConnectionCache(AccessRights accessRights)
         {
-            this.IdleTimeout = DefaultIdleTimeout;
             this.connections = new ConcurrentDictionary<IotHubConnectionString, ConnectionReferenceCounter>(new IotHubConnectionCacheStringComparer());
             this.accessRights = accessRights;
         }
 
-        public TimeSpan IdleTimeout { get; set; }
+        public int GetNumConnections()
+        {
+            return this.connections.Count;
+        }
 
         public IotHubConnection GetConnection(IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
         {
+            if (connectionString.SharedAccessKeyName == null & amqpTransportSettings.AmqpConnectionPoolSettings.NumConnectionPools == 0)
+            {
+                // Connection pooling is turned off for device-scope connection strings
+                return new IotHubMuxConnection(null, connectionString, this.accessRights, amqpTransportSettings);
+            }
+
             // Use connection caching for both hub-scope and device-scope connection strings
             ConnectionReferenceCounter connectionReferenceCounter;
             do
@@ -98,6 +105,7 @@ namespace Microsoft.Azure.Devices.Client
             readonly IotHubConnectionCache cache;
             readonly IotHubConnectionString connectionString;
             readonly IOThreadTimer idleTimer;
+            readonly TimeSpan idleTimeout;
             int referenceCount;
 
             public ConnectionReferenceCounter(IotHubConnectionCache cache, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
@@ -115,10 +123,11 @@ namespace Microsoft.Azure.Devices.Client
                 
                 this.ThisLock = new object();
                 this.idleTimer = new IOThreadTimer(s => ((ConnectionReferenceCounter)s).IdleTimerCallback(), this, false);
-                this.idleTimer.Set(this.cache.IdleTimeout);
+                this.idleTimeout = amqpTransportSettings.AmqpConnectionPoolSettings.CacheIdleTimeout;
+                this.idleTimer.Set(this.idleTimeout);
             }
 
-            public IotHubConnection Connection { get; private set; }
+            internal IotHubConnection Connection { get; }
 
             object ThisLock { get; set; }
 
@@ -145,7 +154,7 @@ namespace Microsoft.Azure.Devices.Client
                 {
                     if (--this.referenceCount == 0)
                     {
-                        this.idleTimer.Set(this.cache.IdleTimeout);
+                        this.idleTimer.Set(this.idleTimeout);
                     }
 
                     Fx.Assert(this.referenceCount >= 0, "Cached IotHubConnection's ref count should never be below 0!");
