@@ -390,7 +390,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
                   (!g_recvMacroData->wasFound) //condition box
               )
         {
-            //just go on;
+            ThreadAPI_Sleep(100);
         }
 
         // assert
@@ -456,7 +456,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
                       (!expectedData->dataWasSent)
                   ) //condition box
             {
-                //just go on;
+                ThreadAPI_Sleep(100);
             }
         }
         ASSERT_IS_TRUE(expectedData->dataWasSent); 
@@ -483,7 +483,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
                     (!expectedData->wasFound)
                 ) //condition box
         {
-            //just go on;
+            ThreadAPI_Sleep(100);
         }
 
         ASSERT_IS_TRUE(expectedData->wasFound); // was found is written by the callback...
@@ -553,6 +553,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
             {
                 //just go on;
                 IoTHubClient_LL_DoWork(iotHubClientHandle);
+                ThreadAPI_Sleep(100);
             }
         }
 
@@ -622,6 +623,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
             {
                 //just go on;
                 IoTHubClient_LL_DoWork(iotHubClientHandle);
+                ThreadAPI_Sleep(100);
             }
         }
         ASSERT_IS_TRUE(expectedData->dataWasSent); 
