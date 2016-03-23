@@ -146,8 +146,7 @@ public final class AmqpsTransport implements IotHubTransport
         }
 
         // Codes_SRS_AMQPSTRANSPORT_11_003: [The function shall add a packet containing the message, callback, and callback context to the transport queue.]
-        IotHubOutboundPacket packet =
-                new IotHubOutboundPacket(message, callback, callbackContext);
+        IotHubOutboundPacket packet = new IotHubOutboundPacket(message, callback, callbackContext);
         this.waitingList.add(packet);
     }
 
@@ -306,8 +305,7 @@ public final class AmqpsTransport implements IotHubTransport
                     "AMQPS transport is already closed.");
         }
 
-        MessageCallback callback =
-                this.config.getMessageCallback();
+        MessageCallback callback = this.config.getMessageCallback();
         Object context = this.config.getMessageContext();
         if (callback == null)
         {
@@ -342,8 +340,7 @@ public final class AmqpsTransport implements IotHubTransport
             // Codes_SRS_AMQPSTRANSPORT_11_011: [If a message is found and a message callback is registered, the function shall invoke the callback on the message.]
             if (message != null)
             {
-                IotHubMessageResult result =
-                        callback.execute(message, context);
+                IotHubMessageResult result = callback.execute(message, context);
 
                 // Codes_SRS_AMQPSTRANSPORT_11_012: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
                 this.connection.sendMessageResult(result);
