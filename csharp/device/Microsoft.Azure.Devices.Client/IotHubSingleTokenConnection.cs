@@ -19,11 +19,6 @@ namespace Microsoft.Azure.Devices.Client
             this.FaultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
         }
 
-        public override Task OpenAsync(TimeSpan timeout)
-        {
-            return this.FaultTolerantSession.GetOrCreateAsync(timeout);
-        }
-
         public override Task CloseAsync()
         {
             return this.FaultTolerantSession.CloseAsync();
@@ -139,6 +134,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             // Closing the connection also closes any sessions.
             amqpSession.Connection.SafeClose();
+            this.iotHubTokenRefresher.Cancel();
         }
 
         static async Task OpenLinkAsync(AmqpObject link, TimeSpan timeout)

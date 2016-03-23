@@ -31,11 +31,6 @@ namespace Microsoft.Azure.Devices.Client
             this.ThisLock = new object();
         }
 
-        public override Task OpenAsync(TimeSpan timeout)
-        {
-            return this.FaultTolerantSession.GetOrCreateAsync(timeout);
-        }
-
         public override Task CloseAsync()
         {
             this.CancelTokenRefreshers();

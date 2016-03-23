@@ -44,8 +44,6 @@ namespace Microsoft.Azure.Devices.Client
         // In case of device-scope connection strings, this connectionString would represent only one of many devices sharing the connection
         public IotHubConnectionString ConnectionString { get; }
 
-        public abstract Task OpenAsync(TimeSpan timeout);
-
         public abstract Task CloseAsync();
 
         public abstract void SafeClose(Exception exception);
