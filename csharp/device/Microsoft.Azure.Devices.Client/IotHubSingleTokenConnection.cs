@@ -10,9 +10,12 @@ namespace Microsoft.Azure.Devices.Client
     {
         IotHubTokenRefresher iotHubTokenRefresher;
 
+        IotHubConnectionCache.ConnectionReferenceCounter ConnectionReferenceCounter { get; }
+
         public IotHubSingleTokenConnection(IotHubConnectionCache.ConnectionReferenceCounter connectionReferenceCounter, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
-            :base(connectionReferenceCounter, connectionString, accessRights, amqpTransportSettings)
+            :base(connectionString, accessRights, amqpTransportSettings)
         {
+            this.ConnectionReferenceCounter = connectionReferenceCounter;
             this.FaultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
         }
 
@@ -31,9 +34,16 @@ namespace Microsoft.Azure.Devices.Client
             this.FaultTolerantSession.Close();
         }
 
-        public override int GetNumberOfLinks()
+        public override void Release()
         {
-            return 1;
+            if (this.ConnectionReferenceCounter != null)
+            {
+                this.ConnectionReferenceCounter.RemoveRef();
+            }
+            else
+            {
+                this.CloseAsync();
+            }
         }
 
         public override async Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString doNotUse, TimeSpan timeout)

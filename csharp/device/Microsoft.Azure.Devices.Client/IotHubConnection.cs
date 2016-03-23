@@ -27,15 +27,15 @@ namespace Microsoft.Azure.Devices.Client
 
         protected AmqpTransportSettings AmqpTransportSettings { get; }
 
-        readonly IotHubConnectionCache.ConnectionReferenceCounter connectionReferenceCounter;
+
 
         static readonly AmqpVersion AmqpVersion_1_0_0 = new AmqpVersion(1, 0, 0);
         const string DisableServerCertificateValidationKeyName = "Microsoft.Azure.Devices.DisableServerCertificateValidation";
         static readonly Lazy<bool> DisableServerCertificateValidation = new Lazy<bool>(InitializeDisableServerCertificateValidation);
 
-        protected IotHubConnection(IotHubConnectionCache.ConnectionReferenceCounter connectionReferenceCounter, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
+        protected IotHubConnection(IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
         {
-            this.connectionReferenceCounter = connectionReferenceCounter;
+
             this.ConnectionString = connectionString;
             this.AccessRights = accessRights;
             this.AmqpTransportSettings = amqpTransportSettings;
@@ -54,25 +54,12 @@ namespace Microsoft.Azure.Devices.Client
 
         public abstract Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount);
 
-        // This number can be volatile for MuxConnections
-        public abstract int GetNumberOfLinks();
-
         public void CloseLink(AmqpLink link)
         {
             link.SafeClose();
         }
 
-        public void Release()
-        {
-            if (this.connectionReferenceCounter != null)
-            {
-                this.connectionReferenceCounter.RemoveRef();
-            }
-            else
-            {
-                this.CloseAsync();
-            }
-        }
+        public abstract void Release();
 
         protected static bool InitializeDisableServerCertificateValidation()
         {
@@ -240,7 +227,6 @@ namespace Microsoft.Azure.Devices.Client
             var deliveryTag = new ArraySegment<byte>(lockTokenGuid.ToByteArray());
             return deliveryTag;
         }
-
 #endif
     }
 }

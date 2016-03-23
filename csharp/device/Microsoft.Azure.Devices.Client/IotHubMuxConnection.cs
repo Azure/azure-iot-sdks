@@ -16,15 +16,19 @@ namespace Microsoft.Azure.Devices.Client
     sealed class IotHubMuxConnection : IotHubConnection
     {
 #if !WINDOWS_UWP
+        readonly IotHubConnectionCache.MuxConnectionPool muxConnectionPool;
         readonly ConcurrentDictionary<AmqpObject, IotHubTokenRefresher> iotHubTokenRefreshers;
-        readonly uint maxNumberOfLinks;
+        int deviceCount;
 
-        public IotHubMuxConnection(IotHubConnectionCache.ConnectionReferenceCounter connectionReferenceCounter, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
-            : base(connectionReferenceCounter, connectionString, accessRights, amqpTransportSettings)
+        object ThisLock { get; set; }
+
+        public IotHubMuxConnection(IotHubConnectionCache.MuxConnectionPool muxConnectionPool, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
+            : base(connectionString, accessRights, amqpTransportSettings)
         {
+            this.muxConnectionPool = muxConnectionPool;
             this.FaultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
             this.iotHubTokenRefreshers = new ConcurrentDictionary<AmqpObject, IotHubTokenRefresher>();
-            this.maxNumberOfLinks = AmqpConnectionPoolSettings.MaxLinksPerConnection;
+            this.ThisLock = new object();
         }
 
         public override Task OpenAsync(TimeSpan timeout)
@@ -44,9 +48,32 @@ namespace Microsoft.Azure.Devices.Client
             this.FaultTolerantSession.Close();
         }
 
-        public override int GetNumberOfLinks()
+        public override void Release()
         {
-            return this.iotHubTokenRefreshers.Count;
+            if (this.muxConnectionPool != null)
+            {
+                this.muxConnectionPool.DecrementDevices(this);
+            }
+            else
+            {
+                this.CloseAsync();
+            }
+        }
+
+        public int IncrementNumberOfDevices()
+        {
+            lock (this.ThisLock)
+            {
+                return ++this.deviceCount;
+            }
+        }
+
+        public int DecrementNumberOfDevices()
+        {
+            lock (this.ThisLock)
+            {
+                return --this.deviceCount;
+            }
         }
 
         /**
@@ -141,12 +168,7 @@ namespace Microsoft.Azure.Devices.Client
         async Task OpenLinkAsync(AmqpObject link, IotHubConnectionString connectionString, string audience, TimeSpan timeout)
         {
             var timeoutHelper = new TimeoutHelper(timeout);
-
-			if (this.iotHubTokenRefreshers.Count == this.maxNumberOfLinks)
-			{
-			   throw new ArgumentOutOfRangeException("IotHubConnection can support a maximum of {0}".FormatInvariant(this.maxNumberOfLinks));
-			}
-
+       
             try
             {
                 // this is a device-scope connection string. We need to send a CBS token for this specific link before opening it.
@@ -157,6 +179,7 @@ namespace Microsoft.Azure.Devices.Client
                     this.AmqpTransportSettings.OperationTimeout,
                     this.AccessRights
                     );
+
                 link.SafeAddClosed((s, e) =>
                 {
                     if (this.iotHubTokenRefreshers.TryRemove(link, out iotHubLinkTokenRefresher))

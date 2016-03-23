@@ -12,10 +12,10 @@ namespace Microsoft.Azure.Devices.Client
     public sealed class AmqpConnectionPoolSettings
     {
         static readonly TimeSpan DefaultCacheIdleTimeout = TimeSpan.FromMinutes(2);
-        internal const uint MaxNumConnectionPools = ushort.MaxValue;
-
         const uint DefaultNumConnectionPools = 1;
-        internal const uint MaxLinksPerConnection = 256;
+        internal const uint MaxNumConnectionPools = ushort.MaxValue;
+        internal const uint DevicesPerConnectionLevel1 = 500;
+        internal const uint DevicesPerConnectionLevel2 = 950;
 
         uint numConnectionPools;
         TimeSpan cacheIdleTimeout;
@@ -42,6 +42,7 @@ namespace Microsoft.Azure.Devices.Client
 
         void SetNumberOfConnectionPools(uint numPools)
         {
+            // zero is allowed. This disables connection pooling for device-scoped connection strings
             if (numPools <= MaxNumConnectionPools)
             {
                 this.numConnectionPools = numPools;
