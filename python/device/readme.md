@@ -30,4 +30,4 @@ Sample Python applications excercising basic features using AMQP, MQTT and HTTP.
 
 ### /tests
 
-Python C wrapper unit tests.
+Python C extension module unit tests. The unit tests exercise a mocked Python extension module to test the Python interface. 
