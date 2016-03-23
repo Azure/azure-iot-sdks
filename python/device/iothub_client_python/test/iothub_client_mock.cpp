@@ -2,7 +2,9 @@
 // Copyright(c) Microsoft.All rights reserved.
 // Licensed under the MIT license.See LICENSE file in the project root for full license information.
 
-#define  IMPORT_NAME iothub_client_mock
+#define _CRT_SECURE_NO_WARNINGS
+
+#define IMPORT_NAME iothub_client_mock
 
 #include "iothub_client_python.cpp"
 

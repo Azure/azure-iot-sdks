@@ -54,6 +54,11 @@ public void onConnectionBound(Event event);
 
 **SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [** The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport **]**
 
+**SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_017: [** The event handler shall not initialize WebSocket if the protocol is AMQP **]**
+
+**SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_018: [** The event handler shall initialize WebSocket if the protocol is AMQP_WS **]**
+
+
 ### onConnectionInit
 
 ```java

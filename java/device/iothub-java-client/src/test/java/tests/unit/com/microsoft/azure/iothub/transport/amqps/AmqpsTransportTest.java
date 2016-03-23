@@ -48,12 +48,12 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig);
+                new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
                 result = mockConnection;
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
 
         final AmqpsIotHubConnection expectedConnection = mockConnection;
@@ -68,7 +68,7 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_11_020: [If an AMQPS session is already open, the function shall do nothing.]
     @Test
     public void openDoesNothingIfAlreadyOpened() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.open();
 
@@ -86,7 +86,7 @@ public class AmqpsTransportTest
     @Test
     public void closeClosesAmqpsConnection() throws IOException
     {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.close();
 
@@ -103,7 +103,7 @@ public class AmqpsTransportTest
     @Test
     public void closeDoesNothingIfConnectionAlreadyClosed() throws IOException
     {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.close();
         transport.close();
@@ -132,7 +132,7 @@ public class AmqpsTransportTest
         }.getMockInstance();
         final Map<String, Object> context = new HashMap<>();
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
 
@@ -154,7 +154,7 @@ public class AmqpsTransportTest
     {
         final Map<String, Object> context = new HashMap<>();
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.addMessage(mockMsg, mockCallback, context);
     }
 
@@ -167,7 +167,7 @@ public class AmqpsTransportTest
     {
         final Map<String, Object> context = new HashMap<>();
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.close();
         transport.addMessage(mockMsg, mockCallback, context);
@@ -187,7 +187,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig);
+                new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
@@ -196,7 +196,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -220,7 +220,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig);
+                new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
@@ -231,7 +231,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
@@ -250,7 +250,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig);
+                new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
@@ -265,7 +265,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         try
         {
             transport.open();
@@ -298,7 +298,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig);
+                new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
@@ -310,7 +310,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         try
         {
             transport.open();
@@ -329,7 +329,7 @@ public class AmqpsTransportTest
         new VerificationsInOrder()
         {
             {
-                new AmqpsIotHubConnection(expectedConfig);
+                new AmqpsIotHubConnection(expectedConfig, IotHubClientProtocol.AMQPS);
                 expectedConnection.open();
             }
         };
@@ -339,7 +339,7 @@ public class AmqpsTransportTest
     @Test(expected = IllegalStateException.class)
     public void sendMessagesFailsIfTransportNeverOpened() throws IOException
     {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.sendMessages();
     }
 
@@ -347,7 +347,7 @@ public class AmqpsTransportTest
     @Test(expected = IllegalStateException.class)
     public void sendMessagesFailsIfTransportAlreadyClosed() throws IOException
     {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.close();
         transport.sendMessages();
@@ -359,7 +359,7 @@ public class AmqpsTransportTest
     @Test(expected = IllegalStateException.class)
     public void invokeCallbacksFailsIfTransportNeverOpened() throws IOException
     {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.invokeCallbacks();
     }
 
@@ -368,7 +368,7 @@ public class AmqpsTransportTest
     public void invokeCallbacksFailsIfTransportAlreadyClosed()
             throws IOException
     {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.close();
         transport.invokeCallbacks();
@@ -383,7 +383,7 @@ public class AmqpsTransportTest
     {
         final Map<String, Object> context = new HashMap<>();
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         boolean testIsEmpty = transport.isEmpty();
@@ -404,7 +404,7 @@ public class AmqpsTransportTest
     {
         final Map<String, Object> context = new HashMap<>();
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -429,7 +429,7 @@ public class AmqpsTransportTest
     {
         final Map<String, Object> context = new HashMap<>();
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -467,7 +467,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.handleMessage();
 
@@ -506,7 +506,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.handleMessage();
 
@@ -551,7 +551,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.handleMessage();
 
@@ -592,7 +592,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.handleMessage();
 
@@ -600,7 +600,7 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                new AmqpsIotHubConnection(expectedConfig);
+                new AmqpsIotHubConnection(expectedConfig, IotHubClientProtocol.AMQPS);
             }
         };
     }
@@ -631,7 +631,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.handleMessage();
     }
@@ -653,7 +653,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         try
         {
             transport.open();
@@ -699,7 +699,7 @@ public class AmqpsTransportTest
             }
         };
 
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         try
         {
             transport.open();
@@ -717,7 +717,7 @@ public class AmqpsTransportTest
         {
             {
                 expectedConnection.consumeMessage();
-                new AmqpsIotHubConnection(expectedConfig);
+                new AmqpsIotHubConnection(expectedConfig, IotHubClientProtocol.AMQPS);
                 expectedConnection.open();
             }
         };
@@ -728,7 +728,7 @@ public class AmqpsTransportTest
     public void handleMessageFailsIfTransportNeverOpened()
             throws IOException
     {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.handleMessage();
     }
 
@@ -737,7 +737,7 @@ public class AmqpsTransportTest
     public void handleMessageFailsIfTransportAlreadyClosed()
             throws IOException
     {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, IotHubClientProtocol.AMQPS);
         transport.open();
         transport.close();
         transport.handleMessage();

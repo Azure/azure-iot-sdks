@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.iot.service.transport.amqps;
 
+import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -18,6 +19,7 @@ import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
 import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.impl.WebSocketImpl;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.messenger.impl.Address;
 import org.apache.qpid.proton.reactor.*;
@@ -41,6 +43,7 @@ public class AmqpReceiveHandlerTest
     @Mocked Session session;
     @Mocked Transport transport;
     @Mocked Address address;
+    @Mocked WebSocketImpl webSocket;
     @Mocked Sasl sasl;
     @Mocked SslDomain sslDomain;
     @Mocked Event event;
@@ -63,6 +66,7 @@ public class AmqpReceiveHandlerTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Assert
         new Expectations()
         {
@@ -72,7 +76,7 @@ public class AmqpReceiveHandlerTest
             }
         };
         // Act
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, amqpFeedbackReceivedEvent);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
         String _hostName = Deencapsulation.getField(amqpReceiveHandler, "hostName");
         String _userName = Deencapsulation.getField(amqpReceiveHandler, "userName");
         String _sasToken = Deencapsulation.getField(amqpReceiveHandler, "sasToken");
@@ -97,8 +101,9 @@ public class AmqpReceiveHandlerTest
         String userName = "bbb";
         String sasToken = "ccc";
         String hostAddr = hostName + ":5671";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         createProtonObjects();
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, amqpFeedbackReceivedEvent);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
         // Assert
         new Expectations()
         {
@@ -123,15 +128,16 @@ public class AmqpReceiveHandlerTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_017: [The event handler shall not initialize WebSocket if the protocol is AMQP]
     @Test
-    public void onConnectionBound_call_flow_and_init_ok()
+    public void onConnectionBound_call_flow_and_init_ok_amqp()
     {
         // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-        String hostAddr = hostName + ":5671";
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, null);
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
         // Assert
         new Expectations()
         {
@@ -149,6 +155,36 @@ public class AmqpReceiveHandlerTest
         amqpReceiveHandler.onConnectionBound(event);
     }
 
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_018: [The event handler shall initialize WebSocket if the protocol is AMQP_WS]
+    @Test
+    public void onConnectionBound_call_flow_and_init_ok_amqps()
+    {
+        // Arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        // Assert
+        new Expectations()
+        {
+            {
+                connection = event.getConnection();
+                transport = connection.getTransport();
+                webSocket = (WebSocketImpl)transport.webSocket();
+                webSocket.configure(anyString, anyString, 0, anyString, null, null);
+                sasl.plain(anyString, anyString);
+                sslDomain = Proton.sslDomain();
+                sslDomain.init(SslDomain.Mode.CLIENT);
+                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
+                transport.ssl(sslDomain);
+            }
+        };
+        // Act
+        amqpReceiveHandler.onConnectionBound(event);
+    }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_011: [The event handler shall set the host name on the connection]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_012: [The event handler shall create a Session (Proton) object from the connection]
@@ -164,7 +200,8 @@ public class AmqpReceiveHandlerTest
         String sasToken = "ccc";
         String hostAddr = hostName + ":5671";
         String receiver_tag = "receiver";
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, null);
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
         // Assert
         new Expectations()
         {
@@ -194,7 +231,8 @@ public class AmqpReceiveHandlerTest
         String sasToken = "ccc";
         String hostAddr = hostName + ":5671";
         String endpoint = "/messages/servicebound/feedback";
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, null);
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
         // Assert
         new Expectations()
         {

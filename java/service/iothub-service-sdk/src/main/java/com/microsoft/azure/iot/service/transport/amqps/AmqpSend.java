@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.iot.service.transport.amqps;
 
+import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
 import com.microsoft.azure.iot.service.sdk.Message;
 import com.microsoft.azure.iot.service.sdk.Tools;
 import org.apache.qpid.proton.Proton;
@@ -27,6 +28,7 @@ public class AmqpSend extends BaseHandler
     protected final String sasToken;
     protected Reactor reactor = null;
     protected AmqpSendHandler amqpSendHandler;
+    protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
 
     /**
      * Constructor to set up connection parameters
@@ -34,7 +36,7 @@ public class AmqpSend extends BaseHandler
      * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      */
-    public AmqpSend(String hostName, String userName, String sasToken)
+    public AmqpSend(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
         if (Tools.isNullOrEmpty(hostName))
@@ -54,6 +56,7 @@ public class AmqpSend extends BaseHandler
         this.hostName = hostName;
         this.userName = userName;
         this.sasToken = sasToken;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
     }
 
     /**
@@ -79,7 +82,7 @@ public class AmqpSend extends BaseHandler
     public void open()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_004: [The function shall create an AmqpsSendHandler object to handle reactor events]
-        amqpSendHandler = new AmqpSendHandler(this.hostName, this.userName, this.sasToken);
+        amqpSendHandler = new AmqpSendHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol);
     }
 
     /**

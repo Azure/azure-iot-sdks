@@ -25,6 +25,7 @@ public class ServiceClient
     private final String userName;
     private final String sasToken;
     protected IotHubConnectionString iotHubConnectionString;
+    private IotHubServiceClientProtocol iotHubServiceClientProtocol;
 
     /**
      * Create ServiceClient from the specified connection string
@@ -33,18 +34,19 @@ public class ServiceClient
      * @return The created ServiceClient object
      * @throws Exception This exception is thrown if the object creation failed
      */
-    public static ServiceClient createFromConnectionString(String connectionString) throws Exception
+    public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol) throws Exception
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_001: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(connectionString))
         {
             throw new IllegalArgumentException(connectionString);
         }
+
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_002: [The constructor shall create IotHubConnectionString object using the IotHubConnectionStringBuilder]
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
 
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_003: [The constructor shall create a new instance of ServiceClient using the created IotHubConnectionString object and return with it]
-        ServiceClient iotServiceClient = new ServiceClient(iotHubConnectionString);
+        ServiceClient iotServiceClient = new ServiceClient(iotHubConnectionString, iotHubServiceClientProtocol);
         return iotServiceClient;
     }
 
@@ -53,7 +55,7 @@ public class ServiceClient
      *
      * @param iotHubConnectionString The ConnectionString object for the IotHub
      */
-    protected ServiceClient(IotHubConnectionString iotHubConnectionString)
+    protected ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_004: [The constructor shall throw IllegalArgumentException if the input object is null]
         if (iotHubConnectionString == null)
@@ -69,9 +71,10 @@ public class ServiceClient
         this.hostName = iotHubConnectionString.getHostName();
         this.userName = iotHubConnectionString.getUserString();
         this.sasToken = iotHubServiceSasToken.toString();
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
 
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_007: [The constructor shall create a new instance of AmqpSend object]
-        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken);
+        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol);
     }
 
     /**
@@ -199,7 +202,7 @@ public class ServiceClient
     public FeedbackReceiver getFeedbackReceiver(String deviceId)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [The function shall create a FeedbackReceiver object and returns with it]
-        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, deviceId);
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
         return feedbackReceiver;
     }
 }

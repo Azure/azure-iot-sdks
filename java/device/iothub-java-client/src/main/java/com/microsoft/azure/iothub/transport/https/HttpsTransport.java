@@ -251,8 +251,7 @@ public final class HttpsTransport implements IotHubTransport
         Message message = this.connection.receiveMessage();
         if (message != null)
         {
-            IotHubMessageResult result =
-                    callback.execute(message, context);
+            IotHubMessageResult result = callback.execute(message, context);
 
             // Codes_SRS_HTTPSTRANSPORT_11_011: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
             // Codes_SRS_HTTPSTRANSPORT_11_020: [If the response from sending the IoT Hub message result does not have status code OK_EMPTY, the function shall throw an IOException.] 

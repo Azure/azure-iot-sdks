@@ -33,7 +33,7 @@ public class FeedbackReceiver extends Receiver
      * @param sasToken The iot hub SAS token for the given device
      * @param deviceId The device id
      */
-    public FeedbackReceiver(String hostName, String userName, String sasToken, String deviceId)
+    public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, String deviceId)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
         if (Tools.isNullOrEmpty(hostName))
@@ -55,7 +55,7 @@ public class FeedbackReceiver extends Receiver
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_002: [The constructor shall store deviceId]
         this.deviceId = deviceId;
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
-        this.amqpReceive = new AmqpReceive(hostName, userName, sasToken);
+        this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
 
     /**

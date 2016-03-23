@@ -52,9 +52,9 @@ public class HttpConnection
         String protocol = url.getProtocol();
         if (!protocol.equalsIgnoreCase("HTTPS"))
         {
-            String errMsg = String.format("Expected URL that uses protocol "
+            String errMsg = String.format("Expected URL that uses iotHubServiceClientProtocol "
                             + "HTTPS but received one that uses "
-                            + "protocol '%s'.\n",
+                            + "iotHubServiceClientProtocol '%s'.\n",
                     protocol);
             throw new IllegalArgumentException(errMsg);
         }

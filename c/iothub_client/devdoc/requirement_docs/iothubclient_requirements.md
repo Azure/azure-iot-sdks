@@ -1,28 +1,28 @@
-# IoTHubClient Requirements
-
+#IoTHubClient Requirements
+ 
 
  
-## Overview
+##Overview
 
 IoTHubClient is a module that extends the IoTHubCLient_LL module with 2 features:
 -	scheduling the work for the IoTHubCLient from a thread, so that the user does not need to create its own thread.
 -	Thread-safe APIs
-Undelaying layer in the following requirements refers to IoTHubClient_LL. 
-
-## Exposed API
+Undelaying layer in the following requirements refers to IoTHubClient_LL.
+ 
+##Exposed API
 
 ```c
-    typedef void* IOTHUB_CLIENT_HANDLE;
-    extern const char* IoTHubClient_GetVersionString(void);
-    extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-    extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config);
-    extern void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
+typedef void* IOTHUB_CLIENT_HANDLE;
+extern const char* IoTHubClient_GetVersionString(void);
+extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config);
+extern void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
     extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void* userContextCallback);
 
     extern IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime);
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
 ```
 
 ## IoTHubClient_GetVersionString
@@ -33,16 +33,21 @@ extern const char* IoTHubClient_GetVersionString(void);
 **SRS_IOTHUBCLIENT_05_001: [** IoTHubClient_GetVersionString shall return a pointer to a constant string which indicates the version of IoTHubClient API. **]**
 
 
+
 ## IoTHubClient_CreateFromConnectionString
 ```c
 extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-```
+``` 
  
 **SRS_IOTHUBCLIENT_12_003: [** IoTHubClient_CreateFromConnectionString shall verify the input parameters and if any of them NULL then return NULL  **]**
 
 **SRS_IOTHUBCLIENT_12_004: [** IoTHubClient_CreateFromConnectionString shall allocate a new IoTHubClient instance.  **]**
 
 **SRS_IOTHUBCLIENT_12_011: [** If the allocation failed, IoTHubClient_CreateFromConnectionString returns NULL  **]**
+
+**SRS_IOTHUBCLIENT_02_039: [** IoTHubClient_CreateFromConnectionString shall create a condition variable object to be used later for stopping the worker thread. **]**
+
+**SRS_IOTHUBCLIENT_02_040: [** If condition variable creation fails, then IoTHubClient_CreateFromConnectionString shall fail and return NULL. **]**
 
 **SRS_IOTHUBCLIENT_12_005: [** IoTHubClient_CreateFromConnectionString shall create a lock object to be used later for serializing IoTHubClient calls **]**
 
@@ -55,7 +60,7 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* 
 
  
 ## IoTHubClient_Create
-```c
+```c 
 extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config);
 ```
 
@@ -66,6 +71,10 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* conf
 **SRS_IOTHUBCLIENT_01_003: [** If IoTHubClient_LL_Create fails, then IoTHubClient_Create shall return NULL. **]**
 
 **SRS_IOTHUBCLIENT_01_004: [** If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_Create shall return NULL. **]**
+
+**SRS_IOTHUBCLIENT_02_041: [** IoTHubClient_Create shall create a condition variable object to be used later for stopping the worker thread. **]**
+
+**SRS_IOTHUBCLIENT_02_042: [** If condition variable creation fails, then IoTHubClient_Create shall fail and return NULL. **]**
 
 **SRS_IOTHUBCLIENT_01_029: [** IoTHubClient_Create shall create a lock object to be used later for serializing IoTHubClient calls. **]**
 
@@ -109,17 +118,21 @@ extern void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 
 **SRS_IOTHUBCLIENT_01_006: [** That includes destroying the IoTHubClient_LL instance by calling IoTHubClient_LL_Destroy. **]**
 
-**SRS_IOTHUBCLIENT_01_007: [** If the IoTHubClient does not share a transport, the thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetMessageCallback shall be joined. **]**
+**SRS_IOTHUBCLIENT_02_043: [** IoTHubClient_Destroy shall lock the serializing lock and signal the worker thread (if any) to end **]**
 
-**SRS_IOTHUBCLIENT_01_032: [** If the IoTHubClient does not share a transport, the lock allocated in IoTHubClient_Create shall be also freed. **]**
+**SRS_IOTHUBCLIENT_02_045: [** IoTHubClient_Destroy shall unlock the serializing lock. **]**
 
-**SRS_IOTHUBCLIENT_17_010: [** If the IoTHubClient shares a transport, the thread shall be closed by calling IoTHubTransport_HL_EndWorkerThread. **]**
+**SRS_IOTHUBCLIENT_01_007: [** The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. **]**
+
+**SRS_IOTHUBCLIENT_02_046: [** the condition variable shall be detroyed. **]**
+
+**SRS_IOTHUBCLIENT_01_032: [** The lock allocated in IoTHubClient_Create shall be also freed. **]**
 
 **SRS_IOTHUBCLIENT_01_008: [** IoTHubClient_Destroy shall do nothing if parameter iotHubClientHandle is NULL. **]**
 
 
 ## IoTHubClient_SendEventAsync 
-```c
+```c 
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
 ```
 
@@ -167,6 +180,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE
 **SRS_IOTHUBCLIENT_01_028: [** If acquiring the lock fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR. **]**
 
 
+
 ## IoTHubClient_GetLastMessageReceiveTime 
 ```c
 extern IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime);
@@ -181,6 +195,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT
 **SRS_IOTHUBCLIENT_01_035: [** IoTHubClient_GetLastMessageReceiveTime shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
 
 **SRS_IOTHUBCLIENT_01_036: [** If acquiring the lock fails, IoTHubClient_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_ERROR. **]**
+
 
 
 ## IoTHubClient_GetSendStatus
@@ -200,7 +215,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotH
 **SRS_IOTHUBCLIENT_01_034: [** If acquiring the lock fails, IoTHubClient_GetSendStatus shall return IOTHUB_CLIENT_ERROR. **]**
 
 
-### Scheduling work
+###Scheduling work
 **SRS_IOTHUBCLIENT_01_037: [** The thread created by IoTHubClient_SendEvent or IoTHubClient_SetMessageCallback shall call IoTHubClient_LL_DoWork every 1 ms. **]**
 
 **SRS_IOTHUBCLIENT_01_038: [** The thread shall exit when all IoTHubClients using the thread have had IoTHubClient_Destroy called. **]**
