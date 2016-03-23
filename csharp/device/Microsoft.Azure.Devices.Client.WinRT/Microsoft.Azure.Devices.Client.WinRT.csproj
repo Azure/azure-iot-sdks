@@ -137,6 +137,7 @@
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\AssertionFailedException.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\CallbackException.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceAlreadyExistsException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceDisabledException.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceMaximumQueueDepthExceededException.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceMessageLockLostException.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceNotFoundException.cs" />
@@ -202,22 +203,34 @@
     <Compile Include="$(DeviceClientDir)\PutOperationType.cs" />
     <Compile Include="$(DeviceClientDir)\WinRTHelpers.cs" />
     <Compile Include="$(DeviceClientDir)\WinRTResources.cs" />
-    <Compile Include="$(DeviceClientDir)\Transport\HttpClientHelper.cs">
-      <Link>HttpClientHelper.cs</Link>
-    </Compile>
-    <Compile Include="$(DeviceClientDir)\Transport\HttpTransportHandler.cs">
-      <Link>HttpTransportHandler.cs</Link>
-    </Compile>
-    <Compile Include="$(DeviceClientDir)\Transport\IHttpClientHelper.cs">
-      <Link>IHttpClientHelper.cs</Link>
-    </Compile>
-    <Compile Include="$(DeviceClientDir)\Transport\TransportHandlerBase.cs">
-      <Link>TransportHandlerBase.cs</Link>
-    </Compile>
+    <Compile Include="$(DeviceClientDir)\Transport\HttpClientHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\Transport\HttpTransportHandler.cs" />
+    <Compile Include="$(DeviceClientDir)\Transport\IHttpClientHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\Transport\TransportHandlerBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="$(DeviceClientDir)\AmqpTransportSettings.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Client\IotHubAmqpProperty.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Data\AmqpErrorMapper.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\IotHubAmqpErrorCode.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\IotHubSuspendedException.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\FaultTolerantAmqpObject.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\IOThreadTimerSlim.cs" />
+    <Compile Include="$(DeviceClientDir)\Http1TransportSettings.cs" />
+    <Compile Include="$(DeviceClientDir)\ITransportSettings.cs" />
+    <Compile Include="$(DeviceClientDir)\Transport\AmqpClientHelper.cs" />
+    <Compile Include="$(DeviceClientDir)\Transport\AmqpTransportHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="Resources.resw" />
+  </ItemGroup>
+
+<!-- test only, will change to Amqp NuGet package -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\arturl-azure-amqp\Microsoft.Azure.Amqp.Uwp\Microsoft.Azure.Amqp.Uwp.csproj">
+      <Project>{f127ef83-0edb-45ef-b719-78703b7fc29c}</Project>
+      <Name>Microsoft.Azure.Amqp.Uwp</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

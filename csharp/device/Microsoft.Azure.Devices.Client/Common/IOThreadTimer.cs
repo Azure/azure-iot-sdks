@@ -634,12 +634,7 @@ namespace Microsoft.Azure.Devices.Client
                 Safe = "Doesn't leak information or resources")]
             public WaitableTimer()
             {
-#if WINDOWS_UWP
-                dueTime = 0;
-                throw new NotImplementedException();
-#else
                 this.SafeWaitHandle = TimerHelper.CreateWaitableTimer();
-#endif
             }
 
             public long DueTime

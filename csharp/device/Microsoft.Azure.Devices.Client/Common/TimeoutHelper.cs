@@ -164,6 +164,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             Fx.Assert(!deadlineSet, "TimeoutHelper deadline set twice.");
             this.deadline = DateTime.UtcNow + this.originalTimeout;
+
+#if NOTIMEOUT
+            this.deadline = DateTime.MaxValue;
+#endif
+
             this.deadlineSet = true;
         }
 
