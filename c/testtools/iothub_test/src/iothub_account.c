@@ -22,6 +22,7 @@
 #include "hmacsha256.h"
 #include "iot_logging.h"
 #include "sastoken.h"
+#include "uniqueid.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define MBED_PARAM_MAX_LENGTH 256
@@ -29,7 +30,7 @@
 
 static const char* URL_API_VERSION = "api-version=2016-02-03";
 static const char* DEVICE_JSON_FMT = "{\"deviceId\":\"%s\",\"etag\":null,\"connectionState\":\"Disconnected\",\"status\":\"enabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"authentication\":{\"symmetricKey\":{\"primaryKey\":null,\"secondaryKey\":null}}}";
-static const char* DEVICE_PREFIX_FMT = "e2eDevice_%p%d%d%d%d";
+static const char* DEVICE_PREFIX_FMT = "e2eDevice_%s";
 static const char* RELATIVE_PATH_FMT = "/devices/%s?%s";
 static const char* SHARED_ACCESS_KEY = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
 
@@ -42,6 +43,7 @@ static const size_t PRIMARY_KEY_FIELD_LEN = 14;
 #define MAX_LENGTH_OF_UNSIGNED_INT  6
 #define MAX_LENGTH_OF_TIME_VALUE    12
 #define MAX_RAND_VALUE              10000
+#define DEVICE_GUID_SIZE            37
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG
 {
@@ -136,41 +138,15 @@ static HTTP_HEADERS_HANDLE getContentHeaders(bool appendIfMatch)
 static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo, const char* callerName)
 {
     int result;
-    unsigned int seedValue = 0;
-
-    if (callerName != NULL)
+    char deviceGuid[DEVICE_GUID_SIZE];
+    if (UniqueId_Generate(deviceGuid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
     {
-        size_t len = strlen(callerName);
-        for (size_t index = 0; index < len; index++)
-        {
-            seedValue += callerName[index];
-        }
-    }
-
-    time_t tmValue = time(NULL);
-    if (tmValue == (time_t)-1)
-    {
-        LogError("time failed.\r\n");
+        LogError("Unable to generate unique Id.\r\n");
         result = __LINE__;
     }
     else
     {
-        struct tm* tmInfo = gmtime(&tmValue);
-        if (tmInfo == NULL)
-        {
-            LogError("gmtime failed.\r\n");
-            result = __LINE__;
-        }
-        else
-        {
-            seedValue += (unsigned int)tmValue;
-            LogInfo("TimeInfo h:%d m:%d s:%d.\r\n", tmInfo->tm_hour, tmInfo->tm_min, tmInfo->tm_sec);
-        }
-
-        srand(seedValue);
-
-        // Create pseudo random device Id
-        size_t len = strlen(DEVICE_PREFIX_FMT) + (MAX_LENGTH_OF_UNSIGNED_INT * 2) + MAX_LENGTH_OF_TIME_VALUE + 8;
+        size_t len = strlen(DEVICE_PREFIX_FMT) + DEVICE_GUID_SIZE;
         accountInfo->deviceId = (char*)malloc(len + 1);
         if (accountInfo->deviceId == NULL)
         {
@@ -179,7 +155,7 @@ static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo, const char* call
         }
         else
         {
-            if (sprintf_s(accountInfo->deviceId, len + 1, DEVICE_PREFIX_FMT, rand() % MAX_RAND_VALUE, tmInfo->tm_hour, tmInfo->tm_min, tmInfo->tm_sec, rand() % MAX_RAND_VALUE) <= 0)
+            if (sprintf_s(accountInfo->deviceId, len + 1, DEVICE_PREFIX_FMT, deviceGuid) <= 0)
             {
                 LogError("Failure constructing device ID.\r\n");
                 result = __LINE__;

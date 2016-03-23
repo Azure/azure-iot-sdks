@@ -158,7 +158,6 @@ static int transport_worker_thread(void* threadArgument)
 
 static bool find_by_handle(const void* element, const void* value)
 {
-	bool result;
 	/* data stored at element is device handle */
 	const IOTHUB_CLIENT_HANDLE * guess = (const IOTHUB_CLIENT_HANDLE *)element;
 	const IOTHUB_CLIENT_HANDLE match = (const IOTHUB_CLIENT_HANDLE)value;

@@ -16,6 +16,7 @@ typedef void* IOTHUB_CLIENT_HANDLE;
 extern const char* IoTHubClient_GetVersionString(void);
 extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config);
+extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transportHandle, const IOTHUB_CLIENT_CONFIG* config);
 extern void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
@@ -89,18 +90,22 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE tr
 
 Create an IoTHubClient using an existing connection.
 
+**SRS_IOTHUBCLIENT_17_013: [** IoTHubClient_CreateWithTransport shall return NULL if transportHandle is NULL. **]**
+
+**SRS_IOTHUBCLIENT_17_014: [** IoTHubClient_CreateWithTransport shall return NULL if config is NULL. **]**
+
 **SRS_IOTHUBCLIENT_17_001: [** IoTHubClient_CreateWithTransport shall allocate a new IoTHubClient instance and return a non-NULL handle to it.
  **]**
  
  **SRS_IOTHUBCLIENT_17_002: [** If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_CreateWithTransport shall return NULL. **]**
  
-**SRS_IOTHUBCLIENT_17_003: [** IoTHubClient_CreateWithTransport shall call IoTHubTransport_HL_GetLLTransport on transportHandle to get lower layer transport. **]**
+**SRS_IOTHUBCLIENT_17_003: [** IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLLTransport on transportHandle to get lower layer transport. **]**
 
-**SRS_IOTHUBCLIENT_17_004: [** If IoTHubTransport_HL_GetLLTransport fails, then IoTHubClient_CreateWithTransport shall return NULL. **]**
+**SRS_IOTHUBCLIENT_17_004: [** If IoTHubTransport_GetLLTransport fails, then IoTHubClient_CreateWithTransport shall return NULL. **]**
 
-**SRS_IOTHUBCLIENT_17_005: [** IoTHubClient_CreateWithTransport shall call IoTHubTransport_HL_GetLock to get the transport lock to be used later for serializing IoTHubClient calls. **]**
+**SRS_IOTHUBCLIENT_17_005: [** IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLock to get the transport lock to be used later for serializing IoTHubClient calls. **]**
 
-**SRS_IOTHUBCLIENT_17_006: [** If IoTHubTransport_HL_GetLock fails, then IoTHubClient_CreateWithTransport shall return NULL. **]**
+**SRS_IOTHUBCLIENT_17_006: [** If IoTHubTransport_GetLock fails, then IoTHubClient_CreateWithTransport shall return NULL. **]**
 
 **SRS_IOTHUBCLIENT_17_007: [** IoTHubClient_CreateWithTransport shall instantiate a new IoTHubClient_LL instance by calling IoTHubClient_LL_CreateWithTransport and passing the lower layer transport and config argument. **]**
 
@@ -126,7 +131,7 @@ extern void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 
 **SRS_IOTHUBCLIENT_02_046: [** the condition variable shall be detroyed. **]**
 
-**SRS_IOTHUBCLIENT_01_032: [** The lock allocated in IoTHubClient_Create shall be also freed. **]**
+**SRS_IOTHUBCLIENT_01_032: [** If the lock was allocated in IoTHubClient_Create, it shall be also freed. **]**
 
 **SRS_IOTHUBCLIENT_01_008: [** IoTHubClient_Destroy shall do nothing if parameter iotHubClientHandle is NULL. **]**
 
@@ -138,7 +143,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iot
 
 **SRS_IOTHUBCLIENT_01_009: [** IoTHubClient_SendEventAsync shall start the worker thread if it was not previously started. **]**
 
-**SRS_IOTHUBCLIENT_17_012: [** If the transport connection is shared, the thread shall be started by calling IoTHubTransport_HL_StartWorkerThread. **]**
+**SRS_IOTHUBCLIENT_17_012: [** If the transport connection is shared, the thread shall be started by calling IoTHubTransport_StartWorkerThread. **]**
 
 **SRS_IOTHUBCLIENT_01_010: [** If starting the thread fails, IoTHubClient_SendEventAsync shall return IOTHUB_CLIENT_ERROR. **]**
 
@@ -163,7 +168,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE
 
 **SRS_IOTHUBCLIENT_01_014: [** IoTHubClient_SetMessageCallback shall start the worker thread if it was not previously started. **]**
 
-**SRS_IOTHUBCLIENT_17_011: [** If the transport connection is shared, the thread shall be started by calling IoTHubTransport_HL_StartWorkerThread. **]**
+**SRS_IOTHUBCLIENT_17_011: [** If the transport connection is shared, the thread shall be started by calling IoTHubTransport_StartWorkerThread. **]**
 
 **SRS_IOTHUBCLIENT_01_015: [** If starting the thread fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR. **]**
 
