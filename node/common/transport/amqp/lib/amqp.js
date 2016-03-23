@@ -36,6 +36,14 @@ function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
       attach: {
         properties: {
           'com.microsoft:client-version': sdkVersionString
+        },
+        maxMessageSize: 9223372036854775807,
+      },
+      encoder: function(body) {
+        if(typeof body === 'string') {
+          return new Buffer(body, 'utf8');
+        } else {
+          return body;
         }
       },
       reattach: {
@@ -48,8 +56,10 @@ function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
         properties: {
           'com.microsoft:client-version': sdkVersionString
         },
+        maxMessageSize: 65536,
         receiverSettleMode: autoSettleMode,
       },
+      decoder: function(body) { return body; },
       reattach: {
         retries: 0,
         forever: false

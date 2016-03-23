@@ -6,6 +6,7 @@
 package com.microsoft.azure.iot.service.transport.amqps;
 
 import com.microsoft.azure.iot.service.sdk.FeedbackBatchMessage;
+import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -44,8 +45,9 @@ public class AmqpReceiveTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken);
+        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
         String _hostName = Deencapsulation.getField(amqpReceive, "hostName");
         String _userName = Deencapsulation.getField(amqpReceive, "userName");
         String _sasToken = Deencapsulation.getField(amqpReceive, "sasToken");
@@ -65,7 +67,8 @@ public class AmqpReceiveTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken);
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
         amqpReceive.open();
         // Assert
         new Expectations()
@@ -93,8 +96,9 @@ public class AmqpReceiveTest
         String userName = "bbb";
         String sasToken = "ccc";
         String deviceId = "deviceId";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         int timeoutMs = 0;
-        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken);
+        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
         amqpReceive.open();
         // Assert
         new Expectations()
@@ -120,8 +124,9 @@ public class AmqpReceiveTest
         String userName = "bbb";
         String sasToken = "ccc";
         String deviceId = "deviceId";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         int timeoutMs = 1;
-        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken);
+        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
         amqpReceive.open();
         // Assert
         new Expectations()
@@ -146,8 +151,9 @@ public class AmqpReceiveTest
         String userName = "bbb";
         String sasToken = "ccc";
         String deviceId = "deviceId";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         int timeoutMs = 1;
-        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken);
+        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
         // Act
         amqpReceive.receive(deviceId, timeoutMs);
     }
@@ -162,7 +168,8 @@ public class AmqpReceiveTest
         String userName = "bbb";
         String sasToken = "ccc";
         String jsonData = "[]";
-        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken);
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {

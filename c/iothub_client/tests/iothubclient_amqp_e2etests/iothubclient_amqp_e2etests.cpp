@@ -43,6 +43,7 @@ typedef struct EXPECTED_SEND_DATA_TAG
     const char* expectedString;
     bool wasFound;
     bool dataWasRecv;
+    LOCK_HANDLE lock;
 } EXPECTED_SEND_DATA;
 
 typedef struct EXPECTED_RECEIVE_DATA_TAG
@@ -52,6 +53,7 @@ typedef struct EXPECTED_RECEIVE_DATA_TAG
     const char* data;
     size_t dataSize;
     bool wasFound;
+    LOCK_HANDLE lock; /*needed to protect this structure*/
 } EXPECTED_RECEIVE_DATA;
 
 BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
@@ -64,6 +66,12 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)context;
         if (expectedData != NULL)
         {
+            if (Lock(expectedData->lock) != LOCK_OK)
+            {
+                ASSERT_FAIL("unable to lock");
+            }
+            else
+        {
             if (
                 (strlen(expectedData->expectedString)== size) && 
                 (memcmp(expectedData->expectedString, data, size) == 0)
@@ -71,6 +79,8 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
             {
                 expectedData->wasFound = true;
                 result = 1;
+                }
+                (void)Unlock(expectedData->lock);
             }
         }
         return result;
@@ -82,13 +92,27 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)userContextCallback;
         if (expectedData != NULL)
         {
+            if (Lock(expectedData->lock) != LOCK_OK)
+            {
+                ASSERT_FAIL("unable to lock");
+            }
+            else
+            {
             expectedData->dataWasRecv = true;
+                (void)Unlock(expectedData->lock);
+            }
         }
     }
 
     static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE msg, void* userContextCallback)
     {
         EXPECTED_RECEIVE_DATA* notifyData = (EXPECTED_RECEIVE_DATA*)userContextCallback;
+        if (Lock(notifyData->lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("unable to lock"); /*because the test must absolutely be terminated*/
+        }
+        else
+        {
         if (notifyData != NULL)
         {
             const char* buffer;
@@ -125,6 +149,8 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
                 }
             }
         }
+            Unlock(notifyData->lock);
+        }
         return IOTHUBMESSAGE_ACCEPTED;
     }
 
@@ -133,37 +159,33 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         EXPECTED_RECEIVE_DATA* result = (EXPECTED_RECEIVE_DATA*)malloc(sizeof(EXPECTED_RECEIVE_DATA));
         if (result != NULL)
         {
-            char temp[1000];
-            char* tempString;
-            time_t t = time(NULL);
-            sprintf(temp, TEST_MESSAGE_DATA_FMT, ctime(&t), g_iotHubTestId);
-            if ( (tempString = (char*)malloc(strlen(temp) + 1) ) == NULL)
+            if ((result->lock = Lock_Init()) == NULL)
             {
                 free(result);
                 result = NULL;
             }
             else
             {
-                strcpy(tempString, temp);
-                result->data = tempString;
-                result->dataSize = strlen(result->data);
-                result->wasFound = false;
-                result->toBeSend = tempString;
-                result->toBeSendSize = strlen(result->toBeSend);
+                char temp[1000];
+                char* tempString;
+                time_t t = time(NULL);
+                sprintf(temp, TEST_MESSAGE_DATA_FMT, ctime(&t), g_iotHubTestId);
+                if ( (tempString = (char*)malloc(strlen(temp) + 1) ) == NULL)
+                {
+                    (void)Lock_Deinit(result->lock);
+                    free(result);
+                    result = NULL;
+                }
+                else
+                {
+                    strcpy(tempString, temp);
+                    result->data = tempString;
+                    result->dataSize = strlen(result->data);
+                    result->wasFound = false;
+                    result->toBeSend = (const char*)tempString;
+                    result->toBeSendSize = strlen(tempString);
+                }
             }
-        }
-        return result;
-    }
-    static EXPECTED_RECEIVE_DATA* NullMessageData_Create(void)
-    {
-        EXPECTED_RECEIVE_DATA* result = (EXPECTED_RECEIVE_DATA*)malloc(sizeof(EXPECTED_RECEIVE_DATA));
-        if (result != NULL)
-        {
-            result->data = NULL;
-            result->dataSize = 0;
-            result->wasFound = false;
-            result->toBeSend = NULL;
-            result->toBeSendSize = 0;
         }
         return result;
     }
@@ -172,6 +194,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
     {
         if (data != NULL)
         {
+            (void)Lock_Deinit(data->lock);
             if (data->data != NULL)
             {
                 free((void*)data->data);
@@ -185,21 +208,29 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         EXPECTED_SEND_DATA* result = (EXPECTED_SEND_DATA*)malloc(sizeof(EXPECTED_SEND_DATA));
         if (result != NULL)
         {
-            char temp[1000];
-            char* tempString;
-            time_t t = time(NULL);
-            sprintf(temp, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
-            if ( (tempString = (char*)malloc(strlen(temp) + 1) ) == NULL)
+            if ((result->lock = Lock_Init()) == NULL)
             {
-                free(result);
-                result = NULL;
+                ASSERT_FAIL("unable to Lock_Init");
             }
             else
             {
-                strcpy(tempString, temp);
-                result->expectedString = tempString;
-                result->wasFound = false;
-                result->dataWasRecv = false;
+                char temp[1000];
+                char* tempString;
+                time_t t = time(NULL);
+                sprintf(temp, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
+                if ( (tempString = (char*)malloc(strlen(temp) + 1) ) == NULL)
+                {
+                        Lock_Deinit(result->lock);
+                    free(result);
+                    result = NULL;
+                }
+                else
+                {
+                    strcpy(tempString, temp);
+                    result->expectedString = tempString;
+                    result->wasFound = false;
+                    result->dataWasRecv = false;
+                }
             }
         }
         return result;
@@ -209,6 +240,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
     {
         if (data != NULL)
         {
+            (void)Lock_Deinit(data->lock);
             if (data->expectedString != NULL)
             {
                 free((void*)data->expectedString);
@@ -279,16 +311,36 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         time_t beginOperation, nowTime;
         beginOperation = time(NULL);
         while (
-              (
                 (nowTime = time(NULL) ),
                 (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
-              ) &&
-                (!sendData->dataWasRecv) // Condition box
               )
         {
-            // Just go on here
+            if (Lock(sendData->lock) != LOCK_OK)
+            {
+                ASSERT_FAIL("unable to lock");
+            }
+            else
+            {
+                if (sendData->dataWasRecv)
+                {
+                    Unlock(sendData->lock);
+                    break;
+                }
+                Unlock(sendData->lock);
+            }
+            ThreadAPI_Sleep(100);
         }
-        ASSERT_IS_TRUE_WITH_MSG(sendData->dataWasRecv, "Failure sending data to Iothub"); // was received by the callback...
+
+        if (Lock(sendData->lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("unable to lock");
+        }
+        else
+        {
+            ASSERT_IS_TRUE_WITH_MSG(sendData->dataWasRecv, "Failure sending data to IotHub"); // was received by the callback...
+            (void)Unlock(sendData->lock);
+        }
+
         IoTHubClient_Destroy(iotHubClientHandle);
 
         {
@@ -345,11 +397,23 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
             (
             (nowTime = time(NULL)),
             (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
-            ) &&
-            (!notifyData->wasFound) //condition box
+              )
             )
         {
-            //just go on;
+            if (Lock(notifyData->lock) != LOCK_OK)
+            {
+                ASSERT_FAIL("unable to lock");
+            }
+            else
+            {
+                if (notifyData->wasFound)
+                {
+                    (void)Unlock(notifyData->lock);
+                    break;
+                }
+                (void)Unlock(notifyData->lock);
+            }
+            ThreadAPI_Sleep(100);
         }
 
         // assert

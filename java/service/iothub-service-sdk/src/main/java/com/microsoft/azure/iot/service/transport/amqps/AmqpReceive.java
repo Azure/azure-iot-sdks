@@ -7,6 +7,7 @@ package com.microsoft.azure.iot.service.transport.amqps;
 
 import com.microsoft.azure.iot.service.sdk.FeedbackBatch;
 import com.microsoft.azure.iot.service.sdk.FeedbackBatchMessage;
+import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Event;
@@ -27,6 +28,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
     private final String userName;
     private final String sasToken;
     private AmqpFeedbackReceivedHandler amqpReceiveHandler;
+    private IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private Reactor reactor = null;
     private Semaphore semaphore = new Semaphore(0);
     private FeedbackBatch feedbackBatch;
@@ -37,12 +39,13 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
      * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      */
-    public AmqpReceive(String hostName, String userName, String sasToken)
+    public AmqpReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
         this.hostName = hostName;
         this.userName = userName;
         this.sasToken = sasToken;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
     }
 
     /**
@@ -68,7 +71,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
     public void open()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_003: [The function shall create an AmqpsReceiveHandler object to handle reactor events]
-        amqpReceiveHandler = new AmqpFeedbackReceivedHandler(this.hostName, this.userName, this.sasToken, this);
+        amqpReceiveHandler = new AmqpFeedbackReceivedHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this);
     }
 
     /**

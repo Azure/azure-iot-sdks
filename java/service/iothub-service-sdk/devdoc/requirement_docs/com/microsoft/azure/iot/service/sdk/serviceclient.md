@@ -13,7 +13,7 @@ Use the ServiceClient class to send C2D messages and receive feedback.
 ```java
 public class ServiceClient
 {
-   public static ServiceClient createFromConnectionString(String connectionString);
+   public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol protocol);
    protected ServiceClient(IotHubConnectionString connectionString);
    public void open();
    public void close();
@@ -27,13 +27,13 @@ public class ServiceClient
 ### createFromConnectionString
 
 ```java
-public static ServiceClient createFromConnectionString (String connectionString);
+public static ServiceClient createFromConnectionString (String connectionString, IotHubServiceClientProtocol protocol);
 ```
 **SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_001: [** The constructor shall throw IllegalArgumentException if the input string is empty or null **]**
 
 **SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_002: [** The constructor shall create IotHubConnectionString object using the IotHubConnectionStringBuilder **]**
 
-**SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_003: [** The constructor shall create a new instance of ServiceClient using the created IotHubConnectionString object and return with it **]**
+**SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_003: [** The constructor shall create a new instance of ServiceClient using the created IotHubConnectionString object and the given protocol return with it **]**
 
 ### ServiceClient
 

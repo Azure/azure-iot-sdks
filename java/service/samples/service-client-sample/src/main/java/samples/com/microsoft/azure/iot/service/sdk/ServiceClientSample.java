@@ -9,10 +9,10 @@ import com.microsoft.azure.iot.service.sdk.FeedbackBatch;
 import com.microsoft.azure.iot.service.sdk.FeedbackReceiver;
 import com.microsoft.azure.iot.service.sdk.Message;
 import com.microsoft.azure.iot.service.sdk.ServiceClient;
+import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +28,10 @@ public class ServiceClientSample
 {
     private static final String connectionString = "[Connection string goes here]";
     private static final String deviceId = "[Device name goes here]";
-    
+    /** Choose iotHubServiceClientProtocol */
+    private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
+//    private static final IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
+
     private static ServiceClient serviceClient = null;
     private static FeedbackReceiver feedbackReceiver = null;
 
@@ -84,7 +87,7 @@ public class ServiceClientSample
     protected static void openServiceClient() throws Exception
     {
         System.out.println("Creating ServiceClient...");
-        serviceClient = ServiceClient.createFromConnectionString(connectionString);
+        serviceClient = ServiceClient.createFromConnectionString(connectionString, protocol);
 
         CompletableFuture<Void> future = serviceClient.openAsync();
         future.get();
