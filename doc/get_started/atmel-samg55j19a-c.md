@@ -48,7 +48,7 @@ You should have the following items ready before beginning the process:
 -  If you need to setup your SAMG55 device, please refer the getting started instructions [here](<http://www.atmel.com/tools/ATSAMG55-XPRO.aspx?tab=documents>) .
 
 ## How to update firmware and Flash the root certificate of the Azure IoT hub host
--  Please convert ms.der to ms.cer with following steps on windows pc.
+-  Please convert ms.der to ms.cer with following steps on Windows pc.
     -  Download ms.der file from [Azure cert](https://github.com/Azure/azure-iot-sdks/tree/master/c/certs)
     -  Open ms.der by double-clinking then you can see a window with title "Certificate"
     -  Select "Details" tab -> click "Copy to File" -> click "Next" button of "Certificate Export Wizard" window
