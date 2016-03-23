@@ -66,12 +66,14 @@ You should have the following items ready before beginning the process:
 
 <a name="buildrunapp"/>
 ## Build and Run the sample project via Atmel Studio7: 
-1. Double click "Ateml_Azure_EXAMPLE.atsln" : **```TBD```**
+1. Open Atmel Studio7 and search for the MS Azure IoT project from the File -> New -> Example Project... menu in Atmel Studio.
+    - Select SAM G, 32-bit from Device Family: and Type winc1500 to input text field.
+    - Select the MS Azure ToT project corresponding to your Xplained Pro board and then press OK button to import MS Azure ToT project
 2. Open the ```simplesample_http.c``` file in the Atmel Studio7.
-3. Locate the following code in the ```simplesample_http.c```: 
+    - Locate the following code in the ```simplesample_http.c```: 
     ```static const char* connectionString = "[device connection string]";``` .
-4. Replace ```[device connection string]``` with the device connection string you noted in [Step 1](#Step-1:-Prerequisites) and save the changes.
-5. In ```main.h```, update the following line with your WiFi accesspoint's SSID and password:
+    - Replace ```[device connection string]``` with the device connection string you noted in [Step 1](#Step-1:-Prerequisites) and save the changes.
+3. In ```main.h```, update the following line with your WiFi accesspoint's SSID and password:
    ```
    #define MAIN_WLAN_SSID                  "your_AP_SSID" /**< Destination SSID */
    ```
@@ -79,16 +81,8 @@ You should have the following items ready before beginning the process:
    ```
    #define MAIN_WLAN_PSK                   "password" /**< Password for Destination SSID */
    ```
-6. Build the project, which can be accessed via ```Build -> Build Solution   F7``` .
-7. Upload a binary to SAMG55 board, which can be accessed via ```Debug -> Continue   F5``` .
-
--   Find the following place holder for IoT connection string:
-
-        static const char* connectionString = "[device connection string]";
-
--   Replace the above placeholder with device connection string you obtained in [Step 1](#Step-1:-Prerequisites) and save the changes.
-
-
+4. Build the project, which can be accessed via ```Build -> Build Solution   F7``` .
+5. Upload a binary to SAMG55 board, which can be accessed via ```Debug -> Continue   F5``` .
 
 ## 3.2 Send Device Events to IoT Hub:
 
