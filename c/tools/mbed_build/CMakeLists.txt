@@ -108,7 +108,6 @@ function(pushMBEDRepository)
 		message(FATAL_ERROR "Failed adding/removing local changes (error code " ${result_code} ")")
 	endif()
 
-	message(STATUS "Working directory is:" WORKING_DIRECTORY "local_repo_path is:" ${local_repo_path})
 	execute_process(COMMAND hg "commit" "-u" $ENV{MBED_HG_USER} "-m ${HG_COMMIT_MSG}" WORKING_DIRECTORY ${local_repo_path} RESULT_VARIABLE result_code)
 	if(NOT ${result_code} EQUAL 0 AND NOT ${result_code} EQUAL 1)
 		message(FATAL_ERROR "Failed commiting changes to local repository (error code " ${result_code} ")")
