@@ -520,8 +520,5 @@ class TestClassDefinitions(unittest.TestCase):
         result = client.set_option("timeout", timeout)
         self.assertIsNone(result)
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestExceptionDefinitions)
-suite.addTest(unittest.TestLoader().loadTestsFromTestCase(TestEnumDefinitions))
-suite.addTest(unittest.TestLoader().loadTestsFromTestCase(
-    TestClassDefinitions))
-unittest.TextTestRunner(verbosity=3).run(suite)
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
