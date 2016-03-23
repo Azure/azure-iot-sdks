@@ -9,13 +9,6 @@ Run a simple C sample on SAM G55 Xplained Pro device running Atmel Studio7
 -   [Step 2: Prepare your Device](#PrepareDevice)
 -   [Step 3: Build and Run the Sample](#Build)
 
-# Instructions for using this template
-
--   Replace the text in {placeholders} with correct values.
--   Delete the lines {{enclosed}} after following the instructions enclosed between them.
--   It is advisable to use external links, wherever possible.
--   Remove this section from final document.
-
 <a name="Introduction"></a>
 # Introduction
 
