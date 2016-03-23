@@ -1417,7 +1417,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE ha
     {
         AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)handle;
 
-        if (strcmp("trusted_certificates", option) == 0)
+        if (strcmp("TrustedCerts", option) == 0)
         {
             transport_state->trusted_certificates = (char*)value;
             result = IOTHUB_CLIENT_OK;
