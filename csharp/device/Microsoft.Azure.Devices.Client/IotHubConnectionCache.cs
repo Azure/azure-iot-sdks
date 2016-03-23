@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-#if !WINDOWS_UWP && !PCL
+#if !PCL
     sealed class IotHubConnectionCache
     {
         static readonly TimeSpan DefaultIdleTimeout = TimeSpan.FromMinutes(2);
@@ -98,7 +98,11 @@ namespace Microsoft.Azure.Devices.Client
         class CachedConnection
         {
             readonly IotHubConnectionCache cache;
+#if WINDOWS_UWP
+            readonly IOThreadTimerSlim idleTimer;
+#else
             readonly IOThreadTimer idleTimer;
+#endif
             int referenceCount;
 
             public CachedConnection(IotHubConnectionCache cache, IotHubConnection connection)
@@ -106,7 +110,12 @@ namespace Microsoft.Azure.Devices.Client
                 this.cache = cache;
                 this.Connection = connection;
                 this.ThisLock = new object();
+#if WINDOWS_UWP
+                this.idleTimer = new IOThreadTimerSlim(s => ((CachedConnection)s).IdleTimerCallback(), this, false);
+#else
                 this.idleTimer = new IOThreadTimer(s => ((CachedConnection)s).IdleTimerCallback(), this, false);
+#endif
+
                 this.idleTimer.Set(this.cache.IdleTimeout);
             }
 

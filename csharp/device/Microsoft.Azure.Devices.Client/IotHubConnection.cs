@@ -10,8 +10,9 @@ namespace Microsoft.Azure.Devices.Client
 
 #if !WINDOWS_UWP
     using System.Configuration;
-    using System.Net;
     using System.Net.WebSockets;
+#endif
+    using System.Net;
     using System.Security.Cryptography.X509Certificates;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
@@ -19,7 +20,6 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Amqp.Transport;
     using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
-#endif
 
     sealed class IotHubConnection
     {
@@ -27,14 +27,17 @@ namespace Microsoft.Azure.Devices.Client
         internal static readonly TimeSpan DefaultOpenTimeout = TimeSpan.FromMinutes(1);
         static readonly TimeSpan RefreshTokenBuffer = TimeSpan.FromMinutes(2);
         static readonly TimeSpan RefreshTokenRetryInterval = TimeSpan.FromSeconds(30);
-#if !WINDOWS_UWP
         static readonly AmqpVersion AmqpVersion_1_0_0 = new AmqpVersion(1, 0, 0);
         const string DisableServerCertificateValidationKeyName = "Microsoft.Azure.Devices.DisableServerCertificateValidation";
         readonly static Lazy<bool> DisableServerCertificateValidation = new Lazy<bool>(InitializeDisableServerCertificateValidation);
         readonly IotHubConnectionString connectionString;
         readonly AccessRights accessRights;
         readonly FaultTolerantAmqpObject<AmqpSession> faultTolerantSession;
+#if WINDOWS_UWP
+        readonly IOThreadTimerSlim refreshTokenTimer;
+#else
         readonly IOThreadTimer refreshTokenTimer;
+#endif
         readonly AmqpTransportSettings amqpTransportSettings;
 
         public IotHubConnection(IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
@@ -42,7 +45,13 @@ namespace Microsoft.Azure.Devices.Client
             this.connectionString = connectionString;
             this.accessRights = accessRights;
             this.faultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
+
+#if WINDOWS_UWP
+            this.refreshTokenTimer = new IOThreadTimerSlim(s => ((IotHubConnection)s).OnRefreshToken(), this, false);
+#else
             this.refreshTokenTimer = new IOThreadTimer(s => ((IotHubConnection)s).OnRefreshToken(), this, false);
+#endif
+
             this.amqpTransportSettings = amqpTransportSettings;
         }
 
@@ -171,12 +180,13 @@ namespace Microsoft.Azure.Devices.Client
 
         static bool InitializeDisableServerCertificateValidation()
         {
+#if !WINDOWS_UWP // No System.Configuration.ConfigurationManager in UWP
             string value = ConfigurationManager.AppSettings[DisableServerCertificateValidationKeyName];
             if (!string.IsNullOrEmpty(value))
             {
                 return bool.Parse(value);
             }
-
+#endif
             return false;
         }
 
@@ -193,9 +203,11 @@ namespace Microsoft.Azure.Devices.Client
 
             switch (this.amqpTransportSettings.GetTransportType())
             {
+#if !WINDOWS_UWP
                 case TransportType.Amqp_WebSocket_Only:
                 transport = await this.CreateClientWebSocketTransport(timeoutHelper.RemainingTime());
                     break;
+#endif
                 case TransportType.Amqp_Tcp_Only:
                     transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
                     break;
@@ -253,6 +265,7 @@ namespace Microsoft.Azure.Devices.Client
             amqpSession.Connection.SafeClose();
         }
 
+#if !WINDOWS_UWP
         async Task<ClientWebSocket> CreateClientWebSocket(Uri websocketUri, TimeSpan timeout)
         {
             var websocket = new ClientWebSocket();
@@ -290,6 +303,7 @@ namespace Microsoft.Azure.Devices.Client
                 null,
                 null);
         }
+#endif
 
         AmqpSettings CreateAmqpSettings()
         {
@@ -305,7 +319,12 @@ namespace Microsoft.Azure.Devices.Client
         static AmqpLinkSettings SetLinkSettingsCommonProperties(AmqpLinkSettings linkSettings, TimeSpan timeSpan)
         {
             linkSettings.AddProperty(IotHubAmqpProperty.TimeoutName, timeSpan.TotalMilliseconds);
+#if WINDOWS_UWP
+            // System.Reflection.Assembly.GetExecutingAssembly() does not exist for UWP, therefore use a hard-coded version name
+            linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, "1.0-UWP");
+#else
             linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, Utils.GetClientVersion());
+#endif
 
             return linkSettings;
         }
@@ -322,7 +341,9 @@ namespace Microsoft.Azure.Devices.Client
             {
                 TargetHost = this.connectionString.HostName,
                 Certificate = null, // TODO: add client cert support
+#if !WINDOWS_UWP // Not supported in UWP
                 CertificateValidationCallback = this.OnRemoteCertificateValidation
+#endif
             };
 
             return tlsTransportSettings;
@@ -418,6 +439,5 @@ namespace Microsoft.Azure.Devices.Client
                 this.refreshTokenTimer.Set(timeFromNow);
             }
         }
-#endif
     }
 }

@@ -7,8 +7,11 @@ namespace Microsoft.Azure.Devices.Client.Exceptions
     using System.Runtime.Serialization;
     using Microsoft.Azure.Devices.Client.Extensions;
 
+#if !WINDOWS_UWP // Exporting custom exception types is not allowed in WinRT
     [Serializable]
-    public class IotHubSuspendedException : IotHubException
+    public
+#endif
+    class IotHubSuspendedException : IotHubException
     {
         public IotHubSuspendedException(string iotHubName)
             : base("Iothub {0} is suspended".FormatInvariant(iotHubName))
@@ -20,9 +23,11 @@ namespace Microsoft.Azure.Devices.Client.Exceptions
         {
         }
 
+#if !WINDOWS_UWP
         IotHubSuspendedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }
