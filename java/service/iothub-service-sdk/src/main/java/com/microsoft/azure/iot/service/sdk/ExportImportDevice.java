@@ -137,4 +137,41 @@ public class ExportImportDevice
     {
         Authentication = authentication;
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other == null)
+        {
+            return false;
+        }
+
+        if (other == this)
+        {
+            return true;
+        }
+
+        if (!(other instanceof ExportImportDevice))
+        {
+            return false;
+        }
+
+        ExportImportDevice otherExportImportDevice = (ExportImportDevice)other;
+        if (!this.getId().equals(otherExportImportDevice.getId())
+                || !this.getAuthentication().getSymmetricKey().getPrimaryKey().equals(otherExportImportDevice.getAuthentication().getSymmetricKey().getPrimaryKey())
+                || !this.getAuthentication().getSymmetricKey().getSecondaryKey().equals(otherExportImportDevice.getAuthentication().getSymmetricKey().getSecondaryKey()))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = Id.hashCode();
+        result = 31 * result + Authentication.hashCode();
+        return result;
+    }
 }

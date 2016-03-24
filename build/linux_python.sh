@@ -6,6 +6,6 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 cd $build_root
 
 # -- Python C wrapper --
-./python/build_all/linux/build.sh
+./python/build_all/linux/build.sh $*
 [ $? -eq 0 ] || exit $?
 

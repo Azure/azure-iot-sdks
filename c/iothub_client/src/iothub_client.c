@@ -13,6 +13,7 @@
 #include "crt_abstractions.h"
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
+#include "iothubtransport.h"
 #include "threadapi.h"
 #include "lock.h"
 #include "iot_logging.h"
@@ -20,6 +21,7 @@
 typedef struct IOTHUB_CLIENT_INSTANCE_TAG
 {
     IOTHUB_CLIENT_LL_HANDLE IoTHubClientLLHandle;
+	TRANSPORT_HANDLE TransportHandle;
     THREAD_HANDLE ThreadHandle;
     LOCK_HANDLE LockHandle;
     sig_atomic_t StopThread;
@@ -61,21 +63,37 @@ static int ScheduleWork_Thread(void* threadArgument)
     return 0;
 }
 
-static void StartWorkerThreadIfNeeded(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance)
+static IOTHUB_CLIENT_RESULT StartWorkerThreadIfNeeded(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance)
 {
-    if (iotHubClientInstance->ThreadHandle == NULL)
-    {
-        iotHubClientInstance->StopThread = 0;
-        if (ThreadAPI_Create(&iotHubClientInstance->ThreadHandle, ScheduleWork_Thread, iotHubClientInstance) != THREADAPI_OK)
-        {
-            iotHubClientInstance->ThreadHandle = NULL;
-            LogError("ThreadAPI_Create failed");
-        }
-        else
-        {
-            /*all is fine*/
-        }
-    }
+	IOTHUB_CLIENT_RESULT result;
+	if (iotHubClientInstance->TransportHandle == NULL)
+	{
+		if (iotHubClientInstance->ThreadHandle == NULL)
+		{
+			iotHubClientInstance->StopThread = 0;
+			if (ThreadAPI_Create(&iotHubClientInstance->ThreadHandle, ScheduleWork_Thread, iotHubClientInstance) != THREADAPI_OK)
+			{
+				iotHubClientInstance->ThreadHandle = NULL;
+				result = IOTHUB_CLIENT_ERROR;
+			}
+			else
+			{
+				result = IOTHUB_CLIENT_OK;
+		}
+	}
+		else
+	{
+			result = IOTHUB_CLIENT_OK;
+		}
+	}
+	else 
+	{
+		/*Codes_SRS_IOTHUBCLIENT_17_012: [ If the transport connection is shared, the thread shall be started by calling IoTHubTransport_StartWorkerThread. ]*/
+		/*Codes_SRS_IOTHUBCLIENT_17_011: [ If the transport connection is shared, the thread shall be started by calling IoTHubTransport_StartWorkerThread*/
+
+		result = IoTHubTransport_StartWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientInstance);
+	}
+	return result;
 }
 
 IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
@@ -127,6 +145,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
                     else
                     {
                         result->ThreadHandle = NULL;
+						result->TransportHandle = NULL;
                     }
                 }
             
@@ -144,9 +163,6 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
     /* Codes_SRS_IOTHUBCLIENT_01_004: [If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_Create shall return NULL.] */
     if (result != NULL)
     {
-        
-        result->ThreadHandle = NULL;
-
         /* Codes_SRS_IOTHUBCLIENT_01_029: [IoTHubClient_Create shall create a lock object to be used later for serializing IoTHubClient calls.] */
         result->LockHandle = Lock_Init();
         if (result->LockHandle == NULL)
@@ -168,10 +184,76 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
                 free(result);
                 result = NULL;
             }
+			else
+			{
+				result->TransportHandle = NULL;
+				result->ThreadHandle = NULL;
+			}
         }
     }
 
     return result;
+}
+
+IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transportHandle, const IOTHUB_CLIENT_CONFIG* config)
+{
+	IOTHUB_CLIENT_INSTANCE* result;
+	/*Codes_SRS_IOTHUBCLIENT_17_013: [ IoTHubClient_CreateWithTransport shall return NULL if transportHandle is NULL. ]*/
+	/*Codes_SRS_IOTHUBCLIENT_17_014: [ IoTHubClient_CreateWithTransport shall return NULL if config is NULL. ]*/
+	if (transportHandle == NULL || config == NULL)
+	{
+		result = NULL;
+	}
+	else
+	{
+		/*Codes_SRS_IOTHUBCLIENT_17_001: [ IoTHubClient_CreateWithTransport shall allocate a new IoTHubClient instance and return a non-NULL handle to it. ]*/
+		result = (IOTHUB_CLIENT_INSTANCE*)malloc(sizeof(IOTHUB_CLIENT_INSTANCE));
+		/*Codes_SRS_IOTHUBCLIENT_17_002: [ If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
+		if (result != NULL)
+		{
+			result->ThreadHandle = NULL;
+			result->TransportHandle = transportHandle;
+			/*Codes_SRS_IOTHUBCLIENT_17_005: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLock to get the transport lock to be used later for serializing IoTHubClient calls. ]*/
+			result->LockHandle = IoTHubTransport_GetLock(transportHandle);
+			if (result->LockHandle == NULL)
+			{
+				/*Codes_SRS_IOTHUBCLIENT_17_006: [ If IoTHubTransport_GetLock fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
+				free(result);
+				result = NULL;
+			}
+			else
+			{
+				IOTHUB_CLIENT_DEVICE_CONFIG deviceConfig;
+				deviceConfig.deviceId = config->deviceId;
+				deviceConfig.deviceKey = config->deviceKey;
+				deviceConfig.protocol = config->protocol;
+
+				/*Codes_SRS_IOTHUBCLIENT_17_003: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLLTransport on transportHandle to get lower layer transport. ]*/
+				deviceConfig.transportHandle = IoTHubTransport_GetLLTransport(transportHandle);
+
+				if (deviceConfig.transportHandle == NULL)
+				{
+					/*Codes_SRS_IOTHUBCLIENT_17_004: [ If IoTHubTransport_GetLLTransport fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
+					free(result);
+					result = NULL;
+				}
+				else
+				{
+					/*Codes_SRS_IOTHUBCLIENT_17_007: [ IoTHubClient_CreateWithTransport shall instantiate a new IoTHubClient_LL instance by calling IoTHubClient_LL_CreateWithTransport and passing the lower layer transport and config argument. ]*/
+					result->IoTHubClientLLHandle = IoTHubClient_LL_CreateWithTransport(&deviceConfig);
+					if (result->IoTHubClientLLHandle == NULL)
+					{
+						/*Codes_SRS_IOTHUBCLIENT_17_008: [ If IoTHubClient_LL_CreateWithTransport fails, then IoTHubClient_Create shall return NULL. ]*/
+						/*Codes_SRS_IOTHUBCLIENT_17_009: [ If IoTHubClient_LL_CreateWithTransport fails, all resources allocated by it shall be freed. ]*/
+						free(result);
+						result = NULL;
+					}
+				}
+			}
+		}
+	}
+
+	return result;
 }
 
 /* Codes_SRS_IOTHUBCLIENT_01_005: [IoTHubClient_Destroy shall free all resources associated with the iotHubClientHandle instance.] */
@@ -182,14 +264,15 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
     {
         
         IOTHUB_CLIENT_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_INSTANCE*)iotHubClientHandle;
-
+		
         if (iotHubClientInstance->ThreadHandle != NULL)
         {
             int res;
             /*Codes_SRS_IOTHUBCLIENT_02_043: [ IoTHubClient_Destroy shall lock the serializing lock and signal the worker thread (if any) to end ]*/
             if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
             {
-                LogError("unable to Lock - - will still proceed to try to end the thread without condition mechanisms");
+                LogError("unable to Lock - - will still proceed to try to end the thread without locking");
+				iotHubClientInstance->StopThread = 1;
             }
             else
             {
@@ -209,11 +292,19 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
             }
         }
 
+		if (iotHubClientInstance->TransportHandle != NULL)
+		{
+			/*Codes_SRS_IOTHUBCLIENT_01_007: [ The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. ]*/
+			IoTHubTransport_EndWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientHandle);
+		}
+		else
+		{
+			/* Codes_SRS_IOTHUBCLIENT_01_032: [If the lock was allocated in IoTHubClient_Create, it shall be also freed..] */
+			Lock_Deinit(iotHubClientInstance->LockHandle);
+		}
+
         /* Codes_SRS_IOTHUBCLIENT_01_006: [That includes destroying the IoTHubClient_LL instance by calling IoTHubClient_LL_Destroy.] */
         IoTHubClient_LL_Destroy(iotHubClientInstance->IoTHubClientLLHandle);
-
-        /* Codes_SRS_IOTHUBCLIENT_01_032: [The lock allocated in IoTHubClient_Create shall be also freed.] */
-        Lock_Deinit(iotHubClientInstance->LockHandle);
 
         free(iotHubClientInstance);
     }
@@ -243,9 +334,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClie
         else
         {
             /* Codes_SRS_IOTHUBCLIENT_01_009: [IoTHubClient_SendEventAsync shall start the worker thread if it was not previously started.] */
-            StartWorkerThreadIfNeeded(iotHubClientInstance);
-
-            if (iotHubClientInstance->ThreadHandle == NULL)
+            if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
             {
                 /* Codes_SRS_IOTHUBCLIENT_01_010: [If starting the thread fails, IoTHubClient_SendEventAsync shall return IOTHUB_CLIENT_ERROR.] */
                 result = IOTHUB_CLIENT_ERROR;
@@ -325,8 +414,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
         else
         {
             /* Codes_SRS_IOTHUBCLIENT_01_014: [IoTHubClient_SetMessageCallback shall start the worker thread if it was not previously started.] */
-            StartWorkerThreadIfNeeded(iotHubClientInstance);
-            if (iotHubClientInstance->ThreadHandle == NULL)
+            if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
             {
                 /* Codes_SRS_IOTHUBCLIENT_01_015: [If starting the thread fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR.] */
                 result = IOTHUB_CLIENT_ERROR;

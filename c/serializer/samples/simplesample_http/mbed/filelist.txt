@@ -1,5 +1,0 @@
-simplesample_http.h
-simplesample_http.c
-..\..\..\certs\certs.c
-..\..\..\certs\certs.h
-mbed\main.cpp

@@ -1,0 +1,5 @@
+set(mbed_project_files
+		${CMAKE_CURRENT_SOURCE_DIR}/../mbed/main.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs/certs.h
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs/certs.c
+	)

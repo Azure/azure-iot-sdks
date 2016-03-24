@@ -53,7 +53,7 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 link_directories(${PYTHON_LIBRARIES})
 
 set(iothub_client_python_c_files
-    iothub_client_python.cpp
+    ./src/iothub_client_python.cpp
 )
 
 set(iothub_client_mock_c_files
@@ -61,7 +61,7 @@ set(iothub_client_mock_c_files
 )
 
 if(WIN32)
-    set(iothub_client_python_c_files ${iothub_client_python_c_files} ./windows/dllmain.c ./windows/iothub_client_python.def)
+    set(iothub_client_python_c_files ${iothub_client_python_c_files} ./windows/dllmain.c ./windows/iothub_client.def)
     set(iothub_client_mock_c_files ${iothub_client_mock_c_files} ./windows/dllmain.c )
 endif()
 
@@ -77,6 +77,7 @@ if(${use_mqtt})
 	include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
 endif()
 include_directories(.)
+include_directories(./src)
 
 add_library( iothub_client_python SHARED
     ${iothub_client_python_c_files} 

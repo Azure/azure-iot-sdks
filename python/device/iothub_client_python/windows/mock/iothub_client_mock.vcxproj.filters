@@ -15,12 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\iothub_client_python.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\converter\boost_python.converter.arg_to_python_base.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -105,11 +99,14 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_python.wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\iothub_client_mock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dllmain.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="iothub_client_python.def">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

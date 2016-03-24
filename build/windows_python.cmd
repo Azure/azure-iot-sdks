@@ -9,6 +9,6 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- Python --
 cd %build-root%\python\build_all\windows
-call build.cmd 
-if errorlevel 1 goto :eof
+call build.cmd --run-ut
+if errorlevel 1 exit /b 1
 cd %build-root%

@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 2.8.11)
 add_subdirectory(iothubclient_ll_unittests)
 add_subdirectory(iothubclient_unittests)
 add_subdirectory(iothubmessage_unittests)
+add_subdirectory(iothubtransport_unittests)
 
 if(${use_http})
 	add_subdirectory(iothubtransporthttp_unittests)

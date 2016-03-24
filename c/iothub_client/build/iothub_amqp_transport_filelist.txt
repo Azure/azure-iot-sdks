@@ -1,2 +1,0 @@
-..\inc\iothubtransportamqp.h
-..\src\iothubtransportamqp.c

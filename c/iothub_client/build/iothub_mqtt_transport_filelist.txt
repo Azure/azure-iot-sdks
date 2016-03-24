@@ -1,2 +1,0 @@
-..\inc\iothubtransportmqtt.h
-..\src\iothubtransportmqtt.c

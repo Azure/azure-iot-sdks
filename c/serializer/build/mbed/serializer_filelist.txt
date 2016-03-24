@@ -1,0 +1,4 @@
+set(mbed_project_files
+		${CMAKE_CURRENT_SOURCE_DIR}/../../src/*.c 
+		${CMAKE_CURRENT_SOURCE_DIR}/../../inc/*.h
+	)
