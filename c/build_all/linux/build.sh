@@ -89,10 +89,10 @@ if [[ $run_valgrind == 1 ]] ;
 then
 	#use doctored openssl
 	export LD_LIBRARY_PATH=/usr/local/ssl/lib
-	ctest --output-on-failure
+	ctest -j $(nproc) --output-on-failure
 	export LD_LIBRARY_PATH=
 else
-	ctest -C "Debug" --output-on-failure
+	ctest -j $(nproc) -C "Debug" --output-on-failure
 fi
 
 popd
