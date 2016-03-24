@@ -12,7 +12,7 @@ project(${mbed_project_base})
 ###
 ### The compilation environment had the normal project base name with an appended _bld  They will be constantly overwritten.
 if (release_the_project)
-        set(mbed_repo_name ${mbed_project_base})
+        set(mbed_repo_name ${mbed_project_base} CACHE STRING "What will be cloned")
     else()
         set(mbed_repo_name ${mbed_project_base}_bld)
 endif()

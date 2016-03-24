@@ -386,6 +386,41 @@ static STRING_HANDLE ConstructMessageTopic(const char* deviceId)
     return result;
 }
 
+static int GetTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transportState)
+{
+    int result;
+
+    if (transportState->xioTransport == NULL)
+    {
+        // construct address
+        const char* hostAddress = STRING_c_str(transportState->hostAddress);
+        const char* hostName = strstr(hostAddress, "//");
+        if (hostName == NULL)
+        {
+            hostName = hostAddress;
+        }
+        else
+        {
+            // Increment beyond the double backslash
+            hostName += 2;
+        }
+        transportState->xioTransport = getIoTransportProvider(hostName, transportState->portNum);
+        if (transportState->xioTransport == NULL)
+        {
+            LogError("Unable to create the lower level TLS layer.\r\n");
+            result = __LINE__;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    else
+    {
+        result = 0;
+    }
+    return result;
+}
 static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transportState)
 {
     int result = 0;
@@ -412,32 +447,21 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transportState)
         options.useCleanSession = false;
         options.qualityOfServiceValue = DELIVER_AT_LEAST_ONCE;
 
-        // construct address
-        const char* hostAddress = STRING_c_str(transportState->hostAddress);
-        const char* hostName = strstr(hostAddress, "//");
-        if (hostName == NULL)
+        if ((result = GetTransportProviderIfNecessary(transportState)) == 0)
         {
-            hostName = hostAddress;
+            if (mqtt_client_connect(transportState->mqttClient, transportState->xioTransport, &options) != 0)
+            {
+                LogError("failure connecting to address %s:%d.\r\n", STRING_c_str(transportState->hostAddress), transportState->portNum);
+                result = __LINE__;
+            }
+            else
+            {
+                result = 0;
+            }
         }
-        else
-        {
-            // Increment beyond the double backslash
-            hostName += 2;
-        }
-
-        transportState->xioTransport = getIoTransportProvider(hostName, transportState->portNum);
-        if (mqtt_client_connect(transportState->mqttClient, transportState->xioTransport, &options) != 0)
-        {
-            LogError("failure connecting to address %s:%d.\r\n", STRING_c_str(transportState->hostAddress), transportState->portNum);
-            result = __LINE__;
-        }
-        else
-        {
-            result = 0;
-        }
-        STRING_delete(emptyKeyName);
-        STRING_delete(sasToken);
     }
+    STRING_delete(emptyKeyName);
+    STRING_delete(sasToken);
     return result;
 }
 
@@ -922,8 +946,22 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE handle, c
         }
         else
         {
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_032: [IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG if the option parameter is not a known option string*] */
-            result = IOTHUB_CLIENT_INVALID_ARG;
+            if (GetTransportProviderIfNecessary(transportState) == 0)
+            {
+                if (xio_setoption(transportState->xioTransport, option, value) == 0)
+                {
+                    result = IOTHUB_CLIENT_OK;
+                }
+                else
+                {
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_032: [IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG if the option parameter is not a known option string*] */
+                    result = IOTHUB_CLIENT_INVALID_ARG;
+                }
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_ERROR;
+            }
         }
     }
     return result;
