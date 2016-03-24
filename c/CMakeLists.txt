@@ -36,6 +36,16 @@ if(IN_OPENWRT)
     INCLUDE_DIRECTORIES("$ENV{TOOLCHAIN_DIR}/usr/include" "$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
 endif()
 
+if (LINUX)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        if("${build_python}" STREQUAL "ON")
+            # now all static libraries use PIC flag for Python shared lib
+            set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
+            set(CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}")
+        endif()
+    endif()
+endif()
+
 add_subdirectory(azure-c-shared-utility/c)
 add_subdirectory(azure-uamqp-c)
 add_subdirectory(azure-umqtt-c)
@@ -50,6 +60,7 @@ endif()
 if(NOT "${compileOption_CXX}" STREQUAL "OFF")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
 endif()
+
 
 
 #this project uses several other projects that are build not by these CMakeFiles
