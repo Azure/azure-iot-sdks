@@ -75,7 +75,7 @@ namespace Microsoft.Azure.Devices.Client
         readonly object thisLock = new object();
 
         volatile TaskCompletionSource<object> openTaskCompletionSource;
-        bool openCalled;
+        bool closeCalled;
 
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
         {
@@ -100,7 +100,11 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient Create(string hostname, IAuthenticationMethod authenticationMethod)
         {
+#if WINDOWS_UWP
+            return Create(hostname, authenticationMethod, TransportType.Http1);
+#else
             return Create(hostname, authenticationMethod, TransportType.Amqp);
+#endif
         }
 
         /// <summary>
@@ -329,6 +333,10 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public AsyncTask OpenAsync()
         {
+            if (this.closeCalled)
+            {
+                throw new InvalidOperationException("closed DeviceClient object cannot be opened again.");
+            }
 #if WINDOWS_UWP
             return impl.OpenAsync().AsTaskOrAsyncOp();
 #else
@@ -342,13 +350,14 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns></returns>
         public AsyncTask CloseAsync()
         {
+            this.closeCalled = true;
 #if !WINDOWS_UWP
             if (this.impl != null)
             {
 #endif
                 return this.impl.CloseAsync().AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
-        }
+            }
 
             return TaskHelpers.CompletedTask;
 #endif
