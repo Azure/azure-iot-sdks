@@ -56,7 +56,7 @@ You should have the following items ready before beginning the process:
 -  Open Atmel Studio7 and search for the Firmware Update Project from the ```File -> New -> Example Project...``` menu in Atmel Studio.
     -  Select ```SAM G, 32-bit``` from ```Device Family:``` and Type ```winc1500``` to input text field.
     -  Select the appropriate ```WINC1500 Firmware Update Project (vxx.x.x)``` project corresponding to your Xplained Pro board and then press OK button to import firmware update project and related documentation. (for example, ```WINC1500 Firmware Update Project(v19.4.4) - SAMG55 Xplained Pro```)
-    -  For detailed procedure for updating firmware and flashing the root certificate of the Azure IoT hub host, please refer the ```Atmel-AN004-Firmware-Update-Procedure-for-WINC1500-WiFi-Module-using-a-SAM-Xplained-Pro.pdf``` document. (this document is located in src/doc from the Step 3)
+    -  For detailed procedure for updating firmware and flashing the root certificate of the Azure IoT hub host, please refer the ```Atmel-AN004-Firmware-Update-Procedure-for-WINC1500-WiFi-Module-using-a-SAM-Xplained-Pro.pdf``` document. (This document is located in 'src/doc' on the project created on previous step)
 
 <a name="Build"></a>
 # Step 3: Build and Run the sample
