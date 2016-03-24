@@ -52,66 +52,18 @@ find_package(PythonLibs 2.7 REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
 link_directories(${PYTHON_LIBRARIES})
 
-set(iothub_client_python_c_files
-    ./src/iothub_client_python.cpp
-)
-
-set(iothub_client_mock_c_files
-    ./test/iothub_client_mock.cpp
-)
-
-if(WIN32)
-    set(iothub_client_python_c_files ${iothub_client_python_c_files} ./windows/dllmain.c ./windows/iothub_client.def)
-    set(iothub_client_mock_c_files ${iothub_client_mock_c_files} ./windows/dllmain.c )
-endif()
-
+# get iothub_client and protocols
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 if(${use_http})
-	include_directories(${IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER})
+    include_directories(${IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER})
 endif()
 if(${use_amqp})
-	include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER} ${UAMQP_INC_FOLDER})
+    include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER} ${UAMQP_INC_FOLDER})
 endif()
 if(${use_mqtt})
-	include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
+    include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
 endif()
-include_directories(.)
-include_directories(./src)
 
-add_library( iothub_client_python SHARED
-    ${iothub_client_python_c_files} 
-)
-
-add_library( iothub_client_mock SHARED
-    ${iothub_client_mock_c_files} 
-)
-
-# output name of python module is iothub_client
-SET_TARGET_PROPERTIES(iothub_client_python PROPERTIES OUTPUT_NAME "iothub_client")
-SET_TARGET_PROPERTIES(iothub_client_python PROPERTIES PREFIX "")
-SET_TARGET_PROPERTIES(iothub_client_mock PROPERTIES PREFIX "")
-IF(WIN32)
-    SET_TARGET_PROPERTIES(iothub_client_python PROPERTIES SUFFIX ".pyd")
-    SET_TARGET_PROPERTIES(iothub_client_mock PROPERTIES SUFFIX ".pyd")
-ENDIF(WIN32)
-
-target_link_libraries(  
-    iothub_client_python
-    iothub_client_mqtt_transport
-    iothub_client_http_transport
-    iothub_client_amqp_transport
-    iothub_client 
-    uamqp
-    ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
-)
-
-target_link_libraries(  
-    iothub_client_mock
-    ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
-)
-
-linkSharedUtil(iothub_client_python)
-linkUAMQP(iothub_client_python)
+add_subdirectory(src)
+add_subdirectory(test)

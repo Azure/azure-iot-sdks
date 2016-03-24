@@ -12,9 +12,9 @@ cd $build_root
 cd $build_root
 
 echo copy iothub_client library to samples folder
-cp ~/cmake/python/iothub_client.so ./python/device/samples/iothub_client.so
+cp ~/cmake/python/src/iothub_client.so ./python/device/samples/iothub_client.so
 echo copy iothub_client_mock library to tests folder
-cp ~/cmake/python/iothub_client_mock.so ./python/device/tests/iothub_client_mock.so
+cp ~/cmake/python/test/iothub_client_mock.so ./python/device/tests/iothub_client_mock.so
 
 cd $build_root/python/device/tests/
 ./iothub_client_ut.py
