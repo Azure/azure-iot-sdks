@@ -17,9 +17,9 @@ compileAsC99()
 
 # get boost
 if(WIN32)
-    set (Boost_INCLUDE_DIR $ENV{BOOST_ROOT})
+    set(Boost_INCLUDE_DIR $ENV{BOOST_ROOT})
+    set(Boost_USE_STATIC_LIBS    ON) # only find static libs
 endif()
-set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME     OFF)
 find_package(Boost COMPONENTS python REQUIRED)
