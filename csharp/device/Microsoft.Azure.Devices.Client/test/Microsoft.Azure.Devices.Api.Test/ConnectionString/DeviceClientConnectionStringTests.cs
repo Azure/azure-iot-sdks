@@ -25,8 +25,8 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var authMethod = new DeviceAuthenticationWithToken("device1", sasRule.ToSignature());
             var deviceClient = AmqpTransportHandler.Create(hostName, authMethod);
 
-            Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.IotHubConnection);
+            Assert.IsNotNull(deviceClient.IotHubConnection.ConnectionString);
         }
 
         [TestMethod]
@@ -36,8 +36,8 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             string connectionString = "HostName=acme.azure-devices.net;SharedAccessKeyName=AllAccessKey;DeviceId=device1;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
             var deviceClient = AmqpTransportHandler.CreateFromConnectionString(connectionString);
 
-            Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.IotHubConnection);
+            Assert.IsNotNull(deviceClient.IotHubConnection.ConnectionString);
             var iotHubConnectionStringBuilder = IotHubConnectionStringBuilder.Create(connectionString);
         }
 
@@ -49,8 +49,8 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             string connectionString = "HostName=acme.azure-devices.net;CredentialScope=IotHub;CredentialType=SharedAccessSignature;DeviceId=device1;SharedAccessKeyName=AllAccessKey;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
             var deviceClient = AmqpTransportHandler.CreateFromConnectionString(connectionString);
 
-            Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.IotHubConnection);
+            Assert.IsNotNull(deviceClient.IotHubConnection.ConnectionString);
         }
 
         [TestMethod]
@@ -60,8 +60,8 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             string connectionString = "HostName=acme.azure-devices.net;CredentialScope=IotHub;DeviceId=device1;SharedAccessSignature=SharedAccessSignature sr=dh%3a%2f%2facme.azure-devices.net&sig=poifbMLdBGtCJknubF2FW6FLn5vND5k1IKoeQ%2bONgkE%3d&se=87824124985&skn=AllAccessKey";
             var deviceClient = AmqpTransportHandler.CreateFromConnectionString(connectionString);
 
-            Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.IotHubConnection);
+            Assert.IsNotNull(deviceClient.IotHubConnection.ConnectionString);
         }
 
         [TestMethod]
@@ -71,8 +71,8 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             string connectionString = "HostName=acme.azure-devices.net;CredentialScope=IotHub;CredentialType=SharedAccessKey;DeviceId=device1;SharedAccessKeyName=AllAccessKey;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
             var deviceClient = AmqpTransportHandler.CreateFromConnectionString(connectionString);
 
-            Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.IotHubConnection);
+            Assert.IsNotNull(deviceClient.IotHubConnection.ConnectionString);
         }
 
         [TestMethod]
@@ -82,8 +82,8 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             string connectionString = "HostName=acme.azure-devices.net;CredentialScope=Device;CredentialType=SharedAccessSignature;DeviceId=device1;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
             var deviceClient = AmqpTransportHandler.CreateFromConnectionString(connectionString);
 
-            Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.IotHubConnection);
+            Assert.IsNotNull(deviceClient.IotHubConnection.ConnectionString);
         }
 
         [TestMethod]
@@ -93,8 +93,8 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             string connectionString = "HostName=acme.azure-devices.net;CredentialScope=Device;CredentialType=SharedAccessSignature;DeviceId=device1;SharedAccessSignature=SharedAccessSignature sr=dh%3a%2f%2facme.azure-devices.net&sig=poifbMLdBGtCJknubF2FW6FLn5vND5k1IKoeQ%2bONgkE%3d&se=87824124985&skn=AllAccessKey";
             var deviceClient = AmqpTransportHandler.CreateFromConnectionString(connectionString);
 
-            Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.IotHubConnection);
+            Assert.IsNotNull(deviceClient.IotHubConnection.ConnectionString);
         }
 
         [TestMethod]
@@ -104,8 +104,8 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             string connectionString = "HostName=acme.azure-devices.net;CredentialScope=Device;CredentialType=SharedAccessKey;DeviceId=device1;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
             var deviceClient = AmqpTransportHandler.CreateFromConnectionString(connectionString);
 
-            Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            Assert.IsNotNull(deviceClient.IotHubConnection);
+            Assert.IsNotNull(deviceClient.IotHubConnection.ConnectionString);
         }
 
         [TestMethod]

@@ -69,13 +69,13 @@ namespace Microsoft.Azure.Devices.Client
 
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, RegexOptions);
         TransportHandlerBase impl;
+        bool closeCalled;
 #if !WINDOWS_UWP
         readonly IotHubConnectionString iotHubConnectionString;
         readonly ITransportSettings[] transportSettings;
         readonly object thisLock = new object();
 
         volatile TaskCompletionSource<object> openTaskCompletionSource;
-        bool closeCalled;
 
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
         {
