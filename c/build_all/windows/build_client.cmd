@@ -48,12 +48,10 @@ set build-platform=%1
 goto args-continue
 
 :arg-use-websockets
-shift
 set CMAKE_use_wsio=ON
 goto args-continue
 
 :arg-build-python
-shift
 set CMAKE_build_python=ON
 goto args-continue
 
