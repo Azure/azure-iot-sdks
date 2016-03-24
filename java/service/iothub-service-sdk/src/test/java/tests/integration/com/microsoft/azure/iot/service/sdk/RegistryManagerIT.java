@@ -12,9 +12,7 @@ import com.microsoft.azure.iot.service.sdk.*;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.*;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,9 +36,11 @@ public class RegistryManagerIT
 
     private static Gson gson = new GsonBuilder().disableHtmlEscaping().create();
     private static CloudBlobClient blobClient;
+    private static CloudBlobContainer importContainer;
+    private static CloudBlobContainer exportContainer;
 
-    @Before
-    public void setUp() throws URISyntaxException, InvalidKeyException
+    @BeforeClass
+    public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException
     {
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
@@ -60,6 +60,38 @@ public class RegistryManagerIT
 
         CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageAccountConnextionString);
         blobClient = storageAccount.createCloudBlobClient();
+
+        // Creating the export storage container and getting its URI
+        String exportContainerName = "exportcontainersample";
+        exportContainer = blobClient.getContainerReference(exportContainerName);
+        exportContainer.createIfNotExists();
+
+        // Creating the import storage container and getting its URI
+        String importContainerName = "importcontainersample";
+        importContainer = blobClient.getContainerReference(importContainerName);
+        importContainer.createIfNotExists();
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception
+    {
+        //Deleting all devices created as a part of the bulk import-export test
+        List<ExportImportDevice> exportedDevices = runExportJob();
+        List<ExportImportDevice> devicesToBeDeleted = new ArrayList<>();
+
+        for(ExportImportDevice device : exportedDevices)
+        {
+            if (device.getId().startsWith("java-bulk-test-"))
+            {
+                devicesToBeDeleted.add(device);
+            }
+        }
+
+        runImportJob(devicesToBeDeleted, ImportMode.Delete);
+
+        //Cleaning up the containers
+        importContainer.deleteIfExists();
+        exportContainer.deleteIfExists();
     }
 
     @Test
@@ -78,7 +110,8 @@ public class RegistryManagerIT
         {
             Device device = registryManager.getDevice(deviceId);
             deviceExist = true;
-        } catch (IotHubException e)
+        }
+        catch (IotHubException e)
         {
         }
         if (deviceExist)
@@ -130,48 +163,12 @@ public class RegistryManagerIT
     @Test
     public void export_import_e2e() throws Exception
     {
-        Boolean excludeKeys = false;
-        String exportContainerName = "exportcontainersample";
-        String importContainerName = "importcontainersample";
-        Integer numberOfDevices = 10;
-
-        // Creating the export storage container and getting its URI
-        CloudBlobContainer exportContainer = blobClient.getContainerReference(exportContainerName);
-        exportContainer.createIfNotExists();
-        String containerSasUri = getContainerSasUri(exportContainer);
-
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-        JobProperties exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
-
-        JobProperties.JobStatus jobStatus;
-
-        while(true)
-        {
-            exportJob = registryManager.getJob(exportJob.getJobId());
-            jobStatus = exportJob.getStatus();
-            if (jobStatus == JobProperties.JobStatus.COMPLETED || jobStatus == JobProperties.JobStatus.FAILED)
-            {
-                break;
-            }
-            Thread.sleep(100);
-        }
-
-        exportContainer.deleteIfExists();
-
-        if (jobStatus != JobProperties.JobStatus.COMPLETED)
-        {
-            Assert.fail("The export job was not completed successfully");
-        }
-
-        // Creating the import storage container and getting its URI
-        CloudBlobContainer importContainer = blobClient.getContainerReference(importContainerName);
-        importContainer.createIfNotExists();
-
         //Creating the list of devices to be created, then deleted
-        List<ExportImportDevice> devices = new ArrayList<>(numberOfDevices);
+        Integer numberOfDevices = 10;
+        List<ExportImportDevice> devicesForImport = new ArrayList<>(numberOfDevices);
         for (int i = 0; i < numberOfDevices; i++)
         {
-            String deviceId = UUID.randomUUID().toString();
+            String deviceId = "java-bulk-test-" + UUID.randomUUID().toString();
             Device device = Device.createFromId(deviceId, null, null);
             AuthenticationMechanism authentication = new AuthenticationMechanism(device.getSymmetricKey());
 
@@ -180,17 +177,34 @@ public class RegistryManagerIT
             deviceToAdd.setAuthentication(authentication);
             deviceToAdd.setStatus(DeviceStatus.Enabled);
 
-            devices.add(deviceToAdd);
+            devicesForImport.add(deviceToAdd);
         }
 
         //importing devices - create mode
-        runImportJob(importContainer, devices, ImportMode.CreateOrUpdate);
+        runImportJob(devicesForImport, ImportMode.CreateOrUpdate);
+
+        List<ExportImportDevice> exportedDevices = runExportJob();
+
+        for (ExportImportDevice importedDevice : devicesForImport)
+        {
+            if (!exportedDevices.contains(importedDevice))
+            {
+                Assert.fail("Exported devices list does not contain device with id: " + importedDevice.getId());
+            }
+        }
 
         //importing devices - delete mode
-        runImportJob(importContainer, devices, ImportMode.Delete);
+        runImportJob(devicesForImport, ImportMode.Delete);
 
-        //Cleaning up the container
-        importContainer.deleteIfExists();
+        exportedDevices = runExportJob();
+
+        for (ExportImportDevice importedDevice : devicesForImport)
+        {
+            if (exportedDevices.contains(importedDevice))
+            {
+                Assert.fail("Device with id: " + importedDevice.getId() + " was not deleted by the import job");
+            }
+        }
     }
 
     private static String getContainerSasUri(CloudBlobContainer container) throws InvalidKeyException, StorageException
@@ -214,7 +228,56 @@ public class RegistryManagerIT
         return container.getUri() + "?" + sasContainerToken;
     }
 
-    private void runImportJob(CloudBlobContainer container, List<ExportImportDevice> devices, ImportMode importMode) throws Exception
+    private static List<ExportImportDevice> runExportJob() throws Exception
+    {
+        Boolean excludeKeys = false;
+        String containerSasUri = getContainerSasUri(exportContainer);
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        JobProperties exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
+
+        JobProperties.JobStatus jobStatus;
+
+        while(true)
+        {
+            exportJob = registryManager.getJob(exportJob.getJobId());
+            jobStatus = exportJob.getStatus();
+            if (jobStatus == JobProperties.JobStatus.COMPLETED || jobStatus == JobProperties.JobStatus.FAILED)
+            {
+                break;
+            }
+            Thread.sleep(100);
+        }
+
+        String exportedDevicesJson = "";
+        for(ListBlobItem blobItem : exportContainer.listBlobs())
+        {
+            if (blobItem instanceof  CloudBlockBlob)
+            {
+                CloudBlockBlob retrievedBlob = (CloudBlockBlob) blobItem;
+                exportedDevicesJson = retrievedBlob.downloadText();
+            }
+        }
+
+        List<ExportImportDevice> result = new ArrayList<>();
+
+        Scanner scanner = new Scanner(exportedDevicesJson);
+        while(scanner.hasNextLine())
+        {
+            String exportImportDeviceJson = scanner.nextLine();
+            ExportImportDevice device = gson.fromJson(exportImportDeviceJson, ExportImportDevice.class);
+            result.add(device);
+        }
+
+        if (jobStatus != JobProperties.JobStatus.COMPLETED)
+        {
+            Assert.fail("The export job was not completed successfully");
+        }
+
+        return result;
+    }
+
+    private static void runImportJob(List<ExportImportDevice> devices, ImportMode importMode) throws Exception
     {
         // Creating the json string to be submitted for import using the specified importMode
         StringBuilder devicesToAdd = new StringBuilder();
@@ -234,13 +297,13 @@ public class RegistryManagerIT
         // Creating the Azure storage blob and uploading the serialized string of devices
         InputStream stream = new ByteArrayInputStream(blobToImport);
         String importBlobName = "devices.txt";
-        CloudBlockBlob importBlob = container.getBlockBlobReference(importBlobName);
+        CloudBlockBlob importBlob = importContainer.getBlockBlobReference(importBlobName);
         importBlob.deleteIfExists();
         importBlob.upload(stream, blobToImport.length);
 
         // Starting the import job
         RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-        JobProperties importJob = registryManager.importDevices(getContainerSasUri(container), getContainerSasUri(container));
+        JobProperties importJob = registryManager.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
 
         // Waiting for the import job to complete
         while(true)
