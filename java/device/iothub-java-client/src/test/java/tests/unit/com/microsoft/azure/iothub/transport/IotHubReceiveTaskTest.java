@@ -61,7 +61,7 @@ public class IotHubReceiveTaskTest
         {
             {
                 mockTransport.handleMessage();
-                result = new Throwable("Test that receive does not crash.");
+                result = new Throwable("Test if the receive task does not crash.");
             }
         };
 
