@@ -45,7 +45,7 @@ You should have the following items ready before beginning the process:
 # Step 2: Prepare your Device
 - This section shows you how to set up a development environment for the Azure IoT device SDK with the SAMG55 and WINC1500 board.
  - Make sure : you should connect a WINC1500 to "EXT1" port on SAMG55 board.
--  If you need to setup your SAMG55 device, please refer the getting started instructions [here](<http://www.atmel.com/tools/ATSAMG55-XPRO.aspx?tab=documents>) .
+-  'If you need to setup your SAMG55 device, please refer to the "Getting Started" instructions here. [here](<http://www.atmel.com/tools/ATSAMG55-XPRO.aspx?tab=documents>) .
 
 ## How to update firmware and Flash the root certificate of the Azure IoT hub host
 -  Please convert ms.der to ms.cer with following steps on Windows pc.
