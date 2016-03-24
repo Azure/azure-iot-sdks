@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
@@ -8,14 +11,13 @@ namespace Microsoft.Azure.Devices.Client
 
     sealed class IotHubSingleTokenConnection : IotHubConnection
     {
+        readonly IotHubScopeConnectionPool iotHubScopeConnectionPool;
         IotHubTokenRefresher iotHubTokenRefresher;
 
-        IotHubConnectionCache.ConnectionReferenceCounter ConnectionReferenceCounter { get; }
-
-        public IotHubSingleTokenConnection(IotHubConnectionCache.ConnectionReferenceCounter connectionReferenceCounter, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
-            :base(connectionString, accessRights, amqpTransportSettings)
+        public IotHubSingleTokenConnection(IotHubScopeConnectionPool iotHubScopeConnectionPool, IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
+            :base(connectionString, amqpTransportSettings)
         {
-            this.ConnectionReferenceCounter = connectionReferenceCounter;
+            this.iotHubScopeConnectionPool = iotHubScopeConnectionPool;
             this.FaultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
         }
 
@@ -31,9 +33,9 @@ namespace Microsoft.Azure.Devices.Client
 
         public override void Release()
         {
-            if (this.ConnectionReferenceCounter != null)
+            if (this.iotHubScopeConnectionPool != null)
             {
-                this.ConnectionReferenceCounter.RemoveRef();
+                this.iotHubScopeConnectionPool.RemoveRef();
             }
             else
             {
@@ -120,9 +122,8 @@ namespace Microsoft.Azure.Devices.Client
             this.iotHubTokenRefresher = new IotHubTokenRefresher(
                 amqpSession, 
                 this.ConnectionString, 
-                this.ConnectionString.AmqpEndpoint.AbsoluteUri, 
-                this.AmqpTransportSettings.OperationTimeout,
-                this.AccessRights);
+                this.ConnectionString.AmqpEndpoint.AbsoluteUri
+                );
 
             // Send Cbs token for new connection first
             await this.iotHubTokenRefresher.SendCbsTokenAsync(timeoutHelper.RemainingTime());

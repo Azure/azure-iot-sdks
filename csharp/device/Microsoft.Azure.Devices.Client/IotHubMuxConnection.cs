@@ -16,38 +16,40 @@ namespace Microsoft.Azure.Devices.Client
     sealed class IotHubMuxConnection : IotHubConnection
     {
 #if !WINDOWS_UWP
-        readonly IotHubConnectionCache.MuxConnectionPool muxConnectionPool;
+        readonly IotHubDeviceScopeConnectionPool deviceScopeConnectionPool;
         readonly ConcurrentDictionary<AmqpObject, IotHubTokenRefresher> iotHubTokenRefreshers;
-        int deviceCount;
+        readonly IOThreadTimer idleTimer;
+        readonly TimeSpan idleTimeout;
+        readonly object thisLock;
+        uint deviceCount;
 
-        object ThisLock { get; set; }
-
-        public IotHubMuxConnection(IotHubConnectionCache.MuxConnectionPool muxConnectionPool, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
-            : base(connectionString, accessRights, amqpTransportSettings)
+        public IotHubMuxConnection(IotHubDeviceScopeConnectionPool deviceScopeConnectionPool, IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
+            : base(connectionString, amqpTransportSettings)
         {
-            this.muxConnectionPool = muxConnectionPool;
+            this.deviceScopeConnectionPool = deviceScopeConnectionPool;
             this.FaultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
             this.iotHubTokenRefreshers = new ConcurrentDictionary<AmqpObject, IotHubTokenRefresher>();
-            this.ThisLock = new object();
+            this.thisLock = new object();
+            this.idleTimer = new IOThreadTimer(s => ((IotHubMuxConnection)s).IdleTimerCallback(), this, false);
+            this.idleTimeout = amqpTransportSettings.AmqpConnectionPoolSettings.ConnectionIdleTimeout;
+            this.idleTimer.Set(this.idleTimeout);
         }
 
         public override Task CloseAsync()
         {
-            this.CancelTokenRefreshers();
             return this.FaultTolerantSession.CloseAsync();
         }
 
         public override void SafeClose(Exception exception)
         {
-            this.CancelTokenRefreshers();
             this.FaultTolerantSession.Close();
         }
 
         public override void Release()
         {
-            if (this.muxConnectionPool != null)
+            if (this.deviceScopeConnectionPool != null)
             {
-                this.muxConnectionPool.DecrementDevices(this);
+                this.deviceScopeConnectionPool.DecrementNumDevices(this);
             }
             else
             {
@@ -55,19 +57,36 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        public int IncrementNumberOfDevices()
+        public bool IncrementNumberOfDevices(out uint deviceCount)
         {
-            lock (this.ThisLock)
+            lock (this.thisLock)
             {
-                return ++this.deviceCount;
+                if (this.deviceCount == 0)
+                {
+                    if (!this.idleTimer.Cancel())
+                    {
+                        deviceCount = 0;
+                        return false;
+                    }
+                }
+
+                deviceCount = ++this.deviceCount;
+                return true;
             }
         }
 
-        public int DecrementNumberOfDevices()
+        public uint DecrementNumberOfDevices()
         {
-            lock (this.ThisLock)
+            lock (this.thisLock)
             {
-                return --this.deviceCount;
+                if (--this.deviceCount == 0)
+                {
+                    this.idleTimer.Set(this.idleTimeout);
+                }
+
+                Fx.Assert(this.deviceCount >= 0, "Cached IotHubMuxConnection's device count should never be below 0!");
+
+                return this.deviceCount;
             }
         }
 
@@ -170,21 +189,19 @@ namespace Microsoft.Azure.Devices.Client
                 var iotHubLinkTokenRefresher = new IotHubTokenRefresher(
                     this.FaultTolerantSession.Value, 
                     connectionString, 
-                    audience, 
-                    this.AmqpTransportSettings.OperationTimeout,
-                    this.AccessRights
+                    audience
                     );
-
-                link.SafeAddClosed((s, e) =>
-                {
-                    if (this.iotHubTokenRefreshers.TryRemove(link, out iotHubLinkTokenRefresher))
-                    {
-                        iotHubLinkTokenRefresher.Cancel();
-                    }
-                });
 
                 if (this.iotHubTokenRefreshers.TryAdd(link, iotHubLinkTokenRefresher))
                 {
+                    link.SafeAddClosed((s, e) =>
+                    {
+                        if (this.iotHubTokenRefreshers.TryRemove(link, out iotHubLinkTokenRefresher))
+                        {
+                            iotHubLinkTokenRefresher.Cancel();
+                        }
+                    });
+
                     // Send Cbs token for new link first
                     await iotHubLinkTokenRefresher.SendCbsTokenAsync(timeoutHelper.RemainingTime());
                 }
@@ -214,12 +231,14 @@ namespace Microsoft.Azure.Devices.Client
 
         void CancelTokenRefreshers()
         {
-            foreach (var iotHubLinkTokenRefresher in this.iotHubTokenRefreshers.Values)
-            {
-                iotHubLinkTokenRefresher.Cancel();
-            }
-
             this.iotHubTokenRefreshers.Clear();
+        }
+
+        void IdleTimerCallback()
+        {
+            Fx.Assert(this.deviceCount == 0, "Cached IotHubMuxConnection's device count should be zero when idle timeout occurs!");
+            this.deviceScopeConnectionPool.Remove(this);
+            this.CloseAsync().Fork();
         }
 #endif
     }

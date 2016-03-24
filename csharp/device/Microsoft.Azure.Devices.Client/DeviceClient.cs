@@ -62,6 +62,9 @@ namespace Microsoft.Azure.Devices.Client
     /// Contains methods that a device can use to send messages to and receive from the service.
     /// </summary>
     public sealed class DeviceClient
+#if !WINDOWS_UWP
+       : IDisposable
+#endif
     {
         const string DeviceId = "DeviceId";
         const string DeviceIdParameterPattern = @"(^\s*?|.*;\s*?)" + DeviceId + @"\s*?=.*";
@@ -76,6 +79,7 @@ namespace Microsoft.Azure.Devices.Client
         readonly object thisLock = new object();
 
         volatile TaskCompletionSource<object> openTaskCompletionSource;
+        bool disposed;
 
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
         {
@@ -173,7 +177,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString, TransportType transportType)
         {
-            if (connectionString  == null)
+            if (connectionString == null)
             {
                 throw new ArgumentNullException("connectionString");
             }
@@ -185,7 +189,7 @@ namespace Microsoft.Azure.Devices.Client
                     throw new NotImplementedException("Amqp protocol is not supported");
 #else
                     return CreateFromConnectionString(connectionString, new ITransportSettings[]
-            {
+                    {
                         new AmqpTransportSettings(TransportType.Amqp_Tcp_Only),
                         new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
                     });
@@ -256,7 +260,7 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentNullException("connectionString");
             }
 
-            if (transportSettings == null) 
+            if (transportSettings == null)
             {
                 throw new ArgumentNullException("transportSettings");
             }
@@ -335,7 +339,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (this.closeCalled)
             {
-                throw new InvalidOperationException("closed DeviceClient object cannot be opened again.");
+                throw new ObjectDisposedException("DeviceClient object is closed.");
             }
 #if WINDOWS_UWP
             return impl.OpenAsync().AsTaskOrAsyncOp();
@@ -431,13 +435,13 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
                 });
-        }
+            }
             else
             {
 #endif
                 return this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
-        }
+            }
 #endif
         }
 
@@ -456,7 +460,7 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.CompleteAsync(message).AsTaskOrAsyncOp();
                 });
-        }
+            }
             else
             {
 #endif
@@ -484,7 +488,7 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.AbandonAsync(lockToken).AsTaskOrAsyncOp();
                 });
-        }
+            }
             else
             {
 #endif
@@ -509,13 +513,13 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.AbandonAsync(message).AsTaskOrAsyncOp();
                 });
-        }
+            }
             else
             {
 #endif
                 return this.impl.AbandonAsync(message).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
-        }
+            }
 #endif
         }
 
@@ -537,7 +541,7 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.RejectAsync(lockToken).AsTaskOrAsyncOp();
                 });
-        }
+            }
             else
             {
 #endif
@@ -562,7 +566,7 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.RejectAsync(message).AsTaskOrAsyncOp();
                 });
-        }
+            }
             else
             {
 #endif
@@ -593,7 +597,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
                 return this.impl.SendEventAsync(message).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
-        }
+            }
 #endif
         }
 
@@ -625,9 +629,14 @@ namespace Microsoft.Azure.Devices.Client
 #if !WINDOWS_UWP
         async Task EnsureOpenedAsync()
         {
+            if (this.closeCalled)
+            {
+                throw new ObjectDisposedException("DeviceClient object is closed");
+            }
+
             bool executeOpen = false;
             var localTcs = this.openTaskCompletionSource;
-       
+
             if (localTcs == null)
             {
                 lock (this.thisLock)
@@ -672,7 +681,7 @@ namespace Microsoft.Azure.Devices.Client
                 try
                 {
                     switch (transportSetting.GetTransportType())
-                    {                    
+                    {
                         case TransportType.Amqp_WebSocket_Only:
                         case TransportType.Amqp_Tcp_Only:
                             helper = new AmqpTransportHandler(this.iotHubConnectionString, transportSetting as AmqpTransportSettings);
@@ -723,6 +732,12 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             throw lastException;
+        }
+
+        public void Dispose()
+        {
+            this.impl = null;
+            this.openTaskCompletionSource = null;
         }
 #endif
     }

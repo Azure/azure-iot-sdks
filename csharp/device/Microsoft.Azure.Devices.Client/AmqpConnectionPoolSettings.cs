@@ -11,57 +11,55 @@ namespace Microsoft.Azure.Devices.Client
 
     public sealed class AmqpConnectionPoolSettings
     {
-        static readonly TimeSpan DefaultCacheIdleTimeout = TimeSpan.FromMinutes(2);
-        const uint DefaultNumConnectionPools = 1;
-        internal const uint MaxNumConnectionPools = ushort.MaxValue;
+        static readonly TimeSpan DefaultConnectionIdleTimeout = TimeSpan.FromMinutes(2);
+        const uint DefaultPoolSize = 1;
+        internal const uint MaxNumberOfPools = ushort.MaxValue;
         internal const uint DevicesPerConnectionLevel1 = 500;
-        internal const uint DevicesPerConnectionLevel2 = 950;
+        internal const uint DevicesPerConnectionLevel2 = 999;
 
-        uint numConnectionPools;
-        TimeSpan cacheIdleTimeout;
+        uint maxPoolSize;
+        TimeSpan connectionIdleTimeout;
 
         public AmqpConnectionPoolSettings()
         {
-            this.numConnectionPools = DefaultNumConnectionPools;
-            this.cacheIdleTimeout = DefaultCacheIdleTimeout;
+            this.maxPoolSize = DefaultPoolSize;
+            this.Pooling = true;
+            this.connectionIdleTimeout = DefaultConnectionIdleTimeout;
         }
 
-        public uint NumConnectionPools
+        public uint MaxPoolSize
         {
-            get { return this.numConnectionPools; }
+            get { return this.maxPoolSize; }
 
-            set { this.SetNumberOfConnectionPools(value); }
-        }
-
-        public TimeSpan CacheIdleTimeout
-        {
-            get { return this.cacheIdleTimeout; }
-
-            set { this.SetCacheIdleTimeout(value); }
-        }
-
-        void SetNumberOfConnectionPools(uint numPools)
-        {
-            // zero is allowed. This disables connection pooling for device-scoped connection strings
-            if (numPools <= MaxNumConnectionPools)
+            set
             {
-                this.numConnectionPools = numPools;
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException("numPools");
+                if (value > 0 && value <= MaxNumberOfPools)
+                {
+                    this.maxPoolSize = value;
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException("value");
+                }
             }
         }
 
-        void SetCacheIdleTimeout(TimeSpan cacheIdleTimeout)
+        public bool Pooling { get; set; }
+
+        public TimeSpan ConnectionIdleTimeout
         {
-            if (cacheIdleTimeout > TimeSpan.Zero)
+            get { return this.connectionIdleTimeout; }
+
+            set
             {
-                this.cacheIdleTimeout = cacheIdleTimeout;
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException("cacheIdleTimeout");
+                if (value > TimeSpan.Zero)
+                {
+                    this.connectionIdleTimeout = value;
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException("value");
+                }
             }
         }
     }

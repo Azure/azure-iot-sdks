@@ -15,15 +15,14 @@ namespace Microsoft.Azure.Devices.Client
 #if !WINDOWS_UWP
         static readonly TimeSpan RefreshTokenBuffer = TimeSpan.FromMinutes(2);
         static readonly TimeSpan RefreshTokenRetryInterval = TimeSpan.FromSeconds(30);
+        static readonly string[] AccessRightsStringArray = AccessRightsHelper.AccessRightsToStringArray(AccessRights.DeviceConnect);
 
         readonly AmqpSession amqpSession;
         readonly IotHubConnectionString connectionString;
         readonly string audience;
-        readonly IOThreadTimer refreshTokenTimer;
-        readonly TimeSpan operationTimeout;
-        readonly string[] accessRightsStringArray;
+        volatile bool taskCancelled;
 
-        public IotHubTokenRefresher(AmqpSession amqpSession, IotHubConnectionString connectionString, string audience, TimeSpan operationTimeout, AccessRights accessRights)
+        public IotHubTokenRefresher(AmqpSession amqpSession, IotHubConnectionString connectionString, string audience)
         {
             if (amqpSession == null)
             {
@@ -33,67 +32,66 @@ namespace Microsoft.Azure.Devices.Client
             this.amqpSession = amqpSession;
             this.connectionString = connectionString;
             this.audience = audience;
-            this.refreshTokenTimer = new IOThreadTimer(s => ((IotHubTokenRefresher)s).OnLinkRefreshTokenAsync(), this, false);
-            this.operationTimeout = operationTimeout;
-            this.accessRightsStringArray = AccessRightsHelper.AccessRightsToStringArray(accessRights);
+            this.taskCancelled = false;
         }
 
         public void Cancel()
         {
-            this.refreshTokenTimer.Cancel();
+            this.taskCancelled = true;
         }
 
         public async Task SendCbsTokenAsync(TimeSpan timeout)
         {
-            if (!this.amqpSession.IsClosing())
+            // Send a Cbs Token right away and fork off a task to continuously do it
+            var cbsLink = this.amqpSession.Connection.Extensions.Find<AmqpCbsLink>();
+            var expiresAtUtc = await cbsLink.SendTokenAsync(
+                this.connectionString,
+                this.connectionString.AmqpEndpoint,
+                this.audience,
+                this.connectionString.AmqpEndpoint.AbsoluteUri,
+                AccessRightsStringArray,
+                timeout);
+
+            this.SendCbsTokenLoopAsync(timeout).Fork();
+        }
+
+        async Task SendCbsTokenLoopAsync(TimeSpan timeout)
+        {
+            while (!this.amqpSession.IsClosing())
             {
+                if (this.taskCancelled)
+                {
+                    break;
+                }
+
                 var cbsLink = this.amqpSession.Connection.Extensions.Find<AmqpCbsLink>();
                 if (cbsLink != null)
                 {
-                    var expiresAtUtc = await cbsLink.SendTokenAsync(
-                        this.connectionString,
-                        this.connectionString.AmqpEndpoint,
-                        this.audience,
-                        this.connectionString.AmqpEndpoint.AbsoluteUri,
-                        this.accessRightsStringArray,
-                        timeout);
-                    this.ScheduleLinkTokenRefresh(expiresAtUtc);
+                    try
+                    {
+                        var expiresAtUtc = await cbsLink.SendTokenAsync(
+                             this.connectionString,
+                             this.connectionString.AmqpEndpoint,
+                             this.audience,
+                             this.connectionString.AmqpEndpoint.AbsoluteUri,
+                             AccessRightsStringArray,
+                             timeout);
+                        await Task.Delay(RefreshTokenBuffer);
+                    }
+                    catch (Exception exception)
+                    {
+                        if (Fx.IsFatal(exception))
+                        {
+                            throw;
+                        }
+
+                        await Task.Delay(RefreshTokenRetryInterval);
+                    }
                 }
                 else
                 {
-                    // TODO: This is an error
+                    break;
                 }
-            }
-        }
-
-        void ScheduleLinkTokenRefresh(DateTime expiresAtUtc)
-        {
-            if (expiresAtUtc == DateTime.MaxValue)
-            {
-                return;
-            }
-
-            TimeSpan timeFromNow = expiresAtUtc.Subtract(RefreshTokenBuffer).Subtract(DateTime.UtcNow);
-            if (timeFromNow > TimeSpan.Zero)
-            {
-                this.refreshTokenTimer.Set(timeFromNow);
-            }
-        }
-
-        async void OnLinkRefreshTokenAsync()
-        {
-            try
-            {
-                await this.SendCbsTokenAsync(this.operationTimeout);
-            }
-            catch (Exception exception)
-            {
-                if (Fx.IsFatal(exception))
-                {
-                    throw;
-                }
-
-                this.refreshTokenTimer.Set(RefreshTokenRetryInterval);
             }
         }
     }

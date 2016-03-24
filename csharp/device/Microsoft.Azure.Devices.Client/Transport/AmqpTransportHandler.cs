@@ -15,8 +15,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
     sealed class AmqpTransportHandler : TransportHandlerBase
     {
-        static readonly IotHubConnectionCache tcpConnectionCache = new IotHubConnectionCache(AccessRights.DeviceConnect);
-        static readonly IotHubConnectionCache wsConnectionCache = new IotHubConnectionCache(AccessRights.DeviceConnect);
+        static readonly IotHubConnectionCache tcpConnectionCache = new IotHubConnectionCache();
+        static readonly IotHubConnectionCache wsConnectionCache = new IotHubConnectionCache();
         readonly string deviceId;
         readonly Client.FaultTolerantAmqpObject<SendingAmqpLink> faultTolerantEventSendingLink;
         readonly Client.FaultTolerantAmqpObject<ReceivingAmqpLink> faultTolerantDeviceBoundReceivingLink;
@@ -130,6 +130,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         protected override Task OnCloseAsync()
         {
             GC.SuppressFinalize(this);
+            this.faultTolerantEventSendingLink.CloseAsync().Fork();
+            this.faultTolerantDeviceBoundReceivingLink.CloseAsync().Fork();
             this.IotHubConnection.Release();
             return TaskHelpers.CompletedTask;
         }

@@ -21,23 +21,17 @@ namespace Microsoft.Azure.Devices.Client
     abstract class IotHubConnection
     {
 #if !WINDOWS_UWP
-        protected AccessRights AccessRights { get; }
-
         protected FaultTolerantAmqpObject<AmqpSession> FaultTolerantSession { get; set; }
 
         protected AmqpTransportSettings AmqpTransportSettings { get; }
-
-
 
         static readonly AmqpVersion AmqpVersion_1_0_0 = new AmqpVersion(1, 0, 0);
         const string DisableServerCertificateValidationKeyName = "Microsoft.Azure.Devices.DisableServerCertificateValidation";
         static readonly Lazy<bool> DisableServerCertificateValidation = new Lazy<bool>(InitializeDisableServerCertificateValidation);
 
-        protected IotHubConnection(IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
+        protected IotHubConnection(IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
         {
-
             this.ConnectionString = connectionString;
-            this.AccessRights = accessRights;
             this.AmqpTransportSettings = amqpTransportSettings;
         }
 

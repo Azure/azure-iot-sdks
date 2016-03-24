@@ -3,58 +3,82 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
-    using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq;
 
 #if !WINDOWS_UWP
     sealed class IotHubConnectionCache
     {
-        readonly ConcurrentDictionary<IotHubConnectionString, ConnectionReferenceCounter> connections;
-        readonly AccessRights accessRights;
+        readonly ConcurrentDictionary<IotHubConnectionString, IotHubScopeConnectionPool> hubScopeConnectionPools;
+        readonly ConcurrentDictionary<IotHubConnectionString, IotHubDeviceScopeConnectionPool> deviceScopeConnectionPools;
 
-        public IotHubConnectionCache(AccessRights accessRights)
+        public IotHubConnectionCache()
         {
-            this.connections = new ConcurrentDictionary<IotHubConnectionString, ConnectionReferenceCounter>(new IotHubConnectionCacheStringComparer());
-            this.accessRights = accessRights;
+            this.hubScopeConnectionPools = new ConcurrentDictionary<IotHubConnectionString, IotHubScopeConnectionPool>(new HubScopeConnectionPoolStringComparer());
+            this.deviceScopeConnectionPools = new ConcurrentDictionary<IotHubConnectionString, IotHubDeviceScopeConnectionPool>(new DeviceScopeConnectionPoolStringComparer());
         }
 
         public IotHubConnection GetConnection(IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
         {
-            if (connectionString.SharedAccessKeyName == null & amqpTransportSettings.AmqpConnectionPoolSettings.NumConnectionPools == 0)
-            {
-                // Connection pooling is turned off for device-scope connection strings
-                return new IotHubMuxConnection(null, connectionString, this.accessRights, amqpTransportSettings);
-            }
-
+            IotHubConnection iotHubConnection;
             // Use connection caching for both hub-scope and device-scope connection strings
             if (connectionString.SharedAccessKeyName != null)
             {
-                ConnectionReferenceCounter connectionReferenceCounter;
+                IotHubScopeConnectionPool connectionReferenceCounter;
                 do
                 {
-                    connectionReferenceCounter = this.connections.GetOrAdd(connectionString, k => new ConnectionReferenceCounter(this, k, this.accessRights, amqpTransportSettings));
+                    connectionReferenceCounter = this.hubScopeConnectionPools.GetOrAdd(connectionString, k => new IotHubScopeConnectionPool(this, k, amqpTransportSettings));
                 }
                 while (!connectionReferenceCounter.TryAddRef());
 
-                return connectionReferenceCounter.Connection;
+                iotHubConnection = connectionReferenceCounter.Connection;
+            }
+            else if (amqpTransportSettings.AmqpConnectionPoolSettings.Pooling)
+            {
+                do
+                {
+                    IotHubDeviceScopeConnectionPool iotHubDeviceScopeConnectionPool =
+                        this.deviceScopeConnectionPools.GetOrAdd(
+                            connectionString,
+                            k => new IotHubDeviceScopeConnectionPool(this, k, amqpTransportSettings)
+                            );
+                    iotHubConnection = iotHubDeviceScopeConnectionPool.GetConnection();
+                }
+                while (iotHubConnection == null);
             }
             else
             {
-                MuxConnectionPool muxConnectionPool;
-                do
-                {
-                    muxConnectionPool = (MuxConnectionPool)this.connections.GetOrAdd(connectionString, k => new MuxConnectionPool(this, k, this.accessRights, amqpTransportSettings));
-                }
-                while (!muxConnectionPool.TryAddRef());
-
-                return muxConnectionPool.Connection;
+                // Connection pooling is turned off for device-scope connection strings
+                iotHubConnection =  new IotHubMuxConnection(null, connectionString, amqpTransportSettings);
             }
+
+            return iotHubConnection;
+        }
+
+        public bool RemoveHubScopeConnectionPool(IotHubConnectionString connectionString)
+        {
+            IotHubScopeConnectionPool iotHubScopeConnectionPool;
+            if (this.hubScopeConnectionPools.TryRemove(connectionString, out iotHubScopeConnectionPool))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool RemoveDeviceScopeConnectionPool(IotHubConnectionString connectionString)
+        {
+            IotHubDeviceScopeConnectionPool iotHubDeviceScopeConnectionPool;
+            if (this.deviceScopeConnectionPools.TryRemove(connectionString, out iotHubDeviceScopeConnectionPool))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         // A comparer used to see if two IotHubConnectionStrings can share a common AmqpConnection between them.
-        class IotHubConnectionCacheStringComparer : IEqualityComparer<IotHubConnectionString>
+        class HubScopeConnectionPoolStringComparer : IEqualityComparer<IotHubConnectionString>
         {
             public bool Equals(IotHubConnectionString connectionString1, IotHubConnectionString connectionString2)
             {
@@ -67,22 +91,12 @@ namespace Microsoft.Azure.Devices.Client
                     return false;
                 }
 
-                if (connectionString1.SharedAccessKeyName != null || connectionString2.SharedAccessKeyName != null)
-                {
-                    // Hub-Scope connection strings must match fully
-                    return connectionString1.IotHubName == connectionString2.IotHubName &&
-                        connectionString1.AmqpEndpoint == connectionString2.AmqpEndpoint &&
-                        connectionString1.SharedAccessKey == connectionString2.SharedAccessKey &&
-                        connectionString1.SharedAccessKeyName == connectionString2.SharedAccessKeyName &&
-                        connectionString1.SharedAccessSignature == connectionString2.SharedAccessSignature;
-                }
-                else
-                {
-                    // device-scope connection strings only need to match on IotHubName and Endpoint
-                    return connectionString1.IotHubName == connectionString2.IotHubName &&
-                        connectionString1.AmqpEndpoint == connectionString2.AmqpEndpoint;
-                }
-
+                // Hub-Scope connection strings must match fully
+                return connectionString1.IotHubName == connectionString2.IotHubName &&
+                    connectionString1.AmqpEndpoint == connectionString2.AmqpEndpoint &&
+                    connectionString1.SharedAccessKey == connectionString2.SharedAccessKey &&
+                    connectionString1.SharedAccessKeyName == connectionString2.SharedAccessKeyName &&
+                    connectionString1.SharedAccessSignature == connectionString2.SharedAccessSignature;
             }
 
             public int GetHashCode(IotHubConnectionString connectionString)
@@ -92,221 +106,43 @@ namespace Microsoft.Azure.Devices.Client
                     return 0;
                 }
 
-                if (connectionString.SharedAccessKeyName != null)
-                {
-                    return HashCode.CombineHashCodes(
-                        HashCode.SafeGet(connectionString.IotHubName),
-                        HashCode.SafeGet(connectionString.AmqpEndpoint),
-                        HashCode.SafeGet(connectionString.SharedAccessKey),
-                        HashCode.SafeGet(connectionString.SharedAccessKeyName),
-                        HashCode.SafeGet(connectionString.SharedAccessSignature));
-                }
-                else
-                {
-                    return HashCode.CombineHashCodes(
-                        HashCode.SafeGet(connectionString.IotHubName),
-                        HashCode.SafeGet(connectionString.AmqpEndpoint));
-                }
+                return HashCode.CombineHashCodes(
+                    HashCode.SafeGet(connectionString.IotHubName),
+                    HashCode.SafeGet(connectionString.AmqpEndpoint),
+                    HashCode.SafeGet(connectionString.SharedAccessKey),
+                    HashCode.SafeGet(connectionString.SharedAccessKeyName),
+                    HashCode.SafeGet(connectionString.SharedAccessSignature));
             }
         }
 
-        internal class ConnectionReferenceCounter
+        class DeviceScopeConnectionPoolStringComparer : IEqualityComparer<IotHubConnectionString>
         {
-            readonly IotHubConnectionCache cache;
-            readonly IOThreadTimer idleTimer;
-            readonly TimeSpan idleTimeout;
-
-            int referenceCount;
-
-            protected IotHubConnectionString ConnectionString { get; }
-
-            public ConnectionReferenceCounter(IotHubConnectionCache cache, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
+            public bool Equals(IotHubConnectionString connectionString1, IotHubConnectionString connectionString2)
             {
-                this.cache = cache;
-                this.ConnectionString = connectionString;
-
-                if (this.ConnectionString.SharedAccessKeyName != null)
+                if (connectionString1 == null && connectionString2 == null)
                 {
-                    this.Connection = new IotHubSingleTokenConnection(this, connectionString, accessRights, amqpTransportSettings);
-                }
-
-                this.ThisLock = new object();
-                this.idleTimer = new IOThreadTimer(s => ((ConnectionReferenceCounter)s).IdleTimerCallback(), this, false);
-                this.idleTimeout = amqpTransportSettings.AmqpConnectionPoolSettings.CacheIdleTimeout;
-                this.idleTimer.Set(this.idleTimeout);
-            }
-
-            public virtual IotHubConnection Connection { get; }
-
-            object ThisLock { get; set; }
-
-            public bool TryAddRef()
-            {
-                lock (this.ThisLock)
-                {
-                    if (this.referenceCount == 0)
-                    {
-                        if (!this.idleTimer.Cancel())
-                        {
-                            return false;
-                        }
-                    }
-
-                    ++this.referenceCount;
                     return true;
                 }
-            }
-
-            public void RemoveRef()
-            {
-                lock (this.ThisLock)
+                else if (connectionString1 == null || connectionString2 == null)
                 {
-                    if (--this.referenceCount == 0)
-                    {
-                        this.idleTimer.Set(this.idleTimeout);
-                    }
-
-                    Fx.Assert(this.referenceCount >= 0, "Cached IotHubConnection's ref count should never be below 0!");
-                }
-            }
-
-            protected virtual void IdleTimerCallback()
-            {
-                Fx.Assert(this.referenceCount == 0, "Cached IotHubConnection's ref count should be zero when idle timeout occurs!");
-                ConnectionReferenceCounter connectionReferenceCounter;
-                this.cache.connections.TryRemove(this.ConnectionString, out connectionReferenceCounter);
-                this.Connection.CloseAsync().Fork();
-            }
-        }
-
-        internal class MuxConnectionPool : ConnectionReferenceCounter
-        {
-            readonly HashSet<IotHubMuxConnection> fullyLoadedPools;
-            readonly HashSet<IotHubMuxConnection> semiLoadedPools;
-            readonly HashSet<IotHubMuxConnection> lightlyLoadedPools;
-            readonly AccessRights accessRights;
-            readonly AmqpTransportSettings amqpTransportSettings;
-
-            public MuxConnectionPool(IotHubConnectionCache cache, IotHubConnectionString connectionString, AccessRights accessRights, AmqpTransportSettings amqpTransportSettings)
-                : base(cache, connectionString, accessRights, amqpTransportSettings)
-            {
-                this.accessRights = accessRights;
-                this.amqpTransportSettings = amqpTransportSettings;
-                this.fullyLoadedPools = new HashSet<IotHubMuxConnection>();
-                this.semiLoadedPools = new HashSet<IotHubMuxConnection>();
-                this.lightlyLoadedPools = new HashSet<IotHubMuxConnection>();
-                this.ThisLock = new object();
-            }
-
-            public override IotHubConnection Connection
-            {
-                get
-                {
-                    return this.PickConnectionPool();
-                }
-            }
-
-            public bool IncrementDevices(IotHubMuxConnection iotHubMuxConnection)
-            {
-                lock (this.ThisLock)
-                {
-                    var numDevices = iotHubMuxConnection.IncrementNumberOfDevices();
-
-                    if (numDevices > AmqpConnectionPoolSettings.DevicesPerConnectionLevel1 &&
-                        numDevices <= AmqpConnectionPoolSettings.DevicesPerConnectionLevel2)
-                    {
-                        if (this.lightlyLoadedPools.Contains(iotHubMuxConnection))
-                        {
-                            this.lightlyLoadedPools.Remove(iotHubMuxConnection);
-                            this.semiLoadedPools.Add(iotHubMuxConnection);
-                        }
-                    }
-                    else if (numDevices > AmqpConnectionPoolSettings.DevicesPerConnectionLevel2)
-                    {
-                        if (this.semiLoadedPools.Contains(iotHubMuxConnection))
-                        {
-                            this.semiLoadedPools.Remove(iotHubMuxConnection);
-                            this.fullyLoadedPools.Add(iotHubMuxConnection);
-                        }
-                    }
+                    return false;
                 }
 
-                return true;
+                // device-scope connection strings only need to match on IotHubName and Endpoint
+                return connectionString1.IotHubName == connectionString2.IotHubName &&
+                    connectionString1.AmqpEndpoint == connectionString2.AmqpEndpoint;
             }
 
-            public void DecrementDevices(IotHubMuxConnection iotHubMuxConnection)
+            public int GetHashCode(IotHubConnectionString connectionString)
             {
-                lock (this.ThisLock)
+                if (connectionString == null)
                 {
-                    var numDevices = iotHubMuxConnection.DecrementNumberOfDevices();
-
-                    if (numDevices <= AmqpConnectionPoolSettings.DevicesPerConnectionLevel1)
-                    {
-                        if (this.semiLoadedPools.Contains(iotHubMuxConnection))
-                        {
-                            this.semiLoadedPools.Remove(iotHubMuxConnection);
-                            this.lightlyLoadedPools.Add(iotHubMuxConnection);
-                        }
-                    }
-                    else if (numDevices > AmqpConnectionPoolSettings.DevicesPerConnectionLevel1 &&
-                             numDevices <= AmqpConnectionPoolSettings.DevicesPerConnectionLevel2)
-                    {
-                        if (this.fullyLoadedPools.Contains(iotHubMuxConnection))
-                        {
-                            this.fullyLoadedPools.Remove(iotHubMuxConnection);
-                            this.semiLoadedPools.Add(iotHubMuxConnection);
-                        }
-                    }
-                }
-            }
-
-            object ThisLock { get; }
-
-            protected override void IdleTimerCallback()
-            {
-                lock (this.ThisLock)
-                {
-                    this.fullyLoadedPools.Clear();
-                    this.semiLoadedPools.Clear();
-                    this.lightlyLoadedPools.Clear();
+                    return 0;
                 }
 
-                base.IdleTimerCallback();
-            }
-
-            IotHubMuxConnection PickConnectionPool()
-            {
-                lock (this.ThisLock)
-                {
-                    IotHubMuxConnection selectedPool = null;
-                    if (!this.lightlyLoadedPools.Any() && this.GetNumConnectionPools() < AmqpConnectionPoolSettings.MaxNumConnectionPools)
-                    {
-                        var iotHubMuxConnection = new IotHubMuxConnection(this, this.ConnectionString, this.accessRights, this.amqpTransportSettings);
-                        this.lightlyLoadedPools.Add(iotHubMuxConnection);
-                    }
-
-                    if (this.lightlyLoadedPools.Any())
-                    {
-                        selectedPool = this.lightlyLoadedPools.FirstOrDefault();
-                    }
-                    else if (this.semiLoadedPools.Any())
-                    {
-                        selectedPool = this.semiLoadedPools.FirstOrDefault();
-                    }
-                    else if (this.fullyLoadedPools.Any())
-                    {
-                        selectedPool = this.fullyLoadedPools.FirstOrDefault();
-                    }
-
-                    this.IncrementDevices(selectedPool);
-
-                    return selectedPool;
-                }
-            }
-
-            int GetNumConnectionPools()
-            {
-                return this.lightlyLoadedPools.Count + this.semiLoadedPools.Count + this.fullyLoadedPools.Count;
+                return HashCode.CombineHashCodes(
+                    HashCode.SafeGet(connectionString.IotHubName),
+                    HashCode.SafeGet(connectionString.AmqpEndpoint));
             }
         }
     }
