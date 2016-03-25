@@ -231,6 +231,11 @@ namespace Microsoft.Azure.Devices.Client
 
         void CancelTokenRefreshers()
         {
+            foreach (var iotHubLinkTokenRefresher in this.iotHubTokenRefreshers.Values)
+            {
+                iotHubLinkTokenRefresher.Cancel();
+            }
+
             this.iotHubTokenRefreshers.Clear();
         }
 
