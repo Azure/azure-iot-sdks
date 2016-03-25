@@ -137,7 +137,6 @@
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\AssertionFailedException.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\CallbackException.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceAlreadyExistsException.cs" />
-    <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceDisabledException.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceMaximumQueueDepthExceededException.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceMessageLockLostException.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Exceptions\DeviceNotFoundException.cs" />
