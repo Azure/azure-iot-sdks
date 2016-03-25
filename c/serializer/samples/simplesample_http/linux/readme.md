@@ -2,8 +2,8 @@
 --------------------
 This sample does the following:
  
- * Uploads raw data (at the transport level) to Event Hubs via HTTPS
- * Defines a model and uploads structured data to Event Hubs based on that model via HTTPs
+ * Uploads raw data (at the transport level) to Azure IoT Hub via HTTPS
+ * Defines a model and uploads structured data to Azure IoT Hub based on that model via HTTPs
 
  Dependencies
 ----------------

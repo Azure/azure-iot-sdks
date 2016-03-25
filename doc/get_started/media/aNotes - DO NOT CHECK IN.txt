@@ -1,5 +1,0 @@
-add-apt-repository not found on BBB
-
-Trying sudo apt-get install python-software-properties
-
-Unable to get it to work on desktop Ubuntu: tried 14.04 and 15.10

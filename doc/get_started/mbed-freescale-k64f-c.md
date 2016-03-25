@@ -42,7 +42,7 @@ You should have the following items ready before beginning the process:
 
 -   Connect the board to your network using an Ethernet cable. This step is required, as the sample depends on internet access.
 
--   Plug the device into your computer using a micro-USB cable. Be sure to attach the cable to the USB port next to the reset button on the FRDM-K64F device.
+-   Plug the device into your computer using a micro-USB cable. **Be sure to attach the cable to the USB port next to the reset button on the FRDM-K64F device**.
 
 -   Follow the [instructions on the mbed handbook](https://developer.mbed.org/handbook/SerialPC) to set up the serial connection with your device from your development machine. If you are on Windows, install the Windows serial port drivers located [here](http://developer.mbed.org/handbook/Windows-serial-configuration#1-download-the-mbed-windows-serial-port).
 
@@ -85,7 +85,7 @@ You should have the following items ready before beginning the process:
 
 	![][6]
 
--   In PuTTY, click the **Serial** connection type. The device most likely connects at 115200, so enter that value in the **Speed** box. Then click **Open**:
+-   In PuTTY, click the **Serial** connection type. The device most likely connects at 115200, so enter that value in the **Speed** box. Then click **Open**: **NOTE** Try 9600 if unable to communicate with the board.
 
 	![][7]
 
