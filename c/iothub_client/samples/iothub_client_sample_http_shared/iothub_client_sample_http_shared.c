@@ -23,20 +23,12 @@
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
-/*String containing Hostname, Device Id & Device Key in the format:             */
-/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
-//static const char* hubName = "[IoT Hub Name]";
-//static const char* hubSuffix = "[IoT Hub Suffix]";
-//static const char* deviceId1 = "[device id 1]";
-//static const char* deviceId2 = "[device id 2]";
-//static const char* deviceKey1 = "[device key 1]";
-//static const char* deviceKey2 = "[device key 2]";
-static const char* hubName = "dcristotst2";
-static const char* hubSuffix = "azure-devices.net";
-static const char* deviceId1 = "dwr-sample1";
-static const char* deviceId2 = "dwr-sample2";
-static const char* deviceKey1 = "s8Eq2Yby9ofsUu8z+YkKeujjsB4sqe+ZUQU3w5Aw1LU=";
-static const char* deviceKey2 = "xYCio7z0muXIElqEYEpQeI5yTqDGyDH+RhFePJ1r/xM=";
+static const char* hubName = "[IoT Hub Name]";
+static const char* hubSuffix = "[IoT Hub Suffix]";
+static const char* deviceId1 = "[device id 1]";
+static const char* deviceId2 = "[device id 2]";
+static const char* deviceKey1 = "[device key 1]";
+static const char* deviceKey2 = "[device key 2]";
 
 static int callbackCounter;
 
