@@ -20,8 +20,8 @@ cd %build-root%
 
 echo CMAKE Output Path: %USERPROFILE%\%cmake-output%\python
 
-copy %USERPROFILE%\%cmake-output%\python\Release\iothub_client.pyd ..\..\device\samples
-copy %USERPROFILE%\%cmake-output%\python\Release\iothub_client_mock.pyd ..\..\device\tests
+copy %USERPROFILE%\%cmake-output%\python\src\Release\iothub_client.pyd ..\..\device\samples
+copy %USERPROFILE%\%cmake-output%\python\test\Release\iothub_client_mock.pyd ..\..\device\tests
 
 cd ..\..\device\tests
 python iothub_client_ut.py
