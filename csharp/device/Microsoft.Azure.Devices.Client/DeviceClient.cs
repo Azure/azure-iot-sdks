@@ -79,7 +79,6 @@ namespace Microsoft.Azure.Devices.Client
         readonly object thisLock = new object();
 
         volatile TaskCompletionSource<object> openTaskCompletionSource;
-        bool disposed;
 
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
         {
