@@ -7,10 +7,15 @@ setlocal
 @REM  %1 Local path to the project to be released.
 
 set project_path=%1
-set hg_commit_message="Release 1.0.tony"
+set hg_commit_message="Release 1.0.2"
+set project_name_override=""
+
+if  NOT "%2" equ "" (
+set project_name_override="-Dmbed_repo_name:string=%2"
+)
 
 rmdir /s /q hg 2>nul
 mkdir hg
 cd hg
 
-cmake -DHG_COMMIT_MSG:string=%hg_commit_message% -Drelease_the_project:bool=ON %project_path%\mbed
+cmake -DHG_COMMIT_MSG:string=%hg_commit_message% -Drelease_the_project:bool=ON %project_name_override% %project_path%\mbed
