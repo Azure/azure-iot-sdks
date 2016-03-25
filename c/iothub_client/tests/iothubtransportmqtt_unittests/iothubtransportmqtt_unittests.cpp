@@ -1354,7 +1354,9 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         mocks.ResetAllCalls();
 
         bool traceOn = true;
-
+        EXPECTED_CALL(mocks, STRING_c_str(NULL));
+        EXPECTED_CALL(mocks, platform_get_default_tlsio());
+        EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL));
         STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
             .IgnoreArgument(1);
 
@@ -1369,6 +1371,44 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         //cleanup
         IoTHubTransportMqtt_Destroy(handle);
     }
+
+
+    /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_132: [IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG xio_setoption fails] */
+    TEST_FUNCTION(IoTHubTransportMqtt_Setoption_fails_when_xio_setoption_fails)
+    {
+        // arrange
+        CIoTHubTransportMqttMocks mocks;
+
+        const char* SOME_OPTION = "AnOption";
+        const void* SOME_VALUE = (void*)42;
+
+        IOTHUBTRANSPORT_CONFIG config = { 0 };
+        SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+        auto handle = IoTHubTransportMqtt_Create(&config);
+        mocks.ResetAllCalls();
+
+        bool traceOn = true;
+
+        EXPECTED_CALL(mocks, STRING_c_str(NULL));
+        EXPECTED_CALL(mocks, platform_get_default_tlsio());
+        EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL));
+        STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
+            .IgnoreArgument(1)
+            .SetReturn(42);
+
+        // act
+        auto result = IoTHubTransportMqtt_SetOption(handle, SOME_OPTION, SOME_VALUE);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+        mocks.AssertActualAndExpectedCalls();
+
+        //cleanup
+        IoTHubTransportMqtt_Destroy(handle);
+    }
+
 
     /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_021: [If any parameter is NULL then IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
     TEST_FUNCTION(IoTHubTransportMqtt_Setoption_option_NULL_fail)

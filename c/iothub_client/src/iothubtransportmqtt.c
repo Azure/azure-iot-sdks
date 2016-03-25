@@ -946,6 +946,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE handle, c
         }
         else
         {
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_032: [IoTHubTransportMqtt_SetOption shall pass down the option to xio_setoption if the option parameter is not a known option string for the MQTT transport.] */
             if (GetTransportProviderIfNecessary(transportState) == 0)
             {
                 if (xio_setoption(transportState->xioTransport, option, value) == 0)
@@ -954,7 +955,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE handle, c
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_032: [IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG if the option parameter is not a known option string*] */
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_132: [IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG xio_setoption fails] */
                     result = IOTHUB_CLIENT_INVALID_ARG;
                 }
             }
