@@ -24,7 +24,7 @@ module.exports = [
     {
         "taskType": "regexReplaceTask",
         "filePath": "build/release/release_mbed_project.cmd",
-        "search": "(MBED\\_HG\\_USER\%\"\ \-m)([ ]+)(\".*\")",
+        "search": "(hg\\_commit\\_message\%\"\ \-m)([ ]+)(\".*\")",
         "replaceString": function(versions) {
             return '$1' + '$2' + '"' + versions.c.device + '"';
         }
