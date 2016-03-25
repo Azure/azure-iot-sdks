@@ -180,7 +180,10 @@ public:
 	MOCK_STATIC_METHOD_2(, IOTHUB_CLIENT_RESULT, IoTHubTransport_StartWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle)
 	MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK)
 
-	MOCK_STATIC_METHOD_2(, void, IoTHubTransport_EndWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle)
+	MOCK_STATIC_METHOD_2(, bool, IoTHubTransport_SignalEndWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle)
+	MOCK_METHOD_END(bool, true)
+
+	MOCK_STATIC_METHOD_2(, void, IoTHubTransport_JoinWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle)
 	MOCK_VOID_METHOD_END()
 
 };
@@ -217,7 +220,8 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , IOTHUBMESSAGE_DISPOSITION_RES
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , LOCK_HANDLE, IoTHubTransport_GetLock, TRANSPORT_HANDLE, transportHlHandle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , TRANSPORT_LL_HANDLE, IoTHubTransport_GetLLTransport, TRANSPORT_HANDLE, transportHlHandle);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubTransport_StartWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle);
-DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, IoTHubTransport_EndWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , bool, IoTHubTransport_SignalEndWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, IoTHubTransport_JoinWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle);
 
 
 static const void* provideFAKE(void)
@@ -471,6 +475,35 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		// arrange
 		CIoTHubClientMocks mocks;
 
+		STRICT_EXPECTED_CALL(mocks, Lock(TEST_IOTHUBTRANSPORT_LOCK));
+		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_IOTHUBTRANSPORT_LOCK));
+
+		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLock(TEST_IOTHUBTRANSPORT_HANDLE));
+		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLLTransport(TEST_IOTHUBTRANSPORT_HANDLE));
+		STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_CreateWithTransport(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+
+		// act
+		IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_CreateWithTransport(TEST_IOTHUBTRANSPORT_HANDLE, &TEST_CONFIG);
+
+		// assert
+		ASSERT_IS_NOT_NULL(iotHubClient);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubClient_Destroy(iotHubClient);
+	}
+
+	TEST_FUNCTION(When_creating_with_transport_Unlock_fails_non_null)
+	{
+		// arrange
+		CIoTHubClientMocks mocks;
+
+		STRICT_EXPECTED_CALL(mocks, Lock(TEST_IOTHUBTRANSPORT_LOCK));
+		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_IOTHUBTRANSPORT_LOCK))
+			.SetFailReturn((LOCK_RESULT)LOCK_ERROR);
+
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLock(TEST_IOTHUBTRANSPORT_HANDLE));
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLLTransport(TEST_IOTHUBTRANSPORT_HANDLE));
@@ -495,6 +528,9 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		// arrange
 		CIoTHubClientMocks mocks;
 
+		STRICT_EXPECTED_CALL(mocks, Lock(TEST_IOTHUBTRANSPORT_LOCK));
+		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_IOTHUBTRANSPORT_LOCK));
+
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLock(TEST_IOTHUBTRANSPORT_HANDLE));
@@ -513,6 +549,28 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		///cleanup
 	}
 
+	TEST_FUNCTION(When_creating_with_transport_Lock_fails_returns_null)
+	{
+		// arrange
+		CIoTHubClientMocks mocks;
+
+		STRICT_EXPECTED_CALL(mocks, Lock(TEST_IOTHUBTRANSPORT_LOCK))
+			.SetFailReturn((LOCK_RESULT)LOCK_ERROR);
+
+		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLock(TEST_IOTHUBTRANSPORT_HANDLE));
+		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLLTransport(TEST_IOTHUBTRANSPORT_HANDLE));
+
+		// act
+		IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_CreateWithTransport(TEST_IOTHUBTRANSPORT_HANDLE, &TEST_CONFIG);
+
+		// assert
+		ASSERT_IS_NULL(iotHubClient);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+	}
 	//Tests_SRS_IOTHUBCLIENT_17_004: [ If IoTHubTransport_GetLLTransport fails, then IoTHubClient_CreateWithTransport shall return NULL. ]
 	TEST_FUNCTION(When_creating_with_transport_IoTHubClient_get_ll_transport_fails_returns_null)
 	{
@@ -660,6 +718,9 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_Create(&TEST_CONFIG);
         mocks.ResetAllCalls();
 
+		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
+		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
@@ -671,6 +732,29 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         // uMock checks the calls
     }
 
+	TEST_FUNCTION(IoTHubClient_Destroy_lock_fails_still_continues)
+	{
+		// arrange
+		CIoTHubClientMocks mocks;
+		IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_Create(&TEST_CONFIG);
+		mocks.ResetAllCalls();
+
+		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
+			.SetFailReturn((LOCK_RESULT)LOCK_ERROR);
+		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
+			.SetFailReturn((LOCK_RESULT)LOCK_ERROR);
+
+		STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
+		STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
+		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+
+		// act
+		IoTHubClient_Destroy(iotHubClient);
+
+		// assert
+		// uMock checks the calls
+	}
+
 	TEST_FUNCTION(IoTHubClient_Destroy_shared_transport_frees_LL_client)
 	{
 		// arrange
@@ -678,8 +762,12 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_CreateWithTransport(TEST_IOTHUBTRANSPORT_HANDLE, &TEST_CONFIG);
 		mocks.ResetAllCalls();
 
+		STRICT_EXPECTED_CALL(mocks, Lock(TEST_IOTHUBTRANSPORT_LOCK));
+		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_IOTHUBTRANSPORT_LOCK));
+
 		STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
-		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_EndWorkerThread(TEST_IOTHUBTRANSPORT_HANDLE, iotHubClient));
+		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_SignalEndWorkerThread(TEST_IOTHUBTRANSPORT_HANDLE, iotHubClient));
+		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_JoinWorkerThread(TEST_IOTHUBTRANSPORT_HANDLE, iotHubClient));
 		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
 		// act

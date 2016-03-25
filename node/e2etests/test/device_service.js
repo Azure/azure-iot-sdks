@@ -154,7 +154,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
     });
 
     it('Service sends 5 C2D messages and they are all received by the device', function (done) {
-      this.timeout(60000);
+      this.timeout(120000);
       var deviceMessageCounter = 0;
 
       deviceClient.open(function (openErr) {
@@ -198,9 +198,9 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
     });
 
     it('Device sends a message of maximum size and it is received by the service', function (done) {
-      this.timeout(60000);
+      this.timeout(120000);
       var startTime = Date.now();
-      var bufferSize = 255 * 1024 - 66; // 66 being the current node-amqp10 overhead.
+      var bufferSize = 254 * 1024;
       var buffer = new Buffer(bufferSize);
       buffer.fill('a');
       deviceClient.open(function (openErr) {
@@ -232,7 +232,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
                     ehClient.close();
                     done();
                   } else {
-                    debug('eventData.Bytes: ' + eventData.Bytes + ' doesn\'t match ' + guid);
+                    debug('eventData.Bytes.length: ' + eventData.Bytes.length + ' doesn\'t match bufferSize: ' + bufferSize);
                   }
                 }
               });
@@ -251,7 +251,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
 
   describe('Using a SAS token over ' + DeviceTransport.name + ':', function() {
     it('Device can connect and send a message', function(done) {
-      this.timeout(30000);
+      this.timeout(60000);
       var host = serviceSdk.ConnectionString.parse(hubConnStr).HostName;
       var sas = deviceSas.create(host, deviceName, deviceKey, anHourFromNow()).toString();
       var client = deviceSdk.Client.fromSharedAccessSignature(sas, DeviceTransport);
@@ -280,7 +280,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
     });
 
     it('Service can connect', function(done) {
-      this.timeout(30000);
+      this.timeout(60000);
       var connStr = serviceSdk.ConnectionString.parse(hubConnStr);
       var sas = serviceSas.create(connStr.HostName, connStr.SharedAccessKeyName, connStr.SharedAccessKey, anHourFromNow()).toString();
       var client = serviceSdk.Client.fromSharedAccessSignature(sas);

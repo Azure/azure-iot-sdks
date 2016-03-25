@@ -885,14 +885,15 @@ public class AmqpsIotHubConnectionBaseHandlerTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_039: [The event handler shall cause the AmqpsIotHubConnection to fail.]
     @Test
     public void onTransportErrorLogsErrorAndCausesIotHubConnectionFail(
-            @Mocked ErrorCondition mockCondition)
+            @Mocked ErrorCondition mockCondition
+    )
     {
         final String hostName = "test.host.name";
         final String deviceId = "test-deviceId";
         final String userName = "test-deviceId@sas.test.host.name";
         final String sasToken = "test-token";
-        final String errorString = "Mock Error";
-        final String errorDescription = "Mock Description";
+        final String errorString = "This error is mocked by the test case. It is OK";
+        final String errorDescription = "This is error description is mocked by the test case. It is OK";
         final IotHubClientProtocol iotHubClientProtocol = IotHubClientProtocol.AMQPS;
 
         new NonStrictExpectations()

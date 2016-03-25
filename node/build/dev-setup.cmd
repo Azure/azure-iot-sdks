@@ -77,6 +77,21 @@ call npm link azure-iot-amqp-base
 call npm link azure-iot-http-base
 call npm link
 
+cd %node-root%\e2etests
+echo.
+echo -- Creating links for %cd% --
+call npm link azure-iot-common
+call npm link azure-iot-amqp-base
+call npm link azure-iot-http-base
+call npm link azure-iot-mqtt-base
+call npm link azure-iot-device
+call npm link azure-iot-device-amqp
+call npm link azure-iot-device-amqp-ws
+call npm link azure-iot-device-http
+call npm link azure-iot-device-mqtt
+call npm link azure-iothub
+call npm install
+
 cd %node-root%\..\tools\iothub-explorer
 echo.
 echo -- Creating links for %cd% --

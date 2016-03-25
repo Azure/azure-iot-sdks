@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <cstdlib>
@@ -661,8 +661,6 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
 			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-			.IgnoreAllArguments();
 		STRICT_EXPECTED_CALL(mocks, Lock_Deinit(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
@@ -687,6 +685,7 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		CIotHubTransportMocks mocks;
 		///arrange
 		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
+		(void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 		mocks.ResetAllCalls();
 
 		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
@@ -725,9 +724,6 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
 			.IgnoreArgument(1)
 			.SetFailReturn(LOCK_ERROR);
-		STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-			.IgnoreAllArguments()
-			.SetFailReturn(THREADAPI_ERROR);
 		STRICT_EXPECTED_CALL(mocks, Lock_Deinit(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
@@ -837,8 +833,6 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
-	//Tests_SRS_IOTHUBTRANSPORT_17_034: [ IoTHubTransport_StartWorkerThread shall lock the transport lock. ]
-	//Tests_SRS_IOTHUBTRANSPORT_17_035: [ IoTHubTransport_StartWorkerThread shall unlock the transport lock. 
 	//Tests_SRS_IOTHUBTRANSPORT_17_018: [ If the worker thread does not exist, IoTHubTransport_StartWorkerThread shall start the thread using ThreadAPI_Create. ]
 	//Tests_SRS_IOTHUBTRANSPORT_17_021: [ If handle is not found, then clientHandle shall be added to the list. ]
 	//Tests_SRS_IOTHUBTRANSPORT_17_022: [ Upon success, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_OK.]
@@ -850,10 +844,6 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, transportHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
@@ -865,6 +855,34 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		///act
 
 		IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+
+		///assert
+		ASSERT_ARE_EQUAL(int, (int)result, (int)IOTHUB_CLIENT_OK);
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransport_Destroy(transportHandle);
+	}
+
+	TEST_FUNCTION(IoTHubTransport_StartWorkerThread_same_client_twice_success)
+	{
+		CIotHubTransportMocks mocks;
+		///arrange
+
+		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
+		IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+
+		mocks.ResetAllCalls();
+
+		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
+			.IgnoreArgument(1);
+		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_IOTHUB_CLIENT_HANDLE1))
+			.IgnoreArgument(1)
+			.IgnoreArgument(2);
+
+		///act
+
+		result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 
 		///assert
 		ASSERT_ARE_EQUAL(int, (int)result, (int)IOTHUB_CLIENT_OK);
@@ -886,10 +904,6 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1); 
-		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_IOTHUB_CLIENT_HANDLE2))
@@ -956,10 +970,6 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, transportHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2)
@@ -985,10 +995,6 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, transportHandle))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
@@ -1010,37 +1016,11 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
-	//Tests_SRS_IOTHUBTRANSPORT_17_041: [ If the lock fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. ]
-	TEST_FUNCTION(IoTHubTransport_StartWorkerThread_lock_fails_returns_error)
-	{
-		CIotHubTransportMocks mocks;
-		///arrange
 
-		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
-		mocks.ResetAllCalls();
-
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1)
-			.SetFailReturn(LOCK_ERROR);
-
-		///act
-
-		IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
-
-		///assert
-		ASSERT_ARE_EQUAL(int, (int)result, (int)IOTHUB_CLIENT_ERROR);
-		mocks.AssertActualAndExpectedCalls();
-
-		///cleanup
-		IoTHubTransport_Destroy(transportHandle);
-	}
-
-	//Tests_SRS_IOTHUBTRANSPORT_17_026: [ IoTHubTransport_EndWorkerThread shall remove clientHandlehandle from handle list. ]
-	//Tests_SRS_IOTHUBTRANSPORT_17_036: [ IoTHubTransport_EndWorkerThread shall lock the transport lock. ]
-	//Tests_SRS_IOTHUBTRANSPORT_17_037: [ IoTHubTransport_EndWorkerThread shall unlock the transport lock. ]
-	//Tests_SRS_IOTHUBTRANSPORT_17_027: [ If handle list is empty, IoTHubTransport_EndWorkerThread shall be joined. ]
-	//Tests_SRS_IOTHUBTRANSPORT_17_028: [ The thread shall exit when IoTHubTransport_EndWorkerThread has been called for each clientHandle which invoked IoTHubTransport_StartWorkerThread. ]
-	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_success)
+	//Tests_SRS_IOTHUBTRANSPORT_17_026: [ IoTHubTransport_SignalEndWorkerThread shall remove clientHandlehandle from handle list. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_028: [ The thread shall exit when IoTHubTransport_SignalEndWorkerThread has been called for each clientHandle which invoked IoTHubTransport_StartWorkerThread. ]
+	//Tests_SRS_IOTHUBTRANSPORT_17_043: [ IoTHubTransport_SignalEndWorkerThread shall signal the worker thread to end. ]
+	TEST_FUNCTION(IoTHubTransport_SignalEndWorkerThread_success)
 	{
 		CIotHubTransportMocks mocks;
 		///arrange
@@ -1049,10 +1029,6 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_IOTHUB_CLIENT_HANDLE1))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
@@ -1061,22 +1037,20 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 			.IgnoreArgument(2);
 		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
 			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-			.IgnoreArgument(1)
-			.IgnoreArgument(2);
 
 		///act
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		auto rv = IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 
 		///assert
+		ASSERT_IS_TRUE(rv);
 		mocks.AssertActualAndExpectedCalls();
 
 		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
-	//Tests_SRS_IOTHUBTRANSPORT_17_026: [ IoTHubTransport_EndWorkerThread shall remove clientHandlehandle from handle list. ]
-	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_2_client_success)
+	//Tests_SRS_IOTHUBTRANSPORT_17_026: [ IoTHubTransport_SignalEndWorkerThread shall remove clientHandlehandle from handle list. ]
+	TEST_FUNCTION(IoTHubTransport_SignalEndWorkerThread_2_client_success)
 	{
 		CIotHubTransportMocks mocks;
 		///arrange
@@ -1087,10 +1061,6 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_IOTHUB_CLIENT_HANDLE1))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
@@ -1101,46 +1071,49 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 			.IgnoreArgument(1);
 
 		///act
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		auto rv = IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 
 		///assert
+		ASSERT_IS_FALSE(rv);
 		mocks.AssertActualAndExpectedCalls();
 
 		///cleanup
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
+		IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
-	//Tests_SRS_IOTHUBTRANSPORT_17_023: [ If transportHlHandle is NULL, IoTHubTransport_EndWorkerThread shall return. ]
-	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_null_transport_does_nothing)
+	//Tests_SRS_IOTHUBTRANSPORT_17_023: [ If transportHlHandle is NULL, IoTHubTransport_SignalEndWorkerThread shall return. ]
+	TEST_FUNCTION(IoTHubTransport_SignalEndWorkerThread_null_transport_does_nothing)
 	{
 		CIotHubTransportMocks mocks;
 		///arrange
 
 		///act
-		IoTHubTransport_EndWorkerThread(NULL, TEST_IOTHUB_CLIENT_HANDLE1);
+		auto rv = IoTHubTransport_SignalEndWorkerThread(NULL, TEST_IOTHUB_CLIENT_HANDLE1);
 
 		///assert
+		ASSERT_IS_FALSE(rv);
 
 		///cleanup
 	}
 
-	//Tests_SRS_IOTHUBTRANSPORT_17_024: [ If clientHandle is NULL, IoTHubTransport_EndWorkerThread shall return. ]
-	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_null_client_does_nothing)
+	//Tests_SRS_IOTHUBTRANSPORT_17_024: [ If clientHandle is NULL, IoTHubTransport_SignalEndWorkerThread shall return. ]
+	TEST_FUNCTION(IoTHubTransport_SignalEndWorkerThread_null_client_does_nothing)
 	{
 		CIotHubTransportMocks mocks;
 		///arrange
 		int fake = 0x43;
 		///act
-		IoTHubTransport_EndWorkerThread((TRANSPORT_HANDLE)(&fake), NULL);
+		auto rv = IoTHubTransport_SignalEndWorkerThread((TRANSPORT_HANDLE)(&fake), NULL);
 
 		///assert
+		ASSERT_IS_FALSE(rv);
 
 		///cleanup
 	}
 
-	//Tests_SRS_IOTHUBTRANSPORT_17_025: [If the worker thread does not exist, then IoTHubTransport_EndWorkerThread shall return.]
-	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_end_thread_client_not_found)
+	//Tests_SRS_IOTHUBTRANSPORT_17_025: [If the worker thread does not exist, then IoTHubTransport_SignalEndWorkerThread shall return.]
+	TEST_FUNCTION(IoTHubTransport_SignalEndWorkerThread_end_thread_client_not_found)
 	{
 		CIotHubTransportMocks mocks;
 		///arrange
@@ -1148,25 +1121,22 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_IOTHUB_CLIENT_HANDLE1))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
 
 		///act
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		auto rv = IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 
 		///assert
+		ASSERT_IS_FALSE(rv);
 		mocks.AssertActualAndExpectedCalls();
 
 		///cleanup
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
-	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_end_thread_client_not_found2)
+	TEST_FUNCTION(IoTHubTransport_SignalEndWorkerThread_end_thread_client_not_found2)
 	{
 		CIotHubTransportMocks mocks;
 		///arrange
@@ -1175,10 +1145,6 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 		mocks.ResetAllCalls();
 
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_IOTHUB_CLIENT_HANDLE2))
 			.IgnoreArgument(1)
 			.IgnoreArgument(2);
@@ -1186,67 +1152,76 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 			.IgnoreArgument(1);
 
 		///act
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
+		IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 
 		///assert
 		mocks.AssertActualAndExpectedCalls();
 
 		///cleanup
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
-	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_join_fails)
+	//Tests_SRS_IOTHUBTRANSPORT_17_044: [ If transportHlHandle is NULL, IoTHubTransport_JoinWorkerThread shall do nothing. ]
+	TEST_FUNCTION(IoTHubTransport_JoinWorkerThread_null_transport_just_returns)
 	{
 		CIotHubTransportMocks mocks;
 		///arrange
 
-		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
-		IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
-		mocks.ResetAllCalls();
+		///act
+		IoTHubTransport_JoinWorkerThread(NULL, TEST_IOTHUB_CLIENT_HANDLE1);
+		///assert
+		///cleanup
+	}
 
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_IOTHUB_CLIENT_HANDLE1))
-			.IgnoreArgument(1)
+	//Tests_SRS_IOTHUBTRANSPORT_17_045: [ If clientHandle is NULL, IoTHubTransport_JoinWorkerThread shall do nothing. ]
+	TEST_FUNCTION(IoTHubTransport_JoinWorkerThread_null_client_just_returns)
+	{
+		CIotHubTransportMocks mocks;
+		///arrange
+		int fake = 0x43;
+		///act
+		IoTHubTransport_JoinWorkerThread((TRANSPORT_HANDLE)(&fake), NULL);
+
+		///assert
+		///cleanup
+	}
+
+	//Tests_SRS_IOTHUBTRANSPORT_17_027: [ The worker thread shall be joined. ]
+	TEST_FUNCTION(IoTHubTransport_JoinWorkerThread_success)
+	{
+		CIotHubTransportMocks mocks;
+		///arrange
+		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
+		(void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		(void)IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		mocks.ResetAllCalls();
+		STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(TEST_THREAD_HANDLE, IGNORED_PTR_ARG))
 			.IgnoreArgument(2);
-		STRICT_EXPECTED_CALL(mocks, VECTOR_erase(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
-			.IgnoreArgument(1)
-			.IgnoreArgument(2);
-		STRICT_EXPECTED_CALL(mocks, VECTOR_size(IGNORED_PTR_ARG))
-			.IgnoreArgument(1);
-		STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-			.IgnoreArgument(1)
+
+		///act
+		IoTHubTransport_JoinWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+
+		///assert
+		mocks.AssertActualAndExpectedCalls();
+
+		///cleanup
+		IoTHubTransport_Destroy(transportHandle);
+	}
+
+	TEST_FUNCTION(IoTHubTransport_JoinWorkerThread_join_fails)
+	{
+		CIotHubTransportMocks mocks;
+		///arrange
+		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
+		(void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		(void)IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		mocks.ResetAllCalls();
+		STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(TEST_THREAD_HANDLE, IGNORED_PTR_ARG))
 			.IgnoreArgument(2)
 			.SetFailReturn(THREADAPI_ERROR);
-
 		///act
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
-
-		///assert
-		mocks.AssertActualAndExpectedCalls();
-
-		///cleanup
-		IoTHubTransport_Destroy(transportHandle);
-	}
-
-	TEST_FUNCTION(IoTHubTransport_EndWorkerThread_lock_fails)
-	{
-		CIotHubTransportMocks mocks;
-		///arrange
-
-		auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
-		IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
-		mocks.ResetAllCalls();
-
-		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-			.IgnoreArgument(1)
-			.SetFailReturn(LOCK_ERROR);
-
-		///act
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		IoTHubTransport_JoinWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 
 		///assert
 		mocks.AssertActualAndExpectedCalls();
@@ -1288,8 +1263,9 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		mocks.AssertActualAndExpectedCalls();
 
 		///cleanup
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
+		IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
+		//If a thread were actually created, we'd need a Join here.
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -1322,8 +1298,8 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		mocks.AssertActualAndExpectedCalls();
 
 		///cleanup
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
+		IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 		IoTHubTransport_Destroy(transportHandle);
 	}
 
@@ -1359,8 +1335,8 @@ BEGIN_TEST_SUITE(iothubtransport_unittests)
 		mocks.AssertActualAndExpectedCalls();
 
 		///cleanup
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
-		IoTHubTransport_EndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
+		IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+		IoTHubTransport_SignalEndWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 
 		IoTHubTransport_Destroy(transportHandle);
 	}
