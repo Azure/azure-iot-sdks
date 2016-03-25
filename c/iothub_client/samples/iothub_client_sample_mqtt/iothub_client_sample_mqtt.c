@@ -120,7 +120,7 @@ void iothub_client_sample_mqtt_run(void)
 
 #ifdef MBED_BUILD_TIMESTAMP
             // For mbed add the certificate information
-            if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"TrustedCerts\"\r\n");
             }
