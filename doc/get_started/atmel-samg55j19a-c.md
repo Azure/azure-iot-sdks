@@ -71,7 +71,7 @@ You should have the following items ready before beginning the process:
 ## Build and Run the sample project via Atmel Studio7: 
 1. Open Atmel Studio7 and search for the MS Azure IoT project from the File -> New -> Example Project... menu in Atmel Studio.
     - Select SAM G, 32-bit from Device Family: and Type winc1500 to input text field.
-    - Select the MS Azure ToT project corresponding to your Xplained Pro board and then press OK button to import MS Azure ToT project
+    - Select the MS Azure IoT project corresponding to your Xplained Pro board and then press OK button to import MS Azure IoT project
 2. Open the ```simplesample_http.c``` file in the Atmel Studio7.
     - Locate the following code in the ```simplesample_http.c```: 
     ```static const char* connectionString = "[device connection string]";``` .
