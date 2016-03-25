@@ -207,17 +207,30 @@ static IOTHUB_CLIENT_RESULT start_worker_if_needed(TRANSPORT_HANDLE_DATA * trans
 
 static void stop_worker_thread(TRANSPORT_HANDLE_DATA * transportData)
 {
-	int res;
+	/*Codes_SRS_IOTHUBTRANSPORT_17_043: [** IoTHubTransport_SignalEndWorkerThread shall signal the worker thread to end.*/
 	transportData->stopThread = 1;
-	/*Codes_SRS_IOTHUBTRANSPORT_17_027: [ If handle list is empty, IoTHubTransport_EndWorkerThread shall be joined. ]*/
-	if (ThreadAPI_Join(transportData->workerThreadHandle, &res) != THREADAPI_OK)
+}
+
+static void wait_worker_thread(TRANSPORT_HANDLE_DATA * transportData)
+{
+	if (transportData->workerThreadHandle != NULL)
 	{
-		LogError("ThreadAPI_Join failed");
+		int res;
+		/*Codes_SRS_IOTHUBTRANSPORT_17_027: [ If handle list is empty, IoTHubTransport_EndWorkerThread shall be joined. ]*/
+		if (ThreadAPI_Join(transportData->workerThreadHandle, &res) != THREADAPI_OK)
+		{
+			LogError("ThreadAPI_Join failed");
+		}
+		else
+		{
+			transportData->workerThreadHandle = NULL;
+		}
 	}
 }
 
-static void end_worker_thread(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIENT_HANDLE clientHandle)
+static bool signal_end_worker_thread(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIENT_HANDLE clientHandle)
 {
+	bool okToJoin;
 	void* element = VECTOR_find_if(transportData->clients, find_by_handle, clientHandle);
 	if (element != NULL)
 	{
@@ -230,8 +243,18 @@ static void end_worker_thread(TRANSPORT_HANDLE_DATA * transportData, IOTHUB_CLIE
 		if (VECTOR_size(transportData->clients) == 0)
 		{
 			stop_worker_thread(transportData);
+			okToJoin = true;
+		}
+		else
+		{
+			okToJoin = false;
 		}
 	}
+	else
+	{
+		okToJoin = false;
+	}
+	return okToJoin;
 }
 
 void IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHlHandle)
@@ -251,6 +274,7 @@ void IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHlHandle)
 			stop_worker_thread(transportData);
 			(void)Unlock(transportData->lockHandle);
 		}
+		wait_worker_thread(transportData);
 		/*Codes_SRS_IOTHUBTRANSPORT_17_010: [ IoTHubTransport_Destroy shall free all resources. ]*/
 		Lock_Deinit(transportData->lockHandle);
 		(transportData->IoTHubTransport_Destroy)(transportData->transportLLHandle);
@@ -305,51 +329,46 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transpor
 	else
 	{
 		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
-		/*Codes_SRS_IOTHUBTRANSPORT_17_034: [ IoTHubTransport_StartWorkerThread shall lock the transport lock. ]*/
-		if (Lock(transportData->lockHandle) != LOCK_OK)
+
+		if ((result = start_worker_if_needed(transportData, clientHandle)) != IOTHUB_CLIENT_OK)
 		{
-			/*Codes_SRS_IOTHUBTRANSPORT_17_041: [ If the lock fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. ]*/
+			/*Codes_SRS_IOTHUBTRANSPORT_17_019: [ If thread creation fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. */
 			LogError("Unable to start thread safely");
-			result = IOTHUB_CLIENT_ERROR;
 		}
 		else
 		{
-			if ((result = start_worker_if_needed(transportData, clientHandle)) != IOTHUB_CLIENT_OK)
-			{
-				/*Codes_SRS_IOTHUBTRANSPORT_17_019: [ If thread creation fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. */
-				LogError("Unable to start thread safely");
-			}
-			else
-			{
-				/*Codes_SRS_IOTHUBTRANSPORT_17_022: [ Upon success, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_OK. ]*/
-				result = IOTHUB_CLIENT_OK;
-			}
-			
-			/*Codes_SRS_IOTHUBTRANSPORT_17_035: [ IoTHubTransport_StartWorkerThread shall unlock the transport lock. ]*/
-			(void)Unlock(transportData->lockHandle);
+			/*Codes_SRS_IOTHUBTRANSPORT_17_022: [ Upon success, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_OK. ]*/
+			result = IOTHUB_CLIENT_OK;
 		}
 	}
 	return result;
 }
 
-void IoTHubTransport_EndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle)
+bool IoTHubTransport_SignalEndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle)
 {
+	bool okToJoin;
 	/*Codes_SRS_IOTHUBTRANSPORT_17_023: [ If transportHlHandle is NULL, IoTHubTransport_EndWorkerThread shall return. ]*/
 	/*Codes_SRS_IOTHUBTRANSPORT_17_024: [ If clientHandle is NULL, IoTHubTransport_EndWorkerThread shall return. ]*/
 	if (!(transportHlHandle == NULL || clientHandle == NULL))
 	{
 		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
-		/*Codes_SRS_IOTHUBTRANSPORT_17_036: [ IoTHubTransport_EndWorkerThread shall lock the transport lock. ]*/
-		if (Lock(transportData->lockHandle) != LOCK_OK)
-		{
-			LogError("Unable to acquire lock - abandoning the attempt to end the thread");
-		}
-		else
-		{
-			end_worker_thread(transportData, clientHandle);
-			/*Codes_SRS_IOTHUBTRANSPORT_17_037: [ IoTHubTransport_EndWorkerThread shall unlock the transport lock. ]*/
-			(void)Unlock(transportData->lockHandle);
-		}
+		okToJoin = signal_end_worker_thread(transportData, clientHandle);
 	}
-	
+	else
+	{
+		okToJoin = false;
+	}
+	return okToJoin;
+}
+
+void IoTHubTransport_JoinWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle)
+{
+	/*Codes_SRS_IOTHUBTRANSPORT_17_044: [ If transportHlHandle is NULL, IoTHubTransport_JoinWorkerThread shall do nothing. ]*/
+	/*Codes_SRS_IOTHUBTRANSPORT_17_045: [ If clientHandle is NULL, IoTHubTransport_JoinWorkerThread shall do nothing. ]*/
+	if (!(transportHlHandle == NULL || clientHandle == NULL))
+	{
+		TRANSPORT_HANDLE_DATA * transportData = (TRANSPORT_HANDLE_DATA*)transportHlHandle;
+		/*Codes_SRS_IOTHUBTRANSPORT_17_027: [ The worker thread shall be joined. ]*/
+		wait_worker_thread(transportData);
+	}
 }

@@ -41,24 +41,15 @@ namespace DeviceClientSampleiOS
 
         partial void UIButton15_TouchUpInside(UIButton sender)
         {
-            var asyncTask = Task.Run(() => ReceiveMessage().Result);
+            var asyncTask = Task.Run(() => this.deviceClient.ReceiveAsync());
             var receivedMessage = asyncTask.Result;
             if (receivedMessage != null)
             {
                 this.receivedMessagesTextBox.Text += Encoding.Default.GetString(receivedMessage.GetBytes()) + "\r\n";
             }
             Console.WriteLine("Message received, now completing it...");
-            Task.Run(async () => { await this.deviceClient.ReceiveAsync(); });
+            Task.Run(() => this.deviceClient.CompleteAsync(receivedMessage));
             Console.WriteLine("Message completed.");
-        }
-        private async Task<Message> ReceiveMessage()
-        {
-            return await this.deviceClient.ReceiveAsync();
-        }
-
-        private async Task CompleteMessage(Message message)
-        {
-            await this.deviceClient.CompleteAsync(message);
         }
     }
 }

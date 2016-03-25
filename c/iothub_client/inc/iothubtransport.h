@@ -21,7 +21,8 @@ extern void					IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHlHandle);
 extern LOCK_HANDLE			IoTHubTransport_GetLock(TRANSPORT_HANDLE transportHlHandle);
 extern TRANSPORT_LL_HANDLE	IoTHubTransport_GetLLTransport(TRANSPORT_HANDLE transportHlHandle);
 extern IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
-extern void					IoTHubTransport_EndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
+extern bool					IoTHubTransport_SignalEndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
+extern void					IoTHubTransport_JoinWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
 
 #ifdef __cplusplus
 }

@@ -17,7 +17,8 @@ extern void					IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHlHandle);
 extern LOCK_HANDLE			IoTHubTransport_GetLock(TRANSPORT_HANDLE transportHlHandle);
 extern TRANSPORT_LL_HANDLE	IoTHubTransport_GetLLTransport(TRANSPORT_HANDLE transportHlHandle);
 extern IOTHUB_CLIENT_RESULT IoTHubTransport_StartWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
-extern void					IoTHubTransport_EndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
+extern bool					IoTHubTransport_SignalEndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
+extern void					IoTHubTransport_JoinWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
 ```
 
 ## IoTHubTransport_Create
@@ -59,6 +60,8 @@ extern void					IoTHubTransport_Destroy(TRANSPORT_HANDLE transportHlHandle);
 
 **SRS_IOTHUBTRANSPORT_17_010: [** IoTHubTransport_Destroy shall free all resources. **]**
 
+IoTHubTransport_Destroy shall close the worker thread if worker thread is running.
+
 **SRS_IOTHUBTRANSPORT_17_011: [** IoTHubTransport_Destroy shall do nothing if transportHlHandle is NULL. **]**
 
 ## IoTHubTransport_GetLock
@@ -90,10 +93,6 @@ IoTHubTransport_StartWorkerThread ensures a single thread for all device communi
 
 **SRS_IOTHUBTRANSPORT_17_017: [** If clientHandle is NULL, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_INVALID_ARG. **]**
 
-**SRS_IOTHUBTRANSPORT_17_034: [** IoTHubTransport_StartWorkerThread shall lock the transport lock. **]**
-
-**SRS_IOTHUBTRANSPORT_17_041: [** If the lock fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. **]**
-
 **SRS_IOTHUBTRANSPORT_17_018: [** If the worker thread does not exist, IoTHubTransport_StartWorkerThread shall start the thread using ThreadAPI_Create. **]**
 
 **SRS_IOTHUBTRANSPORT_17_019: [** If thread creation fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. **]**
@@ -104,28 +103,37 @@ IoTHubTransport_StartWorkerThread ensures a single thread for all device communi
 
 **SRS_IOTHUBTRANSPORT_17_042: [** If Adding to the client list fails, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_ERROR. **]**
 
-**SRS_IOTHUBTRANSPORT_17_035: [** IoTHubTransport_StartWorkerThread shall unlock the transport lock. **]**
-
 **SRS_IOTHUBTRANSPORT_17_022: [** Upon success, IoTHubTransport_StartWorkerThread shall return IOTHUB_CLIENT_OK. **]**
 
-## IoTHubTransport_EndWorkerThread
+## IoTHubTransport_SignalEndWorkerThread
 ```c
-extern void					IoTHubTransport_EndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
+extern bool IoTHubTransport_SignalEndWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
 ```
 
-**SRS_IOTHUBTRANSPORT_17_023: [** If transportHlHandle is NULL, IoTHubTransport_EndWorkerThread shall return. **]**
+This function will signal the transport worker thread to end.  It will return true if
+the thread has been successfully signalled to end and is ready to terminate.
 
-**SRS_IOTHUBTRANSPORT_17_024: [** If clientHandle is NULL, IoTHubTransport_EndWorkerThread shall return. **]**
+**SRS_IOTHUBTRANSPORT_17_023: [** If transportHlHandle is NULL, IoTHubTransport_SignalEndWorkerThread shall return false. **]**
 
-**SRS_IOTHUBTRANSPORT_17_036: [** IoTHubTransport_EndWorkerThread shall lock the transport lock. **]**
+**SRS_IOTHUBTRANSPORT_17_024: [** If clientHandle is NULL, IoTHubTransport_SignalEndWorkerThread shall return false. **]**
 
-**SRS_IOTHUBTRANSPORT_17_025: [** If the worker thread does not exist, then IoTHubTransport_EndWorkerThread shall return. **]**
+**SRS_IOTHUBTRANSPORT_17_043: [** IoTHubTransport_SignalEndWorkerThread shall signal the worker thread to end. **]**
 
-**SRS_IOTHUBTRANSPORT_17_026: [** IoTHubTransport_EndWorkerThread shall remove clientHandlehandle from handle list. **]**
+**SRS_IOTHUBTRANSPORT_17_025: [** If the worker thread does not exist, then IoTHubTransport_SignalEndWorkerThread shall return false. **]**
 
-**SRS_IOTHUBTRANSPORT_17_027: [** If handle list is empty, IoTHubTransport_EndWorkerThread shall be joined.  **]**
+**SRS_IOTHUBTRANSPORT_17_026: [** IoTHubTransport_SignalEndWorkerThread shall remove clientHandlehandle from handle list. **]**
 
-**SRS_IOTHUBTRANSPORT_17_037: [** IoTHubTransport_EndWorkerThread shall unlock the transport lock. **]**
+
+## IoTHubTransport_JoinWorkerThread
+```c
+extern void	IoTHubTransport_JoinWorkerThread(TRANSPORT_HANDLE transportHlHandle, IOTHUB_CLIENT_HANDLE clientHandle);
+```
+
+**SRS_IOTHUBTRANSPORT_17_044: [** If transportHlHandle is NULL, IoTHubTransport_JoinWorkerThread shall do nothing. **]**
+
+**SRS_IOTHUBTRANSPORT_17_045: [** If clientHandle is NULL, IoTHubTransport_JoinWorkerThread shall do nothing. **]**
+
+**SRS_IOTHUBTRANSPORT_17_027: [** The worker thread shall be joined.  **]**
 
 ## Worker Thread
 

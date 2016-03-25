@@ -106,7 +106,11 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient Create(string hostname, IAuthenticationMethod authenticationMethod)
         {
+#if WINDOWS_UWP || PCL
+            return Create(hostname, authenticationMethod, TransportType.Http1);
+#else
             return Create(hostname, authenticationMethod, TransportType.Amqp);
+#endif
         }
 
         /// <summary>
@@ -139,7 +143,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString)
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             return CreateFromConnectionString(connectionString, TransportType.Http1);
 #else
             return CreateFromConnectionString(connectionString, TransportType.Amqp);

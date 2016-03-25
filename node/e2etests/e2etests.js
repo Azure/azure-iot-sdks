@@ -13,10 +13,11 @@ var registry_tests = require('./test/registry.js');
 var deviceName = process.env.IOTHUB_DEVICE_ID;
 var deviceKey = process.env.IOTHUB_DEVICE_KEY;
 var hubConnectionString = process.env.IOTHUB_CONNECTION_STRING;
+var storageConnectionString = process.env.STORAGE_CONNECTION_STRING;
 var host = ConnectionString.parse(process.env.IOTHUB_CONNECTION_STRING).HostName;
 var deviceConnectionString = 'HostName=' + host + ';DeviceId=' + deviceName + ';SharedAccessKey=' + deviceKey;
 
 device_service_tests(deviceAmqp.Amqp, hubConnectionString, deviceConnectionString, deviceName, deviceKey);
 device_service_tests(deviceHttp.Http, hubConnectionString, deviceConnectionString, deviceName, deviceKey);
 
-registry_tests(hubConnectionString);
+registry_tests(hubConnectionString, storageConnectionString);
