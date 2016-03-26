@@ -16,16 +16,16 @@
     <tags>HTTP Microsoft Azure IoT Native x86 x64 native package</tags>
     <dependencies>
       <dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.1"/>
-        <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.2"/>
+        <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.3"/>
     </dependencies>
   </metadata>
     <files>
     <!-- these are files for x86 plaform -->
     <file src="..\..\..\..\build_output\c\win32\debug\iothub_client_http_transport.lib" target="build\native\Win32\Debug"/>
     <file src="..\..\..\..\build_output\c\win32\debug\iothub_client_http_transport.pdb" target="build\native\Win32\Debug"/>
-      
+
     <file src="..\..\..\..\build_output\c\win32\release\iothub_client_http_transport.lib" target="build\native\Win32\Release"/>
-      
+
     <!-- these are files for x64 plaform -->
     <file src="..\..\..\..\build_output\c\x64\debug\iothub_client_http_transport.lib" target="build\native\x64\Debug"/>
     <file src="..\..\..\..\build_output\c\x64\debug\iothub_client_http_transport.pdb" target="build\native\x64\Debug"/>
