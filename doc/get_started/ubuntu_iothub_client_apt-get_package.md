@@ -8,9 +8,9 @@ These instructions assume that your system contains the following:
 
 1. Add the azure ppa to your repository and update the machine repository:
     ```
-    sudo add-apt-repository ppa:aziotsdklinux/ppa-azure-iot-sdk-c
-    sudo apt-get update
-    sudo apt-get dist-upgrade
+    sudo add-apt-repository ppa:aziotsdklinux/ppa-azureiot  
+    sudo apt-get update  
+    sudo apt-get dist-upgrade  
     ```
 2. Install the iothub_client development package for the apt-get package
     ```
@@ -38,5 +38,5 @@ These instructions assume that your system contains the following:
 
 ###To remove the package
     ```
-    sudo apt-get --purge remove azure-iot-sdk-c
+    sudo apt-get --purge remove azure-iot-sdk-c-dev
     ```
