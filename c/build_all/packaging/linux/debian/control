@@ -11,7 +11,7 @@ Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/azure-iot-sdk-c.git;a=sum
 Package: azure-iot-sdk-c-dev
 Section: libdevel
 Architecture: any
-Depends: azure-iot-sdk-c-lib (= ${binary:Version}), ${misc:Depends}
+Depends: azure-iot-sdk-c-lib (= ${binary:Version}), ${misc:Depends}, libssl-dev, libcurl4-openssl-dev, curl, azure-c-shared-util-dev, azure-uamqp-c-dev, azure-umqtt-c-dev
 Description: Microsoft Azure IoT device SDK for C Library
  The Microsoft Azure IoT device libraries for C contain code that
  facilitates building devices and applications that connect to and
@@ -19,7 +19,7 @@ Description: Microsoft Azure IoT device SDK for C Library
 
 Package: azure-iot-sdk-c-lib
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libssl-dev, libcurl4-openssl-dev, curl, azure-c-shared-util-dev, azure-uamqp-c-dev, azure-umqtt-c-dev
 Description: Microsoft Azure IoT device SDK for C Library
  The Microsoft Azure IoT device libraries for C contain code that
  facilitates building devices and applications that connect to and
