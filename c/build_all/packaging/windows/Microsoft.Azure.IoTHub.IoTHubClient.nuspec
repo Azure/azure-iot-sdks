@@ -36,5 +36,6 @@
     <file src="..\..\..\iothub_client\inc\iothub_client_private.h" target="build\native\include"/>
     <file src="..\..\..\iothub_client\inc\iothub_message.h" target="build\native\include"/>
     <file src="..\..\..\iothub_client\inc\iothub_client_version.h" target="build\native\include"/>
+    <file src="..\..\..\iothub_client\inc\iothubtransport.h" target="build\native\include"/>
 </files>
 </package>
