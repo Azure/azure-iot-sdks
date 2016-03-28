@@ -11,9 +11,9 @@ namespace Microsoft.Azure.Devices.Client
 #if !WINDOWS_UWP
     using System.Configuration;
     using System.Net.WebSockets;
+    using System.Security.Cryptography.X509Certificates;
 #endif
     using System.Net;
-    using System.Security.Cryptography.X509Certificates;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Amqp.Sasl;
@@ -342,8 +342,8 @@ namespace Microsoft.Azure.Devices.Client
             var tlsTransportSettings = new TlsTransportSettings(tcpTransportSettings)
             {
                 TargetHost = this.connectionString.HostName,
-                Certificate = null, // TODO: add client cert support
 #if !WINDOWS_UWP // Not supported in UWP
+                Certificate = null, // TODO: add client cert support
                 CertificateValidationCallback = this.OnRemoteCertificateValidation
 #endif
             };
@@ -390,6 +390,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
+#if !WINDOWS_UWP // Not supported in UWP
         bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
@@ -404,6 +405,7 @@ namespace Microsoft.Azure.Devices.Client
 
             return false;
         }
+#endif
 
         public static ArraySegment<byte> GetNextDeliveryTag(ref int deliveryTag)
         {
