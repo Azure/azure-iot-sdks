@@ -222,15 +222,6 @@
   <ItemGroup>
     <PRIResource Include="Resources.resw" />
   </ItemGroup>
-
-<!-- test only, will change to Amqp NuGet package -->
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\arturl-azure-amqp\Microsoft.Azure.Amqp.Uwp\Microsoft.Azure.Amqp.Uwp.csproj">
-      <Project>{f127ef83-0edb-45ef-b719-78703b7fc29c}</Project>
-      <Name>Microsoft.Azure.Amqp.Uwp</Name>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
