@@ -1,4 +1,4 @@
-# Microsoft Azure IoT service SDK for C##
+# Microsoft Azure IoT service SDK for C`#
 
 The Azure IoT Service SDK for C# helps you build applications that interact with your devices and manage their identities in your IoT hub.
 
