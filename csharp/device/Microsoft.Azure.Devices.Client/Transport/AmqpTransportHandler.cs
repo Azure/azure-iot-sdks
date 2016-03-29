@@ -132,7 +132,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             GC.SuppressFinalize(this);
             this.faultTolerantEventSendingLink.CloseAsync().Fork();
             this.faultTolerantDeviceBoundReceivingLink.CloseAsync().Fork();
-            this.IotHubConnection.Release();
+            this.IotHubConnection.Release(this.deviceId);
             return TaskHelpers.CompletedTask;
         }
 

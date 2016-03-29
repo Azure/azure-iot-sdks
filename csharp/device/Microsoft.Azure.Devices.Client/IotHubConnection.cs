@@ -21,37 +21,109 @@ namespace Microsoft.Azure.Devices.Client
     abstract class IotHubConnection
     {
 #if !WINDOWS_UWP
-        protected FaultTolerantAmqpObject<AmqpSession> FaultTolerantSession { get; set; }
-
-        protected AmqpTransportSettings AmqpTransportSettings { get; }
+        readonly string hostName;
+        readonly int port;
 
         static readonly AmqpVersion AmqpVersion_1_0_0 = new AmqpVersion(1, 0, 0);
         const string DisableServerCertificateValidationKeyName = "Microsoft.Azure.Devices.DisableServerCertificateValidation";
         static readonly Lazy<bool> DisableServerCertificateValidation = new Lazy<bool>(InitializeDisableServerCertificateValidation);
 
-        protected IotHubConnection(IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
+        protected IotHubConnection(string hostName, int port, AmqpTransportSettings amqpTransportSettings)
         {
-            this.ConnectionString = connectionString;
+            this.hostName = hostName;
+            this.port = port;
             this.AmqpTransportSettings = amqpTransportSettings;
         }
 
-        // In case of device-scope connection strings, this connectionString would represent only one of many devices sharing the connection
-        public IotHubConnectionString ConnectionString { get; }
+        public abstract IotHubConnectionString ConnectionString { get; }
+
+        protected FaultTolerantAmqpObject<AmqpSession> FaultTolerantSession { get; set; }
+
+        protected AmqpTransportSettings AmqpTransportSettings { get; }
 
         public abstract Task CloseAsync();
 
         public abstract void SafeClose(Exception exception);
 
-        public abstract Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout);
+        public virtual async Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout)
+        {
+            var timeoutHelper = new TimeoutHelper(timeout);
 
-        public abstract Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount);
+            AmqpSession session;
+            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
+            {
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+            }
 
+            var linkAddress = this.BuildLinkAddress(connectionString, path);
+
+            var linkSettings = new AmqpLinkSettings()
+            {
+                Role = false,
+                InitialDeliveryCount = 0,
+                Target = new Target() { Address = linkAddress.AbsoluteUri },
+                SndSettleMode = null, // SenderSettleMode.Unsettled (null as it is the default and to avoid bytes on the wire)
+                RcvSettleMode = null, // (byte)ReceiverSettleMode.First (null as it is the default and to avoid bytes on the wire)
+                LinkName = Guid.NewGuid().ToString("N") // Use a human readable link name to help with debugging
+            };
+
+            SetLinkSettingsCommonProperties(linkSettings, timeoutHelper.RemainingTime());
+
+            var link = new SendingAmqpLink(linkSettings);
+            link.AttachTo(session);
+
+            var audience = this.BuildAudience(connectionString, path);
+            await this.OpenLinkAsync(link, connectionString, audience, timeoutHelper.RemainingTime());
+
+            return link;
+        }
+
+        public virtual async Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount)
+        {
+            var timeoutHelper = new TimeoutHelper(timeout);
+
+            AmqpSession session;
+            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
+            {
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+            }
+
+            var linkAddress = this.BuildLinkAddress(connectionString, path);
+
+            var linkSettings = new AmqpLinkSettings()
+            {
+                Role = true,
+                TotalLinkCredit = prefetchCount,
+                AutoSendFlow = prefetchCount > 0,
+                Source = new Source() { Address = linkAddress.AbsoluteUri },
+                SndSettleMode = null, // SenderSettleMode.Unsettled (null as it is the default and to avoid bytes on the wire)
+                RcvSettleMode = (byte)ReceiverSettleMode.Second,
+                LinkName = Guid.NewGuid().ToString("N") // Use a human readable link name to help with debuggin
+            };
+
+            SetLinkSettingsCommonProperties(linkSettings, timeoutHelper.RemainingTime());
+
+            var link = new ReceivingAmqpLink(linkSettings);
+            link.AttachTo(session);
+
+            var audience = this.BuildAudience(connectionString, path);
+            await this.OpenLinkAsync(link, connectionString, audience, timeoutHelper.RemainingTime());
+
+            return link;
+        }
+        
         public void CloseLink(AmqpLink link)
         {
             link.SafeClose();
         }
 
-        public abstract void Release();
+        public abstract void Release(string deviceId);
+
+        protected abstract Uri BuildLinkAddress(IotHubConnectionString iotHubConnectionString, string path);
+
+        protected abstract string BuildAudience(IotHubConnectionString iotHubConnectionString, string path);
+
+        protected abstract Task OpenLinkAsync(AmqpObject link, IotHubConnectionString connectionString, string audience, TimeSpan timeout);
 
         protected static bool InitializeDisableServerCertificateValidation()
         {
@@ -89,7 +161,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 MaxFrameSize = AmqpConstants.DefaultMaxFrameSize,
                 ContainerId = Guid.NewGuid().ToString("N"),
-                HostName = this.ConnectionString.AmqpEndpoint.Host
+                HostName = this.hostName
             };
 
             var amqpConnection = new AmqpConnection(transport, amqpSettings, amqpConnectionSettings);
@@ -137,7 +209,7 @@ namespace Microsoft.Azure.Devices.Client
         async Task<TransportBase> CreateClientWebSocketTransportAsync(TimeSpan timeout)
         {
             var timeoutHelper = new TimeoutHelper(timeout);
-            Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
+            Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.hostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
             var websocket = await CreateClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
             return new ClientWebSocketTransport(
                 websocket,
@@ -168,13 +240,13 @@ namespace Microsoft.Azure.Devices.Client
         {
             var tcpTransportSettings = new TcpTransportSettings()
             {
-                Host = this.ConnectionString.HostName,
-                Port = this.ConnectionString.AmqpEndpoint.Port
+                Host = this.hostName,
+                Port = this.port
             };
 
             var tlsTransportSettings = new TlsTransportSettings(tcpTransportSettings)
             {
-                TargetHost = this.ConnectionString.HostName,
+                TargetHost = this.hostName,
                 Certificate = null, // TODO: add client cert support
                 CertificateValidationCallback = OnRemoteCertificateValidation
             };

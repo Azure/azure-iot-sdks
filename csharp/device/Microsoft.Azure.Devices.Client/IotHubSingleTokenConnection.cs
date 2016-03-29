@@ -6,7 +6,6 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.Amqp;
-    using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Devices.Client.Extensions;
 
     sealed class IotHubSingleTokenConnection : IotHubConnection
@@ -15,11 +14,14 @@ namespace Microsoft.Azure.Devices.Client
         IotHubTokenRefresher iotHubTokenRefresher;
 
         public IotHubSingleTokenConnection(IotHubScopeConnectionPool iotHubScopeConnectionPool, IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
-            :base(connectionString, amqpTransportSettings)
+            :base(connectionString.HostName, connectionString.AmqpEndpoint.Port, amqpTransportSettings)
         {
             this.iotHubScopeConnectionPool = iotHubScopeConnectionPool;
+            this.ConnectionString = connectionString;
             this.FaultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
         }
+
+        public override IotHubConnectionString ConnectionString { get; }
 
         public override Task CloseAsync()
         {
@@ -31,81 +33,9 @@ namespace Microsoft.Azure.Devices.Client
             this.FaultTolerantSession.Close();
         }
 
-        public override void Release()
+        public override void Release(string doNotUse)
         {
-            if (this.iotHubScopeConnectionPool != null)
-            {
-                this.iotHubScopeConnectionPool.RemoveRef();
-            }
-            else
-            {
-                this.CloseAsync();
-            }
-        }
-
-        public override async Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString doNotUse, TimeSpan timeout)
-        {
-            var timeoutHelper = new TimeoutHelper(timeout);
-
-            AmqpSession session;
-            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
-            {
-                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
-            }
-
-            var linkAddress = this.ConnectionString.BuildLinkAddress(path);
-
-            var linkSettings = new AmqpLinkSettings()
-            {
-                Role = false,
-                InitialDeliveryCount = 0,
-                Target = new Target() { Address = linkAddress.AbsoluteUri },
-                SndSettleMode = null, // SenderSettleMode.Unsettled (null as it is the default and to avoid bytes on the wire)
-                RcvSettleMode = null, // (byte)ReceiverSettleMode.First (null as it is the default and to avoid bytes on the wire)
-                LinkName = Guid.NewGuid().ToString("N") // Use a human readable link name to help with debugging
-            };
-
-            SetLinkSettingsCommonProperties(linkSettings, timeoutHelper.RemainingTime());
-
-            var link = new SendingAmqpLink(linkSettings);
-            link.AttachTo(session);
-
-            await OpenLinkAsync(link, timeoutHelper.RemainingTime());
-
-            return link;
-        }
-
-        public override async Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString doNotUse, TimeSpan timeout, uint prefetchCount)
-        {
-            var timeoutHelper = new TimeoutHelper(timeout);
-
-            AmqpSession session;
-            if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
-            {
-                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
-            }
-
-            var linkAddress = this.ConnectionString.BuildLinkAddress(path);
-
-            var linkSettings = new AmqpLinkSettings()
-            {
-                Role = true,
-                TotalLinkCredit = prefetchCount,
-                AutoSendFlow = prefetchCount > 0,
-                Source = new Source() { Address = linkAddress.AbsoluteUri },
-                SndSettleMode = null, // SenderSettleMode.Unsettled (null as it is the default and to avoid bytes on the wire)
-                RcvSettleMode = (byte)ReceiverSettleMode.Second, 
-                LinkName = Guid.NewGuid().ToString("N") // Use a human readable link name to help with debuggin
-            };
-
-            SetLinkSettingsCommonProperties(linkSettings, timeoutHelper.RemainingTime());
-
-            var link = new ReceivingAmqpLink(linkSettings);
-            link.AttachTo(session);
-
-            await OpenLinkAsync(link, timeoutHelper.RemainingTime());
-
-            return link;
+            this.iotHubScopeConnectionPool.RemoveRef();
         }
 
         protected override async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout)
@@ -115,7 +45,6 @@ namespace Microsoft.Azure.Devices.Client
             if (this.iotHubTokenRefresher != null)
             {
                 this.iotHubTokenRefresher.Cancel();
-                this.iotHubTokenRefresher = null;
             }
 
             AmqpSession amqpSession = await base.CreateSessionAsync(timeoutHelper.RemainingTime());
@@ -131,19 +60,21 @@ namespace Microsoft.Azure.Devices.Client
             return amqpSession;
         }
 
-        void CloseConnection(AmqpSession amqpSession)
+        protected override Uri BuildLinkAddress(IotHubConnectionString doNotUse, string path)
         {
-            // Closing the connection also closes any sessions.
-            amqpSession.Connection.SafeClose();
-            this.iotHubTokenRefresher.Cancel();
+            return this.ConnectionString.BuildLinkAddress(path);
         }
 
-        static async Task OpenLinkAsync(AmqpObject link, TimeSpan timeout)
+        protected override string BuildAudience(IotHubConnectionString doNotUse, string path)
         {
-            var timeoutHelper = new TimeoutHelper(timeout);
+            return string.Empty;
+        }
+
+        protected override async Task OpenLinkAsync(AmqpObject link, IotHubConnectionString doNotUse, string doNotUse2, TimeSpan timeout)
+        {
             try
             {
-                await link.OpenAsync(timeoutHelper.RemainingTime());
+                await link.OpenAsync(timeout);
             }
             catch (Exception exception)
             {
@@ -156,6 +87,13 @@ namespace Microsoft.Azure.Devices.Client
 
                 throw;
             }
+        }
+
+        void CloseConnection(AmqpSession amqpSession)
+        {
+            // Closing the connection also closes any sessions.
+            amqpSession.Connection.SafeClose();
+            this.iotHubTokenRefresher.Cancel();
         }
     }
 }

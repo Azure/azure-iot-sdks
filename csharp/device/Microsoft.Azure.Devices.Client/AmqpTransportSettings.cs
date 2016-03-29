@@ -25,6 +25,11 @@ namespace Microsoft.Azure.Devices.Client
             this.openTimeout = DefaultOpenTimeout;
         }
 
+        public AmqpTransportSettings(TransportType transportType, uint prefetchCount)
+            :this(transportType, prefetchCount, new AmqpConnectionPoolSettings())
+        {
+        }
+
         public AmqpTransportSettings(TransportType transportType, uint prefetchCount, AmqpConnectionPoolSettings amqpConnectionPoolSettings)
         {
             if (prefetchCount <= 0)

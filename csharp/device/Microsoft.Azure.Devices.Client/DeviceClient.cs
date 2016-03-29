@@ -72,7 +72,7 @@ namespace Microsoft.Azure.Devices.Client
 
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, RegexOptions);
         TransportHandlerBase impl;
-        bool closeCalled;
+        volatile bool closeCalled;
 #if !WINDOWS_UWP
         readonly IotHubConnectionString iotHubConnectionString;
         readonly ITransportSettings[] transportSettings;
@@ -85,7 +85,6 @@ namespace Microsoft.Azure.Devices.Client
             this.iotHubConnectionString = iotHubConnectionString;
             this.transportSettings = transportSettings;
         }
-
 #else
         DeviceClient(TransportHandlerBase impl, TransportType transportType)
         {
@@ -355,6 +354,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             this.closeCalled = true;
 #if !WINDOWS_UWP
+            GC.SuppressFinalize(this);
             if (this.impl != null)
             {
 #endif
@@ -385,6 +385,10 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                if (this.closeCalled)
+                {
+                    throw new ObjectDisposedException("DeviceClient object is closed.");
+                }
                 return this.impl.ReceiveAsync().AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
@@ -410,6 +414,10 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                if (this.closeCalled)
+                {
+                    throw new ObjectDisposedException("DeviceClient object is closed.");
+                }
                 return this.impl.ReceiveAsync(timeout).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
@@ -438,6 +446,10 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                if (this.closeCalled)
+                {
+                    throw new ObjectDisposedException("DeviceClient object is closed.");
+                }
                 return this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
@@ -463,6 +475,10 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                if (this.closeCalled)
+                {
+                    throw new ObjectDisposedException("DeviceClient object is closed.");
+                }
                 return this.impl.CompleteAsync(message).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
@@ -491,6 +507,10 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                if (this.closeCalled)
+                {
+                    throw new ObjectDisposedException("DeviceClient object is closed.");
+                }
                 return this.impl.AbandonAsync(lockToken).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
@@ -516,6 +536,10 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                if (this.closeCalled)
+                {
+                    throw new ObjectDisposedException("DeviceClient object is closed.");
+                }
                 return this.impl.AbandonAsync(message).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
@@ -544,6 +568,10 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                if (this.closeCalled)
+                {
+                    throw new ObjectDisposedException("DeviceClient object is closed.");
+                }
                 return this.impl.RejectAsync(lockToken).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
@@ -569,6 +597,10 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                if (this.closeCalled)
+                {
+                    throw new ObjectDisposedException("DeviceClient object is closed.");
+                }
                 return this.impl.RejectAsync(message).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
@@ -594,6 +626,10 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                if (this.closeCalled)
+                {
+                    throw new ObjectDisposedException("DeviceClient object is closed.");
+                }
                 return this.impl.SendEventAsync(message).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
@@ -619,10 +655,21 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                if (this.closeCalled)
+                {
+                    throw new ObjectDisposedException("DeviceClient object is closed.");
+                }
                 return this.impl.SendEventBatchAsync(messages).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP
             }
 #endif
+        }
+
+        // This Finalizer gets cancelled when/if the user calls CloseAsync.
+        ~DeviceClient()
+        {
+            // If the user failed to call CloseAsync make sure the connection's reference count gets updated.
+            this.Dispose();
         }
 
 #if !WINDOWS_UWP
@@ -732,12 +779,17 @@ namespace Microsoft.Azure.Devices.Client
 
             throw lastException;
         }
-
+#endif
         public void Dispose()
         {
+#if !WINDOWS_UWP
+            this.CloseAsync().Fork();
             this.impl = null;
             this.openTaskCompletionSource = null;
-        }
+#else
+            this.CloseAsync();
+            this.impl = null;
 #endif
+        }
     }
 }

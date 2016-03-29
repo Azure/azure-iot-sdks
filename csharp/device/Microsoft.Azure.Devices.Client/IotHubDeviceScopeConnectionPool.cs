@@ -5,17 +5,17 @@ namespace Microsoft.Azure.Devices.Client
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using Microsoft.Azure.Devices.Common.Cloud;
 
 #if !WINDOWS_UWP
     sealed class IotHubDeviceScopeConnectionPool
     {
         readonly IotHubConnectionCache cache;
-        readonly HashSet<IotHubMuxConnection> fullyLoadedPools;
-        readonly HashSet<IotHubMuxConnection> semiLoadedPools;
-        readonly HashSet<IotHubMuxConnection> lightlyLoadedPools;
+        readonly Dictionary<long, Tuple<IotHubDeviceMuxConnection, uint>> connectionPool;
+        readonly Dictionary<IotHubDeviceMuxConnection, IOThreadTimer> idleTimers;
         readonly AmqpTransportSettings amqpTransportSettings;
         readonly object thisLock;
+        readonly TimeSpan idleTimeout;
         readonly IotHubConnectionString connectionString;
 
         public IotHubDeviceScopeConnectionPool(IotHubConnectionCache cache, IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
@@ -23,126 +23,115 @@ namespace Microsoft.Azure.Devices.Client
             this.cache = cache;
             this.connectionString = connectionString;
             this.amqpTransportSettings = amqpTransportSettings;
-            this.fullyLoadedPools = new HashSet<IotHubMuxConnection>();
-            this.semiLoadedPools = new HashSet<IotHubMuxConnection>();
-            this.lightlyLoadedPools = new HashSet<IotHubMuxConnection>();
+            this.connectionPool = new Dictionary<long, Tuple<IotHubDeviceMuxConnection, uint>>();
+            this.idleTimers = new Dictionary<IotHubDeviceMuxConnection, IOThreadTimer>();
+            this.idleTimeout = amqpTransportSettings.AmqpConnectionPoolSettings.ConnectionIdleTimeout;
             this.thisLock = new object();
         }
 
-        public IotHubConnection GetConnection()
+        public IotHubConnection GetConnection(string deviceId)
         {
             lock (this.thisLock)
             {
-                IotHubMuxConnection selectedPool = null;
-                if (!this.lightlyLoadedPools.Any() && this.GetNumConnectionPools() < AmqpConnectionPoolSettings.MaxNumberOfPools)
+                var cacheIndex = this.HashDevice(deviceId);
+                Tuple<IotHubDeviceMuxConnection, uint> selectedConnectionTuple;
+                if (!this.connectionPool.TryGetValue(cacheIndex, out selectedConnectionTuple) &&
+                    this.connectionPool.Count <= this.amqpTransportSettings.AmqpConnectionPoolSettings.MaxPoolSize)
                 {
-                    var iotHubMuxConnection = new IotHubMuxConnection(this, this.connectionString, this.amqpTransportSettings);
-                    this.lightlyLoadedPools.Add(iotHubMuxConnection);
+                    var newConnection = new IotHubDeviceMuxConnection(this, cacheIndex, this.connectionString, this.amqpTransportSettings);
+                    this.StartIdleTimer(newConnection);
+                    selectedConnectionTuple = Tuple.Create(newConnection, (uint)0);
+                    this.connectionPool.Add(cacheIndex, selectedConnectionTuple);
                 }
 
-                if (this.lightlyLoadedPools.Any())
+                if (selectedConnectionTuple == null)
                 {
-                    selectedPool = this.lightlyLoadedPools.FirstOrDefault();
-                }
-                else if (this.semiLoadedPools.Any())
-                {
-                    selectedPool = this.semiLoadedPools.FirstOrDefault();
-                }
-                else
-                {
-                    throw new InvalidOperationException("Amqp device-scoped iothub connection pool capacity exhausted");
+                    throw new InvalidOperationException("device scope connection pool capacity reached. Consider increasing AmqpConnectionSettings.MaxPoolSize");
                 }
 
-                bool success = this.IncrementNumDevices(selectedPool);
+                var numDevices = selectedConnectionTuple.Item2;
+                if (numDevices == 0)
+                {
+                    if (!this.TryCancelIdleTimer(selectedConnectionTuple.Item1))
+                    {
+                        return null;
+                    }
+                }
 
-                return success ? selectedPool : null;
+                if (++numDevices > AmqpConnectionPoolSettings.MaxDevicesPerConnection)
+                {
+                    throw new InvalidOperationException("device scope connection pool capacity reached. Consider increasing AmqpConnectionSettings.MaxPoolSize");
+                }
+
+                var updatedConnectionTuple = Tuple.Create(selectedConnectionTuple.Item1, numDevices);
+                this.connectionPool.Remove(cacheIndex);
+                this.connectionPool.Add(cacheIndex, updatedConnectionTuple);
+
+                return selectedConnectionTuple.Item1;
             }
         }
 
-        public void DecrementNumDevices(IotHubMuxConnection iotHubMuxConnection)
+        public void RemoveDeviceFromConnection(IotHubDeviceMuxConnection iotHubDeviceMuxConnection, string deviceId)
         {
             lock (this.thisLock)
             {
-                var numDevices = iotHubMuxConnection.DecrementNumberOfDevices();
-                switch (numDevices)
+                var cacheIndex = this.HashDevice(deviceId);
+                Tuple<IotHubDeviceMuxConnection, uint> selectedConnectionTuple;
+                if (!this.connectionPool.TryGetValue(cacheIndex, out selectedConnectionTuple))
                 {
-                    case AmqpConnectionPoolSettings.DevicesPerConnectionLevel1:
-                        if (this.semiLoadedPools.Contains(iotHubMuxConnection))
-                        {
-                            this.semiLoadedPools.Remove(iotHubMuxConnection);
-                            this.lightlyLoadedPools.Add(iotHubMuxConnection);
-                        }
-                        break;
-                    case AmqpConnectionPoolSettings.DevicesPerConnectionLevel2:
-                        if (this.fullyLoadedPools.Contains(iotHubMuxConnection))
-                        {
-                            this.fullyLoadedPools.Remove(iotHubMuxConnection);
-                            this.semiLoadedPools.Add(iotHubMuxConnection);
-                        }
-                        break;
-                    default:
-                        //do nothing
-                        break;
+                    throw new InvalidOperationException("Unable to find iotHubMuxConnection to delete device");
                 }
+
+                var numDevices = selectedConnectionTuple.Item2;
+                if (--numDevices == 0)
+                {
+                    this.StartIdleTimer(iotHubDeviceMuxConnection);
+                }
+
+                var updatedConnectionTuple = Tuple.Create(selectedConnectionTuple.Item1, numDevices);
+                this.connectionPool.Remove(cacheIndex);
+                this.connectionPool.Add(cacheIndex, updatedConnectionTuple);
             }
         }
 
-        public void Remove(IotHubMuxConnection iotHubMuxConnection)
+        public void Remove(IotHubDeviceMuxConnection iotHubDeviceMuxConnection)
         {
             lock (this.thisLock)
             {
-                if (this.lightlyLoadedPools.Contains(iotHubMuxConnection))
-                {
-                    this.lightlyLoadedPools.Remove(iotHubMuxConnection);
-                }
-                else if (this.semiLoadedPools.Contains(iotHubMuxConnection))
-                {
-                    this.semiLoadedPools.Remove(iotHubMuxConnection);
-                }
-                else if (this.fullyLoadedPools.Contains(iotHubMuxConnection))
-                {
-                    this.fullyLoadedPools.Remove(iotHubMuxConnection);
-                }
+                this.connectionPool.Remove(iotHubDeviceMuxConnection.GetCacheKey());
 
-                if (this.GetNumConnectionPools() == 0)
+                this.idleTimers.Remove(iotHubDeviceMuxConnection);
+
+                if (this.connectionPool.Count == 0)
                 {
                     this.cache.RemoveDeviceScopeConnectionPool(this.connectionString);
                 }
             }
         }
 
+        long HashDevice(string deviceId)
+        {
+            return Math.Abs(PerfectHash.HashToLong(deviceId) % this.amqpTransportSettings.AmqpConnectionPoolSettings.MaxPoolSize);
+        }
+
         /*
         * Only called under this.thisLock
         */
-        bool IncrementNumDevices(IotHubMuxConnection iotHubMuxConnection)
+        bool TryCancelIdleTimer(IotHubDeviceMuxConnection iotHubDeviceMuxConnection)
         {
-            uint numDevices;
-            bool success = iotHubMuxConnection.IncrementNumberOfDevices(out numDevices);
-
-            if (!success)
+            IOThreadTimer idleTimer;
+            if (this.idleTimers.TryGetValue(iotHubDeviceMuxConnection, out idleTimer))
             {
-                return false;
+                if (!idleTimer.Cancel())
+                {
+                    return false;
+                }
+
+                this.idleTimers.Remove(iotHubDeviceMuxConnection);
             }
-
-            switch (numDevices)
+            else
             {
-                case AmqpConnectionPoolSettings.DevicesPerConnectionLevel1:
-                    if (this.lightlyLoadedPools.Contains(iotHubMuxConnection))
-                    {
-                        this.lightlyLoadedPools.Remove(iotHubMuxConnection);
-                        this.semiLoadedPools.Add(iotHubMuxConnection);
-                    }
-                    break;
-                case AmqpConnectionPoolSettings.DevicesPerConnectionLevel2:
-                    if (this.semiLoadedPools.Contains(iotHubMuxConnection))
-                    {
-                        this.semiLoadedPools.Remove(iotHubMuxConnection);
-                        this.fullyLoadedPools.Add(iotHubMuxConnection);
-                    }
-                    break;
-                default:
-                    // do nothing
-                    break;
+               throw new InvalidOperationException("IdleTimer could not be found");
             }
 
             return true;
@@ -151,9 +140,11 @@ namespace Microsoft.Azure.Devices.Client
         /*
         * Only called under this.thisLock
         */
-        int GetNumConnectionPools()
+        void StartIdleTimer(IotHubDeviceMuxConnection iotHubDeviceMuxConnection)
         {
-            return this.lightlyLoadedPools.Count + this.semiLoadedPools.Count + this.fullyLoadedPools.Count;
+            var idleTimer = new IOThreadTimer(s => ((IotHubDeviceMuxConnection)s).IdleTimerCallback(), iotHubDeviceMuxConnection, false);
+            this.idleTimers.Add(iotHubDeviceMuxConnection, idleTimer);
+            idleTimer.Set(this.idleTimeout);
         }
     }
 #endif

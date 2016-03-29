@@ -17,6 +17,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public IotHubScopeConnectionPool(IotHubConnectionCache cache, IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSettings)
         {
+            Fx.Assert(cache != null, "IotHubConnectionCache reference is null");
             this.cache = cache;
             this.ConnectionString = connectionString;
             this.Connection = new IotHubSingleTokenConnection(this, connectionString,  amqpTransportSettings);

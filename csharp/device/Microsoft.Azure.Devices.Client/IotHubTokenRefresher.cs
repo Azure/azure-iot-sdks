@@ -32,7 +32,6 @@ namespace Microsoft.Azure.Devices.Client
             this.amqpSession = amqpSession;
             this.connectionString = connectionString;
             this.audience = audience;
-            this.taskCancelled = false;
         }
 
         public void Cancel()

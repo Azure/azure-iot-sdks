@@ -119,12 +119,13 @@
     <Compile Include="AmqpConnectionPoolSettings.cs" />
     <Compile Include="Common\Exceptions\IotHubClientException.cs" />
     <Compile Include="AmqpTransportSettings.cs" />
+    <Compile Include="Common\PerfectHash.cs" />
     <Compile Include="Common\TaskConstants.cs" />
     <Compile Include="Common\TaskUtils.cs" />
     <Compile Include="IotHubDeviceScopeConnectionPool.cs" />
     <Compile Include="IotHubScopeConnectionPool.cs" />
     <Compile Include="IotHubSingleTokenConnection.cs" />
-    <Compile Include="IotHubMuxConnection.cs" />
+    <Compile Include="IotHubDeviceMuxConnection.cs" />
     <Compile Include="IotHubTokenRefresher.cs" />
     <Compile Include="Transport\AmqpClientHelper.cs" />
     <Compile Include="Common\UrlEncodedDictionarySerializer.cs" />
