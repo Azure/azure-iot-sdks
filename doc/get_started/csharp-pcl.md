@@ -49,12 +49,19 @@ You should have the following items ready before beginning the process:
 
 -   The following code can be copy/pasted anywhere an action is to be performed, in order to send data to IotHub (for instance, in a method triggered by a button click/touch)
 
+    ``` csharp
+            // Connect to Azure IoT Hub
             string DeviceConnectionString = "<replace>"; //replace `<replace>` with the connection string for your device.
             DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Http1);
-            string dataBuffer = string.Format("Message from PCL: {0}_{1}", this.count, Guid.NewGuid().ToString()); //dataBuffer is the payload of the message to be sent to IotHub
+            
+            // Create a message
+            string dataBuffer = string.Format("Message from PCL: {0}", Guid.NewGuid().ToString());
             var eventMessage = new Message(Encoding.UTF8.GetBytes(dataBuffer));
+            
+            // Send the message
             deviceClient.SendEventAsync(eventMessage);
-			
+	```
+    		
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application and how to send cloud-to-device messages to the application.
 
 <a name="ReceiveData"></a>
@@ -63,15 +70,28 @@ You should have the following items ready before beginning the process:
 -   The following code can be copy/pasted anywhere an action is to be performed, in order to receive data from IotHub (for instance, in a background thread waking every once
 in a while to check for new messages):
 
-            var asyncTask = Task.Run(() => this.deviceClient.ReceiveAsync());
-            var receivedMessage = asyncTask.Result;
-            if (receivedMessage != null)
+    ``` csharp
+            Message receivedMessage = null;
+            try
             {
-                Console.WriteLine(Encoding.Default.GetString(receivedMessage.GetBytes()) + "\r\n");
-                Console.WriteLine("Message received, now completing it...");
-                Task.Run(() => { deviceClient.CompleteAsync(receivedMessage); });
-                Console.WriteLine("Message completed.");
+                receivedMessage = await deviceClient.ReceiveAsync();
+
+                if (receivedMessage != null)
+                {
+                    byte[] data = receivedMessage.GetBytes();
+                    Debug.WriteLine(Encoding.UTF8.GetString(data, 0, data.Length) + "\r\n");
+                    Debug.WriteLine("Message received, now completing it...");
+                    await deviceClient.CompleteAsync(receivedMessage);
+                    Debug.WriteLine("Message completed.");
+                }
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error while receiving a message from IoT Hub: " + ex.Message);
+                if (receivedMessage != null)
+                    await deviceClient.RejectAsync(receivedMessage);
+            }
+    ```
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
