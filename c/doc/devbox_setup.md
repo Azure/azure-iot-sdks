@@ -80,9 +80,9 @@ The following instructions outline how you can build the libraries in Windows:
 
 3. Ensure that the git.exe application is in your system path.
 
-4. Open a Visual Studio 2015 x86 Native Tools command prompt.
+4. Open a Developer Command Prompt for VS2015.
 
-5. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
+5. Run the script **build_client.cmd** in the **c\\build_all\\windows** directory.
 
 
 > Note: To enable support to AMQP over WebSockets, 
