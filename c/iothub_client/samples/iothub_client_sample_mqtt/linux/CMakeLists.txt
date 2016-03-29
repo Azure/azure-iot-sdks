@@ -24,16 +24,12 @@ set(iothub_client_sample_mqtt_h_files
 add_executable(iothub_client_sample_mqtt ${iothub_client_sample_mqtt_c_files} ${iothub_client_sample_mqtt_h_files})
 
 target_link_libraries(iothub_client_sample_mqtt
+    iothub_client
+    iothub_client_mqtt_transport
+    aziotsharedutil
+    umqtt
+    pthread
     curl
     ssl
     crypto
-    pthread
-    iothub_client
-    pthread
-    ssl
-    crypto
-    aziotsharedutil
-    umqtt
-    iothub_client_mqtt_transport
-    iothub_client
 )

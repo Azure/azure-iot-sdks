@@ -24,16 +24,12 @@ set(iothub_client_sample_amqp_h_files
 add_executable(iothub_client_sample_amqp ${iothub_client_sample_amqp_c_files} ${iothub_client_sample_amqp_h_files})
 
 target_link_libraries(iothub_client_sample_amqp
+    iothub_client
+    iothub_client_amqp_transport
+    aziotsharedutil
+    uamqp
+    pthread
     curl
     ssl
     crypto
-    pthread
-    iothub_client
-    pthread
-    ssl
-    crypto
-    aziotsharedutil
-    uamqp
-    iothub_client_amqp_transport
-    iothub_client
 )

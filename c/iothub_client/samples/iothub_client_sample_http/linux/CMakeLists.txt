@@ -24,15 +24,11 @@ set(iothub_client_sample_http_h_files
 add_executable(iothub_client_sample_http ${iothub_client_sample_http_c_files} ${iothub_client_sample_http_h_files})
 
 target_link_libraries(iothub_client_sample_http
+    iothub_client
+    iothub_client_http_transport
+    aziotsharedutil
+    pthread
     curl
     ssl
     crypto
-    pthread
-    iothub_client
-    pthread
-    ssl
-    crypto
-    aziotsharedutil
-    iothub_client_http_transport
-    iothub_client
 )
