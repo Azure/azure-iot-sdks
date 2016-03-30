@@ -83,16 +83,18 @@ rm -r -f ~/cmake
 mkdir ~/cmake
 pushd ~/cmake
 cmake $toolchainfile -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:BOOL=$build_python $build_root
-make --jobs=$(nproc)
+
+CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+make --jobs=$CORES
 
 if [[ $run_valgrind == 1 ]] ;
 then
-	#use doctored openssl
-	export LD_LIBRARY_PATH=/usr/local/ssl/lib
-	ctest -j $(nproc) --output-on-failure
-	export LD_LIBRARY_PATH=
+    #use doctored openssl
+    export LD_LIBRARY_PATH=/usr/local/ssl/lib
+    ctest -j $CORES --output-on-failure
+    export LD_LIBRARY_PATH=
 else
-	ctest -j $(nproc) -C "Debug" --output-on-failure
+    ctest -j $CORES -C "Debug" --output-on-failure
 fi
 
 popd
