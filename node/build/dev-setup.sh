@@ -76,6 +76,7 @@ npm link
 
 cd $node_root/e2etests
 echo "\n-- Creating links for `pwd` --"
+npm install
 npm link azure-iot-common
 npm link azure-iot-amqp-base
 npm link azure-iot-http-base
@@ -86,7 +87,6 @@ npm link azure-iot-device-amqp-ws
 npm link azure-iot-device-http
 npm link azure-iot-device-mqtt
 npm link azure-iothub
-npm install
 
 cd $node_root/../tools/iothub-explorer
 echo "\n-- Creating links for `pwd` --"

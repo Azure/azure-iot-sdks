@@ -93,7 +93,7 @@ module.exports = [
         "replaceString": function(versions) {
             return '$1' + versions.csharp.devicepcl + '$2';
         }
-    },	
+    },
     {
         "taskType": "regexReplaceTask",
         "filePath": "csharp/device/Microsoft.Azure.Devices.Client.WinRT/Properties/AssemblyInfo.cs",
@@ -407,7 +407,7 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
-                "search": "devDependencies.azure-iot-common",
+                "search": "dependencies.azure-iot-common",
                 "replaceString": "node.common"
             }
         ]
