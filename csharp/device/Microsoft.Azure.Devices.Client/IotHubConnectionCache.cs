@@ -7,7 +7,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
 
 #if !WINDOWS_UWP
-    sealed class IotHubConnectionCache
+    class IotHubConnectionCache
     {
         readonly ConcurrentDictionary<IotHubConnectionString, IotHubScopeConnectionPool> hubScopeConnectionPools;
         readonly ConcurrentDictionary<IotHubConnectionString, IotHubDeviceScopeConnectionPool> deviceScopeConnectionPools;
@@ -19,7 +19,8 @@ namespace Microsoft.Azure.Devices.Client
             this.deviceScopeConnectionPools = new ConcurrentDictionary<IotHubConnectionString, IotHubDeviceScopeConnectionPool>(new DeviceScopeConnectionPoolStringComparer());
         }
 
-        public IotHubConnection GetConnection(IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSetting)
+        // Making this virtual to allow Moq to override
+        public virtual IotHubConnection GetConnection(IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSetting)
         {
             // Only the initial transportSetting is used, subsequent ones are ignored
             if (this.amqpTransportSettings == null)
@@ -29,7 +30,7 @@ namespace Microsoft.Azure.Devices.Client
 
             IotHubConnection iotHubConnection;
             // Use connection caching for both hub-scope and device-scope connection strings
-            if (connectionString.SharedAccessKeyName != null)
+            if (connectionString.SharedAccessKeyName != null || connectionString.SharedAccessSignature != null)
             {
                 IotHubScopeConnectionPool iotHubScopeConnectionPool;
                 do
@@ -66,7 +67,8 @@ namespace Microsoft.Azure.Devices.Client
             return iotHubConnection;
         }
 
-        public bool RemoveHubScopeConnectionPool(IotHubConnectionString connectionString)
+        // Making this virtual to allow Moq to override
+        public virtual bool RemoveHubScopeConnectionPool(IotHubConnectionString connectionString)
         {
             IotHubScopeConnectionPool iotHubScopeConnectionPool;
             if (this.hubScopeConnectionPools.TryRemove(connectionString, out iotHubScopeConnectionPool))

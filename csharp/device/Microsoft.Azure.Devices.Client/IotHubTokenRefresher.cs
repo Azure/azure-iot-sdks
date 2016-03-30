@@ -56,42 +56,55 @@ namespace Microsoft.Azure.Devices.Client
 
         async Task SendCbsTokenLoopAsync(TimeSpan timeout)
         {
-            while (!this.amqpSession.IsClosing())
+            try
             {
-                if (this.taskCancelled)
+                while (!this.amqpSession.IsClosing())
                 {
-                    break;
-                }
-
-                var cbsLink = this.amqpSession.Connection.Extensions.Find<AmqpCbsLink>();
-                if (cbsLink != null)
-                {
-                    try
+                    if (this.taskCancelled)
                     {
-                        var expiresAtUtc = await cbsLink.SendTokenAsync(
-                             this.connectionString,
-                             this.connectionString.AmqpEndpoint,
-                             this.audience,
-                             this.connectionString.AmqpEndpoint.AbsoluteUri,
-                             AccessRightsStringArray,
-                             timeout);
-                        await Task.Delay(RefreshTokenBuffer);
+                        break;
                     }
-                    catch (Exception exception)
+
+                    var cbsLink = this.amqpSession.Connection.Extensions.Find<AmqpCbsLink>();
+                    if (cbsLink != null)
                     {
-                        if (Fx.IsFatal(exception))
+                        try
                         {
-                            throw;
+                            var expiresAtUtc = await cbsLink.SendTokenAsync(
+                                 this.connectionString,
+                                 this.connectionString.AmqpEndpoint,
+                                 this.audience,
+                                 this.connectionString.AmqpEndpoint.AbsoluteUri,
+                                 AccessRightsStringArray,
+                                 timeout);
+                            await Task.Delay(RefreshTokenBuffer);
                         }
+                        catch (Exception exception)
+                        {
+                            if (Fx.IsFatal(exception))
+                            {
+                                throw;
+                            }
 
-                        await Task.Delay(RefreshTokenRetryInterval);
+                            await Task.Delay(RefreshTokenRetryInterval);
+                        }
                     }
-                }
-                else
-                {
-                    break;
+                    else
+                    {
+                        break;
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                if (Fx.IsFatal(e))
+                {
+                    throw;
+                }
+
+                // ignore other exceptions
+            }
+
         }
     }
 #endif

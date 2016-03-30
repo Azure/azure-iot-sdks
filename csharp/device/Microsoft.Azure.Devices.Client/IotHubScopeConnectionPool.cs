@@ -59,6 +59,12 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
+        // This method is only for unit tests
+        internal int GetCount()
+        {
+            return this.referenceCount;
+        }
+
         void IdleTimerCallback()
         {
             Fx.Assert(this.referenceCount == 0, "Cached IotHubConnection's ref count should be zero when idle timeout occurs!");

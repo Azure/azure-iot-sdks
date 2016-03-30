@@ -109,6 +109,12 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
+        // This method is only for unit tests
+        internal int GetCount()
+        {
+            return this.connectionPool.Count;
+        }
+
         long HashDevice(string deviceId)
         {
             return Math.Abs(PerfectHash.HashToLong(deviceId) % this.amqpTransportSettings.AmqpConnectionPoolSettings.MaxPoolSize);

@@ -21,7 +21,7 @@ namespace Microsoft.Azure.Devices.Client
             this.FaultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
         }
 
-        public override IotHubConnectionString ConnectionString { get; }
+        public IotHubConnectionString ConnectionString { get; }
 
         public override Task CloseAsync()
         {

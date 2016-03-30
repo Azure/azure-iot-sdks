@@ -28,14 +28,6 @@ namespace Microsoft.Azure.Devices.Client
             this.iotHubTokenRefreshers = new ConcurrentDictionary<AmqpObject, IotHubTokenRefresher>();
         }
 
-        public override IotHubConnectionString ConnectionString
-        {
-            get
-            {
-                throw new InvalidOperationException("ConnectionString property invalid for IotHubDeviceMuxConnection");
-            }
-        }
-
         public override Task CloseAsync()
         {
             return this.FaultTolerantSession.CloseAsync();

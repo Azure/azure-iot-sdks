@@ -118,22 +118,33 @@ namespace Microsoft.Azure.Devices.Client.Test
         [TestCategory("CIT")]
         [TestCategory("TransportSettings")]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void ConnectionPoolSettingsTest_ZeroIdleTimeout()
+        public void ConnectionPoolSettingsTest_4SecsIdleTimeout()
         {
             var connectionPoolSettings = new AmqpConnectionPoolSettings();
-            connectionPoolSettings.ConnectionIdleTimeout = TimeSpan.Zero;
+            connectionPoolSettings.ConnectionIdleTimeout = TimeSpan.FromSeconds(4);
             var transportSetting = new AmqpTransportSettings(TransportType.Amqp, 200, connectionPoolSettings);
         }
 
         [TestMethod]
         [TestCategory("CIT")]
         [TestCategory("TransportSettings")]
-        public void ConnectionPoolSettingsTest()
+        public void ConnectionPoolSettingsTest_MaxPoolSizeTest()
         {
             var connectionPoolSettings = new AmqpConnectionPoolSettings();
             connectionPoolSettings.MaxPoolSize = ushort.MaxValue;
             var transportSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 200, connectionPoolSettings);
             Assert.IsTrue(transportSetting.AmqpConnectionPoolSettings.MaxPoolSize == ushort.MaxValue, "MaxPoolSize should be 64K");
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("TransportSettings")]
+        public void ConnectionPoolSettingsTest_PoolingOff()
+        {
+            var connectionPoolSettings = new AmqpConnectionPoolSettings();
+            connectionPoolSettings.Pooling = false;
+            var transportSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 200, connectionPoolSettings);
+            Assert.IsTrue(transportSetting.AmqpConnectionPoolSettings.Pooling == false, "Pooling should be off");
         }
     }
 }

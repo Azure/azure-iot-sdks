@@ -35,8 +35,6 @@ namespace Microsoft.Azure.Devices.Client
             this.AmqpTransportSettings = amqpTransportSettings;
         }
 
-        public abstract IotHubConnectionString ConnectionString { get; }
-
         protected FaultTolerantAmqpObject<AmqpSession> FaultTolerantSession { get; set; }
 
         protected AmqpTransportSettings AmqpTransportSettings { get; }
