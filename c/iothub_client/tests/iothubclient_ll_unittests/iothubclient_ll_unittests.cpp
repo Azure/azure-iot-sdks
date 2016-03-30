@@ -18,6 +18,7 @@
 #include "lock.h"
 #include "doublylinkedlist.h"
 #include "iothub_client_private.h"
+#include "iothub_transport_ll.h"
 
 #include "string_tokenizer.h"
 #include "strings.h"
