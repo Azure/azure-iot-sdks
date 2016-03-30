@@ -27,7 +27,7 @@ del /F /Q %client-build-root%\build\tosign
 del /F /Q %client-build-root%\build\signed
 
 rem -- Build the DeviceExplorerWithInstaller.sln to ensure both projects are built
-%client-build-root%\tools\DeviceExplorer\build\build.cmd
+call %client-build-root%\tools\DeviceExplorer\build\build.cmd
 echo ErrorLevel after build.cmd for DeviceExplorer is %errorlevel%
 if not %errorlevel%==0 exit /b %errorlevel%
 
