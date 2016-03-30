@@ -11,8 +11,7 @@ public final class IotHubSasToken
      * the signature, the expiry time, the key name (device ID), and the
      * resource URI.
      */
-    public static final String TOKEN_FORMAT =
-            "SharedAccessSignature sig=%s&se=%s&sr=%s";
+    public static final String TOKEN_FORMAT = "SharedAccessSignature sig=%s&se=%s&sr=%s";
 
     /** Components of the SAS token. */
     protected final String signature;

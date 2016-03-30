@@ -338,7 +338,8 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
     @Override
     public void onConnectionRemoteClose(Event event){
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_035: [If the Connection was remotely closed abnormally, the event handler shall complete the sent message CompletableFuture with a new HandlerException.]
-        if(event.getConnection().getCondition() != null){
+        if(event.getConnection().getCondition() != null)
+        {
             this.currentSentMessageFuture.completeExceptionally(new HandlerException(this, new Throwable("Connected remotely closed due to error.")));
         }
     }
@@ -434,9 +435,7 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
         outgoingMessage.setBody(section);
 
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_047: [The function shall return a new CompletableFuture for the sent message.]
-        this.currentSentMessageFuture = new CompletableFuture<Integer>();
-        this.send();
-        return this.currentSentMessageFuture;
+        return this.send();
     }
 
     public void shutdown(){
@@ -467,7 +466,8 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
         return domain;
     }
 
-    private void send(){
+    private CompletableFuture<Integer> send(){
+        this.currentSentMessageFuture = new CompletableFuture<>();
         new Thread(() -> {
             if (this.linkFlow) {
                 //Encode the message and copy the contents to the byte buffer
@@ -497,5 +497,6 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
                 this.currentSentMessageFuture.completeExceptionally(new Throwable("Link is currently closed. A new link will be opened and the message resent."));
             }
         }).start();
+        return this.currentSentMessageFuture;
     }
 }

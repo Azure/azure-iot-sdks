@@ -205,7 +205,8 @@ public final class AmqpsIotHubConnection extends BaseHandler {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_14_016: [If the AMQPS connection is already closed, the function shall do nothing.]
 		// Codes_SRS_AMQPSIOTHUBCONNECTION_14_033: [The function shall close the AmqpsIotHubConnectionBaseHandler.]
 		// Codes_SRS_AMQPSIOTHUBCONNECTION_14_034: [The function shall exceptionally complete all remaining messages that are currently in progress and clear the queue.]
-		if(this.state != ReactorState.CLOSED) {
+		if(this.state != ReactorState.CLOSED)
+        {
             this.amqpsHandler.shutdown();
             this.clearInProgressMap();
             this.freeReactor();
@@ -347,24 +348,35 @@ public final class AmqpsIotHubConnection extends BaseHandler {
      * </p>
      * @throws IOException If {@link AmqpsIotHubConnectionBaseHandler} has not been initialized.
      */
-    protected synchronized void send(Tuple<CompletableFuture<Boolean>, byte[], Object> message) throws IOException {
-        if(this.state == ReactorState.CLOSED) {
+    protected synchronized void send(Tuple<CompletableFuture<Boolean>, byte[], Object> message) throws IOException
+    {
+        if(this.state == ReactorState.CLOSED)
+        {
             throw new IllegalStateException("The AMQPS IotHub Connection is currently closed. Call open() before attempting to send a message.");
         }
-        if(message != null) {
-            if (this.inProgressMessageMap.size() >= this.maxQueueSize * 0.9) {
+        if(message != null)
+        {
+            if (this.inProgressMessageMap.size() >= this.maxQueueSize * 0.9)
+            {
                 message.V1.completeExceptionally(new Throwable("Insufficient link credit to send message."));
-            } else {
-                try {
+            }
+            else
+            {
+                try
+                {
                     //Use the content and ID fields of the input message to have the handler create and send the message
-                    CompletableFuture<Integer> deliveryFuture = amqpsHandler.createBinaryMessage((byte[]) message.V2, message.V3);
+                    CompletableFuture<Integer> deliveryFuture = amqpsHandler.createBinaryMessage(message.V2, message.V3);
 
                     //Wait for a period of time before rejecting the message
-                    new Thread(() -> {
-                        try {
+                    new Thread(() ->
+                    {
+                        try
+                        {
                             Thread.sleep(DEFAULT_DELIVERY_WAIT_TIME_SECONDS * 1000);
                             deliveryFuture.completeExceptionally(new Throwable("Default timeout exceeded before this message was sent."));
-                        } catch (InterruptedException e) {
+                        }
+                        catch (InterruptedException e)
+                        {
                             e.printStackTrace();
                         }
                     }).start();
@@ -373,23 +385,20 @@ public final class AmqpsIotHubConnection extends BaseHandler {
                     //When this future completes, the message has been SENT
                     Integer deliveryHash = deliveryFuture.get();
                     inProgressMessageMap.put(deliveryHash, message);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
-                //The message was unable to be sent, exceptionally complete that future causing the message to be put back on the queue.
-                catch (ExecutionException e) {
-                    message.V1.completeExceptionally(e.getCause());
-                    this.fail(e.getCause());
-                }
-                //There was some other problem sending, exceptionally complete that future causing the message to be put back on the queue.
-                catch (Exception e) {
-                    if (message != null) {
+                // There was a problem sending, exceptionally complete the future causing the message to be put back on the queue.
+                catch (Exception e)
+                {
+                    if (message != null)
+                    {
                         message.V1.completeExceptionally(e);
                     }
                     this.fail(e);
                 }
             }
-        } else {
+        }
+        else
+        {
             throw new IOException("Cannot send an unitialized message.");
         }
     }
@@ -497,21 +506,17 @@ public final class AmqpsIotHubConnection extends BaseHandler {
 
         if(this.amqpsHandler != null) {
             Reactor reactor = Proton.reactor(this);
-            IotHubReactor iotHubReactor = new IotHubReactor(reactor);
+            this.iotHubReactor = new IotHubReactor(reactor);
 
             new Thread(() -> {
                 try {
                     iotHubReactor.run();
 
-                    //Closing here should be okay. The reactor will only stop running if the connection is remotely
-                    //or locally closed. The transport will attempt to receive/send a message and will get an exception
-                    //causing it to create a new AmqpsIoTHubConnection.
-                    close();
-
                     //Release the semaphore and make permit available allowing for the next reactor thread to spawn.
                     reactorSemaphore.release();
-                } catch(Exception e){
-                    close();
+                }
+                catch(Exception e)
+                {
                     reactorSemaphore.release();
                 }
             }).start();
