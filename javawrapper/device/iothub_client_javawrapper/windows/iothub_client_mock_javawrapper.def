@@ -1,0 +1,50 @@
+; Copyright(c) Microsoft.All rights reserved.
+; Licensed under the MIT license.See LICENSE file in the project root for full license information.
+; IotHub_Client_javawrapper.def : Declares the module parameters.
+; LIBRARY      "IotHub_Client_mock.dll"
+
+EXPORTS
+;   version.h
+    IoTHubClient_GetVersionString
+;   iothub_client.h
+    IoTHubClient_CreateFromConnectionString
+    IoTHubClient_Create
+    IoTHubClient_Destroy
+    IoTHubClient_SendEventAsync
+    IoTHubClient_GetSendStatus
+    IoTHubClient_SetMessageCallback
+    IoTHubClient_GetLastMessageReceiveTime
+    IoTHubClient_SetOption
+;   iothub_message.h
+    IoTHubMessage_CreateFromByteArray
+    IoTHubMessage_CreateFromString
+    IoTHubMessage_Clone
+    IoTHubMessage_GetByteArray
+    IoTHubMessage_GetString
+    IoTHubMessage_GetContentType
+    IoTHubMessage_Properties
+    IoTHubMessage_GetMessageId
+    IoTHubMessage_SetMessageId
+    IoTHubMessage_GetCorrelationId
+    IoTHubMessage_SetCorrelationId
+    IoTHubMessage_Destroy
+;   iothubtransporthttp.h
+    HTTP_Protocol
+;   iothubtransportamqp.h
+    AMQP_Protocol
+;   iothubtransportmqtt.h
+    MQTT_Protocol
+;   map.h (azure-c-shared-utility)
+    Map_Create
+    Map_Destroy
+    Map_Clone
+    Map_Add
+    Map_AddOrUpdate
+    Map_Delete
+    Map_ContainsKey
+    Map_ContainsValue
+    Map_GetValueFromKey
+    Map_GetInternals
+;   platform.h
+    platform_init
+    platform_deinit

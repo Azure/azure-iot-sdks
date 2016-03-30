@@ -14,6 +14,7 @@ build_http=ON
 build_mqtt=ON
 skip_unittests=OFF
 build_python=OFF
+build_javawrapper=OFF
 run_valgrind=0
 
 usage ()
@@ -31,6 +32,7 @@ usage ()
     echo " --no-mqtt                     do no build MQTT transport and samples"
     echo " --toolchain-file <file>       pass cmake a toolchain file for cross compiling"
     echo " --build-python                build Python C wrapper module (requires boost)"
+    echo " --build-javawrapper           build java C wrapper module"
     echo " -rv, --run_valgrind           will execute ctest with valgrind"
     exit 1
 }
@@ -63,6 +65,7 @@ process_args ()
               "--no-http" ) build_http=OFF;;
               "--no-mqtt" ) build_mqtt=OFF;;
               "--build-python" ) build_python=ON;;
+              "--build-javawrapper" ) build_javawrapper=ON;;
               "--toolchain-file" ) save_next_arg=2;;
               "-rv" | "--run_valgrind" ) run_valgrind=1;;
               * ) usage;;
