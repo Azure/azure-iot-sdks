@@ -55,18 +55,16 @@ namespace Microsoft.Azure.Devices.Client
             return this.cacheKey;
         }
 
-        protected override Task<AmqpSession> CreateSessionAsync(TimeSpan timeout)
+        protected override void OnCreateSession()
         {
             // Cleanup any lingering link refresh token timers
             this.CancelTokenRefreshers();
-
-            return base.CreateSessionAsync(timeout);
         }
 
         /**
           The input connection string can only be a device-scope connection string
          **/
-        protected override void OnCreateSendingLinkAsync(IotHubConnectionString connectionString)
+        protected override void OnCreateSendingLink(IotHubConnectionString connectionString)
         {
             if (connectionString.SharedAccessKeyName != null)
             {
@@ -74,7 +72,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        protected override void OnCreateReceivingLinkAsync(IotHubConnectionString connectionString)
+        protected override void OnCreateReceivingLink(IotHubConnectionString connectionString)
         {
             if (connectionString.SharedAccessKeyName != null)
             {

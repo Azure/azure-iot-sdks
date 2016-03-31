@@ -24,17 +24,16 @@ namespace Microsoft.Azure.Devices.Client
         public virtual IotHubConnection GetConnection(IotHubConnectionString connectionString, AmqpTransportSettings amqpTransportSetting)
         {
             // Only the initial transportSetting is used, subsequent ones are ignored
-            Interlocked.CompareExchange(ref this.amqpTransportSettings, amqpTransportSetting, null);
+            if (this.amqpTransportSettings == null)
+            {
+                Interlocked.CompareExchange(ref this.amqpTransportSettings, amqpTransportSetting, null);
+            }
 
             IotHubConnection iotHubConnection;
-            if (connectionString.SharedAccessSignature != null)
+            if (connectionString.SharedAccessKeyName != null  || connectionString.SharedAccessSignature != null)
             {
-                // Connection pooling is turned off when SAS signatures are used
-                iotHubConnection = new IotHubDeviceMuxConnection(null, long.MaxValue, connectionString, this.amqpTransportSettings);
-            }
-            else if (connectionString.SharedAccessKeyName != null)
-            {
-                // Hub scope connection string
+                // Connections are not pooled when SAS signatures are used. However, we still use a connection pool object
+                // Connections are not shared since the SAS signature will not match another connection string
                 IotHubScopeConnectionPool iotHubScopeConnectionPool;
                 do
                 {

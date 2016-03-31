@@ -45,7 +45,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public async Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout)
         {
-            this.OnCreateSendingLinkAsync(connectionString);
+            this.OnCreateSendingLink(connectionString);
 
             var timeoutHelper = new TimeoutHelper(timeout);
 
@@ -80,7 +80,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public async Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount)
         {
-            this.OnCreateReceivingLinkAsync(connectionString);
+            this.OnCreateReceivingLink(connectionString);
 
             var timeoutHelper = new TimeoutHelper(timeout);
 
@@ -138,18 +138,20 @@ namespace Microsoft.Azure.Devices.Client
             return false;
         }
 
-        protected virtual void OnCreateSendingLinkAsync(IotHubConnectionString connectionString)
+        protected virtual void OnCreateSendingLink(IotHubConnectionString connectionString)
         {
             // do nothing. Override in derived classes if necessary
         }
 
-        protected virtual void OnCreateReceivingLinkAsync(IotHubConnectionString connectionString)
+        protected virtual void OnCreateReceivingLink(IotHubConnectionString connectionString)
         {
             // do nothing. Override in derived classes if necessary
         }
 
         protected virtual async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout)
         {
+            this.OnCreateSession();
+
             var timeoutHelper = new TimeoutHelper(timeout);
 
             AmqpSettings amqpSettings = CreateAmqpSettings();
@@ -190,6 +192,11 @@ namespace Microsoft.Azure.Devices.Client
             // This adds itself to amqpConnection.Extensions
             var cbsLink = new AmqpCbsLink(amqpConnection);
             return amqpSession;
+        }
+
+        protected virtual void OnCreateSession()
+        {
+            // do nothing. Override in derived classes if necessary
         }
 
         static async Task<ClientWebSocket> CreateClientWebSocketAsync(Uri websocketUri, TimeSpan timeout)
