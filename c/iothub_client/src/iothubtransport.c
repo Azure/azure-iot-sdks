@@ -6,19 +6,19 @@
 #include <crtdbg.h>
 #endif
 
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include <stdlib.h>
 #include <signal.h>
 #include <stddef.h>
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothubtransport.h"
 #include "iothub_client.h"
 #include "iothub_client_private.h"
-#include "threadapi.h"
-#include "lock.h"
-#include "iot_logging.h"
-#include "vector.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/vector.h"
 
 typedef struct TRANSPORT_HANDLE_DATA_TAG
 {

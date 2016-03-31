@@ -5,15 +5,15 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include <stdbool.h>
 #include "datamarshaller.h"
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "schema.h"
 #include "jsonencoder.h"
 #include "agenttypesystem.h"
-#include "iot_logging.h"
+#include "azure_c_shared_utility/iot_logging.h"
 
 DEFINE_ENUM_STRINGS(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
 

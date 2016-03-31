@@ -5,7 +5,7 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include "agenttypesystem.h"
 #include <inttypes.h>
@@ -25,12 +25,12 @@
 #define ULLONG_MAX 18446744073709551615
 #endif
 
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 #include "jsonencoder.h"
 #include "multitree.h"
 
-#include "iot_logging.h"
+#include "azure_c_shared_utility/iot_logging.h"
 
 #define NaN_STRING "NaN"
 #define MINUSINF_STRING "-INF"

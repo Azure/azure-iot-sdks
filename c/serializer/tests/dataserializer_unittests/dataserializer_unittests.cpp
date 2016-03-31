@@ -12,7 +12,7 @@
 #include "micromockenumtostring.h"
 #include "micromockcharstararenullterminatedstrings.h"
 #include "multitree.h"
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
 
 /*this is what we test*/
 #include "dataserializer.h"

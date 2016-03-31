@@ -5,14 +5,14 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include <stddef.h>
 
 #include "commanddecoder.h"
 #include "multitree.h"
-#include "crt_abstractions.h"
-#include "iot_logging.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/iot_logging.h"
 #include "schema.h"
 #include "codefirst.h"
 #include "jsondecoder.h"

@@ -5,7 +5,7 @@
 #define JSONENCODER_H
 
 #include "macro_utils.h"
-#include "strings.h"
+#include "azure_c_shared_utility/strings.h"
 
 #ifdef __cplusplus
 #include "cstddef"

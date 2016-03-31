@@ -5,18 +5,18 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include <stdlib.h>
 #include <signal.h>
 #include <stddef.h>
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
 #include "iothubtransport.h"
-#include "threadapi.h"
-#include "lock.h"
-#include "iot_logging.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/iot_logging.h"
 
 typedef struct IOTHUB_CLIENT_INSTANCE_TAG
 {

@@ -17,9 +17,9 @@
 #include "iothub_account.h"
 #include "iothubtest.h"
 
-#include "buffer_.h"
-#include "threadapi.h"
-#include "platform.h"
+#include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/platform.h"
 
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 static bool g_callbackRecv = false;

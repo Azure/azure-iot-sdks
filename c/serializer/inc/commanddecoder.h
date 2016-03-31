@@ -7,7 +7,7 @@
 #include "multitree.h"
 #include "schema.h"
 #include "agenttypesystem.h"
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
 
 #define COMMANDDECODER_RESULT_VALUES \
     COMMANDDECODER_OK, \

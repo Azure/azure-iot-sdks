@@ -5,22 +5,22 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
-#include "iot_logging.h"
-#include "strings.h"
-#include "doublylinkedlist.h"
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 #include "iothub_client_ll.h"
 #include "iothub_client_private.h"
 #include "iothubtransportmqtt.h"
-#include "mqtt_client.h"
-#include "sastoken.h"
-#include "tickcounter.h"
+#include "azure_umqtt_c/mqtt_client.h"
+#include "azure_c_shared_utility/sastoken.h"
+#include "azure_c_shared_utility/tickcounter.h"
 
-#include "tlsio.h"
-#include "platform.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/platform.h"
 
 #include "iothub_client_version.h"
 

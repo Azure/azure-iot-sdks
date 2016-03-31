@@ -15,15 +15,15 @@
 #include "iothub_client_ll.h"
 #include "iothub_client_version.h"
 
-#include "lock.h"
-#include "doublylinkedlist.h"
+#include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
 #include "iothub_client_private.h"
 #include "iothub_transport_ll.h"
 
-#include "string_tokenizer.h"
-#include "strings.h"
+#include "azure_c_shared_utility/string_tokenizer.h"
+#include "azure_c_shared_utility/strings.h"
 
-#include "tickcounter.h"
+#include "azure_c_shared_utility/tickcounter.h"
 
 extern "C" int gballoc_init(void);
 extern "C" void gballoc_deinit(void);

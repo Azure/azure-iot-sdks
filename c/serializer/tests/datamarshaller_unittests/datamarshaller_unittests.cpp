@@ -14,7 +14,7 @@
 #include "schema.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
-#include "strings.h"
+#include "azure_c_shared_utility/strings.h"
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
 

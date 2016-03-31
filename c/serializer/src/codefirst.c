@@ -5,14 +5,14 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include "codefirst.h"
-#include "macro_utils.h"
-#include "crt_abstractions.h"
-#include "iot_logging.h"
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/iot_logging.h"
 #include <stddef.h>
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "iotdevice.h"
 
 DEFINE_ENUM_STRINGS(CODEFIRST_RESULT, CODEFIRST_ENUM_VALUES)

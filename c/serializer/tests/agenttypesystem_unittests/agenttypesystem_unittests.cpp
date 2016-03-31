@@ -14,8 +14,8 @@
 
 #include "agenttypesystem.h"
 #include <limits>
-#include "crt_abstractions.h"
-#include "strings.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/strings.h"
 
 #include "jsondecoder.h"
 #include "jsonencoder.h"

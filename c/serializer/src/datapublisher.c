@@ -5,7 +5,7 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include <stdbool.h>
 #include "datapublisher.h"
@@ -13,8 +13,8 @@
 #include "datamarshaller.h"
 #include "agenttypesystem.h"
 #include "schema.h"
-#include "crt_abstractions.h"
-#include "iot_logging.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/iot_logging.h"
 
 DEFINE_ENUM_STRINGS(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES)
 

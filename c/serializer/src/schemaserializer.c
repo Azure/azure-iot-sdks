@@ -5,12 +5,12 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include <stddef.h>
 #include "schemaserializer.h"
-#include "iot_logging.h"
-#include "macro_utils.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/macro_utils.h"
 
 DEFINE_ENUM_STRINGS(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_RESULT_VALUES);
 

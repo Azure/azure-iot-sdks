@@ -6,12 +6,12 @@
 
 #include <signal.h>
 
-#include "macro_utils.h"
-#include "threadapi.h"
-#include "lock.h"
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
 
-#include "doublylinkedlist.h"
 #include "iothub_message.h"
 #include "iothub_client_ll.h"
 

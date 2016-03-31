@@ -5,7 +5,7 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
@@ -13,24 +13,24 @@
 #include <math.h>
 #include <time.h>
 #include <limits.h>
-#include "urlencode.h"
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/urlencode.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
-#include "threadapi.h"
-#include "strings.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/strings.h"
 #include "iothubtest.h"
-#include "iot_logging.h"
-#include "connection.h"
-#include "message_receiver.h"
-#include "message_sender.h"
-#include "messaging.h"
-#include "tlsio.h"
-#include "platform.h"
-#include "sasl_mechanism.h"
-#include "saslclientio.h"
-#include "sasl_plain.h"
-#include "cbs.h"
-#include "consolelogger.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_uamqp_c/connection.h"
+#include "azure_uamqp_c/message_receiver.h"
+#include "azure_uamqp_c/message_sender.h"
+#include "azure_uamqp_c/messaging.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/platform.h"
+#include "azure_uamqp_c/sasl_mechanism.h"
+#include "azure_uamqp_c/saslclientio.h"
+#include "azure_uamqp_c/sasl_plain.h"
+#include "azure_uamqp_c/cbs.h"
+#include "azure_uamqp_c/consolelogger.h"
 
 const char* AMQP_RECV_ADDRESS_FMT = "%s/ConsumerGroups/%s/Partitions/%u";
 const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";

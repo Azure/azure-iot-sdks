@@ -7,12 +7,12 @@
 #endif
 
 #include "testrunnerswitcher.h"
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
 #include <stdexcept>
 #include "multitree.h"
-#include "buffer_.h"
+#include "azure_c_shared_utility/buffer_.h"
 
 /*this is what we test*/
 #include "jsonencoder.h"

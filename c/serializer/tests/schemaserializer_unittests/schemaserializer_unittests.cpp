@@ -10,8 +10,8 @@
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
 #include "schemaserializer.h"
-#include "vector.h"
-#include "strings.h"
+#include "azure_c_shared_utility/vector.h"
+#include "azure_c_shared_utility/strings.h"
 #include "schema.h"
 
 TYPED_MOCK_CLASS(CSchemaSerializerMocks, CGlobalMock)

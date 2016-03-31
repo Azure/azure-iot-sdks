@@ -23,16 +23,11 @@
 #ifndef IOTHUB_CLIENT_LL_H
 #define IOTHUB_CLIENT_LL_H
 
-#include "agenttime.h"
-
-#include "macro_utils.h"
-
+#include "azure_c_shared_utility/agenttime.h"
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
 #include "iothub_message.h"
-
-#include "xio.h"
-
-#include "doublylinkedlist.h"
-
 
 #ifdef __cplusplus
 extern "C"

@@ -8,28 +8,27 @@
 
 #include <cstddef>
 
-#include "sastoken.h"
+#include "azure_c_shared_utility/sastoken.h"
 
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
-#include "doublylinkedlist.h"
-#include "strings.h"
-#include "mqtt_client.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
+#include "azure_c_shared_utility/strings.h"
+#include "azure_umqtt_c/mqtt_client.h"
 
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
 #undef DEFINE_ENUM
 #define DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName; 
 
 #include "iothubtransportmqtt.h"
 #include "iothub_client_private.h"
 
-#include "tlsio_schannel.h"
-#include "tlsio_wolfssl.h"
-#include "tlsio_openssl.h"
-#include "platform.h"
+#include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/platform.h"
 
-#include "tickcounter.h"
+#include "azure_c_shared_utility/tickcounter.h"
 
 #define GBALLOC_H
 extern "C" int gballoc_init(void);
@@ -349,12 +348,6 @@ public:
     MOCK_STATIC_METHOD_1(, time_t, get_time, time_t*, currentTime)
     MOCK_METHOD_END(time_t, TEST_TIME_T);
 
-    MOCK_STATIC_METHOD_0(, const IO_INTERFACE_DESCRIPTION*, tlsio_schannel_get_interface_description)
-    MOCK_METHOD_END(const IO_INTERFACE_DESCRIPTION*, TEST_IO_INTERFACE);
-
-    MOCK_STATIC_METHOD_0(, const IO_INTERFACE_DESCRIPTION*, tlsio_openssl_get_interface_description)
-    MOCK_METHOD_END(const IO_INTERFACE_DESCRIPTION*, TEST_IO_INTERFACE);
-
     MOCK_STATIC_METHOD_0(, const IO_INTERFACE_DESCRIPTION*, platform_get_default_tlsio)
     MOCK_METHOD_END(const IO_INTERFACE_DESCRIPTION*, TEST_IO_INTERFACE)
 
@@ -385,8 +378,6 @@ public:
 
 };
 
-DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, tlsio_schannel_get_interface_description);
-DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, tlsio_openssl_get_interface_description);
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, platform_get_default_tlsio);
 
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, xio_create_parameters, LOGGER_LOG, logger_log);

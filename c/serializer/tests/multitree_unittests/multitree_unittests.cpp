@@ -10,9 +10,9 @@
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
 #include "multitree.h"
-#include "crt_abstractions.h"
-#include "macro_utils.h"
-#include "lock.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/lock.h"
 
 #ifndef SIZE_MAX
 #define SIZE_MAX ((size_t)~(size_t)0)

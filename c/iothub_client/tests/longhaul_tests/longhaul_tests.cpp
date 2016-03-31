@@ -9,7 +9,7 @@
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
-#include "iot_logging.h"
+#include "azure_c_shared_utility/iot_logging.h"
 
 #include "iothub_client.h"
 #include "iothub_message.h"
@@ -18,8 +18,8 @@
 #include "iothub_account.h"
 #include "iothubtest.h"
 
-#include "buffer_.h"
-#include "threadapi.h"
+#include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/threadapi.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"

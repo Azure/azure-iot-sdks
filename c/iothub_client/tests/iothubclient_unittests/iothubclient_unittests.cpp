@@ -15,8 +15,8 @@
 
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
-#include "threadapi.h"
-#include "lock.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/lock.h"
 #include "iothubtransport.h"
 
 extern "C" int gballoc_init(void);

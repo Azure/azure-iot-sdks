@@ -11,7 +11,7 @@
 #include "micromockenumtostring.h"
 #include "micromockcharstararenullterminatedstrings.h"
 #include "codefirst.h"
-#include "strings.h"
+#include "azure_c_shared_utility/strings.h"
 #include "serializer.h"
 
 

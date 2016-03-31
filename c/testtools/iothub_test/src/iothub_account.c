@@ -7,22 +7,20 @@
 #endif
 
 #include <stdio.h>
-#include "string.h"
-#include "string_tokenizer.h"
+#include <string.h>
+#include "azure_c_shared_utility/string_tokenizer.h"
 #include "iothub_account.h"
 
-#include "httpapiexsas.h"
-#include "base64.h"
-#include "hmacsha256.h"
-#include "iot_logging.h"
-#include "sastoken.h"
+#include "azure_c_shared_utility/httpapiexsas.h"
+#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/hmacsha256.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/sastoken.h"
 
-#include "httpapiexsas.h"
-#include "base64.h"
-#include "hmacsha256.h"
-#include "iot_logging.h"
-#include "sastoken.h"
-#include "uniqueid.h"
+#include "azure_c_shared_utility/httpapiexsas.h"
+#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/uniqueid.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define MBED_PARAM_MAX_LENGTH 256

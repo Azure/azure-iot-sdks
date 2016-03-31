@@ -5,19 +5,17 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
-#include "string.h"
-#include "string_tokenizer.h"
+#include <string.h>
+#include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/string_tokenizer.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/tickcounter.h"
 
 #include "iothub_client_ll.h"
 #include "iothub_client_private.h"
-#include "doublylinkedlist.h"
 #include "iothub_client_version.h"
 #include "iothub_transport_ll.h"
-
-#include "iot_logging.h"
-
-#include "tickcounter.h"
 
 #define LOG_ERROR LogError("result = %s\r\n", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
 #define INDEFINITE_TIME ((time_t)(-1))
