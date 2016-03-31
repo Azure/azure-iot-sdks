@@ -26,7 +26,6 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var deviceClient = AmqpTransportHandler.Create(hostName, authMethod);
 
             Assert.IsNotNull(deviceClient.IotHubConnection);
-            Assert.IsNotNull(((IotHubSingleTokenConnection)deviceClient.IotHubConnection).ConnectionString);
         }
 
         [TestMethod]
@@ -61,7 +60,6 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var deviceClient = AmqpTransportHandler.CreateFromConnectionString(connectionString);
 
             Assert.IsNotNull(deviceClient.IotHubConnection);
-            Assert.IsNotNull(((IotHubSingleTokenConnection)deviceClient.IotHubConnection).ConnectionString);
         }
 
         [TestMethod]

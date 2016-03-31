@@ -43,8 +43,10 @@ namespace Microsoft.Azure.Devices.Client
 
         public abstract void SafeClose(Exception exception);
 
-        public virtual async Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout)
+        public async Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout)
         {
+            this.OnCreateSendingLinkAsync(connectionString);
+
             var timeoutHelper = new TimeoutHelper(timeout);
 
             AmqpSession session;
@@ -76,8 +78,10 @@ namespace Microsoft.Azure.Devices.Client
             return link;
         }
 
-        public virtual async Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount)
+        public async Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount)
         {
+            this.OnCreateReceivingLinkAsync(connectionString);
+
             var timeoutHelper = new TimeoutHelper(timeout);
 
             AmqpSession session;
@@ -132,6 +136,16 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             return false;
+        }
+
+        protected virtual void OnCreateSendingLinkAsync(IotHubConnectionString connectionString)
+        {
+            // do nothing. Override in derived classes if necessary
+        }
+
+        protected virtual void OnCreateReceivingLinkAsync(IotHubConnectionString connectionString)
+        {
+            // do nothing. Override in derived classes if necessary
         }
 
         protected virtual async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout)

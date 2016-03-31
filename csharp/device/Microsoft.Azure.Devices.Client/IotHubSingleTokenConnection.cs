@@ -65,7 +65,7 @@ namespace Microsoft.Azure.Devices.Client
             return this.ConnectionString.BuildLinkAddress(path);
         }
 
-        protected override string BuildAudience(IotHubConnectionString doNotUse, string path)
+        protected override string BuildAudience(IotHubConnectionString doNotUse, string donotUse2)
         {
             return string.Empty;
         }

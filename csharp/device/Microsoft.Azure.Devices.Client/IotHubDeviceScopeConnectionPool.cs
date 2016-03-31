@@ -39,9 +39,9 @@ namespace Microsoft.Azure.Devices.Client
                     this.connectionPool.Count <= this.amqpTransportSettings.AmqpConnectionPoolSettings.MaxPoolSize)
                 {
                     var newConnection = new IotHubDeviceMuxConnection(this, cacheIndex, this.connectionString, this.amqpTransportSettings);
-                    this.StartIdleTimer(newConnection);
                     selectedConnectionTuple = Tuple.Create(newConnection, (uint)0);
-                    this.connectionPool.Add(cacheIndex, selectedConnectionTuple);
+                    this.connectionPool[cacheIndex] = selectedConnectionTuple;
+                    this.StartIdleConnectionTimer(newConnection);
                 }
 
                 if (selectedConnectionTuple == null)
@@ -64,8 +64,7 @@ namespace Microsoft.Azure.Devices.Client
                 }
 
                 var updatedConnectionTuple = Tuple.Create(selectedConnectionTuple.Item1, numDevices);
-                this.connectionPool.Remove(cacheIndex);
-                this.connectionPool.Add(cacheIndex, updatedConnectionTuple);
+                this.connectionPool[cacheIndex] = updatedConnectionTuple;
 
                 return selectedConnectionTuple.Item1;
             }
@@ -79,22 +78,21 @@ namespace Microsoft.Azure.Devices.Client
                 Tuple<IotHubDeviceMuxConnection, uint> selectedConnectionTuple;
                 if (!this.connectionPool.TryGetValue(cacheIndex, out selectedConnectionTuple))
                 {
-                    throw new InvalidOperationException("Unable to find iotHubMuxConnection to delete device");
+                    throw new InvalidOperationException("Unable to find iotHubMuxConnection to remove device from connection");
                 }
 
                 var numDevices = selectedConnectionTuple.Item2;
-                if (--numDevices == 0)
-                {
-                    this.StartIdleTimer(iotHubDeviceMuxConnection);
-                }
+                var updatedConnectionTuple = Tuple.Create(selectedConnectionTuple.Item1, --numDevices);
+                this.connectionPool[cacheIndex] = updatedConnectionTuple;
 
-                var updatedConnectionTuple = Tuple.Create(selectedConnectionTuple.Item1, numDevices);
-                this.connectionPool.Remove(cacheIndex);
-                this.connectionPool.Add(cacheIndex, updatedConnectionTuple);
+                if (numDevices == 0)
+                {
+                    this.StartIdleConnectionTimer(iotHubDeviceMuxConnection);
+                }
             }
         }
 
-        public void Remove(IotHubDeviceMuxConnection iotHubDeviceMuxConnection)
+        void RemoveConnection(IotHubDeviceMuxConnection iotHubDeviceMuxConnection)
         {
             lock (this.thisLock)
             {
@@ -146,11 +144,18 @@ namespace Microsoft.Azure.Devices.Client
         /*
         * Only called under this.thisLock
         */
-        void StartIdleTimer(IotHubDeviceMuxConnection iotHubDeviceMuxConnection)
+        void StartIdleConnectionTimer(IotHubDeviceMuxConnection iotHubDeviceMuxConnection)
         {
-            var idleTimer = new IOThreadTimer(s => ((IotHubDeviceMuxConnection)s).IdleTimerCallback(), iotHubDeviceMuxConnection, false);
+            var idleTimer = new IOThreadTimer(this.IdleConnectionTimerCallback, iotHubDeviceMuxConnection, false);
             this.idleTimers.Add(iotHubDeviceMuxConnection, idleTimer);
             idleTimer.Set(this.idleTimeout);
+        }
+
+        void IdleConnectionTimerCallback(object state)
+        {
+            var iotHubDeviceMuxConnection = (IotHubDeviceMuxConnection)state;
+            this.RemoveConnection(iotHubDeviceMuxConnection);
+            iotHubDeviceMuxConnection.CloseAsync().Fork();
         }
     }
 #endif

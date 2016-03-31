@@ -50,29 +50,6 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        /**
-         The input connection string can only be a device-scope connection string
-        **/
-        public override Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout)
-        {
-            if (connectionString.SharedAccessKeyName != null)
-            {
-                throw new ArgumentException("Must provide a device-scope connection string", "connectionString");
-            }
-
-            return base.CreateSendingLinkAsync(path, connectionString, timeout);
-        }
-
-        public override Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount)
-        {
-            if (connectionString.SharedAccessKeyName != null)
-            {
-                throw new ArgumentException("Must provide a device-scope connection string", "connectionString");
-            }
-
-            return base.CreateReceivingLinkAsync(path, connectionString, timeout, prefetchCount);
-        }
-
         public long GetCacheKey()
         {
             return this.cacheKey;
@@ -84,6 +61,26 @@ namespace Microsoft.Azure.Devices.Client
             this.CancelTokenRefreshers();
 
             return base.CreateSessionAsync(timeout);
+        }
+
+        /**
+          The input connection string can only be a device-scope connection string
+         **/
+        protected override void OnCreateSendingLinkAsync(IotHubConnectionString connectionString)
+        {
+            if (connectionString.SharedAccessKeyName != null)
+            {
+                throw new ArgumentException("Must provide a device-scope connection string", "connectionString");
+            }
+        }
+
+        protected override void OnCreateReceivingLinkAsync(IotHubConnectionString connectionString)
+        {
+            if (connectionString.SharedAccessKeyName != null)
+            {
+                throw new ArgumentException("Must provide a device-scope connection string", "connectionString");
+            }
+
         }
 
         protected override Uri BuildLinkAddress(IotHubConnectionString iotHubConnectionString, string path)
@@ -154,13 +151,6 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             this.iotHubTokenRefreshers.Clear();
-        }
-
-        public void IdleTimerCallback()
-        {
-            Fx.Assert(this.deviceScopeConnectionPool != null, "DeviceScopeConnectionPool handle is null");
-            this.deviceScopeConnectionPool.Remove(this);
-            this.CloseAsync().Fork();
         }
 #endif
     }
