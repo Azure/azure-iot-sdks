@@ -14,68 +14,53 @@ This document describes how to prepare your development environment to use the *
 Complete the following steps to set up your development environment:
 
 - Follow the instructions to setup [Microsoft Azure IoT device SDK for C][setup-devbox].
-
-- Ensure that Python version 2.7.x is installed. Run `python --version` at the command line to check the version. Python 2.7 is typically already installed on Linux. On Windows install the latest 32 bit x86 Python 2.7 client from ([python-2.7] (https://www.python.org/downloads/)).
-
+- Ensure that Python version 2.7.x is installed. Run `python --version` at the command line to check the version. 
+    - On Linux, Python 2.7 is typically already installed and active. 
+    - On Windows, install the latest x86 or x64 Python 2.7 client from ([python-2.7] (https://www.python.org/downloads/)). The build needs a valid Python.exe in the path. Based on the active Python version (e.g. Python 2.7.11 x86 32bit) the build script choses the compiler settings for the Python extension module build accordingly and copies the extension to the test and sample folder.
 - When you have installed Python, make sure you cloned the latest version of this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to your development machine or device. You should always use the **master** branch for the latest version of the libraries and samples.
 
 <a name="linux"/>
-## Build the Python iothub_client module on Ubuntu
+## Build the Python iothub_client module on Linux
 
-The Python module builds on the Azure IoT device SDK for C. Please make sure you successfully built the C samples [setup-devbox] before you continue in this section.
+The Python module builds on the Azure IoT device SDK for C. Please make sure you can build the C samples as described in [setup-devbox] before you continue in this section.
 
 1. Ensure that Python version 2.7.x is installed and active. Run `python --version` at the command line to check the version.
-
 2. Open a shell and navigate to the folder **python/build_all/linux** in your local copy of the repository.
-
 3. Run the `./setup.sh` script to install the prerequisite packages and the dependent libraries.
-
 4. Run the `./build.sh` script.
-
 5. After a successful build, the `iothub_client.so` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
 <a name="windows"/>
-## Build the Python iothub_client module in Windows using Nuget packages
+## Build the Python iothub_client module on Windows using Nuget packages (recommended)
 
 The following instructions outline how you can build the libraries in Windows:
 
 1. Open a Visual Studio 2015 x86 Native Tools command prompt and navigate to the folder **python/build_all/windows** in your local copy of the repository.
-
 2. Run the script `build.cmd` in the **python\\build_all\\windows** directory.
-
 3. As a result, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
 <a name="windows-cmake"/>
+## Build the Python iothub_client module on Windows using cmake and boost libraries 
 
-## Build the Python iothub_client module in Windows using cmake and boost libraries
+###The following instructions outline how you prepare the boost::python libraries in Windows. 
+This step is only required once and only necessary for the cmake build:
 
-The following instructions outline how you can build the boost::python libraries in Windows. This step is only required once:
-
-1. Open a Visual Studio 2015 x86 Native Tools command prompt.
-
+1. Open a Visual Studio 2015 x86 or x64 Native Tools command prompt, depending on your installed Python version.
 2. Download the zip version of the boost 1.60 library for windows from [boost-zip]. 
+3. Unpack zip to a local folder, e.g. **C:\boost_1_60_0**.
+4. Navigate to the root folder of the boost library, e.g. **C:\boost_1_60_0**.
+5. Run the script `bootstrap.bat` in the boost folder.
+6. Run the build command `b2` in the same folder. For x64 builds use the build command `b2 address-model=64`.
+7. Set the environment variable BOOST_ROOT to the boost folder using the command `SET BOOST_ROOT=C:\boost_1_60_0`.
 
-3. Unpack zip to a local folder, e.g. **C:\\boost_1_60_0**.
+Now the boost::python library is ready for use. 
 
-3. Navigate to the root folder of the boost library, e.g. **C:\\boost_1_60_0**.
-
-4. Run the script `bootstrap.bat` in the boost folder.
-
-5. Run the build command `b2` in the same folder.
-
-6. Set the environment variable BOOST_ROOT to the boost folder using the command `SET BOOST_ROOT=C:\\boost_1_60_0`.
-
-Now the boost::python library is ready for use in cmake. 
-
-The following instructions outline how you can build the Python extension module in Windows:
+###The following instructions outline how you can build the Python extension module with cmake in Windows:
 
 1. Open a Visual Studio 2015 x86 Native Tools command prompt and navigate to the folder **python/build_all/windows** in your local copy of the repository.
-
 2. Verify that `BOOST_ROOT` points to the local boost installation.
-
 3. Run the script `build_client.cmd` in the **python\\build_all\\windows** directory.
-
-3. After a successful build, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
+4. After a successful build, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
 <a name="samplecode"/>
 ## Sample applications
