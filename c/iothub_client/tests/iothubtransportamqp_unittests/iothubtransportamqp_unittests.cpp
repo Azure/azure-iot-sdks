@@ -27,13 +27,13 @@ static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/map.h"
 
 #include "iothubtransportamqp.h"
 #include "iothub_client_private.h"
 #include "iothub_message.h"
 
 #include "azure_uamqp_c/amqpvalue.h"
-#include "azure_uamqp_c/map.h"
 #include "azure_uamqp_c/amqpvalue_to_string.h"
 #include "azure_uamqp_c/amqp_definitions.h"
 #include "azure_uamqp_c/amqp_frame_codec.h"
