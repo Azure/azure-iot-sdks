@@ -102,6 +102,14 @@ module.exports = [
             return '$1' + versions.csharp.device + '$2';
         }
     },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "csharp/device/Microsoft.Azure.Devices.Client/IotHubConnection.cs",
+        "search": "(UWPAssemblyVersion[ \t]*=[ \t]*\").*(\")",
+        "replaceString": function(versions) {
+            return '$1' + versions.csharp.device + '$2';
+        }
+    },
     ///////////////////////////////////////////////////
     // C# Service SDK
     ///////////////////////////////////////////////////
