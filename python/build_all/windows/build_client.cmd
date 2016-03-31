@@ -1,27 +1,57 @@
 @REM Copyright (c) Microsoft. All rights reserved.
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-setlocal
+@setlocal
+@echo off
 
 set build-root=%~dp0
 rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
+cd %build-root%
 
+rem -----------------------------------------------------------------------------
+rem -- check prerequisites
+rem -----------------------------------------------------------------------------
 
-REM keep in sync with c build
+rem ensure python.exe exists
+where /q python.exe
+if errorlevel 1 goto :NeedPython
+
+rem -----------------------------------------------------------------------------
+rem -- detect Python x86 or x64 version, select build target accordingly
+rem -----------------------------------------------------------------------------
+
+REM target may be set to 64 bit build if Python 2.7 x64 detected
 set build-platform=Win32
+set build-config=Release
+
+python python_version_check.py >pyenv.bat
+if errorlevel 1 goto :NeedPython
+call pyenv.bat
+@Echo Using Python found in: %PYTHON_PATH%, building %build-platform% platform extension
+goto :build
+
+:NeedPython
+@Echo Azure IoT SDK needs Python 2.7 from 
+@Echo https://www.python.org/download/releases/2.7/ 
+exit /b 1
+
+:build
+
 set cmake-output=cmake_%build-platform%
 
 REM -- C --
 cd %build-root%..\..\..\c\build_all\windows
-call build_client.cmd --platform %build-platform% --buildpython %1 %2 %3
+call build_client.cmd --platform %build-platform% --buildpython 
 if errorlevel 1 exit /b 1
 cd %build-root%
 
 echo CMAKE Output Path: %USERPROFILE%\%cmake-output%\python
 
-copy %USERPROFILE%\%cmake-output%\python\src\Release\iothub_client.pyd ..\..\device\samples
-copy %USERPROFILE%\%cmake-output%\python\test\Release\iothub_client_mock.pyd ..\..\device\tests
+copy %USERPROFILE%\%cmake-output%\python\src\%build-config%\iothub_client.pyd ..\..\device\samples
+if not %errorlevel%==0 exit /b %errorlevel%
+copy %USERPROFILE%\%cmake-output%\python\test\%build-config%\iothub_client_mock.pyd ..\..\device\tests
+if not %errorlevel%==0 exit /b %errorlevel%
 
 cd ..\..\device\tests
 python iothub_client_ut.py

@@ -17,9 +17,12 @@ try:
     if sys.version_info >= (3, 0):
         raise PlatformError("Require Python 2.7, version 3.x is not supported")
     plat = platform.architecture()
-    if (plat[0] != "32bit"):
-        raise PlatformError("Require Python 32bit version")
-    print "SET PYTHON_PATH=%s" % os.path.dirname(sys.executable)
+    if (plat[0] == "64bit"):
+        print ("SET build-platform=x64")
+    else:
+        if (plat[0] != "32bit"):
+            raise PlatformError("Require Windows CPython 2.7 32bit or 64bit version")
+    print ("SET PYTHON_PATH=%s" % os.path.dirname(sys.executable))
     sys.exit(0)
 except PlatformError as e:
     sys.exit(e.value)

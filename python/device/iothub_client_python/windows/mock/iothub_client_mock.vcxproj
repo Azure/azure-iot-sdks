@@ -5,9 +5,17 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
@@ -31,7 +39,20 @@
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
@@ -46,7 +67,13 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -54,11 +81,41 @@
     <LinkIncremental>true</LinkIncremental>
     <CustomBuildAfterTargets>Link</CustomBuildAfterTargets>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <CustomBuildAfterTargets>Link</CustomBuildAfterTargets>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <CustomBuildAfterTargets>Link</CustomBuildAfterTargets>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <CustomBuildAfterTargets>Link</CustomBuildAfterTargets>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IOTHUB_CLIENT_PYTHON_HTTP_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(PYTHON_PATH)\include;..\..\src</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AdditionalLibraryDirectories>$(PYTHON_PATH)\libs</AdditionalLibraryDirectories>
+    </Link>
+    <CustomBuildStep>
+      <Command>Copy $(TargetPath) $(TargetDir)\$(TargetName).pyd</Command>
+      <Outputs>$(TargetDir)\$(TargetName).pyd;%(Outputs)</Outputs>
+      <Inputs>$(TargetPath);%(Inputs)</Inputs>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -109,17 +166,46 @@
       <TreatOutputAsContent>true</TreatOutputAsContent>
     </CustomBuildStep>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;IOTHUB_CLIENT_PYTHON_HTTP_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(PYTHON_PATH)\include;..\..\src</AdditionalIncludeDirectories>
+      <Optimization>MinSpace</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AdditionalLibraryDirectories>$(PYTHON_PATH)\libs</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+    <CustomBuildStep>
+      <Command>Copy $(TargetPath) $(TargetDir)\$(TargetName).pyd</Command>
+      <Outputs>$(TargetDir)\$(TargetName).pyd;%(Outputs)</Outputs>
+      <Inputs>$(TargetPath);%(Inputs)</Inputs>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\boost.1.60.0.0\build\native\boost.targets" Condition="Exists('..\packages\boost.1.60.0.0\build\native\boost.targets')" />
     <Import Project="..\packages\boost_python.1.60.0.0\build\native\boost_python.targets" Condition="Exists('..\packages\boost_python.1.60.0.0\build\native\boost_python.targets')" />
-    <Import Project="..\packages\Microsoft.Azure.C.SharedUtility.1.0.2\build\native\Microsoft.Azure.C.SharedUtility.targets" Condition="Exists('..\packages\Microsoft.Azure.C.SharedUtility.1.0.2\build\native\Microsoft.Azure.C.SharedUtility.targets')" />
-    <Import Project="..\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.3\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('..\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.3\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
-    <Import Project="..\packages\Microsoft.Azure.uamqp.1.0.2\build\native\Microsoft.Azure.uamqp.targets" Condition="Exists('..\packages\Microsoft.Azure.uamqp.1.0.2\build\native\Microsoft.Azure.uamqp.targets')" />
-    <Import Project="..\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets" Condition="Exists('..\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets')" />
-    <Import Project="..\packages\Microsoft.Azure.umqtt.1.0.1\build\native\Microsoft.Azure.umqtt.targets" Condition="Exists('..\packages\Microsoft.Azure.umqtt.1.0.1\build\native\Microsoft.Azure.umqtt.targets')" />
-    <Import Project="..\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets" Condition="Exists('..\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" />
-    <Import Project="..\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets" Condition="Exists('..\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" />
+    <Import Project="..\packages\Microsoft.Azure.C.SharedUtility.1.0.3\build\native\Microsoft.Azure.C.SharedUtility.targets" Condition="Exists('..\packages\Microsoft.Azure.C.SharedUtility.1.0.3\build\native\Microsoft.Azure.C.SharedUtility.targets')" />
+    <Import Project="..\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.4\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('..\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.4\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
+    <Import Project="..\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets" Condition="Exists('..\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" />
+    <Import Project="..\packages\Microsoft.Azure.uamqp.1.0.3\build\native\Microsoft.Azure.uamqp.targets" Condition="Exists('..\packages\Microsoft.Azure.uamqp.1.0.3\build\native\Microsoft.Azure.uamqp.targets')" />
+    <Import Project="..\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets" Condition="Exists('..\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets')" />
+    <Import Project="..\packages\Microsoft.Azure.umqtt.1.0.2\build\native\Microsoft.Azure.umqtt.targets" Condition="Exists('..\packages\Microsoft.Azure.umqtt.1.0.2\build\native\Microsoft.Azure.umqtt.targets')" />
+    <Import Project="..\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets" Condition="Exists('..\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -127,12 +213,12 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\boost.1.60.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.60.0.0\build\native\boost.targets'))" />
     <Error Condition="!Exists('..\packages\boost_python.1.60.0.0\build\native\boost_python.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_python.1.60.0.0\build\native\boost_python.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Azure.C.SharedUtility.1.0.2\build\native\Microsoft.Azure.C.SharedUtility.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.C.SharedUtility.1.0.2\build\native\Microsoft.Azure.C.SharedUtility.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.3\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.3\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Azure.uamqp.1.0.2\build\native\Microsoft.Azure.uamqp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.uamqp.1.0.2\build\native\Microsoft.Azure.uamqp.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Azure.umqtt.1.0.1\build\native\Microsoft.Azure.umqtt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.umqtt.1.0.1\build\native\Microsoft.Azure.umqtt.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.3\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Azure.C.SharedUtility.1.0.3\build\native\Microsoft.Azure.C.SharedUtility.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.C.SharedUtility.1.0.3\build\native\Microsoft.Azure.C.SharedUtility.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.4\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.4\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Azure.uamqp.1.0.3\build\native\Microsoft.Azure.uamqp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.uamqp.1.0.3\build\native\Microsoft.Azure.uamqp.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.IoTHub.AmqpTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.AmqpTransport.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Azure.umqtt.1.0.2\build\native\Microsoft.Azure.umqtt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.umqtt.1.0.2\build\native\Microsoft.Azure.umqtt.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.4\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets'))" />
   </Target>
 </Project>
