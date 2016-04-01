@@ -388,6 +388,16 @@ namespace Microsoft.Azure.Devices.Client.Common
                     return ResourceManager.GetString("MessageDisposed", resourceCulture);
                 }
             }
+
+            /// <summary>
+            ///   Looks up a localized string similar to Serialization operation failed due to unsupported type {0}..
+            /// </summary>
+            internal static string FailedToSerializeUnsupportedType {
+                get {
+                    return ResourceManager.GetString("FailedToSerializeUnsupportedType", resourceCulture);
+                }
+            }
+
         }
     }
 

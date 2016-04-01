@@ -26,6 +26,7 @@ option(skip_unittests "set skip_unittests to ON to skip unittests (default is OF
 option(compileOption_C "passes a string to the command line of the C compiler" OFF)
 option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
 option(build_python "builds the Python native iothub_client module" OFF)
+option(build_javawrapper "builds the native iothub_client library for java C wrapper" OFF)
 
 
 #Use solution folders. 
@@ -38,7 +39,7 @@ endif()
 
 if (LINUX)
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        if("${build_python}" STREQUAL "ON")
+        if(("${build_python}" STREQUAL "ON") OR ("${build_javawrapper}" STREQUAL "ON"))
             # now all static libraries use PIC flag for Python shared lib
             set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
             set(CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}")
@@ -164,6 +165,10 @@ add_subdirectory(iothub_client)
 add_subdirectory(serializer)
 if("${build_python}" STREQUAL "ON")
     add_subdirectory(../python/device/iothub_client_python python)
+endif()
+
+if("${build_javawrapper}" STREQUAL "ON")	
+     add_subdirectory(../javawrapper/device/iothub_client_javawrapper javawrapper)
 endif()
 
 

@@ -6,25 +6,25 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using System.IO;
     using System.Threading;
-#if WINDOWS_UWP && !NETMF
-    using Windows.Storage.Streams;
-#elif !NETMF && !PCL
-    using Microsoft.Azure.Amqp;
-#endif
-
-#if NETMF
-    using System.Collections;
-#else
-    using System.Collections.Generic;
-#endif
-
-#if !PCL && !NETMF
-    using Microsoft.Azure.Devices.Client.Common.Api;
-#endif
     using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
 
-    // TODO: can we use DateTimeOffset for WinRT as well? With conversion to local time?
+#if WINDOWS_UWP
+    using Windows.Storage.Streams;
+    using Microsoft.Azure.Amqp;
+    using System.Collections.Generic;
+    using Microsoft.Azure.Devices.Client.Common.Api;
+#elif NETMF
+    using System.Collections;
+#elif PCL
+    using System.Collections.Generic;
+#else
+    // Full .NET Framework
+    using Microsoft.Azure.Devices.Client.Common.Api;
+    using System.Collections.Generic;
+    using Microsoft.Azure.Amqp;
+#endif
+
 #if WINDOWS_UWP || PCL
     using DateTimeT = System.DateTimeOffset;
 #else
@@ -35,6 +35,7 @@ namespace Microsoft.Azure.Devices.Client
     /// The data structure represent the message that is used for interacting with IotHub.
     /// </summary>
     public sealed class Message :
+// TODO: this is a crazy mess, clean it up
 #if !WINDOWS_UWP && !PCL && !NETMF
         IDisposable, IReadOnlyIndicator
 #elif NETMF
@@ -58,7 +59,7 @@ namespace Microsoft.Azure.Devices.Client
         long sizeInBytesCalled;
 #endif
 
-#if !WINDOWS_UWP && !PCL && !NETMF
+#if !PCL && !NETMF
         AmqpMessage serializedAmqpMessage;
 #endif
 
@@ -119,7 +120,7 @@ namespace Microsoft.Azure.Devices.Client
             this.ownsBodyStream = true;
         }
 
-#if !WINDOWS_UWP && !PCL && !NETMF
+#if !PCL && !NETMF
         /// <summary>
         /// This constructor is only used in the receive path from Amqp path, 
         /// or in Cloning from a Message that has serialized.
@@ -513,7 +514,7 @@ namespace Microsoft.Azure.Devices.Client
             return ReadFullStream(this.bodyStream);
         }
 
-#if !WINDOWS_UWP && !PCL && !NETMF
+#if !PCL && !NETMF
         internal AmqpMessage ToAmqpMessage(bool setBodyCalled = true)
         {
             this.ThrowIfDisposed();
@@ -598,7 +599,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         }
 
-#if !WINDOWS_UWP && !PCL && !NETMF
+#if !PCL && !NETMF
         AmqpMessage PopulateAmqpMessageForSend(AmqpMessage message)
         {
             MessageConverter.UpdateAmqpMessageHeadersAndProperties(message, this);
