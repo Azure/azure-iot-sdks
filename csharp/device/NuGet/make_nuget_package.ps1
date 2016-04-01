@@ -12,7 +12,8 @@ function GetAssemblyVersionFromFile($filename) {
 }
 
 if (-Not (Test-Path 'NuGet.exe')) {
-    Invoke-WebRequest 'https://nuget.org/nuget.exe' -OutFile 'NuGet.exe'
+	# this gets the latest nuget.exe version (currently 3.3)
+    Invoke-WebRequest 'https://dist.nuget.org/win-x86-commandline/latest/nuget.exe' -OutFile 'NuGet.exe' 
 }
 
 # Delete existing packages to force rebuild
