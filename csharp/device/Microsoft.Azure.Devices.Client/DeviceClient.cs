@@ -6,13 +6,13 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
-#if !WINDOWS_UWP
     using System.Linq;
-    using System.Threading.Tasks;
-    using Microsoft.Azure.Devices.Client.Exceptions;
-#endif
     using Microsoft.Azure.Devices.Client.Extensions;
     using Microsoft.Azure.Devices.Client.Transport;
+
+    using System.Threading.Tasks;
+    using Microsoft.Azure.Devices.Client.Exceptions;
+
 #if !WINDOWS_UWP && !PCL
     using System.Net.Sockets;
     using Microsoft.Azure.Devices.Client.Transport.Mqtt;
@@ -75,13 +75,12 @@ namespace Microsoft.Azure.Devices.Client
 
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, RegexOptions);
         TransportHandlerBase impl;
-#if !WINDOWS_UWP && !PCL
+#if !PCL
         readonly IotHubConnectionString iotHubConnectionString;
         readonly ITransportSettings[] transportSettings;
         readonly object thisLock = new object();
 
         volatile TaskCompletionSource<object> openTaskCompletionSource;
-        bool openCalled;
 
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
         {
@@ -96,6 +95,8 @@ namespace Microsoft.Azure.Devices.Client
             this.TransportTypeInUse = transportType;
         }
 #endif
+
+
         public TransportType TransportTypeInUse { get; private set; }
 
         /// <summary>
@@ -187,11 +188,11 @@ namespace Microsoft.Azure.Devices.Client
             switch (transportType)
             {
                 case TransportType.Amqp:
-#if WINDOWS_UWP || PCL
+#if PCL
                     throw new NotImplementedException("Amqp protocol is not supported");
 #else
                     return CreateFromConnectionString(connectionString, new ITransportSettings[]
-            {
+                    {
                         new AmqpTransportSettings(TransportType.Amqp_Tcp_Only),
                         new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
                     });
@@ -204,13 +205,14 @@ namespace Microsoft.Azure.Devices.Client
 #endif
                 case TransportType.Amqp_WebSocket_Only:
                 case TransportType.Amqp_Tcp_Only:
-#if WINDOWS_UWP || PCL
+#if PCL
                     throw new NotImplementedException("Amqp protocol is not supported");
 #else
                     return CreateFromConnectionString(connectionString, new ITransportSettings[] { new AmqpTransportSettings(transportType) });
 #endif
                 case TransportType.Http1:
-#if WINDOWS_UWP || PCL
+
+#if PCL
                     var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
                     return new DeviceClient(new HttpTransportHandler(iotHubConnectionString), TransportType.Http1);
 #else
@@ -252,14 +254,14 @@ namespace Microsoft.Azure.Devices.Client
             return CreateFromConnectionString(connectionString + ";" + DeviceId + "=" + deviceId, transportType);
         }
 
-#if !WINDOWS_UWP && !PCL
+#if !PCL
         /// <summary>
         /// Create DeviceClient from the specified connection string using a prioritized list of transports
         /// </summary>
         /// <param name="connectionString">Connection string for the IoT hub (with DeviceId)</param>
         /// <param name="transportSettings">Prioritized list of transports</param>
         /// <returns>DeviceClient</returns>
-        public static DeviceClient CreateFromConnectionString(string connectionString, ITransportSettings[] transportSettings)
+        public static DeviceClient CreateFromConnectionString(string connectionString, [System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute] ITransportSettings[] transportSettings)
         {
             if (connectionString == null)
             {
@@ -295,12 +297,14 @@ namespace Microsoft.Azure.Devices.Client
                             throw new InvalidOperationException("Unknown implementation of ITransportSettings type");
                         }
                         break;
+#if !WINDOWS_UWP
                     case TransportType.Mqtt:
                         if (!(transportSetting is MqttTransportSettings))
                         {
                             throw new InvalidOperationException("Unknown implementation of ITransportSettings type");
                         }
                         break;
+#endif
                     default:
                         throw new InvalidOperationException("Unsupported Transport Type {0}".FormatInvariant(transportSetting.GetTransportType()));
                 }
@@ -317,7 +321,10 @@ namespace Microsoft.Azure.Devices.Client
         /// <param name="deviceId">Id of the device</param>
         /// <param name="transportSettings">Prioritized list of transportTypes</param>
         /// <returns>DeviceClient</returns>
-        public static DeviceClient CreateFromConnectionString(string connectionString, string deviceId, ITransportSettings[] transportSettings)
+#if WINDOWS_UWP
+        [Windows.Foundation.Metadata.DefaultOverloadAttribute]
+#endif
+        public static DeviceClient CreateFromConnectionString(string connectionString, string deviceId, [System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute] ITransportSettings[] transportSettings)
         {
             if (connectionString == null)
             {
@@ -343,10 +350,10 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public AsyncTask OpenAsync()
         {
-#if WINDOWS_UWP || PCL
+#if PCL
             return impl.OpenAsync().AsTaskOrAsyncOp();
 #else
-            return this.EnsureOpenedAsync();
+            return this.EnsureOpenedAsync().AsTaskOrAsyncOp();
 #endif
         }
 
@@ -356,15 +363,15 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns></returns>
         public AsyncTask CloseAsync()
         {
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             if (this.impl != null)
             {
 #endif
                 return this.impl.CloseAsync().AsTaskOrAsyncOp();
-#if !WINDOWS_UWP && !PCL
-        }
-            return TaskHelpers.CompletedTask;
+#if !PCL
+            }
 #endif
+            return TaskHelpers.CompletedTask.AsTaskOrAsyncOp();
         }
 
         /// <summary>
@@ -373,21 +380,21 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The receive message or null if there was no message until the default timeout</returns>
         public AsyncTaskOfMessage ReceiveAsync()
         {
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             if (this.impl == null)
             {
-                return AsyncTask.Run(async () =>
+                return Task.Run(async () =>
                 {
                     await this.EnsureOpenedAsync();
 
                     return await this.impl.ReceiveAsync();
-                });
+                }).AsTaskOrAsyncOp();
             }
             else
             {
 #endif
                 return this.impl.ReceiveAsync().AsTaskOrAsyncOp();
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             }
 #endif
         }
@@ -398,21 +405,21 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The receive message or null if there was no message until the specified time has elapsed</returns>
         public AsyncTaskOfMessage ReceiveAsync(TimeSpan timeout)
         {
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             if (this.impl == null)
             {
-                return AsyncTask.Run(async () =>
+                return Task.Run(async () =>
                 {
                     await this.EnsureOpenedAsync();
 
                     return await this.impl.ReceiveAsync(timeout);
-                });
+                }).AsTaskOrAsyncOp();
             }
             else
             {
 #endif
                 return this.impl.ReceiveAsync(timeout).AsTaskOrAsyncOp();
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             }
 #endif
         }
@@ -426,22 +433,22 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The lock identifier for the previously received message</returns>
         public AsyncTask CompleteAsync(string lockToken)
         {
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             if (this.impl == null)
             {
-                return AsyncTask.Run(async () =>
+                return Task.Run(async () =>
                 {
                     await this.EnsureOpenedAsync();
 
                     await this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
-                });
-        }
+                }).AsTaskOrAsyncOp();
+            }
             else
             {
 #endif
                 return this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
-#if !WINDOWS_UWP && !PCL
-        }
+#if !PCL
+            }
 #endif
         }
 
@@ -451,21 +458,21 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The previously received message</returns>
         public AsyncTask CompleteAsync(Message message)
         {
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             if (this.impl == null)
             {
-                return AsyncTask.Run(async () =>
+                return Task.Run(async () =>
                 {
                     await this.EnsureOpenedAsync();
 
-                    await this.impl.CompleteAsync(message).AsTaskOrAsyncOp();
-                });
-        }
+                    await this.impl.CompleteAsync(message);
+                }).AsTaskOrAsyncOp();
+            }
             else
             {
 #endif
                 return this.impl.CompleteAsync(message).AsTaskOrAsyncOp();
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             }
 #endif
         }
@@ -479,21 +486,21 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The previously received message</returns>
         public AsyncTask AbandonAsync(string lockToken)
         {
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             if (this.impl == null)
             {
-                return AsyncTask.Run(async () =>
+                return Task.Run(async () =>
                 {
                     await this.EnsureOpenedAsync();
 
-                    await this.impl.AbandonAsync(lockToken).AsTaskOrAsyncOp();
-                });
-        }
+                    await this.impl.AbandonAsync(lockToken);
+                }).AsTaskOrAsyncOp();
+            }
             else
             {
 #endif
                 return this.impl.AbandonAsync(lockToken).AsTaskOrAsyncOp();
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             }
 #endif
         }
@@ -504,22 +511,22 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The lock identifier for the previously received message</returns>
         public AsyncTask AbandonAsync(Message message)
         {
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             if (this.impl == null)
             {
-                return AsyncTask.Run(async () =>
+                return Task.Run(async () =>
                 {
                     await this.EnsureOpenedAsync();
 
-                    await this.impl.AbandonAsync(message).AsTaskOrAsyncOp();
-                });
-        }
+                    await this.impl.AbandonAsync(message);
+                }).AsTaskOrAsyncOp();
+            }
             else
             {
 #endif
                 return this.impl.AbandonAsync(message).AsTaskOrAsyncOp();
-#if !WINDOWS_UWP && !PCL
-        }
+#if !PCL
+            }
 #endif
         }
 
@@ -541,7 +548,7 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.RejectAsync(lockToken).AsTaskOrAsyncOp();
                 });
-        }
+            }
             else
             {
 #endif
@@ -557,21 +564,21 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The lock identifier for the previously received message</returns>
         public AsyncTask RejectAsync(Message message)
         {
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             if (this.impl == null)
             {
-                return AsyncTask.Run(async () =>
+                return Task.Run(async () =>
                 {
                     await this.EnsureOpenedAsync();
 
-                    await this.impl.RejectAsync(message).AsTaskOrAsyncOp();
-                });
-        }
+                    await this.impl.RejectAsync(message);
+                }).AsTaskOrAsyncOp();
+            }
             else
             {
 #endif
                 return this.impl.RejectAsync(message).AsTaskOrAsyncOp();
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             }
 #endif
         }
@@ -582,22 +589,22 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The message containing the event</returns>
         public AsyncTask SendEventAsync(Message message)
         {
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             if (this.impl == null)
             {
-                return AsyncTask.Run(async () =>
+                return Task.Run(async () =>
                 {
                     await this.EnsureOpenedAsync();
 
                     await this.impl.SendEventAsync(message);
-                });
+                }).AsTaskOrAsyncOp();
             }
             else
             {
 #endif
                 return this.impl.SendEventAsync(message).AsTaskOrAsyncOp();
-#if !WINDOWS_UWP && !PCL
-        }
+#if !PCL
+            }
 #endif
         }
 
@@ -607,26 +614,26 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The task containing the event</returns>
         public AsyncTask SendEventBatchAsync(IEnumerable<Message> messages)
         {
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             if (this.impl == null)
             {
-                return AsyncTask.Run(async () =>
+                return Task.Run(async () =>
                 {
                     await this.EnsureOpenedAsync();
 
-                    await this.impl.SendEventBatchAsync(messages).AsTaskOrAsyncOp();
-                });
+                    await this.impl.SendEventBatchAsync(messages);
+                }).AsTaskOrAsyncOp();
             }
             else
             {
 #endif
                 return this.impl.SendEventBatchAsync(messages).AsTaskOrAsyncOp();
-#if !WINDOWS_UWP && !PCL
+#if !PCL
             }
 #endif
         }
 
-#if !WINDOWS_UWP && !PCL
+#if !PCL
         async Task EnsureOpenedAsync()
         {
             bool executeOpen = false;
@@ -666,7 +673,7 @@ namespace Microsoft.Azure.Devices.Client
             await localTcs.Task;
         }
 
-        async AsyncTask TryOpenPrioritizedTransportsAsync()
+        async Task TryOpenPrioritizedTransportsAsync()
         {
             Exception lastException = null;
             // Concrete Device Client creation was deferred. Use prioritized list of transports.
@@ -684,9 +691,11 @@ namespace Microsoft.Azure.Devices.Client
                         case TransportType.Http1:
                             helper = new HttpTransportHandler(this.iotHubConnectionString, transportSetting as Http1TransportSettings);
                             break;
+#if !WINDOWS_UWP
                         case TransportType.Mqtt:
                             helper = new MqttTransportHandler(this.iotHubConnectionString, transportSetting as MqttTransportSettings);
                             break;
+#endif
                         default:
                             throw new InvalidOperationException("Unsupported Transport Setting {0}".FormatInvariant(transportSetting));
                     }
@@ -697,7 +706,13 @@ namespace Microsoft.Azure.Devices.Client
                 catch (Exception exception)
                 {
                     await helper.CloseAsync();
+
+#if WINDOWS_UWP
+                    // UWP does not use sockets
+                    if (!(exception is IotHubCommunicationException || exception is TimeoutException || exception is AggregateException))
+#else
                     if (!(exception is IotHubCommunicationException || exception is TimeoutException || exception is SocketException || exception is AggregateException))
+#endif
                     {
                         throw;
                     }
@@ -706,7 +721,11 @@ namespace Microsoft.Azure.Devices.Client
                     {
                         var aggregateException = (AggregateException)exception;
                         var innerExceptions = aggregateException.Flatten().InnerExceptions;
+#if WINDOWS_UWP
+                        if (!innerExceptions.Any(x => x is IotHubCommunicationException || x is TimeoutException))
+#else
                         if (!innerExceptions.Any(x => x is IotHubCommunicationException || x is SocketException || x is TimeoutException))
+#endif
                         {
                             throw;
                         }

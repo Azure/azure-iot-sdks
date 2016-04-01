@@ -34,6 +34,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Amqp/1.1.0": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -1625,6 +1633,14 @@
         },
         "runtime": {
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
+        }
+      },
+      "Microsoft.Azure.Amqp/1.1.0": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
         }
       },
       "Microsoft.CSharp/4.0.0": {
@@ -3310,6 +3326,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Amqp/1.1.0": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -4963,6 +4987,14 @@
         },
         "runtime": {
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
+        }
+      },
+      "Microsoft.Azure.Amqp/1.1.0": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
         }
       },
       "Microsoft.CSharp/4.0.0": {
@@ -6653,6 +6685,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Amqp/1.1.0": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -8306,6 +8346,14 @@
         },
         "runtime": {
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
+        }
+      },
+      "Microsoft.Azure.Amqp/1.1.0": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
         }
       },
       "Microsoft.CSharp/4.0.0": {
@@ -9996,6 +10044,14 @@
           "lib/win81/Microsoft.ApplicationInsights.Extensibility.Windows.dll": {}
         }
       },
+      "Microsoft.Azure.Amqp/1.1.0": {
+        "compile": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        },
+        "runtime": {
+          "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll": {}
+        }
+      },
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -11656,7 +11712,7 @@
       ]
     },
     "Microsoft.ApplicationInsights.WindowsApps/1.0.0": {
-      "sha512": "fNCAjIwvbTV+G0dT14bgM5tptsqeSaKQaCrlq7QknOq1Xdm8ZmgsDYddMgXkvykyKLjWyU6fKuOpj6fsQJy+wQ==",
+      "sha512": "NvBQnFeiFd0O1QdBz06UGApD7zn7ztVi7qO18IsM3EjiXRNgfrEBXB+azNm8XqLY8xGFAqh3HAuSd/wHZMe0XA==",
       "type": "Package",
       "files": [
         "[Content_Types].xml",
@@ -11669,6 +11725,19 @@
         "lib/wpa81/Microsoft.ApplicationInsights.Extensibility.Windows.XML",
         "Microsoft.ApplicationInsights.WindowsApps.nuspec",
         "package/services/metadata/core-properties/4f6f732debe548beaa1183418e8d65cc.psmdcp"
+      ]
+    },
+    "Microsoft.Azure.Amqp/1.1.0": {
+      "sha512": "hFhKe9KqkOiu0UxudpnozjP/7cwD39g4MRP7xNQd7EejMnxYgALVv7TlThIEH3fikx0nyasICrJ7M+HyJkfCiA==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/net451/Microsoft.Azure.Amqp.dll",
+        "lib/net451/Microsoft.Azure.Amqp.XML",
+        "lib/uap10.0/Microsoft.Azure.Amqp.Uwp.dll",
+        "Microsoft.Azure.Amqp.nuspec",
+        "package/services/metadata/core-properties/eda239a8af6b4cda95f3dda5bbd8ad77.psmdcp"
       ]
     },
     "Microsoft.CSharp/4.0.0": {
@@ -12325,7 +12394,7 @@
       ]
     },
     "Newtonsoft.Json/6.0.8": {
-      "sha512": "nZX7xCBl3PXpxRCxVtVfUXn63gSzrT8aO0VB9Tp24q656IUup9EGE8SGlo0UJ9if48OacJU34ZEtKEGWIdNCzg==",
+      "sha512": "7ut47NDedTW19EbL0JpFDYUP62fcuz27hJrehCDNajdCS5NtqL+E39+7Um3OkNc2wl2ym7K8Ln5eNuLus6mVGQ==",
       "type": "Package",
       "files": [
         "[Content_Types].xml",

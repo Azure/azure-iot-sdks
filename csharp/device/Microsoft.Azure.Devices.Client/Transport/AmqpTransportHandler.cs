@@ -7,7 +7,6 @@ namespace Microsoft.Azure.Devices.Client.Transport
     using System.Collections.Generic;
     using System.Globalization;
     using System.Threading.Tasks;
-    using System.Web;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Devices.Client.Exceptions;
@@ -347,7 +346,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         async Task<SendingAmqpLink> CreateEventSendingLinkAsync(TimeSpan timeout)
         {
-            string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/events", HttpUtility.UrlEncode(this.deviceId));
+            string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/events", System.Net.WebUtility.UrlEncode(this.deviceId));
 
             return await this.IotHubConnection.CreateSendingLinkAsync(path, timeout);
         }
@@ -365,7 +364,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         async Task<ReceivingAmqpLink> CreateDeviceBoundReceivingLinkAsync(TimeSpan timeout)
         {
-            string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/deviceBound", HttpUtility.UrlEncode(this.deviceId));
+            string path = string.Format(CultureInfo.InvariantCulture, "/devices/{0}/messages/deviceBound", System.Net.WebUtility.UrlEncode(this.deviceId));
 
             return await this.IotHubConnection.CreateReceivingLink(path, timeout, this.prefetchCount);
         }
