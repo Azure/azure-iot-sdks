@@ -25,7 +25,7 @@ xdcargs = java.lang.System.getenv("XDCARGS").split(" ");
 var slIncs = "";
 var ndkIncs = "";
 var wolfsslIncs = "";
-var iotclientIncs = "-I../../inc -I../../../azure-c-shared-utility/c/inc ";
+var iotclientIncs = "-I../../inc -I../../../azure-c-shared-utility/inc -I../../../azure-c-shared-utility/inc/azure_c_shared_utility ";
 var pthreadIncs = "";
 
 /* Parse out the XDCARGS options for the library source paths */
