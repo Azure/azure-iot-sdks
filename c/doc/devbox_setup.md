@@ -107,7 +107,7 @@ Use the **master** branch to ensure you fetch the latest release version.
 
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
-3. Run the `/setup.sh` script to install the prerequisite packages and the dependent libraries.
+3. Run the `./setup.sh` script to install the prerequisite packages and the dependent libraries.
 
 4. Run the `./build.sh` script.
 
