@@ -30,6 +30,7 @@
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/vector.h"
+#include "azure_c_shared_utility/lock.h"
 
 #define IOTHUB_ACK "iothub-ack"
 #define IOTHUB_ACK_NONE "none"

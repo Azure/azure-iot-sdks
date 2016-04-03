@@ -22,6 +22,7 @@
 #include "azure_c_shared_utility/strings.h"
 
 #include "azure_c_shared_utility/tickcounter.h"
+#include "azure_c_shared_utility/threadapi.h"
 
 #define GBALLOC_H
 extern "C" int gballoc_init(void);

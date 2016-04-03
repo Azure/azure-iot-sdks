@@ -29,6 +29,7 @@
 #include "azure_c_shared_utility/platform.h"
 
 #include "azure_c_shared_utility/tickcounter.h"
+#include "azure_c_shared_utility/lock.h"
 
 #define GBALLOC_H
 extern "C" int gballoc_init(void);
