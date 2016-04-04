@@ -22,7 +22,6 @@ if(WIN32)
 endif()
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME     OFF)
-find_package(Boost COMPONENTS python REQUIRED)
 
 if(WIN32)
     IF (NOT Boost_FOUND)
@@ -48,7 +47,16 @@ endif()
 
 
 # get python
-find_package(PythonLibs 2.7 REQUIRED)
+if (${python_3})
+    set(Python_ADDITIONAL_VERSIONS 3.4)
+    find_package(Boost COMPONENTS python-py34 REQUIRED)
+
+    find_package(PythonLibs 3 REQUIRED)
+else()
+    find_package(Boost COMPONENTS python REQUIRED)
+    
+    find_package(PythonLibs 2.7 REQUIRED)
+endif()
 include_directories(${PYTHON_INCLUDE_DIRS})
 link_directories(${PYTHON_LIBRARIES})
 

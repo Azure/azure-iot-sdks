@@ -26,6 +26,7 @@ option(skip_unittests "set skip_unittests to ON to skip unittests (default is OF
 option(compileOption_C "passes a string to the command line of the C compiler" OFF)
 option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
 option(build_python "builds the Python native iothub_client module" OFF)
+option(python_3 "choose between Python 2 and 3" OFF)
 option(build_javawrapper "builds the native iothub_client library for java C wrapper" OFF)
 
 
