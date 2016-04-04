@@ -87,11 +87,16 @@ endfunction(cloneMBEDRepository)
 
 function(updateMBEDSourceFiles)
 	set(source_file_destination ${local_repo_path})
+    set(exported_file_destination ${local_repo_path}/${mbed_project_base})
 	
 	message(STATUS "Copying target project files.")
 	foreach(file_item ${mbed_project_files})
 		file(GLOB expanded_file_item ${file_item})
 		file(COPY ${expanded_file_item} DESTINATION ${source_file_destination})
+    endforeach()
+	foreach(file_item ${mbed_exported_project_files})
+		file(GLOB expanded_file_item ${file_item})
+		file(COPY ${expanded_file_item} DESTINATION ${exported_file_destination})
 	endforeach()
 	
 endfunction(updateMBEDSourceFiles)
