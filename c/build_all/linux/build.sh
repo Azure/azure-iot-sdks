@@ -16,6 +16,7 @@ skip_unittests=OFF
 build_python=OFF
 build_javawrapper=OFF
 run_valgrind=0
+python_3=OFF
 
 usage ()
 {
@@ -65,6 +66,7 @@ process_args ()
               "--no-http" ) build_http=OFF;;
               "--no-mqtt" ) build_mqtt=OFF;;
               "--build-python" ) build_python=ON;;
+              "--python-3" ) python_3=ON;;
               "--build-javawrapper" ) build_javawrapper=ON;;
               "--toolchain-file" ) save_next_arg=2;;
               "-rv" | "--run_valgrind" ) run_valgrind=1;;
@@ -85,7 +87,7 @@ process_args $*
 rm -r -f ~/cmake
 mkdir ~/cmake
 pushd ~/cmake
-cmake $toolchainfile -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:BOOL=$build_python $build_root
+cmake $toolchainfile -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:BOOL=$build_python -Dpython_3:BOOL=$python_3 $build_root
 
 CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 make --jobs=$CORES

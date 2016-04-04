@@ -474,7 +474,7 @@ public:
         }
         PyByteArrayObject *pyByteArray = (PyByteArrayObject *)pyObject;
         const unsigned char* byteArray = (const unsigned char*)pyByteArray->ob_bytes;
-        size_t size = (size_t)pyByteArray->ob_size;
+        size_t size = Py_SIZE(pyByteArray);
         iotHubMessageHandle = IoTHubMessage_CreateFromByteArray(byteArray, size);
         if (iotHubMessageHandle == NULL)
         {
@@ -496,7 +496,7 @@ public:
         }
         PyByteArrayObject *pyByteArray = (PyByteArrayObject *)pyObject;
         const unsigned char* byteArray = (const unsigned char*)pyByteArray->ob_bytes;
-        size_t size = (size_t)pyByteArray->ob_size;
+        size_t size = Py_SIZE(pyByteArray);
         return new IoTHubMessage(IoTHubMessage_CreateFromByteArray(byteArray, size));
     }
 
@@ -929,7 +929,7 @@ public:
         boost::python::object& option
         )
     {
-        if (!PyInt_Check(option.ptr()))
+        if (!PyLong_Check(option.ptr()))
         {
             PyErr_SetString(PyExc_TypeError, "set_option expected type int");
             boost::python::throw_error_already_set();
