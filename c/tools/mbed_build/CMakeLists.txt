@@ -65,6 +65,7 @@ function(cloneMBEDRepository)
 	set(mbed_repo_address https://$ENV{MBED_USER}:$ENV{MBED_PWD}@developer.mbed.org/users/$ENV{MBED_USER}/code/${mbed_repo_name}/)
 	
 	message(STATUS "Trying to delete " ${local_repo_path})
+    message(STATUS "Trying to clone " ${mbed_repo_address})
 	
 	if(EXISTS ${local_repo_path})
 		message(STATUS "Removing existing cloned directory.")
@@ -101,6 +102,19 @@ function(updateMBEDSourceFiles)
 	
 endfunction(updateMBEDSourceFiles)
 
+function(updateMBEDLibraries)
+
+#We want to find all the .lib files that contain teh mbed_User that is using this script
+
+    file(GLOB libfiles ${local_repo_path}/*.lib)
+    foreach(file_item ${libfiles})
+        file (READ ${file_item} fileContents)
+        STRING(FIND ${fileContents} $ENV{MBED_USER} matchResult)
+        if (NOT ${matchResult} EQUAL -1) 
+            message(STATUS "The library that will be worked on is: " ${file_item})
+        endif()
+    endforeach()
+endfunction(updateMBEDLibraries)
 
 function(pushMBEDRepository)
 	
@@ -147,6 +161,7 @@ function(releaseMBEDRepository)
 	verifyRequiredParameters()
 	verifyMercurialIsInstalled()
 	cloneMBEDRepository()
+    updateMBEDLibraries()
 	updateMBEDSourceFiles()
 	pushMBEDRepository()
 endfunction(releaseMBEDRepository)
