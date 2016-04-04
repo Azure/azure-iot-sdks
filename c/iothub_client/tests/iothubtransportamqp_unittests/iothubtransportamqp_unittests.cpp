@@ -6,6 +6,7 @@
 #include <crtdbg.h>
 #endif
 
+#include <cstdint>
 #include <csignal>
 
 #include "testrunnerswitcher.h"
