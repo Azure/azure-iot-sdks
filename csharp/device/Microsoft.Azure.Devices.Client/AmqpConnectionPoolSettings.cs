@@ -23,7 +23,7 @@ namespace Microsoft.Azure.Devices.Client
         public AmqpConnectionPoolSettings()
         {
             this.maxPoolSize = DefaultPoolSize;
-            this.Pooling = true;
+            this.Pooling = false;
             this.connectionIdleTimeout = DefaultConnectionIdleTimeout;
         }
 

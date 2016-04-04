@@ -78,7 +78,6 @@ namespace Microsoft.Azure.Devices.Client
             {
                 throw new ArgumentException("Must provide a device-scope connection string", "connectionString");
             }
-
         }
 
         protected override Uri BuildLinkAddress(IotHubConnectionString iotHubConnectionString, string path)
