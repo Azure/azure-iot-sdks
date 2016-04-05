@@ -4196,7 +4196,7 @@ TEST_FUNCTION(when_setting_the_message_properties_fails_AMQP_DoWork_completes_th
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_003: [IoTHubTransportAMQ_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_003: [IoTHubTransportAMQP_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
 TEST_FUNCTION(AMQP_Register_transport_success_returns_transport)
 {
 	// arrange
@@ -4273,7 +4273,7 @@ TEST_FUNCTION(AMQP_Register_twice_returns_null_second_time)
 	cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_002: [IoTHubTransportAMQ_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.] 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_002: [IoTHubTransportAMQP_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.] 
 TEST_FUNCTION(AMQP_Register_transport_deviceKey_mismatch_returns_null)
 {
 	// arrange
@@ -4311,7 +4311,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_mismatch_returns_null)
 	cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_002: [IoTHubTransportAMQ_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.] 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_002: [IoTHubTransportAMQP_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.] 
 TEST_FUNCTION(AMQP_Register_transport_deviceId_mismatch_returns_null)
 {
 	// arrange
@@ -4348,7 +4348,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_mismatch_returns_null)
 	cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQP_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
 TEST_FUNCTION(AMQP_Register_transport_deviceId_null_returns_null)
 {
 	// arrange
@@ -4377,7 +4377,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_null_returns_null)
 	cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQP_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
 TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_returns_null)
 {
 	// arrange
@@ -4406,7 +4406,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_returns_null)
 	cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQP_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
 TEST_FUNCTION(AMQP_Register_transport_wts_null_returns_null)
 {
 	// arrange
@@ -4435,7 +4435,7 @@ TEST_FUNCTION(AMQP_Register_transport_wts_null_returns_null)
 	cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQ_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.] 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQP_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.] 
 TEST_FUNCTION(AMQP_Register_transport_null_returns_null)
 {
 	// arrange
@@ -4459,7 +4459,7 @@ TEST_FUNCTION(AMQP_Register_transport_null_returns_null)
 	cleanupList(&wts);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_004: [IoTHubTransportAMQ_Unregister shall return.] 
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_004: [IoTHubTransportAMQP_Unregister shall return.] 
 TEST_FUNCTION(AMQP_Unregister_transport_success)
 {
 	// arrange

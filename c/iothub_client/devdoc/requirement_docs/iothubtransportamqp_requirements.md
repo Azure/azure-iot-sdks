@@ -29,9 +29,9 @@ static void IoTHubTransportAMQP_Destroy(TRANSPORT_LL_HANDLE handle)
 
 static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 
-static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQ_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
+static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
 
-static void IoTHubTransportAMQ_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
+static void IoTHubTransportAMQP_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 
 static int IoTHubTransportAMQP_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 
@@ -338,21 +338,21 @@ This section defines the functionality of the callback function ‘on_message_re
   
   
     
-###IoTHubTransportAMQ_Register
+###IoTHubTransportAMQP_Register
 
 This function registers a device with the transport.  The AMQP transport only supports a single device established on create, so this function will prevent multiple devices from being registered.
-SRS_IOTHUBTRANSPORTUAMQP_17_005: [**IoTHubTransportAMQ_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.**]**
-SRS_IOTHUBTRANSPORTUAMQP_17_001: [**IoTHubTransportAMQ_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.**]**
-SRS_IOTHUBTRANSPORTUAMQP_17_002: [**IoTHubTransportAMQ_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.**]**
-SRS_IOTHUBTRANSPORTUAMQP_17_003: [**IoTHubTransportAMQ_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE.**]**
+SRS_IOTHUBTRANSPORTUAMQP_17_005: [**IoTHubTransportAMQP_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.**]**
+SRS_IOTHUBTRANSPORTUAMQP_17_001: [**IoTHubTransportAMQP_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.**]**
+SRS_IOTHUBTRANSPORTUAMQP_17_002: [**IoTHubTransportAMQP_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.**]**
+SRS_IOTHUBTRANSPORTUAMQP_17_003: [**IoTHubTransportAMQP_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE.**]**
   
   
   
-###IoTHubTransportAMQ_Unregister
+###IoTHubTransportAMQP_Unregister
 
 This function is intended to remove a device as registered with the transport.  As there is only one IoT Hub Device per AMQP transport established on create, this function is a placeholder not intended to do meaningful work.
 
-SRS_IOTHUBTRANSPORTUAMQP_17_004: [**IoTHubTransportAMQ_Unregister shall return.**]**
+SRS_IOTHUBTRANSPORTUAMQP_17_004: [**IoTHubTransportAMQP_Unregister shall return.**]**
   
   
   
