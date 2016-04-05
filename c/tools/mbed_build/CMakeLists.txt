@@ -104,14 +104,59 @@ endfunction(updateMBEDSourceFiles)
 
 function(updateMBEDLibraries)
 
-#We want to find all the .lib files that contain teh mbed_User that is using this script
-
     file(GLOB libfiles ${local_repo_path}/*.lib)
     foreach(file_item ${libfiles})
+    
+        #
+        # We go through all of the .lib files.  We only want to update what we own.
+        #
         file (READ ${file_item} fileContents)
-        STRING(FIND ${fileContents} $ENV{MBED_USER} matchResult)
-        if (NOT ${matchResult} EQUAL -1) 
-            message(STATUS "The library that will be worked on is: " ${file_item})
+        STRING(FIND ${fileContents} /$ENV{MBED_USER}/ matchResult)
+        if (NOT ${matchResult} EQUAL -1)
+        
+            #
+            # Found one.  We want to get the the clone path of the library.  Go up to the slash and pound sign.  (The sha follows that.)
+            #
+            STRING(FIND ${fileContents} /\# uriEnd)
+            if (NOT ${uriEnd} EQUAL -1)
+                STRING(SUBSTRING ${fileContents} 0 ${uriEnd} libraryUri)
+                
+                #
+                # Get the sha that exists in the file.  We'll compare after the clone to see if we need to change the file.
+                # This is because even if we have the same sha, we could change the whitespace and this will cause hg to think the file has
+                # changed.
+                
+                math(EXPR beginSha "${uriEnd} + 2}")
+                STRING(SUBSTRING ${fileContents} ${beginSha} -1 rawOldSha)
+                STRING(STRIP ${rawOldSha} oldSha)
+                
+                #
+                # Get the name that will clone will go to.  (This is the last part of the uri.
+                #
+                STRING(FIND ${libraryUri} / finalSlash REVERSE)
+                math(EXPR finalSlash "${finalSlash} + 1")
+                STRING(SUBSTRING ${libraryUri} ${finalSlash} -1 libraryName)
+                
+                #
+                # We got the parts we need.  Get clone the lib and then go get the sha.
+                #
+            	execute_process(COMMAND hg "clone" "--insecure" ${libraryUri} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} RESULT_VARIABLE result_code)
+                if(NOT ${result_code} EQUAL 0)
+                    message(FATAL_ERROR "Failed to clone the sub library " ${libraryName} " (error code " ${result_code} ")")
+                endif()
+            	execute_process(COMMAND hg "id" "-i" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${libraryName} RESULT_VARIABLE result_code OUTPUT_VARIABLE outputSha OUTPUT_STRIP_TRAILING_WHITESPACE)
+                if(NOT ${result_code} EQUAL 0)
+                    message(FATAL_ERROR "Failed to obtain the sha of the sublibrary" ${libraryName} "(error code " ${result_code} ")")
+                endif()
+                if (NOT ${outputSha} EQUAL ${oldSha})
+                    message(STATUS "We would rewite the lib file for: " ${file_item})
+                else()
+                    message(STATUS "We would NOT rewrite the lib file for: " ${file_item})
+                endif()
+                file(WRITE ${file_item} ${libraryUri} /\# ${outputSha})                
+            else()
+                message(FATAL "Improperly formed lib file: " ${file_item})                
+            endif()
         endif()
     endforeach()
 endfunction(updateMBEDLibraries)
