@@ -46,19 +46,6 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
-	set(iothub_client_amqp_transport_c_files
-		${iothub_client_ll_transport_c_files}
-		./src/iothubtransportamqp.c
-	)
-
-	set(iothub_client_amqp_transport_h_files
-		${iothub_client_ll_transport_h_files}
-		./inc/iothubtransporthttp.h
-		./inc/iothubtransportamqp.h
-	)
-endif()
-
-if(${use_amqp})
 	if (${use_wsio})
 		set(iothub_client_amqp_transport_c_files
 			${iothub_client_ll_transport_c_files}
@@ -90,7 +77,6 @@ if(${use_mqtt})
 	
 	set(iothub_client_mqtt_transport_h_files
 		${iothub_client_ll_transport_h_files}
-		./inc/iothubtransporthttp.h
 		./inc/iothubtransportmqtt.h
 	)
 endif()
