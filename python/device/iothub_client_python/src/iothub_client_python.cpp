@@ -20,6 +20,10 @@
 #define IMPORT_NAME iothub_client
 #endif
 
+#if PY_MARJOR_VERSION >= 3
+#define IS_PY3
+#endif
+
 //#define SUPPORT___STR__
 
 // helper for debugging py objects
@@ -929,12 +933,21 @@ public:
         boost::python::object& option
         )
     {
+#ifdef IS_PY3
         if (!PyLong_Check(option.ptr()))
         {
             PyErr_SetString(PyExc_TypeError, "set_option expected type int");
             boost::python::throw_error_already_set();
         }
+        long value = boost::python::extract<long>(option);
+#else
+        if (!PyInt_Check(option.ptr()))
+        {
+            PyErr_SetString(PyExc_TypeError, "set_option expected type int");
+            boost::python::throw_error_already_set();
+        }
         int value = boost::python::extract<int>(option);
+#endif
         IOTHUB_CLIENT_RESULT result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
         if (result != IOTHUB_CLIENT_OK)
         {

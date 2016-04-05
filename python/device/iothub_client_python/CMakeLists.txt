@@ -48,10 +48,11 @@ endif()
 
 # get python
 if (${python_3})
-    set(Python_ADDITIONAL_VERSIONS 3.4)
-    find_package(Boost COMPONENTS python-py34 REQUIRED)
+    set(Python_ADDITIONAL_VERSIONS 3)
+    add_definitions(-DPY_MARJOR_VERSION=3)
+    find_package(Boost COMPONENTS python-py35 REQUIRED)
 
-    find_package(PythonLibs 3 REQUIRED)
+    find_package(PythonLibs 3.5 REQUIRED)
 else()
     find_package(Boost COMPONENTS python REQUIRED)
     
