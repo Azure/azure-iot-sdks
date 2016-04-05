@@ -92,7 +92,7 @@ if %build-platform% == Win32 (
 	if not %errorlevel%==0 exit /b %errorlevel%	
 ) else (
 	echo ***Running CMAKE for Win64***
-	cmake %build-root% -G "Visual Studio 14 Win64" -Dbuild_python:BOOL=%CMAKE_build_python%
+	cmake %build-root% -G "Visual Studio 14 Win64" -Dbuild_python:BOOL=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper%
 	if not %errorlevel%==0 exit /b %errorlevel%	
 )
 
