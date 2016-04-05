@@ -32,6 +32,8 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
 	IoTHubTransportAMQP_SetOption,
 	IoTHubTransportAMQP_Create_WebSocketsOverTls,
 	IoTHubTransportAMQP_Destroy,
+	IoTHubTransportAMQP_Register,
+    IoTHubTransportAMQP_Unregister,
 	IoTHubTransportAMQP_Subscribe,
 	IoTHubTransportAMQP_Unsubscribe,
 	IoTHubTransportAMQP_DoWork,
