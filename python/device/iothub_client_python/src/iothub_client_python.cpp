@@ -936,7 +936,7 @@ public:
 #ifdef IS_PY3
         if (!PyLong_Check(option.ptr()))
         {
-            PyErr_SetString(PyExc_TypeError, "set_option expected type int");
+            PyErr_SetString(PyExc_TypeError, "set_option expected type long");
             boost::python::throw_error_already_set();
         }
         long value = boost::python::extract<long>(option);
