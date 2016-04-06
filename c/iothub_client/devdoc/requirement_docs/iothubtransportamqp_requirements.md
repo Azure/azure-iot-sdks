@@ -90,9 +90,8 @@ This function creates all the inner components required by the IoT Hub client to
 **SRS_IOTHUBTRANSPORTAMQP_09_128: [**IoTHubTransportAMQP_Create shall set parameter transport_state->sas_token_refresh_time with the default value of sas_token_lifetime/2 (milliseconds).**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_129: [**IoTHubTransportAMQP_Create shall set parameter transport_state->cbs_request_timeout with the default value of 30000 (milliseconds).**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_130: [**IoTHubTransportAMQP_Create shall set parameter transport_state->message_send_timeout with the default value of 300000 (milliseconds).**]**
-
+  
+  
 Summary of timeout parameters:
 
 Parameter	Default Value
@@ -100,8 +99,6 @@ double sas_token_lifetime	3600000 (milliseconds)
 double sas_token_refresh_time	1800000 (milliseconds)
 double cbs_request_timeout	30000 (milliseconds)
 
-double message_send_timeout
-300000 (milliseconds)
 
 **SRS_IOTHUBTRANSPORTAMQP_09_023: [**If IoTHubTransportAMQP_Create succeeds it shall return a non-NULL pointer to the structure that represents the transport.**]**
   
@@ -309,10 +306,6 @@ For each property:
 **SRS_IOTHUBTRANSPORTAMQP_09_152: [**The callback ‘on_message_send_complete’ shall destroy the IOTHUB_MESSAGE_LIST instance**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_103: [**IoTHubTransportAMQP_DoWork shall invoke connection_dowork() on AMQP for triggering sending and receiving messages**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_085: [**IoTHubTransportAMQP_DoWork shall attempt to send all the queued messages for up to ‘message_send_timeout’ milliseconds**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_120: [**If a ‘message_send_timeout’ occurs the timed out events removed from the inProgress and the upper layer notified of the send error**]**
   
   
   
@@ -400,7 +393,6 @@ This function disables the notifications to the upper client layer of new messag
 
 **SRS_IOTHUBTRANSPORTAMQP_09_148: [**IoTHubTransportAMQP_SetOption shall save and apply the value if the option name is "cbs_request_timeout", returning IOTHUB_CLIENT_OK**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_149: [**IoTHubTransportAMQP_SetOption shall save and apply the value if the option name is "message_send_timeout", returning IOTHUB_CLIENT_OK**]**
 
 <table>
 <tr><th>Parameter</th><th>Possible Values</th><th>Details</th></tr>
@@ -408,7 +400,6 @@ This function disables the notifications to the upper client layer of new messag
 <tr><td>sas_token_lifetime</td><td>0 to TIME_MAX (milliseconds)</td><td>Default: 3600000 milliseconds (1 hour)	How long a SAS token created by the transport is valid, in milliseconds.</td></tr>
 <tr><td>sas_token_refresh_time</td><td>0 to TIME_MAX (milliseconds)</td><td>Default: sas_token_lifetime/2	Maximum period of time for the transport to wait before refreshing the SAS token it created previously.</td></tr>
 <tr><td>cbs_request_timeout</td><td>1 to TIME_MAX (milliseconds)</td><td>Default: 30 millisecond	Maximum time the transport waits for  AMQP cbs_put_token() to complete before marking it a failure.</td></tr>
-<tr><td>message_send_timeout</td><td>1 to TIME_MAX (milliseconds)</td><td>Default: 300000 millisecond	Maximum time the transport waits for an event to be sent before marking it a failure.</td></tr>
 <table>
   
   
