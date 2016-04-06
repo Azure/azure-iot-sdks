@@ -18,6 +18,7 @@ if (release_the_project)
 endif()
 
 set(local_repo_path ${CMAKE_CURRENT_BINARY_DIR}/${mbed_repo_name})
+set(local_sublib_dir ${CMAKE_CURRENT_BINARY_DIR}/temp)
 set(compile_mbed_tool ${sdk_base_path}/c/tools/compilembed/bin/release/compilembed.exe)
 
 set(mbed_platform "FRDM-K64F")
