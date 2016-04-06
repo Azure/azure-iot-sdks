@@ -62,7 +62,7 @@ if(NOT "${compileOption_CXX}" STREQUAL "OFF")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
 endif()
 
-
+include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility)
 
 #this project uses several other projects that are build not by these CMakeFiles
 #this project also targets several OSes
