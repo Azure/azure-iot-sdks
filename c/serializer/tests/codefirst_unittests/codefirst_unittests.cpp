@@ -15,7 +15,7 @@
 #include <cstdint>
 #include "c_bool_size.h"
 #include <string>
-#include "strings.h"
+#include "azure_c_shared_utility/strings.h"
 #include "serializer.h"
 
 

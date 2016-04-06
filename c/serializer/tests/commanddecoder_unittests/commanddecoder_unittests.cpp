@@ -6,7 +6,7 @@
 #include <crtdbg.h>
 #endif
 
-#include "lock.h"
+#include "azure_c_shared_utility/lock.h"
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
