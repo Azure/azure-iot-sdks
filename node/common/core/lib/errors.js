@@ -41,7 +41,7 @@ DeviceMaximumQueueDepthExceededError.prototype.name = 'DeviceMaximumQueueDepthEx
  *
  * @augments {Error}
  */
-function DeviceNotFoundError(message) {
+  function DeviceNotFoundError(message) {
   this.message = message;
   this.stack = (new Error()).stack;
   Error.call(this, message);
@@ -103,6 +103,46 @@ NotConnectedError.prototype = Object.create(Error.prototype);
 NotConnectedError.prototype.constructor = NotConnectedError;
 NotConnectedError.prototype.name = 'NotConnectedError';
 
+function IotHubQuotaExceededError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+IotHubQuotaExceededError.prototype = Object.create(Error.prototype);
+IotHubQuotaExceededError.prototype.constructor = IotHubQuotaExceededError;
+IotHubQuotaExceededError.prototype.name = 'IotHubQuotaExceededError';
+
+function MessageTooLargeError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+MessageTooLargeError.prototype = Object.create(Error.prototype);
+MessageTooLargeError.prototype.constructor = MessageTooLargeError;
+MessageTooLargeError.prototype.name = 'MessageTooLargeError';
+
+function InternalServerError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+InternalServerError.prototype = Object.create(Error.prototype);
+InternalServerError.prototype.constructor = InternalServerError;
+InternalServerError.prototype.name = 'InternalServerError';
+
+function ServiceUnavailableError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+ServiceUnavailableError.prototype = Object.create(Error.prototype);
+ServiceUnavailableError.prototype.constructor = ServiceUnavailableError;
+ServiceUnavailableError.prototype.name = 'ServiceUnavailableError';
+
 module.exports = {
   ArgumentError: ArgumentError,
   DeviceMaximumQueueDepthExceededError: DeviceMaximumQueueDepthExceededError,
@@ -110,5 +150,9 @@ module.exports = {
   FormatError: FormatError,
   UnauthorizedError: UnauthorizedError,
   NotImplementedError: NotImplementedError,
-  NotConnectedError: NotConnectedError
+  NotConnectedError: NotConnectedError,
+  IotHubQuotaExceededError: IotHubQuotaExceededError,
+  MessageTooLargeError: MessageTooLargeError,
+  InternalServerError: InternalServerError,
+  ServiceUnavailableError: ServiceUnavailableError
 };
