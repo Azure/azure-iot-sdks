@@ -11,12 +11,23 @@ cd $build_root
 [ $? -eq 0 ] || exit $?
 cd $build_root
 
-echo copy iothub_client library to samples folder
-cp ~/cmake/python/src/iothub_client.so ./python/device/samples/iothub_client.so
-echo copy iothub_client_mock library to tests folder
-cp ~/cmake/python/test/iothub_client_mock.so ./python/device/tests/iothub_client_mock.so
+if [[ $* == *--python-3* ]]; then
+    echo copy iothub_client library to py3 samples folder
+    cp ~/cmake/python/src/iothub_client.so ./python/device/samples/py3/iothub_client.so
+    echo copy iothub_client_mock library to tests folder
+    cp ~/cmake/python/test/iothub_client_mock.so ./python/device/tests/iothub_client_mock.so
+else
+    echo copy iothub_client library to samples folder
+    cp ~/cmake/python/src/iothub_client.so ./python/device/samples/iothub_client.so
+    echo copy iothub_client_mock library to tests folder
+    cp ~/cmake/python/test/iothub_client_mock.so ./python/device/tests/iothub_client_mock.so
+fi
 
 cd $build_root/python/device/tests/
-./iothub_client_ut.py
+if [[ $* == *--python-3* ]]; then
+python3 iothub_client_ut.py
+else
+python iothub_client_ut.py
+fi
 [ $? -eq 0 ] || exit $?
 cd $build_root
