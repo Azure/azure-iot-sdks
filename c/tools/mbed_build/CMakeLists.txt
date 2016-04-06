@@ -131,14 +131,14 @@ function(updateMBEDLibraries)
                 STRING(STRIP ${rawOldSha} oldSha)
                 
                 #
-                # Get the name that will clone will go to.  (This is the last part of the uri.
+                # Get the name that the clone will go to.  (This is the last part of the uri).
                 #
                 STRING(FIND ${libraryUri} / finalSlash REVERSE)
                 math(EXPR finalSlash "${finalSlash} + 1")
                 STRING(SUBSTRING ${libraryUri} ${finalSlash} -1 libraryName)
                 
                 #
-                # We got the parts we need.  Get clone the lib and then go get the sha.
+                # We got the parts we need.  Clone the lib and then go get the sha.
                 #
             	execute_process(COMMAND hg "clone" "--insecure" ${libraryUri} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} RESULT_VARIABLE result_code)
                 if(NOT ${result_code} EQUAL 0)
