@@ -318,7 +318,7 @@ class TestClassDefinitions(unittest.TestCase):
         message = IoTHubMessage(messageString)
         self.assertIsInstance(message, IoTHubMessage)
         # get_bytearray
-        message = IoTHubMessage(bytearray(messageString))
+        message = IoTHubMessage(bytearray(messageString, "utf8"))
         self.assertIsInstance(message, IoTHubMessage)
         with self.assertRaises(AttributeError):
             message.GetByteArray()
@@ -329,7 +329,7 @@ class TestClassDefinitions(unittest.TestCase):
         with self.assertRaises(Exception):
             message.get_bytearray(["key", "value"])
         result = message.get_bytearray()
-        self.assertEqual(result, "myMessage")
+        self.assertEqual(result, b"myMessage")
         # get_string
         message = IoTHubMessage(messageString)
         self.assertIsInstance(message, IoTHubMessage)
@@ -355,7 +355,7 @@ class TestClassDefinitions(unittest.TestCase):
         message = IoTHubMessage(messageString)
         result = message.get_content_type()
         self.assertEqual(result, IoTHubMessageContent.STRING)
-        message = IoTHubMessage(bytearray(messageString))
+        message = IoTHubMessage(bytearray(messageString, "utf8"))
         result = message.get_content_type()
         self.assertEqual(result, IoTHubMessageContent.BYTEARRAY)
         # properties
