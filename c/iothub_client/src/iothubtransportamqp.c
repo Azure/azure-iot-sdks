@@ -252,7 +252,7 @@ static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_res
         iot_hub_send_result = IOTHUB_CLIENT_CONFIRMATION_OK;
     }
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_143: [The callback 'on_message_send_complete' shall pass to the upper layer callback an IOTHUB_CLIENT_CONFIRMATION_ERROR if the result received is MESSAGE_SEND_ERROR]
-    else if (send_result == MESSAGE_SEND_ERROR)
+    else
     {
         iot_hub_send_result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
     }
@@ -280,7 +280,7 @@ static void on_put_token_complete(void* context, CBS_OPERATION_RESULT operation_
 {
     AMQP_TRANSPORT_INSTANCE* transportState = (AMQP_TRANSPORT_INSTANCE*)context;
 
-    if (operation_result == OPERATION_RESULT_OK)
+    if (operation_result == CBS_OPERATION_RESULT_OK)
     {
         transportState->cbs_state = CBS_STATE_AUTHENTICATED;
     }
@@ -895,7 +895,7 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
         IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message->messageHandle);
         const unsigned char* messageContent;
         size_t messageContentSize;
-        MESSAGE_HANDLE amqp_message;
+        MESSAGE_HANDLE amqp_message = NULL;
         bool is_message_error = false;
         EVENT_TRACKER* event_tracker;
 
