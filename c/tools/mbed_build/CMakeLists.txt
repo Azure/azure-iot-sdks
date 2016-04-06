@@ -160,6 +160,7 @@ function(updateMBEDLibraries)
                 endif()
                 
                 if (NOT ${outputSha} STREQUAL ${oldSha})
+                    message(STATUS "Need to update the reference to libary at " ${libraryUri})
                     file(WRITE ${file_item} ${libraryUri} /\# ${outputSha})                
                 endif()
             else()
