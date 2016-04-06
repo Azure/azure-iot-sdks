@@ -14,8 +14,8 @@ and removing calls to _DoWork will yield the same results. */
 #include "serializer.h"
 #include "iothub_client_ll.h"
 #include "iothubtransportmqtt.h"
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/platform.h"
+#include "threadapi.h"
+#include "platform.h"
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP

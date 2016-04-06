@@ -6,9 +6,9 @@
 #include "schemalib.h"
 #include "serializer.h"
 #include "schemaserializer.h"
-#include "azure_c_shared_utility/threadapi.h"
+#include "threadapi.h"
 #include "iothub_client_ll.h"
-#include "azure_c_shared_utility/platform.h"
+#include "platform.h"
 
 static const char* connectionString = "[device connection string]";
 static const char* deviceId = "[deviceName]"; /*must match the one on connectionString*/
