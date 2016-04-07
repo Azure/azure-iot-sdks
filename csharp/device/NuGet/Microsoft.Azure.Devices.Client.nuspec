@@ -17,14 +17,14 @@
             <group targetFramework="net45" >
                 <dependency id="Newtonsoft.Json" version="6.0.8" />
                 <dependency id="PCLCrypto" version="1.0.86" />
-                <dependency id="Microsoft.Azure.Amqp" version="1.1.0" />
+                <dependency id="Microsoft.Azure.Amqp" version="1.1.1" />
                 <dependency id="DotNetty.Codecs.Mqtt-signed" version="0.2.3" />
                 <dependency id="DotNetty.Handlers-signed" version="0.2.3" />
             </group>
-			<group targetFramework="uap">
-				<dependency id="PCLCrypto" version="1.0.86" />
-				<dependency id="Microsoft.Azure.Amqp" version="1.1.0" />
-			</group>			
+	    <group targetFramework="uap">
+		<dependency id="PCLCrypto" version="1.0.86" />
+		<dependency id="Microsoft.Azure.Amqp" version="1.1.1" />
+	    </group>			
         </dependencies>
     </metadata>
     <files>
