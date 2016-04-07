@@ -148,9 +148,15 @@ function(updateMBEDLibraries)
                 STRING(SUBSTRING ${libraryUri} ${finalSlash} -1 libraryName)
                 
                 #
+                # Our compile sandboxes are actually private.  So we need to pass the username and password to do the clone.
+                # So we actually form the address all over again.  Sigh.
+                #
+                set(subLibraryCloningUri https://$ENV{MBED_USER}:$ENV{MBED_PWD}@developer.mbed.org/users/$ENV{MBED_USER}/code/${libraryName}/)
+                
+                #
                 # We got the parts we need.  Clone the lib and then go get the sha.
                 #
-            	execute_process(COMMAND hg "clone" "--insecure" ${libraryUri} WORKING_DIRECTORY ${local_sublib_dir} RESULT_VARIABLE result_code)
+            	execute_process(COMMAND hg "clone" "--insecure" ${subLibraryCloningUri} WORKING_DIRECTORY ${local_sublib_dir} RESULT_VARIABLE result_code)
                 if(NOT ${result_code} EQUAL 0)
                     message(FATAL_ERROR "Failed to clone the sub library " ${libraryName} " (error code " ${result_code} ")")
                 endif()
