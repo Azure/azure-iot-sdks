@@ -8,6 +8,7 @@ var endpoint = require('azure-iot-common').endpoint;
 var HttpReceiver = require('./http_receiver.js');
 var PackageJson = require('../package.json');
 var results = require('azure-iot-common').results;
+var translateError = require('./http_errors.js');
 
 /*Codes_SRS_NODE_DEVICE_HTTP_05_009: [When any Http method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
 err - the standard JavaScript Error object, with the Node.js http.ServerResponse object attached as the property response]*/
@@ -20,9 +21,8 @@ function handleResponse(done) {
     if (!err) {
       done(null, new results.MessageEnqueued(response));
     } else {
-      err.response = response;
-      err.responseBody = body;
-      done(err);
+      var error = response ? translateError('Could not send message: ' + err.message, body, response) : err;
+      done(error);
     }
   };
 }
