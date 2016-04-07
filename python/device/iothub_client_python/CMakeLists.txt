@@ -22,7 +22,10 @@ if(WIN32)
 endif()
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME     OFF)
-find_package(Boost COMPONENTS python REQUIRED)
+
+# Remove the period from python version for boost component
+string(REPLACE "." "" boost_python ${build_python})
+find_package(Boost COMPONENTS "python-py${boost_python}" REQUIRED)
 
 if(WIN32)
     IF (NOT Boost_FOUND)
@@ -48,7 +51,7 @@ endif()
 
 
 # get python
-find_package(PythonLibs 2.7 REQUIRED)
+find_package(PythonLibs ${build_python} REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
 link_directories(${PYTHON_LIBRARIES})
 

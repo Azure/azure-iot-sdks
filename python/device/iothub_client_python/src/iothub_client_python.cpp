@@ -20,7 +20,7 @@
 #define IMPORT_NAME iothub_client
 #endif
 
-#if PY_MARJOR_VERSION >= 3
+#if PY_MAJOR_VERSION >= 3
 #define IS_PY3
 #endif
 

@@ -39,7 +39,7 @@ endif()
 
 if (LINUX)
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        if(("${build_python}" STREQUAL "ON") OR ("${build_javawrapper}" STREQUAL "ON"))
+        if((NOT "${build_python}" STREQUAL "OFF") OR ("${build_javawrapper}" STREQUAL "ON"))
             # now all static libraries use PIC flag for Python shared lib
             set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
             set(CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}")
@@ -163,7 +163,7 @@ endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
-if("${build_python}" STREQUAL "ON")
+if(NOT "${build_python}" STREQUAL "OFF")
     add_subdirectory(../python/device/iothub_client_python python)
 endif()
 
