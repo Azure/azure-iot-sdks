@@ -1,4 +1,4 @@
-# azure-iot-device.translateError Requirements
+# azure-iot-device-http.translateError Requirements
 
 ## Overview
 `translateError` is a method that translates HTTP errors into Azure IoT Hub errors, effectively abstracting the error that is returned to the SDK user of from the transport layer.
