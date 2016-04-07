@@ -16,6 +16,8 @@
 #include "iothubtransportamqp.h"
 #include "iothubtransportmqtt.h"
 
+namespace bp = boost::python;
+
 #ifndef IMPORT_NAME
 #define IMPORT_NAME iothub_client
 #endif
@@ -84,8 +86,10 @@ enum IOTHUB_TRANSPORT_PROVIDER
 };
 
 //
-//  IotHubError as exception handler base class
+//  IotHubError exception handler base class
 //
+
+PyObject* iotHubErrorType = NULL;
 
 class IoTHubError : public std::exception
 {
@@ -98,7 +102,8 @@ public:
     {
         exc = _exc;
         cls = _cls;
-        func = _func;
+        // only display class names in camel case
+        func = (_func[0] != 'I') ? CamelToPy(_func): _func;
     }
 
     std::string exc;
@@ -108,7 +113,7 @@ public:
     std::string str() const
     {
         std::stringstream s;
-        s << cls << "::" << func << ", " << decode_error();
+        s << cls << "." << func << ", " << decode_error();
         return s.str();
     }
 
@@ -121,7 +126,43 @@ public:
 
     virtual std::string decode_error() const = 0;
 
+private:
+
+    std::string CamelToPy(std::string &func)
+    {
+        std::string py;
+        std::string::size_type len = func.length();
+        for (std::string::size_type i = 0; i<len; i++)
+        {
+            char ch = func[i];
+            if ((i > 0) && isupper(ch))
+            {
+                py.push_back('_');
+            }
+            py.push_back(tolower(ch));
+        }
+        return py;
+    }
+
 };
+
+PyObject*
+createExceptionClass(
+    const char* name,
+    PyObject* baseTypeObj = PyExc_Exception
+    )
+{
+    using std::string;
+    string scopeName = bp::extract<string>(bp::scope().attr("__name__"));
+    string qualifiedName0 = scopeName + "." + name;
+    char* qualifiedName1 = const_cast<char*>(qualifiedName0.c_str());
+
+    PyObject* typeObj = PyErr_NewException(qualifiedName1, baseTypeObj, 0);
+    if (!typeObj) bp::throw_error_already_set();
+    bp::scope().attr(name) = bp::handle<>(bp::borrowed(typeObj));
+
+    return typeObj;
+}
 
 //
 //  map.h
@@ -991,30 +1032,33 @@ BOOST_PYTHON_MODULE(IMPORT_NAME)
     scope().attr("__version__") = IOTHUB_SDK_VERSION;
 
     // exception handlers
-    class_<IoTHubMapError>IoTHubMapErrorClass("IoTHubMapError", init<std::string, MAP_RESULT>());
+    class_<IoTHubMapError>IoTHubMapErrorClass("IoTHubMapError", no_init);
     IoTHubMapErrorClass.def_readonly("result", &IoTHubMapError::result);
     IoTHubMapErrorClass.def_readonly("func", &IoTHubMapError::func);
     IoTHubMapErrorClass.def("__str__", &IoTHubMapError::str);
     IoTHubMapErrorClass.def("__repr__", &IoTHubMapError::repr);
-    iotHubMapErrorType = IoTHubMapErrorClass.ptr();
 
-    class_<IoTHubMessageError>IotHubMessageErrorClass("IoTHubMessageError", init<std::string, IOTHUB_MESSAGE_RESULT>());
+    class_<IoTHubMessageError>IotHubMessageErrorClass("IoTHubMessageError", no_init);
     IotHubMessageErrorClass.def_readonly("result", &IoTHubMessageError::result);
     IotHubMessageErrorClass.def_readonly("func", &IoTHubMessageError::func);
     IotHubMessageErrorClass.def("__str__", &IoTHubMessageError::str);
     IotHubMessageErrorClass.def("__repr__", &IoTHubMessageError::repr);
-    iothubMessageErrorType = IotHubMessageErrorClass.ptr();
 
-    class_<IoTHubClientError>IotHubClientErrorClass("IoTHubClientError", init<std::string, IOTHUB_CLIENT_RESULT>());
+    class_<IoTHubClientError>IotHubClientErrorClass("IoTHubClientError", no_init);
     IotHubClientErrorClass.def_readonly("result", &IoTHubClientError::result);
     IotHubClientErrorClass.def_readonly("func", &IoTHubClientError::func);
     IotHubClientErrorClass.def("__str__", &IoTHubClientError::str);
     IotHubClientErrorClass.def("__repr__", &IoTHubClientError::repr);
-    iothubClientErrorType = IotHubClientErrorClass.ptr();
 
     register_exception_translator<IoTHubMapError>(iotHubMapError);
     register_exception_translator<IoTHubMessageError>(iothubMessageError);
     register_exception_translator<IoTHubClientError>(iothubClientError);
+
+    // iothub errors derived from BaseException --> IoTHubError --> IoTHubXXXError
+    iotHubErrorType = createExceptionClass("IoTHubError");
+    iotHubMapErrorType = createExceptionClass("IoTHubMapError", iotHubErrorType);
+    iothubMessageErrorType = createExceptionClass("IoTHubMessageError", iotHubErrorType);
+    iothubClientErrorType = createExceptionClass("IoTHubClientError", iotHubErrorType);
 
     // iothub return codes
     enum_<MAP_RESULT>("IoTHubMapResult")
