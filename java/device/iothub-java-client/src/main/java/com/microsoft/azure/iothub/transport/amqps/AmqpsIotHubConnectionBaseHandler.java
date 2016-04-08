@@ -225,14 +225,25 @@ public final class AmqpsIotHubConnectionBaseHandler extends BaseHandler {
      */
     @Override
     public void onLinkLocalClose(Event event){
+
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_016: [If the link was locally closed before the current message is sent, the sent message CompletableFuture will be completed exceptionally with a new HandlerException.]
-        if(!this.currentSentMessageFuture.isDone()){
+        if(currentSentMessageFuture != null && !this.currentSentMessageFuture.isDone()){
             this.currentSentMessageFuture.completeExceptionally(new HandlerException(this, new Throwable("Link closed before the message was sent.")));
         }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTIONBASEHANDLER_14_015: [The event handler shall close the Session and Connection (Proton) objects.]
         event.getSession().close();
         event.getSession().getConnection().close();
+    }
+
+    /**
+     * Event handler for the link remote close event. If the link closes remotely, fail the parent connection.
+     * @param event The Proton Event object.
+     */
+    @Override
+    public void onLinkRemoteClose(Event event)
+    {
+        this.parentIotHubConnection.fail("Connection to the server closed");
     }
 
     //==============================================================================
