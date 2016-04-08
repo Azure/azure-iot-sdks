@@ -30,11 +30,11 @@ override_dh_auto_install:
 	mkdir $$(pwd)/debian/tmp/usr
 	mkdir $$(pwd)/debian/tmp/usr/lib
 	mkdir $$(pwd)/debian/tmp/usr/include
-	mkdir $$(pwd)/debian/tmp/usr/include/azureiotsdk
+	mkdir $$(pwd)/debian/tmp/usr/include/azureiot
 	cp $$(pwd)/obj-*/iothub_client/*.a $$(pwd)/debian/tmp/usr/lib/
 	cp $$(pwd)/obj-*/serializer/*.a $$(pwd)/debian/tmp/usr/lib/
-	cp $$(pwd)/iothub_client/inc/* $$(pwd)/debian/tmp/usr/include/azureiotsdk
-	cp $$(pwd)/serializer/inc/* $$(pwd)/debian/tmp/usr/include/azureiotsdk
+	cp $$(pwd)/iothub_client/inc/* $$(pwd)/debian/tmp/usr/include/azureiot
+	cp $$(pwd)/serializer/inc/* $$(pwd)/debian/tmp/usr/include/azureiot
 
 
 

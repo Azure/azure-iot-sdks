@@ -16,7 +16,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     using System.Net.Http.Formatting;
 #endif
 
@@ -101,8 +101,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
             CancellationToken cancellationToken) where T: IETagHolder
         {
-#if WINDOWS_UWP
-            await Task.CompletedTask; // to suppress async warning
+#if WINDOWS_UWP || PCL
             throw new NotImplementedException();
 #else
             T result = default(T);
@@ -131,7 +130,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 return (T) (object)message;
             }
 
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             // ReadAsAsync does not exist in UWP. Looks like all callers call this API 
             // with HttpResponseMessage, so it might be unreachable. If you reach it, implement deserialization from stream
             await message.Content.ReadAsStreamAsync();
@@ -250,7 +249,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                         }
                         else
                         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
                             // System.Net.Http.Formatting does not exist in UWP. Need to find another way to create content
                             throw new NotImplementedException();
 #else
@@ -320,7 +319,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             using (var msg = new HttpRequestMessage(httpMethod, requestUri))
             {
                 msg.Headers.Add(HttpRequestHeader.Authorization.ToString(), this.authenticationHeaderProvider.GetAuthorizationHeader());
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
                 msg.Headers.UserAgent.ParseAdd(Utils.GetClientVersion());
 #endif
                 if (modifyRequestMessageAsync != null) await modifyRequestMessageAsync(msg, cancellationToken);

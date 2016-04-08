@@ -5,18 +5,17 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
-#include "string.h"
-#include "string_tokenizer.h"
+#include <string.h>
+#include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/string_tokenizer.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/tickcounter.h"
 
 #include "iothub_client_ll.h"
 #include "iothub_client_private.h"
-#include "doublylinkedlist.h"
 #include "iothub_client_version.h"
-
-#include "iot_logging.h"
-
-#include "tickcounter.h"
+#include "iothub_transport_ll.h"
 
 #define LOG_ERROR LogError("result = %s\r\n", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
 #define INDEFINITE_TIME ((time_t)(-1))
@@ -26,7 +25,7 @@ DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
 {
     DLIST_ENTRY waitingToSend;
-    TRANSPORT_HANDLE transportHandle;
+    TRANSPORT_LL_HANDLE transportHandle;
 	bool isSharedTransport;
 	IOTHUB_DEVICE_HANDLE deviceHandle;
     TRANSPORT_PROVIDER_FIELDS;

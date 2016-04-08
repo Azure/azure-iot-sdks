@@ -10,6 +10,7 @@ import com.microsoft.azure.iothub.transport.https.HttpsTransport;
 
 import com.microsoft.azure.iothub.transport.IotHubReceiveTask;
 import com.microsoft.azure.iothub.transport.IotHubSendTask;
+import com.microsoft.azure.iothub.transport.mqtt.MqttTransport;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -131,7 +132,47 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new AmqpsTransport((DeviceClientConfig) any);
+                new AmqpsTransport((DeviceClientConfig) any, protocol);
+            }
+        };
+    }
+
+    // Tests_SRS_DEVICECLIENT_11_046: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
+    @Test
+    public void connStringConstructorInitializesMqttTransport(
+            @Mocked final HttpsTransport mockTransport)
+            throws URISyntaxException
+    {
+        final String connString =
+                "HostName=iothub.device.com;CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId=testdevice;SharedAccessKey=adjkl234j52=;";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+
+        new DeviceClient(connString, protocol);
+
+        new Verifications()
+        {
+            {
+                new MqttTransport((DeviceClientConfig) any);
+            }
+        };
+    }
+
+    // Tests_SRS_DEVICECLIENT_11_046: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
+    @Test
+    public void connStringConstructorInitializesAmqps_Ws_Transport(
+            @Mocked final AmqpsTransport mockTransport)
+            throws URISyntaxException
+    {
+        final String connString =
+                "HostName=iothub.device.com;CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId=testdevice;SharedAccessKey=adjkl234j52=;";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
+
+        new DeviceClient(connString, protocol);
+
+        new Verifications()
+        {
+            {
+                new AmqpsTransport((DeviceClientConfig) any, protocol);
             }
         };
     }
@@ -235,7 +276,7 @@ public class DeviceClientTest
         DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
 
-        final long expectedSendPeriodMillis = 5000l;
+        final long expectedSendPeriodMillis = 10l;
         new Verifications()
         {
             {
@@ -262,7 +303,7 @@ public class DeviceClientTest
         DeviceClient client = new DeviceClient(connString, protocol);
         client.open();
 
-        final long expectedReceivePeriodMillis = 5000l;
+        final long expectedReceivePeriodMillis = 10l;
         new Verifications()
         {
             {

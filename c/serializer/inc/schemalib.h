@@ -9,8 +9,8 @@
 #ifndef SCHEMALIB_H
 #define SCHEMALIB_H
 
-#include "macro_utils.h"
-#include "strings.h"
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/strings.h"
 #include "iotdevice.h"
 
 #ifdef __cplusplus

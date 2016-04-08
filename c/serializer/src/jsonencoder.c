@@ -5,12 +5,12 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include "jsonencoder.h"
-#include "crt_abstractions.h"
-#include "iot_logging.h"
-#include "strings.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/strings.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4701) /* potentially uninitialized local variable 'result' used */ /* the scanner cannot track variable "i" and link it to childCount*/

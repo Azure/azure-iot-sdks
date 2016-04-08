@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 'use strict';
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
 var FakeMqtt = function() {

@@ -15,9 +15,9 @@ namespace Microsoft.Azure.Devices.Client
     using Windows.Security.Cryptography.Core;
     using System.Runtime.InteropServices.WindowsRuntime;
     using Windows.Storage.Streams;
-#else
-    using System.Security.Cryptography;
 #endif
+    using PCLCrypto;
+
     using System.Text;
 
     sealed class SharedAccessSignatureBuilder
@@ -134,55 +134,13 @@ namespace Microsoft.Azure.Devices.Client
             return Convert.ToString(seconds, CultureInfo.InvariantCulture);
 #endif
         }
-
-#if WINDOWS_UWP
         static string Sign(string requestString, string key)
         {
-            var algo = MacAlgorithmProvider.OpenAlgorithm(MacAlgorithmNames.HmacSha256);
-            var keyMaterial = Convert.FromBase64String(key).AsBuffer();
-            var hash = algo.CreateHash(keyMaterial);
-            hash.Append(CryptographicBuffer.ConvertStringToBinary(requestString, BinaryStringEncoding.Utf8));
-
-            var sign = CryptographicBuffer.EncodeToBase64String(hash.GetValueAndReset());
-            return sign;
+            var algorithm = WinRTCrypto.MacAlgorithmProvider.OpenAlgorithm(MacAlgorithm.HmacSha256);
+            var hash = algorithm.CreateHash(Convert.FromBase64String(key));
+            hash.Append(Encoding.UTF8.GetBytes(requestString));
+            var mac = hash.GetValueAndReset();
+            return Convert.ToBase64String(mac);
         }
-#elif NETMF
-        static string Sign(string requestString, string key)
-        {
-            // computing SHA256 signature using a managed code library
-            var hmac = SHA.computeHMAC_SHA256(Convert.FromBase64String(key), Encoding.UTF8.GetBytes(requestString));
-            return Convert.ToBase64String(hmac);
-
-            // computing SHA256 signature using the .NET Micro Framework classes
-            // this requires that the appropriate assemblies are compiled and available in the .NETMF build it's being used
-            // required assemblies are: Microsoft.SPOT.Cryptoki and System.Security.Cryptography
-            //using (Microsoft.SPOT.Cryptoki.Session openSession = new Microsoft.SPOT.Cryptoki.Session("", Microsoft.SPOT.Cryptoki.MechanismType.SHA256_HMAC))
-            //{
-            //    Microsoft.SPOT.Cryptoki.CryptokiAttribute[] secretKey = new Microsoft.SPOT.Cryptoki.CryptokiAttribute[] 
-            //    { 
-            //        new Microsoft.SPOT.Cryptoki.CryptokiAttribute(Microsoft.SPOT.Cryptoki.CryptokiAttribute.CryptokiType.Class, Microsoft.SPOT.Cryptoki.Utility.ConvertToBytes((int)Microsoft.SPOT.Cryptoki.CryptokiClass.SECRET_KEY)),
-            //        new Microsoft.SPOT.Cryptoki.CryptokiAttribute(Microsoft.SPOT.Cryptoki.CryptokiAttribute.CryptokiType.KeyType, Microsoft.SPOT.Cryptoki.Utility.ConvertToBytes((int)System.Security.Cryptography.CryptoKey.KeyType.GENERIC_SECRET)),
-            //        new Microsoft.SPOT.Cryptoki.CryptokiAttribute(Microsoft.SPOT.Cryptoki.CryptokiAttribute.CryptokiType.Value, Convert.FromBase64String(key)) 
-            //    }; 
-
-            //    System.Security.Cryptography.CryptoKey binKey = System.Security.Cryptography.CryptoKey.LoadKey(openSession, secretKey);
-
-            //    using (System.Security.Cryptography.KeyedHashAlgorithm hmacOpenSSL = new System.Security.Cryptography.KeyedHashAlgorithm(System.Security.Cryptography.KeyedHashAlgorithmType.HMACSHA256, binKey))
-            //    {
-            //        byte[] hmac1 = hmacOpenSSL.ComputeHash(Encoding.UTF8.GetBytes(requestString));
-            //        return Convert.ToBase64String(hmac1);
-            //    }
-            //}
-        }
-#else
-        static string Sign(string requestString, string key)
-        {
-            using (var hmac = new HMACSHA256(Convert.FromBase64String(key)))
-            {
-                var sign = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(requestString)));
-                return sign;
-            }
-        }
-#endif
     }
 }

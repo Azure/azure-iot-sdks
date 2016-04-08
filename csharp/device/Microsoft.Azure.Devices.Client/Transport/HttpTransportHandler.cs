@@ -35,9 +35,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         readonly IHttpClientHelper httpClientHelper;
         readonly string deviceId;
 
-#if !WINDOWS_UWP
         readonly Http1TransportSettings transportSettings;
-#endif
 
         internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString)
         {
@@ -51,13 +49,11 @@ namespace Microsoft.Azure.Devices.Client.Transport
             this.DefaultReceiveTimeout = DefaultReceiveTimeoutInSeconds;
         }
 
-#if !WINDOWS_UWP
         internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString, Http1TransportSettings transportSettings)
             :this(iotHubConnectionString)
         {
             this.transportSettings = transportSettings;
         }
-#endif
 
         /// <summary>
         /// Create a DeviceClient from individual parameters
@@ -206,7 +202,11 @@ namespace Microsoft.Azure.Devices.Client.Transport
             responseMessage.Headers.TryGetValues(CustomHeaderConstants.MessageId, out messageId);
 
             IEnumerable<string> lockToken;
+#if !PCL
             responseMessage.Headers.TryGetValues(HttpResponseHeader.ETag.ToString(), out lockToken);
+#else
+            responseMessage.Headers.TryGetValues("ETag", out lockToken);
+#endif
 
             IEnumerable<string> enqueuedTime;
             responseMessage.Headers.TryGetValues(CustomHeaderConstants.EnqueuedTime, out enqueuedTime);

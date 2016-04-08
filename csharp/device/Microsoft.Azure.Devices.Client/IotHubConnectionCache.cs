@@ -7,7 +7,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
     using System.Threading;
 
-#if !WINDOWS_UWP
+#if !PCL
     class IotHubConnectionCache
     {
         readonly ConcurrentDictionary<IotHubConnectionString, IotHubScopeConnectionPool> hubScopeConnectionPools;
@@ -64,7 +64,7 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
                 // Connection pooling is turned off for device-scope connection strings
-                iotHubConnection =  new IotHubSingleTokenConnection(null, connectionString, this.amqpTransportSettings);
+                iotHubConnection =  new IotHubDeviceMuxConnection(null, long.MaxValue, connectionString, this.amqpTransportSettings);
             }
 
             return iotHubConnection;
@@ -118,7 +118,7 @@ namespace Microsoft.Azure.Devices.Client
                     HashCode.SafeGet(connectionString.SharedAccessKey),
                     HashCode.SafeGet(connectionString.SharedAccessKeyName),
                     HashCode.SafeGet(connectionString.SharedAccessSignature));
-            }
+           }
         }
 
         class DeviceScopeConnectionPoolStringComparer : IEqualityComparer<IotHubConnectionString>

@@ -7,12 +7,16 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
     using Microsoft.Azure.Devices.Common.Cloud;
 
-#if !WINDOWS_UWP
+#if !PCL
     sealed class IotHubDeviceScopeConnectionPool
     {
         readonly IotHubConnectionCache cache;
         readonly Dictionary<long, Tuple<IotHubDeviceMuxConnection, uint>> connectionPool;
+#if WINDOWS_UWP
+        readonly Dictionary<IotHubDeviceMuxConnection, IOThreadTimerSlim> idleTimers;
+#else
         readonly Dictionary<IotHubDeviceMuxConnection, IOThreadTimer> idleTimers;
+#endif
         readonly AmqpTransportSettings amqpTransportSettings;
         readonly object thisLock;
         readonly TimeSpan idleTimeout;
@@ -24,7 +28,11 @@ namespace Microsoft.Azure.Devices.Client
             this.connectionString = connectionString;
             this.amqpTransportSettings = amqpTransportSettings;
             this.connectionPool = new Dictionary<long, Tuple<IotHubDeviceMuxConnection, uint>>();
+#if WINDOWS_UWP
+            this.idleTimers = new Dictionary<IotHubDeviceMuxConnection, IOThreadTimerSlim>();
+#else
             this.idleTimers = new Dictionary<IotHubDeviceMuxConnection, IOThreadTimer>();
+#endif
             this.idleTimeout = amqpTransportSettings.AmqpConnectionPoolSettings.ConnectionIdleTimeout;
             this.thisLock = new object();
         }
@@ -123,7 +131,11 @@ namespace Microsoft.Azure.Devices.Client
         */
         bool TryCancelIdleTimer(IotHubDeviceMuxConnection iotHubDeviceMuxConnection)
         {
+#if WINDOWS_UWP
+            IOThreadTimerSlim idleTimer;
+#else
             IOThreadTimer idleTimer;
+#endif
             if (this.idleTimers.TryGetValue(iotHubDeviceMuxConnection, out idleTimer))
             {
                 if (!idleTimer.Cancel())
@@ -146,7 +158,11 @@ namespace Microsoft.Azure.Devices.Client
         */
         void StartIdleConnectionTimer(IotHubDeviceMuxConnection iotHubDeviceMuxConnection)
         {
+#if WINDOWS_UWP
+            var idleTimer = new IOThreadTimerSlim(this.IdleConnectionTimerCallback, iotHubDeviceMuxConnection, false);
+#else
             var idleTimer = new IOThreadTimer(this.IdleConnectionTimerCallback, iotHubDeviceMuxConnection, false);
+#endif
             this.idleTimers.Add(iotHubDeviceMuxConnection, idleTimer);
             idleTimer.Set(this.idleTimeout);
         }
@@ -159,4 +175,4 @@ namespace Microsoft.Azure.Devices.Client
         }
     }
 #endif
-}
+        }

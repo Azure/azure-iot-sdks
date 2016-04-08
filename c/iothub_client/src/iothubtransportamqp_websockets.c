@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "iothubtransportamqp_websockets.h"
-#include "wsio.h"
+#include "azure_uamqp_c/wsio.h"
 #include "iothubtransportamqp.c"
 
 #define DEFAULT_WS_PROTOCOL_NAME "AMQPWSB10"
@@ -15,7 +15,7 @@ XIO_HANDLE getWebSocketsIOTransport(const char* fqdn, int port, const char* cert
 
 	return xio_create(wsio_get_interface_description(), &ws_io_config, NULL);
 }
-static TRANSPORT_HANDLE IoTHubTransportAMQP_Create_WebSocketsOverTls(const IOTHUBTRANSPORT_CONFIG* config)
+static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create_WebSocketsOverTls(const IOTHUBTRANSPORT_CONFIG* config)
 {
 	AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)IoTHubTransportAMQP_Create(config);
 
@@ -32,6 +32,8 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
 	IoTHubTransportAMQP_SetOption,
 	IoTHubTransportAMQP_Create_WebSocketsOverTls,
 	IoTHubTransportAMQP_Destroy,
+	IoTHubTransportAMQP_Register,
+    IoTHubTransportAMQP_Unregister,
 	IoTHubTransportAMQP_Subscribe,
 	IoTHubTransportAMQP_Unsubscribe,
 	IoTHubTransportAMQP_DoWork,

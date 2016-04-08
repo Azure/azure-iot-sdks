@@ -6,12 +6,10 @@
 
 #include <signal.h>
 
-#include "macro_utils.h"
-#include "threadapi.h"
-#include "lock.h"
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
 
-#include "doublylinkedlist.h"
 #include "iothub_message.h"
 #include "iothub_client_ll.h"
 
@@ -39,12 +37,6 @@ DEFINE_ENUM(IOTHUB_BATCHSTATE_RESULT, IOTHUB_BATCHSTATE_RESULT_VALUES);
 extern void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY completed, IOTHUB_BATCHSTATE_RESULT result);
 extern IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_MESSAGE_HANDLE message);
 
-typedef struct IOTHUBTRANSPORT_CONFIG_TAG
-{
-    const IOTHUB_CLIENT_CONFIG* upperConfig;
-    PDLIST_ENTRY waitingToSend;
-}IOTHUBTRANSPORT_CONFIG;
-
 typedef struct IOTHUB_MESSAGE_LIST_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
@@ -54,34 +46,6 @@ typedef struct IOTHUB_MESSAGE_LIST_TAG
     uint64_t ms_timesOutAfter; /* a value of "0" means "no timeout", if the IOTHUBCLIENT_LL's handle tickcounter > msTimesOutAfer then the message shall timeout*/
 }IOTHUB_MESSAGE_LIST;
 
-typedef void* TRANSPORT_HANDLE;
-typedef void* IOTHUB_DEVICE_HANDLE;
-
-typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_SetOption)(TRANSPORT_HANDLE handle, const char *optionName, const void* value);
-typedef TRANSPORT_HANDLE(*pfIoTHubTransport_Create)(const IOTHUBTRANSPORT_CONFIG* config);
-typedef void (*pfIoTHubTransport_Destroy)(TRANSPORT_HANDLE handle);
-typedef IOTHUB_DEVICE_HANDLE(*pfIotHubTransport_Register)(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
-typedef void(*pfIotHubTransport_Unregister)(IOTHUB_DEVICE_HANDLE deviceHandle);
-typedef int (*pfIoTHubTransport_Subscribe)(IOTHUB_DEVICE_HANDLE handle);
-typedef void (*pfIoTHubTransport_Unsubscribe)(IOTHUB_DEVICE_HANDLE handle);
-typedef void (*pfIoTHubTransport_DoWork)(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
-typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetSendStatus)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
-
-#define TRANSPORT_PROVIDER_FIELDS                            \
-pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       \
-pfIoTHubTransport_Create IoTHubTransport_Create;             \
-pfIoTHubTransport_Destroy IoTHubTransport_Destroy;           \
-pfIotHubTransport_Register IoTHubTransport_Register;         \
-pfIotHubTransport_Unregister IoTHubTransport_Unregister;      \
-pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;       \
-pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;   \
-pfIoTHubTransport_DoWork IoTHubTransport_DoWork;             \
-pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus  /*there's an intentional missing ; on this line*/ \
-
-typedef struct TRANSPORT_PROVIDER_TAG
-{
-    TRANSPORT_PROVIDER_FIELDS;
-}TRANSPORT_PROVIDER;
 
 #ifdef __cplusplus
 }

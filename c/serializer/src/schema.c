@@ -5,12 +5,12 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include "schema.h"
-#include "crt_abstractions.h"
-#include "iot_logging.h"
-#include "vector.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/vector.h"
 
 
 DEFINE_ENUM_STRINGS(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);

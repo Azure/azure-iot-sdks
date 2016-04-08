@@ -17,6 +17,7 @@ This repository contains the following IoT device SDKs:
 - [Azure IoT device SDK for Node.js](node/device/core/readme.md)
 - [Azure IoT device SDK for Java](java/device/readme.md)
 - [Azure IoT device SDK for .NET](csharp/device/readme.md)
+- [Azure IoT device SDK for Python](python/device/readme.md)
 
 Each language SDK includes sample code and documentation in addition to the library code. The API reference documentation is [here](http://azure.github.io/azure-iot-sdks).
 
@@ -71,6 +72,10 @@ And if you are looking for end to end samples that show how to do simple analyti
    - [Registry manager simple sample](node/service/samples/registry_sample.js): Shows how to manage the device ID registry of IoT Hub from a Node.js application.
    - [Bulk Registry sample](node/service/samples/registry_sample.js): Shows how to create a set of device IDs in the device ID registry of IoT Hub in bulk from a Node.js application.
    - [Simple Cloud to Device messaging sample](node/service/samples/send_c2d_message.js) : Shows how to send messages to a device from a Node.js application through IoT Hub.
+- Python device SDK:   
+   - [Sample using AMQP](python/device/samples/iothub_client_sample_amqp.py): shows how to connect to IoT Hub and send and receive messages using the AMQP protocol.
+   - [Sample using HTTP](python/device/samples/iothub_client_sample_http.py): shows how to connect to IoT Hub and send and receive messages using the HTTP protocol.
+   - [Sample using MQTT](python/device/samples/iothub_client_sample_mqtt.py): shows how to connect to IoT Hub and send and receive messages using the MQTT protocol.
 
 
 ## Contribution, feedback and issues
@@ -80,7 +85,7 @@ If you encounter any bugs or have suggestions for new features, please file an i
 
 ## Support
 
-If you are having issues using one of the packages or using the Azure IoT Hub service that go beyond simple bug fixes or help requests that would be dealt within the issues section of this project, the Microsoft Customer Support team will try and help out on a best effort basis.
+If you are having issues using one of the packages or using the Azure IoT Hub service that go beyond simple bug fixes or help requests that would be dealt within the [issues section](https://github.com/Azure/azure-iot-sdks/issues) of this project, the Microsoft Customer Support team will try and help out on a best effort basis.
 To engage Microsoft support, you can create a support ticket directly from the [Azure portal](https://ms.portal.azure.com/#blade/Microsoft_Azure_Support/HelpAndSupportBlade).
 Escalated support requests for Azure IoT Hub SDKs development questions will only be available Monday thru Friday during normal coverage hours of 6 a.m. to 6 p.m. PST.
 Here is what you can expect Microsoft Support to be able to help with:

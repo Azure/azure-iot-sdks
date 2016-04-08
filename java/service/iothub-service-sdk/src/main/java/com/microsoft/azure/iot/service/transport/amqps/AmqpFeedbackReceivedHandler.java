@@ -5,12 +5,14 @@
 
 package com.microsoft.azure.iot.service.transport.amqps;
 
+import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
 import com.microsoft.azure.iot.service.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.impl.WebSocketImpl;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 
@@ -27,12 +29,18 @@ import java.util.Map;
 public class AmqpFeedbackReceivedHandler extends BaseHandler
 {
     public static final String RECEIVE_TAG = "receiver";
-    public static final String SEND_PORT = ":5671";
+    public static final String SEND_PORT_AMQPS = ":5671";
+    public static final String SEND_PORT_AMQPS_WS = ":443";
     public static final String ENDPOINT = "/messages/servicebound/feedback";
+    public static final String WEBSOCKET_PATH = "/$iothub/websocket";
+    public static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
 
     private final String hostName;
     private final String userName;
     private final String sasToken;
+
+    protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    protected final String webSocketHostName;
 
     private AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
 
@@ -44,10 +52,20 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
      * @param sasToken The SAS token string
      * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
      */
-    public AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
+    public AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
-        this.hostName = hostName + SEND_PORT;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.webSocketHostName = hostName;
+        if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
+        {
+            this.hostName = hostName + SEND_PORT_AMQPS_WS;
+        }
+        else
+        {
+            this.hostName = hostName + SEND_PORT_AMQPS;
+        }
+
         this.userName = userName;
         this.sasToken = sasToken;
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
@@ -116,6 +134,11 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
         Transport transport = event.getConnection().getTransport();
         if (transport != null)
         {
+            if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
+            {
+                WebSocketImpl webSocket = (WebSocketImpl)transport.webSocket();
+                webSocket.configure(this.webSocketHostName, WEBSOCKET_PATH, 0, WEBSOCKET_SUB_PROTOCOL, null, null);
+            }
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);
 

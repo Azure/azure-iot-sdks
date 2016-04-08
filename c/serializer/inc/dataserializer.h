@@ -4,9 +4,9 @@
 #ifndef DATASERIALIZER_H
 #define DATASERIALIZER_H
 
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
 #include "multitree.h"
-#include "buffer_.h"
+#include "azure_c_shared_utility/buffer_.h"
 
 #ifdef __cplusplus
 #include <cstddef>

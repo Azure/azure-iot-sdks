@@ -8,10 +8,10 @@ namespace Microsoft.Azure.Devices.Client.Exceptions
     using System.Runtime.Serialization;
 #endif
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     [Serializable]
 #endif
-#if !WINDOWS_UWP // Exporting custom exception types is not allowed in WinRT
+#if !WINDOWS_UWP && !PCL // Exporting custom exception types is not allowed in WinRT
     public
 #endif
     class IotHubException : Exception
@@ -64,7 +64,7 @@ namespace Microsoft.Azure.Devices.Client.Exceptions
             this.TrackingId = trackingId;
         }
 
-#if !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !PCL && !NETMF
         protected IotHubException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

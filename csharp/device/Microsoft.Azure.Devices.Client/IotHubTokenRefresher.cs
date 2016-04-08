@@ -6,13 +6,13 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using System.Threading.Tasks;
 
-#if !WINDOWS_UWP
+#if !PCL
     using Microsoft.Azure.Amqp;
 #endif
 
     sealed class IotHubTokenRefresher
     {
-#if !WINDOWS_UWP
+#if !PCL
         static readonly TimeSpan RefreshTokenBuffer = TimeSpan.FromMinutes(2);
         static readonly TimeSpan RefreshTokenRetryInterval = TimeSpan.FromSeconds(30);
         static readonly string[] AccessRightsStringArray = AccessRightsHelper.AccessRightsToStringArray(AccessRights.DeviceConnect);

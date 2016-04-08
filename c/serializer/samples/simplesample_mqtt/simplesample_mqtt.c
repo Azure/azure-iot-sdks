@@ -16,6 +16,10 @@ and removing calls to _DoWork will yield the same results. */
 #include "iothubtransportmqtt.h"
 #include "threadapi.h"
 #include "platform.h"
+#ifdef MBED_BUILD_TIMESTAMP
+#include "certs.h"
+#endif // MBED_BUILD_TIMESTAMP
+
 
 /*String containing Hostname, Device Id & Device Key in the format:             */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
@@ -149,6 +153,14 @@ void simplesample_mqtt_run(void)
             }
             else
             {
+#ifdef MBED_BUILD_TIMESTAMP
+                // For mbed add the certificate information
+                if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+                {
+                    (void)printf("failure to set option \"TrustedCerts\"\r\n");
+                }
+#endif // MBED_BUILD_TIMESTAMP
+                
 
                 ContosoAnemometer* myWeather = CREATE_MODEL_INSTANCE(WeatherStation, ContosoAnemometer);
                 if (myWeather == NULL)

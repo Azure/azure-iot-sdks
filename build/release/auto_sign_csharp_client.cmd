@@ -36,6 +36,9 @@ rem -- Copy the managed dlls to the "tosign" Folder for signing
 xcopy /q /y /R %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client\bin\Release_Delay_Sign\Microsoft.Azure.Devices.Client.dll %client-build-root%\build\tosign\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
+xcopy /q /y /R %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.PCL\bin\Release_Delay_Sign\Microsoft.Azure.Devices.Client.PCL.dll %client-build-root%\build\tosign\
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 xcopy /q /y /R %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.WinRT\bin\Release_Delay_Sign\Microsoft.Azure.Devices.Client.winmd %client-build-root%\build\tosign\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
@@ -51,6 +54,12 @@ xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.d
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client\obj\Release_Delay_Sign\
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.PCL.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.PCL\bin\Release_Delay_Sign\
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.PCL.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.PCL\obj\Release_Delay_Sign\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.winmd %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.WinRT\bin\Release_Delay_Sign\

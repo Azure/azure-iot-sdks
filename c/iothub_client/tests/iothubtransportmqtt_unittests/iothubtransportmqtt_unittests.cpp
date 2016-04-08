@@ -8,28 +8,28 @@
 
 #include <cstddef>
 
-#include "sastoken.h"
+#include "azure_c_shared_utility/sastoken.h"
 
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
-#include "doublylinkedlist.h"
-#include "strings.h"
-#include "mqtt_client.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
+#include "azure_c_shared_utility/strings.h"
+#include "azure_umqtt_c/mqtt_client.h"
 
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
 #undef DEFINE_ENUM
 #define DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName; 
 
 #include "iothubtransportmqtt.h"
 #include "iothub_client_private.h"
 
-#include "tlsio_schannel.h"
-#include "tlsio_wolfssl.h"
-#include "tlsio_openssl.h"
-#include "platform.h"
+#include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/platform.h"
 
-#include "tickcounter.h"
+#include "azure_c_shared_utility/tickcounter.h"
+#include "azure_c_shared_utility/lock.h"
 
 #define GBALLOC_H
 extern "C" int gballoc_init(void);
@@ -55,7 +55,7 @@ static const char* LOG_TRACE_OPTION = "logtrace";
 static const char* KEEP_ALIVE_OPTION = "keepalive";
 
 static const IOTHUB_CLIENT_LL_HANDLE TEST_IOTHUB_CLIENT_LL_HANDLE = (IOTHUB_CLIENT_LL_HANDLE)0x4343;
-static const TRANSPORT_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_HANDLE)0x4444;
+static const TRANSPORT_LL_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_LL_HANDLE)0x4444;
 static const MQTT_CLIENT_HANDLE TEST_MQTT_CLIENT_HANDLE = (MQTT_CLIENT_HANDLE)0x1122;
 static const PDLIST_ENTRY TEST_PDLIST_ENTRY = (PDLIST_ENTRY)0x1123;
 static const MQTT_MESSAGE_HANDLE TEST_MQTT_MESSAGE_HANDLE = (MQTT_MESSAGE_HANDLE)0x1124;
@@ -349,12 +349,6 @@ public:
     MOCK_STATIC_METHOD_1(, time_t, get_time, time_t*, currentTime)
     MOCK_METHOD_END(time_t, TEST_TIME_T);
 
-    MOCK_STATIC_METHOD_0(, const IO_INTERFACE_DESCRIPTION*, tlsio_schannel_get_interface_description)
-    MOCK_METHOD_END(const IO_INTERFACE_DESCRIPTION*, TEST_IO_INTERFACE);
-
-    MOCK_STATIC_METHOD_0(, const IO_INTERFACE_DESCRIPTION*, tlsio_openssl_get_interface_description)
-    MOCK_METHOD_END(const IO_INTERFACE_DESCRIPTION*, TEST_IO_INTERFACE);
-
     MOCK_STATIC_METHOD_0(, const IO_INTERFACE_DESCRIPTION*, platform_get_default_tlsio)
     MOCK_METHOD_END(const IO_INTERFACE_DESCRIPTION*, TEST_IO_INTERFACE)
 
@@ -363,6 +357,9 @@ public:
 
     MOCK_STATIC_METHOD_3(, int, xio_close, XIO_HANDLE, ioHandle, ON_IO_CLOSE_COMPLETE, on_io_close_complete, void*, callback_context)
     MOCK_METHOD_END(int, 0);
+
+    MOCK_STATIC_METHOD_3(, int, xio_setoption, XIO_HANDLE, xio, const char*, optionName, const void*, value)
+    MOCK_METHOD_END(int, 0)
 
     MOCK_STATIC_METHOD_1(, void, xio_destroy, XIO_HANDLE, ioHandle)
     MOCK_VOID_METHOD_END();
@@ -382,13 +379,12 @@ public:
 
 };
 
-DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, tlsio_schannel_get_interface_description);
-DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, tlsio_openssl_get_interface_description);
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, platform_get_default_tlsio);
 
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, xio_create_parameters, LOGGER_LOG, logger_log);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , void, xio_destroy, XIO_HANDLE, ioHandle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , int, xio_close, XIO_HANDLE, ioHandle, ON_IO_CLOSE_COMPLETE, on_io_close_complete, void*, callback_context);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , int, xio_setoption, XIO_HANDLE, xio, const char*, optionName, const void*, value);
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , void, DList_InitializeListHead, PDLIST_ENTRY, listHead);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , int, DList_IsListEmpty, PDLIST_ENTRY, listHead);
@@ -1189,7 +1185,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         IOTHUBTRANSPORT_CONFIG config = { 0 };
         SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
-        TRANSPORT_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+        TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
 
         g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
         mocks.ResetAllCalls();
@@ -1223,7 +1219,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         IOTHUBTRANSPORT_CONFIG config = { 0 };
         SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
-        TRANSPORT_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+        TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
 
         g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
         mocks.ResetAllCalls();
@@ -1262,7 +1258,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         suback.qosCount = 1;
         suback.qosReturn = QosValue;
 
-        TRANSPORT_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+        TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
 
         g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
         IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -1334,11 +1330,50 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         IoTHubTransportMqtt_Destroy(handle);
     }
 
-    /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_021: [If any parameter is NULL then IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
-    TEST_FUNCTION(IoTHubTransportMqtt_Setoption_invalid_option_fail)
+    /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_032: [IoTHubTransportMqtt_SetOption shall pass down the option to xio_setoption if the option parameter is not a known option string for the MQTT transport.] */
+    TEST_FUNCTION(IoTHubTransportMqtt_Setoption_invokes_xio_setoption_when_option_not_consumed_by_mqtt_transport)
     {
         // arrange
         CIoTHubTransportMqttMocks mocks;
+
+        const char* SOME_OPTION = "AnOption";
+        const void* SOME_VALUE = (void*)42;
+
+        IOTHUBTRANSPORT_CONFIG config = { 0 };
+        SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+        auto handle = IoTHubTransportMqtt_Create(&config);
+        mocks.ResetAllCalls();
+
+        bool traceOn = true;
+        EXPECTED_CALL(mocks, STRING_c_str(NULL));
+        EXPECTED_CALL(mocks, platform_get_default_tlsio());
+        EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL));
+        STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
+            .IgnoreArgument(1);
+
+        // act
+        auto result = IoTHubTransportMqtt_SetOption(handle, SOME_OPTION, SOME_VALUE);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+        mocks.AssertActualAndExpectedCalls();
+
+        //cleanup
+        IoTHubTransportMqtt_Destroy(handle);
+    }
+
+
+    /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_132: [IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG xio_setoption fails] */
+    TEST_FUNCTION(IoTHubTransportMqtt_Setoption_fails_when_xio_setoption_fails)
+    {
+        // arrange
+        CIoTHubTransportMqttMocks mocks;
+
+        const char* SOME_OPTION = "AnOption";
+        const void* SOME_VALUE = (void*)42;
+
         IOTHUBTRANSPORT_CONFIG config = { 0 };
         SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
@@ -1347,8 +1382,15 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 
         bool traceOn = true;
 
+        EXPECTED_CALL(mocks, STRING_c_str(NULL));
+        EXPECTED_CALL(mocks, platform_get_default_tlsio());
+        EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL));
+        STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
+            .IgnoreArgument(1)
+            .SetReturn(42);
+
         // act
-        auto result = IoTHubTransportMqtt_SetOption(handle, "invalid", "");
+        auto result = IoTHubTransportMqtt_SetOption(handle, SOME_OPTION, SOME_VALUE);
 
         // assert
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
@@ -1358,6 +1400,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         //cleanup
         IoTHubTransportMqtt_Destroy(handle);
     }
+
 
     /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_021: [If any parameter is NULL then IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
     TEST_FUNCTION(IoTHubTransportMqtt_Setoption_option_NULL_fail)
@@ -2530,7 +2573,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
         IoTHubTransportMqtt_Destroy(handle);
     }
 
-	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
 	TEST_FUNCTION(IoTHubTransportMqtt_Register_succeeds_returns_transport)
 	{
 		// arrange
@@ -2556,7 +2599,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 		IoTHubTransportMqtt_Destroy(handle);
 	}
 
-	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
 	TEST_FUNCTION(IoTHubTransportMqtt_Register_twice_fails_second_time)
 	{
 		// arrange
@@ -2699,7 +2742,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 		IoTHubTransportMqtt_Destroy(handle);
 	}
 
-	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransportMqtt_Register shall return NULL if the TRANSPORT_HANDLE is NULL.]
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransportMqtt_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.]
 	TEST_FUNCTION(IoTHubTransportMqtt_Register_transport_null_returns_null)
 	{
 		// arrange
@@ -2745,7 +2788,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 		IoTHubTransportMqtt_Destroy(handle);
 	}
 
-	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
+	// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransportMqtt_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
 	TEST_FUNCTION(IoTHubTransportMqtt_Register_Unregister_Register_returns_handle)
 	{
 		// arrange

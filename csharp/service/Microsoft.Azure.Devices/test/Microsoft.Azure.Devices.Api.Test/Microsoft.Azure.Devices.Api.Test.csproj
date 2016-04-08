@@ -69,6 +69,7 @@
     <Compile Include="ClientWebSocketTransportTests.cs" />
     <Compile Include="ConnectionString\ServiceClientConnectionStringExceptionTests.cs" />
     <Compile Include="ConnectionString\ServiceClientConnectionStringTests.cs" />
+    <Compile Include="ExportImportDeviceTests.cs" />
     <Compile Include="RegistryManagerTests.cs" />
     <Compile Include="MessageTests.cs" />
     <Compile Include="TestAssert.cs" />
@@ -83,9 +84,9 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Azure.Amqp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.Azure.Amqp.1.0.0\lib\net451\Microsoft.Azure.Amqp.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.Azure.Amqp, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\packages\Microsoft.Azure.Amqp.1.1.0\lib\net451\Microsoft.Azure.Amqp.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Azure.Devices.Client, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\Microsoft.Azure.Devices.Client.1.0.0\lib\net45\Microsoft.Azure.Devices.Client.dll</HintPath>

@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include "agenttypesystem.h"
 #include "schema.h"
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
 
 #ifdef __cplusplus
 extern "C"

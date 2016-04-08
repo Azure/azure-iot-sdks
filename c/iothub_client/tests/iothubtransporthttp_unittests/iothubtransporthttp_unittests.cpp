@@ -21,15 +21,16 @@
 #include "iothub_client_version.h"
 #include "iothub_client_private.h"
 
-#include "urlencode.h"
-#include "doublylinkedlist.h"
-#include "httpheaders.h"
-#include "strings.h"
-#include "buffer_.h"
-#include "httpapiex.h"
-#include "httpapiexsas.h"
-#include "base64.h"
-#include "vector.h"
+#include "azure_c_shared_utility/urlencode.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
+#include "azure_c_shared_utility/httpheaders.h"
+#include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/httpapiex.h"
+#include "azure_c_shared_utility/httpapiexsas.h"
+#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/vector.h"
+#include "azure_c_shared_utility/lock.h"
 
 #define IOTHUB_ACK "iothub-ack"
 #define IOTHUB_ACK_NONE "none"
@@ -4034,24 +4035,6 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
         ///assert
         mocks.AssertActualAndExpectedCalls();
-    }
-
-    //Tests_SRS_TRANSPORTMULTITHTTP_17_140: [ If iotHubClientHandle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]
-    TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_NULL_iotHubClientHandle_does_nothing)
-    {
-        ///arrange
-        CIoTHubTransportHttpMocks mocks;
-        auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        mocks.ResetAllCalls();
-
-        ///act
-        IoTHubTransportHttp_DoWork(handle, NULL);
-
-        ///assert
-        mocks.AssertActualAndExpectedCalls();
-
-        ///cleanup
-        IoTHubTransportHttp_Destroy(handle);
     }
 
 	//Tests_SRS_TRANSPORTMULTITHTTP_17_050: [ IoTHubTransportHttp_DoWork shall call loop through the device list. ]

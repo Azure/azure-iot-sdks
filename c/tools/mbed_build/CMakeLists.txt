@@ -3,6 +3,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 project(mbed_iothub_client_lib)
+set(HG_COMMIT_MSG "Automatic Build Commit" CACHE STRING "Passed to the mercurial commit")
 
 set(MBED_CMAKE_LIB)
 
@@ -64,7 +65,18 @@ function(cloneMBEDRepository)
 	set(mbed_repo_address https://$ENV{MBED_USER}:$ENV{MBED_PWD}@developer.mbed.org/users/$ENV{MBED_USER}/code/${mbed_repo_name}/)
 	
 	message(STATUS "Trying to delete " ${local_repo_path})
+    message(STATUS "Trying to delete " ${local_sublib_dir})
+    message(STATUS "Trying to clone " ${mbed_repo_address})
 	
+    if (EXISTS ${local_sublib_dir})
+        message(STATUS "Removing old sublib directory: " ${local_sublib_dir})
+		file(REMOVE_RECURSE ${local_sublib_dir})
+		
+		if(EXISTS ${local_subdir_path})
+			message(FATAL_ERROR "Failed removing sublib directory: " ${local_sublib_dir})
+		endif()
+    endif()
+    file(MAKE_DIRECTORY  ${local_sublib_dir})
 	if(EXISTS ${local_repo_path})
 		message(STATUS "Removing existing cloned directory.")
 		file(REMOVE_RECURSE ${local_repo_path})
@@ -85,34 +97,88 @@ endfunction(cloneMBEDRepository)
 
 
 function(updateMBEDSourceFiles)
-	set(source_file_destination ${local_repo_path}/${target_project_name})
+	set(source_file_destination ${local_repo_path})
+    set(exported_file_destination ${local_repo_path}/${mbed_project_base})
 	
-	message(STATUS "Copying SDK common files.")
-	foreach(file_item ${common_files})
-		file(GLOB expanded_file_item ${file_item})
-		file(COPY ${expanded_file_item} DESTINATION ${source_file_destination})
-	endforeach()
-
 	message(STATUS "Copying target project files.")
-	foreach(file_item ${project_files})
+	foreach(file_item ${mbed_project_files})
 		file(GLOB expanded_file_item ${file_item})
 		file(COPY ${expanded_file_item} DESTINATION ${source_file_destination})
+    endforeach()
+	foreach(file_item ${mbed_exported_project_files})
+		file(GLOB expanded_file_item ${file_item})
+		file(COPY ${expanded_file_item} DESTINATION ${exported_file_destination})
 	endforeach()
 	
-	message(STATUS "Removing excluded files.")
-	foreach(file_item ${exclude_files})
-		file(GLOB expanded_file_item ${source_file_destination}/${file_item})
-		
-		if (NOT "${expanded_file_item}" STREQUAL "")
-			file(REMOVE ${expanded_file_item})
-		endif()
-	endforeach()	
 endfunction(updateMBEDSourceFiles)
 
+function(updateMBEDLibraries)
+
+    file(GLOB libfiles ${local_repo_path}/*.lib)
+    foreach(file_item ${libfiles})
+    
+        #
+        # We go through all of the .lib files.  We only want to update what we own.
+        #
+        file (READ ${file_item} fileContents)
+        STRING(FIND ${fileContents} /$ENV{MBED_USER}/ matchResult)
+        if (NOT ${matchResult} EQUAL -1)
+        
+            #
+            # Found one.  We want to get the the clone path of the library.  Go up to the slash and pound sign.  (The sha follows that.)
+            #
+            STRING(FIND ${fileContents} /\# uriEnd)
+            if (NOT ${uriEnd} EQUAL -1)
+                STRING(SUBSTRING ${fileContents} 0 ${uriEnd} libraryUri)
+                
+                #
+                # Get the sha that exists in the file.  We'll compare after the clone to see if we need to change the file.
+                # This is because even if we have the same sha, we could change the whitespace and this will cause hg to think the file has
+                # changed.
+                
+                math(EXPR beginSha "${uriEnd} + 2}")
+                STRING(SUBSTRING ${fileContents} ${beginSha} -1 rawOldSha)
+                STRING(STRIP ${rawOldSha} oldSha)
+                
+                #
+                # Get the name that the clone will go to.  (This is the last part of the uri).
+                #
+                STRING(FIND ${libraryUri} / finalSlash REVERSE)
+                math(EXPR finalSlash "${finalSlash} + 1")
+                STRING(SUBSTRING ${libraryUri} ${finalSlash} -1 libraryName)
+                
+                #
+                # Our compile sandboxes are actually private.  So we need to pass the username and password to do the clone.
+                # So we actually form the address all over again.  Sigh.
+                #
+                set(subLibraryCloningUri https://$ENV{MBED_USER}:$ENV{MBED_PWD}@developer.mbed.org/users/$ENV{MBED_USER}/code/${libraryName}/)
+                
+                #
+                # We got the parts we need.  Clone the lib and then go get the sha.
+                #
+            	execute_process(COMMAND hg "clone" "--insecure" ${subLibraryCloningUri} WORKING_DIRECTORY ${local_sublib_dir} RESULT_VARIABLE result_code)
+                if(NOT ${result_code} EQUAL 0)
+                    message(FATAL_ERROR "Failed to clone the sub library " ${libraryName} " (error code " ${result_code} ")")
+                endif()
+            	execute_process(COMMAND hg "id" "-i" WORKING_DIRECTORY ${local_sublib_dir}/${libraryName} RESULT_VARIABLE result_code OUTPUT_VARIABLE outputSha OUTPUT_STRIP_TRAILING_WHITESPACE)
+                if(NOT ${result_code} EQUAL 0)
+                    message(FATAL_ERROR "Failed to obtain the sha of the sublibrary" ${libraryName} "(error code " ${result_code} ")")
+                endif()
+                
+                if (NOT ${outputSha} STREQUAL ${oldSha})
+                    message(STATUS "Need to update the reference to libary at " ${libraryUri})
+                    file(WRITE ${file_item} ${libraryUri} /\# ${outputSha})                
+                endif()
+            else()
+                message(FATAL "Improperly formed lib file: " ${file_item})                
+            endif()
+        endif()
+    endforeach()
+endfunction(updateMBEDLibraries)
 
 function(pushMBEDRepository)
+	
 	set(mbed_repo_address https://$ENV{MBED_USER}:$ENV{MBED_PWD}@developer.mbed.org/users/$ENV{MBED_USER}/code/${mbed_repo_name}/)
-
 
 	message(STATUS "Commiting changes to local repository.")
 
@@ -121,7 +187,7 @@ function(pushMBEDRepository)
 		message(FATAL_ERROR "Failed adding/removing local changes (error code " ${result_code} ")")
 	endif()
 
-	execute_process(COMMAND hg "commit" "-u" $ENV{MBED_HG_USER} "-m \"Automatic build commit\"" WORKING_DIRECTORY ${local_repo_path} RESULT_VARIABLE result_code)
+	execute_process(COMMAND hg "commit" "-u" $ENV{MBED_HG_USER} "-m ${HG_COMMIT_MSG}" WORKING_DIRECTORY ${local_repo_path} RESULT_VARIABLE result_code)
 	if(NOT ${result_code} EQUAL 0 AND NOT ${result_code} EQUAL 1)
 		message(FATAL_ERROR "Failed commiting changes to local repository (error code " ${result_code} ")")
 	endif()
@@ -150,5 +216,19 @@ function(compileMBEDProject)
 		message(FATAL_ERROR "Failed compiling MBED repository '" ${mbed_repo_name} "' (error code " ${result_code} ")")
 	endif()
 endfunction(compileMBEDProject)
+
+function(releaseMBEDRepository)
+	verifyRequiredParameters()
+	verifyMercurialIsInstalled()
+	cloneMBEDRepository()
+    updateMBEDLibraries()
+	updateMBEDSourceFiles()
+	pushMBEDRepository()
+endfunction(releaseMBEDRepository)
+
+function(compileMBEDRepository)
+    releaseMBEDRepository()
+	compileMBEDProject()
+endfunction(compileMBEDRepository)
 
 

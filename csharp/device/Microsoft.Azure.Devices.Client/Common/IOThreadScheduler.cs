@@ -597,14 +597,14 @@ namespace Microsoft.Azure.Devices.Client
         [SecurityCritical]
         unsafe class ScheduledOverlapped
         {
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
             readonly NativeOverlapped* nativeOverlapped;
 #endif
             IOThreadScheduler scheduler;
 
             public ScheduledOverlapped()
             {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
                 throw new NotImplementedException();
 #else
                 this.nativeOverlapped = (new Overlapped()).UnsafePack(

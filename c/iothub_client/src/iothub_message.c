@@ -5,11 +5,11 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/buffer_.h"
 
 #include "iothub_message.h"
-#include "iot_logging.h"
-#include "buffer_.h"
 
 DEFINE_ENUM_STRINGS(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 DEFINE_ENUM_STRINGS(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);

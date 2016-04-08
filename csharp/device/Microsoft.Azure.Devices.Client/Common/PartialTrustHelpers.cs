@@ -7,13 +7,13 @@ namespace Microsoft.Azure.Devices.Client
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Security;
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     using System.Security.Permissions;
 #endif
 
     static class PartialTrustHelpers
     {
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         [Fx.Tag.SecurityNote(Critical = "used in a security-sensitive decision")]
         [SecurityCritical]
         static Type aptca;
@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Devices.Client
             [SecurityCritical]
             get
             {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
                 throw new NotImplementedException();
 #else
                 if (AppDomain.CurrentDomain.IsHomogenous)
@@ -41,7 +41,7 @@ namespace Microsoft.Azure.Devices.Client
         [SecurityCritical]
         internal static bool IsInFullTrust()
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             throw new NotImplementedException();
 #else
             if (AppDomain.CurrentDomain.IsHomogenous)
@@ -72,7 +72,7 @@ namespace Microsoft.Azure.Devices.Client
         [SecurityCritical]
         internal static bool UnsafeIsInFullTrust()
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             throw new NotImplementedException();
 #else
             if (AppDomain.CurrentDomain.IsHomogenous)
@@ -86,7 +86,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         [Fx.Tag.SecurityNote(Critical = "Captures security context with identity flow suppressed, " +
             "this requires satisfying a LinkDemand for infrastructure.")]
         [SecurityCritical]
@@ -110,7 +110,7 @@ namespace Microsoft.Azure.Devices.Client
         [SecurityCritical]
         internal static bool IsTypeAptca(Type type)
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             throw new NotImplementedException();
 #else
             Assembly assembly = type.Assembly;
@@ -120,7 +120,7 @@ namespace Microsoft.Azure.Devices.Client
 
         [Fx.Tag.SecurityNote(Critical = "used in a security-sensitive decision")]
         [SecurityCritical]
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
 #endif
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -132,7 +132,7 @@ namespace Microsoft.Azure.Devices.Client
         [SecurityCritical]
         static bool IsAssemblyAptca(Assembly assembly)
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             throw new NotImplementedException();
 #else
             if (aptca == null)
@@ -145,7 +145,7 @@ namespace Microsoft.Azure.Devices.Client
 
         [Fx.Tag.SecurityNote(Critical = "used in a security-sensitive decision")]
         [SecurityCritical]
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         [FileIOPermission(SecurityAction.Assert, Unrestricted = true)]
 #endif
         static bool IsAssemblySigned(Assembly assembly)
@@ -154,7 +154,7 @@ namespace Microsoft.Azure.Devices.Client
             return publicKeyToken != null & publicKeyToken.Length > 0;
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         [Fx.Tag.SecurityNote(Critical = "used in a security-sensitive decision")]
         [SecurityCritical]
         internal static bool CheckAppDomainPermissions(PermissionSet permissions)
@@ -169,7 +169,7 @@ namespace Microsoft.Azure.Devices.Client
         [SecurityCritical]
         internal static bool HasEtwPermissions()
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             throw new NotImplementedException();
 #else
             //Currently unrestricted permissions are required to create Etw provider. 

@@ -12,7 +12,8 @@ function GetAssemblyVersionFromFile($filename) {
 }
 
 if (-Not (Test-Path 'NuGet.exe')) {
-    Invoke-WebRequest 'https://nuget.org/nuget.exe' -OutFile 'NuGet.exe'
+	# this gets the latest nuget.exe version (currently 3.3)
+    Invoke-WebRequest 'https://dist.nuget.org/win-x86-commandline/latest/nuget.exe' -OutFile 'NuGet.exe' 
 }
 
 # Delete existing packages to force rebuild
@@ -21,9 +22,11 @@ ls Microsoft.Azure.Devices.Client.*.nupkg | % { del $_ }
 # Get the assembly versions from both files, make sure they match, and use that as the package version
 $dotNetFile = "..\Microsoft.Azure.Devices.Client\Properties\AssemblyInfo.cs"
 $winRTNetFile = "..\Microsoft.Azure.Devices.Client.WinRT\Properties\AssemblyInfo.cs"
+$dotNetPCLFile = "..\Microsoft.Azure.Devices.Client.PCL\Properties\AssemblyInfo.cs"
 
 $v1 = GetAssemblyVersionFromFile($dotNetFile)
 $v2 = GetAssemblyVersionFromFile($winRTNetFile)
+$v3 = GetAssemblyVersionFromFile($dotNetPCLFile)
 
 if($v1 -ne $v2) {
     Write-Host "Error: Mismatching assembly versions in files $dotNetFile and $winRTNetFile. Check AssemblyInformationalVersion attribute in each file." -foregroundcolor "red"
@@ -31,7 +34,12 @@ if($v1 -ne $v2) {
 }
 
 $id='Microsoft.Azure.Devices.Client'
+$id2='Microsoft.Azure.Devices.Client.PCL'
 
 echo "Creating NuGet package $id version $v1"
 
 .\NuGet.exe pack "$id.nuspec" -Prop Configuration=Release -Prop id=$id -Prop Version=$v1
+
+echo "Creating NuGet package $id2 version $v1"
+
+.\NuGet.exe pack "$id2.nuspec" -Prop Configuration=Release -Prop id=$id2 -Prop Version=$v1

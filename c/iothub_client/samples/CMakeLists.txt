@@ -14,6 +14,7 @@ endfunction()
 
 if(${use_http})
 	add_sample_directory(iothub_client_sample_http)
+	add_sample_directory(iothub_client_sample_http_shared)
 endif()
 
 if(${use_mqtt})

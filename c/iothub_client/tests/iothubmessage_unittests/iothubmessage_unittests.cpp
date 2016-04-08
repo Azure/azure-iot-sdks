@@ -10,10 +10,10 @@
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
 #include "iothub_message.h"
-#include "buffer_.h"
-#include "strings.h"
-#include "lock.h"
-#include "map.h"
+#include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/map.h"
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
 

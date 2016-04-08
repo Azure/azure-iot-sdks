@@ -145,6 +145,10 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 
+# CPython
+*.pyc
+*.pyd
+
 # =========================
 # Windows detritus
 # =========================
@@ -198,6 +202,8 @@ java/**/*dependency-reduced-pom.xml
 # VS Code stuff
 **/typings/**
 **/.vscode/**
+# C/C++ extension for VS Code
+browse.VC.db
 
 csharp/device/NuGet/*.exe
 csharp/device/NuGet/*.nupkg

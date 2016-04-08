@@ -7,21 +7,20 @@
 #endif
 
 #include <stdio.h>
-#include "string.h"
-#include "string_tokenizer.h"
+#include <string.h>
+#include "azure_c_shared_utility/string_tokenizer.h"
 #include "iothub_account.h"
 
-#include "httpapiexsas.h"
-#include "base64.h"
-#include "hmacsha256.h"
-#include "iot_logging.h"
-#include "sastoken.h"
+#include "azure_c_shared_utility/httpapiexsas.h"
+#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/hmacsha256.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/sastoken.h"
 
-#include "httpapiexsas.h"
-#include "base64.h"
-#include "hmacsha256.h"
-#include "iot_logging.h"
-#include "sastoken.h"
+#include "azure_c_shared_utility/httpapiexsas.h"
+#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/uniqueid.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define MBED_PARAM_MAX_LENGTH 256
@@ -29,7 +28,7 @@
 
 static const char* URL_API_VERSION = "api-version=2016-02-03";
 static const char* DEVICE_JSON_FMT = "{\"deviceId\":\"%s\",\"etag\":null,\"connectionState\":\"Disconnected\",\"status\":\"enabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"authentication\":{\"symmetricKey\":{\"primaryKey\":null,\"secondaryKey\":null}}}";
-static const char* DEVICE_PREFIX_FMT = "e2eDevice_%p%d%d%d%d";
+static const char* DEVICE_PREFIX_FMT = "e2eDevice_%s";
 static const char* RELATIVE_PATH_FMT = "/devices/%s?%s";
 static const char* SHARED_ACCESS_KEY = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
 
@@ -42,6 +41,7 @@ static const size_t PRIMARY_KEY_FIELD_LEN = 14;
 #define MAX_LENGTH_OF_UNSIGNED_INT  6
 #define MAX_LENGTH_OF_TIME_VALUE    12
 #define MAX_RAND_VALUE              10000
+#define DEVICE_GUID_SIZE            37
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG
 {
@@ -133,50 +133,35 @@ static HTTP_HEADERS_HANDLE getContentHeaders(bool appendIfMatch)
     return httpHeader;
 }
 
-static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo)
+static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo, const char* callerName)
 {
     int result;
-
-    time_t tmValue = time(NULL);
-    if (tmValue == (time_t)-1)
+    char deviceGuid[DEVICE_GUID_SIZE];
+    if (UniqueId_Generate(deviceGuid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
     {
-        LogError("time failed.\r\n");
+        LogError("Unable to generate unique Id.\r\n");
         result = __LINE__;
     }
     else
     {
-        struct tm* tmInfo = gmtime(&tmValue);
-        if (tmInfo == NULL)
+        size_t len = strlen(DEVICE_PREFIX_FMT) + DEVICE_GUID_SIZE;
+        accountInfo->deviceId = (char*)malloc(len + 1);
+        if (accountInfo->deviceId == NULL)
         {
-            LogError("gmtime failed.\r\n");
+            LogError("Failure allocating device ID.\r\n");
             result = __LINE__;
         }
         else
         {
-            size_t seedValue = tmInfo->tm_hour*tmInfo->tm_min*tmInfo->tm_sec;
-            LogInfo("TimeInfo h:%d m:%d s:%d.\r\n", tmInfo->tm_hour, tmInfo->tm_min, tmInfo->tm_sec);
-            srand((unsigned int)time(NULL));
-
-            // Create pseudo random device Id
-            size_t len = strlen(DEVICE_PREFIX_FMT) + (MAX_LENGTH_OF_UNSIGNED_INT * 2) + MAX_LENGTH_OF_TIME_VALUE+8;
-            accountInfo->deviceId = (char*)malloc(len + 1);
-            if (accountInfo->deviceId == NULL)
+            if (sprintf_s(accountInfo->deviceId, len + 1, DEVICE_PREFIX_FMT, deviceGuid) <= 0)
             {
-                LogError("Failure allocating device ID.\r\n");
+                LogError("Failure constructing device ID.\r\n");
                 result = __LINE__;
             }
             else
             {
-                if (sprintf_s(accountInfo->deviceId, len + 1, DEVICE_PREFIX_FMT, &seedValue, tmInfo->tm_hour, tmInfo->tm_min, tmInfo->tm_sec, rand() % MAX_RAND_VALUE) <= 0)
-                {
-                    LogError("Failure constructing device ID.\r\n");
-                    result = __LINE__;
-                }
-                else
-                {
-                    LogInfo("Created Device %s.\r\n", accountInfo->deviceId);
-                    result = 0;
-                }
+                LogInfo("Created Device %s.\r\n", accountInfo->deviceId);
+                result = 0;
             }
         }
     }
@@ -295,10 +280,10 @@ static BUFFER_HANDLE sendDeviceRegistryInfo(IOTHUB_ACCOUNT_INFO* accountInfo, BU
     return result;
 }
 
-static int create_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
+static int create_Device(IOTHUB_ACCOUNT_INFO* accountInfo, const char* callerName)
 {
     int result = 0;
-    if (generateDeviceName(accountInfo) != 0)
+    if (generateDeviceName(accountInfo, callerName) != 0)
     {
         result = __LINE__;
     }
@@ -317,10 +302,10 @@ static int create_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
             if (deviceResp != NULL)
             {
                 if (parseDeviceJson(accountInfo, deviceResp) != 0)
-    {
+                {
                     result = __LINE__;
-        free(accountInfo->deviceId);
-        accountInfo->deviceId = NULL;
+                    free(accountInfo->deviceId);
+                    accountInfo->deviceId = NULL;
                 }
                 else
                 {
@@ -330,7 +315,7 @@ static int create_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
             }
             else
             {
-        result = __LINE__;
+                result = __LINE__;
                 free(accountInfo->deviceId);
                 accountInfo->deviceId = NULL;
             }
@@ -342,7 +327,7 @@ static int create_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
 
 static int delete_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
 {
-    int result;
+    int result = 0;
     if (accountInfo->deviceId != NULL)
     {
         BUFFER_HANDLE deleteDevice = sendDeviceRegistryInfo(accountInfo, NULL, HTTPAPI_REQUEST_DELETE);
@@ -357,8 +342,8 @@ static int delete_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
             result = 0;
         }
 
-    free(accountInfo->deviceId);
-    free(accountInfo->deviceKey);
+        free(accountInfo->deviceId);
+        free(accountInfo->deviceKey);
     }
     return result;
 }
@@ -435,7 +420,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
     return result;
 }
 
-IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
+IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice, const char* callerName)
 {
     IOTHUB_ACCOUNT_INFO* result = malloc(sizeof(IOTHUB_ACCOUNT_INFO));
     if (result != NULL)
@@ -459,7 +444,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
             }
             else if (createDevice)
             {
-                if (create_Device(result) != 0)
+                if (create_Device(result, callerName) != 0)
                 {
                     IoTHubAccount_deinit((IOTHUB_ACCOUNT_INFO_HANDLE)result);
                     result = NULL;

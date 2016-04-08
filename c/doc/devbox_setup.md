@@ -80,13 +80,13 @@ The following instructions outline how you can build the libraries in Windows:
 
 3. Ensure that the git.exe application is in your system path.
 
-4. Open a Visual Studio 2015 x86 Native Tools command prompt.
+4. Open a Developer Command Prompt for VS2015.
 
-5. Run the script **build\_client.cmd** in the **c\\build_all\\windows** directory.
+5. Run the script **build_client.cmd** in the **c\\build_all\\windows** directory.
 
 
 > Note: To enable support to AMQP over WebSockets, 
-  1. Install [OpenSSL 1.0.1 (x86)](https://github.com/openssl/openssl) (tip: install with dynamic libraries); 
+  1. Install [OpenSSL 1.0.1 (x86)](https://github.com/openssl/openssl) (tip: build the dll prior to running the following steps); 
   2. Additionally to instructions on **step 1 above**, create the environment variable **OPENSSL_ROOT_DIR=C:\\OpenSSL** 
   3. Run the **build\_client.cmd** script with the option ```--use-websockets```.
 

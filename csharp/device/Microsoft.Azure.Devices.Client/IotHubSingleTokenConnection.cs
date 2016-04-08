@@ -35,14 +35,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public override void Release(string doNotUse)
         {
-            if (this.iotHubScopeConnectionPool != null)
-            {
-                this.iotHubScopeConnectionPool.RemoveRef();
-            }
-            else
-            {
-                this.CloseAsync();
-            }
+            this.iotHubScopeConnectionPool.RemoveRef();
         }
 
         protected override async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout)

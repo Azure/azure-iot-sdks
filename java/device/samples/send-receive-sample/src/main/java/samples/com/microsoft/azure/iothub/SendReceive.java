@@ -112,7 +112,7 @@ public class SendReceive
      * HTTPS transport.
      *
      * @param args args[0] = IoT Hub connection string; args[1] = protocol (one
-     * of 'https', 'amqps' or 'mqtt', optional).
+     * of 'https', 'amqps', 'mqtt' or 'amqps_ws' , optional).
      */
     public static void main(String[] args)
             throws IOException, URISyntaxException
@@ -127,7 +127,7 @@ public class SendReceive
                             + "should be called with the: "
                             + "following args: \n"
                             + "[Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                            + "[number of requests to send] (https | amqps | mqtt).\n",
+                            + "[number of requests to send] (https | amqps | mqtt | amqps_ws).\n",
                     args.length);
             return;
         }
@@ -165,15 +165,19 @@ public class SendReceive
             {
                 protocol = IotHubClientProtocol.MQTT;
             }
+            else if (protocolStr.equals("amqps_ws"))
+            {
+                protocol = IotHubClientProtocol.AMQPS_WS;
+            }
             else
             {
                 System.out.format(
-                        "Expected argument 2 to be one of 'https', 'amqps' or 'mqtt'"
+                        "Expected argument 2 to be one of 'https', 'amqps' or 'mqtt' or 'amqps_ws'"
                                 + "but received %s. The program should be "
                                 + "called with the: following args:\n"
                                 + "[Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
                                 + "[number of requests to send]\n"
-                                + "(https | amqps | mqtt).\n"
+                                + "(https | amqps | mqtt | amqps_ws).\n"
                                 + "\n",
                         protocolStr);
                 return;
@@ -227,7 +231,7 @@ public class SendReceive
                 {
                 }
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

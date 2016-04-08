@@ -3,18 +3,36 @@
 
 echo Releasing mbed bits ...
 
-call release_mbed_project.cmd iothub_amqp_transport ..\..\c\iothub_client\build iothub_amqp_transport_filelist.txt
-call release_mbed_project.cmd iothub_http_transport ..\..\c\iothub_client\build iothub_http_transport_filelist.txt
-call release_mbed_project.cmd iothub_mqtt_transport ..\..\c\iothub_client\build iothub_mqtt_transport_filelist.txt
-call release_mbed_project.cmd iothub_client ..\..\c\iothub_client\build iothub_client_filelist.txt
-call release_mbed_project.cmd azure_uamqp ..\..\c\azure-uamqp-c\build azure_uamqp_filelist.txt
-call release_mbed_project.cmd azure_umqtt ..\..\c\azure-umqtt-c build\mbed\shared-umqtt_filelist.txt
-call release_mbed_project.cmd serializer ..\..\c\serializer\build serializer_filelist.txt
-call release_mbed_project.cmd azureiot_common ..\..\c\azure-c-shared-utility\c build\mbed\shared-util_filelist.txt
-call release_mbed_project.cmd iothub_client_sample_amqp ..\..\c\iothub_client\samples\iothub_client_sample_amqp mbed\filelist.txt FRDM-K64F
-call release_mbed_project.cmd iothub_client_sample_http ..\..\c\iothub_client\samples\iothub_client_sample_http mbed\filelist.txt FRDM-K64F
-call release_mbed_project.cmd iothub_client_sample_mqtt ..\..\c\iothub_client\samples\iothub_client_sample_mqtt mbed\filelist.txt FRDM-K64F
-call release_mbed_project.cmd remote_monitoring ..\..\c\serializer\samples\remote_monitoring mbed\filelist.txt FRDM-K64F
-call release_mbed_project.cmd simplesample_amqp ..\..\c\serializer\samples\simplesample_amqp mbed\filelist.txt FRDM-K64F
-call release_mbed_project.cmd simplesample_http ..\..\c\serializer\samples\simplesample_http mbed\filelist.txt FRDM-K64F
-call release_mbed_project.cmd temp_sensor_anomaly ..\..\c\serializer\samples\temp_sensor_anomaly mbed\filelist.txt FRDM-K64F
+call release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_amqp_transport
+call release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_http_transport
+call release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_mqtt_transport
+call release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_client
+call release_mbed_project.cmd ..\..\..\c\azure-uamqp-c\build
+call release_mbed_project.cmd ..\..\..\c\azure-umqtt-c\build
+call release_mbed_project.cmd ..\..\..\c\serializer\build
+call release_mbed_project.cmd ..\..\..\c\azure-c-shared-utility\build
+call release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_amqp
+call release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_http
+call release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_mqtt
+call release_mbed_project.cmd ..\..\..\c\serializer\samples\remote_monitoring
+call release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_amqp
+call release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_http
+call release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_mqtt
+call release_mbed_project.cmd ..\..\..\c\serializer\samples\temp_sensor_anomaly
+
+call release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_amqp_transport iothub_amqp_transport_bld
+call release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_http_transport iothub_http_transport_bld
+call release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_mqtt_transport iothub_mqtt_transport_bld
+call release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_client iothub_client_bld
+call release_mbed_project.cmd ..\..\..\c\azure-uamqp-c\build azure_uamqp_c_bld
+call release_mbed_project.cmd ..\..\..\c\azure-umqtt-c\build azure_umqtt_c_bld
+call release_mbed_project.cmd ..\..\..\c\serializer\build serializer_bld
+call release_mbed_project.cmd ..\..\..\c\azure-c-shared-utility\build azure_c_shared_utility_bld
+call release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_amqp iothub_client_sample_amqp_bld
+call release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_http iothub_client_sample_http_bld
+call release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_mqtt iothub_client_sample_mqtt_bld
+call release_mbed_project.cmd ..\..\..\c\serializer\samples\remote_monitoring remote_monitoring_bld
+call release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_amqp simplesample_amqp_bld
+call release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_http simplesample_http_bld
+call release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_mqtt simplesample_mqtt_bld
+call release_mbed_project.cmd ..\..\..\c\serializer\samples\temp_sensor_anomaly temp_sensor_anomaly_bld

@@ -18,3 +18,9 @@ cd %build-root%\csharp\service\build
 call build.cmd
 if errorlevel 1 goto :eof
 cd %build-root%
+
+REM -- Device Explorer --
+cd %build-root%\tools\DeviceExplorer\build
+call build.cmd
+if errorlevel 1 goto :eof
+cd %build-root%

@@ -13,6 +13,20 @@ echo -- Removing links for %cd% --
 call npm rm azure-iothub
 call npm rm azure-iot-common
 
+cd %node-root%\e2etests
+echo.
+echo -- Removing links for %cd% --
+call npm rm azure-iothub
+call npm rm azure-iot-device-mqtt
+call npm rm azure-iot-device-http
+call npm rm azure-iot-device-amqp-ws
+call npm rm azure-iot-device-amqp
+call npm rm azure-iot-device
+call npm rm azure-iot-mqtt-base
+call npm rm azure-iot-http-base
+call npm rm azure-iot-amqp-base
+call npm rm azure-iot-common
+
 cd %node-root%\service
 echo -- Removing links for %cd% --
 call npm rm

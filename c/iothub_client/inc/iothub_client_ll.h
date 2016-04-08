@@ -23,13 +23,11 @@
 #ifndef IOTHUB_CLIENT_LL_H
 #define IOTHUB_CLIENT_LL_H
 
-#include "agenttime.h"
-
-#include "macro_utils.h"
-
+#include "azure_c_shared_utility/agenttime.h"
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
 #include "iothub_message.h"
-
-#include "xio.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -132,6 +130,14 @@ typedef struct IOTHUB_CLIENT_DEVICE_CONFIG_TAG
     const char* deviceKey;
 
 } IOTHUB_CLIENT_DEVICE_CONFIG;
+
+/** @brief	This struct captures IoTHub transport configuration. */
+typedef struct IOTHUBTRANSPORT_CONFIG_TAG
+{
+	const IOTHUB_CLIENT_CONFIG* upperConfig;
+	PDLIST_ENTRY waitingToSend;
+}IOTHUBTRANSPORT_CONFIG;
+
 
 /**
  * @brief	Creates a IoT Hub client for communication with an existing

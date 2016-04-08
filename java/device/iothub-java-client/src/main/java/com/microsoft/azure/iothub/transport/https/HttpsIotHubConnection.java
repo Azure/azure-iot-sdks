@@ -65,7 +65,6 @@ public class HttpsIotHubConnection
             IotHubEventUri eventUri = new IotHubEventUri(iotHubHostname, deviceId);
             URL eventUrl = new URL("https://" + eventUri.toString());
             IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceId(),
                     this.config.getDeviceKey(),
                     System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
 
@@ -114,12 +113,10 @@ public class HttpsIotHubConnection
             int messageLockTimeoutSecs = this.config.getMessageLockTimeoutSecs();
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_013: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03'.]
-            IotHubMessageUri messageUri =
-                    new IotHubMessageUri(iotHubHostname, deviceId);
+            IotHubMessageUri messageUri = new IotHubMessageUri(iotHubHostname, deviceId);
             URL messageUrl = new URL("https://" + messageUri.toString());
 
             IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceId(),
                     this.config.getDeviceKey(),
                     System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
 
@@ -144,17 +141,13 @@ public class HttpsIotHubConnection
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_021: [If a response with IoT Hub status code OK is not received, the function shall return null.]
             Message msg = null;
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_019: [If a response with IoT Hub status code OK is received, the function shall return the IoT Hub message included in the response.]
-            IotHubStatusCode messageStatus =
-                    IotHubStatusCode.getIotHubStatusCode(
-                            response.getStatus());
+            IotHubStatusCode messageStatus = IotHubStatusCode.getIotHubStatusCode(response.getStatus());
             if (messageStatus == IotHubStatusCode.OK)
             {
                 // Codes_SRS_HTTPSIOTHUBCONNECTION_11_020: [If a response with IoT Hub status code OK is received, the function shall save the response header field 'etag'.]
-                this.messageEtag = sanitizeEtag(
-                        response.getHeaderField("etag"));
+                this.messageEtag = sanitizeEtag(response.getHeaderField("etag"));
 
-                HttpsSingleMessage httpsMsg = HttpsSingleMessage.parseHttpsMessage(
-                        response);
+                HttpsSingleMessage httpsMsg = HttpsSingleMessage.parseHttpsMessage(response);
                 msg = httpsMsg.toMessage();
             }
 
@@ -245,7 +238,6 @@ public class HttpsIotHubConnection
             }
 
             IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceId(),
                     this.config.getDeviceKey(),
                     System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
 

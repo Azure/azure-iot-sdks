@@ -25,12 +25,16 @@ set build-clean=0
 set build-config=
 set build-platform=Win32
 set CMAKE_use_wsio=OFF
+set CMAKE_build_python=OFF
+set CMAKE_build_javawrapper=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
 if "%1" equ "--config" goto arg-build-config
 if "%1" equ "--platform" goto arg-build-platform
 if "%1" equ "--use-websockets" goto arg-use-websockets
+if "%1" equ "--buildpython" goto arg-build-python
+if "%1" equ "--build-javawrapper" goto arg-build-javawrapper
 call :usage && exit /b 1
 
 :arg-build-config
@@ -46,9 +50,16 @@ set build-platform=%1
 goto args-continue
 
 :arg-use-websockets
-shift
 set CMAKE_use_wsio=ON
 goto args-continue
+
+:arg-build-python
+set CMAKE_build_python=ON
+goto args-continue
+
+:arg-build-javawrapper
+set CMAKE_build_javawrapper=ON 
+goto args-continue 
 
 :args-continue
 shift
@@ -77,11 +88,11 @@ pushd %USERPROFILE%\%cmake-output%
 
 if %build-platform% == Win32 (
 	echo ***Running CMAKE for Win32***
-	cmake %build-root% -Duse_wsio:BOOL=%CMAKE_use_wsio%
+	cmake %build-root% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Dbuild_python:BOOL=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper%
 	if not %errorlevel%==0 exit /b %errorlevel%	
 ) else (
 	echo ***Running CMAKE for Win64***
-	cmake %build-root% -G "Visual Studio 14 Win64"
+	cmake %build-root% -G "Visual Studio 14 Win64" -Dbuild_python:BOOL=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper%
 	if not %errorlevel%==0 exit /b %errorlevel%	
 )
 

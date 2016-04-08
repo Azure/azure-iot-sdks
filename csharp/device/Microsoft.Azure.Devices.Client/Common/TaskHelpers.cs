@@ -7,7 +7,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     using System.Transactions;
 #endif
     static class TaskHelpers
@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Devices.Client
             return retval;
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         /// <summary>
         /// Create a Task based on Begin/End IAsyncResult pattern.
         /// </summary>

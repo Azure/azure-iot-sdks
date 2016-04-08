@@ -6,6 +6,7 @@
 package tests.unit.com.microsoft.azure.iothub.transport.amqps;
 
 import com.microsoft.azure.iothub.DeviceClientConfig;
+import com.microsoft.azure.iothub.IotHubClientProtocol;
 import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.net.IotHubUri;
@@ -61,7 +62,6 @@ public class AmqpsIotHubConnectionTest {
     protected Event mockEvent;
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_001: [The constructor shall save the configuration.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_14_003: [The constructor shall create a new SAS token and copy all input parameters to private member variables.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_004: [The constructor shall set it’s state to CLOSED.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_005: [The constructor shall initialize a new private queue for received messages.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_14_006: [The constructor shall initialize a new private map for messages that are in progress.]
@@ -70,18 +70,16 @@ public class AmqpsIotHubConnectionTest {
     public void constructorCopiesAllData() throws IOException {
         baseExpectations();
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
 
         String actualHostName = Deencapsulation.getField(connection, "hostName");
         String actualDeviceId = Deencapsulation.getField(connection, "deviceID");
         String actualUserName = Deencapsulation.getField(connection, "userName");
-        String actualSasToken = Deencapsulation.getField(connection, "sasToken");
         DeviceClientConfig actualConfig = Deencapsulation.getField(connection, "config");
 
         assertEquals(hostName, actualHostName);
         assertEquals(deviceId + "@sas." + hubName, actualUserName);
         assertEquals(deviceId, actualDeviceId);
-        assertEquals(mockToken.toString(), actualSasToken);
         assertEquals(mockConfig, actualConfig);
 
         assertEquals(LinkedBlockingQueue.class, Deencapsulation.getField(connection, "receivedMessageQueue").getClass());
@@ -114,7 +112,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_14_002: [The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.]
@@ -133,7 +131,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_14_002: [The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.]
@@ -152,7 +150,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_14_002: [The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.]
@@ -171,7 +169,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_14_002: [The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.]
@@ -190,7 +188,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_14_002: [The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.]
@@ -209,7 +207,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_14_002: [The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.]
@@ -228,7 +226,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_14_002: [The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.]
@@ -247,24 +245,24 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection handler = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_14_008: [The function shall initialize it’s AmqpsIotHubConnectionBaseHandler using the saved host name, user name, device ID and sas token.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_14_008: [The function shall initialize its AmqpsIotHubConnectionBaseHandler using the saved host name, user name, device ID and sas token.]
     @Test
     public void openInitializesBaseHandler(
             @Mocked CompletableFuture<Boolean> future) throws InterruptedException, ExecutionException, IOException, TimeoutException {
         baseExpectations();
         connectionOpenExpectations(future, false);
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.open();
 
         new Verifications()
         {
             {
                 new AmqpsIotHubConnectionBaseHandler(hostName,
-                        deviceId + "@sas." + hubName, mockToken.toString(), deviceId, connection);
+                        deviceId + "@sas." + hubName, mockToken.toString(), deviceId, IotHubClientProtocol.AMQPS, connection);
             }
         };
     }
@@ -296,7 +294,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         //mockReactor.run() will only be invoked once if the state is set to OPEN after the first invocation
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.open();
         connection.open();
 
@@ -321,7 +319,7 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         connectionOpenExpectations(future);
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         //Will close after opening
         connection.open();
         connection.close();
@@ -349,7 +347,7 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.close();
 
         new Verifications()
@@ -381,7 +379,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         Message consumedMessage = connection.consumeMessage();
 
         assertNotNull(consumedMessage);
@@ -402,7 +400,7 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         Message consumedMessage = connection.consumeMessage();
         assertNull(consumedMessage);
     }
@@ -414,7 +412,7 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         connectionOpenExpectations(future);
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.open();
         Deencapsulation.setField(connection, "amqpsHandler", mockHandler);
         Deencapsulation.setField(connection, "lastMessage", mockAmqpsMessage);
@@ -439,7 +437,7 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         connectionOpenExpectations(future);
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.open();
         Deencapsulation.setField(connection, "amqpsHandler", mockHandler);
         connection.sendMessageResult(IotHubMessageResult.COMPLETE);
@@ -459,7 +457,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.open();
         Deencapsulation.setField(connection, "amqpsHandler", mockHandler);
         Deencapsulation.setField(connection, "lastMessage", mockAmqpsMessage);
@@ -472,7 +470,7 @@ public class AmqpsIotHubConnectionTest {
 
         baseExpectations();
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(connection, "amqpsHandler", mockHandler);
         connection.sendMessageResult(IotHubMessageResult.COMPLETE);
     }
@@ -487,7 +485,7 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         connectionOpenExpectations(future);
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.open();
         Deencapsulation.setField(connection, "completionStatus", mockCompletionStatus);
         Deencapsulation.setField(connection, "amqpsHandler", null);
@@ -511,7 +509,7 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         connectionOpenExpectations(future);
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.open();
         Deencapsulation.setField(connection, "completionStatus", mockCompletionStatus);
         Deencapsulation.setField(connection, "amqpsHandler", null);
@@ -538,7 +536,7 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         connectionOpenExpectations(future);
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.open();
         connection.scheduleSend(msgBody);
 
@@ -560,7 +558,7 @@ public class AmqpsIotHubConnectionTest {
 
         baseExpectations();
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.scheduleSend(msgBody);
     }
 
@@ -571,7 +569,7 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         connectionOpenExpectations(future);
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, IotHubClientProtocol.AMQPS);
         connection.open();
         connection.onReactorInit(mockEvent);
 
@@ -598,8 +596,8 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceKey;
                 IotHubUri.getResourceUri(hostName, deviceId);
                 result = resourceUri;
-                new IotHubSasToken(resourceUri, deviceId, deviceKey, anyLong );
-                result = mockToken;
+//                new IotHubSasToken(resourceUri, deviceKey, anyLong );
+//                result = mockToken;
             }
         };
     }
@@ -613,7 +611,7 @@ public class AmqpsIotHubConnectionTest {
         if(needsBaseHandler) {
             new NonStrictExpectations() {
                 {
-                    new AmqpsIotHubConnectionBaseHandler(anyString, anyString, anyString, anyString, (AmqpsIotHubConnection) any);
+                    new AmqpsIotHubConnectionBaseHandler(anyString, anyString, anyString, anyString, IotHubClientProtocol.AMQPS, (AmqpsIotHubConnection) any);
                     result = mockHandler;
                     mockProton.reactor((BaseHandler) any);
                     result = mockReactor;

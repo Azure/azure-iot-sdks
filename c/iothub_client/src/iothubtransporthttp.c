@@ -5,24 +5,25 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include <time.h>
 #include "iothub_client_version.h"
 #include "iothub_client_private.h"
+#include "iothub_transport_ll.h"
 #include "iothubtransporthttp.h"
 
-#include "httpapiexsas.h"
-#include "urlencode.h"
-#include "iot_logging.h"
-#include "httpapiex.h"
-#include "httpapiexsas.h"
-#include "strings.h"
-#include "base64.h"
-#include "doublylinkedlist.h"
-#include "vector.h"
-#include "httpheaders.h"
-#include "agenttime.h"
+#include "azure_c_shared_utility/httpapiexsas.h"
+#include "azure_c_shared_utility/urlencode.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/httpapiex.h"
+#include "azure_c_shared_utility/httpapiexsas.h"
+#include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
+#include "azure_c_shared_utility/vector.h"
+#include "azure_c_shared_utility/httpheaders.h"
+#include "azure_c_shared_utility/agenttime.h"
 
 #define IOTHUB_APP_PREFIX "iothub-app-"
 const char* IOTHUB_MESSAGE_ID = "iothub-messageid";
@@ -464,7 +465,7 @@ static bool findDeviceById(const void* element, const void* value)
     return result;
 }
 
-IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
+IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
 	HTTPTRANSPORT_PERDEVICE_DATA* result;
 	if (handle == NULL)
@@ -691,7 +692,7 @@ static bool create_perDeviceList(HTTPTRANSPORT_HANDLE_DATA* handleData)
 }
 
 
-TRANSPORT_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config)
+TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config)
 {
     HTTPTRANSPORT_HANDLE_DATA* result;
     if (config == NULL)
@@ -759,7 +760,7 @@ TRANSPORT_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config
     return result;
 }
 
-void IoTHubTransportHttp_Destroy(TRANSPORT_HANDLE handle)
+void IoTHubTransportHttp_Destroy(TRANSPORT_LL_HANDLE handle)
 {
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_012: [ IoTHubTransportHttp_Destroy shall do nothing is handle is NULL. ]*/
     if (handle != NULL)
@@ -1873,13 +1874,13 @@ responseContent: a new instance of buffer]
     }
 }
 
-void IoTHubTransportHttp_DoWork(TRANSPORT_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
+void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_049: [ If handle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_140: [ If iotHubClientHandle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
 
 	(void)iotHubClientHandle; // use the perDevice handle.
-    if ((handle != NULL) && (iotHubClientHandle != NULL))
+    if (handle != NULL)
     {
 		HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
 		IOTHUB_DEVICE_HANDLE* listItem;
@@ -1947,7 +1948,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE hand
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_HANDLE handle, const char* option, const void* value)
+IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_LL_HANDLE handle, const char* option, const void* value)
 {
     IOTHUB_CLIENT_RESULT result;
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_114: [If handle parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */

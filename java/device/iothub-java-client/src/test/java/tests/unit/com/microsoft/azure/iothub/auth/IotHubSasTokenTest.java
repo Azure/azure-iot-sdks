@@ -8,7 +8,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertTrue;
 
-import com.microsoft.azure.iothub.AzureHubType;
 import com.microsoft.azure.iothub.DeviceClientConfig;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.auth.Signature;
@@ -24,12 +23,11 @@ public class IotHubSasTokenTest
 {
     @Mocked Signature mockSig;
 
-    // Tests_SRS_IOTHUBSASTOKEN_11_001: [The SAS token shall have the format "SharedAccessSignature sig=<signature >&se=<expiryTime>&skn=&sr=<resourceURI>". The params can be in any order.]
+    // Tests_SRS_IOTHUBSASTOKEN_11_001: [The SAS token shall have the format "SharedAccessSignature sig=<signature>&se=<expiryTime>&sr=<resourceURI>". The params can be in any order.]
     @Test
     public void sasTokenHasCorrectFormat()
     {
         final String resourceUri = "sample-resource-uri";
-        final String deviceId = "sample-device-id";
         final String deviceKey = "sample-device-key";
         final long expiryTime = 100;
         final String signature = "sample-sig";
@@ -41,18 +39,13 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token = new IotHubSasToken(resourceUri, deviceId, deviceKey, expiryTime);
-        token.appendSknValue = false;
+        IotHubSasToken token = new IotHubSasToken(resourceUri, deviceKey, expiryTime);
         String tokenStr = token.toString();
 
-        // assert that sig, se, skn, and sr exist in the token in any order.
-        assertThat(tokenStr.matches("SharedAccessSignature "
-                + "((sig|se|sr)=[^&=]+|skn=)&((sig|se|sr)=[^&=]+|skn=)"
-                + "&((sig|se|sr)=[^&=]+|skn=)&((sig|se|sr)=[^&=]+|skn=)"), is(true));
-
+        // assert that sig, se and sr exist in the token in any order.
+        assertThat(tokenStr.indexOf("SharedAccessSignature "), is(not(-1)));
         assertThat(tokenStr.indexOf("sig="), is(not(-1)));
         assertThat(tokenStr.indexOf("se="), is(not(-1)));
-        assertThat(tokenStr.indexOf("skn="), is(not(-1)));
         assertThat(tokenStr.indexOf("sr="), is(not(-1)));
     }
 
@@ -61,7 +54,6 @@ public class IotHubSasTokenTest
     public void expiryTimeSetCorrectly()
     {
         final String resourceUri = "sample-resource-uri";
-        final String deviceId = "sample-device-id";
         final String deviceKey = "sample-device-key";
         final long expiryTime = 100;
         final String signature = "sample-sig";
@@ -74,8 +66,7 @@ public class IotHubSasTokenTest
         };
 
         IotHubSasToken token =
-                new IotHubSasToken(resourceUri, deviceId, deviceKey,
-                        expiryTime);
+                new IotHubSasToken(resourceUri, deviceKey, expiryTime);
         String tokenStr = token.toString();
         // extract the value assigned to se.
         int expiryTimeKeyIdx = tokenStr.indexOf("se=");
@@ -94,83 +85,11 @@ public class IotHubSasTokenTest
         assertThat(testExpiryTimeStr, is(expectedExpiryTimeStr));
     }
 
-    @Test
-    public void keyNameEqualToDeviceId()
-    {
-        final String resourceUri = "sample-resource-uri";
-        final String deviceId = "sample-device-id";
-        final String deviceKey = "sample-device-key";
-        final long expiryTime = 100;
-        final String signature = "sample-sig";
-        new NonStrictExpectations()
-        {
-            {
-                mockSig.toString();
-                result = signature;
-            }
-        };
-
-        IotHubSasToken token =
-                new IotHubSasToken(resourceUri, deviceId, deviceKey,
-                        expiryTime);
-        token.appendSknValue = false;
-        String tokenStr = token.toString();
-        // extract the value assigned to skn.
-        int keyNameKeyIdx = tokenStr.indexOf("skn=");
-        int keyNameStartIdx = keyNameKeyIdx + 4;
-        int keyNameEndIdx = tokenStr.indexOf("&", keyNameStartIdx);
-        if (keyNameEndIdx == -1)
-        {
-            keyNameEndIdx = tokenStr.length();
-        }
-        String testKeyName =
-                tokenStr.substring(keyNameStartIdx, keyNameEndIdx);
-
-        String expectedKeyName = "";
-        assertThat(testKeyName, is(expectedKeyName));
-    }
-
-    @Test
-    public void keyNameIsSuppressedForIoTHub()
-    {
-        final String resourceUri = "sample-resource-uri";
-        final String deviceId = "sample-device-id";
-        final String deviceKey = "sample-device-key";
-        final long expiryTime = 100;
-        final String signature = "sample-sig";
-
-        new NonStrictExpectations()
-        {
-            {
-                mockSig.toString();
-                result = signature;
-            }
-        };
-
-        IotHubSasToken token = new IotHubSasToken(resourceUri, deviceId, deviceKey, expiryTime);
-        token.appendSknValue = true;
-
-        String tokenStr = token.toString();
-        // extract the value assigned to skn.
-        int keyNameKeyIdx = tokenStr.indexOf("skn=");
-        int keyNameStartIdx = keyNameKeyIdx + 4;
-        int keyNameEndIdx = tokenStr.indexOf("&", keyNameStartIdx);
-        if (keyNameEndIdx == -1)
-        {
-            keyNameEndIdx = tokenStr.length();
-        }
-        String testKeyName = tokenStr.substring(keyNameStartIdx, keyNameEndIdx);
-
-        String expectedKeyName = deviceId;
-        assertThat(testKeyName, is(expectedKeyName));
-    }
-
     // Tests_SRS_IOTHUBSASTOKEN_11_004: [The resource URI shall be the given resource URI.]
     @Test
     public void resourceUriSetCorrectly()
     {
         final String resourceUri = "sample-resource-uri";
-        final String deviceId = "sample-device-id";
         final String deviceKey = "sample-device-key";
         final long expiryTime = 100;
         final String signature = "sample-sig";
@@ -183,8 +102,7 @@ public class IotHubSasTokenTest
         };
 
         IotHubSasToken token =
-                new IotHubSasToken(resourceUri, deviceId, deviceKey,
-                        expiryTime);
+                new IotHubSasToken(resourceUri, deviceKey, expiryTime);
         String tokenStr = token.toString();
         // extract value assigned to sr.
         int resourceUriKeyIdx = tokenStr.indexOf("sr=");
@@ -209,7 +127,6 @@ public class IotHubSasTokenTest
     public void signatureSetCorrectly()
     {
         final String resourceUri = "sample-resource-uri";
-        final String deviceId = "sample-device-id";
         final String deviceKey = "sample-device-key";
         final long expiryTime = 100;
         final String signature = "sample-sig";
@@ -222,8 +139,7 @@ public class IotHubSasTokenTest
         };
 
         IotHubSasToken token =
-                new IotHubSasToken(resourceUri, deviceId, deviceKey,
-                        expiryTime);
+                new IotHubSasToken(resourceUri, deviceKey, expiryTime);
         String tokenStr = token.toString();
         // extract the value assigned to sig.
         int signatureKeyIdx = tokenStr.indexOf("sig=");
@@ -243,20 +159,17 @@ public class IotHubSasTokenTest
 
     // Tests_SRS_IOTHUBSASTOKEN_11_013: [**The token generated from DeviceClientConfig shall use correct expiry time (seconds rather than milliseconds)]
     @Test
-    public void constructorSetsExpiryTimeAndHubTypeCorrectly() throws URISyntaxException
+    public void constructorSetsExpiryTimeCorrectly() throws URISyntaxException
     {
         String iotHubHostname = "sample-iothub-hostname.net";
-        String deviceId = "sample-device-id";
         String deviceKey = "sample-device-key";
 
         long token_valid_secs = DeviceClientConfig.TOKEN_VALID_SECS;
         long expiryTimeTestErrorRange = 1;
 
-        DeviceClientConfig deviceClientConfig = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
-
         long expiryTimeBaseInSecs = System.currentTimeMillis() / 1000l + token_valid_secs + 1l;
 
-        IotHubSasToken token = new IotHubSasToken(iotHubHostname, deviceId, deviceKey, expiryTimeBaseInSecs);
+        IotHubSasToken token = new IotHubSasToken(iotHubHostname, deviceKey, expiryTimeBaseInSecs);
 
         String tokenStr = token.toString();
         // extract the value assigned to se.
@@ -271,7 +184,5 @@ public class IotHubSasTokenTest
         long expiryTimeInSecs = Long.valueOf(testExpiryTimeStr);
 
         assertTrue(expiryTimeBaseInSecs <= expiryTimeInSecs && expiryTimeInSecs <= (expiryTimeBaseInSecs + expiryTimeTestErrorRange));
-        assertTrue(deviceClientConfig.targetHubType == AzureHubType.IoTHub);
-        assertTrue(token.appendSknValue = true);
     }
 }

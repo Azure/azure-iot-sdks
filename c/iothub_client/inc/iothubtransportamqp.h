@@ -4,7 +4,8 @@
 #ifndef IOTHUBTRANSPORTAMQP_H
 #define IOTHUBTRANSPORTAMQP_H
 
-#include "iothub_client_private.h"
+#include "iothub_client_ll.h"
+#include "iothub_transport_ll.h"
 
 #ifdef __cplusplus
 extern "C"

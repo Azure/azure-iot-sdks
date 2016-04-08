@@ -14,17 +14,17 @@
 #include "iothubtest.h"
 
 #include "serializer.h"
-#include "buffer_.h"
-#include "strings.h"
-#include "lock.h"
-#include "crt_abstractions.h"
-#include "threadapi.h"
+#include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/threadapi.h"
 #include "iothubtransportamqp.h"
 #include "iothubtransporthttp.h"
 #include "MacroE2EModelAction.h"
 #include "iothub_client.h"
 
-#include "platform.h"
+#include "azure_c_shared_utility/platform.h"
 
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 
@@ -390,7 +390,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
                   (!g_recvMacroData->wasFound) //condition box
               )
         {
-            //just go on;
+            ThreadAPI_Sleep(100);
         }
 
         // assert
@@ -456,7 +456,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
                       (!expectedData->dataWasSent)
                   ) //condition box
             {
-                //just go on;
+                ThreadAPI_Sleep(100);
             }
         }
         ASSERT_IS_TRUE(expectedData->dataWasSent); 
@@ -483,7 +483,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
                     (!expectedData->wasFound)
                 ) //condition box
         {
-            //just go on;
+            ThreadAPI_Sleep(100);
         }
 
         ASSERT_IS_TRUE(expectedData->wasFound); // was found is written by the callback...
@@ -553,6 +553,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
             {
                 //just go on;
                 IoTHubClient_LL_DoWork(iotHubClientHandle);
+                ThreadAPI_Sleep(100);
             }
         }
 
@@ -622,6 +623,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
             {
                 //just go on;
                 IoTHubClient_LL_DoWork(iotHubClientHandle);
+                ThreadAPI_Sleep(100);
             }
         }
         ASSERT_IS_TRUE(expectedData->dataWasSent); 

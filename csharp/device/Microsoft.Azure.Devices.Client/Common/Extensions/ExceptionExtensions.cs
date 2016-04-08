@@ -28,11 +28,6 @@ namespace Microsoft.Azure.Devices.Client.Extensions
             }
         }
 
-        public static IEnumerable<Exception> Unwind(this Exception exception, params Type[] targetTypes)
-        {
-            return exception.Unwind().Where(e => targetTypes.Any(t => t.IsInstanceOfType(e)));
-        }
-
         public static IEnumerable<TException> Unwind<TException>(this Exception exception)
         {
             return exception.Unwind().OfType<TException>();
@@ -52,7 +47,7 @@ namespace Microsoft.Azure.Devices.Client.Extensions
                 // Racing here is harmless
                 if (ExceptionExtensions.prepForRemotingMethodInfo == null)
                 {
-#if WINDOWS_UWP // No Type.GetMethod in UWP
+#if WINDOWS_UWP || PCL // No Type.GetMethod in UWP
                     ExceptionExtensions.prepForRemotingMethodInfo = null;
 #else
                     ExceptionExtensions.prepForRemotingMethodInfo =

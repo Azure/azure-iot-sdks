@@ -10,17 +10,18 @@ namespace Microsoft.Azure.Devices.Client
 
 #if !WINDOWS_UWP
     using System.Configuration;
-    using System.Net;
     using System.Net.WebSockets;
     using System.Security.Cryptography.X509Certificates;
+#endif
+    using System.Net;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Amqp.Transport;
-#endif
+    using Microsoft.Azure.Devices.Client.Exceptions;
+    using Microsoft.Azure.Devices.Client.Extensions;
 
     abstract class IotHubConnection
     {
-#if !WINDOWS_UWP
         readonly string hostName;
         readonly int port;
 
@@ -99,7 +100,7 @@ namespace Microsoft.Azure.Devices.Client
                 AutoSendFlow = prefetchCount > 0,
                 Source = new Source() { Address = linkAddress.AbsoluteUri },
                 SndSettleMode = null, // SenderSettleMode.Unsettled (null as it is the default and to avoid bytes on the wire)
-                RcvSettleMode = (byte)ReceiverSettleMode.Second,
+                RcvSettleMode = (byte)ReceiverSettleMode.Second, 
                 LinkName = Guid.NewGuid().ToString("N") // Use a human readable link name to help with debuggin
             };
 
@@ -113,11 +114,11 @@ namespace Microsoft.Azure.Devices.Client
 
             return link;
         }
-        
+
         public void CloseLink(AmqpLink link)
-        {
+            {
             link.SafeClose();
-        }
+            }
 
         public abstract void Release(string deviceId);
 
@@ -129,12 +130,13 @@ namespace Microsoft.Azure.Devices.Client
 
         protected static bool InitializeDisableServerCertificateValidation()
         {
+#if !WINDOWS_UWP // No System.Configuration.ConfigurationManager in UWP
             string value = ConfigurationManager.AppSettings[DisableServerCertificateValidationKeyName];
             if (!string.IsNullOrEmpty(value))
             {
                 return bool.Parse(value);
             }
-
+#endif
             return false;
         }
 
@@ -159,9 +161,11 @@ namespace Microsoft.Azure.Devices.Client
 
             switch (this.AmqpTransportSettings.GetTransportType())
             {
+#if !WINDOWS_UWP
                 case TransportType.Amqp_WebSocket_Only:
                     transport = await this.CreateClientWebSocketTransportAsync(timeoutHelper.RemainingTime());
                     break;
+#endif
                 case TransportType.Amqp_Tcp_Only:
                     TlsTransportSettings tlsTransportSettings = this.CreateTlsTransportSettings();
                     var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
@@ -197,8 +201,9 @@ namespace Microsoft.Azure.Devices.Client
         protected virtual void OnCreateSession()
         {
             // do nothing. Override in derived classes if necessary
-        }
+            }
 
+#if !WINDOWS_UWP
         static async Task<ClientWebSocket> CreateClientWebSocketAsync(Uri websocketUri, TimeSpan timeout)
         {
             var websocket = new ClientWebSocket();
@@ -235,6 +240,7 @@ namespace Microsoft.Azure.Devices.Client
                 null,
                 null);
         }
+#endif
 
         static AmqpSettings CreateAmqpSettings()
         {
@@ -250,7 +256,14 @@ namespace Microsoft.Azure.Devices.Client
         protected static AmqpLinkSettings SetLinkSettingsCommonProperties(AmqpLinkSettings linkSettings, TimeSpan timeSpan)
         {
             linkSettings.AddProperty(IotHubAmqpProperty.TimeoutName, timeSpan.TotalMilliseconds);
+#if WINDOWS_UWP
+            // System.Reflection.Assembly.GetExecutingAssembly() does not exist for UWP, therefore use a hard-coded version name
+            // (This string is picked up by the bump_version script, so don't change the line below)
+            var UWPAssemblyVersion = "1.0.3";
+            linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, UWPAssemblyVersion);
+#else
             linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, Utils.GetClientVersion());
+#endif
 
             return linkSettings;
         }
@@ -266,13 +279,16 @@ namespace Microsoft.Azure.Devices.Client
             var tlsTransportSettings = new TlsTransportSettings(tcpTransportSettings)
             {
                 TargetHost = this.hostName,
+#if !WINDOWS_UWP // Not supported in UWP
                 Certificate = null, // TODO: add client cert support
                 CertificateValidationCallback = OnRemoteCertificateValidation
+#endif
             };
 
             return tlsTransportSettings;
         }
 
+#if !WINDOWS_UWP // Not supported in UWP
         static bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
@@ -287,6 +303,7 @@ namespace Microsoft.Azure.Devices.Client
 
             return false;
         }
+#endif
 
         public static ArraySegment<byte> GetNextDeliveryTag(ref int deliveryTag)
         {
@@ -310,6 +327,5 @@ namespace Microsoft.Azure.Devices.Client
             var deliveryTag = new ArraySegment<byte>(lockTokenGuid.ToByteArray());
             return deliveryTag;
         }
-#endif
     }
 }

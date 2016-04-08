@@ -7,7 +7,7 @@
 #include <crtdbg.h>
 #endif
 #endif
-#include "gballoc.h"
+#include "azure_c_shared_utility/gballoc.h"
 
 #include "schemalib.h"
 #include "codefirst.h"
@@ -15,7 +15,7 @@
 #include "datamarshaller.h"
 #include "datapublisher.h"
 #include <stddef.h>
-#include "iot_logging.h"
+#include "azure_c_shared_utility/iot_logging.h"
 #include "iotdevice.h"
 
 #define DEFAULT_CONTAINER_NAME  "Container"

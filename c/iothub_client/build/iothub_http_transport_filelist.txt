@@ -1,2 +1,0 @@
-..\inc\iothubtransporthttp.h
-..\src\iothubtransporthttp.c

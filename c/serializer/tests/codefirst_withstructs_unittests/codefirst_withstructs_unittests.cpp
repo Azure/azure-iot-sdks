@@ -8,7 +8,7 @@
 
 #include "testrunnerswitcher.h"
 #include "codefirst.h"
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
 #include "schema.h"

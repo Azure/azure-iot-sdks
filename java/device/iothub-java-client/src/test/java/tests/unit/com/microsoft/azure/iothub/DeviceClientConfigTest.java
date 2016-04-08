@@ -6,7 +6,6 @@ package tests.unit.com.microsoft.azure.iothub;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.microsoft.azure.iothub.AzureHubType;
 import com.microsoft.azure.iothub.DeviceClientConfig;
 
 import com.microsoft.azure.iothub.MessageCallback;
@@ -192,34 +191,5 @@ public class DeviceClientConfigTest
         final int expectedMessageLockTimeoutSecs = 180;
         assertThat(testMessageLockTimeoutSecs,
                 is(expectedMessageLockTimeoutSecs));
-    }
-
-    // Tests_SRS_DEVICECLIENTCONFIG_08_012: [Configuration shall expose an option to define if client
-    // will connect to an IoT Hub or an Event Hub directly]
-    @Test(expected = URISyntaxException.class)
-    public void defaultAzureHubTypeIsIoTHub() throws URISyntaxException
-    {
-        final String illegalIotHubHostname = "test.iothubhostname}{";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
-
-        DeviceClientConfig config = new DeviceClientConfig(illegalIotHubHostname, deviceId, deviceKey);
-
-        assertThat(config.targetHubType, is(AzureHubType.IoTHub));
-    }
-
-    // Tests_SRS_DEVICECLIENTCONFIG_08_012: [Configuration shall expose an option to define
-    // if client will connect to an IoT Hub or an Event Hub directly]
-    @Test(expected = URISyntaxException.class)
-    public void targetHubTypeSetToEventHub() throws URISyntaxException
-    {
-        final String illegalIotHubHostname = "test.iothubhostname}{";
-        final String deviceId = "test-deviceid";
-        final String deviceKey = "test-devicekey";
-
-        DeviceClientConfig config = new DeviceClientConfig(illegalIotHubHostname, deviceId, deviceKey);
-        config.targetHubType = AzureHubType.EventHub;
-
-        assertThat(config.targetHubType, is(AzureHubType.EventHub));
     }
 }

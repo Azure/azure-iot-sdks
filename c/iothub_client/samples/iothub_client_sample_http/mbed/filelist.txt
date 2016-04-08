@@ -1,5 +1,0 @@
-iothub_client_sample_http.h
-iothub_client_sample_http.c
-..\..\..\certs\certs.c
-..\..\..\certs\certs.h
-mbed\main.cpp

@@ -12,8 +12,8 @@ extern "C"
 #include <stddef.h>
 #endif
 
-#include "macro_utils.h"
-#include "buffer_.h"
+#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/buffer_.h"
 
 typedef void* IOTHUB_TEST_HANDLE;
 

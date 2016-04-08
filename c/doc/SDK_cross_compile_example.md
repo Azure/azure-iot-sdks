@@ -92,9 +92,9 @@ and save the toolchain file. Your cross compilation environment is now complete.
 The final step in the process is to run the actual build. For this you will need to be in the Linux build directory as shown above. Enter the following commands
 ```
 cd ~/Source/azure-iot-sdks/c/build_all/linux
-./build.sh –-toolchain-file toolchain-rpi.cmake –-skip-e2e-tests \
---skip-unittests -–no-amqp –-no-mqtt -cl -D__STDC_NO_ATOMICS__ \
--cl –-sysroot=$RPI_ROOT
+./build.sh --toolchain-file toolchain-rpi.cmake --skip-e2e-tests \
+--skip-unittests --no-amqp --no-mqtt -cl -D__STDC_NO_ATOMICS__ \
+-cl --sysroot=$RPI_ROOT
 ```
 This will tell cmake to build the SDK using the toolchain file toolchain-rpi.cmake, skip running all tests which is important since the executables will (probably) not run successfully on the host anyway, and exclude building the amqp and mqtt transports. The define *\_\_STDC\_NO\_ATOMICS\_\_* is required because this version of the Raspberry Pi compiler does not support *atomic\_fetch\_add* and *atomic\_fetch\_sub* so we need to tell it to use the GNU equivalents. Finally, and absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries.
 

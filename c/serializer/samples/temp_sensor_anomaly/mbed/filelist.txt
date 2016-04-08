@@ -1,3 +1,0 @@
-..\..\..\certs\certs.c
-..\..\..\certs\certs.h
-mbed\main.cpp

@@ -51,11 +51,11 @@
 #include <crtdbg.h>
 #endif
 
-#include "gballoc.h"
-#include "macro_utils.h"
+#include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/macro_utils.h"
 #include "iotdevice.h"
-#include "crt_abstractions.h"
-#include "iot_logging.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/iot_logging.h"
 #include "schemalib.h"
 #include "codefirst.h"
 #include "agenttypesystem.h"

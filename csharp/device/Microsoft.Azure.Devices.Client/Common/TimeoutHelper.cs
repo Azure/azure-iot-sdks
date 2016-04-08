@@ -164,6 +164,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             Fx.Assert(!deadlineSet, "TimeoutHelper deadline set twice.");
             this.deadline = DateTime.UtcNow + this.originalTimeout;
+
+#if NOTIMEOUT
+            this.deadline = DateTime.MaxValue;
+#endif
+
             this.deadlineSet = true;
         }
 
@@ -193,7 +198,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         [Fx.Tag.Blocking]
 #endif
         public static bool WaitOne(WaitHandle waitHandle, TimeSpan timeout)

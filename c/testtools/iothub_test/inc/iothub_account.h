@@ -12,11 +12,11 @@ extern "C"
 #include <stddef.h>
 #endif
 
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG* IOTHUB_ACCOUNT_INFO_HANDLE;
 
-extern IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice);
+extern IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice, const char* callerName);
 extern void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 
 extern const char* IoTHubAccount_GetEventHubConnectionString(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);

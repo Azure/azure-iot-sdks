@@ -24,9 +24,9 @@ module.exports = [
     {
         "taskType": "regexReplaceTask",
         "filePath": "build/release/release_mbed_project.cmd",
-        "search": "(MBED\\_HG\\_USER\%\"\ \-m)([ ]+)(\".*\")",
+        "search": "(hg\\_commit\\_message\\=)(\".*\")",
         "replaceString": function(versions) {
-            return '$1' + '$2' + '"' + versions.c.device + '"';
+            return '$1' + '"' + versions.c.device + '"';
         }
     },
     {
@@ -88,8 +88,24 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
+        "filePath": "csharp/device/Microsoft.Azure.Devices.Client.PCL/Properties/AssemblyInfo.cs",
+        "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
+        "replaceString": function(versions) {
+            return '$1' + versions.csharp.devicepcl + '$2';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
         "filePath": "csharp/device/Microsoft.Azure.Devices.Client.WinRT/Properties/AssemblyInfo.cs",
         "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
+        "replaceString": function(versions) {
+            return '$1' + versions.csharp.device + '$2';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "csharp/device/Microsoft.Azure.Devices.Client/IotHubConnection.cs",
+        "search": "(UWPAssemblyVersion[ \t]*=[ \t]*\").*(\")",
         "replaceString": function(versions) {
             return '$1' + versions.csharp.device + '$2';
         }
@@ -399,7 +415,7 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
-                "search": "devDependencies.azure-iot-common",
+                "search": "dependencies.azure-iot-common",
                 "replaceString": "node.common"
             }
         ]

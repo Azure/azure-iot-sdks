@@ -195,4 +195,7 @@
   <data name="ValueMustBeNonNegative" xml:space="preserve">
     <value>The value of this argument must be non-negative.</value>
   </data>
+  <data name="FailedToSerializeUnsupportedType" xml:space="preserve">
+    <value>Serialization operation failed due to unsupported type {0}.</value>
+  </data>
 </root>

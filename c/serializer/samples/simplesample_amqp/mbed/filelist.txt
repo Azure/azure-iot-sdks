@@ -1,5 +1,0 @@
-simplesample_amqp.h
-simplesample_amqp.c
-..\..\..\certs\certs.c
-..\..\..\certs\certs.h
-mbed\main.cpp

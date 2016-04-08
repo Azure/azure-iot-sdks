@@ -51,13 +51,13 @@ public final class DeviceClient
      * The number of milliseconds the transport will wait between
      * sending out messages.
      */
-    public static long SEND_PERIOD_MILLIS = 5000l;
+    public static long SEND_PERIOD_MILLIS = 10l;
     /**
      * The number of milliseconds the transport will wait between
      * polling for messages.
      */
-    public static long RECEIVE_PERIOD_MILLIS_AMQPS = 5000l;
-    public static long RECEIVE_PERIOD_MILLIS_MQTT = 5000l;
+    public static long RECEIVE_PERIOD_MILLIS_AMQPS = 10l;
+    public static long RECEIVE_PERIOD_MILLIS_MQTT = 10l;
     public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     /** The hostname attribute name in a connection string. */
@@ -326,7 +326,8 @@ public final class DeviceClient
                 RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_HTTPS;
                 break;
             case AMQPS:
-                this.transport = new AmqpsTransport(this.config);
+            case AMQPS_WS:
+                this.transport = new AmqpsTransport(this.config, protocol);
                 RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_AMQPS;
                 break;
             case MQTT:

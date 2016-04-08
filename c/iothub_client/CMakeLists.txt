@@ -16,16 +16,19 @@ set(iothub_client_ll_transport_h_files
 ./inc/iothub_message.h
 ./inc/iothub_client_ll.h
 ./inc/iothub_client_version.h
+./inc/iothub_transport_ll.h
 )
 
 set(iothub_client_c_files
 ./src/iothub_client.c
 ./src/version.c
+./src/iothubtransport.c
 )
 
 set(iothub_client_h_files
 ./inc/iothub_client.h
 ./inc/iothub_client_version.h
+./inc/iothubtransport.h
 )
 
 if(${use_http})
@@ -37,19 +40,8 @@ if(${use_http})
 	set(iothub_client_http_transport_h_files
 		${iothub_client_ll_transport_h_files}
 		./inc/iothubtransporthttp.h
+		./inc/iothub_transport_ll.h
 		./inc/iothub_client_private.h
-	)
-endif()
-
-if(${use_amqp})
-	set(iothub_client_amqp_transport_c_files
-		${iothub_client_ll_transport_c_files}
-		./src/iothubtransportamqp.c
-	)
-
-	set(iothub_client_amqp_transport_h_files
-		${iothub_client_ll_transport_h_files}
-		./inc/iothubtransportamqp.h
 	)
 endif()
 
