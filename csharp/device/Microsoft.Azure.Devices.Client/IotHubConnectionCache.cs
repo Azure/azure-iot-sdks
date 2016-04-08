@@ -64,7 +64,7 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
                 // Connection pooling is turned off for device-scope connection strings
-                iotHubConnection =  new IotHubDeviceMuxConnection(null, long.MaxValue, connectionString, this.amqpTransportSettings);
+                iotHubConnection =  new IotHubSingleTokenConnection(null, connectionString, this.amqpTransportSettings);
             }
 
             return iotHubConnection;
