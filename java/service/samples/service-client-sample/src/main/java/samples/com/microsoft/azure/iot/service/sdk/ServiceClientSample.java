@@ -5,11 +5,7 @@
 
 package samples.com.microsoft.azure.iot.service.sdk;
 
-import com.microsoft.azure.iot.service.sdk.FeedbackBatch;
-import com.microsoft.azure.iot.service.sdk.FeedbackReceiver;
-import com.microsoft.azure.iot.service.sdk.Message;
-import com.microsoft.azure.iot.service.sdk.ServiceClient;
-import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
+import com.microsoft.azure.iot.service.sdk.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -52,6 +48,7 @@ public class ServiceClientSample
         System.out.println("********* Sending message to device...");
 
         Message messageToSend = new Message(commandMessage);
+        messageToSend.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
 
         // Setting standard properties
         messageToSend.setMessageId(java.util.UUID.randomUUID().toString());
@@ -59,6 +56,7 @@ public class ServiceClientSample
         messageToSend.setExpiryTimeUtc(new Date(now.getTime() + 60 * 1000));
         messageToSend.setCorrelationId(java.util.UUID.randomUUID().toString());
         messageToSend.setUserId(java.util.UUID.randomUUID().toString());
+        messageToSend.clearCustomProperties();
 
         // Setting user properties
         Map<String, String> propertiesToSend = new HashMap<String, String>();
