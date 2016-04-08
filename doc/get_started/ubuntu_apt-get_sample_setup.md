@@ -1,6 +1,6 @@
-# Using apt-get to create a project
+# Using apt-get to create a project on Ubuntu
 
-This document describes how to create a program that uses the AzureIoT apt-get package
+This document describes how to create a program that uses the AzureIoT apt-get package on Ubuntu versions 14.04, 15.04, and 15.10.
 
 Before you start, make sure you have **CMake**, **g++**, and **gcc** installed on your development machine:
 
@@ -8,7 +8,7 @@ Before you start, make sure you have **CMake**, **g++**, and **gcc** installed o
 sudo apt-get install cmake gcc g++
 ```
 
-### Update and install binaries on machine 
+## Update and install binaries on machine 
 1. Add the AzureIoT repository to the machine
 
     ```
@@ -23,7 +23,7 @@ sudo apt-get install cmake gcc g++
     sudo apt-get install -y azure-iot-sdk-c-dev  
     ```
 
-### Creating the application
+## Creating the application
 
 1. Create a CMakeLists.txt file for the application
 
@@ -65,3 +65,30 @@ sudo apt-get install cmake gcc g++
     cmake ../[Directory that contains the CMakeLists.txt File]
     make
     ```
+
+## Notes
+
+The azure-iot-sdk and it's dependencies install to the following locations:
+  
+/usr/lib  
+    * libiothub_client_amqp_transport.a  
+    * libiothub_client_http_transport.a  
+    * libiothub_client_mqtt_transport.a  
+    * libserializer.a  
+    * libiothub_client.a    
+  
+/usr/include/azureiotsdk  
+    * [all azure-iot-sdk] header files  
+
+###Dependencies for iot-sdk
+
+/usr/lib
+    * libumqtt.a
+    * libamqp.a
+    * libaziotsharedutil.a
+
+###To remove the package
+
+```
+sudo apt-get --purge remove azure-iot-sdk-c-dev
+```
