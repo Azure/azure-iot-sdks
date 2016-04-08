@@ -14,11 +14,12 @@ project(${mbed_project_base})
 if (release_the_project)
         set(mbed_repo_name ${mbed_project_base} CACHE STRING "What will be cloned")
     else()
-        set(mbed_repo_name ${mbed_project_base}_bld)
+        set(mbed_repo_name ${mbed_project_base}_bld CACHE STRING "What will be cloned")
 endif()
 
 set(local_repo_path ${CMAKE_CURRENT_BINARY_DIR}/${mbed_repo_name})
-set(compile_mbed_tool ${sdk_base_path}/c/tools/compilembed/bin/debug/compilembed.exe)
+set(local_sublib_dir ${CMAKE_CURRENT_BINARY_DIR}/temp)
+set(compile_mbed_tool ${sdk_base_path}/c/tools/compilembed/bin/release/compilembed.exe)
 
 set(mbed_platform "FRDM-K64F")
 

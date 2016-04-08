@@ -42,45 +42,50 @@ def send_confirmation_callback(message, result, userContext):
 
 class TestExceptionDefinitions(unittest.TestCase):
 
+    def test_IoTHubError(self):
+        error = IoTHubError()
+        self.assertIsInstance(error, BaseException)
+        self.assertIsInstance(error, IoTHubError)
+        with self.assertRaises(BaseException):
+            raise IoTHubError()
+        with self.assertRaises(IoTHubError):
+            raise IoTHubError()
+
     def test_IoTHubMapError(self):
-        with self.assertRaises(Exception):
-            error = IoTHubMapError()
-        with self.assertRaises(Exception):
-            error = IoTHubMapError(__name__)
-        with self.assertRaises(Exception):
-            error = IoTHubMapError(__name__, "function")
-        with self.assertRaises(Exception):
-            error = IoTHubMapError(IoTHubMapResult.ERROR)
-        error = IoTHubMapError("function", IoTHubMapResult.ERROR)
-        with self.assertRaises(TypeError):
-            raise IoTHubMapError("function", IoTHubMapResult.ERROR)
+        error = IoTHubMapError()
+        self.assertIsInstance(error, BaseException)
+        self.assertIsInstance(error, IoTHubError)
+        self.assertIsInstance(error, IoTHubMapError)
+        with self.assertRaises(BaseException):
+            raise IoTHubMapError()
+        with self.assertRaises(IoTHubError):
+            raise IoTHubMapError()
+        with self.assertRaises(IoTHubMapError):
+            raise IoTHubMapError()
 
     def test_IoTHubMessageError(self):
-        with self.assertRaises(Exception):
-            error = IoTHubMessageError()
-        with self.assertRaises(Exception):
-            error = IoTHubMessageError(__name__)
-        with self.assertRaises(Exception):
-            error = IoTHubMessageError(__name__, "function")
-        with self.assertRaises(Exception):
-            error = IoTHubMessageError(IoTHubMapResult.ERROR)
-        error = IoTHubMessageError("function", IoTHubMessageResult.ERROR)
-        with self.assertRaises(TypeError):
-            raise IoTHubMessageError("function", IoTHubMessageResult.ERROR)
+        error = IoTHubMessageError()
+        self.assertIsInstance(error, BaseException)
+        self.assertIsInstance(error, IoTHubError)
+        self.assertIsInstance(error, IoTHubMessageError)
+        with self.assertRaises(BaseException):
+            raise IoTHubMessageError()
+        with self.assertRaises(IoTHubError):
+            raise IoTHubMessageError()
+        with self.assertRaises(IoTHubMessageError):
+            raise IoTHubMessageError()
 
     def test_IoTHubClientError(self):
-        with self.assertRaises(Exception):
-            error = IoTHubClientError()
-        with self.assertRaises(Exception):
-            error = IoTHubClientError(__name__)
-        with self.assertRaises(Exception):
-            error = IoTHubClientError(__name__, "function")
-        with self.assertRaises(Exception):
-            error = IoTHubClientError(IoTHubMapResult.ERROR)
-        error = IoTHubClientError("function", IoTHubClientResult.ERROR)
-        with self.assertRaises(TypeError):
-            raise IoTHubClientError("function", IoTHubClientResult.ERROR)
-
+        error = IoTHubClientError()
+        self.assertIsInstance(error, BaseException)
+        self.assertIsInstance(error, IoTHubError)
+        self.assertIsInstance(error, IoTHubClientError)
+        with self.assertRaises(BaseException):
+            raise IoTHubClientError()
+        with self.assertRaises(IoTHubError):
+            raise IoTHubClientError()
+        with self.assertRaises(IoTHubClientError):
+            raise IoTHubClientError()
 
 class TestEnumDefinitions(unittest.TestCase):
 
