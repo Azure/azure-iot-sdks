@@ -108,7 +108,7 @@ Amqp.prototype.connect = function connect(done) {
       .catch(function (err) {
         this._connected = false;
         /*Codes_SRS_NODE_COMMON_AMQP_16_003: [The connect method shall call the done callback if the connection fails.] */
-        if (done) done(translateError(err));
+        if (done) done(err);
       }.bind(this));
   } else {
     debug('connect called when already connected.');
@@ -176,7 +176,7 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
       })
       .catch(function (err) {
         /*Codes_SRS_NODE_IOTHUB_AMQPCOMMON_16_007: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-        if (done) done(translateError(err));
+        if (done) done(err);
       });
   };
 
@@ -186,7 +186,7 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
         this._sender = sender;
         /*Codes_SRS_NODE_COMMON_AMQP_16_007: [If send encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
         this._sender.on('errorReceived', function (err) {
-          if (done) done(translateError(err));
+          if (done) done(err);
           return null;
         });
 
@@ -226,33 +226,8 @@ Amqp.prototype._setupReceiverLink = function setupReceiverLink(endpoint, done) {
       done(null, this._receiver);
     }.bind(this))
     .catch(function (err) {
-      if (done) done(translateError(err));
+      if (done) done(err);
     });
 };
-
-function translateError(err) {
-  var error = err;
-
-  if (err.constructor.name === 'AMQPError') {
-    if (err.condition.contents === 'amqp:resource-limit-exceeded') {
-      error = new errors.DeviceMaximumQueueDepthExceededError(err.description);
-    }
-    else if (err.condition.contents === 'amqp:not-found') {
-      error = new errors.DeviceNotFoundError(err.description);
-    }
-    else if (err.condition.contents === 'amqp:unauthorized-access') {
-      error = new errors.UnauthorizedError(err.description);
-    }
-    else {
-      error = new Error(err.description);
-    }
-    error.transport = err;
-  }
-  else if (err instanceof amqp10.Errors.AuthenticationError) {
-    error = new errors.UnauthorizedError(err.message);
-  }
-
-  return error;
-}
 
 module.exports = Amqp;

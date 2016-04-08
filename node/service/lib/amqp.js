@@ -6,6 +6,7 @@
 var Base = require('azure-iot-amqp-base').Amqp;
 var endpoint = require('azure-iot-common').endpoint;
 var PackageJson = require('../package.json');
+var translateError = require('./amqp_service_errors.js');
 
 /**
  * @class       module:azure-iothub.Amqp
@@ -31,6 +32,16 @@ function Amqp(config) {
   this._config = config;
 }
 
+var handleResult = function (errorMessage, done) {
+  return function (err, result) {
+    if (err) {
+      done(translateError(errorMessage, err));
+    } else {
+      done(null, result);
+    }
+  };
+};
+
 /**
  * @method             module:azure-iothub.Amqp#connect
  * @description        Establishes a connection with the IoT Hub instance.
@@ -39,7 +50,7 @@ function Amqp(config) {
 /*Codes_SRS_NODE_IOTHUB_SERVICE_AMQP_16_009: [The done callback method passed in argument shall be called if the connection is established] */
 /*Codes_SRS_NODE_IOTHUB_SERVICE_AMQP_16_010: [The done callback method passed in argument shall be called with an error object if the connection fails] */
 Amqp.prototype.connect = function connect(done) {
-  this._amqp.connect(done);
+  this._amqp.connect(handleResult('AMQP Transport: Could not connect', done));
 };
 
 /**
@@ -50,7 +61,7 @@ Amqp.prototype.connect = function connect(done) {
 /*Codes_SRS_NODE_IOTHUB_SERVICE_AMQP_16_011: [The done callback method passed in argument shall be called when disconnected]*/
 /*Codes_SRS_NODE_IOTHUB_SERVICE_AMQP_16_012: [The done callback method passed in argument shall be called with an error objec if disconnecting fails]*/
 Amqp.prototype.disconnect = function disconnect(done) {
-  this._amqp.disconnect(done);
+  this._amqp.disconnect(handleResult('AMQP Transport: Could not disconnect', done));
 };
 
 /**
@@ -68,7 +79,7 @@ Amqp.prototype.disconnect = function disconnect(done) {
 Amqp.prototype.send = function send(deviceId, message, done) {
   var serviceEndpoint = '/messages/devicebound';
   var deviceEndpoint = endpoint.messagePath(encodeURIComponent(deviceId));
-  this._amqp.send(message, serviceEndpoint, deviceEndpoint, done);
+  this._amqp.send(message, serviceEndpoint, deviceEndpoint, handleResult('AMQP Transport: Could not send message', done));
 };
 
 /**
@@ -80,7 +91,7 @@ Amqp.prototype.send = function send(deviceId, message, done) {
 /*Codes_SRS_NODE_IOTHUB_SERVICE_AMQP_16_008: [If a receiver for this endpoint doesn’t exist, the getReceiver method should create a new AmqpReceiver object and then call the done() method with the object that was just created as an argument.]*/
 Amqp.prototype.getReceiver = function getFeedbackReceiver(done) {
   var feedbackEndpoint = '/messages/serviceBound/feedback';
-  this._amqp.getReceiver(feedbackEndpoint, done);
+  this._amqp.getReceiver(feedbackEndpoint, handleResult('AMQP Transport: Could not get receiver', done));
 };
 
 module.exports = Amqp;

@@ -9,6 +9,7 @@ var Base = require('azure-iot-amqp-base').Amqp;
 var endpoint = require('azure-iot-common').endpoint;
 var PackageJson = require('../package.json');
 var results = require('azure-iot-common').results;
+var translateError = require('./amqp_device_errors.js');
 
 /**
  * @class module:azure-iot-device-amqp.Amqp
@@ -45,6 +46,16 @@ Amqp.prototype._initialize = function () {
   }.bind(this));
 };
 
+var handleResult = function (errorMessage, done) {
+  return function (err, result) {
+    if (err) {
+      done(translateError(errorMessage, err));
+    } else {
+      done(null, result);
+    }
+  };
+};
+
 /**
  * @method              module:azure-iot-device-amqp.Amqp#connect
  * @description         Establishes a connection with the IoT Hub instance.
@@ -54,7 +65,7 @@ Amqp.prototype._initialize = function () {
 /*Codes_SRS_NODE_DEVICE_AMQP_16_008: [The done callback method passed in argument shall be called if the connection is established]*/
 /*Codes_SRS_NODE_DEVICE_AMQP_16_009: [The done callback method passed in argument shall be called with an error object if the connecion fails]*/
 Amqp.prototype.connect = function connect(done) {
-  this._amqp.connect(done);
+  this._amqp.connect(handleResult('AMQP Transport: Could not connect', done));
 };
 
 /**
@@ -65,7 +76,7 @@ Amqp.prototype.connect = function connect(done) {
 /*Codes_SRS_NODE_DEVICE_AMQP_16_010: [The done callback method passed in argument shall be called when disconnected]*/
 /*Codes_SRS_NODE_DEVICE_AMQP_16_011: [The done callback method passed in argument shall be called with an error object if disconnecting fails]*/
 Amqp.prototype.disconnect = function disconnect(done) {
-  this._amqp.disconnect(done);
+  this._amqp.disconnect(handleResult('AMQP Transport: Could not disconnect', done));
 };
 
 /**
@@ -81,7 +92,7 @@ Amqp.prototype.disconnect = function disconnect(done) {
 /* Codes_SRS_NODE_DEVICE_AMQP_16_004: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message). ] */
 Amqp.prototype.sendEvent = function sendEvent(message, done) {
   var eventEndpoint = endpoint.eventPath(this._config.deviceId);
-  this._amqp.send(message, eventEndpoint, eventEndpoint, done);
+  this._amqp.send(message, eventEndpoint, eventEndpoint, handleResult('AMQP Transport: Could not send', done));
 };
 
 /**
@@ -93,7 +104,7 @@ Amqp.prototype.sendEvent = function sendEvent(message, done) {
 /* Codes_SRS_NODE_DEVICE_AMQP_16_007: [If a receiver for this endpoint doesn’t exist, the getReceiver method should create a new AmqpReceiver object and then call the done() method with the object that was just created as an argument.]*/
 Amqp.prototype.getReceiver = function getMessageReceiver(done) {
   var messageEndpoint = endpoint.messagePath(encodeURIComponent(this._config.deviceId));
-  this._amqp.getReceiver(messageEndpoint, done);
+  this._amqp.getReceiver(messageEndpoint, handleResult('AMQP Transport: Could not get receiver', done));
 };
 
 /**
