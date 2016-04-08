@@ -15,7 +15,7 @@
     <copyright>Copyright 2015</copyright>
     <tags>Microsoft Azure IoT Native x86 x64 native package IoTHubClient</tags>
     <dependencies>
-        <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.3"/>
+        <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.4"/>
     </dependencies>
   </metadata>
   <files>
