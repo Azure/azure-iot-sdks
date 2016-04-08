@@ -348,13 +348,15 @@ public final class AmqpsTransport implements IotHubTransport
                 // Codes_SRS_AMQPSTRANSPORT_11_012: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
                 this.connection.sendMessageResult(result);
             }
+
+            this.connection.getCompletionStatus();
         }
         catch (Throwable e)
         {
             // Codes_SRS_AMQPSTRANSPORT_11_035: [If the function throws any exception or error, it shall also close the AMQPS session.]
             this.connection.close();
             this.state = AmqpsTransportState.CRASHED;
-            throw e;
+            throw new IOException(e);
         }
     }
 
