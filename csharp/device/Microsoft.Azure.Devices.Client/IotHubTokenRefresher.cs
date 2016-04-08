@@ -50,12 +50,18 @@ namespace Microsoft.Azure.Devices.Client
                 this.connectionString.AmqpEndpoint.AbsoluteUri,
                 AccessRightsStringArray,
                 timeout);
-
-            this.SendCbsTokenLoopAsync(timeout).Fork();
+            this.SendCbsTokenLoopAsync(expiresAtUtc, timeout).Fork();
         }
 
-        async Task SendCbsTokenLoopAsync(TimeSpan timeout)
+        async Task SendCbsTokenLoopAsync(DateTime expiryTimeUtc, TimeSpan timeout)
         {
+            bool continueSendingTokens = await WaitUntilNextTokenSendTime(expiryTimeUtc);
+
+            if (!continueSendingTokens)
+            {
+                return;
+            }
+
             try
             {
                 while (!this.amqpSession.IsClosing())
@@ -77,7 +83,12 @@ namespace Microsoft.Azure.Devices.Client
                                  this.connectionString.AmqpEndpoint.AbsoluteUri,
                                  AccessRightsStringArray,
                                  timeout);
-                            await Task.Delay(RefreshTokenBuffer);
+
+                            continueSendingTokens = await WaitUntilNextTokenSendTime(expiresAtUtc);
+                            if (!continueSendingTokens)
+                            {
+                                break;
+                            }
                         }
                         catch (Exception exception)
                         {
@@ -104,8 +115,25 @@ namespace Microsoft.Azure.Devices.Client
 
                 // ignore other exceptions
             }
-
         }
-    }
+
+        static async Task<bool> WaitUntilNextTokenSendTime(DateTime expiresAtUtc)
+        {
+            var waitTime = ComputeTokenRefreshWaitTime(expiresAtUtc);
+
+            if (waitTime == TimeSpan.MaxValue || waitTime == TimeSpan.Zero)
+            {
+                return false;
+            }
+
+            await Task.Delay(waitTime);
+            return true;
+        }
+
+        static TimeSpan ComputeTokenRefreshWaitTime(DateTime expiresAtUtc)
+        {
+            return expiresAtUtc == DateTime.MaxValue ? TimeSpan.MaxValue : expiresAtUtc.Subtract(RefreshTokenBuffer).Subtract(DateTime.UtcNow);
+        }
 #endif
+    }
 }
