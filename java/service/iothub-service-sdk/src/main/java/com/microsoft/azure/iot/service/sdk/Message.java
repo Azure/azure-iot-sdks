@@ -246,7 +246,7 @@ public class Message
     public void setDeliveryAcknowledgement(DeliveryAcknowledgement deliveryAcknowledgement)
     {
         this.deliveryAcknowledgement = deliveryAcknowledgement;
-        this.properties.put(deliveryAcknowledgementPropertyName, deliveryAcknowledgement.name());
+        this.properties.put(deliveryAcknowledgementPropertyName, deliveryAcknowledgement.name().toLowerCase());
     }
 
     public Map<String, String> getProperties()
@@ -265,6 +265,6 @@ public class Message
     public void clearCustomProperties()
     {
         this.properties.clear();
-        this.properties.put(deliveryAcknowledgementPropertyName, deliveryAcknowledgement.name());
+        setDeliveryAcknowledgement(this.deliveryAcknowledgement);
     }
 }
