@@ -18,7 +18,6 @@
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.5.1" />
       <frameworkAssembly assemblyName="System.Net.Http" targetFramework=".NETFramework4.5.1" />
-      <frameworkAssembly assemblyName="System.Net.Http.Formatting" targetFramework=".NETFramework4.5.1" />
       <frameworkAssembly assemblyName="System.Runtime.Serialization" targetFramework=".NETFramework4.5.1" />
       <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.5.1" />
     </frameworkAssemblies>
