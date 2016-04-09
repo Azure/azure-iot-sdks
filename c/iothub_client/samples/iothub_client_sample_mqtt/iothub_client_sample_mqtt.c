@@ -6,10 +6,10 @@
 
 #include "iothub_client.h"
 #include "iothub_message.h"
-#include "threadapi.h"
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothubtransportmqtt.h"
-#include "platform.h"
+#include "azure_c_shared_utility/platform.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
