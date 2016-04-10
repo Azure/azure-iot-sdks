@@ -16,18 +16,13 @@ endif()
 compileAsC99()
 
 # get boost
-if(WIN32)
-    set(Boost_INCLUDE_DIR $ENV{BOOST_ROOT})
-    set(Boost_USE_STATIC_LIBS    ON) # only find static libs
-endif()
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME     OFF)
 
-# Remove the period from python version for boost component
-string(REPLACE "." "" boost_python ${build_python})
-find_package(Boost COMPONENTS "python-py${boost_python}" REQUIRED)
-
 if(WIN32)
+    set(Boost_INCLUDE_DIR $ENV{BOOST_ROOT})
+    set(Boost_USE_STATIC_LIBS    ON) # only find static libs
+    find_package(Boost COMPONENTS python REQUIRED)
     IF (NOT Boost_FOUND)
         message("FATAL ERROR: Boost Python library not found")
         message("On windows, get boost from http://www.boost.org/users/history/version_1_60_0.html")
@@ -36,6 +31,10 @@ if(WIN32)
         message("of the extracted boost package with headers and libraries")
         message(FATAL_ERROR "iothub_client_python needs Boost library")
     endif()
+else()
+    # Remove the period from python version for boost component
+    string(REPLACE "." "" boost_python ${build_python})
+    find_package(Boost COMPONENTS "python-py${boost_python}" REQUIRED)
 endif()
 
 include_directories(${Boost_INCLUDE_DIRS})

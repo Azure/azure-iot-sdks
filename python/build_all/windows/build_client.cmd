@@ -21,19 +21,20 @@ rem ----------------------------------------------------------------------------
 rem -- detect Python x86 or x64 version, select build target accordingly
 rem -----------------------------------------------------------------------------
 
-REM target may be set to 64 bit build if Python 2.7 x64 detected
+REM target may be set to 64 bit build if a Python x64 detected
 set build-platform=Win32
 set build-config=Release
+set build-python=2.7
 
 python python_version_check.py >pyenv.bat
 if errorlevel 1 goto :NeedPython
 call pyenv.bat
-@Echo Using Python found in: %PYTHON_PATH%, building %build-platform% platform extension
+@Echo Using Python found in: %PYTHON_PATH%, building Python %build-python% %build-platform% extension
 goto :build
 
 :NeedPython
-@Echo Azure IoT SDK needs Python 2.7 from 
-@Echo https://www.python.org/download/releases/2.7/ 
+@Echo Azure IoT SDK needs Python 2.7 or >= 3.4 from 
+@Echo https://www.python.org/downloads/
 exit /b 1
 
 :build
@@ -42,7 +43,7 @@ set cmake-output=cmake_%build-platform%
 
 REM -- C --
 cd %build-root%..\..\..\c\build_all\windows
-call build_client.cmd --platform %build-platform% --buildpython 
+call build_client.cmd --platform %build-platform% --buildpython %build-python%
 if errorlevel 1 exit /b 1
 cd %build-root%
 
