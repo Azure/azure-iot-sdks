@@ -530,6 +530,9 @@ public:
     MOCK_STATIC_METHOD_5(, CONNECTION_HANDLE, connection_create, XIO_HANDLE, io, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context)
     MOCK_METHOD_END(CONNECTION_HANDLE, TEST_CONNECTION)
 
+	MOCK_STATIC_METHOD_10(, CONNECTION_HANDLE, connection_create2, XIO_HANDLE, io, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context, ON_CONNECTION_STATE_CHANGED, on_connection_state_changed, void*, on_connection_state_changed_context, ON_IO_ERROR, on_io_error, void*, on_io_error_context, LOGGER_LOG, logger)
+	MOCK_METHOD_END(CONNECTION_HANDLE, TEST_CONNECTION)
+
     MOCK_STATIC_METHOD_1(, void, connection_destroy, CONNECTION_HANDLE, connection)
     MOCK_VOID_METHOD_END()
 
@@ -816,6 +819,7 @@ DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , int, cbs_delete_token,
 
 // connection.h
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , CONNECTION_HANDLE, connection_create, XIO_HANDLE, io, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context);
+DECLARE_GLOBAL_MOCK_METHOD_10(CIoTHubTransportAMQPMocks, , CONNECTION_HANDLE, connection_create2, XIO_HANDLE, io, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context, ON_CONNECTION_STATE_CHANGED, on_connection_state_changed, void*, on_connection_state_changed_context, ON_IO_ERROR, on_io_error, void*, on_io_error_context, LOGGER_LOG, logger);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, connection_dowork, CONNECTION_HANDLE, connection);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, connection_destroy, CONNECTION_HANDLE, connection);
 
@@ -1232,7 +1236,7 @@ static void setExpectedCallsForTransportDoWorkUpTo(CIoTHubTransportAMQPMocks& mo
 		else if (step == STEP_DOWORK_CREATE_CONNECTION)
 		{
 			EXPECTED_CALL(mocks, STRING_c_str(NULL));
-			EXPECTED_CALL(mocks, connection_create(NULL, NULL, NULL, NULL, NULL));
+			EXPECTED_CALL(mocks, connection_create2(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL));
 		}
 		else if (step == STEP_DOWORK_CREATE_SESSION)
 		{
@@ -1306,6 +1310,19 @@ static void setExpectedCallsForConnectionDestroyUpTo(CIoTHubTransportAMQPMocks& 
 		{
 			EXPECTED_CALL(mocks, xio_destroy(NULL));
 		}
+	}
+}
+
+static void setExpectedCallsForPrepareForConnectionRetry(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG* config, bool wasMessageReceiverCreated, bool wasEventSenderCreated)
+{
+	if (wasMessageReceiverCreated)
+	{
+		setExpectedCallsForDestroyMessageReceiver(mocks, config);
+	}
+
+	if (wasEventSenderCreated)
+	{
+		setExpectedCallsForDestroyEventSender(mocks, config);
 	}
 }
 
@@ -2048,9 +2065,9 @@ TEST_FUNCTION(AMQP_DoWork_saslio_create_fails)
     transport_interface->IoTHubTransport_Destroy(transport);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_062: [IoTHubTransportAMQP_DoWork shall create the connection with the IoT service using connection_create() AMQP API, passing the SASL I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks)]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_063: [If connection_create() fails, IoTHubTransportAMQP_DoWork shall fail and return immediately]
-TEST_FUNCTION(AMQP_DoWork_connection_create_fails)
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_062: [IoTHubTransportAMQP_DoWork shall create the connection with the IoT service using connection_create2() AMQP API, passing the SASL I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks)]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_063: [If connection_create2() fails, IoTHubTransportAMQP_DoWork shall fail and return immediately]
+TEST_FUNCTION(AMQP_DoWork_connection_create2_fails)
 {
     // arrange
     CIoTHubTransportAMQPMocks mocks;
@@ -2068,7 +2085,7 @@ TEST_FUNCTION(AMQP_DoWork_connection_create_fails)
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_CREATE_SASLIO, DOWORK_MESSAGERECEIVER_NONE);
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
-    EXPECTED_CALL(mocks, connection_create(NULL, NULL, NULL, NULL, NULL)).SetReturn((CONNECTION_HANDLE)NULL);
+    EXPECTED_CALL(mocks, connection_create2(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)).SetReturn((CONNECTION_HANDLE)NULL);
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_SASLIO);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
 
@@ -2512,6 +2529,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_open_fails)
     EXPECTED_CALL(mocks, messagesender_open(TEST_MESSAGE_SENDER)).SetReturn(1);
     STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
     STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
+	setExpectedCallsForPrepareForConnectionRetry(mocks, &config, false, true);
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
 
@@ -2814,6 +2832,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_open_fails)
     STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_SOURCE));
     STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGERECEIVER_TARGET));
     EXPECTED_CALL(mocks, messaging_create_source(NULL)).SetReturn((AMQP_VALUE)NULL);
+	setExpectedCallsForPrepareForConnectionRetry(mocks, &config, true, false);
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
 

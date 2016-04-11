@@ -163,9 +163,9 @@ This function will close connection established through AMQP API, as well as des
 
 **SRS_IOTHUBTRANSPORTAMQP_09_061: [**If xio_create() fails creating the SASL I/O layer, IoTHubTransportAMQP_DoWork shall fail and return immediately**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_062: [**IoTHubTransportAMQP_DoWork shall create the connection with the IoT service using connection_create() AMQP API, passing the SASL I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks)**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_062: [**IoTHubTransportAMQP_DoWork shall create the connection with the IoT service using connection_create2() AMQP API, passing the SASL I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks)**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_063: [**If connection_create() fails, IoTHubTransportAMQP_DoWork shall fail and return immediately**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_063: [**If connection_create2() fails, IoTHubTransportAMQP_DoWork shall fail and return immediately**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_137: [**IoTHubTransportAMQP_DoWork shall create the AMQP session session_create() AMQP API, passing the connection instance as parameter**]**
 
