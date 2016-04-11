@@ -31,7 +31,7 @@ usage ()
     echo " --no-http                     do no build HTTP transport and samples"
     echo " --no-mqtt                     do no build MQTT transport and samples"
     echo " --toolchain-file <file>       pass cmake a toolchain file for cross compiling"
-    echo " --build-python                build Python C wrapper module (requires boost)"
+    echo " --build-python <version>      build Python C wrapper module (requires boost) with given python version (2.7 3.4 3.5 are currently supported)"
     echo " --build-javawrapper           build java C wrapper module"
     echo " -rv, --run_valgrind           will execute ctest with valgrind"
     exit 1
@@ -55,6 +55,16 @@ process_args ()
         # save arg to pass as toolchain file
         toolchainfile="$arg"
 		save_next_arg=0
+      elif [ $save_next_arg == 3 ]
+      then
+        # save the arg to python version
+        build_python="$arg"
+        if [ $build_python != "2.7" ] && [ $build_python != "3.4" ] && [ $build_python != "3.5" ]
+        then
+          echo "Supported python versions are 2.7, 3.4 or 3.5"
+          exit 1
+        fi 
+        save_next_arg=0
       else
           case "$arg" in
               "-cl" | "--compileoption" ) save_next_arg=1;;
@@ -64,7 +74,7 @@ process_args ()
               "--no-amqp" ) build_amqp=OFF;;
               "--no-http" ) build_http=OFF;;
               "--no-mqtt" ) build_mqtt=OFF;;
-              "--build-python" ) build_python=ON;;
+              "--build-python" ) save_next_arg=3;;
               "--build-javawrapper" ) build_javawrapper=ON;;
               "--toolchain-file" ) save_next_arg=2;;
               "-rv" | "--run_valgrind" ) run_valgrind=1;;
@@ -85,7 +95,7 @@ process_args $*
 rm -r -f ~/cmake
 mkdir ~/cmake
 pushd ~/cmake
-cmake $toolchainfile -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:BOOL=$build_python $build_root
+cmake $toolchainfile -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:STRING=$build_python $build_root
 
 CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 make --jobs=$CORES
