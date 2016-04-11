@@ -286,7 +286,7 @@ Package following artifacts from your device:
 3.  Send us clear instructions of how to run this sample with your hardware
     (explicitly highlighting the new steps for customers). As a
     guideline on how the instructions should look please refer the
-    examples published on github repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/c/doc>)
+    examples published on github repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>)
 
 <a name="Step-4-2-Share"/>
 ## 4.2 Share package with Engineering Support
