@@ -22,7 +22,7 @@ public enum DeliveryAcknowledgement
     **/
     PositiveOnly,
 
-    /** <summary>
+    /**
     * An acknowledgement is sent on delivery success or failure.
     **/
     Full

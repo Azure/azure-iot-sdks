@@ -7,8 +7,7 @@
 #include <vector>
 #include <list>
 
-#include "platform.h"
-#include "map.h"
+#include "azure_c_shared_utility/platform.h"
 #include "iothub_client.h"
 #include "iothub_client_version.h"
 #include "iothub_message.h"

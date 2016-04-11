@@ -54,7 +54,12 @@ set CMAKE_use_wsio=ON
 goto args-continue
 
 :arg-build-python
-set CMAKE_build_python=ON
+set CMAKE_build_python=2.7
+if "%2"=="" goto args-continue
+set PyVer=%2
+if "%PyVer:~0,2%"=="--" goto args-continue
+set CMAKE_build_python=%PyVer%
+shift
 goto args-continue
 
 :arg-build-javawrapper
@@ -88,11 +93,11 @@ pushd %USERPROFILE%\%cmake-output%
 
 if %build-platform% == Win32 (
 	echo ***Running CMAKE for Win32***
-	cmake %build-root% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Dbuild_python:BOOL=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper%
+	cmake %build-root% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper%
 	if not %errorlevel%==0 exit /b %errorlevel%	
 ) else (
 	echo ***Running CMAKE for Win64***
-	cmake %build-root% -G "Visual Studio 14 Win64" -Dbuild_python:BOOL=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper%
+	cmake %build-root% -G "Visual Studio 14 Win64" -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper%
 	if not %errorlevel%==0 exit /b %errorlevel%	
 )
 
@@ -110,8 +115,9 @@ goto :eof
 
 
 :usage
-echo build.cmd [options]
+echo build_client.cmd [options]
 echo options:
-echo  --config ^<value^>      [Debug] build configuration (e.g. Debug, Release)
-echo  --platform ^<value^>    [Win32] build platform (e.g. Win32, x64, ...)
+echo  --config ^<value^>         [Debug] build configuration (e.g. Debug, Release)
+echo  --platform ^<value^>       [Win32] build platform (e.g. Win32, x64, ...)
+echo  --buildpython ^<value^>    [2.7]   build python extension (e.g. 2.7, 3.4, ...)
 goto :eof
