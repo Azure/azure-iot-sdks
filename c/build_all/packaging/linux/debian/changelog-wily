@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0.1-4) wily; urgency=low
+azure-iot-sdk-c (0.1.0.1-5) wily; urgency=low
 
   * Initial release
 
@@ -13,5 +13,7 @@ azure-iot-sdk-c (0.1.0.1-4) wily; urgency=low
   * Fix message settlement bug in AMQP Transport (#91bfe82)
 
   * Introduce _setoption in modules which implement XIO interface (#e721b5c)
+
+  * change the mqtt timeout from 5 min to 4 due to the service disconnect (#451ab96)
 
  -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 20 Oct 2015 17:24:51 +0000
