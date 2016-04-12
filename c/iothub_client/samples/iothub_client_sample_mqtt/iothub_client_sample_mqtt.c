@@ -15,13 +15,11 @@
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
-
-/*String containing Hostname, Device Id & Device Key in the format:             */
-/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
 static const char* connectionString = "[device connection string]";
 
 static int callbackCounter;
 static char msgText[1024];
+static char propText[1024];
 #define MESSAGE_COUNT 5
 static bool continueRunning;
 
@@ -64,7 +62,6 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         {
             if (propertyCount > 0)
             {
-                (void)printf("ERROR: message incorrectly contains properties!\r\n");
                 for (size_t index = 0; index < propertyCount; index++)
                 {
                     (void)printf("\tKey: %s Value: %s\r\n", keys[index], values[index]);
@@ -146,6 +143,12 @@ void iothub_client_sample_mqtt_run(void)
                     else
                     {
                         messages[i].messageTrackingId = i;
+                        MAP_HANDLE propMap = IoTHubMessage_Properties(messages[i].messageHandle);
+                        sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
+                        if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                        {
+                            (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
+                        }
 
                         if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[i].messageHandle, SendConfirmationCallback, &messages[i]) != IOTHUB_CLIENT_OK)
                         {
