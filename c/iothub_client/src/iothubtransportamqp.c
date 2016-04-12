@@ -374,6 +374,16 @@ static void on_amqp_management_state_changed(void* context, AMQP_MANAGEMENT_STAT
     }
 }
 
+static void on_connection_io_error(void* context)
+{
+	AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)context;
+
+	if (transport_state != NULL)
+	{
+		transport_state->connection_state = AMQP_MANAGEMENT_STATE_ERROR;
+	}
+}
+
 static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
 {
     int result;
@@ -403,10 +413,10 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
             result = RESULT_FAILURE;
             LogError("Failed to create a SASL I/O layer.\r\n");
         }
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_062: [IoTHubTransportAMQP_DoWork shall create the connection with the IoT service using connection_create() AMQP API, passing the SASL I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks)] 
-        else if ((transport_state->connection = connection_create(transport_state->sasl_io, STRING_c_str(transport_state->iotHubHostFqdn), DEFAULT_CONTAINER_ID, NULL, NULL)) == NULL)
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_062: [IoTHubTransportAMQP_DoWork shall create the connection with the IoT service using connection_create2() AMQP API, passing the SASL I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks)] 
+		else if ((transport_state->connection = connection_create2(transport_state->sasl_io, STRING_c_str(transport_state->iotHubHostFqdn), DEFAULT_CONTAINER_ID, NULL, NULL, NULL, NULL, on_connection_io_error, (void*)transport_state, NULL)) == NULL)
         {
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_063: [If connection_create() fails, IoTHubTransportAMQP_DoWork shall fail and return immediately.] 
+            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_063: [If connection_create2() fails, IoTHubTransportAMQP_DoWork shall fail and return immediately.] 
             result = RESULT_FAILURE;
             LogError("Failed to create the AMQP connection.\r\n");
         }
@@ -570,6 +580,11 @@ static void destroyEventSender(AMQP_TRANSPORT_INSTANCE* transport_state)
     }
 }
 
+void on_event_sender_state_changed(void* context, MESSAGE_SENDER_STATE new_state, MESSAGE_SENDER_STATE previous_state)
+{
+	LogInfo("Event sender state changed [%d->%d]\r\n", previous_state, new_state);
+}
+
 static int createEventSender(AMQP_TRANSPORT_INSTANCE* transport_state)
 {
     int result = RESULT_FAILURE;
@@ -604,7 +619,7 @@ static int createEventSender(AMQP_TRANSPORT_INSTANCE* transport_state)
             attachDeviceClientTypeToLink(transport_state->sender_link);
 
             // Codes_SRS_IOTHUBTRANSPORTAMQP_09_070: [IoTHubTransportAMQP_DoWork shall create the AMQP message sender using messagesender_create() AMQP API] 
-            if ((transport_state->message_sender = messagesender_create(transport_state->sender_link, NULL, NULL, NULL)) == NULL)
+            if ((transport_state->message_sender = messagesender_create(transport_state->sender_link, on_event_sender_state_changed, (void*)transport_state, NULL)) == NULL)
             {
                 // Codes_SRS_IOTHUBTRANSPORTAMQP_09_071: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message sender instance fails to be created, flagging the connection to be re-established] 
                 LogError("Could not allocate AMQP message sender\r\n");
@@ -952,7 +967,10 @@ static bool isSasTokenRefreshRequired(AMQP_TRANSPORT_INSTANCE* transport_state)
 
 static void prepareForConnectionRetry(AMQP_TRANSPORT_INSTANCE* transport_state)
 {
+	destroyMessageReceiver(transport_state);
+	destroyEventSender(transport_state);
     destroyConnection(transport_state);
+	transport_state->connection_state = AMQP_MANAGEMENT_STATE_IDLE;
     rollEventsBackToWaitList(transport_state);
 }
 
@@ -1191,8 +1209,14 @@ static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_147: [IoTHubTransportAMQP_DoWork shall save a reference to the client handle in transport_state->iothub_client_handle]
         transport_state->iothub_client_handle = iotHubClientHandle;
 
+		if (transport_state->connection != NULL &&
+			transport_state->connection_state == AMQP_MANAGEMENT_STATE_ERROR)
+		{
+			LogError("An error occured on AMQP connection. The connection will be restablished.\r\n");
+			trigger_connection_retry = true;
+		}
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_055: [If the transport handle has a NULL connection, IoTHubTransportAMQP_DoWork shall instantiate and initialize the AMQP components and establish the connection] 
-        if (transport_state->connection == NULL &&
+        else if (transport_state->connection == NULL &&
             establishConnection(transport_state) != RESULT_OK)
         {
             LogError("AMQP transport failed to establish connection with service.\r\n");
