@@ -58,6 +58,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ClientWebSocketTransportTests.cs" />
+    <Compile Include="ConnectionPoolTests.cs" />
     <Compile Include="ConnectionString\DeviceClientConnectionStringExceptionTests.cs" />
     <Compile Include="ConnectionString\DeviceClientConnectionStringTests.cs" />
     <Compile Include="MessageTests.cs" />

@@ -10,15 +10,27 @@ namespace Microsoft.Azure.Devices.Client
     /// </summary>
     public sealed class AmqpTransportSettings : ITransportSettings
     {
+        static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromMinutes(1);
+        static readonly TimeSpan DefaultOpenTimeout = TimeSpan.FromMinutes(1);
         const uint DefaultPrefetchCount = 50;
+
         readonly TransportType transportType;
+        TimeSpan operationTimeout;
+        TimeSpan openTimeout;
 
         public AmqpTransportSettings(TransportType transportType)
-            : this(transportType, DefaultPrefetchCount)
+            : this(transportType, DefaultPrefetchCount, new AmqpConnectionPoolSettings())
         {
+            this.operationTimeout = DefaultOperationTimeout;
+            this.openTimeout = DefaultOpenTimeout;
         }
 
         public AmqpTransportSettings(TransportType transportType, uint prefetchCount)
+            :this(transportType, prefetchCount, new AmqpConnectionPoolSettings())
+        {
+        }
+
+        public AmqpTransportSettings(TransportType transportType, uint prefetchCount, AmqpConnectionPoolSettings amqpConnectionPoolSettings)
         {
             if (prefetchCount <= 0)
             {
@@ -38,6 +50,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             this.PrefetchCount = prefetchCount;
+            this.AmqpConnectionPoolSettings = amqpConnectionPoolSettings;
         }
 
         public TransportType GetTransportType()
@@ -45,6 +58,43 @@ namespace Microsoft.Azure.Devices.Client
             return this.transportType;
         }
 
+        public TimeSpan OperationTimeout {
+            get { return this.operationTimeout; }
+            set { this.SetOperationTimeout(value); }
+        }
+
+        public TimeSpan OpenTimeout
+        {
+            get { return this.openTimeout; }
+            set { this.SetOpenTimeout(value); }
+        }
+
         public uint PrefetchCount { get; set; }
+
+        public AmqpConnectionPoolSettings AmqpConnectionPoolSettings { get; set; }
+
+        void SetOperationTimeout(TimeSpan operationTimeout)
+        {
+            if (operationTimeout > TimeSpan.Zero)
+            {
+                this.operationTimeout = operationTimeout;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException("operationTimeout");
+            }
+        }
+
+        void SetOpenTimeout(TimeSpan openTimeout)
+        {
+            if (openTimeout > TimeSpan.Zero)
+            {
+                this.openTimeout = openTimeout;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException("openTimeout");
+            }
+        }
     }
 }

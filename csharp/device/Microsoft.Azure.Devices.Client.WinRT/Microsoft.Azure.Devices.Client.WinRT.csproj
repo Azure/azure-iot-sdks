@@ -120,6 +120,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(DeviceClientDir)\IAuthenticationMethod.cs" />
+    <Compile Include="$(DeviceClientDir)\AmqpConnectionPoolSettings.cs" />
     <Compile Include="$(DeviceClientDir)\AuthenticationMethodFactory.cs" />
     <Compile Include="$(DeviceClientDir)\Common\ActionItem.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Api\ClientApiVersionHelper.cs" />
@@ -164,6 +165,7 @@
     <Compile Include="$(DeviceClientDir)\Common\Interop\SafeEventLogWriteHandle.cs" />
     <Compile Include="$(DeviceClientDir)\Common\IOThreadScheduler.cs" />
     <Compile Include="$(DeviceClientDir)\Common\PartialTrustHelpers.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\PerfectHash.cs" />
     <Compile Include="$(DeviceClientDir)\Common\ReadOnlyDictionary45.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Security\ISharedAccessSignatureCredential.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Security\SecurityConstants.cs" />
@@ -195,6 +197,11 @@
     <Compile Include="$(DeviceClientDir)\IotHubConnectionCache.cs" />
     <Compile Include="$(DeviceClientDir)\IotHubConnectionString.cs" />
     <Compile Include="$(DeviceClientDir)\IotHubConnectionStringBuilder.cs" />
+    <Compile Include="$(DeviceClientDir)\IotHubDeviceScopeConnectionPool.cs" />
+    <Compile Include="$(DeviceClientDir)\IotHubDeviceMuxConnection.cs" />
+    <Compile Include="$(DeviceClientDir)\IotHubScopeConnectionPool.cs" />
+    <Compile Include="$(DeviceClientDir)\IotHubSingleTokenConnection.cs" />
+    <Compile Include="$(DeviceClientDir)\IotHubTokenRefresher.cs" />
     <Compile Include="$(DeviceClientDir)\MappingType.cs" />
     <Compile Include="$(DeviceClientDir)\Message.cs" />
     <Compile Include="$(DeviceClientDir)\MessageConverter.cs" />

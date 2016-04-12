@@ -47,11 +47,6 @@ if (LINUX)
     endif()
 endif()
 
-add_subdirectory(azure-c-shared-utility)
-add_subdirectory(azure-uamqp-c)
-add_subdirectory(azure-umqtt-c)
-
-enable_testing()
 
 #if any compiler has a command line switch called "OFF" then it will need special care
 if(NOT "${compileOption_C}" STREQUAL "OFF")
@@ -61,6 +56,14 @@ endif()
 if(NOT "${compileOption_CXX}" STREQUAL "OFF")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
 endif()
+
+
+add_subdirectory(azure-c-shared-utility)
+add_subdirectory(azure-uamqp-c)
+add_subdirectory(azure-umqtt-c)
+
+enable_testing()
+
 
 include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility)
 
