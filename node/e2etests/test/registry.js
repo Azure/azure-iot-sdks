@@ -5,6 +5,7 @@
 
 var azureStorage = require('azure-storage');
 var Registry = require('azure-iothub').Registry;
+var errors = require('azure-iot-common').errors;
 
 var assert = require('chai').assert;
 var uuid = require('uuid');
@@ -115,8 +116,7 @@ var runTests = function (hubConnectionString, storageConnectionString) {
           done(delErr);
         } else {
           registry.get(deviceIdOnly.deviceId, function (getErr) {
-            assert.isNotNull(getErr);
-            assert.equal(getErr.message, "Not Found");
+            assert.instanceOf(getErr, errors.DeviceNotFoundError);
             done();
           });
         }
@@ -175,8 +175,7 @@ var runTests = function (hubConnectionString, storageConnectionString) {
     it('Fails to delete a device if it doesn\'t exist', function(done) {
       var registry = Registry.fromConnectionString(hubConnectionString);
       registry.delete('doesntexist' + uuid.v4(), function(delErr){
-        assert.isNotNull(delErr);
-        assert.equal(delErr.message, "Not Found");
+        assert.instanceOf(delErr, errors.DeviceNotFoundError);
         done();
       });
     });
@@ -188,8 +187,7 @@ var runTests = function (hubConnectionString, storageConnectionString) {
           done(delErr);
         } else {
           registry.get(deviceIdOnly.deviceId, function (getErr) {
-            assert.isNotNull(getErr);
-            assert.equal(getErr.message, "Not Found");
+            assert.instanceOf(getErr, errors.DeviceNotFoundError);
             done();
           });
         }
