@@ -4,6 +4,7 @@ echo ${IOTHUB_DEVICE_ID?Error \$IOTHUB_DEVICE_ID is not defined.}
 echo ${IOTHUB_DEVICE_KEY?Error \$IOTHUB_DEVICE_KEY is not defined.}
 echo ${IOTHUB_CONNECTION_STRING?Error \$IOTHUB_CONNECTION_STRING is not defined.}
 echo ${STORAGE_CONNECTION_STRING?Error \$STORAGE_CONNECTION_STRING is not defined.}
+echo ${IOTHUB_DM_CONNECTION_STRING?Error \$IOTHUB_DM_CONNECTION_STRING is not defined.}
 
 build_root=$(cd "$(dirname "$0")/../.." && pwd)
 dockerdir=$build_root/build/node_docker
@@ -18,6 +19,7 @@ do
     echo IOTHUB_DEVICE_KEY=$IOTHUB_DEVICE_KEY >> $ENV_FILE
     echo IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING >> $ENV_FILE
     echo STORAGE_CONNECTION_STRING=$STORAGE_CONNECTION_STRING >> $ENV_FILE
+    echo IOTHUB_DM_CONNECTION_STRING=$IOTHUB_DM_CONNECTION_STRING >> $ENV_FILE
 done
 
 # Build and start all containers
