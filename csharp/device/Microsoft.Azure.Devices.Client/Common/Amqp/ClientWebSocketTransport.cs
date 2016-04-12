@@ -21,15 +21,13 @@ namespace Microsoft.Azure.Amqp.Transport
         readonly ClientWebSocket webSocket;
         readonly EndPoint localEndPoint;
         readonly EndPoint remoteEndPoint;
-        readonly string iotHubName;
         volatile CancellationTokenSource writeCancellationTokenSource;
         bool disposed;
 
-        public ClientWebSocketTransport(ClientWebSocket webSocket, string iotHubName, EndPoint localEndpoint, EndPoint remoteEndpoint)
+        public ClientWebSocketTransport(ClientWebSocket webSocket, EndPoint localEndpoint, EndPoint remoteEndpoint)
             : base("clientwebsocket")
         {
             this.webSocket = webSocket;
-            this.iotHubName = iotHubName;
             this.localEndPoint = localEndpoint;
             this.remoteEndPoint = remoteEndpoint;
             this.writeCancellationTokenSource = new CancellationTokenSource();
