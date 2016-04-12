@@ -6,6 +6,7 @@
 
 import sys
 import unittest
+import iothub_client_mock
 from iothub_client_mock import *
 
 # connnection strings for mock testing
@@ -86,6 +87,45 @@ class TestExceptionDefinitions(unittest.TestCase):
             raise IoTHubClientError()
         with self.assertRaises(IoTHubClientError):
             raise IoTHubClientError()
+
+    def test_IoTHubMapErrorArg(self):
+        with self.assertRaises(Exception):
+            error = IoTHubMapErrorArg()
+        with self.assertRaises(Exception):
+            error = IoTHubMapErrorArg(__name__)
+        with self.assertRaises(Exception):
+            error = IoTHubMapErrorArg(__name__, "function")
+        with self.assertRaises(Exception):
+            error = IoTHubMapErrorArg(IoTHubMapResult.ERROR)
+        error = IoTHubMapErrorArg("function", IoTHubMapResult.ERROR)
+        with self.assertRaises(TypeError):
+            raise IoTHubMapErrorArg("function", IoTHubMapResult.ERROR)
+
+    def test_IoTHubMessageErrorArg(self):
+        with self.assertRaises(Exception):
+            error = IoTHubMessageErrorArg()
+        with self.assertRaises(Exception):
+            error = IoTHubMessageErrorArg(__name__)
+        with self.assertRaises(Exception):
+            error = IoTHubMessageErrorArg(__name__, "function")
+        with self.assertRaises(Exception):
+            error = IoTHubMessageErrorArg(IoTHubMapResult.ERROR)
+        error = IoTHubMessageErrorArg("function", IoTHubMessageResult.ERROR)
+        with self.assertRaises(TypeError):
+            raise IoTHubMessageErrorArg("function", IoTHubMessageResult.ERROR)
+
+    def test_IoTHubClientErrorArg(self):
+        with self.assertRaises(Exception):
+            error = IoTHubClientErrorArg()
+        with self.assertRaises(Exception):
+            error = IoTHubClientErrorArg(__name__)
+        with self.assertRaises(Exception):
+            error = IoTHubClientErrorArg(__name__, "function")
+        with self.assertRaises(Exception):
+            error = IoTHubClientErrorArg(IoTHubMapResult.ERROR)
+        error = IoTHubClientErrorArg("function", IoTHubClientResult.ERROR)
+        with self.assertRaises(TypeError):
+            raise IoTHubClientErrorArg("function", IoTHubClientResult.ERROR)
 
 class TestEnumDefinitions(unittest.TestCase):
 
@@ -304,6 +344,12 @@ class TestClassDefinitions(unittest.TestCase):
         self.assertEqual(callback_value, "value")
         callback_key = ""
         callback_value = ""
+        # check if second filter is refused
+        with self.assertRaises(Exception):
+            map2 = IoTHubMap(map_callback_reject)
+        # clear ok filter
+        map = IoTHubMap()
+        # setup reject filter
         map = IoTHubMap(map_callback_reject)
         with self.assertRaises(IoTHubMapError):
             map.add("key", "value")
