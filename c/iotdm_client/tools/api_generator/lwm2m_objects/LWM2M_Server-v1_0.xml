@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+FILE INFORMATION
+
+OMA Permanent Document
+   File: OMA-SUP-XML_LWM2M_Server-V1_0-20131210-C
+   Type: xml
+
+Public Reachable Information
+   Path: http://www.openmobilealliance.org/tech/profiles
+   Name: LWM2M_Server-v1_0.xml
+
+NORMATIVE INFORMATION
+
+  Information about this file can be found in the latest revision of
+
+    OMA-TS-LightweightM2M-V1_0
+
+  This is available at http://www.openmobilealliance.org/
+
+  Send comments to technical-comments@mail.openmobilealliance.org
+
+CHANGE HISTORY
+
+22102013 File created, see OMA-DM-LightweightM2M-2013-0164-INP_LWM2M_Objects_XML_files
+31102013 Changed according to OMA-TS-LightweightM2M-V1_0-20131017-D
+03122013 Incorporated CR OMA-DM-LightweightM2M-2013-0172-CR_SUP_files_schema_reference
+10122013 Status changed to Candidate by TP, TP Ref # OMA-TP-2013-0368-INP_LightweightM2M_V1_0_ERP_and_ETR_for_Candidate_approval
+
+	
+LEGAL DISCLAIMER
+
+Use of this document is subject to all of the terms and conditions
+of the Use Agreement located at
+	http://www.openmobilealliance.org/UseAgreement.html
+
+You may use this document or any part of the document for internal
+or educational purposes only, provided you do not modify, edit or
+take out of context the information in this document in any manner.
+Information contained in this document may be used, at your sole
+risk, for any purposes.
+
+You may not use this document in any other manner without the prior
+written permission of the Open Mobile Alliance.  The Open Mobile
+Alliance authorizes you to copy this document, provided that you
+retain all copyright and other proprietary notices contained in the
+original materials on any copies of the materials and that you
+comply strictly with these terms.  This copyright permission does
+not constitute an endorsement of the products or services.  The
+Open Mobile Alliance assumes no responsibility for errors or
+omissions in this document.
+
+Each Open Mobile Alliance member has agreed to use reasonable
+endeavors to inform the Open Mobile Alliance in a timely manner of
+Essential IPR as it becomes aware that the Essential IPR is related
+to the prepared or published specification.  However, the members
+do not have an obligation to conduct IPR searches.  The declared
+Essential IPR is publicly available to members and non-members of
+the Open Mobile Alliance and may be found on the "OMA IPR
+Declarations" list at http://www.openmobilealliance.org/ipr.html.
+The Open Mobile Alliance has not conducted an independent IPR review
+of this document and the information contained herein, and makes no
+representations or warranties regarding third party IPR, including
+without limitation patents, copyrights or trade secret rights.  This
+document may contain inventions for which you must obtain licenses
+from third parties before making, using or selling the inventions.
+Defined terms above are set forth in the schedule to the Open Mobile
+Alliance Application Form.
+
+NO REPRESENTATIONS OR WARRANTIES (WHETHER EXPRESS OR IMPLIED) ARE
+MADE BY THE OPEN MOBILE ALLIANCE OR ANY OPEN MOBILE ALLIANCE MEMBER
+OR ITS AFFILIATES REGARDING ANY OF THE IPR'S REPRESENTED ON THE "OMA
+IPR DECLARATIONS" LIST, INCLUDING, BUT NOT LIMITED TO THE ACCURACY,
+COMPLETENESS, VALIDITY OR RELEVANCE OF THE INFORMATION OR WHETHER OR
+NOT SUCH RIGHTS ARE ESSENTIAL OR NON-ESSENTIAL.
+
+THE OPEN MOBILE ALLIANCE IS NOT LIABLE FOR AND HEREBY DISCLAIMS ANY
+DIRECT, INDIRECT, PUNITIVE, SPECIAL, INCIDENTAL, CONSEQUENTIAL, OR
+EXEMPLARY DAMAGES ARISING OUT OF OR IN CONNECTION WITH THE USE OF
+DOCUMENTS AND THE INFORMATION CONTAINED IN THE DOCUMENTS.
+
+Copyright 2013 Open Mobile Alliance Ltd.  All Rights Reserved.
+Used with the permission of the Open Mobile Alliance Ltd. under the
+terms set forth above.
+-->
+
+<LWM2M xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://openmobilealliance.org/tech/profiles/LWM2M.xsd" >
+  <Object ObjectType="MODefinition">
+		<Name>LWM2M Server</Name>
+		<Description1><![CDATA[This LWM2M Objects provides the data related to a LWM2M Server. A Bootstrap Server has no such an Object Instance associated to it.]]></Description1>
+		<ObjectID>1</ObjectID>
+		<ObjectURN>TBD</ObjectURN>
+		<MultipleInstances>Multiple</MultipleInstances>
+		<Mandatory>Mandatory</Mandatory>
+		<Resources>
+			<Item ID="0">
+				<Name>Short Server ID</Name>
+        <Operations>R</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration>1-65535</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Used as link to associate server Object Instance.]]></Description>
+			</Item>
+			<Item ID="1">
+				<Name>Lifetime</Name>
+        <Operations>RW</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units>s</Units>
+				<Description><![CDATA[Specify the lifetime of the registration in seconds.]]></Description>
+			</Item>
+			<Item ID="2">
+				<Name>Default Minimum Period</Name>
+        <Operations>RW</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units>s</Units>
+				<Description><![CDATA[The default value the LWM2M Client should use for the Minimum Period of an Observation in the absence of this parameter being included in an Observation.
+If this Resource doesn’t exist, the default value is 1.]]></Description>
+			</Item>
+			<Item ID="3">
+				<Name>Default Maximum Period</Name>
+        <Operations>RW</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units>s</Units>
+				<Description><![CDATA[The default value the LWM2M Client should use for the Maximum Period of an Observation in the absence of this parameter being included in an Observation.]]></Description>
+			</Item>
+			<Item ID="4">
+				<Name>Disable</Name>
+        <Operations>E</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type></Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[If this Resource is executed, this LWM2M Server Object is disabled for a certain period defined in the Disabled Timeout Resource. After receiving “Execute” operation, LWM2M Client MUST send response of the operation and perform de-registration process, and underlying network connection between the Client and Server MUST be disconnected to disable the LWM2M Server account.
+After the above process, the LWM2M Client MUST NOT send any message to the Server and ignore all the messages from the LWM2M Server for the period.]]></Description>
+			</Item>
+			<Item ID="5">
+				<Name>Disable Timeout</Name>
+        <Operations>RW</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units>s</Units>
+				<Description><![CDATA[A period to disable the Server. After this period, the LWM2M Client MUST perform registration process to the Server. If this Resource is not set, a default timeout value is 86400 (1 day).]]></Description>
+			</Item>
+			<Item ID="6">
+				<Name>Notification Storing When Disabled or Offline</Name>
+        <Operations>RW</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>Boolean</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[If true, the LWM2M Client stores “Notify” operations to the LWM2M Server while the LWM2M Server account is disabled or the LWM2M Client is offline. After the LWM2M Server account is enabled or the LWM2M Client is online, the LWM2M Client reports the stored “Notify” operations to the Server.
+If false, the LWM2M Client discards all the “Notify” operationsor temporally disables the Observe function while the LWM2M Server is disabled or the LWM2M Client is offline.
+The default value is true.
+The maximum number of storing Notification per the Server is up to the implementation.]]></Description>
+			</Item>
+			<Item ID="7">
+				<Name>Binding</Name>
+        <Operations>RW</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>String</Type>
+				<RangeEnumeration>The possible values of Resource are listed in 5.2.1.1</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[This Resource defines the transport binding configured for the LWM2M Client.
+If the LWM2M Client supports the binding specified in this Resource, the LWM2M Client MUST use that for Current Binding and Mode.]]></Description>
+			</Item>
+			<Item ID="8">
+				<Name>Registration Update Trigger</Name>
+        <Operations>E</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type></Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[If this Resource is executed the LWM2M Client MUST perform an “Update” operation with this LWM2M Server using the Current Transport Binding and Mode.]]></Description>
+			</Item>
+		</Resources>
+		<Description2></Description2>
+	</Object>
+</LWM2M>

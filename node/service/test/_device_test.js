@@ -19,12 +19,17 @@ var initializeDevice = {
   statusUpdatedTime:'0001-01-01T00:00:00',
   lastActivityTime:'2015-08-26T01:00:51.6950626',
   cloudToDeviceMessageCount:4,
+  isManaged:true,
   authentication:
     {symmetricKey: 
-      {primaryKey:"aBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJK=",secondaryKey:"ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="}}
+      {primaryKey:"aBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJK=",secondaryKey:"ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="}},
+  systemProperties:
+    {batteryLevel:'90',batteryStatus:"good",currentTime:'2015-08-26T01:00:51.6950626',defaultMaxPeriod:'50',defaultMinPeriod:'1',deviceDescription:'devDesc' }
 };
 var fullDevice = JSON.stringify(initializeDevice);
 var deviceName = 'testDevice';
+var newDeviceName = 'newDeviceName';
+var newStatusReason = 'Status Reason';
 
 function throwsRedefineError(device, fieldName, descriptor) {
   assert.throws(function () {
@@ -74,6 +79,8 @@ describe('Device', function () {
     
     it('JSON is created correctly', function() {
       var device = new Device(fullDevice);
+      var auth = device.authentication;
+      var sysProp = device.systemProperties;
       
       assert.equal(device.deviceId, initializeDevice.deviceId);
       assert.equal(device.generationId, initializeDevice.generationId);
@@ -85,7 +92,18 @@ describe('Device', function () {
       assert.equal(device.statusUpdatedTime, initializeDevice.statusUpdatedTime);
       assert.equal(device.lastActivityTime, initializeDevice.lastActivityTime);
       assert.equal(device.cloudToDeviceMessageCount, initializeDevice.cloudToDeviceMessageCount);
-    });
+      assert.equal(device.isManaged, initializeDevice.isManaged);
+
+      assert.equal(auth.symmetricKey.primaryKey, initializeDevice.authentication.symmetricKey.primaryKey);
+      assert.equal(auth.symmetricKey.secondaryKey, initializeDevice.authentication.symmetricKey.secondaryKey);
+            
+      assert.equal(sysProp.batteryLevel, initializeDevice.systemProperties.batteryLevel);
+      assert.equal(sysProp.batteryStatus, initializeDevice.systemProperties.batteryStatus);
+      assert.equal(sysProp.currentTime, initializeDevice.systemProperties.currentTime);
+      assert.equal(sysProp.defaultMaxPeriod, initializeDevice.systemProperties.defaultMaxPeriod);
+      assert.equal(sysProp.defaultMinPeriod, initializeDevice.systemProperties.defaultMinPeriod);
+      assert.equal(sysProp.deviceDescription, initializeDevice.systemProperties.deviceDescription);
+    }); 
   });
 
   describe('#deviceId', function () { 
@@ -105,6 +123,9 @@ describe('Device', function () {
       assert.throws(function () {
         delete device.deviceId;
       }, TypeError, 'Cannot delete property \'deviceId\' of #<Device>');
+      
+      device.deviceId = newDeviceName;
+      assert.equal(device.deviceId, newDeviceName);
     });
   });
 
@@ -187,6 +208,11 @@ describe('Device', function () {
       assert.throws(function () {
         delete device.status;
       }, TypeError, 'Cannot delete property \'status\' of #<Device>');
+
+      assert.throws(function () {
+        device.status = 'invalidStatus';
+      }, RangeError, 'status is neither Enabled or Disabled');
+      
     });
     
     it('Assignments allowed to enable and disabled', function() {
@@ -218,6 +244,9 @@ describe('Device', function () {
       assert.throws(function () {
         delete device.statusReason;
       }, TypeError, 'Cannot delete property \'statusReason\' of #<Device>');
+      
+      device.statusReason = newStatusReason;
+      assert.equal(device.statusReason, newStatusReason); 
     });
   });
   
@@ -324,5 +353,160 @@ describe('Device', function () {
         delete device.authentication;
       }, TypeError, 'Cannot delete property \'authentication\' of #<Device>');
     });
+  });
+  
+  describe('#isManaged', function () { 
+    it('cannot be configured or deleted', function () {
+      var device = new Device(deviceJson);
+      var fieldName = 'isManaged';
+      
+      throwsRedefineError(device, fieldName, { configurable: true });
+      throwsRedefineError(device, fieldName, { enumerable: false });
+      throwsRedefineError(device, fieldName, { set: function () { } });
+      throwsRedefineError(device, fieldName, { get: function () { return deviceName; } });
+      throwsRedefineError(device, fieldName, { value: 'world' });
+
+      assert.doesNotThrow(function () {
+        Object.defineProperty(device, fieldName, { enumerable: true }); // redefine to same value is ok
+      });
+
+      assert.throws(function () {
+        delete device.isManaged;
+      }, TypeError, 'Cannot delete property \'isManaged\' of #<Device>');
+    });
+  });
+  
+  describe('#serviceProperties', function () { 
+    it('cannot be configured or deleted', function () {
+      var device = new Device(deviceJson);
+      var fieldName = 'serviceProperties';
+      
+      throwsRedefineError(device, fieldName, { configurable: true });
+      throwsRedefineError(device, fieldName, { enumerable: false });
+      throwsRedefineError(device, fieldName, { set: function () { } });
+      throwsRedefineError(device, fieldName, { get: function () { return deviceName; } });
+      throwsRedefineError(device, fieldName, { value: 'world' });
+
+      assert.doesNotThrow(function () {
+        Object.defineProperty(device, fieldName, { enumerable: true }); // redefine to same value is ok
+      });
+
+      assert.throws(function () {
+        delete device.serviceProperties;
+      }, TypeError, 'Cannot delete property \'serviceProperties\' of #<Device>');
+    });
+  });
+  
+  describe('#systemProperties', function () { 
+    it('cannot be configured or deleted', function () {
+      var device = new Device(deviceJson);
+      var fieldName = 'systemProperties';
+      
+      throwsRedefineError(device, fieldName, { configurable: true });
+      throwsRedefineError(device, fieldName, { enumerable: false });
+      throwsRedefineError(device, fieldName, { set: function () { } });
+      throwsRedefineError(device, fieldName, { get: function () { return deviceName; } });
+      throwsRedefineError(device, fieldName, { value: 'world' });
+
+      assert.doesNotThrow(function () {
+        Object.defineProperty(device, fieldName, { enumerable: true }); // redefine to same value is ok
+      });
+
+      assert.throws(function () {
+        delete device.systemProperties;
+      }, TypeError, 'Cannot delete property \'systemProperties\' of #<Device>');
+    });
+  });
+  
+  describe('#batteryLevel', function () { 
+    it('cannot be configured or deleted', function () {
+      var device = new Device(deviceJson);
+      var sysProp = device.systemProperties;
+      var fieldName = 'batteryLevel';
+      
+      throwsRedefineError(sysProp, fieldName, { configurable: true });
+      throwsRedefineError(sysProp, fieldName, { enumerable: false });
+      throwsRedefineError(sysProp, fieldName, { set: function () { } });
+      throwsRedefineError(sysProp, fieldName, { get: function () { return deviceName; } });
+      throwsRedefineError(sysProp, fieldName, { value: 'world' });
+
+      assert.doesNotThrow(function () {
+        Object.defineProperty(sysProp, fieldName, { enumerable: true }); // redefine to same value is ok
+      });
+    });
+  });
+
+  describe('#batteryStatus', function () { 
+    it('cannot be configured or deleted', function () {
+      var device = new Device(deviceJson);
+      var sysProp = device.systemProperties;
+      var fieldName = 'batteryStatus';
+      
+      throwsRedefineError(sysProp, fieldName, { configurable: true });
+      throwsRedefineError(sysProp, fieldName, { enumerable: false });
+      throwsRedefineError(sysProp, fieldName, { set: function () { } });
+      throwsRedefineError(sysProp, fieldName, { get: function () { return deviceName; } });
+      throwsRedefineError(sysProp, fieldName, { value: 'world' });
+
+      assert.doesNotThrow(function () {
+        Object.defineProperty(sysProp, fieldName, { enumerable: true }); // redefine to same value is ok
+      });
+    });
+  });
+
+  describe('#currentTime', function () { 
+    it('cannot be configured or deleted', function () {
+      var device = new Device(deviceJson);
+      var sysProp = device.systemProperties;
+      var fieldName = 'currentTime';
+      
+      throwsRedefineError(sysProp, fieldName, { configurable: true });
+      throwsRedefineError(sysProp, fieldName, { enumerable: false });
+      throwsRedefineError(sysProp, fieldName, { set: function () { } });
+      throwsRedefineError(sysProp, fieldName, { get: function () { return deviceName; } });
+      throwsRedefineError(sysProp, fieldName, { value: 'world' });
+
+      assert.doesNotThrow(function () {
+        Object.defineProperty(sysProp, fieldName, { enumerable: true }); // redefine to same value is ok
+      });
+    });
+  });
+  
+  
+  describe('#enumerable', function() {
+    it('is enumerable', function () {
+      var device = new Device(deviceJson);
+      var sysProp = device.systemProperties;
+
+      var allProps = [];
+      for (var prop in sysProp) {
+        if (sysProp.hasOwnProperty(prop)) {
+          allProps.push(prop.toString());
+        }
+      }
+      
+      assert.include(allProps, 'batteryLevel');
+      assert.include(allProps, 'batteryStatus');
+      assert.include(allProps, 'currentTime');
+      assert.include(allProps, 'defaultMaxPeriod');
+      assert.include(allProps, 'defaultMinPeriod');
+      assert.include(allProps, 'deviceDescription');
+      assert.include(allProps, 'firmwarePackage');
+      assert.include(allProps, 'firmwarePackageName');
+      assert.include(allProps, 'firmwarePackageUri');
+      assert.include(allProps, 'firmwarePackageVersion');
+      assert.include(allProps, 'firmwareUpdateResult');
+      assert.include(allProps, 'firmwareUpdateState');
+      assert.include(allProps, 'firmwareVersion');
+      assert.include(allProps, 'hardwareVersion');
+      assert.include(allProps, 'manufacturer');
+      assert.include(allProps, 'memoryFree');
+      assert.include(allProps, 'memoryTotal');
+      assert.include(allProps, 'modelNumber');
+      assert.include(allProps, 'registrationLifetime');
+      assert.include(allProps, 'serialNumber');
+      assert.include(allProps, 'timezone');
+      assert.include(allProps, 'utcOffset');      
+    });  
   });
 });

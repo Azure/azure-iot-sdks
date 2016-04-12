@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+FILE INFORMATION
+
+OMA Permanent Document
+   File: OMA-SUP-XML_LWM2M_Access_Control-V1_0-20131210-C
+   Type: xml
+
+Public Reachable Information
+   Path: http://www.openmobilealliance.org/tech/profiles
+   Name: LWM2M_Access_Control-v1_0.xml
+
+NORMATIVE INFORMATION
+
+  Information about this file can be found in the latest revision of
+
+    OMA-TS-LightweightM2M-V1_0
+
+  This is available at http://www.openmobilealliance.org/
+
+  Send comments to technical-comments@mail.openmobilealliance.org
+
+CHANGE HISTORY
+
+22102013 File created, see OMA-DM-LightweightM2M-2013-0164-INP_LWM2M_Objects_XML_files
+31102013 Incorporated CR OMA-DM-LightweightM2M-2013-0162R03-CR_Bug_Fixes, plus changes according to OMA-TS-LightweightM2M-V1_0-20131017-D
+03122013 Incorporated CR OMA-DM-LightweightM2M-2013-0172-CR_SUP_files_schema_reference
+10122013 Status changed to Candidate by TP, TP Ref # OMA-TP-2013-0368-INP_LightweightM2M_V1_0_ERP_and_ETR_for_Candidate_approval
+
+	
+LEGAL DISCLAIMER
+
+Use of this document is subject to all of the terms and conditions
+of the Use Agreement located at
+	http://www.openmobilealliance.org/UseAgreement.html
+
+You may use this document or any part of the document for internal
+or educational purposes only, provided you do not modify, edit or
+take out of context the information in this document in any manner.
+Information contained in this document may be used, at your sole
+risk, for any purposes.
+
+You may not use this document in any other manner without the prior
+written permission of the Open Mobile Alliance.  The Open Mobile
+Alliance authorizes you to copy this document, provided that you
+retain all copyright and other proprietary notices contained in the
+original materials on any copies of the materials and that you
+comply strictly with these terms.  This copyright permission does
+not constitute an endorsement of the products or services.  The
+Open Mobile Alliance assumes no responsibility for errors or
+omissions in this document.
+
+Each Open Mobile Alliance member has agreed to use reasonable
+endeavors to inform the Open Mobile Alliance in a timely manner of
+Essential IPR as it becomes aware that the Essential IPR is related
+to the prepared or published specification.  However, the members
+do not have an obligation to conduct IPR searches.  The declared
+Essential IPR is publicly available to members and non-members of
+the Open Mobile Alliance and may be found on the "OMA IPR
+Declarations" list at http://www.openmobilealliance.org/ipr.html.
+The Open Mobile Alliance has not conducted an independent IPR review
+of this document and the information contained herein, and makes no
+representations or warranties regarding third party IPR, including
+without limitation patents, copyrights or trade secret rights.  This
+document may contain inventions for which you must obtain licenses
+from third parties before making, using or selling the inventions.
+Defined terms above are set forth in the schedule to the Open Mobile
+Alliance Application Form.
+
+NO REPRESENTATIONS OR WARRANTIES (WHETHER EXPRESS OR IMPLIED) ARE
+MADE BY THE OPEN MOBILE ALLIANCE OR ANY OPEN MOBILE ALLIANCE MEMBER
+OR ITS AFFILIATES REGARDING ANY OF THE IPR'S REPRESENTED ON THE "OMA
+IPR DECLARATIONS" LIST, INCLUDING, BUT NOT LIMITED TO THE ACCURACY,
+COMPLETENESS, VALIDITY OR RELEVANCE OF THE INFORMATION OR WHETHER OR
+NOT SUCH RIGHTS ARE ESSENTIAL OR NON-ESSENTIAL.
+
+THE OPEN MOBILE ALLIANCE IS NOT LIABLE FOR AND HEREBY DISCLAIMS ANY
+DIRECT, INDIRECT, PUNITIVE, SPECIAL, INCIDENTAL, CONSEQUENTIAL, OR
+EXEMPLARY DAMAGES ARISING OUT OF OR IN CONNECTION WITH THE USE OF
+DOCUMENTS AND THE INFORMATION CONTAINED IN THE DOCUMENTS.
+
+Copyright 2013 Open Mobile Alliance Ltd.  All Rights Reserved.
+Used with the permission of the Open Mobile Alliance Ltd. under the
+terms set forth above.
+-->
+
+<LWM2M xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://openmobilealliance.org/tech/profiles/LWM2M.xsd" >
+	<Object ObjectType="MODefinition">
+		<Name>LWM2M Access Control</Name>
+		<Description1><![CDATA[Access Control Object is used to check whether the LWM2M Server has access right for performing a operation.]]></Description1>
+		<ObjectID>2</ObjectID>
+		<ObjectURN>TBD</ObjectURN>
+		<MultipleInstances>Multiple</MultipleInstances>
+		<Mandatory>Optional</Mandatory>
+		<Resources>
+			<Item ID="0">
+				<Name>Object ID</Name>
+        <Operations>R</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration>1-65534</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[The Object ID and The Object Instance ID are applied for.]]></Description>
+			</Item>
+			<Item ID="1">
+				<Name>Object Instance ID</Name>
+        <Operations>R</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration>0-65535</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[See Table 14: LWM2M Identifiers.]]></Description>
+			</Item>
+			<Item ID="2">
+				<Name>ACL</Name>
+        <Operations>RW</Operations>
+				<MultipleInstances>Multiple</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration>16-bit</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Resource Instance ID MUST be the Short Server ID of a certain LWM2M Server which has an access right.
+Resource Instance ID 0 is for default Short Server ID.
+The Value of the Resource Instance contains the access rights.
+Setting each bit means the LWM2M Server has the access right for that operation. The bit order is specified as below.
+1st lsb: R(Read, Observe, Discover, Write Attributes)
+2nd lsb: W(Write)
+3rd lsb: E(Execute)
+4th lsb: D(Delete)
+5th lsb: C(Create)
+Other bits are reserved for future use]]></Description>
+			</Item>
+			<Item ID="3">
+				<Name>Access Control Owner</Name>
+        <Operations>RW</Operations>
+				<MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration>0-65535</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Short Server ID of a certain LWM2M Server. Only this LWM2M Server can manage these Resources of the Object Instance.
+Value MAX_ID=65535 is reserved for the Access Control Object Instances created during Bootstrap procedure.]]></Description>
+			</Item>
+		</Resources>
+		<Description2><![CDATA[==E.3.1	Object Instance Configurations==
+If a new LWM2M Server Account is added when LWM2M Client has only one LWM2M Server Account, Client MUST ensure that Access Control Object Instances for every Object Instance except Security Object Instance exist. The LWM2M Client MUST create the missing Access Control Object Instances as follows:
+−	Access Control Owner MUST be the previously existing LWM2M Server
+−	Previously existing LWM2M Server MUST have full access right.]]></Description2>
+	</Object>
+</LWM2M>

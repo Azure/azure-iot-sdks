@@ -50,7 +50,7 @@ function badConfigTests(opName, badConnStrings, Transport, requestFn) {
   });
 }
 
-function runTests(Transport, goodConnectionString, badConnectionStrings, deviceId) {
+function runTests(Transport, goodConnectionString, badConnectionStrings, dmConnectionString, badDmConnectionStrings, deviceId) {
 
   /*Tests_SRS_NODE_IOTHUB_HTTP_05_001: [The Http constructor shall accept an object with three properties:
   host – (string) the fully-qualified DNS hostname of an IoT hub
@@ -303,6 +303,30 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
       badConfigTests('delete device information', badConnectionStrings, Transport, function (registry, done) {
         registry.delete(deviceId, done);
       });
+    });
+
+    describe('#queryDevices', function () {
+      /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_020: [The QueryDevice method shall call the server for the device that contain the tags] */
+      /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_022: [The JSON array returned from the service shall be converted to a list of Device objects.] */
+      it('calls the transport to query a device with a specified tag', function (done) {
+        var registry = Registry.fromConnectionString(dmConnectionString, Transport);
+        var tagList = ['irrelevant'];
+        registry.queryDevices(tagList, 10, function (err, deviceList, res) {
+          if (err) {
+            done(err);
+          } else {
+            assert.isOk(res);
+            assert.isArray(deviceList);
+            done();
+          }
+        });
+      });
+
+      badConfigTests('query device tags', badDmConnectionStrings, Transport, function (registry, done) {
+        var tagList = ['irrelevant'];
+        registry.queryDevices(tagList, 10, done);
+      });
+
     });
   });
 }

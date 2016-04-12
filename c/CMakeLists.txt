@@ -165,6 +165,7 @@ if(${run_e2e_tests})
 endif()
 
 add_subdirectory(iothub_client)
+add_subdirectory(iotdm_client)
 add_subdirectory(serializer)
 if(NOT "${build_python}" STREQUAL "OFF")
     add_subdirectory(../python/device/iothub_client_python python)

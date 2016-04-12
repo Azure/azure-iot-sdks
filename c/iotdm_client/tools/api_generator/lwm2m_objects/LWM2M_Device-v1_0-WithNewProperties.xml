@@ -1,0 +1,352 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+FILE INFORMATION
+
+OMA Permanent Document
+   File: OMA-SUP-XML_LWM2M_Device-V1_0-20131210-C
+   Type: xml
+
+Public Reachable Information
+   Path: http://www.openmobilealliance.org/tech/profiles
+   Name: LWM2M_Device-v1_0.xml
+
+NORMATIVE INFORMATION
+
+  Information about this file can be found in the latest revision of
+
+    OMA-TS-LightweightM2M-V1_0
+
+  This is available at http://www.openmobilealliance.org/
+
+  Send comments to technical-comments@mail.openmobilealliance.org
+
+CHANGE HISTORY
+
+22102013 File created, see OMA-DM-LightweightM2M-2013-0164-INP_LWM2M_Objects_XML_files
+31102013 Changed according to OMA-TS-LightweightM2M-V1_0-20131017-D
+03122013 Incorporated CR OMA-DM-LightweightM2M-2013-0172-CR_SUP_files_schema_reference
+10122013 Status changed to Candidate by TP, TP Ref # OMA-TP-2013-0368-INP_LightweightM2M_V1_0_ERP_and_ETR_for_Candidate_approval
+
+	
+LEGAL DISCLAIMER
+
+Use of this document is subject to all of the terms and conditions
+of the Use Agreement located at
+	http://www.openmobilealliance.org/UseAgreement.html
+
+You may use this document or any part of the document for internal
+or educational purposes only, provided you do not modify, edit or
+take out of context the information in this document in any manner.
+Information contained in this document may be used, at your sole
+risk, for any purposes.
+
+You may not use this document in any other manner without the prior
+written permission of the Open Mobile Alliance.  The Open Mobile
+Alliance authorizes you to copy this document, provided that you
+retain all copyright and other proprietary notices contained in the
+original materials on any copies of the materials and that you
+comply strictly with these terms.  This copyright permission does
+not constitute an endorsement of the products or services.  The
+Open Mobile Alliance assumes no responsibility for errors or
+omissions in this document.
+
+Each Open Mobile Alliance member has agreed to use reasonable
+endeavors to inform the Open Mobile Alliance in a timely manner of
+Essential IPR as it becomes aware that the Essential IPR is related
+to the prepared or published specification.  However, the members
+do not have an obligation to conduct IPR searches.  The declared
+Essential IPR is publicly available to members and non-members of
+the Open Mobile Alliance and may be found on the "OMA IPR
+Declarations" list at http://www.openmobilealliance.org/ipr.html.
+The Open Mobile Alliance has not conducted an independent IPR review
+of this document and the information contained herein, and makes no
+representations or warranties regarding third party IPR, including
+without limitation patents, copyrights or trade secret rights.  This
+document may contain inventions for which you must obtain licenses
+from third parties before making, using or selling the inventions.
+Defined terms above are set forth in the schedule to the Open Mobile
+Alliance Application Form.
+
+NO REPRESENTATIONS OR WARRANTIES (WHETHER EXPRESS OR IMPLIED) ARE
+MADE BY THE OPEN MOBILE ALLIANCE OR ANY OPEN MOBILE ALLIANCE MEMBER
+OR ITS AFFILIATES REGARDING ANY OF THE IPR'S REPRESENTED ON THE "OMA
+IPR DECLARATIONS" LIST, INCLUDING, BUT NOT LIMITED TO THE ACCURACY,
+COMPLETENESS, VALIDITY OR RELEVANCE OF THE INFORMATION OR WHETHER OR
+NOT SUCH RIGHTS ARE ESSENTIAL OR NON-ESSENTIAL.
+
+THE OPEN MOBILE ALLIANCE IS NOT LIABLE FOR AND HEREBY DISCLAIMS ANY
+DIRECT, INDIRECT, PUNITIVE, SPECIAL, INCIDENTAL, CONSEQUENTIAL, OR
+EXEMPLARY DAMAGES ARISING OUT OF OR IN CONNECTION WITH THE USE OF
+DOCUMENTS AND THE INFORMATION CONTAINED IN THE DOCUMENTS.
+
+Copyright 2013 Open Mobile Alliance Ltd.  All Rights Reserved.
+Used with the permission of the Open Mobile Alliance Ltd. under the
+terms set forth above.
+-->
+
+<LWM2M xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://openmobilealliance.org/tech/profiles/LWM2M.xsd" >
+	<Object ObjectType="MODefinition">
+		<Name>Device</Name>
+		<Description1><![CDATA[This LWM2M Object provides a range of device related information which can be queried by the LWM2M Server, and a device reboot and factory reset function.]]></Description1>
+		<ObjectID>3</ObjectID>
+		<ObjectURN>TBD</ObjectURN>
+		<MultipleInstances>Single</MultipleInstances>
+		<Mandatory>Mandatory</Mandatory>
+		<Resources>
+			<Item ID="0">
+				<Name>Manufacturer</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>String</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Human readable manufacturer name]]></Description>
+			</Item>
+			<Item ID="1">
+				<Name>Model Number</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>String</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[A model identifier (manufacturer specified string)]]></Description>
+			</Item>
+			<Item ID="2">
+				<Name>Serial Number</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>String</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Serial Number]]></Description>
+			</Item>
+			<Item ID="3">
+				<Name>Firmware Version</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>String</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Current firmware version]]></Description>
+			</Item>
+			<Item ID="4">
+				<Name>Reboot</Name>
+        <Operations>E</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type></Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Reboot the LWM2M Device to restore the Device from unexpected firmware failure.]]></Description>
+			</Item>
+			<Item ID="5">
+				<Name>Factory Reset</Name>
+        <Operations>E</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type></Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Perform factory reset of the LWM2M Device to make the LWM2M Device have the same configuration as at the initial deployment.
+When this Resource is executed, “De-register” operation  MAY be sent to the LWM2M Server(s) before factory reset of the LWM2M Device.]]></Description>
+			</Item>
+			<Item ID="6">
+				<Name>Available Power Sources</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Multiple</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration>0-7</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[0 – DC power
+1 – Internal Battery
+2 – External Battery
+4 – Power over Ethernet
+5 – USB
+6 – AC (Mains) power
+7 – Solar]]></Description>
+			</Item>
+			<Item ID="7">
+				<Name>Power Source Voltage</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Multiple</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units>mV</Units>
+				<Description><![CDATA[Present voltage for each Available Power Sources Resource Instance.
+Each Resource Instance ID MUST map to the value of Available Power Sources Resource.]]></Description>
+			</Item>
+      <Item ID="8">
+        <Name>Power Source Current</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Multiple</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>Integer</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units>mA</Units>
+        <Description><![CDATA[Present current for each Available Power Source]]></Description>
+      </Item>
+      <Item ID="9">
+        <Name>Battery Level</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>Integer</Type>
+        <RangeEnumeration>0-100</RangeEnumeration>
+        <Units>%</Units>
+        <Description><![CDATA[Contains the current battery level as a percentage (with a range from 0 to 100). This value is only valid when the value of Available Power Sources Resource is 1.]]></Description>
+      </Item>
+      <Item ID="10">
+        <Name>Memory Free</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>Integer</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units>KB</Units>
+        <Description><![CDATA[Estimated current available amount of storage space which can store data and software in the LWM2M Device (expressed in kilobytes).]]></Description>
+      </Item>
+      <Item ID="11">
+        <Name>Error Code</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Multiple</MultipleInstances>
+        <Mandatory>Mandatory</Mandatory>
+        <Type>Integer</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[0=No error
+1=Low battery power
+2=External power supply off
+3=GPS module failure
+4=Low received signal strength
+5=Out of memory
+6=SMS failure
+7=IP connectivity failure
+8=Peripheral malfunction
+
+When the single Device Object Instance is initiated, there is only one error code Resource Instance whose value is equal to 0 that means no error. When the first error happens, the LWM2M Client changes error code Resource Instance to any non-zero value to indicate the error type. When any other error happens, a new error code Resource Instance is created.
+This error code Resource MAY be observed by the LWM2M Server. How to deal with LWM2M Client’s error report depends on the policy of the LWM2M Server.]]></Description>
+      </Item>
+      <Item ID="12">
+        <Name>Reset Error Code</Name>
+        <Operations>E</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type></Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[Delete all error code Resource Instances and create only one zero-value error code that implies no error.]]></Description>
+      </Item>
+      <Item ID="13">
+        <Name>Current Time</Name>
+        <Operations>RW</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>Time</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[Current UNIX time of the LWM2M Client.
+The LWM2M Client should be responsible to increase this time value as every second elapses.
+The LWM2M Server is able to write this Resource to make the LWM2M Client synchronized with the LWM2M Server.]]></Description>
+      </Item>
+      <Item ID="14">
+        <Name>UTC Offset</Name>
+        <Operations>RW</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>String</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[Indicates the UTC offset currently in effect for this LWM2M Device. UTC+X [ISO 8601].]]></Description>
+      </Item>
+      <Item ID="15">
+        <Name>Timezone</Name>
+        <Operations>RW</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>String</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[Indicates in which time zone the LWM2M Device is located, in IANA Timezone (TZ) database format.]]></Description>
+      </Item>
+      <Item ID="16">
+        <Name>Supported Binding and Modes</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Mandatory</Mandatory>
+        <Type>String</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[Indicates which bindings and modes are supported in the LWM2M Client. The possible values of Resource are combination of "U" or "UQ" and "S" or "SQ".]]></Description>
+      </Item>
+      <Item ID="17">
+        <Name>Device Type</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>String</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[Type of the device (manufacturer specified string : e.g. smart meters / dev Class…)]]></Description>
+      </Item>
+      <Item ID="18">
+        <Name>Hardware Version</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>String</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[Current hardware version of the device]]></Description>
+      </Item>
+      <Item ID="19">
+        <Name>Software Version</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>String</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[Current software version of the device. 
+(manufacturer specified string). 
+On elaborated LWM2M device, SW could be split in 2 parts : a firmware one and a higher level software on top.  
+Both pieces of Software are together managed by LWM2M Firmware Update  Object (Object ID 5)  ]]></Description>
+      </Item>
+      <Item ID="20">
+        <Name>Battery Status</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>Integer</Type>
+        <RangeEnumeration>0-6</RangeEnumeration>
+        <Units></Units>
+        <Description>
+          <![CDATA[This value is only valid when the value of Available Power Sources Resource is 1.  
+0  Normal           The battery is operating normally and not on power.  
+1  Charging         The battery is currently charging.  
+2  Charge Complete  The battery is fully  charged and  still on power.  
+3  Damaged          The battery has some problem.  
+4  Low Battery      The battery is low on charge.  
+5  Not Installed    The battery is not installed.  
+6  Unknown          The battery information is not available]]></Description>
+      </Item>
+      <Item ID="21">
+        <Name>Memory Total</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>Integer</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units>KB</Units>
+        <Description><![CDATA[Total amount of storage space which can store data and software  in the  LWM2M Device (expressed in kilobytes]]></Description>
+      </Item>
+    </Resources>
+			<Description2></Description2>
+	</Object>
+</LWM2M>

@@ -382,4 +382,39 @@ Registry.prototype.cancelJob = function (jobId, done) {
   });
 };
 
+/**
+ * @method              module:azure-iothub.Registry#queryDevices
+ * @description         QueryDevices method will return a list of devices that match the tags that are specified in the tag list.
+ * @param {array}       tags      The list of tags used in the query.
+ * @param {int}         maxCount  The maximum number of devices returned.
+ * @param {Function}    done      The function to call when the operation is
+ *                                complete. `done` will be called with three
+ *                                arguments: an Error object (can be null), an
+ *                                array of
+ *                                {@link module:azure-iothub.Device|Device}
+ *                                objects representing the listed device
+ *                                identities, and a transport-specific response
+ *                                object useful for logging or debugging. */
+Registry.prototype.queryDevices = function (tags, maxCount, done) {
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_019: [A ReferenceError shall be thrown if the tags array is empty.] */
+    if (!tags || tags.length === 0) throw new ArgumentError('tag list is empty');
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_023: [A ReferenceError shall be thrown if the maxCount is less than or equal to zero.] */
+    if (maxCount <= 0) throw new RangeError('invalid Max Count specified');
+    
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_020: [The QueryDevices method shall call the server for the device that contain the tags] */
+    this._transport.queryDevices(endpoint.versionQueryString(), tags, maxCount, function (err, body, response) {
+        var devList = [];
+        if (body) {
+            var jsonArray = JSON.parse(body);
+            jsonArray.forEach(function (jsonElement) {
+                /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_022: [The JSON array returned from the service shall be converted to a list of Device objects.] */
+                var devItem = new Device(JSON.stringify(jsonElement));
+                devList.push(devItem);
+            });
+        }
+        /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_021: [When the list method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an array of Device objects representing up to Max Count devices from the IoT hub.] */
+        done(err, devList, response);
+  });
+};
+
 module.exports = Registry;

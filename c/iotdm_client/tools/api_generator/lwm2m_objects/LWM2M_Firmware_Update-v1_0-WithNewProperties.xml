@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+FILE INFORMATION
+
+OMA Permanent Document
+   File: OMA-SUP-XML_LWM2M_Firmware_Update-V1_0-20131210-C
+   Type: xml
+
+Public Reachable Information
+   Path: http://www.openmobilealliance.org/tech/profiles
+   Name: LWM2M_Firmware_Update-v1_0.xml
+
+NORMATIVE INFORMATION
+
+  Information about this file can be found in the latest revision of
+
+    OMA-TS-LightweightM2M-V1_0
+
+  This is available at http://www.openmobilealliance.org/
+
+  Send comments to technical-comments@mail.openmobilealliance.org
+
+CHANGE HISTORY
+
+22102013 File created, see OMA-DM-LightweightM2M-2013-0164-INP_LWM2M_Objects_XML_files
+31102013 Changed according to OMA-TS-LightweightM2M-V1_0-20131017-D
+03122013 Incorporated CR OMA-DM-LightweightM2M-2013-0172-CR_SUP_files_schema_reference
+10122013 Status changed to Candidate by TP, TP Ref # OMA-TP-2013-0368-INP_LightweightM2M_V1_0_ERP_and_ETR_for_Candidate_approval
+
+	
+LEGAL DISCLAIMER
+
+Use of this document is subject to all of the terms and conditions
+of the Use Agreement located at
+	http://www.openmobilealliance.org/UseAgreement.html
+
+You may use this document or any part of the document for internal
+or educational purposes only, provided you do not modify, edit or
+take out of context the information in this document in any manner.
+Information contained in this document may be used, at your sole
+risk, for any purposes.
+
+You may not use this document in any other manner without the prior
+written permission of the Open Mobile Alliance.  The Open Mobile
+Alliance authorizes you to copy this document, provided that you
+retain all copyright and other proprietary notices contained in the
+original materials on any copies of the materials and that you
+comply strictly with these terms.  This copyright permission does
+not constitute an endorsement of the products or services.  The
+Open Mobile Alliance assumes no responsibility for errors or
+omissions in this document.
+
+Each Open Mobile Alliance member has agreed to use reasonable
+endeavors to inform the Open Mobile Alliance in a timely manner of
+Essential IPR as it becomes aware that the Essential IPR is related
+to the prepared or published specification.  However, the members
+do not have an obligation to conduct IPR searches.  The declared
+Essential IPR is publicly available to members and non-members of
+the Open Mobile Alliance and may be found on the "OMA IPR
+Declarations" list at http://www.openmobilealliance.org/ipr.html.
+The Open Mobile Alliance has not conducted an independent IPR review
+of this document and the information contained herein, and makes no
+representations or warranties regarding third party IPR, including
+without limitation patents, copyrights or trade secret rights.  This
+document may contain inventions for which you must obtain licenses
+from third parties before making, using or selling the inventions.
+Defined terms above are set forth in the schedule to the Open Mobile
+Alliance Application Form.
+
+NO REPRESENTATIONS OR WARRANTIES (WHETHER EXPRESS OR IMPLIED) ARE
+MADE BY THE OPEN MOBILE ALLIANCE OR ANY OPEN MOBILE ALLIANCE MEMBER
+OR ITS AFFILIATES REGARDING ANY OF THE IPR'S REPRESENTED ON THE "OMA
+IPR DECLARATIONS" LIST, INCLUDING, BUT NOT LIMITED TO THE ACCURACY,
+COMPLETENESS, VALIDITY OR RELEVANCE OF THE INFORMATION OR WHETHER OR
+NOT SUCH RIGHTS ARE ESSENTIAL OR NON-ESSENTIAL.
+
+THE OPEN MOBILE ALLIANCE IS NOT LIABLE FOR AND HEREBY DISCLAIMS ANY
+DIRECT, INDIRECT, PUNITIVE, SPECIAL, INCIDENTAL, CONSEQUENTIAL, OR
+EXEMPLARY DAMAGES ARISING OUT OF OR IN CONNECTION WITH THE USE OF
+DOCUMENTS AND THE INFORMATION CONTAINED IN THE DOCUMENTS.
+
+Copyright 2013 Open Mobile Alliance Ltd.  All Rights Reserved.
+Used with the permission of the Open Mobile Alliance Ltd. under the
+terms set forth above.
+-->
+
+<LWM2M xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://openmobilealliance.org/tech/profiles/LWM2M.xsd" >
+	<Object ObjectType="MODefinition">
+		<Name>Firmware Update</Name>
+		<Description1><![CDATA[This LWM2M Object enables management of firmware which is to be updated. This Object includes installing firmware package, updating firmware, and performing actions after updating firmware.]]></Description1>
+		<ObjectID>5</ObjectID>
+		<ObjectURN>TBD</ObjectURN>
+		<MultipleInstances>Single</MultipleInstances>
+		<Mandatory>Optional</Mandatory>
+		<Resources>
+			<Item ID="0">
+				<Name>Package</Name>
+        <Operations>W</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>Opaque</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Firmware package]]></Description>
+			</Item>
+			<Item ID="1">
+				<Name>Package URI</Name>
+        <Operations>W</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>String</Type>
+				<RangeEnumeration>0-255 bytes</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[URI from where the device can download the firmware package by an alternative mechanism. As soon the device has received the Package URI it performs the download at the next practical opportunity.]]></Description>
+			</Item>
+			<Item ID="2">
+				<Name>Update</Name>
+        <Operations>E</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type></Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Updates firmware by using the firmware package stored in Package, or, by using the firmware downloaded from the Package URI.
+This Resource is only executable when the value of the State Resource is Downloaded.]]></Description>
+			</Item>
+			<Item ID="3">
+				<Name>State</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration>1-3</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Indicates current state with respect to this firmware update. This value is set by the LWM2M Client.
+1: Idle (before downloading or after updating)
+2: Downloading (The data sequence is on the way)
+3: Downloaded
+If writing the firmware package to Package Resource is done, or, if the device has downloaded the firmware package from the Package URI the state changes to Downloaded.
+If writing an empty string to Package Resource is done or writing an empty string to Package URI is done, the state changes to Idle.
+If performing the Update Resource failed, the state remains at Downloaded.
+If performing the Update Resource was successful, the state changes from Downloaded to Idle.]]></Description>
+			</Item>
+			<Item ID="4">
+				<Name>Update Supported Objects</Name>
+        <Operations>RW</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>Boolean</Type>
+				<RangeEnumeration></RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[If this value is true, the LWM2M Client MUST inform the registered LWM2M Servers of Objects and Object Instances parameter by sending an Update or Registration message after the firmware update operation at the next practical opportunity if supported Objects in the LWM2M Client have changed, in order for the LWM2M Servers to promptly manage newly installed Objects.
+If false, Objects and Object Instances parameter MUST be reported at the next periodic Update message.
+The default value is false.]]></Description>
+			</Item>
+			<Item ID="5">
+				<Name>Update Result</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type>Integer</Type>
+				<RangeEnumeration>0-6</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Contains the result of downloading or updating the firmware
+0: Default value. Once the updating process is initiated, this Resource SHOULD be reset to default value.
+1: Firmware updated successfully,
+2: Not enough storage for the new firmware package.
+3. Out of memory during downloading process.
+4: Connection lost during downloading process.
+5: CRC check failure for new downloaded package.
+6: Unsupported package type.
+7: Invalid URI
+This Resource MAY be reported by sending Observe operation.]]></Description>
+			</Item>
+      <Item ID="6">
+        <Name>PkgName</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>String</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[Name of the Firmware Package]]></Description>
+      </Item>
+      <Item ID="7">
+        <Name>PkgVersion</Name>
+        <Operations>R</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>String</Type>
+        <RangeEnumeration></RangeEnumeration>
+        <Units></Units>
+        <Description><![CDATA[Version of the Firmware package]]></Description>
+      </Item>
+    </Resources>
+		<Description2><![CDATA[==E.6.1	Firmware Update Consideration==
+If some Objects are not supported after firmware update, the LWM2M Client MUST delete all the Object Instances of the Objects that are not supported.]]></Description2>
+	</Object>
+</LWM2M>

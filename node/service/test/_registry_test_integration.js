@@ -11,8 +11,10 @@ function makeConnectionString(host, policy, key) {
 }
 
 var connectionString = process.env.IOTHUB_CONNECTION_STRING;
+var dmConnectionString = process.env.IOTHUB_DM_CONNECTION_STRING;
 var deviceId = process.env.IOTHUB_DEVICE_ID;
 var cn = ConnectionString.parse(connectionString);
+var dmcn = ConnectionString.parse(dmConnectionString);
 
 var badConnStrings = [
   makeConnectionString('bad', cn.SharedAccessKeyName, cn.SharedAccessKey),
@@ -20,7 +22,13 @@ var badConnStrings = [
   makeConnectionString(cn.HostName, cn.SharedAccessKeyName, 'bad'),
 ];
 
+var badDmConnStrings = [
+  makeConnectionString('bad', dmcn.SharedAccessKeyName, dmcn.SharedAccessKey),
+  makeConnectionString(dmcn.HostName, 'bad',dmcn.SharedAccessKey),
+  makeConnectionString(dmcn.HostName, dmcn.SharedAccessKeyName, 'bad'),
+];
+
 describe('Over real HTTPS', function () {
   this.timeout(60000);
-  runTests(null, connectionString, badConnStrings, deviceId);
+  runTests(null, connectionString, badConnStrings, dmConnectionString, badDmConnStrings, deviceId);
 });

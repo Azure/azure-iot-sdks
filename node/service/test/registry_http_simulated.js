@@ -139,4 +139,12 @@ SimulatedHttp.prototype.cancelJob = function (path, done) {
   }
 };
 
+SimulatedHttp.prototype.queryDevices = function (queryString, tagList, maxCount, done) {
+  var devices = [
+    { deviceId: 'testDevice1' },
+    { deviceId: 'testDevice2' }
+  ];
+  this.handleRequest(done, JSON.stringify(devices));
+};
+
 module.exports = SimulatedHttp;

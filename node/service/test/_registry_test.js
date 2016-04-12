@@ -4,9 +4,11 @@
 'use strict';
 
 var assert = require('chai').assert;
+var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var Registry = require('../lib/registry.js');
 var SimulatedHttp = require('./registry_http_simulated.js');
 var runTests = require('./_registry_common_testrun.js');
+var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 
 function bulkTests(Transport, goodConnectionString) {
   describe('Registry', function () {
@@ -223,6 +225,45 @@ function bulkTests(Transport, goodConnectionString) {
         });
       });
     });
+
+    describe('#queryDevices', function () {
+        /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_019: [A ReferenceError shall be thrown if the tags array is empty.] */
+        [undefined, null, "", 0].forEach(function (tagList) {
+            it('throws if the tagList is empty', function () {
+                var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+                assert.throws(function() {
+                    registry.queryDevices(tagList, 10, function () {});    
+                }, ArgumentError);
+            });
+        });
+
+        /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_023: [A ReferenceError shall be thrown if the maxCount is less than or equal to zero.] */
+        [0, -1].forEach(function (maxCount) {
+            it('throws if the maxCount is less then or equal to zero', function () {
+                var tagList = ['tag1', 'tag2'];
+                var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+                assert.throws(function () {
+                    registry.queryDevices(tagList, maxCount, function () {});
+                }, RangeError);
+            });
+        });
+        
+        /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_020: [The QueryDevice method shall call the server for the device that contain the tags] */
+        /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_022: [The JSON array returned from the service shall be converted to a list of Device objects.] */
+        it('calls the transport to query a device with a specified tag', function (done) {
+            var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+            var tagList = ['tag1', 'tag2'];
+            registry.queryDevices(tagList, 10, function (err, deviceList, res) {
+                if (err) {
+                    done(err);
+                } else {
+                    assert.isOk(res);
+                    assert.isArray(deviceList);                    
+                    done();
+                }
+            });
+        }); 
+    });
   });
 }
 
@@ -239,6 +280,6 @@ var badConnStrings = [
 var deviceId = 'testDevice';
 
 describe('Over simulated HTTPS', function () {
-  runTests(SimulatedHttp, connectionString, badConnStrings, deviceId);
+  runTests(SimulatedHttp, connectionString, badConnStrings, connectionString, badConnStrings, deviceId);
   bulkTests(SimulatedHttp, connectionString);
 });

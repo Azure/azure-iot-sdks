@@ -376,4 +376,33 @@ Http.prototype.cancelJob = function (path, done) {
   request.end();
 };
 
+/* Codes_SRS_NODE_IOTHUB_HTTP_07_001: [The queryDevice method shall construct an HTTP request using information supplied by the caller as follows:
+POST [path]?api-version=[version]&tags=[tagList]&top=[maxCount] HTTP/1.1 
+Authorization: [config.sharedAccessSignature] 
+Content-Type: application/json; charset=utf-8 
+Host: [host-name]]*/
+Http.prototype.queryDevices = function (queryString, tagList, maxCount, done) {
+  var config = this._config;
+  var httpHeaders = {
+    'Authorization': config.sharedAccessSignature,
+    'Accept': 'application/json',
+    'Host': config.host
+  };
+  
+  var tagPath = tagList.join('%2C');
+
+  var path = '/devices/query'+queryString+"&tags="+tagPath+"&top="+maxCount;
+  var request = this._http.buildRequest('POST', path, httpHeaders, config.host, function (err, body, response) {
+    if (!err) {
+      done(null, body, response);
+    } else {
+      err.response = response;
+      err.responseBody = body;
+      done(err);
+    }
+  });
+  
+  request.end();
+};
+
 module.exports = Http;

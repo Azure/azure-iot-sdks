@@ -39,7 +39,8 @@ extern "C"
     IOTHUB_CLIENT_INVALID_ARG,            \
     IOTHUB_CLIENT_ERROR,                  \
     IOTHUB_CLIENT_INVALID_SIZE,           \
-    IOTHUB_CLIENT_INDEFINITE_TIME         \
+    IOTHUB_CLIENT_INDEFINITE_TIME,        \
+    IOTHUB_CLIENT_NOT_IMPLEMENTED         \
 
 /** @brief Enumeration specifying the status of calls to various APIs in this module.
 */

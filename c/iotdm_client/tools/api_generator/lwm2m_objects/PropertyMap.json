@@ -1,0 +1,144 @@
+[
+	{
+		"ServiceName" : "RegistrationLifetime",
+		"Resource" : "Lifetime" ,
+		"Object" : "LWM2M Server"
+	},
+	{
+		"ServiceName" : "DefaultMinPeriod",
+		"Resource" : "Default Minimum Period" ,
+		"Object" : "LWM2M Server"
+	},
+	{
+		"ServiceName" : "DefaultMaxPeriod",
+		"Resource" : "Default Maximum Period" ,
+		"Object" : "LWM2M Server"
+	},
+	{
+		"ServiceName" : "Manufacturer",
+		"Resource" : "Manufacturer",
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "DeviceDescription",
+		"Resource" : "Device Type" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "ModelNumber",
+		"Resource" : "Model Number" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "SerialNumber",
+		"Resource" : "Serial Number" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "HardwareVersion",
+		"Resource" : "Hardware Version" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "FirmwareVersion",
+		"Resource" : "Firmware Version" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "BatteryLevel",
+		"Resource" : "Battery Level" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "BatteryStatus",
+		"Resource" : "Battery Status" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "MemoryFree",
+		"Resource" : "Memory Free" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "MemoryTotal",
+		"Resource" : "Memory Total" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "CurrentTime",
+		"Resource" : "Current Time" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "UTCOffset",
+		"Resource" : "UTC Offset" ,
+		"Object" : "Device",
+    "ApiPropertyOverride" : "Device_UtcOffset"
+	},
+	{
+		"ServiceName" : "Timezone",
+		"Resource" : "Timezone" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "RebootDevice",
+		"Resource" : "Reboot" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "FactoryResetDevice",
+		"Resource" : "Factory Reset" ,
+		"Object" : "Device"
+	},
+	{
+		"ServiceName" : "FirmwarePackage",
+		"Resource" : "Package" ,
+		"Object" : "Firmware Update"
+	},
+	{
+		"ServiceName" : "FirmwarePackageURI",
+		"Resource" : "Package URI" ,
+		"Object" : "Firmware Update",
+    "ApiPropertyOverride" : "FirmwareUpdate_PackageUri"
+	},
+	{
+		"ServiceName" : "FirmwareUpdateState",
+		"Resource" : "State" ,
+		"Object" : "Firmware Update"
+	},
+	{
+		"ServiceName" : "FirmwareUpdateResult",
+		"Resource" : "Update Result" ,
+		"Object" : "Firmware Update"
+	},
+	{
+		"ServiceName" : "FirmwarePackageName",
+		"Resource" : "PkgName" ,
+		"Object" : "Firmware Update"
+	},
+	{
+		"ServiceName" : "FirmwarePackageVersion",
+		"Resource" : "PkgVersion" ,
+		"Object" : "Firmware Update"
+	},
+	{
+		"ServiceName" : "UpdateFirmware",
+		"Resource" : "Update" ,
+		"Object" : "Firmware Update"
+	},
+	{
+		"ServiceName" : "ConfigName",
+		"Resource" : "Name" ,
+		"Object" : "Config"
+	},
+	{
+		"ServiceName" : "ConfigValue",
+		"Resource" : "Value" ,
+		"Object" : "Config"
+	},
+	{
+		"ServiceName" : "ConfigApply",
+		"Resource" : "Apply" ,
+		"Object" : "Config"
+	}
+]

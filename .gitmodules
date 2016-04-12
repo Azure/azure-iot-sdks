@@ -4,8 +4,9 @@
 [submodule "c/azure-umqtt-c"]
 	path = c/azure-umqtt-c
 	url = https://github.com/Azure/azure-umqtt-c.git
-	branch = develop
 [submodule "c/azure-uamqp-c"]
 	path = c/azure-uamqp-c
 	url = https://github.com/Azure/azure-uamqp-c.git
-	branch = master
+[submodule "c/wakaama"]
+	path = c/wakaama
+	url = https://github.com/mhshami01/wakaama.git

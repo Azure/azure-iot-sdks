@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<LWM2M xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://openmobilealliance.org/tech/profiles/LWM2M.xsd" >
+  <Object ObjectType="MODefinition">
+		<Name>Config</Name>
+		<Description1>Represents the Config object represented by Microsoft IOT</Description1>
+		<ObjectID>10241</ObjectID>
+		<ObjectURN>urn:oma:lwm2m:x:10241</ObjectURN>
+		<MultipleInstances>Multiple</MultipleInstances>
+		<Mandatory>Optional</Mandatory>
+		<Resources>
+			<Item ID="1">
+				<Name>Name</Name>
+        <Operations>RW</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>String</Type>
+				<RangeEnumeration>0-255 bytes</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Uniquely identifies the key name ofthe config]]></Description>
+			</Item>
+			<Item ID="2">
+				<Name>Value</Name>
+        <Operations>RW</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Optional</Mandatory>
+				<Type>String</Type>
+				<RangeEnumeration>0-255 bytes</RangeEnumeration>
+				<Units></Units>
+				<Description><![CDATA[Represents the Configuration value]]></Description>
+			</Item>
+			<Item ID="3">
+				<Name>Apply</Name>
+        <Operations>E</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+				<Mandatory>Mandatory</Mandatory>
+				<Type></Type>
+        <RangeEnumeration/>
+        <Units/>
+				<Description><![CDATA[Applies the config value]]></Description>
+			</Item>
+		</Resources>
+			<Description2></Description2>
+	</Object>
+</LWM2M>
