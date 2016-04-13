@@ -15,8 +15,6 @@
 #include "iothubtransportamqp.h"
 #include "iothubtransportmqtt.h"
 
-namespace bp = boost::python;
-
 #ifndef IMPORT_NAME
 #define IMPORT_NAME iothub_client
 #endif
@@ -149,6 +147,7 @@ createExceptionClass(
     PyObject* baseTypeObj = PyExc_Exception
     )
 {
+    namespace bp = boost::python;
     using std::string;
     string scopeName = bp::extract<string>(bp::scope().attr("__name__"));
     string qualifiedName0 = scopeName + "." + name;
@@ -315,11 +314,11 @@ public:
         Destroy();
         if (filter)
         {
-            mapFilterCallback = bp::object();
+            mapFilterCallback = boost::python::object();
         }
     }
 
-    static IoTHubMap *Create(bp::object& _mapFilterCallback)
+    static IoTHubMap *Create(boost::python::object& _mapFilterCallback)
     {
         MAP_FILTER_CALLBACK mapFilterFunc = NULL;
         if (PyFunction_Check(_mapFilterCallback.ptr()))
