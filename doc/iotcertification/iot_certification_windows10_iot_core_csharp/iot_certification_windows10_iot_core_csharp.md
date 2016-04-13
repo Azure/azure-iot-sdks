@@ -188,9 +188,9 @@ Package the following artifacts from your device:
 2. All the screenshots that are shown above in "**Send Device Events to IoT Hub**" section.
 3.  All the screenshots that are shown above in "**Receive messages from IoT Hub**" section.
 4.  Send us clear instructions of how to run this sample with your hardware
-    (explicitly highlighting the new steps for customers). As a
-    guideline on how the instructions should look please refer the
-    examples published on github repository [here](https://github.com/Azure/azure-iot-sdks/tree/master/csharp/doc).
+    (explicitly highlighting the new steps for customers). Please use the template available [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/templates/template-windows-iotcore-csharp.md>) to create your device-specific instructions.
+    
+    As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
 
 <a name="Step_4_2:_Share"/>
 ## 4.2 Share package with the Azure IoT Certification Team
