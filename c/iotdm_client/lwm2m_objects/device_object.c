@@ -173,7 +173,7 @@ IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, int *value)
 IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, int value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Device_CurrentTime being set to to %d\r\n", value);
+    LogInfo("Device_CurrentTime being set to %d\r\n", value);
     obj->propval_device_currenttime = value;
 
     if (obj->device_currenttime_write_callback != NULL)

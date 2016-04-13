@@ -410,29 +410,55 @@ IOTHUB_CLIENT_RESULT wake_main_dm_thread(IOTHUB_CHANNEL_HANDLE h)
     return result;
 }
 
-void IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE h)
+/**
+ * This function will return FALSE if the server refuses to accept the client's request to connect.
+ * All other states indicate happy.
+ */
+bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE h)
 {
+    bool retValue;
     if (NULL == h)
     {
         LogError("Null client handle\r\n");
+        retValue = false;
     }
 
     else
     {
         CLIENT_DATA *client = (CLIENT_DATA *)h;
+
         /* check for pending requests. */
         xio_dowork(client->ioHandle);
 
-        /* process any updates that are due. */
-        time_t now = time(NULL);
-        time_t timeout;
+        /**
+         * LOOK: This code will only work for simple clients. The cases for bootstrap must be considered carefully.
+         */
+        switch (client->session->serverList->status)
+        {
+            case STATE_REGISTERED:
+                /* process any updates that are due. */
+                signal_all_resource_changes();
 
-        signal_all_resource_changes();
-        
-        observation_step(client->session, now, &timeout);
+                time_t now = lwm2m_gettime();
+                time_t timeout = 60;
+                observation_step(client->session, now, &timeout);
+                transaction_step(client->session, now, &timeout);
 
-        transaction_step(client->session, now, &timeout);
+                retValue = true;
+                break;
+
+            case STATE_REG_FAILED:
+                retValue = false;
+                break;
+
+            default:
+                retValue = true;
+                LogInfo("Registration request is pending...\n");
+                break;
+        }
     }
+
+    return retValue;
 }
 
 void on_dm_connect_complete(IOTHUB_CLIENT_RESULT result, void* context)
@@ -467,7 +493,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE h)
             return connectResult;
         }
 
-        IoTHubClient_DM_DoWork(h);
+        if (!IoTHubClient_DM_DoWork(h))
+        {
+            return IOTHUB_CLIENT_ERROR;
+        }
+
         Lock(cd->push_event_lock);
         if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
         {

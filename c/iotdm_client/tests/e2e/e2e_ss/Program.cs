@@ -7,18 +7,38 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using SysTimer = System.Timers.Timer;
 
     class Program
     {
-        static string           _cs;
-        static string           _sscs;
-        static RegistryManager  _rm;
-        static bool             _registered = false;
-        static ManualResetEvent _clientReady = new ManualResetEvent(false);
-        static string           _deviceId = "SimpleSample_" + Guid.NewGuid().ToString();
+        const double OneSecond = 1000;
 
-        static string           _clientBatteryLevel;
-        static string           _clientFirmwareVersion;
+        static string             _cs;
+        static JobClient          _dj;
+        static RegistryManager    _rm;
+        static ManualResetEvent   _clientReady = new ManualResetEvent(false);
+        static string             _deviceId = "SimpleSample_" + Guid.NewGuid().ToString();
+        static bool               _registered = false;
+        static SysTimer           _closer;
+
+        static Dictionary<String, TestCase> _ReadTestCases = new Dictionary<string, TestCase>();
+        static Dictionary<String, TestCase> _WriteTestCases = new Dictionary<string, TestCase>();
+        static Dictionary<String, TestCase> _ExecuteTestCases = new Dictionary<string, TestCase>();
+        static Dictionary<String, TestCase> _ObserveTestCases = new Dictionary<string, TestCase>();
+
+
+        static void ListAllSimpleSampleTestDevices()
+        {
+            Task<IEnumerable<Device>> results = _rm.GetDevicesAsync(500);
+            results.Wait();
+            var devices = results.Result;
+
+            foreach (var device in devices)
+            {
+                Console.WriteLine("*device: {0}", device.Id);
+            }
+        }
+
 
         static void UnregisterStaleTestDevices()
         {
@@ -35,6 +55,7 @@
             }
         }
 
+
         static void Unregister(Device device)
         {
             try
@@ -49,6 +70,7 @@
             }
         }
 
+
         static void Unregister()
         {
             Task<Device> getDeviceTask = _rm.GetDeviceAsync(_deviceId);
@@ -58,20 +80,22 @@
             Unregister(device);
         }
 
-        static void Register()
+
+        static String Register()
         {
             Task<Device> newDevice = _rm.AddDeviceAsync(new Device(_deviceId));
             newDevice.Wait();
             var device = newDevice.Result;
 
-            Console.WriteLine("*Registered device: {0}", device.Id);
+            Console.WriteLine("Registered device: {0}", device.Id);
 
             string hostName = _cs.Split(new string[] { ";" }, StringSplitOptions.None)[0];
             StringBuilder deviceCreds = new StringBuilder();
             deviceCreds.Append(String.Format("{0};DeviceId={1};SharedAccessKey={2}{3}", hostName, device.Id,
                 device.Authentication.SymmetricKey.PrimaryKey, System.Environment.NewLine));
-            _sscs = deviceCreds.ToString(0, deviceCreds.Length - 2);
+            return deviceCreds.ToString(0, deviceCreds.Length - 2);
         }
+
 
         static String getProperty(String property)
         {
@@ -82,46 +106,109 @@
             return device.SystemProperties[property].Value.ToString();
         }
 
+
         private static void onDataOut(object caller, DataReceivedEventArgs eArgs)
         {
-            if (string.IsNullOrEmpty(eArgs.Data) == false)
+            if ((string.IsNullOrEmpty(eArgs.Data) == false) && eArgs.Data.StartsWith("Info: "))
             {
-                /* looking for: 'Info: returning %d/%s for <PropertyName>' */
-                if (eArgs.Data.StartsWith("Info: returning"))
-                {
-                    if (String.IsNullOrEmpty(_clientFirmwareVersion) && eArgs.Data.Contains("Device_FirmwareVersion"))
-                    {
-                        string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        _clientFirmwareVersion = data[2].Substring(1, data[2].Length - 2);
-                    }
-                    else if (String.IsNullOrEmpty(_clientBatteryLevel) && eArgs.Data.Contains("Device_BatteryLevel"))
-                    {
-                        string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        _clientBatteryLevel = data[2];
-                    }
-                }
-
-                else if (eArgs.Data.Contains("REGISTERED"))
+                if (eArgs.Data.Contains("REGISTERED"))
                 {
                     _registered = true;
                     Console.WriteLine("*Device connected to DM channel");
                 }
 
-                if (_registered &&
-                    !String.IsNullOrEmpty(_clientFirmwareVersion) &&
-                    !String.IsNullOrEmpty(_clientBatteryLevel))
+                else
                 {
+                    string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (data.Length > 2)
+                    {
+                        string propertyName = data[data.Length - 1];
+                        if (_ReadTestCases.ContainsKey(propertyName))
+                        {
+                            // looking for: 'Info: returning %d/%s for <PropertyName>'
+                            if (data[1].Equals("returning"))
+                            {
+                                _ReadTestCases[propertyName].ExpectedValue = data[2];
+                            }
+
+                            else if (data[1].Equals("being") && data[2].Equals("set"))
+                            {
+                                _ReadTestCases[propertyName].RecordedValue = data[2];
+                            }
+
+                            else if (data[1].Equals("inside") && data[2].Equals("execute"))
+                            {
+                                _ReadTestCases[propertyName].RecordedValue = "true";
+                            }
+                        }
+                    }
+                }
+            }
+
+            /** If all test cases have been run */
+            bool done = true;
+            foreach (var aCase in _ReadTestCases)
+            {
+                done &= aCase.Value.HasRun;
+                if (done == false) break;
+            }
+
+            foreach (var aCase in _WriteTestCases)
+            {
+                done &= aCase.Value.HasRun;
+                if (done == false) break;
+            }
+
+            foreach (var aCase in _ExecuteTestCases)
+            {
+                done &= aCase.Value.HasRun;
+                if (done == false) break;
+            }
+
+            foreach (var aCase in _ObserveTestCases)
+            {
+                done &= aCase.Value.HasRun;
+                if (done == false) break;
+            }
+
+            if (done)
+            {
+                _clientReady.Set();
+            }
+        }
+
+
+        private static void onErrorOut(object caller, DataReceivedEventArgs eArgs)
+        {
+            if (string.IsNullOrEmpty(eArgs.Data) == false)
+            {
+                if (eArgs.Data.StartsWith("Error:") && eArgs.Data.Contains("Registration FAILED"))
+                {
+                    _registered = false;
+                    Console.WriteLine("*Device failed to connect to DM channel");
+
                     _clientReady.Set();
+                }
+
+                else if (eArgs.Data.StartsWith("Observe Update"))
+                {
+                    Console.WriteLine(eArgs.Data);
+                    string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    string uRI = data[1].Substring(7, data[0].Length - 1);
+                    TestCase aCase = _ObserveTestCases[uRI];
+                    if (aCase != null)
+                    {
+                        int size = Int32.Parse(data[2]);
+                        aCase.ExpectedValue = data[3].Substring(0, size);
+
+                        Thread.Sleep(2000);
+                        aCase.RecordedValue = ReadPropertyThroughService(_ObserveTestCases[uRI].Name);
+                    }
                 }
             }
         }
 
-        private static void onErrorOut(object caller, DataReceivedEventArgs eArgs)
-        {
-            if ((string.IsNullOrEmpty(eArgs.Data) == false))
-            {
-            }
-        }
 
         class DmClient
         {
@@ -129,7 +216,8 @@
 
             private DmClient(String exeName, String connectionString)
             {
-                var startInfo = new ProcessStartInfo() {
+                var startInfo = new ProcessStartInfo()
+                {
                     FileName = exeName,
                     CreateNoWindow = true,
                     UseShellExecute = false,
@@ -151,18 +239,102 @@
                 }
             }
 
+
             public static DmClient Start(String exeName, String connectionString)
             {
                 var dmClient = new DmClient(exeName, connectionString);
                 return (dmClient.process_ == null) ? null : dmClient;
             }
 
+
             public void Stop()
             {
-                process_.Kill();
-                process_.WaitForExit();
+                try
+                {
+                    process_.Kill();
+                    process_.WaitForExit();
+                }
+
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
+
+
+        private class TestCase
+        {
+            public enum TestType { Read, Write, Observe, Execute };
+
+            public String Name { get; }
+
+            private TestType type_;
+            public TestType Type
+            {
+                get { return type_; }
+                private set
+                {
+                    this.type_ = value;
+                    if (value == TestType.Execute)
+                    {
+                        this.ExpectedValue = "true";
+                    }
+                }
+            }
+
+            public String  RecordedValue { get; set; }
+            public String ExpectedValue { get; set; }
+
+            public TestCase(String name, TestType type)
+            {
+                this.Name = name;
+                this.Type = type;
+            }
+
+            public bool IsValid
+            {
+                get { return AreEqual(ExpectedValue, RecordedValue, Name); }
+            }
+
+            public bool HasRun
+            {
+                get { return ((this.ExpectedValue != null) && (this.RecordedValue != null)); }
+            }
+        }
+
+
+        static void RunTestCases()
+        {
+            try
+            {
+                _dj = JobClient.CreateFromConnectionString(_cs);
+
+                while (_registered == false)
+                    Thread.Sleep(1000);
+
+                foreach (var one in _ReadTestCases)
+                {
+                    one.Value.RecordedValue = ReadPropertyThroughService(one.Value.Name);
+                }
+
+                foreach (var one in _WriteTestCases)
+                {
+                    WritePropertyThroughService(one.Value.Name, one.Value.ExpectedValue);
+                }
+
+                foreach (var one in _ExecuteTestCases)
+                {
+                    ExecuteResourceThroughService(one.Value.Name);
+                }
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
 
         /**
          *  arg[0] = full path to iotdm_simple_sample binary.
@@ -172,47 +344,85 @@
         {
             if (args.Length != 2)
             {
-                Console.WriteLine("Usage: e2e_ss.exe <clientEXE> <IotHub Connection String>");
+                Console.WriteLine("Usage: ");
+                Console.WriteLine("  - to run the tests: 2e_ss.exe <clientEXE> <IotHub Connection String>");
+                Console.WriteLine("  - to delete stale test devices: 2e_ss.exe --cleanupRegistrar <IotHub Connection String>");
+
+                return -1;
             }
 
             _cs = args[1];
             _rm = RegistryManager.CreateFromConnectionString(_cs);
 
-            UnregisterStaleTestDevices(); // TODO: We don't want to do this here, mulitple instances of this app will duel for devices
-            Register();
+            if (args[0].Equals("--cleanupRegistrar"))
+            {
+                UnregisterStaleTestDevices();
 
-            var client = DmClient.Start(args[0], _sscs);
+                return 0;
+            }
+
+            String connectionString = Register();
+            var client = DmClient.Start(args[0], connectionString);
+
+            // the 'read' test cases.
+            var oneCase = new TestCase(SystemPropertyNames.FirmwareVersion, TestCase.TestType.Read);
+            _ReadTestCases.Add("Device_FirmwareVersion", oneCase);
+
+            // the 'write' test cases
+            oneCase = new TestCase(SystemPropertyNames.Timezone, TestCase.TestType.Write);
+            oneCase.ExpectedValue = "-10:00"; /* US/Hawaii timezone */
+            _WriteTestCases.Add("Device_Timezone", oneCase);
+
+            // the 'execute' test cases
+            oneCase = new TestCase("Device_FactoryReset", TestCase.TestType.Execute);
+            _ExecuteTestCases.Add("Device_FactoryReset", oneCase);
+            oneCase = new TestCase("Device_Reboot", TestCase.TestType.Execute);
+            _ExecuteTestCases.Add("Device_Reboot", oneCase);
+            oneCase = new TestCase("FirmwareUpdate_Update", TestCase.TestType.Execute);
+            _ExecuteTestCases.Add("FirmwareUpdate_Update", oneCase);
+
+            // the 'observe' test cases
+            /**
+             * Note that we are using a URI - This is a side effect of wakaama messages on stderr...
+             *    Let's figure out a more generic way of identifying the URI!
+             */
+            oneCase = new TestCase(SystemPropertyNames.BatteryLevel, TestCase.TestType.Observe);
+            _ObserveTestCases.Add("/3/0/9", oneCase);
+
+            Thread thread = new Thread(new ThreadStart(RunTestCases));
+            thread.Start();
+
+            /**
+             *  Start a timer for the process. The interval should be large enough to validate all tests.
+             *  Care must be taken to ensure PMIN and PMAX, for example, are honored.
+             */
+            _closer = new SysTimer(10 * 60 * OneSecond);
+            _closer.Elapsed += (sender, e) =>
+            {
+                _clientReady.Set();
+            };
+
+            _closer.Start();
 
             _clientReady.WaitOne();
+            if (_registered)
+                client.Stop();
 
-            // client is ready, but server probably is not
-            Thread.Sleep(6000);
+            /** report -- */
 
-            bool passed =
-                VerifyAutoSyncProperties() &&
-                VerifyWriteReadCycle();
-
-            client.Stop();
+            thread.Abort();
             Unregister();
 
-            Console.WriteLine("Tests " + (passed ? "PASSED" : "FAILED") + ".");
-            return passed ? 0 : 1;
+            return 0;
         }
+
 
         static bool AreEqual(string expected, string actual, string message)
         {
             if (!String.Equals(expected, actual))
             {
                 Console.Write("ERROR: Expected '{0}' to equal '{1}'", expected, actual);
-
-                if (message == null)
-                {
-                    Console.WriteLine(String.Empty);
-                }
-                else
-                {
-                    Console.WriteLine(" {0}", message);
-                }
+                Console.WriteLine(" {0}", (message == null) ? String.Empty : message);
 
                 return false;
             }
@@ -220,47 +430,21 @@
             return true;
         }
 
-        static bool ServiceValueEqualsClientValue(string name, string clientValue)
-        {
-            String serviceValue = getProperty(name);
-            return AreEqual(clientValue, serviceValue, name);
-        }
-
-        static bool VerifyAutoSyncProperties()
-        {
-            Console.WriteLine("+Verify auto-sync properties");
-            return
-                ServiceValueEqualsClientValue(SystemPropertyNames.BatteryLevel, _clientBatteryLevel) &&
-                ServiceValueEqualsClientValue(SystemPropertyNames.FirmwareVersion, _clientFirmwareVersion);
-        }
-
-        static bool VerifyWriteReadCycle()
-        {
-            Console.WriteLine("+Write, then read property");
-
-            var valueToWrite = "-10:00"; // US/Hawaii timezone
-            var valueRead = String.Empty;
-            if (WritePropertyThroughService(SystemPropertyNames.Timezone, valueToWrite))
-            {
-                valueRead = ReadPropertyThroughService(SystemPropertyNames.Timezone);
-            }
-
-            return AreEqual(valueToWrite, valueRead, SystemPropertyNames.Timezone);
-        }
 
         static string ReadPropertyThroughService(string propertyName)
         {
             try
             {
-                var deviceJobClient = JobClient.CreateFromConnectionString(_cs);
-                var jobID = Guid.NewGuid().ToString();
-                Task<JobResponse> job = deviceJobClient.ScheduleSystemPropertyReadAsync(jobID, _deviceId, SystemPropertyNames.FirmwareVersion);
+                var jobID = "Read" + propertyName + Guid.NewGuid().ToString();
+
+                Console.WriteLine("ReadPropertyThroughService({0})", propertyName);
+                Task<JobResponse> job = _dj.ScheduleSystemPropertyReadAsync(jobID, _deviceId, propertyName);
                 job.Wait();
                 JobResponse rs = job.Result;
                 while (rs.Status < JobStatus.Completed)
                 {
                     Thread.Sleep(2000);
-                    job = deviceJobClient.GetJobAsync(jobID);
+                    job = _dj.GetJobAsync(jobID);
                     job.Wait();
                     rs = job.Result;
                 }
@@ -273,31 +457,78 @@
 
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex);
             }
 
             return String.Empty;
         }
 
+
         static bool WritePropertyThroughService(string propertyName, string propertyValue)
         {
             try
             {
-                var deviceJobClient = JobClient.CreateFromConnectionString(_cs);
-                var jobID = Guid.NewGuid().ToString();
+                var jobID = "Write" + propertyName + Guid.NewGuid().ToString();
 
-                Task<JobResponse> job = deviceJobClient.ScheduleSystemPropertyWriteAsync(jobID, _deviceId, propertyName, propertyValue);
+                Task<JobResponse> job = _dj.ScheduleSystemPropertyWriteAsync(jobID, _deviceId, propertyName, propertyValue);
                 job.Wait();
                 JobResponse rs = job.Result;
-                while (rs.Status < JobStatus.Completed )
+                while (rs.Status < JobStatus.Completed)
                 {
                     Thread.Sleep(2000);
-                    job = deviceJobClient.GetJobAsync(jobID);
+                    job = _dj.GetJobAsync(jobID);
                     job.Wait();
                     rs = job.Result;
                 }
 
                 return (rs.Status == JobStatus.Completed);
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            return false;
+        }
+
+
+        static bool ExecuteResourceThroughService(string resourceName)
+        {
+            try
+            {
+                var jobID = "Execute" + resourceName + Guid.NewGuid().ToString();
+
+                Task<JobResponse> job = null;
+                if (resourceName.Equals("Device_FactoryReset"))
+                {
+                    job = _dj.ScheduleFactoryResetDeviceAsync(jobID, _deviceId);
+                }
+
+                else if (resourceName.Equals("Device_Reboot"))
+                {
+                    job = _dj.ScheduleRebootDeviceAsync(jobID, _deviceId);
+                }
+
+                else if (resourceName.Equals("FirmwareUpdate_Update"))
+                {
+                    job = _dj.ScheduleFirmwareUpdateAsync(jobID, _deviceId, "https://FakeURI", TimeSpan.MinValue);
+                }
+
+                if (job != null)
+                {
+                    job.Wait();
+                    JobResponse rs = job.Result;
+                    while (rs.Status < JobStatus.Completed)
+                    {
+                        Thread.Sleep(2000);
+                        job = _dj.GetJobAsync(jobID);
+                        job.Wait();
+                        rs = job.Result;
+                    }
+
+                    return (rs.Status == JobStatus.Completed);
+                }
             }
 
             catch (Exception ex)

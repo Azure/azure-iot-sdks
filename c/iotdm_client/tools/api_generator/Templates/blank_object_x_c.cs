@@ -341,7 +341,7 @@ foreach (var prop in allProps)
             
             #line default
             #line hidden
-            this.Write(" being set to to %d\\r\\n\", value);\r\n            obj->");
+            this.Write(" being set to %d\\r\\n\", value);\r\n            obj->");
             
             #line 123 "H:\repos\Azure-Iot-Sdks-OneBranch\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));

@@ -139,38 +139,38 @@ void iotdmc_handle_registration_reply(lwm2m_transaction_t *transacP, void *messa
 
     switch (targetP->status)
     {
-    case STATE_REG_PENDING:
-    {
-        time_t tv_sec = lwm2m_gettime();
-        if (tv_sec >= 0)
+        case STATE_REG_PENDING:
         {
-            targetP->registration = tv_sec;
-        }
-
-        if (packet != NULL && packet->code == CREATED_2_01)
-        {
-            targetP->status = STATE_REGISTERED;
-            if (NULL != targetP->location)
+            time_t tv_sec = lwm2m_gettime();
+            if (tv_sec >= 0)
             {
-                lwm2m_free(targetP->location);
+                targetP->registration = tv_sec;
             }
 
-            targetP->location = coap_get_multi_option_as_string(packet->location_path);
+            if (packet != NULL && packet->code == CREATED_2_01)
+            {
+                targetP->status = STATE_REGISTERED;
+                if (NULL != targetP->location)
+                {
+                    lwm2m_free(targetP->location);
+                }
 
-            LogInfo("    => REGISTERED(%s)\r\n", targetP->location ? targetP->location : "");
+                targetP->location = coap_get_multi_option_as_string(packet->location_path);
+
+                LogInfo("    => REGISTERED(%s)\r\n", targetP->location ? targetP->location : "");
+            }
+
+            else
+            {
+                targetP->status = STATE_REG_FAILED;
+                LogError("    => Registration FAILED\r\n");
+            }
+
+            break;
         }
 
-        else
-        {
-            targetP->status = STATE_REG_FAILED;
-            LogError("    => Registration FAILED\r\n");
-        }
-
-        break;
-    }
-
-    default:
-        break;
+        default:
+            break;
     }
 }
 
@@ -436,7 +436,6 @@ void on_bytes_received(void *context, const unsigned char *buffer, size_t size)
                     lwm2m_handle_packet(client->session, &(client->input.buffer[SIZEOF_MESSAGE_LENGTH_FIELD]), client->input.length, client->ioHandle);
                     reset_input_buffer(client);
                 }
-
             }
 
             break;

@@ -145,7 +145,7 @@ void set_default_<#= ObjectCodeName #>_property_values(<#= ObjectStructName #> *
                 case LWM2MObjectItemType.Time:
 #>
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("<#= prop.PropertyName #> being set to to %d\r\n", value);
+    LogInfo("<#= prop.PropertyName #> being set to %d\r\n", value);
     obj-><#= prop.SampleVariableName #> = value;
 
     if (obj-><#= prop.PropertyName.ToLower() #>_write_callback != NULL)

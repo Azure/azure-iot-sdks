@@ -119,7 +119,7 @@ foreach (var prop in allProps)
 #>
         if (obj-><#= prop.SampleVariableName #> != value)
         {
-            LogInfo("<#= prop.PropertyName #> being set to to %d\r\n", value);
+            LogInfo("<#= prop.PropertyName #> being set to %d\r\n", value);
             obj-><#= prop.SampleVariableName #> = value;
 
             obj->resourceUpdated[INDEX_<#= prop.PropertyName.ToUpper() #>] = (char)true;
