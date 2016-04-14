@@ -23,8 +23,6 @@ void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE client);
 
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_CreateDefaultObjects(IOTHUB_CHANNEL_HANDLE h);
     
-IOTHUB_CLIENT_RESULT IoTHubClient_DM_AddNewObject(IOTHUB_CHANNEL_HANDLE h, unsigned int objectID);
-
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE client);
 
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE h, ON_DM_CONNECT_COMPLETE onComplete, void* callbackContext);

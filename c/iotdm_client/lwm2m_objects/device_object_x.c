@@ -154,7 +154,7 @@ IOTHUB_CLIENT_RESULT set_device_batterylevel(uint16_t instanceId, int value)
     {
         if (obj->propval_device_batterylevel != value)
         {
-            LogInfo("Device_BatteryLevel being set to to %d\r\n", value);
+            LogInfo("Device_BatteryLevel being set to %d\r\n", value);
             obj->propval_device_batterylevel = value;
 
             obj->resourceUpdated[INDEX_DEVICE_BATTERYLEVEL] = (char)true;
@@ -175,7 +175,7 @@ IOTHUB_CLIENT_RESULT set_device_memoryfree(uint16_t instanceId, int value)
     {
         if (obj->propval_device_memoryfree != value)
         {
-            LogInfo("Device_MemoryFree being set to to %d\r\n", value);
+            LogInfo("Device_MemoryFree being set to %d\r\n", value);
             obj->propval_device_memoryfree = value;
 
             obj->resourceUpdated[INDEX_DEVICE_MEMORYFREE] = (char)true;
@@ -196,7 +196,7 @@ IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, int value)
     {
         if (obj->propval_device_currenttime != value)
         {
-            LogInfo("Device_CurrentTime being set to to %d\r\n", value);
+            LogInfo("Device_CurrentTime being set to %d\r\n", value);
             obj->propval_device_currenttime = value;
 
             obj->resourceUpdated[INDEX_DEVICE_CURRENTTIME] = (char)true;
@@ -305,7 +305,7 @@ IOTHUB_CLIENT_RESULT set_device_batterystatus(uint16_t instanceId, int value)
     {
         if (obj->propval_device_batterystatus != value)
         {
-            LogInfo("Device_BatteryStatus being set to to %d\r\n", value);
+            LogInfo("Device_BatteryStatus being set to %d\r\n", value);
             obj->propval_device_batterystatus = value;
 
             obj->resourceUpdated[INDEX_DEVICE_BATTERYSTATUS] = (char)true;
@@ -326,7 +326,7 @@ IOTHUB_CLIENT_RESULT set_device_memorytotal(uint16_t instanceId, int value)
     {
         if (obj->propval_device_memorytotal != value)
         {
-            LogInfo("Device_MemoryTotal being set to to %d\r\n", value);
+            LogInfo("Device_MemoryTotal being set to %d\r\n", value);
             obj->propval_device_memorytotal = value;
 
             obj->resourceUpdated[INDEX_DEVICE_MEMORYTOTAL] = (char)true;
@@ -401,14 +401,6 @@ IOTHUB_CLIENT_RESULT create_device_object(IOTHUB_CLIENT_HANDLE h, uint16_t *inst
             else
             {
                 set_default_device_property_values(obj);
-                
-                res = IoTHubClient_DM_AddNewObject(h, OID_DEVICE);
-                if (res != IOTHUB_CLIENT_OK)
-                {
-                    LogError("Failure to add the Device object for client: %p\r\n", h);
-                    destroy_device_object(obj);
-                    obj = NULL;
-                }
             }
         }
 

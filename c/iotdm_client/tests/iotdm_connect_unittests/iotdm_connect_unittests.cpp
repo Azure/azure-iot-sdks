@@ -14,8 +14,7 @@
 extern "C"
 {
 #endif
-    STRING_HANDLE iotdmc_describe_one_object(uint16_t aObjectID);
-    STRING_HANDLE iotdmc_get_registration_payload(CLIENT_DATA *cd);
+    bool append_object_link(uint16_t oid, void *ctx);
     STRING_HANDLE iotdmc_get_registration_query(const char* endpointName, const char* iotHubName, const char* deviceKey);
     void iotdmc_handle_registration_reply(lwm2m_transaction_t *transacP, void *message);
     STRING_HANDLE iotdmc_SAS_create(const char* iotHubName, const char* deviceKey);
@@ -23,6 +22,11 @@ extern "C"
     uint32_t parse_int(uint8_t *bytes, size_t length);
     uint16_t prv_min(uint16_t x, uint16_t y, uint16_t z);
     void reset_input_buffer(CLIENT_DATA* cd);
+
+    bool for_each_oid(for_each_oid_predicate pred, void* context)
+    {
+        return false;
+    }
 #ifdef __cplusplus
 }
 #endif
@@ -234,44 +238,33 @@ BEGIN_TEST_SUITE(iotdm_connect_unittests)
         ASSERT_IS_NULL(tr.server.location);
     }
 
-    TEST_FUNCTION(iotdmc_describe_one_object_describes_an_object)
+    TEST_FUNCTION(append_object_link_appends_an_object_link)
     {
         CNiceCallComparer<iotdm_connect_mocks> mocks;
-        uint16_t obj = 42;
+        STRING_HANDLE str = STRING_construct("prefix:");
+        uint16_t objectId = 42;
 
-        STRING_HANDLE result = iotdmc_describe_one_object(obj);
+        bool result = append_object_link(objectId, str);
 
-        ASSERT_ARE_EQUAL(char_ptr, "</42/0>,", STRING_c_str(result));
+        ASSERT_IS_TRUE(result);
+        ASSERT_ARE_EQUAL(char_ptr, "prefix:</42/0>,", STRING_c_str(str));
 
-        STRING_delete(result);
+        STRING_delete(str);
     }
 
-    TEST_FUNCTION(iotdmc_describe_one_object_returns_null_if_STRING_construct_fails)
+    TEST_FUNCTION(append_object_link_does_not_append_if_STRING_concat_fails)
     {
         CNiceCallComparer<iotdm_connect_mocks> mocks;
+        STRING_HANDLE str = STRING_construct("prefix:");
+        uint16_t objectId = 42;
 
-        uint16_t obj = 42;
+        STRING_concat_failer.fail_on(1);
+        bool result = append_object_link(objectId, str);
 
-        STRING_construct_failer.fail_on(1);
-        STRING_HANDLE result = iotdmc_describe_one_object(obj);
+        ASSERT_IS_FALSE(result);
+        ASSERT_ARE_EQUAL(char_ptr, "prefix:", STRING_c_str(str));
 
-        ASSERT_IS_NULL(result);
-
-        STRING_delete(result);
-    }
-
-    TEST_FUNCTION(iotdmc_get_registration_payload_serializes_all_but_the_first_object)
-    {
-        CNiceCallComparer<iotdm_connect_mocks> mocks;
-        uint16_t hidden = 0, server = 1, custom = 42;
-        uint16_t pobjs[] = { hidden, server, hidden, custom };
-        CLIENT_DATA data = { NULL, pobjs, 4 };
-
-        STRING_HANDLE result = iotdmc_get_registration_payload(&data);
-
-        ASSERT_ARE_EQUAL(char_ptr, "</>;rt=\"oma.lwm2m\",</1/0>,</42/0>,", STRING_c_str(result));
-
-        STRING_delete(result);
+        STRING_delete(str);
     }
 
     TEST_FUNCTION(iotdmc_register_fails_if_xio_create_fails)

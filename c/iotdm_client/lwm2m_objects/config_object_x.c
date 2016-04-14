@@ -133,14 +133,6 @@ IOTHUB_CLIENT_RESULT create_config_object(IOTHUB_CLIENT_HANDLE h, uint16_t *inst
             else
             {
                 set_default_config_property_values(obj);
-                
-                res = IoTHubClient_DM_AddNewObject(h, OID_CONFIG);
-                if (res != IOTHUB_CLIENT_OK)
-                {
-                    LogError("Failure to add the Config object for client: %p\r\n", h);
-                    destroy_config_object(obj);
-                    obj = NULL;
-                }
             }
         }
 

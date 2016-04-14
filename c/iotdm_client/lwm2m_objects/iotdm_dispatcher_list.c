@@ -318,6 +318,47 @@ void *get_object_instance(uint16_t objectId, uint16_t instanceId)
     }
 }
 
+typedef bool(*for_each_dispatcher_predicate)(DmDispatchers* disp, void* context);
+
+static bool for_each_dispatcher(for_each_dispatcher_predicate pred, void* context)
+{
+    if (!dispatcherList)
+    {
+        return false;
+    }
+
+    LIST_ITEM_HANDLE dispHandle = list_get_head_item(dispatcherList);
+    while (dispHandle != NULL)
+    {
+        DmDispatchers* disp = (DmDispatchers*)list_item_get_value(dispHandle);
+
+        if (!pred(disp, context))
+        {
+            break;
+        }
+
+        dispHandle = list_get_next_item(dispHandle);
+    }
+
+    return (dispHandle == NULL);
+}
+
+static bool signal_object_resource_changes(DmDispatchers* disp, void* context)
+{
+    if (disp->instanceList != NULL)
+    {
+        LIST_ITEM_HANDLE objHandle = list_get_head_item(*disp->instanceList);
+        while (objHandle != NULL)
+        {
+            void* obj = (void*)list_item_get_value(objHandle);
+            disp->changeSignaller(obj);
+            objHandle = list_get_next_item(objHandle);
+        }
+    }
+
+    return true;
+}
+
 //
 // calls on_resource_value_changed for every resource changed on every instance of every object 
 //
@@ -330,26 +371,23 @@ void *get_object_instance(uint16_t objectId, uint16_t instanceId)
 //
 void signal_all_resource_changes()
 {
-    if (dispatcherList != NULL)
-    {
-        LIST_ITEM_HANDLE dispHandle = list_get_head_item(dispatcherList);
-        while (dispHandle != NULL)
-        {
-            DmDispatchers *disp = (DmDispatchers*)list_item_get_value(dispHandle);
+    (void)for_each_dispatcher(signal_object_resource_changes, NULL);
+}
 
-            if (disp->instanceList != NULL)
-            {
-                LIST_ITEM_HANDLE objHandle = list_get_head_item(*disp->instanceList);
-                while (objHandle != NULL)
-                {
-                    void *obj = (void*)list_item_get_value(objHandle);
-                    disp->changeSignaller(obj);
-                    objHandle = list_get_next_item(objHandle);
-                }
-            }
-            
-            dispHandle = list_get_next_item(dispHandle);
-        }
-    }
+typedef struct oid_context
+{
+    for_each_oid_predicate pred;
+    void* context;
+} oid_context;
 
+static bool call_outer_predicate_with_oid(DmDispatchers* disp, void* context)
+{
+    oid_context* outer = (oid_context*)context;
+    return outer->pred(disp->objectId, outer->context);
+}
+
+bool for_each_oid(for_each_oid_predicate pred, void* context)
+{
+    oid_context outer = { pred, context };
+    return for_each_dispatcher(call_outer_predicate_with_oid, &outer);
 }

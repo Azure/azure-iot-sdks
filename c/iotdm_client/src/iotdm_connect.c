@@ -7,76 +7,6 @@
 #include <ctype.h>
 
 
-STRING_HANDLE iotdmc_describe_one_object(uint16_t objectID)
-{
-    char data[201];
-    int  result;
-
-#if defined(MULTIPLE_INSTANCES)
-    STRING_HANDLE retValue = STRING_new();
-
-    if (aObject->instanceList == NULL)
-    {
-        result = snprintf(data, 200, REG_OBJECT_PATH, "", aObject->objID);
-        if (result > 0)
-        {
-            STRING_concat(retValue, data);
-        }
-    }
-
-    else
-    {
-        lwm2m_list_t *targetP;
-        for (targetP = aObject->instanceList; targetP != NULL; targetP = targetP->next)
-        {
-            result = snprintf(data, 200, REG_OBJECT_INSTANCE_PATH, "", aObject->objID, targetP->id);
-            if (result > 0)
-            {
-                STRING_concat(retValue, data);
-            }
-        }
-    }
-
-#else
-    STRING_HANDLE retValue = NULL;
-
-    result = snprintf(data, 200, REG_OBJECT_INSTANCE_PATH, "", objectID, 0);
-    if (result > 0)
-    {
-        retValue = STRING_construct(data);
-    }
-
-#endif
-
-    return retValue;
-}
-
-STRING_HANDLE iotdmc_get_registration_payload(CLIENT_DATA *cd)
-{
-    STRING_HANDLE retValue = STRING_construct("</>;rt=\"oma.lwm2m\",");
-    if (NULL != retValue)
-    {
-        // grab the server object.
-        STRING_HANDLE oneObject = NULL;
-
-        size_t index;
-        for (index = 0; index < cd->nrObjects; ++index)
-        {
-            if (cd->allObjects[index] == LWM2M_SECURITY_OBJECT_ID)
-            {
-                continue; /* skip security object */
-            }
-
-            oneObject = iotdmc_describe_one_object(cd->allObjects[index]);
-
-            STRING_concat(retValue, STRING_c_str(oneObject));
-            STRING_delete(oneObject);
-        }
-    }
-
-    return retValue;
-}
-
 STRING_HANDLE iotdmc_SAS_create(const char* iotHubName, const char* deviceKey)
 {
     STRING_HANDLE retValue = NULL;
@@ -276,6 +206,47 @@ IOTHUB_CLIENT_RESULT iotdmc_register(CLIENT_DATA *cd, ON_REGISTER_COMPLETE onCom
     return IOTHUB_CLIENT_ERROR;
 }
 
+bool append_object_link(uint16_t oid, void *context)
+{
+    bool suceeded = false;
+
+    // don't add LWM2M_SECURITY_OBJECT_ID to the payload
+    if (oid == LWM2M_SECURITY_OBJECT_ID)
+    {
+        return true;
+    }
+
+    int cch = snprintf(NULL, 0, REG_OBJECT_INSTANCE_PATH, "", oid, 0);
+    if (cch > 0)
+    {
+        char* link = malloc(cch + 1);
+        if (link != NULL)
+        {
+            cch = snprintf(link, cch + 1, REG_OBJECT_INSTANCE_PATH, "", oid, 0);
+            if (cch > 0)
+            {
+                STRING_HANDLE object_links = (STRING_HANDLE)context;
+                int result = STRING_concat(object_links, link);
+                suceeded = (result == 0);
+            }
+
+            free(link);
+        }
+    }
+
+    return suceeded;
+}
+
+static STRING_HANDLE get_registration_payload()
+{
+    STRING_HANDLE payload = STRING_construct("</>;rt=\"oma.lwm2m\",");
+    if (payload != NULL)
+    {
+        return for_each_oid(append_object_link, payload) ? payload : NULL;
+    }
+
+    return NULL;
+}
 
 IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA* cd)
 {
@@ -287,7 +258,7 @@ IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA* cd)
     }
     else
     {
-        STRING_HANDLE hPayload = iotdmc_get_registration_payload(cd);
+        STRING_HANDLE hPayload = get_registration_payload();
         if (!hPayload)
         {
             result = IOTHUB_CLIENT_ERROR;

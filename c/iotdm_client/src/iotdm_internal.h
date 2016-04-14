@@ -55,9 +55,6 @@ typedef struct IO_BUFFER_TAG
 typedef struct CLIENT_DATA_TAG
 {
     lwm2m_context_t      *session;
-    uint16_t             *allObjects;
-    uint16_t              nrObjects;
-    uint32_t              step;
 
     XIO_HANDLE            ioHandle;
     IOTHUB_CLIENT_STATE   state;
@@ -101,10 +98,11 @@ IOTHUB_CLIENT_RESULT wake_main_dm_thread(IOTHUB_CHANNEL_HANDLE h);
 
 // iotdm_dispatcher_list.c
 void signal_all_resource_changes();
+typedef bool (*for_each_oid_predicate)(uint16_t oid, void* context);
+bool for_each_oid(for_each_oid_predicate pred, void* context);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
 #endif /* !IOTDM_INTERNAL_H */
-

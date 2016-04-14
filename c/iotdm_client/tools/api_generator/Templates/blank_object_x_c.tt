@@ -205,14 +205,6 @@ IOTHUB_CLIENT_RESULT create_<#= ObjectCodeName #>_object(IOTHUB_CLIENT_HANDLE h,
             else
             {
                 set_default_<#= ObjectCodeName #>_property_values(obj);
-                
-                res = IoTHubClient_DM_AddNewObject(h, OID_<#= ObjectCodeName.ToUpper() #>);
-                if (res != IOTHUB_CLIENT_OK)
-                {
-                    LogError("Failure to add the <#= ObjectName #> object for client: %p\r\n", h);
-                    destroy_<#= ObjectCodeName #>_object(obj);
-                    obj = NULL;
-                }
             }
         }
 

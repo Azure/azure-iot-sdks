@@ -194,26 +194,6 @@ IOTHUB_CHANNEL_HANDLE IoTHubClient_DM_Open(const char *connectionString, IOTHUB_
 }
 
 
-IOTHUB_CLIENT_RESULT IoTHubClient_DM_AddNewObject(IOTHUB_CHANNEL_HANDLE h, unsigned int objectID)
-{
-    if (NULL == h)
-    {
-        return IOTHUB_CLIENT_INVALID_ARG;
-    }
-
-    CLIENT_DATA *client = (CLIENT_DATA *)h;
-    uint16_t *newArray = (uint16_t *)realloc(client->allObjects, (client->nrObjects + 1) * sizeof(uint16_t));
-    if (NULL == newArray)
-    {
-        return IOTHUB_CLIENT_ERROR;
-    }
-
-    client->allObjects = newArray;
-    client->allObjects[client->nrObjects++] = objectID;
-
-    return IOTHUB_CLIENT_OK;
-}
-
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_CreateDefaultObjects(IOTHUB_CHANNEL_HANDLE h)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
@@ -315,6 +295,34 @@ void on_register_complete(IOTHUB_CLIENT_RESULT result, void* context)
     free(context);
 }
 
+typedef struct oids_found
+{
+    bool server;
+    bool device;
+} oids_found;
+
+static bool find_mandatory_objects(uint16_t oid, void *ctx)
+{
+    oids_found *found = (oids_found*)ctx;
+
+    if (oid == LWM2M_SERVER_OBJECT_ID) found->server = true;
+    if (oid == LWM2M_DEVICE_OBJECT_ID) found->device = true;
+
+    return true;
+}
+
+static bool mandatory_objects_exist()
+{
+    oids_found found = { false, false };
+
+    if (for_each_oid(find_mandatory_objects, &found))
+    {
+        return (found.server && found.device);
+    }
+
+    return false;
+}
+
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE h, ON_DM_CONNECT_COMPLETE onComplete, void* callbackContext)
 {
     if (NULL == h)
@@ -323,19 +331,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE h, ON_DM_CONN
         return IOTHUB_CLIENT_INVALID_ARG;
     }
 
-    CLIENT_DATA *client = (CLIENT_DATA *)h;
-    int required = 0;
-    for (uint16_t ix = 0; ix < client->nrObjects; ++ix)
-    {
-        if (//(client->allObjects[ix] == LWM2M_SECURITY_OBJECT_ID) ||
-            (client->allObjects[ix] == LWM2M_SERVER_OBJECT_ID) ||
-            (client->allObjects[ix] == LWM2M_DEVICE_OBJECT_ID))
-        {
-            required++;
-        }
-    }
-
-    if (required != 2)
+    if (!mandatory_objects_exist())
     {
         LogError("    one or more of the minimum required lwm2m objects is missing.\n");
         return IOTHUB_CLIENT_ERROR;
@@ -348,6 +344,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE h, ON_DM_CONN
 #pragma warning(disable:4113)
 #endif
 
+    CLIENT_DATA *client = (CLIENT_DATA *)h;
     client->session = lwm2m_init(client);
 
 #if defined(WIN32)

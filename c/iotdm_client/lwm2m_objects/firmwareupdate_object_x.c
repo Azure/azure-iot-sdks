@@ -47,7 +47,7 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_state(uint16_t instanceId, int value)
     {
         if (obj->propval_firmwareupdate_state != value)
         {
-            LogInfo("FirmwareUpdate_State being set to to %d\r\n", value);
+            LogInfo("FirmwareUpdate_State being set to %d\r\n", value);
             obj->propval_firmwareupdate_state = value;
 
             obj->resourceUpdated[INDEX_FIRMWAREUPDATE_STATE] = (char)true;
@@ -68,7 +68,7 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_updateresult(uint16_t instanceId, int va
     {
         if (obj->propval_firmwareupdate_updateresult != value)
         {
-            LogInfo("FirmwareUpdate_UpdateResult being set to to %d\r\n", value);
+            LogInfo("FirmwareUpdate_UpdateResult being set to %d\r\n", value);
             obj->propval_firmwareupdate_updateresult = value;
 
             obj->resourceUpdated[INDEX_FIRMWAREUPDATE_UPDATERESULT] = (char)true;
@@ -182,14 +182,6 @@ IOTHUB_CLIENT_RESULT create_firmwareupdate_object(IOTHUB_CLIENT_HANDLE h, uint16
             else
             {
                 set_default_firmwareupdate_property_values(obj);
-                
-                res = IoTHubClient_DM_AddNewObject(h, OID_FIRMWAREUPDATE);
-                if (res != IOTHUB_CLIENT_OK)
-                {
-                    LogError("Failure to add the Firmware Update object for client: %p\r\n", h);
-                    destroy_firmwareupdate_object(obj);
-                    obj = NULL;
-                }
             }
         }
 
