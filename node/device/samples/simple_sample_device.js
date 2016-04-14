@@ -5,7 +5,7 @@
 
 var Protocol = require('azure-iot-device-amqp').Amqp;
 // Uncomment one of these transports and then change it in fromConnectionString to test other transports
-//var Protocol = require('azure-iot-device-amqp-ws').AmqpWs;
+// var Protocol = require('azure-iot-device-amqp-ws').AmqpWs;
 // var Protocol = require('azure-iot-device-http').Http;
 // var Protocol = require('azure-iot-device-mqtt').Mqtt;
 var Client = require('azure-iot-device').Client;
@@ -13,7 +13,7 @@ var Message = require('azure-iot-device').Message;
 
 // String containing Hostname, Device Id & Device Key in the following formats:
 //  "HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
-var connectionString = 'HostName=demo-AzureIoTHub.azure-devices.net;DeviceId=device4;SharedAccessKey=6SruNtZaKl+bR1b5/A7V6A/eut7CifNtEOTJgxpv/yY=';
+var connectionString = '[IoT device connection string]';
 
 // fromConnectionString must specify a transport constructor, coming from any transport package.
 var client = Client.fromConnectionString(connectionString, Protocol);
