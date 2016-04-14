@@ -269,7 +269,7 @@ public:
     IoTHubMap(boost::python::object &_mapFilterCallback)
     {
         MAP_FILTER_CALLBACK mapFilterFunc = NULL;
-        if (PyFunction_Check(_mapFilterCallback.ptr()))
+        if (PyCallable_Check(_mapFilterCallback.ptr()))
         {
             mapFilterCallback = _mapFilterCallback;
             mapFilterFunc = &MapFilterCallback;
@@ -303,7 +303,7 @@ public:
     static IoTHubMap *Create(boost::python::object& _mapFilterCallback)
     {
         MAP_FILTER_CALLBACK mapFilterFunc = NULL;
-        if (PyFunction_Check(_mapFilterCallback.ptr()))
+        if (PyCallable_Check(_mapFilterCallback.ptr()))
         {
             mapFilterCallback = _mapFilterCallback;
             mapFilterFunc = &MapFilterCallback;
@@ -904,7 +904,7 @@ public:
         boost::python::object& userContext
         )
     {
-        if (!PyFunction_Check(messageCallback.ptr()))
+        if (!PyCallable_Check(messageCallback.ptr()))
         {
             PyErr_SetString(PyExc_TypeError, "send_event_async expected type function");
             boost::python::throw_error_already_set();
@@ -941,7 +941,7 @@ public:
         boost::python::object& userContext
         )
     {
-        if (!PyFunction_Check(messageCallback.ptr()))
+        if (!PyCallable_Check(messageCallback.ptr()))
         {
             PyErr_SetString(PyExc_TypeError, "set_message_callback expected type function");
             boost::python::throw_error_already_set();
