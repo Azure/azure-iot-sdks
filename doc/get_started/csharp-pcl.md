@@ -40,7 +40,7 @@ You should have the following items ready before beginning the process:
 -   Create a solution using the following guide: https://msdn.microsoft.com/en-us/library/mt488769.aspx
 -	Right click on the solution in Solution Explorer
 -	Click on "Manage NuGet Packages for solution"
--	Install the "Microsoft.Azure.Devices.Client.PCL" nuget in all the projects of the solution
+-	*NOTE:* Please make sure that you add the NuGet package "Microsoft.Azure.Devices.Client.PCL" for **ALL** the projects in your solution as shown below.
 	![](./media/pcl_nuget.png)
 -	You're ready to send/receive data to/from Microsoft Azure IotHub!
 
