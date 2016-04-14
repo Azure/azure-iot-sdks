@@ -120,15 +120,18 @@ namespace Microsoft.Azure.Devices.Client
                 amqpMessage.Properties.To = data.To;
             }
 
+
+#if WINDOWS_UWP
+            if (!data.ExpiryTimeUtc.Equals(default(DateTimeOffset)))
+            {
+                amqpMessage.Properties.AbsoluteExpiryTime = data.ExpiryTimeUtc.DateTime;
+            }
+#else
             if (!data.ExpiryTimeUtc.Equals(default(DateTime)))
             {
-#if WINDOWS_UWP
-                amqpMessage.Properties.AbsoluteExpiryTime = data.ExpiryTimeUtc.DateTime;
-#else
                 amqpMessage.Properties.AbsoluteExpiryTime = data.ExpiryTimeUtc;
-#endif
             }
-
+#endif
             if (data.CorrelationId != null)
             {
                 amqpMessage.Properties.CorrelationId = data.CorrelationId;
@@ -352,4 +355,4 @@ namespace Microsoft.Azure.Devices.Client
         }
     }
 #endif
-}
+        }
