@@ -14,9 +14,9 @@ This document describes how to prepare your development environment to use the *
 Complete the following steps to set up your development environment:
 
 - Follow the instructions to setup [Microsoft Azure IoT device SDK for C][setup-devbox].
-- Ensure that Python version 2.7.x is installed. Run `python --version` at the command line to check the version. 
+- Ensure that the desired Python version is installed (2.7.x, 3.4.x or 3.5.x). Run `python --version` or `python3 --version` at the command line to check the version. 
     - On Linux, Python 2.7 is typically already installed and active. 
-    - On Windows, install the latest x86 or x64 Python 2.7 client from ([python-2.7] (https://www.python.org/downloads/)). The build needs a valid Python.exe in the path. Based on the active Python version (e.g. Python 2.7.11 x86 32bit) the build script choses the compiler settings for the Python extension module build accordingly and copies the extension to the test and sample folder.
+    - On Windows, install the latest x86 or x64 Python 2.7 or 3.x client from ([python.org](https://www.python.org/downloads/)). The build needs a valid Python.exe in the path. Based on the active Python version (e.g. Python 2.7.11 x86 32bit) the build script choses the compiler settings for the Python extension module build accordingly and copies the extension to the test and sample folder.
 - When you have installed Python, make sure you cloned the latest version of this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) to your development machine or device. You should always use the **master** branch for the latest version of the libraries and samples.
 
 <a name="linux"/>
@@ -24,10 +24,16 @@ Complete the following steps to set up your development environment:
 
 The Python module builds on the Azure IoT device SDK for C. Please make sure you can build the C samples as described in [setup-devbox] before you continue in this section.
 
-1. Ensure that Python version 2.7.x is installed and active. Run `python --version` at the command line to check the version.
+The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know the appropriate version you would like to build the library with for the following instructions.
+
+1. Ensure that the desired Python version (2.7.x, 3.4 or 3.5.x) is installed and active. Run `python --version` or `python3 --version` at the command line to check the version.
 2. Open a shell and navigate to the folder **python/build_all/linux** in your local copy of the repository.
 3. Run the `./setup.sh` script to install the prerequisite packages and the dependent libraries.
+    * Setup will default to python 2.7
+    * To setup dependencies for python 3.4 or 3.5, run `./setup.sh --python-version 3.4` or `./setup.sh --python-version 3.5` respectively
 4. Run the `./build.sh` script.
+    * Build will default to python 2.7
+    * To build with python 3.4 or 3.5, run `./build.sh --build-python 3.4` or `./build.sh --build-python 3.5` respectively 
 5. After a successful build, the `iothub_client.so` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
 <a name="windows"/>
@@ -67,7 +73,7 @@ Now the boost::python library is ready for use.
 
 This repository contains various Python sample applications that illustrate how to use the Microsoft Azure IoT SDK for Python. To learn how to run a sample application that sends messages to an IoT hub, see [Getting started - running a Python sample application][getstarted].
 
-[python-2.7]: https://www.python.org/downloads/
+[python-2.7 or python-3.5]: https://www.python.org/downloads/
 [setup-devbox]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
 [getstarted]: python-run-sample.md
 [boost-zip]: http://www.boost.org/users/history/version_1_60_0.html
