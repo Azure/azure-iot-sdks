@@ -339,7 +339,7 @@ function endTime() {
 function connectionString(device) {
   return 'HostName=' + hostname + ';' +
     'DeviceId=' + device.deviceId + ';' +
-    'SharedAccessKey=' + device.authentication.SymmetricKey.primaryKey;
+    'SharedAccessKey=' + device.authentication.symmetricKey.primaryKey;
 }
 
 function printDevice(device) {
