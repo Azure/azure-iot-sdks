@@ -39,16 +39,23 @@ function Client(transport) {
  * @description       Creates an IoT Hub service client from the given
  *                    connection string using the default transport
  *                    ({@link module:azure-iothub~Transport|Transport}).
- * @param {String}    value   A connection string which encapsulates "service
- *                            connect" permissions on an IoT hub.
+ * 
+ * @param {String}    connStr       A connection string which encapsulates "device
+ *                                  connect" permissions on an IoT hub.
+ * @param {Function}  Transport     A transport constructor.
+ * 
  * @returns {module:azure-iothub.Client}
 */
-Client.fromConnectionString = function fromConnectionString(value) {
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_002: [The fromConnectionString method shall throw ReferenceError if the value argument is falsy.]*/
-  if (!value) throw new ReferenceError('value is \'' + value + '\'');
-
+Client.fromConnectionString = function fromConnectionString(connStr, Transport) {
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_002: [The fromConnectionString method shall throw ReferenceError if the connStr argument is falsy.]*/
+  if (!connStr) throw new ReferenceError('connStr is \'' + connStr + '\'');
+  
+  if(!Transport){
+      Transport = DefaultTransport;
+  }
+  
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_003: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a new instance of the default transport (azure-iothub.Transport).]*/
-  var cn = ConnectionString.parse(value);
+  var cn = ConnectionString.parse(connStr);
   var sas = SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
 
   var config = {
@@ -57,9 +64,9 @@ Client.fromConnectionString = function fromConnectionString(value) {
     keyName: cn.SharedAccessKeyName,
     sharedAccessSignature: sas.toString()
   };
-
+  
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_004: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(transport).]*/
-  return new Client(new DefaultTransport(config));
+  return new Client(new Transport(config));
 };
 
 /**
@@ -67,16 +74,22 @@ Client.fromConnectionString = function fromConnectionString(value) {
  * @description       Creates an IoT Hub service client from the given
  *                    shared access signature using the default transport
  *                    ({@link module:azure-iothub~Transport|Transport}).
- * @param {String}    value   A shared access signature which encapsulates
+ * 
+ * @param {String}    sharedAccessSignature   A shared access signature which encapsulates
  *                            "service connect" permissions on an IoT hub.
+ * @param {Function}  Transport     A transport constructor.
+ * 
  * @returns {module:azure-iothub.Client}
  */
-Client.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_005: [The fromSharedAccessSignature method shall throw ReferenceError if the value argument is falsy.]*/
-  if (!value) throw new ReferenceError('value is \'' + value + '\'');
-
+Client.fromSharedAccessSignature = function fromSharedAccessSignature(sharedAccessSignature, Transport) {
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_005: [The fromSharedAccessSignature method shall throw ReferenceError if the sharedAccessSignature argument is falsy.]*/
+  if (!sharedAccessSignature) throw new ReferenceError('sharedAccessSignature is \'' + sharedAccessSignature + '\'');
+  
+  if(!Transport){
+      Transport = DefaultTransport;
+  }  
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_006: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a new instance of the default transport (azure-iothub.Transport).]*/
-  var sas = SharedAccessSignature.parse(value);
+  var sas = SharedAccessSignature.parse(sharedAccessSignature);
   var decodedUri = decodeURIComponent(sas.sr);
 
   var config = {
@@ -87,7 +100,7 @@ Client.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
   };
 
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_007: [The fromSharedAccessSignature method shall return a new instance of the Client object, as by a call to new Client(transport).]*/
-  return new Client(new DefaultTransport(config));
+  return new Client(new Transport(config));
 };
 
 /**
