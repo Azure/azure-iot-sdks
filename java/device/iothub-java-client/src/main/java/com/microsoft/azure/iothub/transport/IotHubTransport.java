@@ -5,12 +5,12 @@ package com.microsoft.azure.iothub.transport;
 
 import com.microsoft.azure.iothub.IotHubEventCallback;
 import com.microsoft.azure.iothub.Message;
+import java.io.Closeable;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 /** An interface for an IoT Hub transport. */
-public interface IotHubTransport
+public interface IotHubTransport extends Closeable
 {
     /**
      * Establishes a communication channel with an IoT Hub. If a channel is
