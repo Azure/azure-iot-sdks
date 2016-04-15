@@ -5,13 +5,8 @@
 #individual samples
 
 add_subdirectory(iotdm_simple_sample)
-add_subdirectory(iotdm_app_template)
 
 if(NOT WIN32)
     add_subdirectory(iotdm_edison_sample)
 endif()
 
-# This sample depends on the iothub SDK components.  Only include it if we're building from way up there
-if ("${CMAKE_PROJECT_NAME}" STREQUAL "azure_iot_sdks")
-#        add_subdirectory(iotdm_2channel_sample)
-endif()
