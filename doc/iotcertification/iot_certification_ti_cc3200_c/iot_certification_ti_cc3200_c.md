@@ -247,7 +247,7 @@ Package the following artifacts from your device:
 
 2.  All the screenshots that belong to "**Running the sample simplesample_http**" section.
 
-3.  Create a document that explains how to run the sample with your hardware (explicitly highlighting the new steps for customers). As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/c/doc>).
+3.  Create a document that explains how to run the sample with your hardware (explicitly highlighting the new steps for customers). As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
 
 <a name="Step_4_2"></a>
 ## 4.2 Share with the Azure IoT Certification team
