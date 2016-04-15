@@ -127,3 +127,11 @@ UserAgent: <user-agent-string>
 Accept: application/json
 ```
 **]**  
+
+###queryJobHistory(query, done)
+the `queryJobHistory` method retrieves an array of jobs or the result of an aggregation operation on jobs from the history that match the specified filter.
+
+**SRS_NODE_IOTHUB_JOBCLIENT_16_001: [** queryJobHistory shall throw a ReferenceError if the query parameter is falsy **]**
+**SRS_NODE_IOTHUB_JOBCLIENT_16_002: [** queryJobHistory shall call the done callback with an `Error` object if the request fails. **]**
+**SRS_NODE_IOTHUB_JOBCLIENT_16_003: [** queryJobHistory shall call the done callback with a null error object and an array of matching jobs if the query is a projection query. **]**
+**SRS_NODE_IOTHUB_JOBCLIENT_16_004: [** queryJobHistory shall call the done callback with a null error object and an associative array containing the results if the query is an aggregation query.  **]**
