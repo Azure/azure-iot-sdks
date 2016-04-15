@@ -222,6 +222,22 @@ bool spawn_factoryreset_process()
     return ret;
 }
 
+bool use_wget(const char *uri)
+{
+    bool ret = false;
+    if (uri[0] == 'h' && uri[1] == 't' && uri[2] == 't' && uri[3] == 'p')
+    {
+        ret = true;
+    }
+    else if (uri[0] == 'f' && uri[1] == 't' && uri[2] == 'p')
+    {
+        ret = true;
+    }
+    return ret;
+}
+
+    
+
 bool spawn_download_process(const char *uri)
 {
     bool ret = false;
@@ -240,13 +256,21 @@ bool spawn_download_process(const char *uri)
         {
             char buffer[1024];
 
-#if 0
-            sprintf(buffer, "/usr/bin/wget \"%s\" -O /home/root/nf.zip", STRING_c_str(value));
-            _system(buffer);
-#endif
-
-            sprintf(buffer, "cp /home/root/nf.zip /home/root/newFirmware.zip");
-            _system(buffer);
+            if (use_wget(uri))
+            {
+                sprintf(buffer, "/usr/bin/wget \"%s\" -O /home/root/nf.zip", uri);
+                _system(buffer);
+                
+                sprintf(buffer, "cp /home/root/nf.zip /home/root/newFirmware.zip");
+                _system(buffer);
+            }
+            else
+            {
+                sprintf(buffer, "cp \"%s\" /home/root/newFirmware.zip", uri);
+                _system(buffer);
+            }
+                
+            
             LogInfo("** Download complete\r\n");
             exit(0);
         }
