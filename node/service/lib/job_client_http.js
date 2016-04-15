@@ -13,8 +13,7 @@ Http.prototype.sendHttpRequest = function (verb, path, headers, host, writeData,
     var request = this._http.buildRequest(verb, path, headers, host, function (err, body, response) {
         if (!err) {
              done(null, body, response);
-        }
-        else {
+        } else {
             err.response = response;
             err.responseBody = body;
             done(err);

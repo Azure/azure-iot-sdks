@@ -23,8 +23,8 @@ var DefaultTransport = require('./job_client_http.js');
  */
 /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_001: [The JobClient constructor shall accept a config object] */
 function JobClient(config, transport) {
-  this._config = config;
-  this._httpTransport = transport;    
+    this._config = config;
+    this._httpTransport = transport;
 }
 
 /**
@@ -52,7 +52,7 @@ JobClient.fromConnectionString = function fromConnectionString(value, Transport)
         sharedAccessSignature: sas.toString()
     };
     /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_004: [The fromConnectionString method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/
-    return new JobClient(config, new UseTransport() );
+    return new JobClient(config, new UseTransport());
 };
 
 /**
@@ -78,7 +78,7 @@ JobClient.fromSharedAccessSignature = function fromSharedAccessSignature(value, 
         sharedAccessSignature: sas.toString()
     };
     /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_007: [The fromSharedAccessSignature method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/
-    return new JobClient(config, new UseTransport() );
+    return new JobClient(config, new UseTransport());
 };
 
 /**
@@ -118,21 +118,21 @@ JobClient.prototype.scheduleFirmwareUpdate = function (jobId, deviceIds, package
         'Accept': 'application/json',
         'Content-Type': 'application/json; charset=utf-8',
     };
-    
+
     /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_014: [ If the deviceIds argument is not an array, then getJob shall convert it to an array with one element before using it.] */
     if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
-        
+
     var firmwareUpdateJob = {
         "jobId": jobId,
-        "jobParameters":{
+        "jobParameters": {
             "DeviceIds": deviceIds,
             "PackageUri": packageUri,
             "Timeout": '00:' + timeout + ':00', // Will be replace with the Timespan object after some research
             "jobType": "firmwareUpdate"
-        } 
+        }
     };
-        
-    var path = '/jobs/v2/'+ jobId + endpoint.versionQueryString();
+
+    var path = '/jobs/v2/' + jobId + endpoint.versionQueryString();
     this._httpTransport.sendHttpRequest('PUT', path, httpHeaders, config.host, JSON.stringify(firmwareUpdateJob), function (err, body, response) {
         if (!err) {
             /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_011: [When the scheduleFirmwareUpdate method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a JobResponse object representing the new job identity returned from the IoT hub.]*/
@@ -151,7 +151,7 @@ JobClient.prototype.scheduleFirmwareUpdate = function (jobId, deviceIds, package
     });
 };
 
-JobClient.prototype.scheduleDeviceConfigurationUpdate = function(jobId, deviceIds, value, done) {
+JobClient.prototype.scheduleDeviceConfigurationUpdate = function (jobId, deviceIds, value, done) {
     /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_001: [ `scheduleDeviceConfigurationUpdate` shall throw `ReferenceError` if either of the `jobId` or `deviceIds` arguments are falsy. ]*/
     if (!jobId) throw new ReferenceError('Argument \'jobId\' is ' + jobId);
     if (!deviceIds) throw new ReferenceError('Argument \'deviceId\' is ' + deviceIds);
@@ -162,10 +162,10 @@ JobClient.prototype.scheduleDeviceConfigurationUpdate = function(jobId, deviceId
         'Accept': 'application/json',
         'Content-Type': 'application/json; charset=utf-8',
     };
-    
+
     /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_005: [ If the `deviceIds` argument is not an array, then `scheduleDeviceConfigurationUpdate` shall convert it to an array with one element before using it. ]*/
     if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
-    
+
     var deviceConfigurationUpdateJob = {
         jobId: jobId,
         jobParameters: {
@@ -189,7 +189,7 @@ JobClient.prototype.scheduleDeviceConfigurationUpdate = function(jobId, deviceId
     /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [ When `scheduleDeviceConfigurationUpdate` completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub. ]*/
     this._httpTransport.sendHttpRequest('PUT', path, headers, this._config.host, JSON.stringify(deviceConfigurationUpdateJob), function (err, body, response) {
         if (!done) return;
-            
+
         if (err) {
             err.response = response;
             err.responseBody = body;
@@ -244,22 +244,22 @@ JobClient.prototype.scheduleSystemPropertyRead = function (jobId, deviceIds, pro
         'Accept': 'application/json',
         'Content-Type': 'application/json; charset=utf-8',
     };
-    
+
     /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_017: [ If the deviceIds argument is not an array, then getJob shall convert it to an array with one element before using it.] */
     /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_018: [ If the sysPropNames argument is not an array, then getJob shall convert it to an array with one element before using it.] */
     if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
     if (!Array.isArray(propertyName)) propertyName = [propertyName];
-        
+
     var sysPropUpdate = {
         "jobId": jobId,
-        "jobParameters":{
+        "jobParameters": {
             "SystemPropertyNames": propertyName,
             "DeviceIds": deviceIds,
             "jobType": "readDeviceProperties"
-        } 
+        }
     };
 
-    var path = '/jobs/v2/'+ jobId + endpoint.versionQueryString();
+    var path = '/jobs/v2/' + jobId + endpoint.versionQueryString();
     this._httpTransport.sendHttpRequest('PUT', path, httpHeaders, config.host, JSON.stringify(sysPropUpdate), function (err, body, response) {
         if (!err) {
             /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_019: [ When the ScheduleSystemPropertyRead method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a JobResponse object representing the new job identity returned from the IoT hub.] */
@@ -312,18 +312,63 @@ JobClient.prototype.getJob = function (jobId, done) {
         'UserAgent': packageJson.name + '/' + packageJson.version
     };
 
-    var path = '/jobs/v2/'+ jobId + endpoint.versionQueryString();
+    var path = '/jobs/v2/' + jobId + endpoint.versionQueryString();
     this._httpTransport.sendHttpRequest('GET', path, httpHeaders, config.host, null, function (err, body, response) {
         if (!done) return;
-        
+
         if (!err) {
             var jobInfo;
             if (body) {
-            jobInfo = new JobResponse(body);
+                jobInfo = new JobResponse(body);
             }
             done(null, jobInfo, response);
         }
         else {
+            err.response = response;
+            err.responseBody = body;
+            done(err);
+        }
+    });
+};
+
+/**
+ * @method            module:azure-iothub.JobClient#queryJobHistory
+ * @description       Gets the jobs matching the specified query from the history.
+ * 
+ * @param {Object}    jobQuery  An object containing the query parameters.
+ * @param {Function}  done   The function to call when the operation is
+ *                           complete. `done` will be called with two
+ *                           arguments: an Error object (can be null) and a
+ *                           result object containing either an array of jobs
+ *                           matching the query or an associative array containing
+ *                           the aggregation results of the query.
+ */
+JobClient.prototype.queryJobHistory = function (jobQuery, done) {
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_001: [queryJobHistory shall throw a ReferenceError if the query parameter is falsy]*/
+    if (!jobQuery) throw new ReferenceError('jobQuery cannot be \'' + jobQuery + '\'');
+
+    var config = this._config;
+
+    var httpHeaders = {
+        'Authorization': config.sharedAccessSignature,
+        'UserAgent': packageJson.name + '/' + packageJson.version,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+    };
+    
+    var path = '/jobs/v2/query' + endpoint.versionQueryString();
+    var queryContent = JSON.stringify(jobQuery);
+    
+    this._httpTransport.sendHttpRequest('POST', path, httpHeaders, config.host, queryContent, function (err, body, response) {
+        if (!done) return;
+        if (!err) {
+            var bodyObject = JSON.parse(body);
+            /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_003: [queryJobHistory shall call the done callback with a null error object and an array of matching jobs if the query is a projection query.]*/
+            /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_004: [queryJobHistory shall call the done callback with a null error object and an associative array containing the results if the query is an aggregation query. ]*/
+            var result = bodyObject.AggregateResult ? bodyObject.AggregateResult : bodyObject.Result;
+            done(null, result, response);
+        } else {
+            /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_002: [queryJobHistory shall call the done callback with an `Error` object if the request fails.]*/
             err.response = response;
             err.responseBody = body;
             done(err);
