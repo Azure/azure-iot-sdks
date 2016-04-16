@@ -4,7 +4,9 @@
 namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
 {
     using System;
+    using System.Security.Cryptography.X509Certificates;
     using Microsoft.Azure.Devices.Client;
+    using Microsoft.Azure.Devices.Client.ApiTest;
     using Microsoft.Azure.Devices.Client.Transport;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -103,6 +105,21 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
         {
             string connectionString = "HostName=acme.azure-devices.net;CredentialScope=Device;CredentialType=SharedAccessKey;DeviceId=device1;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
             var deviceClient = AmqpTransportHandler.CreateFromConnectionString(connectionString);
+
+            Assert.IsNotNull(deviceClient.Connection);
+            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        public void DeviceClient_ConnectionString_X509Certificate_Test()
+        {
+            string hostName = "acme.azure-devices.net";
+            string password = "CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
+
+            var cert = CertificateHelper.InstallCertificateFromFile("device.pfx", "device.txt");
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
+            var deviceClient = AmqpTransportHandler.Create(hostName, authMethod);
 
             Assert.IsNotNull(deviceClient.Connection);
             Assert.IsNotNull(deviceClient.Connection.ConnectionString);

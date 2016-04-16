@@ -37,11 +37,13 @@ namespace Microsoft.Azure.Devices.Client
         static readonly string SharedAccessKeyNamePropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.SharedAccessKeyName)).Body).Member.Name; // todo: replace with nameof()
         static readonly string SharedAccessKeyPropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.SharedAccessKey)).Body).Member.Name; // todo: replace with nameof()
         static readonly string SharedAccessSignaturePropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.SharedAccessSignature)).Body).Member.Name; // todo: replace with nameof();
+        static readonly string AuthMechanismPropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.AuthMechanism)).Body).Member.Name; // todo: replace with nameof()
         static readonly Regex HostNameRegex = new Regex(@"[a-zA-Z0-9_\-\.]+$", regexOptions);
         static readonly Regex DeviceIdRegex = new Regex(@"^[A-Za-z0-9\-:.+%_#*?!(),=@;$']{1,128}$", regexOptions);
         static readonly Regex SharedAccessKeyNameRegex = new Regex(@"^[a-zA-Z0-9_\-@\.]+$", regexOptions);
         static readonly Regex SharedAccessKeyRegex = new Regex(@"^.+$", regexOptions);
         static readonly Regex SharedAccessSignatureRegex = new Regex(@"^.+$", regexOptions);
+        static readonly Regex AuthMechanismRegex = new Regex(@"^[a-zA-Z0-9_\-@\.]+$", regexOptions);
 #endif
 
         string hostName;
@@ -130,6 +132,8 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string SharedAccessSignature { get; internal set; }
 
+        public string AuthMechanism { get; internal set; }
+
         internal string IotHubName 
         {
             get { return this.iotHubName; }
@@ -216,6 +220,7 @@ namespace Microsoft.Azure.Devices.Client
             this.SharedAccessKeyName = GetConnectionStringOptionalValue(map, SharedAccessKeyNamePropertyName);
             this.SharedAccessKey = GetConnectionStringOptionalValue(map, SharedAccessKeyPropertyName);
             this.SharedAccessSignature = GetConnectionStringOptionalValue(map, SharedAccessSignaturePropertyName);
+            this.AuthMechanism = GetConnectionStringOptionalValue(map, AuthMechanismPropertyName);
 #endif
             this.Validate();
         }
@@ -227,9 +232,9 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentException("DeviceId must be specified in connection string");
             }
 
-            if (!(this.SharedAccessKey.IsNullOrWhiteSpace() ^ this.SharedAccessSignature.IsNullOrWhiteSpace()))
+            if (this.AuthMechanism.IsNullOrWhiteSpace() && !(this.SharedAccessKey.IsNullOrWhiteSpace() ^ this.SharedAccessSignature.IsNullOrWhiteSpace()))
             {
-                throw new ArgumentException("Should specify either SharedAccessKey or SharedAccessSignature");
+                throw new ArgumentException("Should specify either SharedAccessKey or SharedAccessSignature if X.509 certificate is not used");
             }
 
             if (this.IotHubName.IsNullOrWhiteSpace())
@@ -257,6 +262,7 @@ namespace Microsoft.Azure.Devices.Client
             ValidateFormatIfSpecified(this.SharedAccessKeyName, SharedAccessKeyNamePropertyName, SharedAccessKeyNameRegex);
             ValidateFormatIfSpecified(this.SharedAccessKey, SharedAccessKeyPropertyName, SharedAccessKeyRegex);
             ValidateFormatIfSpecified(this.SharedAccessSignature, SharedAccessSignaturePropertyName, SharedAccessSignatureRegex);
+            ValidateFormatIfSpecified(this.AuthMechanism, AuthMechanismPropertyName, AuthMechanismRegex);
 #endif
         }
 

@@ -4,6 +4,9 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+#if !WINDOWS_UWP
+    using System.Security.Cryptography.X509Certificates;
+#endif
 
     /// <summary>
     /// contains Amqp transport-specific settings for DeviceClient
@@ -46,5 +49,9 @@ namespace Microsoft.Azure.Devices.Client
         }
 
         public uint PrefetchCount { get; set; }
+
+#if !WINDOWS_UWP
+        public X509Certificate2 ClientCertificate { get; set; }
+#endif
     }
 }

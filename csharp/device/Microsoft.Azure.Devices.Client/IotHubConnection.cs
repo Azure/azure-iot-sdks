@@ -343,10 +343,16 @@ namespace Microsoft.Azure.Devices.Client
             {
                 TargetHost = this.connectionString.HostName,
 #if !WINDOWS_UWP // Not supported in UWP
-                Certificate = null, // TODO: add client cert support
                 CertificateValidationCallback = this.OnRemoteCertificateValidation
 #endif
             };
+
+#if !WINDOWS_UWP
+            if (this.amqpTransportSettings.ClientCertificate != null)
+            {
+                tlsTransportSettings.Certificate = this.amqpTransportSettings.ClientCertificate;
+            }
+#endif
 
             return tlsTransportSettings;
         }

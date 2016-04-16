@@ -45,15 +45,35 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 iotHubConnectionString,
                 ExceptionHandlingHelper.GetDefaultErrorMapping(),
                 DefaultOperationTimeout,
-                null);
+                null
+#if !WINDOWS_UWP && !PCL
+                , null
+#endif
+                );
             this.DefaultReceiveTimeout = DefaultReceiveTimeoutInSeconds;
         }
 
+#if WINDOWS_UWP || PCL
         internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString, Http1TransportSettings transportSettings)
-            :this(iotHubConnectionString)
+            : this(iotHubConnectionString)
         {
             this.transportSettings = transportSettings;
         }
+#else
+        internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString, Http1TransportSettings transportSettings)
+        {
+            this.transportSettings = transportSettings;
+            this.deviceId = iotHubConnectionString.DeviceId;
+            this.httpClientHelper = new HttpClientHelper(
+                iotHubConnectionString.HttpsEndpoint,
+                iotHubConnectionString,
+                ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                DefaultOperationTimeout,
+                null,
+                this.transportSettings.ClientCertificate);
+            this.DefaultReceiveTimeout = DefaultReceiveTimeoutInSeconds;
+        }
+#endif
 
         /// <summary>
         /// Create a DeviceClient from individual parameters

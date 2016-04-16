@@ -257,7 +257,7 @@
     </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\Http1TransportSettings.cs">
       <Link>Http1TransportSettings.cs</Link>
-    </Compile>
+    </Compile>    
     <Compile Include="..\Microsoft.Azure.Devices.Client\IAuthenticationMethod.cs">
       <Link>IAuthenticationMethod.cs</Link>
     </Compile>

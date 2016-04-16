@@ -18,6 +18,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
     using Microsoft.Azure.Devices.Client.Extensions;
 #if !WINDOWS_UWP && !PCL
     using System.Net.Http.Formatting;
+    using System.Security.Cryptography.X509Certificates;
 #endif
 
     sealed class HttpClientHelper : IHttpClientHelper
@@ -25,6 +26,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         readonly Uri baseAddress;
         readonly IAuthorizationHeaderProvider authenticationHeaderProvider;
         readonly IReadOnlyDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> defaultErrorMapping;
+        readonly bool usingX509ClientCert;
         HttpClient httpClientObj;
         bool isDisposed;
 
@@ -33,23 +35,75 @@ namespace Microsoft.Azure.Devices.Client.Transport
             IAuthorizationHeaderProvider authenticationHeaderProvider,
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> defaultErrorMapping,
             TimeSpan timeout,
-            Action<HttpClient> preRequestActionForAllRequests)
+            Action<HttpClient> preRequestActionForAllRequests
+#if !WINDOWS_UWP && !PCL
+            , X509Certificate2 clientCert
+#endif
+            )
         {
             this.baseAddress = baseAddress;
             this.authenticationHeaderProvider = authenticationHeaderProvider;
             this.defaultErrorMapping =
                 new ReadOnlyDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>(defaultErrorMapping);
 
+#if !WINDOWS_UWP && !PCL
+            WebRequestHandler handler = null;
+            if (clientCert != null)
+            {
+                handler = new WebRequestHandler();
+                handler.ClientCertificates.Add(clientCert);
+                this.usingX509ClientCert = true;
+            }
+
+            this.httpClientObj = handler != null ? new HttpClient(handler) : new HttpClient();
+#else
             this.httpClientObj = new HttpClient();
+#endif
+
             this.httpClientObj.BaseAddress = this.baseAddress;
             this.httpClientObj.Timeout = timeout;
             this.httpClientObj.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(CommonConstants.MediaTypeForDeviceManagementApis));
-            this.httpClientObj.DefaultRequestHeaders.ExpectContinue = false; 
+            this.httpClientObj.DefaultRequestHeaders.ExpectContinue = false;
             if (preRequestActionForAllRequests != null)
             {
                 preRequestActionForAllRequests(this.httpClientObj);
             }
         }
+
+//#if !WINDOWS_UWP && !PCL
+//        public HttpClientHelper(
+//            Uri baseAddress,
+//            IAuthorizationHeaderProvider authenticationHeaderProvider,
+//            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> defaultErrorMapping,
+//            TimeSpan timeout,
+//            Action<HttpClient> preRequestActionForAllRequests,
+//            X509Certificate2 clientCert)
+//        {
+//            this.baseAddress = baseAddress;
+//            this.authenticationHeaderProvider = authenticationHeaderProvider;
+//            this.defaultErrorMapping =
+//                new ReadOnlyDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>(defaultErrorMapping);
+
+//            WebRequestHandler handler = null;
+//            if (clientCert != null)
+//            {
+//                handler = new WebRequestHandler();
+//                handler.ClientCertificates.Add(clientCert);
+//                this.usingX509ClientCert = true;
+//            }
+
+//            this.httpClientObj = handler != null ? new HttpClient(handler) : new HttpClient();
+
+//            this.httpClientObj.BaseAddress = this.baseAddress;
+//            this.httpClientObj.Timeout = timeout;
+//            this.httpClientObj.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(CommonConstants.MediaTypeForDeviceManagementApis));
+//            this.httpClientObj.DefaultRequestHeaders.ExpectContinue = false;
+//            if (preRequestActionForAllRequests != null)
+//            {
+//                preRequestActionForAllRequests(this.httpClientObj);
+//            }
+//        }
+//#endif
 
         public Task<T> GetAsync<T>(
             Uri requestUri,
@@ -318,7 +372,10 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
             using (var msg = new HttpRequestMessage(httpMethod, requestUri))
             {
-                msg.Headers.Add(HttpRequestHeader.Authorization.ToString(), this.authenticationHeaderProvider.GetAuthorizationHeader());
+                if (!this.usingX509ClientCert)
+                {
+                    msg.Headers.Add(HttpRequestHeader.Authorization.ToString(), this.authenticationHeaderProvider.GetAuthorizationHeader());
+                }
 #if !WINDOWS_UWP && !PCL
                 msg.Headers.UserAgent.ParseAdd(Utils.GetClientVersion());
 #endif

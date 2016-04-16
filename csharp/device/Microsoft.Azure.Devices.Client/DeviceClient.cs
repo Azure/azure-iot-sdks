@@ -5,12 +5,11 @@ namespace Microsoft.Azure.Devices.Client
 {
     using System;
     using System.Collections.Generic;
-    using System.Text.RegularExpressions;
     using System.Linq;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client.Extensions;
     using Microsoft.Azure.Devices.Client.Transport;
-
-    using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client.Exceptions;
 
 #if !WINDOWS_UWP && !PCL
@@ -87,7 +86,6 @@ namespace Microsoft.Azure.Devices.Client
             this.iotHubConnectionString = iotHubConnectionString;
             this.transportSettings = transportSettings;
         }
-
 #else
         DeviceClient(TransportHandlerBase impl, TransportType transportType)
         {
@@ -95,8 +93,6 @@ namespace Microsoft.Azure.Devices.Client
             this.TransportTypeInUse = transportType;
         }
 #endif
-
-
         public TransportType TransportTypeInUse { get; private set; }
 
         /// <summary>
@@ -114,6 +110,9 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         }
 
+#if WINDOWS_UWP
+        [Windows.Foundation.Metadata.DefaultOverloadAttribute()]
+#endif
         /// <summary>
         /// Create a DeviceClient from individual parameters
         /// </summary>
@@ -137,6 +136,31 @@ namespace Microsoft.Azure.Devices.Client
             return CreateFromConnectionString(connectionStringBuilder.ToString(), transportType);
         }
 
+#if !PCL
+        /// <summary>
+        /// Create a DeviceClient from individual parameters
+        /// </summary>
+        /// <param name="hostname">The fully-qualified DNS hostname of IoT Hub</param>
+        /// <param name="authenticationMethod">The authentication method that is used</param>
+        /// <param name="transportSettings">Prioritized list of transportTypes and their settings</param>
+        /// <returns>DeviceClient</returns>
+        public static DeviceClient Create(string hostname, IAuthenticationMethod authenticationMethod, [System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute] ITransportSettings[] transportSettings)
+        {
+            if (hostname == null)
+            {
+                throw new ArgumentNullException("hostname");
+            }
+
+            if (authenticationMethod == null)
+            {
+                throw new ArgumentNullException("authenticationMethod");
+            }
+
+            var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authenticationMethod);
+            return CreateFromConnectionString(connectionStringBuilder.ToString(), transportSettings);
+        }
+#endif
+
         /// <summary>
         /// Create a DeviceClient using Amqp transport from the specified connection string
         /// </summary>
@@ -149,7 +173,6 @@ namespace Microsoft.Azure.Devices.Client
 #else
             return CreateFromConnectionString(connectionString, TransportType.Amqp);
 #endif
-
         }
 
         /// <summary>
@@ -180,7 +203,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString, TransportType transportType)
         {
-            if (connectionString  == null)
+            if (connectionString == null)
             {
                 throw new ArgumentNullException("connectionString");
             }
@@ -259,7 +282,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Create DeviceClient from the specified connection string using a prioritized list of transports
         /// </summary>
         /// <param name="connectionString">Connection string for the IoT hub (with DeviceId)</param>
-        /// <param name="transportSettings">Prioritized list of transports</param>
+        /// <param name="transportSettings">Prioritized list of transports and their settings</param>
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString, [System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute] ITransportSettings[] transportSettings)
         {
@@ -268,7 +291,7 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentNullException("connectionString");
             }
 
-            if (transportSettings == null) 
+            if (transportSettings == null)
             {
                 throw new ArgumentNullException("transportSettings");
             }
@@ -319,7 +342,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <param name="connectionString">Connection string for the IoT hub (without DeviceId)</param>
         /// <param name="deviceId">Id of the device</param>
-        /// <param name="transportSettings">Prioritized list of transportTypes</param>
+        /// <param name="transportSettings">Prioritized list of transportTypes and their settings</param>
         /// <returns>DeviceClient</returns>
 #if WINDOWS_UWP
         [Windows.Foundation.Metadata.DefaultOverloadAttribute]
@@ -638,7 +661,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             bool executeOpen = false;
             var localTcs = this.openTaskCompletionSource;
-       
+
             if (localTcs == null)
             {
                 lock (this.thisLock)
@@ -708,7 +731,7 @@ namespace Microsoft.Azure.Devices.Client
                     await helper.CloseAsync();
 
 #if WINDOWS_UWP
-                    // UWP does not use sockets
+    // UWP does not use sockets
                     if (!(exception is IotHubCommunicationException || exception is TimeoutException || exception is AggregateException))
 #else
                     if (!(exception is IotHubCommunicationException || exception is TimeoutException || exception is SocketException || exception is AggregateException))
