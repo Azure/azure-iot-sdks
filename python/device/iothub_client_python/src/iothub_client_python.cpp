@@ -36,6 +36,11 @@
 // note: all new allocations throw a std::bad_alloc exception which trigger a MemoryError in Python
 //
 
+// helper to suppress AMQP console messages, comment function to get the output to console
+extern "C"
+void consolelogger_log(unsigned int options, char* format, ...)
+{}
+
 // helper classes for transitions between Python and C++ layer
 
 class ScopedGILAcquire
@@ -273,7 +278,7 @@ public:
         MAP_FILTER_CALLBACK mapFilterFunc = NULL;
         if (PyCallable_Check(_mapFilterCallback.ptr()))
         {
-            if (PyFunction_Check(mapFilterCallback.ptr()))
+            if (PyCallable_Check(mapFilterCallback.ptr()))
             {
                 PyErr_SetString(PyExc_TypeError, "Filter already in use");
                 boost::python::throw_error_already_set();
@@ -288,7 +293,7 @@ public:
         }
         else
         {
-            PyErr_SetString(PyExc_TypeError, "expected type function");
+            PyErr_SetString(PyExc_TypeError, "expected type callable");
             boost::python::throw_error_already_set();
             return;
         }
@@ -328,7 +333,7 @@ public:
         }
         else if (Py_None != _mapFilterCallback.ptr())
         {
-            PyErr_SetString(PyExc_TypeError, "Create expected type function or None");
+            PyErr_SetString(PyExc_TypeError, "Create expected type callable or None");
             boost::python::throw_error_already_set();
             return NULL;
         }
@@ -924,7 +929,7 @@ public:
     {
         if (!PyCallable_Check(messageCallback.ptr()))
         {
-            PyErr_SetString(PyExc_TypeError, "send_event_async expected type function");
+            PyErr_SetString(PyExc_TypeError, "send_event_async expected type callable");
             boost::python::throw_error_already_set();
             return;
         }
@@ -961,7 +966,7 @@ public:
     {
         if (!PyCallable_Check(messageCallback.ptr()))
         {
-            PyErr_SetString(PyExc_TypeError, "set_message_callback expected type function");
+            PyErr_SetString(PyExc_TypeError, "set_message_callback expected type callable");
             boost::python::throw_error_already_set();
             return;
         }
@@ -991,22 +996,40 @@ public:
         boost::python::object& option
         )
     {
+        IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
 #ifdef IS_PY3
-        if (!PyLong_Check(option.ptr()))
+        if (PyUnicode_Check(option.ptr()))
         {
-            PyErr_SetString(PyExc_TypeError, "set_option expected type long");
+            std::string stringValue = boost::python::extract<std::string>(option);
+            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), stringValue.c_str());
+        }
+        else if (PyLong_Check(option.ptr()))
+        {
+            long value = boost::python::extract<long>(option);
+            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
+        }
+        else
+        {
+            PyErr_SetString(PyExc_TypeError, "set_option expected type long or unicode");
             boost::python::throw_error_already_set();
         }
-        long value = boost::python::extract<long>(option);
 #else
-        if (!PyInt_Check(option.ptr()))
+        if (PyString_Check(option.ptr()))
         {
-            PyErr_SetString(PyExc_TypeError, "set_option expected type int");
+            std::string stringValue = boost::python::extract<std::string>(option);
+            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), stringValue.c_str());
+        }
+        else if (PyInt_Check(option.ptr()))
+        {
+            int value = boost::python::extract<int>(option);
+            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
+        }
+        else
+        {
+            PyErr_SetString(PyExc_TypeError, "set_option expected type int or string");
             boost::python::throw_error_already_set();
         }
-        int value = boost::python::extract<int>(option);
 #endif
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
         if (result != IOTHUB_CLIENT_OK)
         {
             throw IoTHubClientError(__func__, result);

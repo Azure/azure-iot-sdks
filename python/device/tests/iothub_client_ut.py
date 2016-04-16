@@ -127,6 +127,7 @@ class TestExceptionDefinitions(unittest.TestCase):
         with self.assertRaises(TypeError):
             raise IoTHubClientErrorArg("function", IoTHubClientResult.ERROR)
 
+
 class TestEnumDefinitions(unittest.TestCase):
 
     def test_IoTHubMapResult(self):
@@ -567,7 +568,9 @@ class TestClassDefinitions(unittest.TestCase):
         with self.assertRaises(Exception):
             client.set_option(timeout)
         with self.assertRaises(TypeError):
-            client.set_option("timeout", "241000")
+            client.set_option("timeout", bytearray("241000"))
+        result = client.set_option("timeout", "241000")
+        self.assertIsNone(result)
         result = client.set_option("timeout", timeout)
         self.assertIsNone(result)
 

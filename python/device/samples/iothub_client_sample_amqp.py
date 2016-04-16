@@ -4,7 +4,9 @@
 # Licensed under the MIT license. See LICENSE file in the project root for
 # full license information.
 
-import random, time, sys
+import random
+import time
+import sys
 import iothub_client
 from iothub_client import *
 
@@ -27,12 +29,23 @@ connectionString = "[device connection string]"
 msgTxt = "{\"deviceId\": \"myAMQPDevice\",\"windSpeed\": %.2f}"
 
 
+# some embedded platforms need certificate information
+def set_certificates(iotHubClient):
+    from iothub_client_cert import certificates
+    try:
+        iotHubClient.set_option("TrustedCerts", certificates)
+        print ("set_option TrustedCerts successful")
+    except IoTHubClientError as e:
+        print ("set_option TrustedCerts failed (%s)" % e)
+
+
 def receive_message_callback(message, counter):
     global receive_callbacks
     buffer = message.get_bytearray()
     size = len(buffer)
     print ("Received Message [%d]:" % counter)
-    print ("    Data: <<<%s>>> & Size=%d" % (buffer[:size].decode('utf-8') , size))
+    print ("    Data: <<<%s>>> & Size=%d" %
+           (buffer[:size].decode('utf-8'), size))
     mapProperties = message.properties()
     keyValuePair = mapProperties.get_internals()
     print ("    Properties: %s" % keyValuePair)
@@ -44,7 +57,9 @@ def receive_message_callback(message, counter):
 
 def send_confirmation_callback(message, result, userContext):
     global send_callbacks
-    print ("Confirmation[%d] received for message with result = %s" % (userContext, result))
+    print (
+        "Confirmation[%d] received for message with result = %s" %
+        (userContext, result))
     mapProperties = message.properties()
     keyValuePair = mapProperties.get_internals()
     print ("    Properties: %s" % keyValuePair)
@@ -55,6 +70,8 @@ def send_confirmation_callback(message, result, userContext):
 def iothub_client_init():
     # prepare iothub client
     iotHubClient = IoTHubClient(connectionString, Protocol)
+    # some embedded platforms need certificate information
+    # set_certificates(iotHubClient)
     iotHubClient.set_message_callback(receive_message_callback, receiveContext)
     return iotHubClient
 
@@ -84,13 +101,15 @@ def iothub_client_sample_run():
             for i in range(0, message_count):
                 msgTxtFormatted = msgTxt % (
                     avgWindSpeed + (random.random() * 4 + 2))
-                message = IoTHubMessage(bytearray(msgTxtFormatted,'utf8'))
+                message = IoTHubMessage(bytearray(msgTxtFormatted, 'utf8'))
                 propMap = message.properties()
                 propText = "PropMsg_%d" % i
                 propMap.add("Property", propText)
                 iotHubClient.send_event_async(
                     message, send_confirmation_callback, i)
-                print ("IoTHubClient.send_event_async accepted message [%d] for transmission to IoT Hub." % i)
+                print (
+                    "IoTHubClient.send_event_async accepted message [%d] for transmission to IoT Hub." %
+                    i)
 
             # Wait for Commands or exit
             print ("IoTHubClient waiting for commands, press Ctrl-C to exit")
@@ -103,8 +122,8 @@ def iothub_client_sample_run():
                 n += 1
 
     except IoTHubError as e:
-       print ("Unexpected error %s from IoTHub" % e)
-       return
+        print ("Unexpected error %s from IoTHub" % e)
+        return
     except KeyboardInterrupt:
         print ("IoTHubClient sample stopped")
 
