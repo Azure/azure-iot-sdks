@@ -56,7 +56,7 @@ You should have the following items ready before beginning the process:
     2)  Using SCP or WINSCP over Ethernet connection
         -   Enable SSH on the FATBOX (reboot after 'Update').
 	-   Use SCP or WINSCP to transfer the connstr.txt from your computer to the FATBOX /user folder. 
-        -   In the FATBOX G3 'Azure IoT' menu, enable the Azure IoT device client option.
+-   In the FATBOX G3 'Azure IoT' menu, enable the Azure IoT device client option.
 
             ![](media/fatbox_enable_device_client.png)
 	    
