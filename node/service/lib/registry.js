@@ -202,17 +202,15 @@ Registry.prototype.list = function (done) {
   var path = endpoint.devicePath('') + endpoint.versionQueryString();
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_004: [The list method shall request information about devices from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
   this._transport.listDevices(path, function (err, body, response) {
-    var devList = [];
-    if (body) {
-      var jsonArray = JSON.parse(body);
-      jsonArray.forEach(function (jsonElement) {
-        /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_006: [The JSON array returned from the service shall be converted to a list of Device objects.]*/
-        var devItem = new Device(JSON.stringify(jsonElement));
-        devList.push(devItem);
-      });
+    if (err) {
+      done(err);
+    } else {
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_006: [The JSON array returned from the service shall be converted to a list of Device objects.]*/
+      var sourceArray = JSON.parse(body);
+      var devList = createDeviceArray(sourceArray);
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_005: [When the list method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an array of Device objects representing up to 1000 devices from the IoT hub.]*/
+      done(err, devList, response);
     }
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_005: [When the list method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an array of Device objects representing up to 1000 devices from the IoT hub.]*/
-    done(err, devList, response);
   });
 };
 
@@ -382,9 +380,18 @@ Registry.prototype.cancelJob = function (jobId, done) {
   });
 };
 
+function createDeviceArray(sourceArray) {
+  var devList = [];
+  sourceArray.forEach(function (jsonElement) {
+    var devItem = new Device(JSON.stringify(jsonElement));
+    devList.push(devItem);
+  });
+  return devList;
+}
+
 /**
- * @method              module:azure-iothub.Registry#queryDevices
- * @description         QueryDevices method will return a list of devices that match the tags that are specified in the tag list.
+ * @method              module:azure-iothub.Registry#queryDevicesByTags
+ * @description         The queryDevicesByTags method will return a list of devices that match the tags that are specified in the tag list.
  * @param {array}       tags      The list of tags used in the query.
  * @param {int}         maxCount  The maximum number of devices returned.
  * @param {Function}    done      The function to call when the operation is
@@ -395,25 +402,62 @@ Registry.prototype.cancelJob = function (jobId, done) {
  *                                objects representing the listed device
  *                                identities, and a transport-specific response
  *                                object useful for logging or debugging. */
-Registry.prototype.queryDevices = function (tags, maxCount, done) {
-    /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_019: [A ReferenceError shall be thrown if the tags array is empty.] */
-    if (!tags || tags.length === 0) throw new ArgumentError('tag list is empty');
-    /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_023: [A ReferenceError shall be thrown if the maxCount is less than or equal to zero.] */
-    if (maxCount <= 0) throw new RangeError('invalid Max Count specified');
-    
-    /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_020: [The QueryDevices method shall call the server for the device that contain the tags] */
-    this._transport.queryDevices(endpoint.versionQueryString(), tags, maxCount, function (err, body, response) {
-        var devList = [];
-        if (body) {
-            var jsonArray = JSON.parse(body);
-            jsonArray.forEach(function (jsonElement) {
-                /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_022: [The JSON array returned from the service shall be converted to a list of Device objects.] */
-                var devItem = new Device(JSON.stringify(jsonElement));
-                devList.push(devItem);
-            });
-        }
-        /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_021: [When the list method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an array of Device objects representing up to Max Count devices from the IoT hub.] */
-        done(err, devList, response);
+Registry.prototype.queryDevicesByTags = function (tags, maxCount, done) {
+  /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_019: [A ReferenceError shall be thrown if the tags array is empty.] */
+  if (!tags || tags.length === 0) throw new ArgumentError('tag list is empty');
+  /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_023: [A ReferenceError shall be thrown if the maxCount is less than or equal to zero.] */
+  if (maxCount <= 0) throw new RangeError('invalid Max Count specified');
+
+  /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_020: [The queryDevicesByTags method shall call the server for the device that contain the tags] */
+  this._transport.queryDevicesByTags(endpoint.versionQueryString(), tags, maxCount, function (err, body, response) {
+    if (err) {
+      done(err);
+    } else {
+      /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_022: [The JSON array returned from the service shall be converted to a list of Device objects.] */
+      var sourceArray = JSON.parse(body);
+      var devList = createDeviceArray(sourceArray);
+      /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_021: [When the list method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an array of Device objects representing up to Max Count devices from the IoT hub.] */
+      done(err, devList, response);
+    }
+  });
+};
+
+/**
+ * @method              module:azure-iothub.Registry#queryDevices
+ * @description         The queryDevices method will return a list of devices that match the specified query.
+ * @param {Object}      query     The query object.
+ * @param {Function}    done      The function to call when the operation is
+ *                                complete. `done` will be called with three arguments:
+ *                                - an Error object (can be null)
+ *                                - a result object that can be:
+ *                                  - an array of {@link module:azure-iothub.Device|Device}
+ *                                    objects representing the matching device
+ *                                    identities
+ *                                  - an associative array with the aggregate results 
+ *                                    if the query object requested an aggregation operation
+ *                                - a transport-specific response object useful for logging or debugging.
+ */
+Registry.prototype.queryDevices = function (query, done) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_019: [** A `ReferenceError` shall be thrown if the query object is falsy or empty.]*/
+  if (!query) throw new ReferenceError('Query object cannot be \'' + query + '\'');
+
+  this._transport.queryDevices(endpoint.versionQueryString(), query, function (err, body, response) {
+    if(err) {
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_020: [** The `done` callback shall be called with an `Error` object if the request fails.]*/
+      done(err);
+    } else {
+      var queryResult;
+      var resultObject = JSON.parse(body);
+      if(resultObject.Result) {
+        /*SRS_NODE_IOTHUB_REGISTRY_16_021: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is a simple array of `Device` objects corresponding to the devices matching the query if it uses projection.]*/
+        queryResult = createDeviceArray(resultObject.Result);
+      } else {
+        /*SRS_NODE_IOTHUB_REGISTRY_16_022: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of results if the query was an aggregation query.]*/
+        queryResult = resultObject.AggregateResult;
+      }
+
+      done(null, queryResult, response);
+    }
   });
 };
 

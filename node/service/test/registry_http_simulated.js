@@ -139,12 +139,34 @@ SimulatedHttp.prototype.cancelJob = function (path, done) {
   }
 };
 
-SimulatedHttp.prototype.queryDevices = function (queryString, tagList, maxCount, done) {
+SimulatedHttp.prototype.queryDevicesByTags = function (queryString, tagList, maxCount, done) {
   var devices = [
     { deviceId: 'testDevice1' },
     { deviceId: 'testDevice2' }
   ];
   this.handleRequest(done, JSON.stringify(devices));
+};
+
+SimulatedHttp.prototype.queryDevices = function(queryString, query, done) {
+  var testResponse = {
+    statusCode: 200
+  };
+
+  if (query.aggregate) {
+    var testResultObject = {
+      AvgTemperature: 42
+    };
+
+    done(null, JSON.stringify({ Result: null, AggregateResult: testResultObject }), testResponse);
+  } else {
+    var testResultArray = [
+      { deviceId: 'device1' },
+      { deviceId: 'device2' },
+      { deviceId: 'device3' }
+    ];
+    
+    done(null, JSON.stringify({ Result: testResultArray, AggregateResult: null }), testResponse);
+  }
 };
 
 module.exports = SimulatedHttp;

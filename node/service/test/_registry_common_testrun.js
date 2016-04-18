@@ -305,13 +305,13 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       });
     });
 
-    describe('#queryDevices', function () {
+    describe('#queryDevicesByTags', function () {
       /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_020: [The QueryDevice method shall call the server for the device that contain the tags] */
       /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_022: [The JSON array returned from the service shall be converted to a list of Device objects.] */
       it('calls the transport to query a device with a specified tag', function (done) {
         var registry = Registry.fromConnectionString(dmConnectionString, Transport);
         var tagList = ['irrelevant'];
-        registry.queryDevices(tagList, 10, function (err, deviceList, res) {
+        registry.queryDevicesByTags(tagList, 10, function (err, deviceList, res) {
           if (err) {
             done(err);
           } else {
@@ -324,9 +324,65 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
 
       badConfigTests('query device tags', badDmConnectionStrings, Transport, function (registry, done) {
         var tagList = ['irrelevant'];
-        registry.queryDevices(tagList, 10, done);
+        registry.queryDevicesByTags(tagList, 10, done);
       });
 
+    });
+    
+    describe('#queryDevices', function() {
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_021: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is a simple array of `Device` objects corresponding to the devices matching the query if it uses projection.]*/
+      it('calls the done callback with a null error object and a list of devices if the query is a projection query', function(done) {
+        var registry = Registry.fromConnectionString(dmConnectionString, Transport);
+        // Setting everything to null is like SELECT *
+        var testQuery = {
+          project: null,
+          aggregate: null,
+          filter: null,
+          sort: []
+        };
+        
+        registry.queryDevices(testQuery, function(err, result, response) {
+          assert.isNull(err);
+          assert.isArray(result);
+          assert.equal(response.statusCode, 200);
+          done();
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_022: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionnary) of results if the query was an aggregation query.]*/
+      it('calls the done callback with a null error object and an aggregate result object if the query is an aggregate query', function(done) {
+        var testQuery = {
+          project: null,
+          aggregate: {
+            "keys": [
+              {
+                "name": "tags",
+                "type": "default"
+              }
+            ],
+            "properties": [
+              {
+                "operator": "count",
+                "property": {
+                  "name": "tags",
+                  "type": "service"
+                },
+                "columnName": "deviceCount"
+              }
+            ]
+          },
+          sort: null,
+          filter: null
+        };
+
+        var registry = Registry.fromConnectionString(dmConnectionString, Transport);
+        registry.queryDevices(testQuery, function(err, result, response) {
+          assert.isNull(err);
+          assert.isOk(result);
+          assert.equal(response.statusCode, 200);
+          done();
+        });
+      });
     });
   });
 }
