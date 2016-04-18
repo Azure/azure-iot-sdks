@@ -4,7 +4,6 @@
 'use strict';
 
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
-var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var ConnectionString = require('./connection_string.js');
 var JobResponse = require('./job_response.js');
 var endpoint = require('azure-iot-common').endpoint;
@@ -81,6 +80,35 @@ JobClient.fromSharedAccessSignature = function fromSharedAccessSignature(value, 
     return new JobClient(config, new UseTransport());
 };
 
+/*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_003: [If an error is encountered while sending the request, it shall invoke the `done` callback function and pass the standard JavaScript `Error` object with a text description of the error (`err.message`).]*/  
+/*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub.]*/
+
+JobClient.prototype._scheduleJob = function (jobDesc, done) {
+    var config = this._config;
+    var httpHeaders = {
+        'Authorization': config.sharedAccessSignature,
+        'UserAgent': packageJson.name + '/' + packageJson.version,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+    };
+
+    var path = '/jobs/v2/' + jobDesc.jobId + endpoint.versionQueryString();
+    this._httpTransport.sendHttpRequest('PUT', path, httpHeaders, config.host, JSON.stringify(jobDesc), function (err, body, response) {
+        if (!err) {
+            var jobInfo;
+            if (body) {
+                jobInfo = new JobResponse(body);
+            }
+            done(null, jobInfo, response);
+        }
+        else {
+            err.response = response;
+            err.responseBody = body;
+            done(err);
+        }
+    });
+};
+
 /**
  * @method            module:azure-iothub.JobClient#scheduleFirmwareUpdate`
  * @description       .
@@ -98,30 +126,31 @@ JobClient.fromSharedAccessSignature = function fromSharedAccessSignature(value, 
  *                                  object useful for logging or debugging.
  */
 JobClient.prototype.scheduleFirmwareUpdate = function (jobId, deviceIds, packageUri, timeout, done) {
-    /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_008: [scheduleFirmwareUpdate method shall throw ArgumentError if any argument contains a falsy value.] */
-    if (!jobId) throw new ArgumentError('The object \'jobId\' is not valid');
-    if (!deviceIds) throw new ArgumentError('The object \'deviceIds\' is not valid');
-    if (!packageUri) throw new ArgumentError('The object \'packageUri\' is not valid');
-    if (!timeout) throw new ArgumentError('The object \'timeout\' is not valid');
-
-    var config = this._config;
-    /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_009: [scheduleFirmwareUpdate shall construct an HTTP request using information supplied by the caller, as follows:
-    PUT <path>?api-version=<version> HTTP/1.1
-    Authorization: <config.sharedAccessSignature>
-    Content-Type: application/json; charset=utf-8
-    'Accept': 'application/json',
-    [JobInfo]
-    ]*/
-    var httpHeaders = {
-        'Authorization': config.sharedAccessSignature,
-        'UserAgent': packageJson.name + '/' + packageJson.version,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json; charset=utf-8',
-    };
+    /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_008: [scheduleFirmwareUpdate method shall throw ReferenceError if any argument contains a falsy value.] */
+    if (!jobId) throw new ReferenceError('The object \'jobId\' is not valid');
+    if (!deviceIds) throw new ReferenceError('The object \'deviceIds\' is not valid');
+    if (!packageUri) throw new ReferenceError('The object \'packageUri\' is not valid');
+    if (!timeout) throw new ReferenceError('The object \'timeout\' is not valid');
 
     /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_014: [ If the deviceIds argument is not an array, then getJob shall convert it to an array with one element before using it.] */
     if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
 
+    /*Codes_Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_009: [`scheduleFirmwareUpdate` shall construct an HTTP request using information supplied by the caller, as follows:
+    ```
+    PUT <config.host>/jobs/v2/<jobId>?api-version=<version> HTTP/1.1
+    Authorization: <config.sharedAccessSignature>
+    Content-Type: application/json; charset=utf-8
+    Accept: application/json,
+    {
+    "jobId":<jobId>,
+    "jobParameters":{
+        "DeviceIds":<deviceId>,
+        "PackageUri":<packageUri>,
+        "Timeout":<timeout>,
+        "jobType":"firmwareUpdate"
+    }
+    }
+    ```]*/
     var firmwareUpdateJob = {
         "jobId": jobId,
         "jobParameters": {
@@ -132,23 +161,7 @@ JobClient.prototype.scheduleFirmwareUpdate = function (jobId, deviceIds, package
         }
     };
 
-    var path = '/jobs/v2/' + jobId + endpoint.versionQueryString();
-    this._httpTransport.sendHttpRequest('PUT', path, httpHeaders, config.host, JSON.stringify(firmwareUpdateJob), function (err, body, response) {
-        if (!err) {
-            /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_011: [When the scheduleFirmwareUpdate method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a JobResponse object representing the new job identity returned from the IoT hub.]*/
-            var jobInfo;
-            if (body) {
-                jobInfo = new JobResponse(body);
-            }
-            done(null, jobInfo, response);
-        }
-        else {
-            /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_010: [If any scheduleFirmwareUpdate operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-            err.response = response;
-            err.responseBody = body;
-            done(err);
-        }
-    });
+    this._scheduleJob(firmwareUpdateJob, done);
 };
 
 JobClient.prototype.scheduleDeviceConfigurationUpdate = function (jobId, deviceIds, value, done) {
@@ -156,16 +169,27 @@ JobClient.prototype.scheduleDeviceConfigurationUpdate = function (jobId, deviceI
     if (!jobId) throw new ReferenceError('Argument \'jobId\' is ' + jobId);
     if (!deviceIds) throw new ReferenceError('Argument \'deviceId\' is ' + deviceIds);
 
-    var headers = {
-        'Authorization': this._config.sharedAccessSignature,
-        'UserAgent': packageJson.name + '/' + packageJson.version,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json; charset=utf-8',
-    };
-
     /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_005: [ If the `deviceIds` argument is not an array, then `scheduleDeviceConfigurationUpdate` shall convert it to an array with one element before using it. ]*/
     if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
 
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_002: [`scheduleDeviceConfigurationUpdate` shall construct an HTTPS request using information supplied by the caller, as follows:  
+    ```
+    PUT <config.host>/jobs/v2/<jobId>?api-version=<version> HTTP/1.1
+    Authorization: <config.sharedAccessSignature>
+    UserAgent: <user-agent-string>
+    Accept: application/json
+    Content-Type: application/json; charset=utf-8
+    Host: <config.host>
+
+    {
+    "jobId":"<jobId>",
+    "jobParameters":{
+        "Value":"<value>",
+        "DeviceIds":<deviceIds>,
+        "jobType":"updateDeviceConfiguration"
+    }
+    }
+    ```]*/
     var deviceConfigurationUpdateJob = {
         jobId: jobId,
         jobParameters: {
@@ -175,30 +199,7 @@ JobClient.prototype.scheduleDeviceConfigurationUpdate = function (jobId, deviceI
         }
     };
 
-    var path = '/jobs/v2/' + jobId + endpoint.versionQueryString();
-    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_002: [ `scheduleDeviceConfigurationUpdate` shall construct an HTTPS request using information supplied by the caller, as follows:  
-    PUT <config.host>/jobs/v2/<jobId>?api-version=<version> HTTP/1.1
-    Authorization: <config.sharedAccessSignature>
-    UserAgent: <user-agent-string>
-    Accept: application/json
-    Content-Type: application/json; charset=utf-8
-    Host: <config.host>
-
-    {"jobId":"<jobId>","jobParameters":{"Value":"<value>","DeviceIds":<deviceIds>,"jobType":"updateDeviceConfiguration"}}]*/
-    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_003: [ If `scheduleDeviceConfigurationUpdate` encounters an error before it can send the request, it shall invoke the `done` callback function and pass the standard JavaScript `Error` object with a text description of the error (`err.message`). ]*/
-    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [ When `scheduleDeviceConfigurationUpdate` completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub. ]*/
-    this._httpTransport.sendHttpRequest('PUT', path, headers, this._config.host, JSON.stringify(deviceConfigurationUpdateJob), function (err, body, response) {
-        if (!done) return;
-
-        if (err) {
-            err.response = response;
-            err.responseBody = body;
-            done(err);
-        } else {
-            var jobInfo = body ? new JobResponse(body) : null;
-            done(null, jobInfo, response);
-        }
-    });
+    this._scheduleJob(deviceConfigurationUpdateJob, done);
 };
 
 /**
@@ -222,34 +223,25 @@ JobClient.prototype.scheduleSystemPropertyRead = function (jobId, deviceIds, pro
     if (!deviceIds) throw new ReferenceError('The object \'deviceIds\' is not valid');
     if (!propertyName) throw new ReferenceError('The object \'propertyName\' is not valid');
 
-    var config = this._config;
-    /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_016: [ ScheduleSystemPropertyRead shall construct an HTTP request using information supplied by the caller, as follows:
-    PUT <path>?api-version=<version> HTTP/1.1
-    Authorization: <config.sharedAccessSignature>
-    UserAgent: packageJson.name + '/' + packageJson.version
-    Content-Type: application/json; charset=utf-8
-    'Accept': 'application/json',
-    {
-        "jobId":"<jobId>",
-        "jobParameters":{
-            "SystemPropertyNames":"<propertyName>",
-            "DeviceIds":<deviceIds>,
-            "jobType":"readDeviceProperties"
-        }
-    }
-    ]*/
-    var httpHeaders = {
-        'Authorization': config.sharedAccessSignature,
-        'UserAgent': packageJson.name + '/' + packageJson.version,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json; charset=utf-8',
-    };
-
-    /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_017: [ If the deviceIds argument is not an array, then getJob shall convert it to an array with one element before using it.] */
-    /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_018: [ If the sysPropNames argument is not an array, then getJob shall convert it to an array with one element before using it.] */
     if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
     if (!Array.isArray(propertyName)) propertyName = [propertyName];
 
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_016: [`scheduleSystemPropertyRead` shall construct an HTTP request using information supplied by the caller, as follows:
+    ```
+        PUT <path>?api-version=<version> HTTP/1.1
+        Authorization: <config.sharedAccessSignature>
+        UserAgent: packageJson.name + '/' + packageJson.version
+        Content-Type: application/json; charset=utf-8
+        'Accept': 'application/json',
+        {
+            "jobId":"<jobId>",
+            "jobParameters":{
+                "SystemPropertyNames":"<propertyNames>",
+                "DeviceIds":<deviceIds>,
+                "jobType":"readDeviceProperties"
+            }
+        }
+    ```]*/
     var sysPropUpdate = {
         "jobId": jobId,
         "jobParameters": {
@@ -259,23 +251,158 @@ JobClient.prototype.scheduleSystemPropertyRead = function (jobId, deviceIds, pro
         }
     };
 
-    var path = '/jobs/v2/' + jobId + endpoint.versionQueryString();
-    this._httpTransport.sendHttpRequest('PUT', path, httpHeaders, config.host, JSON.stringify(sysPropUpdate), function (err, body, response) {
-        if (!err) {
-            /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_019: [ When the ScheduleSystemPropertyRead method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a JobResponse object representing the new job identity returned from the IoT hub.] */
-            var jobInfo;
-            if (body) {
-                jobInfo = new JobResponse(body);
+    this._scheduleJob(sysPropUpdate, done);
+};
+
+/**
+ * @method            module:azure-iothub.JobClient#scheduleSystemPropertyWrite`
+ * @description       Schedules a Job to update the System defined Device Property value.
+ * @param {Object}    jobId         An object which must include a `deviceId`
+ *                                  property whose value is a valid device identifier.
+ *                    deviceId      A string that indicates the device that is being Updated 
+ *                    propertyName  The Property to write
+ * @param {Function}  done          function to call when the operation is
+ *                                  complete. `done` will be called with three
+ *                                  arguments: an Error object (can be null), a
+ *                                  {@link module:azure-iothub.JobResponse|JobResponse}
+ *                                  object representing the updated device
+ *                                  identity, and a transport-specific response
+ *                                  object useful for logging or debugging.
+ */
+JobClient.prototype.scheduleSystemPropertyWrite = function (jobId, deviceIds, propertyName, done) {
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_005: [** `scheduleSystemPropertyWrite` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.]*/
+    if (!jobId) throw new ReferenceError('The object \'jobId\' is not valid');
+    if (!deviceIds) throw new ReferenceError('The object \'deviceIds\' is not valid');
+    if (!propertyName) throw new ReferenceError('The object \'propertyName\' is not valid');
+
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_007: [If the `deviceIds` argument is not an array, then `scheduleSystemPropertyWrite` shall convert it to an array with one element before using it. ]*/
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_008: [If the `propertyNames` argument is not an array, then `scheduleSystemPropertyWrite` shall convert it to an array with one element before using it. ]*/
+    if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
+    if (!Array.isArray(propertyName)) propertyName = [propertyName];
+
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_006: [`scheduleSystemPropertyWrite` shall construct an HTTP request using information supplied by the caller, as follows:
+    ```
+        PUT <path>?api-version=<version> HTTP/1.1
+        Authorization: <config.sharedAccessSignature>
+        UserAgent: packageJson.name + '/' + packageJson.version
+        Content-Type: application/json; charset=utf-8
+        'Accept': 'application/json',
+        {
+            "jobId":"<jobId>",
+            "jobParameters":{
+                "SystemPropertyNames":"<propertyNames>",
+                "DeviceIds":<deviceIds>,
+                "jobType":"writeDeviceProperties"
             }
-            done(null, jobInfo, response);
         }
-        else {
-            /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_020: [ If any ScheduleSystemPropertyRead operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).] */
-            err.response = response;
-            err.responseBody = body;
-            done(err);
+    ```]*/
+    var writeDeviceProp = {
+        "jobId": jobId,
+        "jobParameters": {
+            "SystemPropertyNames": propertyName,
+            "DeviceIds": deviceIds,
+            "jobType": "writeDeviceProperties"
         }
-    });
+    };
+
+    this._scheduleJob(writeDeviceProp, done);
+};
+
+/**
+ * @method            module:azure-iothub.JobClient#scheduleReboot`
+ * @description       Schedules a Job to reboot one or more device(s).
+ * @param {Object}    jobId         An object which must include a `deviceId`
+ *                                  property whose value is a valid device identifier.
+ *                    deviceId      A string that indicates the device(s) that is/are being rebooted 
+ * @param {Function}  done          function to call when the operation is
+ *                                  complete. `done` will be called with three
+ *                                  arguments: an Error object (can be null), a
+ *                                  {@link module:azure-iothub.JobResponse|JobResponse}
+ *                                  object representing the updated device
+ *                                  identity, and a transport-specific response
+ *                                  object useful for logging or debugging.
+ */
+JobClient.prototype.scheduleReboot = function (jobId, deviceIds, done) {
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_009: [`scheduleReboot` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.]*/
+    if (!jobId) throw new ReferenceError('The object \'jobId\' is not valid');
+    if (!deviceIds) throw new ReferenceError('The object \'deviceIds\' is not valid');
+
+    /*Codes_Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_011: [If the `deviceIds` argument is not an array, then `scheduleReboot` shall convert it to an array with one element before using it.]*/
+    if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
+
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_010: [`scheduleReboot` shall construct an HTTP request using information supplied by the caller, as follows:
+    ```
+        PUT <path>?api-version=<version> HTTP/1.1
+        Authorization: <config.sharedAccessSignature>
+        UserAgent: packageJson.name + '/' + packageJson.version
+        Content-Type: application/json; charset=utf-8
+        'Accept': 'application/json',
+        {
+            "jobId":"<jobId>",
+            "jobParameters":{
+                "DeviceIds":<deviceIds>,
+                "jobType":"rebootDevice"
+            }
+        }
+    ```]*/
+    var rebootDevice = {
+        "jobId": jobId,
+        "jobParameters": {
+            "DeviceIds": deviceIds,
+            "jobType": "rebootDevice"
+        }
+    };
+
+    this._scheduleJob(rebootDevice, done);
+};
+
+
+/**
+ * @method            module:azure-iothub.JobClient#scheduleFactoryReset`
+ * @description       Schedules a Job to factory-reset one or more device(s).
+ * @param {Object}    jobId         An object which must include a `deviceId`
+ *                                  property whose value is a valid device identifier.
+ *                    deviceId      A string that indicates the device(s) that is/are being rebooted 
+ * @param {Function}  done          function to call when the operation is
+ *                                  complete. `done` will be called with three
+ *                                  arguments: an Error object (can be null), a
+ *                                  {@link module:azure-iothub.JobResponse|JobResponse}
+ *                                  object representing the updated device
+ *                                  identity, and a transport-specific response
+ *                                  object useful for logging or debugging.
+ */
+JobClient.prototype.scheduleFactoryReset = function (jobId, deviceIds, done) {
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_012: [`scheduleFactoryReset` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.]*/
+    if (!jobId) throw new ReferenceError('The object \'jobId\' is not valid');
+    if (!deviceIds) throw new ReferenceError('The object \'deviceIds\' is not valid');
+
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_014: [If the `deviceIds` argument is not an array, then `scheduleFactoryReset` shall convert it to an array with one element before using it.]*/
+    if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
+
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_013: [`scheduleFactoryReset` shall construct an HTTP request using information supplied by the caller, as follows:
+    ```
+        PUT <path>?api-version=<version> HTTP/1.1
+        Authorization: <config.sharedAccessSignature>
+        UserAgent: packageJson.name + '/' + packageJson.version
+        Content-Type: application/json; charset=utf-8
+        'Accept': 'application/json',
+        {
+            "jobId":"<jobId>",
+            "jobParameters":{
+                "DeviceIds":<deviceIds>,
+                "jobType":"factoryResetDevice"
+            }
+        }
+    ```]*/
+    var factoryResetDevice = {
+        "jobId": jobId,
+        "jobParameters": {
+            "DeviceIds": deviceIds,
+            "jobType": "factoryResetDevice"
+        }
+    };
+
+    this._scheduleJob(factoryResetDevice, done);
 };
 
 /**
