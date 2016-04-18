@@ -10,8 +10,8 @@
 #include "iothub_client.h"
 #include "serializer.h"
 #include "schemaserializer.h"
-#include "threadapi.h"
-#include "platform.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/platform.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"

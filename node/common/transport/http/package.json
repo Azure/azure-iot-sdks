@@ -10,16 +10,19 @@
   "devDependencies": {
     "chai": "^3.3.0",
     "jshint": "^2.8.0",
-    "mocha": "^2.3.3"
+    "mocha": "^2.3.3",
+    "istanbul": "^0.4.3",
+    "debug": "^2.2.0"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",
-    "unittest-min": "echo \"No tests\"",
-    "alltest-min": "echo \"No tests\"",
-    "unittest": "echo \"No tests\"",
-    "alltest": "echo \"No tests\"",
-    "ci": "npm -s run lint && npm -s run alltest-min",
-    "test": "npm -s run lint && npm -s run unittest"
+    "unittest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/_*_test.js",
+    "alltest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/_*_test*.js",
+    "unittest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test.js",
+    "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test*.js",
+    "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
+    "test": "npm -s run lint && npm -s run unittest",
+    "check-cover": "istanbul check-coverage --statements 39 --branches 29 --functions 12 --lines 39"
   },
   "engines": {
     "node": "0.10.x || 0.12.x || 4.x.x || 5.x.x"

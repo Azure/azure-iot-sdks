@@ -13,8 +13,31 @@ cd $build_root
 ./c/build_all/linux/setup.sh 
 [ $? -eq 0 ] || exit $?
 
+PYTHON_VERSION=2.7
+
+process_args()
+{
+    save_next_arg=0
+    
+    for arg in $*
+    do
+      if [ $save_next_arg == 1 ]
+      then
+        PYTHON_VERSION="$arg"
+        save_next_arg=0
+      else
+        case "$arg" in
+          "--python-version" ) save_next_arg=1;;
+          * ) ;;
+        esac
+      fi
+    done
+}
+
+process_args $*
+
 scriptdir=$(cd "$(dirname "$0")" && pwd)
-deps="python2.7-dev libboost-python-dev"
+deps="python${PYTHON_VERSION}-dev libboost-python-dev"
 
 deps_install ()
 {

@@ -23,11 +23,11 @@ describe('Client', function () {
   describe('#fromConnectionString', function () {
     var connStr = 'HostName=a.b.c;SharedAccessKeyName=name;SharedAccessKey=key';
 
-    /*Tests_SRS_NODE_IOTHUB_CLIENT_05_002: [The fromConnectionString method shall throw ReferenceError if the value argument is falsy.]*/
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_05_002: [The fromConnectionString method shall throw ReferenceError if the connStr argument is falsy.]*/
     it('throws when value is falsy', function () {
       assert.throws(function () {
         return Client.fromConnectionString();
-      }, ReferenceError, 'value is \'undefined\'');
+      }, ReferenceError, 'connStr is \'undefined\'');
     });
 
     /*Tests_SRS_NODE_IOTHUB_CLIENT_05_003: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a new instance of the default transport (azure-iothub.Transport).]*/
@@ -46,11 +46,11 @@ describe('Client', function () {
   describe('#fromSharedAccessSignature', function () {
     var token = 'SharedAccessSignature sr=hubName.azure-devices.net&sig=signature&skn=keyname&se=expiry';
 
-    /*Tests_SRS_NODE_IOTHUB_CLIENT_05_005: [The fromSharedAccessSignature method shall throw ReferenceError if the value argument is falsy.]*/
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_05_005: [The fromSharedAccessSignature method shall throw ReferenceError if the sharedAccessSignature argument is falsy.]*/
     it('throws when value is falsy', function () {
       assert.throws(function () {
         return Client.fromSharedAccessSignature();
-      }, ReferenceError, 'value is \'undefined\'');
+      }, ReferenceError, 'sharedAccessSignature is \'undefined\'');
     });
 
     it('correctly populates the config structure', function() {
@@ -106,7 +106,7 @@ describe('Client', function () {
 describe('Over simulated AMQP', function () {
   var opts = {
     transport: function () { return new SimulatedAmqp(); },
-    connectionString: null,
+    connectionString: process.env.IOTHUB_CONNECTION_STRING,
     id: 'id'
   };
   transportSpecificTests(opts);

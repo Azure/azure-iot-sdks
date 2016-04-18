@@ -6,6 +6,7 @@
 var Base = require('azure-iot-http-base').Http;
 var uuid = require('uuid');
 var PackageJson = require('../package.json');
+var translateError = require('./registry_http_errors.js');
 
 /*Codes_SRS_NODE_IOTHUB_HTTP_05_001: [The Http constructor shall accept an object with three properties:
 host - (string) the fully-qualified DNS hostname of an IoT hub
@@ -43,10 +44,11 @@ Http.prototype.createDevice = function (path, deviceInfo, done) {
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
   var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) done(null, body, response);
-    else {
-      err.response = response;
-      err.responseBody = body;
+    if (!err) {
+      done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
+    } else {
       done(err);
     }
   });
@@ -81,10 +83,11 @@ Http.prototype.updateDevice = function (path, deviceInfo, done) {
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
   var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) done(null, body, response);
-    else {
-      err.response = response;
-      err.responseBody = body;
+    if (!err) {
+      done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
+    } else {
       done(err);
     }
   });
@@ -114,10 +117,11 @@ Http.prototype.getDevice = function (path, done) {
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
   var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) done(null, body, response);
-    else {
-      err.response = response;
-      err.responseBody = body;
+    if (!err) {
+      done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
+    } else {
       done(err);
     }
   });
@@ -146,10 +150,11 @@ Http.prototype.listDevices = function (path, done) {
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
   var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) done(null, body, response);
-    else {
-      err.response = response;
-      err.responseBody = body;
+    if (!err) {
+      done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
+    } else {
       done(err);
     }
   });
@@ -180,10 +185,11 @@ Http.prototype.deleteDevice = function (path, done) {
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
   var request = this._http.buildRequest('DELETE', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) done(null, body, response);
-    else {
-      err.response = response;
-      err.responseBody = body;
+    if (!err) {
+      done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
+    } else {
       done(err);
     }
   });
@@ -218,9 +224,9 @@ Http.prototype.importDevicesFromBlob = function (path, importRequest, done) {
   var request = this._http.buildRequest('POST', path, httpHeaders, config.host, function (err, body, response) {
     if (!err) {
       done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
     } else {
-      err.response = response;
-      err.responseBody = body;
       done(err);
     }
   });
@@ -257,9 +263,9 @@ Http.prototype.exportDevicesToBlob = function (path, exportRequest, done) {
   var request = this._http.buildRequest('POST', path, httpHeaders, config.host, function (err, body, response) {
     if (!err) {
       done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
     } else {
-      err.response = response;
-      err.responseBody = body;
       done(err);
     }
   });
@@ -292,9 +298,9 @@ Http.prototype.listJobs = function (path, done) {
   var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
     if (!err) {
       done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
     } else {
-      err.response = response;
-      err.responseBody = body;
       done(err);
     }
   });
@@ -326,9 +332,9 @@ Http.prototype.getJob = function (path, done) {
   var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
     if (!err) {
       done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
     } else {
-      err.response = response;
-      err.responseBody = body;
       done(err);
     }
   });
@@ -360,9 +366,9 @@ Http.prototype.cancelJob = function (path, done) {
   var request = this._http.buildRequest('DELETE', path, httpHeaders, config.host, function (err, body, response) {
     if (!err) {
       done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
     } else {
-      err.response = response;
-      err.responseBody = body;
       done(err);
     }
   });

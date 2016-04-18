@@ -39,7 +39,7 @@ endif()
 
 if (LINUX)
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        if(("${build_python}" STREQUAL "ON") OR ("${build_javawrapper}" STREQUAL "ON"))
+        if((NOT "${build_python}" STREQUAL "OFF") OR ("${build_javawrapper}" STREQUAL "ON"))
             # now all static libraries use PIC flag for Python shared lib
             set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
             set(CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}")
@@ -47,11 +47,6 @@ if (LINUX)
     endif()
 endif()
 
-add_subdirectory(azure-c-shared-utility)
-add_subdirectory(azure-uamqp-c)
-add_subdirectory(azure-umqtt-c)
-
-enable_testing()
 
 #if any compiler has a command line switch called "OFF" then it will need special care
 if(NOT "${compileOption_C}" STREQUAL "OFF")
@@ -61,6 +56,14 @@ endif()
 if(NOT "${compileOption_CXX}" STREQUAL "OFF")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
 endif()
+
+
+add_subdirectory(azure-c-shared-utility)
+add_subdirectory(azure-uamqp-c)
+add_subdirectory(azure-umqtt-c)
+
+enable_testing()
+
 
 include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility)
 
@@ -163,7 +166,7 @@ endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
-if("${build_python}" STREQUAL "ON")
+if(NOT "${build_python}" STREQUAL "OFF")
     add_subdirectory(../python/device/iothub_client_python python)
 endif()
 

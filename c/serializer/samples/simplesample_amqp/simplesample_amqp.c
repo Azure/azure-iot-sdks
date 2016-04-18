@@ -7,12 +7,12 @@
 #include <stdint.h>
 
 #include "serializer.h"
-#include "threadapi.h"
-#include "sastoken.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/sastoken.h"
 #include "iothub_client.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_ll.h"
-#include "platform.h"
+#include "azure_c_shared_utility/platform.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"

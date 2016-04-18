@@ -63,6 +63,8 @@ You should have the following items ready before beginning the process:
 
 - The sample application will send messages to your IoT hub. The **iothub-explorer** utility will display the messages as your IoT hub receives them.
 
+If you receive the error "ImportError: dynamic module does not define module export function (PyInit_iothub_client)" you may be running the samples with a different version of python than the iothub_client was build with. Following the [Prepare your development environment](#python-devbox-setup) to ensure the library is built with the desired python version
+
 # Experimenting with various transport protocols
 There is a sample to test each of the AMQP, HTTP and MQTT protocols. It is also possible to simply change the transport in the sample.
 

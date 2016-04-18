@@ -4,6 +4,7 @@
 'use strict';
 
 var Message = require('azure-iot-common').Message;
+var debug = require('debug')('azure-iot-common.Http');
 
 /**
  * @class           module:azure-iot-http-base.Http
@@ -109,6 +110,42 @@ Http.prototype.toMessage = function toMessage(response, body) {
   }
 
   return msg;
+};
+
+
+/**
+ * @method              module:azure-iot-http-base.Http#parseErrorBody
+ * @description         Parses the body of an error response and returns it as an object.
+ *
+ * @params {String}     body  The body of the HTTP error response
+ * @returns {Object}    An object with 2 properties: code and message.
+ */
+Http.parseErrorBody = function parseError (body) {
+  var result = null;
+
+  try {
+    var jsonErr = JSON.parse(body);
+    var errParts = jsonErr.Message.split(';');
+    var errMessage = errParts[1].slice(1, -1);
+    var errCode = errParts[0].split(':')[1];
+
+    if(!!errCode && !!errMessage) {
+      result = {
+        message: errMessage,
+        code: errCode
+      };
+    }
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      debug('Could not parse error body: Invalid JSON');
+    } else if (err instanceof TypeError) {
+      debug('Could not parse error body: Unknown body format');
+    } else {
+      throw err;
+    }
+  }
+
+  return result;
 };
 
 module.exports = Http;

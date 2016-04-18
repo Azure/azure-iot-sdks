@@ -47,7 +47,7 @@ namespace Microsoft.Azure.Devices.Client.Test
         public void ClientWebSocketTransportWriteTest()
         {
             var websocket = new ClientWebSocket();
-            var clientWebSocketTransport = new ClientWebSocketTransport(websocket, IotHubName, null, null);
+            var clientWebSocketTransport = new ClientWebSocketTransport(websocket, null, null);
             TransportAsyncCallbackArgs args = new TransportAsyncCallbackArgs();
             args.SetBuffer(byteArray, 0, byteArray.Length);
             clientWebSocketTransport.WriteAsync(args);
@@ -60,7 +60,7 @@ namespace Microsoft.Azure.Devices.Client.Test
         public void ClientWebSocketTransportReadTest()
         {
             var websocket = new ClientWebSocket();
-            var clientWebSocketTransport = new ClientWebSocketTransport(websocket, IotHubName, null, null);
+            var clientWebSocketTransport = new ClientWebSocketTransport(websocket, null, null);
             TransportAsyncCallbackArgs args = new TransportAsyncCallbackArgs();
             byte[] byteArray = new byte[10];
             args.SetBuffer(byteArray, 0, 10);
@@ -78,7 +78,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             websocket.Options.AddSubProtocol(WebSocketConstants.SubProtocols.Amqpwsb10);
             Uri uri = new Uri("ws://" + IotHubName + ":" + Port + WebSocketConstants.UriSuffix);
             websocket.ConnectAsync(uri, CancellationToken.None).Wait(CancellationToken.None);
-            clientWebSocketTransport = new ClientWebSocketTransport(websocket, IotHubName, null, null);
+            clientWebSocketTransport = new ClientWebSocketTransport(websocket, null, null);
 
             // Test Write API
             TransportAsyncCallbackArgs args = new TransportAsyncCallbackArgs();
@@ -140,7 +140,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             websocket.Options.AddSubProtocol(WebSocketConstants.SubProtocols.Amqpwsb10);
             Uri uri = new Uri("ws://" + IotHubName + ":" + Port + WebSocketConstants.UriSuffix);
             websocket.ConnectAsync(uri, CancellationToken.None).Wait(CancellationToken.None);
-            clientWebSocketTransport = new ClientWebSocketTransport(websocket, IotHubName, null, null);
+            clientWebSocketTransport = new ClientWebSocketTransport(websocket, null, null);
             clientWebSocketTransport.CloseAsync(TimeSpan.FromSeconds(30)).Wait(CancellationToken.None);
 
             try
@@ -178,7 +178,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             websocket.Options.AddSubProtocol(WebSocketConstants.SubProtocols.Amqpwsb10);
             Uri uri = new Uri("ws://" + IotHubName + ":" + Port + WebSocketConstants.UriSuffix);
             websocket.ConnectAsync(uri, CancellationToken.None).Wait(CancellationToken.None);
-            clientWebSocketTransport = new ClientWebSocketTransport(websocket, IotHubName, null, null);
+            clientWebSocketTransport = new ClientWebSocketTransport(websocket, null, null);
             clientWebSocketTransport.Abort();
 
             try

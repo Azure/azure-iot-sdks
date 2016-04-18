@@ -143,6 +143,66 @@ ServiceUnavailableError.prototype = Object.create(Error.prototype);
 ServiceUnavailableError.prototype.constructor = ServiceUnavailableError;
 ServiceUnavailableError.prototype.name = 'ServiceUnavailableError';
 
+function IotHubNotFoundError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+IotHubNotFoundError.prototype = Object.create(Error.prototype);
+IotHubNotFoundError.prototype.constructor = IotHubNotFoundError;
+IotHubNotFoundError.prototype.name = 'IotHubNotFoundError';
+
+function JobNotFoundError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+JobNotFoundError.prototype = Object.create(Error.prototype);
+JobNotFoundError.prototype.constructor = JobNotFoundError;
+JobNotFoundError.prototype.name = 'JobNotFoundError';
+
+function TooManyDevicesError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+TooManyDevicesError.prototype = Object.create(Error.prototype);
+TooManyDevicesError.prototype.constructor = TooManyDevicesError;
+TooManyDevicesError.prototype.name = 'TooManyDevicesError';
+
+function ThrottlingError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+ThrottlingError.prototype = Object.create(Error.prototype);
+ThrottlingError.prototype.constructor = ThrottlingError;
+ThrottlingError.prototype.name = 'ThrottlingError';
+
+function DeviceAlreadyExistsError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+DeviceAlreadyExistsError.prototype = Object.create(Error.prototype);
+DeviceAlreadyExistsError.prototype.constructor = DeviceAlreadyExistsError;
+DeviceAlreadyExistsError.prototype.name = 'DeviceAlreadyExistsError';
+
+function InvalidEtagError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+InvalidEtagError.prototype = Object.create(Error.prototype);
+InvalidEtagError.prototype.constructor = InvalidEtagError;
+InvalidEtagError.prototype.name = 'InvalidEtagError';
+
 module.exports = {
   ArgumentError: ArgumentError,
   DeviceMaximumQueueDepthExceededError: DeviceMaximumQueueDepthExceededError,
@@ -154,5 +214,11 @@ module.exports = {
   IotHubQuotaExceededError: IotHubQuotaExceededError,
   MessageTooLargeError: MessageTooLargeError,
   InternalServerError: InternalServerError,
-  ServiceUnavailableError: ServiceUnavailableError
+  ServiceUnavailableError: ServiceUnavailableError,
+  IotHubNotFoundError: IotHubNotFoundError,
+  JobNotFoundError: JobNotFoundError,
+  TooManyDevicesError: TooManyDevicesError,
+  ThrottlingError: ThrottlingError,
+  DeviceAlreadyExistsError: DeviceAlreadyExistsError,
+  InvalidEtagError: InvalidEtagError
 };

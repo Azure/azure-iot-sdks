@@ -1,4 +1,4 @@
-# Microsoft Azure IoT device SDK for Python 2.7
+# Microsoft Azure IoT device SDK for Python
 
 Build devices that communicate with Azure IoT Hub.
 

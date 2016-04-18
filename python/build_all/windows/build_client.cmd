@@ -21,20 +21,38 @@ rem ----------------------------------------------------------------------------
 rem -- detect Python x86 or x64 version, select build target accordingly
 rem -----------------------------------------------------------------------------
 
-REM target may be set to 64 bit build if Python 2.7 x64 detected
+REM target may be set to 64 bit build if a Python x64 detected
 set build-platform=Win32
 set build-config=Release
+set build-python=2.7
 
 python python_version_check.py >pyenv.bat
 if errorlevel 1 goto :NeedPython
 call pyenv.bat
-@Echo Using Python found in: %PYTHON_PATH%, building %build-platform% platform extension
-goto :build
+@Echo Using Python found in: %PYTHON_PATH%, building Python %build-python% %build-platform% extension
+goto :args-loop
 
 :NeedPython
-@Echo Azure IoT SDK needs Python 2.7 from 
-@Echo https://www.python.org/download/releases/2.7/ 
+@Echo Azure IoT SDK needs Python 2.7 or Python 3.4 from 
+@Echo https://www.python.org/downloads/
 exit /b 1
+
+:args-loop
+if "%1" equ "" goto args-done
+if "%1" equ "--config" goto arg-build-config
+call :usage && exit /b 1
+
+:arg-build-config
+shift
+if "%1" equ "" call :usage && exit /b 1
+set build-config=%1
+goto args-continue
+
+:args-continue
+shift
+goto args-loop
+
+:args-done
 
 :build
 
@@ -42,11 +60,11 @@ set cmake-output=cmake_%build-platform%
 
 REM -- C --
 cd %build-root%..\..\..\c\build_all\windows
-call build_client.cmd --platform %build-platform% --buildpython 
+call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config%
 if errorlevel 1 exit /b 1
 cd %build-root%
 
-echo CMAKE Output Path: %USERPROFILE%\%cmake-output%\python
+@Echo CMAKE Output Path: %USERPROFILE%\%cmake-output%\python
 
 copy %USERPROFILE%\%cmake-output%\python\src\%build-config%\iothub_client.pyd ..\..\device\samples
 if not %errorlevel%==0 exit /b %errorlevel%
@@ -54,6 +72,7 @@ copy %USERPROFILE%\%cmake-output%\python\test\%build-config%\iothub_client_mock.
 if not %errorlevel%==0 exit /b %errorlevel%
 
 cd ..\..\device\tests
+@Echo python iothub_client_ut.py
 python iothub_client_ut.py
 if ERRORLEVEL 1 exit /b 1
 echo Python unit test PASSED

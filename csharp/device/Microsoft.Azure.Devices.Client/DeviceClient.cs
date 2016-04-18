@@ -74,6 +74,7 @@ namespace Microsoft.Azure.Devices.Client
 
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, RegexOptions);
         TransportHandlerBase impl;
+        volatile bool closeCalled;
 #if !PCL
         readonly IotHubConnectionString iotHubConnectionString;
         readonly ITransportSettings[] transportSettings;
@@ -215,7 +216,7 @@ namespace Microsoft.Azure.Devices.Client
                     throw new NotImplementedException("Amqp protocol is not supported");
 #else
                     return CreateFromConnectionString(connectionString, new ITransportSettings[]
-                    {
+            {
                         new AmqpTransportSettings(TransportType.Amqp_Tcp_Only),
                         new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
                     });
@@ -373,6 +374,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public AsyncTask OpenAsync()
         {
+            this.ThrowIfDisposed();
 #if PCL
             return impl.OpenAsync().AsTaskOrAsyncOp();
 #else
@@ -386,13 +388,14 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns></returns>
         public AsyncTask CloseAsync()
         {
+            this.closeCalled = true;
 #if !PCL
             if (this.impl != null)
             {
 #endif
                 return this.impl.CloseAsync().AsTaskOrAsyncOp();
 #if !PCL
-            }
+        }
 #endif
             return TaskHelpers.CompletedTask.AsTaskOrAsyncOp();
         }
@@ -416,6 +419,7 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                this.ThrowIfDisposed();
                 return this.impl.ReceiveAsync().AsTaskOrAsyncOp();
 #if !PCL
             }
@@ -441,6 +445,7 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                this.ThrowIfDisposed();
                 return this.impl.ReceiveAsync(timeout).AsTaskOrAsyncOp();
 #if !PCL
             }
@@ -465,13 +470,14 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
                 }).AsTaskOrAsyncOp();
-            }
+        }
             else
             {
 #endif
+                this.ThrowIfDisposed();
                 return this.impl.CompleteAsync(lockToken).AsTaskOrAsyncOp();
 #if !PCL
-            }
+        }
 #endif
         }
 
@@ -490,10 +496,11 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.CompleteAsync(message);
                 }).AsTaskOrAsyncOp();
-            }
+        }
             else
             {
 #endif
+                this.ThrowIfDisposed();
                 return this.impl.CompleteAsync(message).AsTaskOrAsyncOp();
 #if !PCL
             }
@@ -518,10 +525,11 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.AbandonAsync(lockToken);
                 }).AsTaskOrAsyncOp();
-            }
+        }
             else
             {
 #endif
+                this.ThrowIfDisposed();
                 return this.impl.AbandonAsync(lockToken).AsTaskOrAsyncOp();
 #if !PCL
             }
@@ -543,13 +551,14 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.AbandonAsync(message);
                 }).AsTaskOrAsyncOp();
-            }
+        }
             else
             {
 #endif
+                this.ThrowIfDisposed();
                 return this.impl.AbandonAsync(message).AsTaskOrAsyncOp();
 #if !PCL
-            }
+        }
 #endif
         }
 
@@ -571,10 +580,11 @@ namespace Microsoft.Azure.Devices.Client
 
                     await this.impl.RejectAsync(lockToken).AsTaskOrAsyncOp();
                 });
-            }
+        }
             else
             {
 #endif
+                this.ThrowIfDisposed();
                 return this.impl.RejectAsync(lockToken).AsTaskOrAsyncOp();
 #if !WINDOWS_UWP && !PCL
             }
@@ -600,6 +610,7 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                this.ThrowIfDisposed();
                 return this.impl.RejectAsync(message).AsTaskOrAsyncOp();
 #if !PCL
             }
@@ -625,9 +636,10 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                this.ThrowIfDisposed();
                 return this.impl.SendEventAsync(message).AsTaskOrAsyncOp();
 #if !PCL
-            }
+        }
 #endif
         }
 
@@ -650,6 +662,7 @@ namespace Microsoft.Azure.Devices.Client
             else
             {
 #endif
+                this.ThrowIfDisposed();
                 return this.impl.SendEventBatchAsync(messages).AsTaskOrAsyncOp();
 #if !PCL
             }
@@ -659,6 +672,8 @@ namespace Microsoft.Azure.Devices.Client
 #if !PCL
         async Task EnsureOpenedAsync()
         {
+            this.ThrowIfDisposed();
+
             bool executeOpen = false;
             var localTcs = this.openTaskCompletionSource;
 
@@ -706,7 +721,7 @@ namespace Microsoft.Azure.Devices.Client
                 try
                 {
                     switch (transportSetting.GetTransportType())
-                    {
+                    {                    
                         case TransportType.Amqp_WebSocket_Only:
                         case TransportType.Amqp_Tcp_Only:
                             helper = new AmqpTransportHandler(this.iotHubConnectionString, transportSetting as AmqpTransportSettings);
@@ -770,5 +785,13 @@ namespace Microsoft.Azure.Devices.Client
             throw lastException;
         }
 #endif
+
+        void ThrowIfDisposed()
+        {
+            if (this.closeCalled)
+            {
+                throw new ObjectDisposedException("DeviceClient object is closed.");
+            }
+        }
     }
 }
