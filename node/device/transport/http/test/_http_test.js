@@ -39,12 +39,23 @@ describe('Http', function () {
     /*Tests_SRS_NODE_DEVICE_HTTP_16_004: [The ‘setOptions’ method shall call the setOptions method of the HTTP Receiver with the options parameter.] */
     /*Tests_SRS_NODE_DEVICE_HTTP_16_005: [The ‘setOptions’ method shall call the ‘done’ callback when finished.] */
 
-    it('calls the receiver `setOptions` method', function () {
+    it('calls the receiver `setOptions` method', function (done) {
       var testOptions = { foo: 42 };
       transport.setOptions(testOptions, function (err, result) {
         assert.isNull(err);
         assert.equal(result.constructor.name, 'TransportConfigured');
         assert(receiver.setOptions.calledWith(testOptions));
+        done();
+      });
+    });
+    
+    it('instanciate the receiver if necessary', function() {
+      var transport = new Http({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sas: 'sas.key' });
+      assert.doesNotThrow(function() {
+        transport.setOptions({interval: 1}, function(err, result){
+          assert.isNull(err);
+          assert.equal(result.constructor.name, 'TransportConfigured');
+        });
       });
     });
   });
