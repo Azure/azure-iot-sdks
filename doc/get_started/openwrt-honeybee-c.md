@@ -4,7 +4,7 @@ device: HoneyBee Repeater
 language: c
 ---
 
-Run a simple C sample on HoneyBee Repeater device
+Run a simple C sample on HoneyBee Repeater device running Linux
 ===
 ---
 
