@@ -226,13 +226,13 @@ function bulkTests(Transport, goodConnectionString) {
       });
     });
 
-    describe('#queryDevices', function () {
+    describe('#queryDevicesByTags', function () {
         /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_019: [A ReferenceError shall be thrown if the tags array is empty.] */
         [undefined, null, "", 0].forEach(function (tagList) {
-            it('throws if the tagList is empty', function () {
+            it('throws if the tagList is \'' + tagList + '\'', function () {
                 var registry = Registry.fromConnectionString(goodConnectionString, Transport);
                 assert.throws(function() {
-                    registry.queryDevices(tagList, 10, function () {});    
+                    registry.queryDevicesByTags(tagList, 10, function () {});    
                 }, ArgumentError);
             });
         });
@@ -243,26 +243,62 @@ function bulkTests(Transport, goodConnectionString) {
                 var tagList = ['tag1', 'tag2'];
                 var registry = Registry.fromConnectionString(goodConnectionString, Transport);
                 assert.throws(function () {
-                    registry.queryDevices(tagList, maxCount, function () {});
+                    registry.queryDevicesByTags(tagList, maxCount, function () {});
                 }, RangeError);
             });
         });
-        
-        /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_020: [The QueryDevice method shall call the server for the device that contain the tags] */
+
+        /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_020: [The queryDevicesByTags method shall call the server for the device that contain the tags] */
         /* Tests_SRS_NODE_IOTHUB_REGISTRY_07_022: [The JSON array returned from the service shall be converted to a list of Device objects.] */
         it('calls the transport to query a device with a specified tag', function (done) {
             var registry = Registry.fromConnectionString(goodConnectionString, Transport);
             var tagList = ['tag1', 'tag2'];
-            registry.queryDevices(tagList, 10, function (err, deviceList, res) {
+            registry.queryDevicesByTags(tagList, 10, function (err, deviceList, res) {
                 if (err) {
                     done(err);
                 } else {
                     assert.isOk(res);
-                    assert.isArray(deviceList);                    
+                    assert.isArray(deviceList);
                     done();
                 }
             });
         }); 
+    });
+
+    describe('#queryDevices', function () {
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_019: [** A `ReferenceError` shall be thrown if the query object is falsy or empty.]*/
+      [undefined, null, "", 0].forEach(function (testParam) {
+          it('throws if the query is \'' + testParam + '\'', function () {
+              var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+              assert.throws(function() {
+                  registry.queryDevices(testParam, function () {});    
+              }, ReferenceError);
+          });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_020: [** The `done` callback shall be called with an `Error` object if the request fails.]*/
+      it('calls the done callback with an error object if the request fails', function(done) {
+        var FailingTransport = function () { };
+        FailingTransport.prototype.queryDevices = function (versionString, query, callback) {
+          var error = new Error('fake query couldn\'t be completed');
+          callback(error);
+        };
+
+        var registry = Registry.fromConnectionString(goodConnectionString, FailingTransport);
+        var query = {
+          project: null,
+          aggregate: null,
+          sort: null,
+          filter: null
+        };
+
+        registry.queryDevices(query, function(err, result, response) {
+          assert.instanceOf(err, Error);
+          assert.isUndefined(result);
+          assert.isUndefined(response);
+          done();
+        });
+      });
     });
   });
 }

@@ -33,6 +33,8 @@ registry.create({deviceId: 'dev1'}, function (err, dev) {
   }
 });
 ```
+
+## Public API
 ###Registry constructor
 **SRS_NODE_IOTHUB_REGISTRY_05_001: [**The Registry constructor shall accept a transport object**]**, e.g. azure-iothub.Https;  
 
@@ -118,10 +120,17 @@ The cancelJob method will cancel the bulk import/export job identified by the jo
 **SRS_NODE_IOTHUB_REGISTRY_16_013: [**The ‘done’ callback shall be called with only an error object if the request fails.**]**  
 **SRS_NODE_IOTHUB_REGISTRY_16_014: [**The ‘done’ callback shall be called with no parameters if the request is successful.**]**  
 
-###queryDevices(tags, maxCount, done)
-QueryDevices method will return a list of devices that match the tags that are specified in the tag list.  
-**SRS_NODE_IOTHUB_REGISTRY_07_019: [**A ReferenceError shall be thrown if the tags array is empty.**]**  
-**SRS_NODE_IOTHUB_REGISTRY_07_020: [**The QueryDevices method shall call the server for the device that contain the tags**]**  
-**SRS_NODE_IOTHUB_REGISTRY_07_021: [**When the list method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an array of Device objects representing up to Max Count devices from the IoT hub.**]**  
-**SRS_NODE_IOTHUB_REGISTRY_07_022: [**The JSON array returned from the service shall be converted to a list of Device objects.**]**
-**SRS_NODE_IOTHUB_REGISTRY_07_023: [**A ReferenceError shall be thrown if the maxCount is less than or equal to zero.**]**  
+###queryDevicesByTag(tags, maxCount, done)
+The `queryDevicesByTag` method will return a list of devices that match the tags that are specified in the `tags` array.  
+**SRS_NODE_IOTHUB_REGISTRY_07_019: [**A `ReferenceError` shall be thrown if the tags array is empty.**]**  
+**SRS_NODE_IOTHUB_REGISTRY_07_020: [**The `queryDevicesByTag` method shall call the server for the devices that contain the tags**]**  
+**SRS_NODE_IOTHUB_REGISTRY_07_021: [**When the list method completes, the callback function (indicated by the done argument) shall be invoked with an `Error` object (may be null), and an array of `Device` objects representing up to `maxCount` devices from the IoT hub.**]**  
+**SRS_NODE_IOTHUB_REGISTRY_07_022: [**The JSON array returned from the service shall be converted to a list of `Device` objects.**]**
+**SRS_NODE_IOTHUB_REGISTRY_07_023: [**A `ReferenceError` shall be thrown if the `maxCount` parameter is less than or equal to zero.**]**  
+
+###queryDevices(query, done)
+The `queryDevices` method will return a list of devices that match the query parameters specified in the `query` object.
+**SRS_NODE_IOTHUB_REGISTRY_16_019: [** A `ReferenceError` shall be thrown if the query object is falsy or empty. **]**
+**SRS_NODE_IOTHUB_REGISTRY_16_020: [** The `done` callback shall be called with an `Error` object if the request fails. **]**
+**SRS_NODE_IOTHUB_REGISTRY_16_021: [** The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is a simple array of `Device` objects corresponding to the devices matching the query if it uses projection. **]**
+**SRS_NODE_IOTHUB_REGISTRY_16_022: [** The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of results if the query was an aggregation query. **]**

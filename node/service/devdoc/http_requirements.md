@@ -139,14 +139,25 @@ Request-Id: [guid]
 ```
 **]** 
 
-###queryDevices(path, tagQuery, maxCount, done)
-**SRS_NODE_IOTHUB_HTTP_07_001: [**The queryDevices method shall construct an HTTP request using information supplied by the caller as follows:
+###queryDevicesByTags(path, tagQuery, maxCount, done)
+**SRS_NODE_IOTHUB_HTTP_07_001: [**The `queryDevicesByTags` method shall construct an HTTP request using information supplied by the caller as follows:
 ```
 POST [path]?api-version=[version]&tags=[tagList]&top=[maxCount] HTTP/1.1
 Authorization: [config.sharedAccessSignature]
 Content-Type: application/json; charset=utf-8 
 Host: [host-name]
 ```
+**]**
+
+###queryDevices(path, query, done)
+**SRS_NODE_IOTHUB_HTTP_16_006: [** The `queryDevices` method shall construct an HTTP request using information supplied by the caller as follows:
+```
+POST [path]?api-version=[version] HTTP/1.1
+Authorization: [config.sharedAccessSignature]
+Content-Type: application/json; charset=utf-8 
+Host: [host-name]
+[query]
+``` 
 **]**
 
 ###All HTTP requests

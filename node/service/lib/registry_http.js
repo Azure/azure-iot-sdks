@@ -17,6 +17,18 @@ function Http(config) {
   this._http = new Base();
 }
 
+var handleHttpResponse = function handleHttpResponse (done) {
+  return function (err, body, response) {
+    if (!err) {
+      done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
+    } else {
+      done(err);
+    }
+  };
+};
+
 Http.prototype.createDevice = function (path, deviceInfo, done) {
   var config = this._config;
   var httpHeaders = {
@@ -43,15 +55,7 @@ Http.prototype.createDevice = function (path, deviceInfo, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else if (response) {
-      done(translateError(body, response));
-    } else {
-      done(err);
-    }
-  });
+  var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, handleHttpResponse(done));
   request.write(JSON.stringify(deviceInfo));
   request.end();
 };
@@ -82,15 +86,7 @@ Http.prototype.updateDevice = function (path, deviceInfo, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else if (response) {
-      done(translateError(body, response));
-    } else {
-      done(err);
-    }
-  });
+  var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, handleHttpResponse (done));
   request.write(JSON.stringify(deviceInfo));
   request.end();
 };
@@ -116,15 +112,7 @@ Http.prototype.getDevice = function (path, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else if (response) {
-      done(translateError(body, response));
-    } else {
-      done(err);
-    }
-  });
+  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, handleHttpResponse (done));
   request.end();
 };
 
@@ -149,15 +137,7 @@ Http.prototype.listDevices = function (path, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else if (response) {
-      done(translateError(body, response));
-    } else {
-      done(err);
-    }
-  });
+  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, handleHttpResponse (done));
   request.end();
 };
 
@@ -184,15 +164,7 @@ Http.prototype.deleteDevice = function (path, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('DELETE', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else if (response) {
-      done(translateError(body, response));
-    } else {
-      done(err);
-    }
-  });
+  var request = this._http.buildRequest('DELETE', path, httpHeaders, config.host, handleHttpResponse (done));
   request.end();
 };
 
@@ -221,16 +193,7 @@ Http.prototype.importDevicesFromBlob = function (path, importRequest, done) {
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
   var requestBody = JSON.stringify(importRequest);
-  var request = this._http.buildRequest('POST', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else if (response) {
-      done(translateError(body, response));
-    } else {
-      done(err);
-    }
-  });
-
+  var request = this._http.buildRequest('POST', path, httpHeaders, config.host, handleHttpResponse (done));
   request.write(requestBody);
   request.end();
 };
@@ -260,16 +223,7 @@ Http.prototype.exportDevicesToBlob = function (path, exportRequest, done) {
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
   var requestBody = JSON.stringify(exportRequest);
-  var request = this._http.buildRequest('POST', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else if (response) {
-      done(translateError(body, response));
-    } else {
-      done(err);
-    }
-  });
-
+  var request = this._http.buildRequest('POST', path, httpHeaders, config.host, handleHttpResponse (done));
   request.write(requestBody);
   request.end();
 };
@@ -295,16 +249,7 @@ Http.prototype.listJobs = function (path, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else if (response) {
-      done(translateError(body, response));
-    } else {
-      done(err);
-    }
-  });
-
+  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, handleHttpResponse (done));
   request.end();
 };
 
@@ -329,16 +274,7 @@ Http.prototype.getJob = function (path, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else if (response) {
-      done(translateError(body, response));
-    } else {
-      done(err);
-    }
-  });
-
+  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, handleHttpResponse (done));
   request.end();
 };
 
@@ -363,45 +299,50 @@ Http.prototype.cancelJob = function (path, done) {
   err - null
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
-  var request = this._http.buildRequest('DELETE', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else if (response) {
-      done(translateError(body, response));
-    } else {
-      done(err);
-    }
-  });
-
+  var request = this._http.buildRequest('DELETE', path, httpHeaders, config.host, handleHttpResponse (done));
   request.end();
 };
 
-/* Codes_SRS_NODE_IOTHUB_HTTP_07_001: [The queryDevice method shall construct an HTTP request using information supplied by the caller as follows:
-POST [path]?api-version=[version]&tags=[tagList]&top=[maxCount] HTTP/1.1 
-Authorization: [config.sharedAccessSignature] 
-Content-Type: application/json; charset=utf-8 
+/* Codes_SRS_NODE_IOTHUB_HTTP_07_001: [The queryDeviceByTags method shall construct an HTTP request using information supplied by the caller as follows:
+POST [path]?api-version=[version]&tags=[tagList]&top=[maxCount] HTTP/1.1
+Authorization: [config.sharedAccessSignature]
+Content-Type: application/json; charset=utf-8
 Host: [host-name]]*/
-Http.prototype.queryDevices = function (queryString, tagList, maxCount, done) {
+Http.prototype.queryDevicesByTags = function (queryString, tagList, maxCount, done) {
   var config = this._config;
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
     'Accept': 'application/json',
     'Host': config.host
   };
-  
+
   var tagPath = tagList.join('%2C');
 
-  var path = '/devices/query'+queryString+"&tags="+tagPath+"&top="+maxCount;
-  var request = this._http.buildRequest('POST', path, httpHeaders, config.host, function (err, body, response) {
-    if (!err) {
-      done(null, body, response);
-    } else {
-      err.response = response;
-      err.responseBody = body;
-      done(err);
-    }
-  });
-  
+  var path = '/devices/query' + queryString + "&tags=" + tagPath + "&top=" + maxCount;
+  var request = this._http.buildRequest('POST', path, httpHeaders, config.host, handleHttpResponse (done));
+  request.end();
+};
+
+/*Codes_SRS_NODE_IOTHUB_HTTP_16_006: [The `queryDevices` method shall construct an HTTP request using information supplied by the caller as follows:
+POST [path]?api-version=[version] HTTP/1.1
+Authorization: [config.sharedAccessSignature]
+Content-Type: application/json; charset=utf-8 
+Host: [host-name]
+[query]]*/
+Http.prototype.queryDevices = function (queryString, query, done) {
+  var config = this._config;
+  var httpHeaders = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Authorization': config.sharedAccessSignature,
+    'Accept': 'application/json',
+    'Host': config.host
+  };
+
+  var path = '/devices/query' + queryString;
+  var body = JSON.stringify(query);
+
+  var request = this._http.buildRequest('POST', path, httpHeaders, config.host, handleHttpResponse (done));
+  request.write(body);
   request.end();
 };
 
