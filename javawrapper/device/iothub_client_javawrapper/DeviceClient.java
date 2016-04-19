@@ -47,6 +47,13 @@ public final class DeviceClient
                     "Invalid client protocol specified."); 
         } 
 
+        int status = Iothub_client_wrapperLibrary.INSTANCE.platform_init();
+        if (status != 0)
+        {
+        	 throw new IllegalStateException(
+                     "Failed to initialize the platform. ");
+        }
+        
         handle = Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_CreateFromConnectionString(connString, transport);
     
         if (handle == null)
@@ -72,4 +79,15 @@ public final class DeviceClient
     {
         return Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_SetOption(handle.getPointer(), optionName, value);	
     }
+    
+    public void destroy()
+    {
+    	Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_Destroy(handle.getPointer());
+    }
+    
+    public void platformDeInit()
+    {
+    	Iothub_client_wrapperLibrary.INSTANCE.platform_deinit();
+    }
+    
 }

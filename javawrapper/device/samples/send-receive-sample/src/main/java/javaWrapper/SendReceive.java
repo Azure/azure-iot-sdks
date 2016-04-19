@@ -277,6 +277,8 @@ public class SendReceive
      scanner.nextLine();
 
      System.out.println("Shutting down...");
+     client.destroy();
+     client.platformDeInit();
  }
  
 }
