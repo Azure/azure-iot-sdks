@@ -6,7 +6,11 @@
 
 bool is_download_happening();
 
+bool was_file_successfully_downloaded();
+
 bool is_update_happening();
+
+char *read_string_from_file(const char *filename);
 
 char *get_serial_number();
 

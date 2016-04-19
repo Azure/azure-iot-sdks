@@ -11,11 +11,14 @@
 #include <sys/reboot.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include "iotdm_internal.h"
 
 pid_t child_download = -1;
 pid_t child_update = -1;
 pid_t child_factory_reset = -1;
+
+#define DOWNLOAD_DESTINATION "/home/root/newFirmware.zip"
 
 void _system(const char *command)
 {
@@ -61,6 +64,13 @@ bool is_factory_reset_happening()
     return is_process_running(&child_factory_reset);
 }
 
+bool was_file_successfully_downloaded()
+{
+    struct stat s;
+    int status = stat(DOWNLOAD_DESTINATION,&s);
+    return (status == 0);
+}
+
 bool is_any_child_process_running()
 {
     bool ret = false;
@@ -81,16 +91,12 @@ bool is_any_child_process_running()
     }
 }
 
-char *get_serial_number()
+char *read_string_from_file(const char *filename)
 {
     char *sn = NULL;
-    FILE *fd = fopen("/factory/serial_number", "r");
+    FILE *fd = fopen(filename, "r");
 
-    if (NULL == fd)
-    {
-        sn = lwm2m_strdup("");
-    }
-    else
+    if (NULL != fd)
     {
         fseek(fd, 0, SEEK_END);
         size_t size = ftell(fd);
@@ -107,32 +113,21 @@ char *get_serial_number()
     return sn;
 }
 
+char *get_serial_number()
+{
+    return read_string_from_file("/factory/serial_number");
+}
+
 char *get_firmware_version()
 {
-    char *version = NULL;
-    FILE *fd = fopen("/etc/version", "r");
-
-    if (NULL == fd)
+    char *version = read_string_from_file("/etc/version");
+    if (version != NULL)
     {
-        version = lwm2m_strdup("");
-    }
-    else
-    {
-        fseek(fd, 0, SEEK_END);
-        size_t size = ftell(fd);
-        version = (char *)malloc(size * sizeof(char));
-        if (NULL != version)
-        {
-            fseek(fd, 0L, SEEK_SET);
-            int count = fread(version, sizeof(char), size, fd);
-            fclose(fd);
-            version[count - 1] = '\0';
-
             char *atSign = strchr(version, '@');
-            if (atSign != NULL) *atSign = '\0';
-       }
-
-        close(fd);
+            if (atSign != NULL) 
+            {
+                *atSign = '\0';
+            }
     }
     return version;
 }
@@ -207,6 +202,7 @@ bool spawn_factoryreset_process()
             unlink("/home/root/factory.zip");
 
             _system("reboot ota");
+            exit(0);
         }
         else if (child > 0)
         {
@@ -261,12 +257,12 @@ bool spawn_download_process(const char *uri)
                 sprintf(buffer, "/usr/bin/wget \"%s\" -O /home/root/nf.zip", uri);
                 _system(buffer);
                 
-                sprintf(buffer, "cp /home/root/nf.zip /home/root/newFirmware.zip");
+                sprintf(buffer, "cp /home/root/nf.zip  \"%s\"", DOWNLOAD_DESTINATION);
                 _system(buffer);
             }
             else
             {
-                sprintf(buffer, "cp \"%s\" /home/root/newFirmware.zip", uri);
+                sprintf(buffer, "cp \"%s\" \"%s\"", uri, DOWNLOAD_DESTINATION);
                 _system(buffer);
             }
                 
@@ -323,7 +319,8 @@ bool spawn_update_process()
             unlink("/home/root/newFirmware.zip");
 
             LogInfo("** Update complete\r\n");
-            _system("reboot ota");
+            //_system("reboot ota");
+            exit(0);
         }
         else if (child > 0)
         {

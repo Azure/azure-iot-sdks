@@ -24,7 +24,9 @@ IOTHUB_CLIENT_RESULT start_firmware_update(object_firmwareupdate *obj);
 IOTHUB_CLIENT_RESULT start_factory_reset(object_device *obj);
 IOTHUB_CLIENT_RESULT start_reboot(object_device *obj);
 
-static const char *connectionString = "[device connection string]";
+// To hardcode your connection string, put it here.  If you leave this as NULL,
+// we will look on the command line and in ~/.cs
+static const char *connectionString = NULL;
 
 // LWM2M Update State -- for /5/0/3 resource
 typedef enum FIRMWARE_UPDATE_STATE_TAG
@@ -63,16 +65,77 @@ APP_UPDATE_STATE update_state = APP_UPDATE_STATE_IDLE;
 IOTHUB_CLIENT_RESULT create_update_thread();
 void set_device_state();
 
+// Read the connection string from a file
+const char *read_connection_string()
+{
+    return read_string_from_file("/home/root/.cs");
+}
+
+void print_usage()
+{
+    LogInfo("Usage: IotdmEdisonSample [--service] [connection_string]\r\n ");
+    LogInfo("--service               = Run as a service\r\n");
+    LogInfo("connection_string   = connection string for hub.\r\n");
+}
+
 /**********************************************************************************
  * MAIN LOOP
  *
  **********************************************************************************/
 int main(int argc, char *argv[])
 {
-    const char *cs;
+    const char *cs = NULL;
+    bool runAsService = false;
 
-    if (argc == 2) cs = argv[1];
-    else cs = connectionString;
+    // Look for --service and connection string on command line
+    if (argc >= 2)
+    {
+        for (int i = 1; i <  argc; i++)
+        {
+            if (strcasecmp(argv[i], "--service") == 0)
+            {
+                runAsService = true;
+            }
+            else
+            {
+                if (cs == NULL)
+                {
+                    LogInfo("Getting connection string from command line\r\n");
+                    cs = argv[i];
+                }
+                else
+                {
+                    print_usage();
+                    return -1;
+                }
+            }
+        }
+    }
+
+    // No connection string yet, look in ~/.cs
+    if (cs ==NULL)
+    {
+        cs = read_connection_string();
+        if (cs != NULL)
+        {
+            LogInfo("Got connection string from ~/.cs file\r\n");
+        }
+    }
+
+    // Still no connection string?  Look for something hardcoded
+    if (cs == NULL)
+    {
+        cs = connectionString;
+    }
+    
+    // We've tried everything to get our connection string.  Error out if we don't have one.
+    if (cs == NULL)
+    {
+        print_usage();
+        return -1;
+    }
+    
+    LogInfo("Connection string is \"%s\"\r\n",cs);
 
     IOTHUB_CHANNEL_HANDLE IoTHubChannel = IoTHubClient_DM_Open(cs, COAP_TCPIP);
     if (NULL == IoTHubChannel)
@@ -121,6 +184,14 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    if (runAsService)
+    {
+        LogInfo("--service flag specified.  Running as service\r\n ");
+        
+        chdir("/");
+        daemon(0, 1);
+    }
+
     if (IOTHUB_CLIENT_OK != IoTHubClient_DM_Start(IoTHubChannel))
     {
         LogError("failure to start the client: %p\r\n", IoTHubChannel);
@@ -163,10 +234,21 @@ void update_firmware_udpate_progress()
     case APP_UPDATE_STATE_DOWNLOAD_IN_PROGRESS:
         if (is_download_happening() == false)
         {
-            LogInfo("** firmware download completed\r\n");
-            set_firmwareupdate_state(0, LWM2M_UPDATE_STATE_IMAGE_DOWNLOADED);
-            LogInfo("** %s - > APP_UPDATE_STATE_DOWNLOAD_COMPLETE\r\n", ENUM_TO_STRING(APP_UPDATE_STATE, update_state));
-            update_state = APP_UPDATE_STATE_DOWNLOAD_COMPLETE;
+            if (was_file_successfully_downloaded())
+            {
+                LogInfo("** firmware download completed\r\n");
+                set_firmwareupdate_state(0, LWM2M_UPDATE_STATE_IMAGE_DOWNLOADED);
+                LogInfo("** %s - > APP_UPDATE_STATE_DOWNLOAD_COMPLETE\r\n", ENUM_TO_STRING(APP_UPDATE_STATE, update_state));
+                update_state = APP_UPDATE_STATE_DOWNLOAD_COMPLETE;
+            }
+            else
+            {
+                LogInfo("** firmware download failed\r\n");
+                set_firmwareupdate_updateresult(0, LWM2M_UPDATE_RESULT_INVALID_URI);
+                set_firmwareupdate_state(0, LWM2M_UPDATE_STATE_NONE);
+                LogInfo("** %s - > APP_UPDATE_STATE_IDLE\r\n", ENUM_TO_STRING(APP_UPDATE_STATE, update_state));
+                update_state = APP_UPDATE_STATE_IDLE;
+            }
         }
         break;
     case APP_UPDATE_STATE_DOWNLOAD_COMPLETE:
