@@ -97,8 +97,7 @@ To run DeviceExplorer tool, use following configuration string as described in
     f. Save this information in Notepad. You will need this information in
     later steps.
 
-***Not running Windows on your PC?*** - Please send us an email on
-<iotcert@microsoft.com> and we will follow up with you with instructions.
+***Not running Windows on your PC?*** - Please follow the instructions [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md>) to provision your device and get its credentials.
 
 <a name="Step-3-Build"></a>
 # Step 3: Build and Validate the sample using C client libraries
