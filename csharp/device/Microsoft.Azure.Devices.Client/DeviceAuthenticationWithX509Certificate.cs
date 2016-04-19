@@ -13,7 +13,6 @@ namespace Microsoft.Azure.Devices.Client
     public sealed class DeviceAuthenticationWithX509Certificate : IAuthenticationMethod
     {
         string deviceId;
-        X509Certificate2 certificate;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DeviceAuthenticationWithX509Certificate"/> class.
@@ -23,7 +22,6 @@ namespace Microsoft.Azure.Devices.Client
         public DeviceAuthenticationWithX509Certificate(string deviceId, X509Certificate2 certificate)
         {
             this.SetDeviceId(deviceId);
-            this.SetCertificate(certificate);
         }
 
         /// <summary>
@@ -38,11 +36,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Gets or sets the X.509 certificate associated with this device
         /// </summary>
-        public X509Certificate2 Certificate
-        {
-            get { return this.certificate; }
-            set { this.SetCertificate(value); }
-        }
+        public X509Certificate2 Certificate { get; set; }
 
         /// <summary>
         /// Populates an <see cref="IotHubConnectionStringBuilder"/> instance based on the properties of the current instance.
@@ -57,7 +51,8 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             iotHubConnectionStringBuilder.DeviceId = this.DeviceId;
-            iotHubConnectionStringBuilder.AuthMechanism = "X509Certificate";
+            iotHubConnectionStringBuilder.AuthMechanism = "X509";
+            iotHubConnectionStringBuilder.Certificate = this.Certificate;
             iotHubConnectionStringBuilder.SharedAccessSignature = null;
             iotHubConnectionStringBuilder.SharedAccessKey = null;
             iotHubConnectionStringBuilder.SharedAccessKeyName = null;
@@ -73,16 +68,6 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             this.deviceId = deviceId;
-        }
-
-        void SetCertificate(X509Certificate2 certificate)
-        {
-            if (certificate == null)
-            {
-                throw new ArgumentNullException("certificate");
-            }
-
-            this.certificate = certificate;
         }
     }
 }

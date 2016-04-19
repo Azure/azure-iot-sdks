@@ -204,7 +204,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
 #if !WINDOWS_UWP
-        static async Task<ClientWebSocket> CreateClientWebSocketAsync(Uri websocketUri, TimeSpan timeout)
+        async Task<ClientWebSocket> CreateClientWebSocketAsync(Uri websocketUri, TimeSpan timeout)
         {
             var websocket = new ClientWebSocket();
 
@@ -220,7 +220,14 @@ namespace Microsoft.Azure.Devices.Client
                 websocket.Options.Proxy = webProxy;
             }
 
-            websocket.Options.UseDefaultCredentials = true;
+            if (this.AmqpTransportSettings.ClientCertificate != null)
+            {
+                websocket.Options.ClientCertificates.Add(this.AmqpTransportSettings.ClientCertificate);
+            }
+            else
+            {
+                websocket.Options.UseDefaultCredentials = true;
+            }
 
             using (var cancellationTokenSource = new CancellationTokenSource(timeout))
             {
@@ -234,7 +241,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             var timeoutHelper = new TimeoutHelper(timeout);
             Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.hostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
-            var websocket = await CreateClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
+            var websocket = await this.CreateClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
             return new ClientWebSocketTransport(
                 websocket,
                 null,
@@ -280,7 +287,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 TargetHost = this.hostName,
 #if !WINDOWS_UWP // Not supported in UWP
-                Certificate = null, // TODO: add client cert support
+                Certificate = null,
                 CertificateValidationCallback = OnRemoteCertificateValidation
 #endif
             };

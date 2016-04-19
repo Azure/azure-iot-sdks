@@ -134,6 +134,49 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authenticationMethod);
+
+            //if (authenticationMethod is DeviceAuthenticationWithX509Certificate)
+            //{
+            //    switch (transportType)
+            //    {
+            //        case TransportType.Amqp:
+            //            return CreateFromConnectionString(connectionStringBuilder.ToString(), new ITransportSettings[]
+            //            {
+            //                new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
+            //                {
+            //                    ClientCertificate = connectionStringBuilder.Certificate
+            //                },
+            //                new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
+            //                {
+            //                    ClientCertificate = connectionStringBuilder.Certificate
+            //                },
+            //            });
+            //        case TransportType.Amqp_Tcp_Only:
+            //            return CreateFromConnectionString(connectionStringBuilder.ToString(), new ITransportSettings[]
+            //            {
+            //                new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
+            //                {
+            //                    ClientCertificate = connectionStringBuilder.Certificate
+            //                }
+            //            });
+            //        case TransportType.Amqp_WebSocket_Only:
+            //            return CreateFromConnectionString(connectionStringBuilder.ToString(), new ITransportSettings[]
+            //            {
+            //                new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
+            //                {
+            //                    ClientCertificate = connectionStringBuilder.Certificate
+            //                }
+            //            });
+            //        case TransportType.Http1:
+            //            return CreateFromConnectionString(connectionStringBuilder.ToString(), new ITransportSettings[]
+            //            {
+            //                new Http1TransportSettings() 
+            //                {
+            //                    ClientCertificate = connectionStringBuilder.Certificate
+            //                }
+            //            });
+            //    }         
+            //}
             return CreateFromConnectionString(connectionStringBuilder.ToString(), transportType);
         }
 

@@ -14,6 +14,10 @@ namespace Microsoft.Azure.Devices.Client
     using System.Text.RegularExpressions;
     using System.Net;
     using SharedAccessSignatureParser = Microsoft.Azure.Devices.Client.SharedAccessSignature;
+
+#if !WINDOWS_UWP && !PCL
+    using System.Security.Cryptography.X509Certificates;
+#endif
 #endif
 
     /// <summary>
@@ -139,6 +143,10 @@ namespace Microsoft.Azure.Devices.Client
             get { return this.iotHubName; }
         }
 
+#if !NETMF && !WINDOWS_UWP && !PCL
+        internal X509Certificate2 Certificate { get; set; }
+#endif
+
         internal IotHubConnectionString ToIotHubConnectionString()
         {
             this.Validate();
@@ -160,6 +168,7 @@ namespace Microsoft.Azure.Devices.Client
             stringBuilder.AppendKeyValuePairIfNotEmpty(SharedAccessKeyNamePropertyName, this.SharedAccessKeyName);
             stringBuilder.AppendKeyValuePairIfNotEmpty(SharedAccessKeyPropertyName, this.SharedAccessKey);
             stringBuilder.AppendKeyValuePairIfNotEmpty(SharedAccessSignaturePropertyName, this.SharedAccessSignature);
+            stringBuilder.AppendKeyValuePairIfNotEmpty(AuthMechanismPropertyName, this.AuthMechanism);
             if (stringBuilder.Length > 0)
             {
                 stringBuilder.Remove(stringBuilder.Length - 1, 1);
@@ -232,9 +241,12 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentException("DeviceId must be specified in connection string");
             }
 
-            if (this.AuthMechanism.IsNullOrWhiteSpace() && !(this.SharedAccessKey.IsNullOrWhiteSpace() ^ this.SharedAccessSignature.IsNullOrWhiteSpace()))
+            if (!(this.SharedAccessKey.IsNullOrWhiteSpace() ^ this.SharedAccessSignature.IsNullOrWhiteSpace()))
             {
-                throw new ArgumentException("Should specify either SharedAccessKey or SharedAccessSignature if X.509 certificate is not used");
+                if (!string.Equals(this.AuthMechanism, "X509", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ArgumentException("Should specify either SharedAccessKey or SharedAccessSignature if X.509 certificate is not used");
+                }
             }
 
             if (this.IotHubName.IsNullOrWhiteSpace())

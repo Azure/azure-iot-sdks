@@ -82,14 +82,12 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
         public void DeviceClient_ConnectionString_X509Certificate_Test()
         {
             string hostName = "acme.azure-devices.net";
-            string password = "CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
 
             var cert = CertificateHelper.InstallCertificateFromFile("device.pfx", "device.txt");
             var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
-            var deviceClient = AmqpTransportHandler.Create(hostName, authMethod);
 
-            Assert.IsNotNull(deviceClient.Connection);
-            Assert.IsNotNull(deviceClient.Connection.ConnectionString);
+            var deviceClient = DeviceClient.Create(hostName, authMethod);
+
         }
 
         [TestMethod]
