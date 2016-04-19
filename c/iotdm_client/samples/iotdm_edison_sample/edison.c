@@ -319,7 +319,7 @@ bool spawn_update_process()
             unlink("/home/root/newFirmware.zip");
 
             LogInfo("** Update complete\r\n");
-            //_system("reboot ota");
+            _system("reboot ota");
             exit(0);
         }
         else if (child > 0)
