@@ -129,6 +129,12 @@ void on_io_open_complete(void* context, IO_OPEN_RESULT open_result)
     openContext->onComplete(result, openContext->context);
 }
 
+//void(*ON_REGISTER_COMPLETE)(IOTHUB_CLIENT_RESULT result, void* context);
+void on_reconnect_complete(IOTHUB_CLIENT_RESULT result, void* context)
+{
+    // ignore result, free the context
+    free(context);
+}
 
 const int MAX_CONNECT_RETRY = 36000;
 void on_io_error(void* context);
@@ -139,7 +145,7 @@ int dm_io_open(IO_OPEN_COMPLETE_CONTEXT *openContext)
     CLIENT_DATA *cd = openContext->client;
     while (retry <= MAX_CONNECT_RETRY)
     {
-        retValue = xio_open(cd->ioHandle, on_io_open_complete, openContext, on_bytes_received, cd, on_io_error, openContext);
+        retValue = xio_open(cd->ioHandle, on_io_open_complete, openContext, on_bytes_received, cd, on_io_error, cd);
         if (retValue == 0)
         {
             return 0;
@@ -159,8 +165,21 @@ void on_io_error(void* context)
 {
     LogError("    on_io_error event\n");
 
-    IO_OPEN_COMPLETE_CONTEXT *openContext = (IO_OPEN_COMPLETE_CONTEXT *)context;
-    (void)xio_close(openContext->client->ioHandle, NULL, NULL);
+    CLIENT_DATA *cd = (CLIENT_DATA *)context;
+    (void)xio_close(cd->ioHandle, NULL, NULL);
+
+    IO_OPEN_COMPLETE_CONTEXT* openContext = malloc(sizeof(IO_OPEN_COMPLETE_CONTEXT));
+    if (!openContext)
+    {
+        LogError("    failed to allocate context object\n");
+    }
+
+    else
+    {
+        openContext->client = cd;
+        openContext->onComplete = on_reconnect_complete;
+        openContext->context = openContext;
+    }
 
     (void)dm_io_open(openContext);
 }
