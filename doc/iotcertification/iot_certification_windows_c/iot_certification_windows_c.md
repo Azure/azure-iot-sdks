@@ -32,7 +32,7 @@ This document provides step by step guidance to IoT hardware publishers on how t
 **Prepare**
 
 Before executing any of the steps below, read through each process, step
-by step to ensure end to end understanding.
+by step to ensure end to end understanding. Follow the instructions [here](<https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md>) to prepare your development environment. 
 
 You should have the following items ready before beginning the process:
 
@@ -87,9 +87,7 @@ To run DeviceExplorer tool, use following configuration string as described in [
     
     f. Save this information in Notepad. You will need this information in later steps.
 
-**Not running Windows on your PC?** - Please send us an email on 
-<iotcert@microsoft.com> and we will follow up with you witAzure IoT SDKh
-instructions.
+***Not running Windows on your PC?*** - Please follow the instructions [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md>) to provision your device and get its credentials.
 
 <a name="Step_3_Build_and_Validate"/>
 # Step 3: Build and Validate the Sample using C Client Libraries 
