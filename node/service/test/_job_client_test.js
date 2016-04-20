@@ -529,6 +529,31 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
             });
         });
 
+        describe('#getJobs', function() {  
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_016: [** `getJobs` shall call the `done` callback with an `Error` object if the request fails.]*/
+            it('returns err if bad host is presented', function (done) {
+                var jobClient = JobClient.fromConnectionString(badConnectionString, Transport);
+                jobClient.getJobs(function (err) {
+                    assert.isNotNull(err);
+                    done();
+                });
+            });
+
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_017: [** `getJobs` shall call the `done` callback with a `null` error object and an array of jobs if the request succeeds.]*/
+            it('calls done function if complete', function (done) {
+                var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
+
+                jobClient.getJobs(function (err, jobs) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        assert.isArray(jobs);
+                        done();
+                    }
+                });
+            });
+        });
+
         describe('#queryJobHistory', function () {
             /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_001: [queryJobHistory shall throw a ReferenceError if the query parameter is falsy]*/
             [null, undefined, ''].forEach(function (testParam) {

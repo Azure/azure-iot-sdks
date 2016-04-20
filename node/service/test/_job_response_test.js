@@ -65,7 +65,7 @@ describe('JobResponse', function () {
       throwsReferenceError(invalidJobResp);
     });
     
-    it('JSON is created correctly', function() {
+    it('is created correctly if the argument is a JSON string', function() {
       var jobResp = new JobResponse(fullJobResponse);
       
       assert.equal(jobResp.jobId, initializeJobResp.jobId);
@@ -75,7 +75,19 @@ describe('JobResponse', function () {
       assert.equal(jobResp.type, initializeJobResp.type);
       assert.equal(jobResp.status, initializeJobResp.status);
       assert.equal(jobResp.progress, initializeJobResp.progress);
-    }); 
+    });
+
+    it('is created correctly if the argument is an object', function() {
+      var jobResp = new JobResponse(initializeJobResp);
+      
+      assert.equal(jobResp.jobId, initializeJobResp.jobId);
+      assert.equal(jobResp.startTimeUtc, initializeJobResp.startTimeUtc);
+      assert.equal(jobResp.endTimeUtc, initializeJobResp.endTimeUtc);
+      assert.equal(jobResp.failureReason, initializeJobResp.failureReason);
+      assert.equal(jobResp.type, initializeJobResp.type);
+      assert.equal(jobResp.status, initializeJobResp.status);
+      assert.equal(jobResp.progress, initializeJobResp.progress);
+    });
   });
 
   describe('#jobId', function () { 

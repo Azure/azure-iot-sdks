@@ -459,6 +459,58 @@ JobClient.prototype.getJob = function (jobId, done) {
 };
 
 /**
+ * @method            module:azure-iothub.JobClient#getJobs`
+ * @description       Gets information for all jobs.
+ * @param {Function}  done   The function to call when the operation is
+ *                           complete. `done` will be called with three
+ *                           arguments: an Error object (can be null), an
+ *                           array of {@link module:azure-iothub.JobResponse|JobResponse}
+ *                           objects representing the Job
+ *                           identities, and a transport-specific response
+ *                           object useful for logging or debugging.
+ */
+JobClient.prototype.getJobs = function getJobs (done) {
+    var config = this._config;
+
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_015: [`getJobs` shall construct an HTTPS request using information supplied by the caller, as follows:
+    ```
+    GET <config.host>/jobs/v2?api-version=<version> HTTP/1.1
+    Authorization: <config.sharedAccessSignature>
+    UserAgent: <user-agent-string>
+    Accept: application/json
+    ```]*/
+
+    var httpHeaders = {
+        'Authorization': config.sharedAccessSignature,
+        'Accept': 'application/json',
+        'UserAgent': packageJson.name + '/' + packageJson.version
+    };
+
+    var path = '/jobs/v2' + endpoint.versionQueryString();
+    this._httpTransport.sendHttpRequest('GET', path, httpHeaders, config.host, null, function (err, body, response) {
+        if (!done) return;
+
+        if (!err) {
+            /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_017: [`getJobs` shall call the `done` callback with a `null` error object and an array of jobs if the request succeeds.]*/
+            var results = [];
+            if (body) {
+                var jobs = JSON.parse(body);
+                jobs.forEach(function (job) {
+                    results.push(new JobResponse(job));
+                });
+            }
+            done(null, results, response);
+        }
+        else {
+            /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_016: [`getJobs` shall call the `done` callback with an `Error` object if the request fails.]*/
+            err.response = response;
+            err.responseBody = body;
+            done(err);
+        }
+    });
+};
+
+/**
  * @method            module:azure-iothub.JobClient#queryJobHistory
  * @description       Gets the jobs matching the specified query from the history.
  * 
@@ -482,7 +534,7 @@ JobClient.prototype.queryJobHistory = function (jobQuery, done) {
         'Accept': 'application/json',
         'Content-Type': 'application/json; charset=utf-8',
     };
-    
+
     var path = '/jobs/v2/query' + endpoint.versionQueryString();
     var queryContent = JSON.stringify(jobQuery);
     

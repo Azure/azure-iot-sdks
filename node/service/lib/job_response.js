@@ -23,7 +23,12 @@
 module.exports = function JobResponse(jsonData) {
   var body;
   if (jsonData) {
-    body = JSON.parse(jsonData);
+    if (typeof jsonData === 'string') {
+      body = JSON.parse(jsonData);
+    } else {
+      body = jsonData;
+    }
+
     if (!body.jobId) {
       throw new ReferenceError('Argument \'jobId\' is ' + body.jobId);
     }

@@ -181,9 +181,9 @@ Host: <config.host>
 
 
 ###getJob(jobId, done)
-The `getJob` method retrieves the job specified in jobId
+The `getJob` method retrieves the job specified in `jobId`
 **SRS_NODE_IOTHUB_JOBCLIENT_07_012: [**`getJob` shall throw an `ReferenceError` if `jobId` is falsy.**]**  
-**SRS_NODE_IOTHUB_JOBCLIENT_07_013: [**`getJob` shall construct an HTTPS request using information supplied by the caller, as follows:    
+**SRS_NODE_IOTHUB_JOBCLIENT_07_013: [**`getJob` shall construct an HTTPS request using information supplied by the caller, as follows:  
 ```
 GET <config.host>/jobs/v2/<jobId>?api-version=<version> HTTP/1.1
 Authorization: <config.sharedAccessSignature>
@@ -192,10 +192,25 @@ Accept: application/json
 ```
 **]**  
 
+###getJobs(done)
+The `getJobs` method retrieves all the jobs from the service.
+
+**SRS_NODE_IOTHUB_JOBCLIENT_16_015: [** `getJobs` shall construct an HTTPS request using information supplied by the caller, as follows:
+```
+GET <config.host>/jobs/v2?api-version=<version> HTTP/1.1
+Authorization: <config.sharedAccessSignature>
+UserAgent: <user-agent-string>
+Accept: application/json
+```
+ **]**
+
+**SRS_NODE_IOTHUB_JOBCLIENT_16_016: [** `getJobs` shall call the `done` callback with an `Error` object if the request fails. **]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_16_017: [** `getJobs` shall call the `done` callback with a `null` error object and an array of jobs if the request succeeds. **]**  
+
 ###queryJobHistory(query, done)
 the `queryJobHistory` method retrieves an array of jobs or the result of an aggregation operation on jobs from the history that match the specified filter.
 
-**SRS_NODE_IOTHUB_JOBCLIENT_16_001: [** `queryJobHistory` shall throw a ReferenceError if the `query` parameter is falsy **]**
-**SRS_NODE_IOTHUB_JOBCLIENT_16_002: [** `queryJobHistory` shall call the done callback with an `Error` object if the request fails. **]**
-**SRS_NODE_IOTHUB_JOBCLIENT_16_003: [** `queryJobHistory` shall call the done callback with a `null` error object and an array of matching jobs if the query is a projection query. **]**
-**SRS_NODE_IOTHUB_JOBCLIENT_16_004: [** `queryJobHistory` shall call the done callback with a `null` error object and an associative array containing the results if the query is an aggregation query.  **]**
+**SRS_NODE_IOTHUB_JOBCLIENT_16_001: [** `queryJobHistory` shall throw a ReferenceError if the `query` parameter is falsy **]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_16_002: [** `queryJobHistory` shall call the `done` callback with an `Error` object if the request fails. **]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_16_003: [** `queryJobHistory` shall call the `done` callback with a `null` error object and an array of matching jobs if the query is a projection query. **]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_16_004: [** `queryJobHistory` shall call the `done` callback with a `null` error object and an associative array containing the results if the query is an aggregation query.  **]**  

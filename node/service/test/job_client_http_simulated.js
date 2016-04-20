@@ -29,7 +29,8 @@ SimulatedHttpAbstract.prototype.sendHttpRequest = function (verb, path, headers,
     status: 'enqueued',
     progress: 35
   };
-  if (path.substring(0, 14) === '/jobs/v2/query') {
+  var pathComponents = path.split('?')[0].split('/');
+  if (pathComponents[3] === 'query') {
     var request = JSON.parse(writeData);
     if (request.aggregate) {
       jobResponse = {
@@ -44,6 +45,8 @@ SimulatedHttpAbstract.prototype.sendHttpRequest = function (verb, path, headers,
         AggregateResult: null
       };
     }
+  } else if (!pathComponents[3]) {
+    jobResponse = [jobDesc];
   } else {
     jobResponse = jobDesc;
   }
