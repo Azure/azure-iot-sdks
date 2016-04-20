@@ -35,7 +35,14 @@ namespace Microsoft.Azure.Devices.Client
 
         public override void Release(string doNotUse)
         {
-            this.iotHubScopeConnectionPool.RemoveRef();
+            if (this.iotHubScopeConnectionPool != null)
+            {
+                this.iotHubScopeConnectionPool.RemoveRef();
+            }
+            else
+            {
+                this.CloseAsync();
+            }
         }
 
         protected override async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout)
@@ -48,14 +55,22 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             AmqpSession amqpSession = await base.CreateSessionAsync(timeoutHelper.RemainingTime());
-            this.iotHubTokenRefresher = new IotHubTokenRefresher(
-                amqpSession, 
-                this.ConnectionString, 
-                this.ConnectionString.AmqpEndpoint.AbsoluteUri
-                );
 
-            // Send Cbs token for new connection first
-            await this.iotHubTokenRefresher.SendCbsTokenAsync(timeoutHelper.RemainingTime());
+#if !WINDOWS_UWP
+            if (this.AmqpTransportSettings.ClientCertificate == null)
+            {
+#endif
+                this.iotHubTokenRefresher = new IotHubTokenRefresher(
+                   amqpSession,
+                   this.ConnectionString,
+                   this.ConnectionString.AmqpEndpoint.AbsoluteUri
+                   );
+
+                // Send Cbs token for new connection first
+                await this.iotHubTokenRefresher.SendCbsTokenAsync(timeoutHelper.RemainingTime());
+#if !WINDOWS_UWP
+            }
+#endif
 
             return amqpSession;
         }
@@ -93,7 +108,11 @@ namespace Microsoft.Azure.Devices.Client
         {
             // Closing the connection also closes any sessions.
             amqpSession.Connection.SafeClose();
-            this.iotHubTokenRefresher.Cancel();
+
+            if (this.iotHubTokenRefresher != null)
+            {
+                this.iotHubTokenRefresher.Cancel();
+            }
         }
     }
 }

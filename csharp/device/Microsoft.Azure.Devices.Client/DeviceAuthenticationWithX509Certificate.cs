@@ -22,6 +22,7 @@ namespace Microsoft.Azure.Devices.Client
         public DeviceAuthenticationWithX509Certificate(string deviceId, X509Certificate2 certificate)
         {
             this.SetDeviceId(deviceId);
+            this.Certificate = certificate;
         }
 
         /// <summary>
