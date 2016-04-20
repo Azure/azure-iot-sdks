@@ -19,9 +19,7 @@ function transportSpecificTests(opts) {
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_009: [When the open method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - standard JavaScript Error object (or subclass)]*/
       /*Tests_SRS_NODE_IOTHUB_CLIENT_05_010: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
-      if (opts.transport && opts.connectionString) assert.fail('test setup error');
-      if (opts.transport) testSubject = new Client(opts.transport());
-      else testSubject = Client.fromConnectionString(opts.connectionString);
+      testSubject = Client.fromConnectionString(opts.connectionString, opts.transport);
       deviceId = opts.id;
       testSubject.open(function (err) { done(err); });
     });

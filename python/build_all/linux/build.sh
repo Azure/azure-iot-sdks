@@ -40,6 +40,7 @@ echo copy iothub_client_mock library to tests folder
 cp ~/cmake/python/test/iothub_client_mock.so ./python/device/tests/iothub_client_mock.so
 
 cd $build_root/python/device/tests/
+echo "python${PYTHON_VERSION}" iothub_client_ut.py
 "python${PYTHON_VERSION}" iothub_client_ut.py
 [ $? -eq 0 ] || exit $?
 cd $build_root

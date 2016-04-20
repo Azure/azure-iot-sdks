@@ -18,5 +18,7 @@ module.exports = {
   JobClient: require('./lib/job_client.js'),
   JobResponse: require('./lib/job_response.js'),
   Registry: require('./lib/registry.js'),
-  SharedAccessSignature: require('./lib/shared_access_signature.js')
+  SharedAccessSignature: require('./lib/shared_access_signature.js'),
+  Amqp: require('./lib/amqp.js'),
+  AmqpWs: require('./lib/amqp-ws.js'),
 };

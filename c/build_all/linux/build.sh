@@ -12,6 +12,7 @@ run_longhaul_tests=OFF
 build_amqp=ON
 build_http=ON
 build_mqtt=ON
+use_wsio=OFF
 skip_unittests=OFF
 build_python=OFF
 build_javawrapper=OFF
@@ -30,6 +31,7 @@ usage ()
     echo " --no-amqp                     do no build AMQP transport and samples"
     echo " --no-http                     do no build HTTP transport and samples"
     echo " --no-mqtt                     do no build MQTT transport and samples"
+    echo " --use-websockets              Enables the support for AMQP over WebSockets."
     echo " --toolchain-file <file>       pass cmake a toolchain file for cross compiling"
     echo " --build-python <version>      build Python C wrapper module (requires boost) with given python version (2.7 3.4 3.5 are currently supported)"
     echo " --build-javawrapper           build java C wrapper module"
@@ -74,6 +76,7 @@ process_args ()
               "--no-amqp" ) build_amqp=OFF;;
               "--no-http" ) build_http=OFF;;
               "--no-mqtt" ) build_mqtt=OFF;;
+              "--use-websockets" ) use_wsio=ON;;
               "--build-python" ) save_next_arg=3;;
               "--build-javawrapper" ) build_javawrapper=ON;;
               "--toolchain-file" ) save_next_arg=2;;
@@ -95,7 +98,7 @@ process_args $*
 rm -r -f ~/cmake
 mkdir ~/cmake
 pushd ~/cmake
-cmake $toolchainfile -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:STRING=$build_python $build_root
+cmake $toolchainfile -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Duse_wsio:BOOL=$use_wsio -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:STRING=$build_python $build_root
 
 CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 make --jobs=$CORES
