@@ -10,7 +10,8 @@ var Promise = require('bluebird');
 
 var repoRoot;
 var remoteName = process.argv[2];
-var packageFolders = process.argv.slice(3);
+var sourceBranch = process.argv[3];
+var packageFolders = process.argv.slice(4);
 
 var packages = Promise.map(packageFolders, function (folder) {
   return new u.Package(folder);
@@ -19,8 +20,9 @@ var packages = Promise.map(packageFolders, function (folder) {
 function usage() {
   console.log([
     '',
-    'node release_npm/app.js <remote-name> <package-folder>...',
+    'node release_npm/app.js <remote-name> <source-branch> <package-folder>...',
     '  <remote-name>        The name of the tracked repository where the npm packages will be staged',
+    '  <source-branch>      The name of a branch in your local repository from which to copy package files',
     '  <package-folder>...  One or more npm package folders within your repository'
   ].join('\n'));
 }
@@ -32,12 +34,20 @@ function getRepoRoot() {
     });
 }
 
-function ensureCurrentBranchIsDevelop() {
-  return u.isCurrentBranch('develop')
-    .then(function (isDevelop) {
-      return isDevelop ?
+function ensureCurrentBranchIsSourceBranch() {
+  return u.localBranchExists(sourceBranch)
+    .then(function (branchExists) {
+      return branchExists ?
         null :
-        Promise.reject(new Error('Please switch to the \'develop\' branch before running this script.'));
+        Promise.reject(new Error('The source branch you specified (\'' + sourceBranch + '\') was not found in this repository. Please specify an existing branch.'));
+    })
+    .then(function () {
+      return u.isCurrentBranch(sourceBranch)
+        .then(function (isSourceBranch) {
+          return isSourceBranch ?
+            null :
+            Promise.reject(new Error('Please switch to the \'' + sourceBranch + '\' branch before running this script.'));
+        });
     });
 }
 
@@ -165,9 +175,17 @@ function getTarballUrl(pkg) {
   return u.getTarballUrl(remoteName, pkg.stagingBranch());
 }
 
-function checkoutDevelop() {
-  console.log('\nReturning to branch \'develop\'...');
-  return u.checkoutBranch('develop');
+function checkoutSourceBranch() {
+  return u.localBranchExists(sourceBranch)
+    .then(function (branchExists) {
+      return branchExists ?
+        null :
+        Promise.reject(new Error('The source branch you specified (\'' + sourceBranch + '\') was not found in this repository. Please specify an existing branch.'));
+    })
+    .then(function () {
+      console.log('\nReturning to branch \'' + sourceBranch + '\'...');
+      return u.checkoutBranch(sourceBranch);
+    });
 }
 
 function deleteStagingBranches() {
@@ -182,7 +200,7 @@ function deleteStagingBranches() {
 }
 
 function cleanup() {
-  return checkoutDevelop()
+  return checkoutSourceBranch()
     .then(deleteStagingBranches);
 }
 
@@ -204,7 +222,7 @@ if (process.argv.length < 4) {
 }
 
 getRepoRoot()
-  .then(ensureCurrentBranchIsDevelop)
+  .then(ensureCurrentBranchIsSourceBranch)
   .then(ensureThereAreNoUncommittedChanges)
   .then(ensureWorkingDirectoryIsClean)
   .then(ensureRepoIsTrackingTheGivenRemote)
