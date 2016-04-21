@@ -1,0 +1,68 @@
+[
+  {
+    "deviceId": "Device11",
+    "serviceProperties": {
+      "properties": {
+        "CustomerId": "123456",
+        "ServiceBy": "Contoso",
+        "QosLevel": 1
+      },
+      "tags": [ "City: Seattle", "Bldg: 109", "Floor: 2", "Room: 2817" ]
+    }
+  },
+  {
+    "deviceId": "Device12",
+    "serviceProperties": {
+      "properties": {
+        "CustomerId": "4829472",
+        "ServiceBy": "Contoso",
+        "QosLevel": 1
+      },
+      "tags": [ "City: Seattle", "Bldg: 109", "Floor: 3", "Room: 3121" ]
+    }
+  },
+  {
+    "deviceId": "Device13",
+    "serviceProperties": {
+      "properties": {
+        "CustomerId": "123456",
+        "ServiceBy": "Fabrikam",
+        "QosLevel": 2
+      },
+      "tags": [ "City: Seattle", "Bldg: 109", "Floor: 1", "Room: 1924" ]
+    }
+  },
+  {
+    "deviceId": "Device14",
+    "serviceProperties": {
+      "properties": {
+        "CustomerId": "985362",
+        "ServiceBy": "Fabrikam",
+        "QosLevel": 3
+      },
+      "tags": [ "City: Seattle", "Bldg: 109", "Floor: 2", "Room: 2963" ]
+    }
+  },
+  {
+    "deviceId": "Device15",
+    "serviceProperties": {
+      "properties": {
+        "CustomerId": "985362",
+        "ServiceBy": "Contoso",
+        "QosLevel": 1
+      },
+      "tags": [ "City: Seattle", "Bldg: 109", "Floor: 3", "Room: 3121" ]
+    }
+  },
+  {
+    "deviceId": "Device16",
+    "serviceProperties": {
+      "properties": {
+        "CustomerId": "284721",
+        "ServiceBy": "Contoso",
+        "QosLevel": 9
+      },
+      "tags": [ "City: Seattle", "Bldg: 109", "Floor: 1", "Room: 1212" ]
+    }
+  }
+]
