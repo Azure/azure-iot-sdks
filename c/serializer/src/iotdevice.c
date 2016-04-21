@@ -15,7 +15,7 @@
 #include "azure_c_shared_utility/iot_logging.h"
 
 #define LOG_DEVICE_ERROR \
-    LogError("(result = %s)\r\n", ENUM_TO_STRING(DEVICE_RESULT, result))
+    LogError("(result = %s)", ENUM_TO_STRING(DEVICE_RESULT, result))
 
 typedef struct DEVICE_TAG
 {
@@ -36,7 +36,7 @@ static EXECUTE_COMMAND_RESULT DeviceInvokeAction(void* actionCallbackContext, co
     if (actionCallbackContext == NULL)
     {
         result = EXECUTE_COMMAND_ERROR;
-        LogError("(Error code = %s)\r\n", ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
+        LogError("(Error code = %s)", ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
     }
     else
     {
@@ -135,7 +135,7 @@ TRANSACTION_HANDLE Device_StartTransaction(DEVICE_HANDLE deviceHandle)
     if (deviceHandle == NULL)
     {
         result = NULL;
-        LogError("(Error code = %s)\r\n", ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
+        LogError("(Error code = %s)", ENUM_TO_STRING(DEVICE_RESULT, DEVICE_INVALID_ARG));
     }
     else
     {

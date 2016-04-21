@@ -19,7 +19,7 @@
 DEFINE_ENUM_STRINGS(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES)
 
 #define LOG_DATA_PUBLISHER_ERROR \
-    LogError("(result = %s)\r\n", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, result))
+    LogError("(result = %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, result))
 
 #define DEFAULT_MAX_BUFFER_SIZE 10240
 /* Codes_SRS_DATA_PUBLISHER_99_066:[ A single value shall be used by all instances of DataPublisher.] */
@@ -50,13 +50,13 @@ DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle,
         )
     {
         result = NULL;
-        LogError("(result = %s)\r\n", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG));
+        LogError("(result = %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG));
     }
     else if ((dataPublisherInstance = (DATA_PUBLISHER_INSTANCE*)malloc(sizeof(DATA_PUBLISHER_INSTANCE))) == NULL)
     {
         /* Codes_SRS_DATA_PUBLISHER_99_047:[ For any other error not specified here, DataPublisher_Create shall return NULL.] */
         result = NULL;
-        LogError("(result = %s)\r\n", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_ERROR));
+        LogError("(result = %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_ERROR));
     }
     else
     {
@@ -68,7 +68,7 @@ DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle,
 
             /* Codes_SRS_DATA_PUBLISHER_99_044:[ If the creation of the DataMarshaller instance fails, DataPublisher_Create shall return NULL.] */
             result = NULL;
-            LogError("(result = %s)\r\n", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_MARSHALLER_ERROR));
+            LogError("(result = %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_MARSHALLER_ERROR));
         }
         else
         {
@@ -101,7 +101,7 @@ TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPubl
     if (dataPublisherHandle == NULL)
     {
         transaction = NULL;
-        LogError("(Error code: %s)\r\n", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG));
+        LogError("(Error code: %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG));
     }
     else
     {
@@ -109,7 +109,7 @@ TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPubl
         transaction = (TRANSACTION*)malloc(sizeof(TRANSACTION));
         if (transaction == NULL)
         {
-            LogError("Allocating transaction failed (Error code: %s)\r\n", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_ERROR));
+            LogError("Allocating transaction failed (Error code: %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_ERROR));
         }
         else
         {

@@ -103,11 +103,11 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
     /* Codes_SRS_IOTHUBCLIENT_12_003: [IoTHubClient_CreateFromConnectionString shall verify the input parameter and if it is NULL then return NULL] */
     if (connectionString == NULL)
     {
-        LogError("Input parameter is NULL: connectionString\r\n");
+        LogError("Input parameter is NULL: connectionString");
     }
     else if (protocol == NULL)
     {
-        LogError("Input parameter is NULL: protocol\r\n");
+        LogError("Input parameter is NULL: protocol");
     }
     else
     {
@@ -117,7 +117,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
         /* Codes_SRS_IOTHUBCLIENT_12_011: [If the allocation failed, IoTHubClient_CreateFromConnectionString returns NULL] */
         if (result == NULL)
         {
-            LogError("Malloc failed\r\n");
+            LogError("Malloc failed");
         }
         else
         {
@@ -128,7 +128,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
                     /* Codes_SRS_IOTHUBCLIENT_12_009: [If lock creation failed, IoTHubClient_CreateFromConnectionString shall do clean up and return NULL] */
                     free(result);
                     result = NULL;
-                    LogError("Lock_Init failed\r\n");
+                    LogError("Lock_Init failed");
                 }
                 else
                 {
@@ -140,7 +140,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
                         Lock_Deinit(result->LockHandle);
                         free(result);
                         result = NULL;
-                        LogError("IoTHubClient_LL_CreateFromConnectionString failed\r\n");
+                        LogError("IoTHubClient_LL_CreateFromConnectionString failed");
                     }
                     else
                     {
@@ -320,7 +320,7 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
 				/*Codes_SRS_IOTHUBCLIENT_01_007: [ The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. ]*/
 				if (ThreadAPI_Join(iotHubClientInstance->ThreadHandle, &res) != THREADAPI_OK)
 				{
-					LogError("ThreadAPI_Join failed\r\n");
+					LogError("ThreadAPI_Join failed");
 				}
 			}
 			if (iotHubClientInstance->TransportHandle != NULL)
@@ -348,7 +348,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClie
     {
         /* Codes_SRS_IOTHUBCLIENT_01_011: [If iotHubClientHandle is NULL, IoTHubClient_SendEventAsync shall return IOTHUB_CLIENT_INVALID_ARG.] */
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("NULL iothubClientHandle\r\n");
+        LogError("NULL iothubClientHandle");
     }
     else
     {
@@ -359,7 +359,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClie
         {
             /* Codes_SRS_IOTHUBCLIENT_01_026: [If acquiring the lock fails, IoTHubClient_SendEventAsync shall return IOTHUB_CLIENT_ERROR.] */
             result = IOTHUB_CLIENT_ERROR;
-            LogError("Could not acquire lock\r\n");
+            LogError("Could not acquire lock");
         }
         else
         {
@@ -368,7 +368,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClie
             {
                 /* Codes_SRS_IOTHUBCLIENT_01_010: [If starting the thread fails, IoTHubClient_SendEventAsync shall return IOTHUB_CLIENT_ERROR.] */
                 result = IOTHUB_CLIENT_ERROR;
-                LogError("Could not start worker thread\r\n");
+                LogError("Could not start worker thread");
             }
             else
             {
@@ -393,7 +393,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotHubClien
     {
         /* Codes_SRS_IOTHUBCLIENT_01_023: [If iotHubClientHandle is NULL, IoTHubClient_ GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG.] */
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("NULL iothubClientHandle\r\n");
+        LogError("NULL iothubClientHandle");
     }
     else
     {
@@ -404,7 +404,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotHubClien
         {
             /* Codes_SRS_IOTHUBCLIENT_01_034: [If acquiring the lock fails, IoTHubClient_GetSendStatus shall return IOTHUB_CLIENT_ERROR.] */
             result = IOTHUB_CLIENT_ERROR;
-            LogError("Could not acquire lock\r\n");
+            LogError("Could not acquire lock");
         }
         else
         {
@@ -428,7 +428,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
     {
         /* Codes_SRS_IOTHUBCLIENT_01_016: [If iotHubClientHandle is NULL, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_INVALID_ARG.] */
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("NULL iothubClientHandle\r\n");
+        LogError("NULL iothubClientHandle");
     }
     else
     {
@@ -439,7 +439,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
         {
             /* Codes_SRS_IOTHUBCLIENT_01_028: [If acquiring the lock fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR.] */
             result = IOTHUB_CLIENT_ERROR;
-            LogError("Could not acquire lock\r\n");
+            LogError("Could not acquire lock");
         }
         else
         {
@@ -448,7 +448,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
             {
                 /* Codes_SRS_IOTHUBCLIENT_01_015: [If starting the thread fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR.] */
                 result = IOTHUB_CLIENT_ERROR;
-                LogError("Could not start worker thread\r\n");
+                LogError("Could not start worker thread");
             }
             else
             {
@@ -472,7 +472,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE
     {
         /* Codes_SRS_IOTHUBCLIENT_01_020: [If iotHubClientHandle is NULL, IoTHubClient_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_INVALID_ARG.] */
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("NULL iothubClientHandle\r\n");
+        LogError("NULL iothubClientHandle");
     }
     else
     {
@@ -483,7 +483,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE
         {
             /* Codes_SRS_IOTHUBCLIENT_01_036: [If acquiring the lock fails, IoTHubClient_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_ERROR.] */
             result = IOTHUB_CLIENT_ERROR;
-            LogError("Could not acquire lock\r\n");
+            LogError("Could not acquire lock");
         }
         else
         {
@@ -520,7 +520,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHan
 
         if (result != IOTHUB_CLIENT_OK)
         {
-            LogError("IoTHubClient_LL_SetOption failed\r\n");
+            LogError("IoTHubClient_LL_SetOption failed");
         }
     }
     return result;

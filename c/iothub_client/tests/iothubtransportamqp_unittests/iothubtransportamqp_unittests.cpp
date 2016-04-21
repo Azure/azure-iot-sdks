@@ -944,7 +944,7 @@ static void addTestEvents(PDLIST_ENTRY waitingToSend, int numberOfEvents, bool s
 
         if (iml == NULL)
         {
-            LogError("Test failure: addTestEvents() failed allocating IOTHUB_MESSAGE_LIST (%i).\r\n", numberOfEvents);
+            LogError("Test failure: addTestEvents() failed allocating IOTHUB_MESSAGE_LIST (%i).", numberOfEvents);
         }
         else
         {
