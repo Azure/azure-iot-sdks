@@ -1,10 +1,10 @@
 ---
 platform: {enter the OS name running on device}
 device: {enter your device name here}
-language: c
+language: python
 ---
 
-Run a simple C sample on {enter your device name here} device running {enter the OS name running on device}
+Run a simple PYTHON sample on {enter your device name here} device running {enter the OS name running on device}
 ===
 ---
 
@@ -14,7 +14,6 @@ Run a simple C sample on {enter your device name here} device running {enter the
 -   [Step 1: Prerequisites](#Prerequisites)
 -   [Step 2: Prepare your Device](#PrepareDevice)
 -   [Step 3: Build and Run the Sample](#Build)
--   [Tips](#tips)
 
 # Instructions for using this template
 
@@ -38,7 +37,7 @@ This document describes how to connect {enter your device name here} device runn
 
 You should have the following items ready before beginning the process:
 
--   [Prepare your development environment][setup-devbox-linux]
+-   [Prepare your development environment][setup-devbox-python]
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
 -   {enter your device name here} device.
@@ -56,68 +55,79 @@ You should have the following items ready before beginning the process:
 
 -   Open a PuTTY session and connect to the device.
 
--   Install the prerequisite packages for the Microsoft Azure IoT Device SDK for C by issuing the following commands from the command line on your board:
+-   Install the prerequisite packages for the Microsoft Azure IoT Device SDK for Python by issuing the following commands from the command line on your board:
 {{***Keep the command set based on your OS and remove the rest.***}}
 
-    {{**Debian or Ubuntu**}}
+     **Debian or Ubuntu**
 
         sudo apt-get update
 
-        sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
+        sudo apt-get install -y curl libcurl4-openssl-dev build-essential cmake git python2.7-dev libboost-python-dev
 
-    {{**Fedora**}}
+    **Fedora**
 
         sudo dnf check-update -y
 
-        sudo dnf install libcurl-devel openssl-devel libuuid-devel uuid-devel gcc-c++ make cmake git unzip java-1.7.0-openjdk
+        sudo dnf install libcurl-devel openssl-devel gcc-c++ make cmake git python2.7-dev libboost-python-dev
 
-    {{**Any Other Linux OS**}}
+    **Any Other Linux OS**
 
-        Write equivalent commands on the target OS
+        Use equivalent commands on the target OS
 
     {{***If any other software is required, please specify here the command(s) for installing same.***}}
 
--   Download the Microsoft Azure IoT Device SDK for C to the board by issuing the following command on the board::
+-   Download the Microsoft Azure IoT Device SDK to the board by issuing the following command on the board::
 
         git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+
+-   Run following commands to build the SDK:
+
+        cd python/build_all/linux
+	    sudo ./build.sh    
+
+-   After a successful build, the `iothub_client.so` Python extension module is copied to the **python/device/samples** folder.
+
+- Navigate to samples folder by executing following command:
+
+        cd azure-iot-sdks/python/device/samples/
 
 -   Edit the following file using any text editor of your choice:
     {{***Keep the file based on your protocol(s) and remove the rest.***}}
 
-    {{**For AMQP protocol:**}}
+    **For AMQP protocol:**
 
-        azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c
+        nano iothub_client_sample_amqp.py
 
-    {{**For HTTPS protocol:**}}
+    **For HTTP protocol:**
 
-        azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http.c
+        nano iothub_client_sample_http.py
 
--   Find the following place holder for IoT connection string:
+    **For MQTT protocol:**
 
-        static const char* connectionString = "[device connection string]";
+        nano iothub_client_sample_mqtt.py
+
+-   Find the following place holder for device connection string:
+
+        connectionString = "[device connection string]"
 
 -   Replace the above placeholder with device connection string you obtained in [Step 1](#Prerequisites) and save the changes.
 
--   Build the SDK using following command.
-
-        sudo ./azure-iot-sdks/c/build_all/linux/build.sh
-
 ## 3.2 Send Device Events to IoT Hub:
 
--   Run the sample by issuing following command:
+-   Run the sample application using the following command:
 {{***Keep the command set based on your protocol(s) and remove the rest.***}}
 
-    {{**If using AMQP protocol:**}}
+    **For AMQP protocol:**
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
+        python iothub_client_sample_amqp.py
 
-    {{**If using HTTPS protocol:**}}
+    **For HTTP protocol:**
 
-        ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
+        python iothub_client_sample_http.py
 
-    {{**If using MQTT protocol:**}}
+    **For MQTT protocol:**
 
-        ~/cmake/c/iothub\_client/samples/iothub_client_sample_mqtt/linux/iothub_client_sample_mqtt
+        python iothub_client_sample_mqtt.py
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 
@@ -125,16 +135,6 @@ You should have the following items ready before beginning the process:
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to send cloud-to-device messages to the application.
 
-<a name="tips"></a>
-# Tips
-
-- If you just want to build the serializer samples, run the following commands:
-
-  ```
-  cd ./c/serializer/build/linux
-  make -f makefile.linux all
-  ```
-
-[setup-devbox-linux]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
+[setup-devbox-python]: https://github.com/Azure/azure-iot-sdks/blob/master/doc/get_started/python-devbox-setup.md
 [lnk-setup-iot-hub]: ../../setup_iothub.md
 [lnk-manage-iot-hub]: ../../manage_iot_hub.md

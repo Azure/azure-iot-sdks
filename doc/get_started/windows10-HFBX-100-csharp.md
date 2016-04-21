@@ -1,10 +1,10 @@
 ---
-platform: {enter the OS name running on device}
-device: {enter your device name here}
+platform: windows 10
+device: HFBX-100
 language: csharp
 ---
 
-Run a simple Csharp sample on {enter your device name here} device running {enter the OS name running on device}
+Run a simple Csharp sample on HFBX-100 device running Windows 10
 ===
 ---
 
@@ -15,19 +15,12 @@ Run a simple Csharp sample on {enter your device name here} device running {ente
 -   [Step 2: Prepare your Device](#PrepareDevice)
 -   [Step 3: Build and Run the Sample](#Build)
 
-# Instructions for using this template
-
--   Replace the text in {placeholders} with correct values.
--   Delete the lines {{enclosed}} after following the instructions enclosed between them.
--   It is advisable to use external links, wherever possible.
--   Remove this section from final document.
-
 <a name="Introduction"></a>
 # Introduction
 
 **About this document**
 
-This document describes how to connect {enter your device name here} device running {enter the OS name running on device} with Azure IoT SDK. This multi-step process includes:
+This document describes how to connect HFBX-100 device running Windows 10 with Azure IoT SDK. This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -40,13 +33,12 @@ You should have the following items ready before beginning the process:
 -   [Prepare your development environment][setup-devbox-windows]
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
--   {enter your device name here} device.
--   {{Please specify if any other software(s) or hardware(s) are required.}}
+-   HFBX-100 device.
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
 
--   {{Write down the instructions required to setup, configure and connect your device. Please use external links when possible pointing to your own page with device preparation steps.}}
+-   Follow the instructions from http://www.dux.co.jp/product/hfbx-100.html
 
 <a name="Build"></a>
 # Step 3: Build and Run the sample
@@ -67,5 +59,5 @@ You should have the following items ready before beginning the process:
 -   Refer "Send cloud-to-device messages" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) for instructions on sending messages to device.
 
 [setup-devbox-windows]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
-[lnk-setup-iot-hub]: ../../setup_iothub.md
-[lnk-manage-iot-hub]: ../../manage_iot_hub.md
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

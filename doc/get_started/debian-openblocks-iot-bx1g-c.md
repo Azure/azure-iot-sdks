@@ -1,10 +1,10 @@
 ---
-platform: {enter the OS name running on device}
-device: {enter your device name here}
+platform: Debian GNU Linux 7
+device: OpenBlocks IoT BX1G
 language: c
 ---
 
-Run a simple C sample on {enter your device name here} device running {enter the OS name running on device}
+Run a simple C sample on OpenBlocks IoT BX1G device running Debian GNU Linux 7
 ===
 ---
 
@@ -16,19 +16,12 @@ Run a simple C sample on {enter your device name here} device running {enter the
 -   [Step 3: Build and Run the Sample](#Build)
 -   [Tips](#tips)
 
-# Instructions for using this template
-
--   Replace the text in {placeholders} with correct values.
--   Delete the lines {{enclosed}} after following the instructions enclosed between them.
--   It is advisable to use external links, wherever possible.
--   Remove this section from final document.
-
 <a name="Introduction"></a>
 # Introduction
 
 **About this document**
 
-This document describes how to connect {enter your device name here} device running {enter the OS name running on device} with Azure IoT SDK. This multi-step process includes:
+This document describes how to connect OpenBlocks IoT BX1G device running Debian GNU Linux 7 with Azure IoT SDK. This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -41,12 +34,15 @@ You should have the following items ready before beginning the process:
 -   [Prepare your development environment][setup-devbox-linux]
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
--   {enter your device name here} device.
--   {{Please specify if any other software(s) or hardware(s) are required.}}
+-   OpenBlocks IoT BX1G device.
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
--   {{Write down the instructions required to setup, configure and connect your device. Please use external links when possible pointing to your own page with device preparation steps.}}
+-   Add following lines in /etc/apt/sources.list
+
+        deb http://cdn.debian.or.jp/debian/ wheezy-backports main
+        deb-src http://cdn.debian.or.jp/debian/ wheezy-backports main
+        deb http://http.us.debian.org/debian/ testing contrib main 
 
 <a name="Build"></a>
 # Step 3: Build and Run the sample
@@ -57,40 +53,29 @@ You should have the following items ready before beginning the process:
 -   Open a PuTTY session and connect to the device.
 
 -   Install the prerequisite packages for the Microsoft Azure IoT Device SDK for C by issuing the following commands from the command line on your board:
-{{***Keep the command set based on your OS and remove the rest.***}}
 
-    {{**Debian or Ubuntu**}}
-
-        sudo apt-get update
-
-        sudo apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make cmake git unzip openjdk-7-jre
-
-    {{**Fedora**}}
-
-        sudo dnf check-update -y
-
-        sudo dnf install libcurl-devel openssl-devel libuuid-devel uuid-devel gcc-c++ make cmake git unzip java-1.7.0-openjdk
-
-    {{**Any Other Linux OS**}}
-
-        Write equivalent commands on the target OS
-
-    {{***If any other software is required, please specify here the command(s) for installing same.***}}
+        apt-get update
+	    apt-get install -y gcc-4.9 g++4.9
+        apt-get install -y curl libcurl4-openssl-dev uuid-dev uuid g++ make git unzip openjdk-7-jre
+	    apt-get -y -t wheezy-backports cmake
 
 -   Download the Microsoft Azure IoT Device SDK for C to the board by issuing the following command on the board::
 
         git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 
 -   Edit the following file using any text editor of your choice:
-    {{***Keep the file based on your protocol(s) and remove the rest.***}}
 
-    {{**For AMQP protocol:**}}
+    **For AMQP protocol:**
 
         azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c
 
-    {{**For HTTPS protocol:**}}
-
+    **For HTTP protocol:**
+ 
         azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http.c
+
+    **For MQTT protocol:**
+
+        azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt.c
 
 -   Find the following place holder for IoT connection string:
 
@@ -100,24 +85,23 @@ You should have the following items ready before beginning the process:
 
 -   Build the SDK using following command.
 
-        sudo ./azure-iot-sdks/c/build_all/linux/build.sh
+        ./azure-iot-sdks/c/build_all/linux/build.sh
 
 ## 3.2 Send Device Events to IoT Hub:
 
 -   Run the sample by issuing following command:
-{{***Keep the command set based on your protocol(s) and remove the rest.***}}
 
-    {{**If using AMQP protocol:**}}
+    **If using AMQP protocol:**
 
         ~/cmake/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
 
-    {{**If using HTTPS protocol:**}}
+    **If using HTTP protocol:**
 
-        ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
+        ~/cmake/iothub_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
 
-    {{**If using MQTT protocol:**}}
+    **If using MQTT protocol:**
 
-        ~/cmake/c/iothub\_client/samples/iothub_client_sample_mqtt/linux/iothub_client_sample_mqtt
+        ~/cmake/iothub_client/samples/iothub_client_sample_mqtt/linux/iothub_client_sample_mqtt
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 

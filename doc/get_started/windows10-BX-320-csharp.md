@@ -1,10 +1,10 @@
 ---
-platform: {enter the OS name running on device}
-device: {enter your device name here}
+platform: Windows 10
+device: BX-320
 language: csharp
 ---
 
-Run a simple Csharp sample on {enter your device name here} device running {enter the OS name running on device}
+Run a simple Csharp sample on BX-320 device running Windows 10
 ===
 ---
 
@@ -15,19 +15,12 @@ Run a simple Csharp sample on {enter your device name here} device running {ente
 -   [Step 2: Prepare your Device](#PrepareDevice)
 -   [Step 3: Build and Run the Sample](#Build)
 
-# Instructions for using this template
-
--   Replace the text in {placeholders} with correct values.
--   Delete the lines {{enclosed}} after following the instructions enclosed between them.
--   It is advisable to use external links, wherever possible.
--   Remove this section from final document.
-
 <a name="Introduction"></a>
 # Introduction
 
 **About this document**
 
-This document describes how to connect {enter your device name here} device running {enter the OS name running on device} with Azure IoT SDK. This multi-step process includes:
+This document describes how to connect BX-320 device running Windows 10 with Azure IoT SDK. This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -40,13 +33,12 @@ You should have the following items ready before beginning the process:
 -   [Prepare your development environment][setup-devbox-windows]
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
--   {enter your device name here} device.
--   {{Please specify if any other software(s) or hardware(s) are required.}}
+-   BX-320 device.
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
 
--   {{Write down the instructions required to setup, configure and connect your device. Please use external links when possible pointing to your own page with device preparation steps.}}
+-   Follow the instructions from http://www.contec.co.jp/
 
 <a name="Build"></a>
 # Step 3: Build and Run the sample
@@ -55,14 +47,14 @@ You should have the following items ready before beginning the process:
 -   Start a new instance of Visual Studio 2015.
 -   Open the **iothub_csharp_client.sln** solution in the `csharp\device` folder in your local copy of the repository.
 -   In Visual Studio, from Solution Explorer, navigate to the **samples** folder.
--   In the **DeviceClientAmqpSample** project, open the ***Program.cs*** file.
+-   In the **DeviceClientHttpSample** project, open the ***Program.cs*** file.
 -   Locate the following code in the file:
 
         private const string DeviceConnectionString = "<replace>";
         
 -   Replace `<replace>` with the connection string for your device.
--   In **Solution Explorer**, right-click the **DeviceClientAmqpSample** project, click **Debug**, and then click **Start new instance** to build and run the sample. The console displays messages as the application sends device-to-cloud messages to IoT Hub.
--   Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **Device Client AMQP Sample** application.
+-   In **Solution Explorer**, right-click the **DeviceClientHttpSample** project, click **Debug**, and then click **Start new instance** to build and run the sample. The console displays messages as the application sends device-to-cloud messages to IoT Hub.
+-   Use the **DeviceExplorer** utility to observe the messages IoT Hub receives from the **Device Client HTTP Sample** application.
 -   Refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to see the data your device is sending.
 -   Refer "Send cloud-to-device messages" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) for instructions on sending messages to device.
 
