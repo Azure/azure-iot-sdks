@@ -1,6 +1,6 @@
 {
   "name": "iothub-explorer",
-  "version": "1.0.2",
+  "version": "1.1.0-dmpreview.0",
   "description": "Azure IoT Hub Explorer",
   "author": "Microsoft Corporation",
   "license": "MIT",
@@ -9,7 +9,7 @@
   "dependencies": {
     "amqp10": "2.1.2",
     "azure-iot-common": "1.0.4",
-    "azure-iothub": "1.0.4",
+    "azure-iothub": "1.1.0-dmpreview.0",
     "bluebird": "^3.0.1",
     "colors-tmpl": "^1.0.0",
     "nopt": "^3.0.4",
