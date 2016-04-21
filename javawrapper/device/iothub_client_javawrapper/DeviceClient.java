@@ -89,5 +89,17 @@ public final class DeviceClient
     {
     	Iothub_client_wrapperLibrary.INSTANCE.platform_deinit();
     }
+
+    @Override
+    protected void finalize() throws Throwable
+    {
+        try{
+        	Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_Destroy(handle.getPointer());
+        }catch(Throwable t){
+            throw t;
+        }finally{
+            super.finalize();
+        }
+    }
     
 }
