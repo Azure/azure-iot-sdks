@@ -103,7 +103,18 @@
             getDeviceTask.Wait();
 
             Device device = getDeviceTask.Result;
-            return device.SystemProperties[property].Value.ToString();
+            String retValue = String.Empty;
+            try
+            {
+                retValue = device.SystemProperties[property].Value.ToString();
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine("{0}: {1}", property, ex.Message);
+            }
+
+            return retValue;
         }
 
 
@@ -114,32 +125,47 @@
                 if (eArgs.Data.Contains("REGISTERED"))
                 {
                     _registered = true;
-                    Console.WriteLine("*Device connected to DM channel");
+                    Console.WriteLine("Device connected to DM channel");
                 }
 
                 else
                 {
-                    string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (data.Length > 2)
+                    if (eArgs.Data.Contains("returning"))
                     {
+                        // this is a 'read' operation
+                        string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         string propertyName = data[data.Length - 1];
                         if (_ReadTestCases.ContainsKey(propertyName))
                         {
-                            // looking for: 'Info: returning %d/%s for <PropertyName>'
-                            if (data[1].Equals("returning"))
-                            {
-                                _ReadTestCases[propertyName].ExpectedValue = data[2];
-                            }
+                            Console.WriteLine("Returning {0} is {1}", propertyName, data[2]);
+                            _ReadTestCases[propertyName].ExpectedValue = data[2].Substring(1, data[2].Length - 2);
+                        }
+                    }
 
-                            else if (data[1].Equals("being") && data[2].Equals("set"))
-                            {
-                                _ReadTestCases[propertyName].RecordedValue = data[2];
-                            }
+                    else if (eArgs.Data.Contains("being set"))
+                    {
+                        // this is a 'write' operation
+                        string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        string propertyName = data[1];
+                        if (_WriteTestCases.ContainsKey(propertyName))
+                        {
+                            string value = data[data.Length - 1].Substring(1, data[data.Length - 1].Length - 2);
 
-                            else if (data[1].Equals("inside") && data[2].Equals("execute"))
-                            {
-                                _ReadTestCases[propertyName].RecordedValue = "true";
-                            }
+                            Console.WriteLine("Setting {0} to {1}", propertyName, value);
+                            _WriteTestCases[propertyName].RecordedValue = value;
+                        }
+                    }
+
+                    else if (eArgs.Data.Contains("inside execute"))
+                    {
+                        // this is an 'execute' operation
+                        string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        string propertyName = data[data.Length - 1];
+
+                        if (_ExecuteTestCases.ContainsKey(propertyName))
+                        {
+                            Console.WriteLine("Execute {0}", propertyName);
+                            _ExecuteTestCases[propertyName].RecordedValue = "true";
                         }
                     }
                 }
@@ -196,10 +222,10 @@
                     string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                     string uRI = data[1].Substring(7, data[0].Length - 1);
-                    TestCase aCase = _ObserveTestCases[uRI];
-                    if (aCase != null)
+                    if (_ObserveTestCases.ContainsKey(uRI))
                     {
-                        int size = Int32.Parse(data[2]);
+                        TestCase aCase = _ObserveTestCases[uRI];
+                        int      size = Int32.Parse(data[2]);
                         aCase.ExpectedValue = data[3].Substring(0, size);
 
                         Thread.Sleep(2000);
@@ -311,7 +337,9 @@
                 _dj = JobClient.CreateFromConnectionString(_cs);
 
                 while (_registered == false)
+                {
                     Thread.Sleep(1000);
+                }
 
                 foreach (var one in _ReadTestCases)
                 {
@@ -369,9 +397,9 @@
             _ReadTestCases.Add("Device_FirmwareVersion", oneCase);
 
             // the 'write' test cases
-            oneCase = new TestCase(SystemPropertyNames.Timezone, TestCase.TestType.Write);
+            oneCase = new TestCase(SystemPropertyNames.UtcOffset, TestCase.TestType.Write);
             oneCase.ExpectedValue = "-10:00"; /* US/Hawaii timezone */
-            _WriteTestCases.Add("Device_Timezone", oneCase);
+            _WriteTestCases.Add("Device_UtcOffset", oneCase);
 
             // the 'execute' test cases
             oneCase = new TestCase("Device_FactoryReset", TestCase.TestType.Execute);
@@ -497,7 +525,7 @@
         {
             try
             {
-                var jobID = "Execute" + resourceName + Guid.NewGuid().ToString();
+                var jobID = "Execute" + Guid.NewGuid().ToString();
 
                 Task<JobResponse> job = null;
                 if (resourceName.Equals("Device_FactoryReset"))
@@ -512,7 +540,7 @@
 
                 else if (resourceName.Equals("FirmwareUpdate_Update"))
                 {
-                    job = _dj.ScheduleFirmwareUpdateAsync(jobID, _deviceId, "https://FakeURI", TimeSpan.MinValue);
+                    job = _dj.ScheduleFirmwareUpdateAsync(jobID, _deviceId, "https://FakeURI", TimeSpan.MaxValue);
                 }
 
                 if (job != null)
