@@ -552,6 +552,10 @@ namespace DeviceExplorer
                 var serviceMessage = new Microsoft.Azure.Devices.Message(Encoding.ASCII.GetBytes(cloudToDeviceMessage));
                 serviceMessage.Ack = DeliveryAcknowledgement.Full;
                 serviceMessage.MessageId = Guid.NewGuid().ToString();
+                serviceMessage.Properties["messageType"] = "interactive";
+                serviceMessage.Properties["elevator"] = "up";
+                serviceMessage.Properties["debug"] = "on";
+                serviceMessage.Properties["light"] = "on";
                 await serviceClient.SendAsync(deviceIDsComboBoxForCloudToDeviceMessage.SelectedItem.ToString(), serviceMessage);
 
                 messagesTextBox.Text += $"Sent to Device ID: [{deviceIDsComboBoxForCloudToDeviceMessage.SelectedItem.ToString()}], Message:\"{cloudToDeviceMessage}\", message Id: {serviceMessage.MessageId}\n";
