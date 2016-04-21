@@ -17,6 +17,6 @@ npm install azure-iothub@latest
 * Import/Export devices in bulk from Azure Storage blobs [Code sample](https://github.com/Azure/azure-iot-sdks/blob/dmpreview/node/service/samples/registry_bulk_sample.js) 
 
 ### Manage your devices
-* Schedule reboots, firmware upgrades, factory resets, and other "device-management" tasks on your devices [Code sample](https://github.com/Azure/azure-iot-sdks/blob/dmpreview/node/service/samples/jobClient_scheduleJob.js)
+* Schedule reboots, firmware upgrades, factory resets, and other device management tasks on your devices [Code sample](https://github.com/Azure/azure-iot-sdks/blob/dmpreview/node/service/samples/jobClient_scheduleJob.js)
 * Read/Write device properties [Code sample](https://github.com/Azure/azure-iot-sdks/blob/dmpreview/node/service/samples/jobClient_scheduleJob.js)
-* Monitor device-management jobs and query for jobs history [Code sample](https://github.com/Azure/azure-iot-sdks/blob/dmpreview/node/service/samples/jobClient_queryJobHistory.js) 
+* Monitor device management jobs and query for jobs history [Code sample](https://github.com/Azure/azure-iot-sdks/blob/dmpreview/node/service/samples/jobClient_queryJobHistory.js) 
