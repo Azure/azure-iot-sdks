@@ -160,7 +160,7 @@ static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo, const char* call
             }
             else
             {
-                LogInfo("Created Device %s.\r\n", accountInfo->deviceId);
+                LogInfo("Created Device %s.", accountInfo->deviceId);
                 result = 0;
             }
         }
