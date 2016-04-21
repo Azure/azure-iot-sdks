@@ -232,7 +232,7 @@ static size_t ResolvePartitionIndex(const char* partitionKey, size_t maxPartitio
     if (byteArray == NULL)
     {
         // On failure look at the zero partition
-        LogError("Failure Getting Byte Array in ResolvePartitionIndex.\r\n");
+        LogError("Failure Getting Byte Array in ResolvePartitionIndex.");
         result = 0;
     }
     else
@@ -265,25 +265,25 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
 
     if (sscanf(pszIotConnString, "HostName=%n%*[^.]%n.%n%*[^;];%nSharedAccessKeyName=*;SharedAccessKey=*", &beginName, &endName, &beginHost, &endHost) != 0)
     {
-        LogError("Failure determinging string sizes in RetrieveIotHubClientInfo.\r\n");
+        LogError("Failure determinging string sizes in RetrieveIotHubClientInfo.");
         result = __LINE__;
     }
     else
     {
         if ( (dvhInfo->iotHubName = (char*)malloc(endName-beginName+1) ) == NULL)
         {
-            LogError("Failure allocating iothubName in RetrieveIotHubClientInfo endName: %d beginName: %d.\r\n", endName, beginName);
+            LogError("Failure allocating iothubName in RetrieveIotHubClientInfo endName: %d beginName: %d.", endName, beginName);
             result = __LINE__;
         }
         else if ( (dvhInfo->hostName = (char*)malloc(endHost-beginName+1) ) == NULL)
         {
-            LogError("Failure allocating hostName in RetrieveIotHubClientInfo endHost: %d beginHost: %d.\r\n", endHost, beginName);
+            LogError("Failure allocating hostName in RetrieveIotHubClientInfo endHost: %d beginHost: %d.", endHost, beginName);
             free(dvhInfo->iotHubName);
             result = __LINE__;
         }
         else if (sscanf(pszIotConnString, "HostName=%[^.].%[^;];SharedAccessKeyName=*;SharedAccessKey=*", dvhInfo->iotHubName, dvhInfo->hostName + endName - beginName + 1) != 2)
         {
-            LogError("Failure retrieving string values in RetrieveIotHubClientInfo.\r\n");
+            LogError("Failure retrieving string values in RetrieveIotHubClientInfo.");
             free(dvhInfo->iotHubName);
             free(dvhInfo->hostName);
             result = __LINE__;
@@ -306,25 +306,25 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
 
     if (sscanf(pszconnString, "Endpoint=sb://%n%*[^.]%n.%n%*[^/]%n/;SharedAccessKeyName=owner;SharedAccessKey=%*s", &beginName, &endName, &beginHost, &endHost) != 0)
     {
-        LogError("Failure determinging string sizes in RetrieveEventHubClientInfo.\r\n");
+        LogError("Failure determinging string sizes in RetrieveEventHubClientInfo.");
         result = __LINE__;
     }
     else
     {
         if ( (dvhInfo->partnerName = (char*)malloc(endName+beginName+1) ) == NULL)
         {
-            LogError("Failure allocating partnerName in RetrieveEventHubClientInfo endName: %d beginName: %d.\r\n", endName, beginName);
+            LogError("Failure allocating partnerName in RetrieveEventHubClientInfo endName: %d beginName: %d.", endName, beginName);
             result = __LINE__;
         }
         else if ( (dvhInfo->partnerHost = (char*)malloc(endHost+beginHost+1) ) == NULL)
         {
-            LogError("Failure allocating partnerHost in RetrieveEventHubClientInfo endHost: %d beginHost: %d.\r\n", endHost, beginHost);
+            LogError("Failure allocating partnerHost in RetrieveEventHubClientInfo endHost: %d beginHost: %d.", endHost, beginHost);
             free(dvhInfo->partnerName);
             result = __LINE__;
         }
         else if (sscanf(pszconnString, "Endpoint=sb://%[^.].%[^/]/;SharedAccessKeyName=owner;SharedAccessKey=%*s", dvhInfo->partnerName, dvhInfo->partnerHost) != 2)
         {
-            LogError("Failure retrieving string values in RetrieveEventHubClientInfo.\r\n");
+            LogError("Failure retrieving string values in RetrieveEventHubClientInfo.");
             free(dvhInfo->partnerName);
             free(dvhInfo->partnerHost);
             result = __LINE__;
@@ -344,30 +344,30 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
 
     if (eventhubConnString == NULL || iothubConnString == NULL || deviceId == NULL || deviceKey == NULL || eventhubName == NULL || sharedSignature == NULL || eventhubAccessKey == NULL)
     {
-        LogError("Invalid parameter sent to Initialize Eventhub conn string: 0x%p\r\niothub Conn string 0x%p\r\ndeviceId 0x%p\r\n devicekey 0x%p\r\nEventhubName 0x%p\r\nAccessKey 0x%p\r\nSharedSig 0x%p.\r\n", eventhubConnString, iothubConnString, deviceId, deviceKey, eventhubName, eventhubAccessKey, sharedSignature);
+        LogError("Invalid parameter sent to Initialize Eventhub conn string: 0x%p\r\niothub Conn string 0x%p\r\ndeviceId 0x%p\r\n devicekey 0x%p\r\nEventhubName 0x%p\r\nAccessKey 0x%p\r\nSharedSig 0x%p.", eventhubConnString, iothubConnString, deviceId, deviceKey, eventhubName, eventhubAccessKey, sharedSignature);
         result = NULL;
     }
     else if ( (devhubValInfo = malloc(sizeof(IOTHUB_VALIDATION_INFO) ) ) == NULL)
     {
-        LogError("Failure allocating devicehub Validation Info.\r\n");
+        LogError("Failure allocating devicehub Validation Info.");
         result = NULL;
     }
     else if ( (devhubValInfo->consumerGroup = STRING_construct(consumerGroup) ) == NULL)
     {
-        LogError("Failure allocating consumerGroup string.\r\n");
+        LogError("Failure allocating consumerGroup string.");
         free(devhubValInfo);
         result = NULL;
     }
     else if ( (devhubValInfo->deviceId = STRING_construct(deviceId) ) == NULL)
     {
-        LogError("Failure allocating deviceId string.\r\n");
+        LogError("Failure allocating deviceId string.");
         STRING_delete(devhubValInfo->consumerGroup);
         free(devhubValInfo);
         result = NULL;
     }
     else if ( (devhubValInfo->eventhubAccessKey = STRING_construct(eventhubAccessKey)) == NULL)
     {
-        LogError("Failure allocating eventhubAccessKey string.\r\n");
+        LogError("Failure allocating eventhubAccessKey string.");
         STRING_delete(devhubValInfo->consumerGroup);
         STRING_delete(devhubValInfo->deviceId);
         free(devhubValInfo);
@@ -375,7 +375,7 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
     }
     else if ( (devhubValInfo->deviceKey = URL_EncodeString(deviceKey) ) == NULL)
     {
-        LogError("Failure allocating deviceKey string.\r\n");
+        LogError("Failure allocating deviceKey string.");
         STRING_delete(devhubValInfo->consumerGroup);
         STRING_delete(devhubValInfo->eventhubAccessKey);
         STRING_delete(devhubValInfo->deviceId);
@@ -384,7 +384,7 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
     }
     else if ( (devhubValInfo->eventhubName = STRING_construct(eventhubName) ) == NULL)
     {
-        LogError("Failure allocating eventhubName string.\r\n");
+        LogError("Failure allocating eventhubName string.");
         STRING_delete(devhubValInfo->consumerGroup);
         STRING_delete(devhubValInfo->eventhubAccessKey);
         STRING_delete(devhubValInfo->deviceId);
@@ -394,7 +394,7 @@ IOTHUB_TEST_HANDLE IoTHubTest_Initialize(const char* eventhubConnString, const c
     }
     else if ( (devhubValInfo->iotSharedSig = STRING_construct(sharedSignature) ) == NULL)
     {
-        LogError("Failure allocating sharedSig string.\r\n");
+        LogError("Failure allocating sharedSig string.");
         STRING_delete(devhubValInfo->consumerGroup);
         STRING_delete(devhubValInfo->eventhubAccessKey);
         STRING_delete(devhubValInfo->deviceId);
@@ -465,7 +465,7 @@ static char* CreateReceiveAddress(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t 
     }
     else
     {
-        LogError("Failure allocating recieving address string.\r\n");
+        LogError("Failure allocating recieving address string.");
         result = NULL;
     }
     return result;
@@ -482,7 +482,7 @@ static char* CreateReceiveHostName(IOTHUB_VALIDATION_INFO* devhubValInfo)
     }
     else
     {
-        LogError("Failure allocating data in CreateReceiveHostName.\r\n");
+        LogError("Failure allocating data in CreateReceiveHostName.");
         result = NULL;
     }
 
@@ -500,7 +500,7 @@ static char* CreateSendTargetAddress(IOTHUB_VALIDATION_INFO* devhubValInfo)
     }
     else
     {
-        LogError("Failure allocating data in CreateSendTargetAddress.\r\n");
+        LogError("Failure allocating data in CreateSendTargetAddress.");
     }
     return result;
 }
@@ -518,7 +518,7 @@ static char* CreateSendAuthCid(IOTHUB_VALIDATION_INFO* devhubValInfo)
     }
     else
     {
-        LogError("Failure allocating data in CreateSendAuthCid.\r\n");
+        LogError("Failure allocating data in CreateSendAuthCid.");
     }
     return result;
 }
@@ -547,7 +547,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
     IOTHUB_TEST_CLIENT_RESULT result = 0;
     if (devhubHandle == NULL || msgCallback == NULL)
     {
-        LogError("Invalid parameter given in IoTHubTest_ListenForEvent DevhubHandle: 0x%p\r\nMessage Callback: 0x%p.\r\n", devhubHandle, msgCallback);
+        LogError("Invalid parameter given in IoTHubTest_ListenForEvent DevhubHandle: 0x%p\r\nMessage Callback: 0x%p.", devhubHandle, msgCallback);
         result = IOTHUB_TEST_CLIENT_ERROR;
     }
     else 
@@ -582,22 +582,22 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 
                 if ((sasl_plain_interface_description = saslplain_get_interface()) == NULL)
                 {
-                    LogError("Failed getting saslplain_get_interface.\r\n");
+                    LogError("Failed getting saslplain_get_interface.");
                     result = IOTHUB_TEST_CLIENT_ERROR;
                 }
                 else if ((sasl_mechanism_handle = saslmechanism_create(sasl_plain_interface_description, &sasl_plain_config)) == NULL)
                 {
-                    LogError("Failed creating sasl PLAN mechanism.\r\n");
+                    LogError("Failed creating sasl PLAN mechanism.");
                     result = IOTHUB_TEST_CLIENT_ERROR;
                 }
                 else if ((tlsio_interface = platform_get_default_tlsio()) == NULL)
                 {
-                    LogError("Failed getting default TLS IO interface.\r\n");
+                    LogError("Failed getting default TLS IO interface.");
                     result = IOTHUB_TEST_CLIENT_ERROR;
                 }
                 else if ((tls_io = xio_create(tlsio_interface, &tls_io_config, NULL)) == NULL)
                 {
-                    LogError("Failed creating the TLS IO.\r\n");
+                    LogError("Failed creating the TLS IO.");
                     result = IOTHUB_TEST_CLIENT_ERROR;
                 }
                 else
@@ -606,24 +606,24 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                     SASLCLIENTIO_CONFIG sasl_io_config = { tls_io, sasl_mechanism_handle };
                     if ((sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_io_config, NULL)) == NULL)
                     {
-                        LogError("Failed creating the SASL IO.\r\n");
+                        LogError("Failed creating the SASL IO.");
                         result = IOTHUB_TEST_CLIENT_ERROR;
                     }
                     /* create the connection, session and link */
                     else if ((connection = connection_create(sasl_io, eh_hostname, "e2etest_link", NULL, NULL)) == NULL)
                     {
-                        LogError("Failed creating the connection.\r\n");
+                        LogError("Failed creating the connection.");
                         result = IOTHUB_TEST_CLIENT_ERROR;
                     }
                     else if ((session = session_create(connection, NULL, NULL)) == NULL)
                     {
-                        LogError("Failed creating the session.\r\n");
+                        LogError("Failed creating the session.");
                         result = IOTHUB_TEST_CLIENT_ERROR;
                     }
                     else if (session_set_incoming_window(session, 100) != 0)
                     {
                         /* set incoming window to 100 for the session */
-                        LogError("Failed setting the session incoming window.\r\n");
+                        LogError("Failed setting the session incoming window.");
                         result = IOTHUB_TEST_CLIENT_ERROR;
                     }
                     else
@@ -643,7 +643,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 
                         if (filter_set == NULL)
                         {
-                            LogError("Failed creating filter set with enqueuedtimeutc filter.\r\n");
+                            LogError("Failed creating filter set with enqueuedtimeutc filter.");
                             result = IOTHUB_TEST_CLIENT_ERROR;
                         }
                         else
@@ -662,7 +662,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 
                             if (source == NULL)
                             {
-                                LogError("Failed creating source for link.\r\n");
+                                LogError("Failed creating source for link.");
                                 result = IOTHUB_TEST_CLIENT_ERROR;
                             }
                             else
@@ -670,17 +670,17 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                 target = messaging_create_target(receive_address);
                                 if (target == NULL)
                                 {
-                                    LogError("Failed creating target for link.\r\n");
+                                    LogError("Failed creating target for link.");
                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                 }
                                 else if ((link = link_create(session, "receiver-link", role_receiver, source, target)) == NULL)
                                 {
-                                    LogError("Failed creating link.\r\n");
+                                    LogError("Failed creating link.");
                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                 }
                                 else if (link_set_rcv_settle_mode(link, receiver_settle_mode_first) != 0)
                                 {
-                                    LogError("Failed setting link receive settle mode.\r\n");
+                                    LogError("Failed setting link receive settle mode.");
                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                 }
                                 else
@@ -692,12 +692,12 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                     message_receiver = messagereceiver_create(link, NULL, NULL);
                                     if (message_receiver == NULL)
                                     {
-                                        LogError("Failed creating message receiver.\r\n");
+                                        LogError("Failed creating message receiver.");
                                         result = IOTHUB_TEST_CLIENT_ERROR;
                                     }
                                     else if (messagereceiver_open(message_receiver, on_message_received, &message_receiver_context) != 0)
                                     {
-                                        LogError("Failed opening message receiver.\r\n");
+                                        LogError("Failed opening message receiver.");
                                         result = IOTHUB_TEST_CLIENT_ERROR;
                                         messagereceiver_destroy(message_receiver);
                                     }
@@ -720,7 +720,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 
                                         if (!message_receiver_context.message_received)
                                         {
-                                            LogError("No message was received, timed out.\r\n");
+                                            LogError("No message was received, timed out.");
                                             result = IOTHUB_TEST_CLIENT_ERROR;
                                         }
                                         else
@@ -787,7 +787,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
         ((len == 0) && (data != NULL)) ||
         ((data != NULL) && (len == 0)))
     {
-        LogError("Invalid arguments for IoTHubTest_SendMessage, devhubHandle = %p, len = %lu, data = %p.\r\n", devhubHandle, (unsigned long)len, data);
+        LogError("Invalid arguments for IoTHubTest_SendMessage, devhubHandle = %p, len = %lu, data = %p.", devhubHandle, (unsigned long)len, data);
         result = IOTHUB_TEST_CLIENT_ERROR;
     }
     else
@@ -796,7 +796,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
         char* authcid = CreateSendAuthCid(devhubValInfo);
         if (authcid == NULL)
         {
-            LogError("Could not create authcid for SASL plain.\r\n");
+            LogError("Could not create authcid for SASL plain.");
             result = IOTHUB_TEST_CLIENT_ERROR;
         }
         else
@@ -812,7 +812,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
             char* target_address = CreateSendTargetAddress(devhubValInfo);
             if (target_address == NULL)
             {
-                LogError("Could not create target_address string.\r\n");
+                LogError("Could not create target_address string.");
                 result = IOTHUB_TEST_CLIENT_ERROR;
             }
             else
@@ -821,7 +821,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                 char* deviceDest = (char*)malloc(deviceDestLen + 1);
                 if (deviceDest == NULL)
                 {
-                    LogError("Could not create device destination string.\r\n");
+                    LogError("Could not create device destination string.");
                     result = IOTHUB_TEST_CLIENT_ERROR;
                 }
                 else
@@ -833,12 +833,12 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
 
                     if ((sasl_mechanism_interface_description = saslplain_get_interface()) == NULL)
                     {
-                        LogError("Could not get SASL plain mechanism interface.\r\n");
+                        LogError("Could not get SASL plain mechanism interface.");
                         result = IOTHUB_TEST_CLIENT_ERROR;
                     }
                     else if ((sasl_mechanism_handle = saslmechanism_create(sasl_mechanism_interface_description, &sasl_plain_config)) == NULL)
                     {
-                        LogError("Could not create SASL plain mechanism.\r\n");
+                        LogError("Could not create SASL plain mechanism.");
                         result = IOTHUB_TEST_CLIENT_ERROR;
                     }
                     else
@@ -849,12 +849,12 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
 
                         if ((tlsio_interface = platform_get_default_tlsio()) == NULL)
                         {
-                            LogError("Could not get default TLS IO interface.\r\n");
+                            LogError("Could not get default TLS IO interface.");
                             result = IOTHUB_TEST_CLIENT_ERROR;
                         }
                         else if ((tls_io = xio_create(tlsio_interface, &tls_io_config, NULL)) == NULL)
                         {
-                            LogError("Could not create TLS IO.\r\n");
+                            LogError("Could not create TLS IO.");
                             result = IOTHUB_TEST_CLIENT_ERROR;
                         }
                         else
@@ -865,33 +865,33 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                             
                             if ((saslclientio_interface = saslclientio_get_interface_description()) == NULL)
                             {
-                                LogError("Could not create get SASL IO interface description.\r\n");
+                                LogError("Could not create get SASL IO interface description.");
                                 result = IOTHUB_TEST_CLIENT_ERROR;
                             }
                             else if ((sasl_io = xio_create(saslclientio_interface, &sasl_io_config, consolelogger_log)) == NULL)
                             {
-                                LogError("Could not create SASL IO.\r\n");
+                                LogError("Could not create SASL IO.");
                                 result = IOTHUB_TEST_CLIENT_ERROR;
                             }
                             /* create the connection, session and link */
                             else if ((connection = connection_create(sasl_io, devhubValInfo->hostName, "some", NULL, NULL)) == NULL)
                             {
-                                LogError("Could not create connection.\r\n");
+                                LogError("Could not create connection.");
                                 result = IOTHUB_TEST_CLIENT_ERROR;
                             }
                             else if ((session = session_create(connection, NULL, NULL)) == NULL)
                             {
-                                LogError("Could not create session.\r\n");
+                                LogError("Could not create session.");
                                 result = IOTHUB_TEST_CLIENT_ERROR;
                             }
                             else if (session_set_incoming_window(session, 2147483647) != 0)
                             {
-                                LogError("Could not set incoming window.\r\n");
+                                LogError("Could not set incoming window.");
                                 result = IOTHUB_TEST_CLIENT_ERROR;
                             }
                             else if (session_set_outgoing_window(session, 65536) != 0)
                             {
-                                LogError("Could not set outgoing window.\r\n");
+                                LogError("Could not set outgoing window.");
                                 result = IOTHUB_TEST_CLIENT_ERROR;
                             }
                             else
@@ -902,32 +902,32 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
 
                                 if ((source = messaging_create_source("ingress")) == NULL)
                                 {
-                                    LogError("Could not create source for link.\r\n");
+                                    LogError("Could not create source for link.");
                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                 }
                                 else if ((target = messaging_create_target(target_address)) == NULL)
                                 {
-                                    LogError("Could not create target for link.\r\n");
+                                    LogError("Could not create target for link.");
                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                 }
                                 else if ((link = link_create(session, "sender-link", role_sender, source, target)) == NULL)
                                 {
-                                    LogError("Could not create link.\r\n");
+                                    LogError("Could not create link.");
                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                 }
                                 else if (link_set_snd_settle_mode(link, sender_settle_mode_unsettled) != 0)
                                 {
-                                    LogError("Could not set the sender settle mode.\r\n");
+                                    LogError("Could not set the sender settle mode.");
                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                 }
                                 else if (link_set_max_message_size(link, 65536) != 0)
                                 {
-                                    LogError("Could not set the message size.\r\n");
+                                    LogError("Could not set the message size.");
                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                 }
                                 else if ((message = message_create()) == NULL)
                                 {
-                                    LogError("Could not create a message.\r\n");
+                                    LogError("Could not create a message.");
                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                 }
                                 else
@@ -935,7 +935,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                                     BINARY_DATA binary_data = { data, len };
                                     if (message_add_body_amqp_data(message, binary_data) != 0)
                                     {
-                                        LogError("Could not add the binary data to the message.\r\n");
+                                        LogError("Could not add the binary data to the message.");
                                         result = IOTHUB_TEST_CLIENT_ERROR;
                                     }
                                     else
@@ -947,24 +947,24 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
 
                                         if (properties == NULL)
                                         {
-                                            LogError("Could not create properties for message.\r\n");
+                                            LogError("Could not create properties for message.");
                                             result = IOTHUB_TEST_CLIENT_ERROR;
                                         }
                                         else
                                         {
                                             if (message_set_properties(message, properties) != 0)
                                             {
-                                                LogError("Could not set the properties on the message.\r\n");
+                                                LogError("Could not set the properties on the message.");
                                                 result = IOTHUB_TEST_CLIENT_ERROR;
                                             }
                                             else if ((message_sender = messagesender_create(link, NULL, NULL, consolelogger_log)) == NULL)
                                             {
-                                                LogError("Could not create message sender.\r\n");
+                                                LogError("Could not create message sender.");
                                                 result = IOTHUB_TEST_CLIENT_ERROR;
                                             }
                                             else if (messagesender_open(message_sender) != 0)
                                             {
-                                                LogError("Could not open the message sender.\r\n");
+                                                LogError("Could not open the message sender.");
                                                 result = IOTHUB_TEST_CLIENT_ERROR;
                                             }
                                             else
@@ -973,7 +973,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
 
                                                 if (messagesender_send(message_sender, message, on_message_send_complete, &message_send_state) != 0)
                                                 {
-                                                    LogError("Could not set outgoing window.\r\n");
+                                                    LogError("Could not set outgoing window.");
                                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                                 }
                                                 else
@@ -995,7 +995,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
 
                                                     if (message_send_state != MESSAGE_SEND_STATE_SENT_OK)
                                                     {
-                                                        LogError("Failed sending (timed out).\r\n");
+                                                        LogError("Failed sending (timed out).");
                                                         result = IOTHUB_TEST_CLIENT_ERROR;
                                                     }
                                                     else

@@ -17,7 +17,7 @@
 #include "iothub_client_version.h"
 #include "iothub_transport_ll.h"
 
-#define LOG_ERROR LogError("result = %s\r\n", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
+#define LOG_ERROR LogError("result = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
 #define INDEFINITE_TIME ((time_t)(-1))
 
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -52,11 +52,11 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
     /* SRS_IOTHUBCLIENT_LL_12_003: [IoTHubClient_LL_CreateFromConnectionString shall verify the input parameter and if it is NULL then return NULL] */
     if (connectionString == NULL)
     {
-        LogError("Input parameter is NULL: connectionString\r\n");
+        LogError("Input parameter is NULL: connectionString");
     }
     else if (protocol == NULL)
     {
-        LogError("Input parameter is NULL: protocol\r\n");
+        LogError("Input parameter is NULL: protocol");
     }
     else
     {
@@ -65,7 +65,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
         if (config == NULL)
         {
             /* SRS_IOTHUBCLIENT_LL_12_012: [If the allocation failed IoTHubClient_LL_CreateFromConnectionString  returns NULL]  */
-            LogError("Malloc failed\r\n");
+            LogError("Malloc failed");
             return NULL;
         }
         else
@@ -91,27 +91,27 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
 
             if ((connString = STRING_construct(connectionString)) == NULL)
             {
-                LogError("Error constructing connectiong String\r\n");
+                LogError("Error constructing connectiong String");
             }
             else if ((tokenizer1 = STRING_TOKENIZER_create(connString)) == NULL)
             {
-                LogError("Error creating Tokenizer\r\n");
+                LogError("Error creating Tokenizer");
             }
             else if ((tokenString = STRING_new()) == NULL)
             {
-                LogError("Error creating Token String\r\n");
+                LogError("Error creating Token String");
             }
             else if ((valueString = STRING_new()) == NULL)
             {
-                LogError("Error creating Value String\r\n");
+                LogError("Error creating Value String");
             }
             else if ((hostNameString = STRING_new()) == NULL)
             {
-                LogError("Error creating HostName String\r\n");
+                LogError("Error creating HostName String");
             }
             else if ((hostSuffixString = STRING_new()) == NULL)
             {
-                LogError("Error creating HostSuffix String\r\n");
+                LogError("Error creating HostSuffix String");
             }
             /* SRS_IOTHUBCLIENT_LL_12_005: [IoTHubClient_LL_CreateFromConnectionString shall try to parse the connectionString input parameter for the following structure: "Key1=value1;key2=value2;key3=value3..."] */
             /* SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey.]  */
@@ -121,7 +121,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                 {
                     if (STRING_TOKENIZER_get_next_token(tokenizer1, valueString, ";") != 0)
                     {
-                        LogError("Tokenizer error\r\n");
+                        LogError("Tokenizer error");
                         break;
                     }
                     else
@@ -136,7 +136,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                 STRING_TOKENIZER_HANDLE tokenizer2 = NULL;
                                 if ((tokenizer2 = STRING_TOKENIZER_create(valueString)) == NULL)
                                 {
-                                    LogError("Error creating Tokenizer\r\n");
+                                    LogError("Error creating Tokenizer");
                                     break;
                                 }
                                 else
@@ -144,7 +144,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                     /* SRS_IOTHUBCLIENT_LL_12_015: [If the string split failed, IoTHubClient_LL_CreateFromConnectionString returns NULL ] */
                                     if (STRING_TOKENIZER_get_next_token(tokenizer2, hostNameString, ".") != 0)
                                     {
-                                        LogError("Tokenizer error\r\n");
+                                        LogError("Tokenizer error");
                                         STRING_TOKENIZER_destroy(tokenizer2);
                                         break;
                                     }
@@ -153,7 +153,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                         config->iotHubName = STRING_c_str(hostNameString);
                                         if (STRING_TOKENIZER_get_next_token(tokenizer2, hostSuffixString, ";") != 0)
                                         {
-                                            LogError("Tokenizer error\r\n");
+                                            LogError("Tokenizer error");
                                             STRING_TOKENIZER_destroy(tokenizer2);
                                             break;
                                         }
@@ -196,19 +196,19 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                 /* parsing is done - check the result */
                 if (config->iotHubName == NULL)
                 {
-                    LogError("iotHubName is not found\r\n");
+                    LogError("iotHubName is not found");
                 }
                 else if (config->iotHubSuffix == NULL)
                 {
-                    LogError("iotHubSuffix is not found\r\n");
+                    LogError("iotHubSuffix is not found");
                 }
                 else if (config->deviceId == NULL)
                 {
-                    LogError("deviceId is not found\r\n");
+                    LogError("deviceId is not found");
                 }
                 else if (config->deviceKey == NULL)
                 {
-                    LogError("deviceId is not found\r\n");
+                    LogError("deviceId is not found");
                 }
                 else
                 {
@@ -216,7 +216,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                     result = IoTHubClient_LL_Create(config);
                     if (result == NULL)
                     {
-                        LogError("IoTHubClient_LL_Create failed\r\n");
+                        LogError("IoTHubClient_LL_Create failed");
                     }
                 }
             }
@@ -270,14 +270,14 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
         )
     {
         result = NULL;
-        LogError("invalid configuration (NULL detected)\r\n");
+        LogError("invalid configuration (NULL detected)");
     }
     else
     {
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)malloc(sizeof(IOTHUB_CLIENT_LL_HANDLE_DATA));
         if (handleData == NULL)
         {
-            LogError("malloc failed\r\n");
+            LogError("malloc failed");
             result = NULL;
         }
         else
@@ -303,7 +303,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
             /*Codes_SRS_IOTHUBCLIENT_LL_02_007: [If the underlaying layer _Create function fails them IoTHubClient_LL_Create shall fail and return NULL.] */
             if ((handleData->transportHandle = handleData->IoTHubTransport_Create(&lowerLayerConfig)) == NULL)
             {
-                LogError("underlying transport failed\r\n");
+                LogError("underlying transport failed");
                     tickcounter_destroy(handleData->tickCounter);
                 free(handleData);
                 result = NULL;
@@ -347,7 +347,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
 		)
 	{
 		result = NULL;
-		LogError("invalid configuration (NULL detected)\r\n");
+		LogError("invalid configuration (NULL detected)");
 	}
 	else
 	{
@@ -356,7 +356,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
 		if (handleData == NULL)
 		{
 			/*Codes_SRS_IOTHUBCLIENT_LL_17_003: [If allocation fails, the function shall fail and return NULL.] */
-			LogError("malloc failed\r\n");
+			LogError("malloc failed");
 			result = NULL;
 		}
 		else
@@ -636,7 +636,7 @@ void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY c
         )
     {
         /*"shall return"*/
-        LogError("invalid arg\r\n");
+        LogError("invalid arg");
     }
     else
     {
@@ -663,7 +663,7 @@ IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_L
     /*Codes_SRS_IOTHUBCLIENT_LL_02_029: [If parameter handle is NULL then IoTHubClient_LL_MessageCallback shall return IOTHUBMESSAGE_ABANDONED.] */
     if (handle == NULL)
     {
-        LogError("invalid argument\r\n");
+        LogError("invalid argument");
         result = IOTHUBMESSAGE_ABANDONED;
     }
     else
@@ -681,7 +681,7 @@ IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_L
         else
         {
             /*Codes_SRS_IOTHUBCLIENT_LL_02_032: [If the last callback function was NULL, then IoTHubClient_LL_MessageCallback  shall return IOTHUBMESSAGE_ABANDONED.] */
-            LogError("user callback was NULL\r\n");
+            LogError("user callback was NULL");
             result = IOTHUBMESSAGE_ABANDONED;
         }
     }
@@ -734,7 +734,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
         )
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("invalid argument (NULL)\r\n");
+        LogError("invalid argument (NULL)");
     }
     else
     {
@@ -755,7 +755,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
 
         if (result != IOTHUB_CLIENT_OK)
         {
-            LogError("underlying transport failed, returned = %s\r\n", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
+            LogError("underlying transport failed, returned = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
         }
         }
     }

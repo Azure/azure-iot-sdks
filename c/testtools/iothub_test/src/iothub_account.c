@@ -85,7 +85,7 @@ static int parseDeviceJson(IOTHUB_ACCOUNT_INFO* accountInfo, BUFFER_HANDLE jsonB
                 accountInfo->deviceKey = (char*)malloc(keyLen + 1);
                 if (accountInfo->deviceKey == NULL)
                 {
-                    LogError("Failure allocating device key.\r\n");
+                    LogError("Failure allocating device key.");
                     result = __LINE__;
                 }
                 else
@@ -113,7 +113,7 @@ static HTTP_HEADERS_HANDLE getContentHeaders(bool appendIfMatch)
             HTTPHeaders_AddHeaderNameValuePair(httpHeader, "Accept", "application/json") != HTTP_HEADERS_OK ||
             HTTPHeaders_AddHeaderNameValuePair(httpHeader, "Content-Type", "application/json; charset=utf-8") != HTTP_HEADERS_OK)
         {
-            LogError("Failure adding http headers.\r\n");
+            LogError("Failure adding http headers.");
             HTTPHeaders_Free(httpHeader);
             httpHeader = NULL;
         }
@@ -123,7 +123,7 @@ static HTTP_HEADERS_HANDLE getContentHeaders(bool appendIfMatch)
             {
                 if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, "If-Match", "*") != HTTP_HEADERS_OK)
                 {
-                    LogError("Failure adding if-Match http headers.\r\n");
+                    LogError("Failure adding if-Match http headers.");
                     HTTPHeaders_Free(httpHeader);
                     httpHeader = NULL;
                 }
@@ -139,7 +139,7 @@ static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo, const char* call
     char deviceGuid[DEVICE_GUID_SIZE];
     if (UniqueId_Generate(deviceGuid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
     {
-        LogError("Unable to generate unique Id.\r\n");
+        LogError("Unable to generate unique Id.");
         result = __LINE__;
     }
     else
@@ -148,14 +148,14 @@ static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo, const char* call
         accountInfo->deviceId = (char*)malloc(len + 1);
         if (accountInfo->deviceId == NULL)
         {
-            LogError("Failure allocating device ID.\r\n");
+            LogError("Failure allocating device ID.");
             result = __LINE__;
         }
         else
         {
             if (sprintf_s(accountInfo->deviceId, len + 1, DEVICE_PREFIX_FMT, deviceGuid) <= 0)
             {
-                LogError("Failure constructing device ID.\r\n");
+                LogError("Failure constructing device ID.");
                 result = __LINE__;
             }
             else
@@ -176,7 +176,7 @@ static BUFFER_HANDLE constructDeviceJson(IOTHUB_ACCOUNT_INFO* accountInfo)
     char* deviceJson = (char*)malloc(len + 1);
     if (deviceJson == NULL)
     {
-        LogError("Failure allocating device Json.\r\n");
+        LogError("Failure allocating device Json.");
         free(accountInfo->deviceId);
     }
     else
@@ -184,7 +184,7 @@ static BUFFER_HANDLE constructDeviceJson(IOTHUB_ACCOUNT_INFO* accountInfo)
         int dataLen = sprintf_s(deviceJson, len + 1, DEVICE_JSON_FMT, accountInfo->deviceId);
         if (dataLen <= 0)
         {
-            LogError("Failure constructing device Json.\r\n");
+            LogError("Failure constructing device Json.");
             free(accountInfo->deviceId);
         }
         else
@@ -192,7 +192,7 @@ static BUFFER_HANDLE constructDeviceJson(IOTHUB_ACCOUNT_INFO* accountInfo)
             result = BUFFER_create(deviceJson, dataLen);
             if (result == NULL)
             {
-                LogError("Failure creating Json buffer.\r\n");
+                LogError("Failure creating Json buffer.");
                 accountInfo->deviceId = NULL;
             }
         }
@@ -216,7 +216,7 @@ static BUFFER_HANDLE sendDeviceRegistryInfo(IOTHUB_ACCOUNT_INFO* accountInfo, BU
             HTTPAPIEX_HANDLE httpExApi = HTTPAPIEX_Create(accountInfo->hostname);
             if (httpExApi == NULL)
             {
-                LogError("Failure creating httpApiEx with hostname: %s.\r\n", accountInfo->hostname);
+                LogError("Failure creating httpApiEx with hostname: %s.", accountInfo->hostname);
                 result = NULL;
             }
             else
@@ -224,7 +224,7 @@ static BUFFER_HANDLE sendDeviceRegistryInfo(IOTHUB_ACCOUNT_INFO* accountInfo, BU
                 char relativePath[256];
                 if (sprintf_s(relativePath, 256, RELATIVE_PATH_FMT, accountInfo->deviceId, URL_API_VERSION) <= 0)
                 {
-                    LogError("Failure creating relative path.\r\n");
+                    LogError("Failure creating relative path.");
                     result = NULL;
                 }
                 else
@@ -243,7 +243,7 @@ static BUFFER_HANDLE sendDeviceRegistryInfo(IOTHUB_ACCOUNT_INFO* accountInfo, BU
                         BUFFER_HANDLE responseContent = BUFFER_new();
                         if (HTTPAPIEX_SAS_ExecuteRequest(httpHandle, httpExApi, requestType, relativePath, httpHeader, deviceBuffer, &statusCode, NULL, responseContent) != HTTPAPIEX_OK)
                         {
-                            LogError("Failure calling HTTPAPIEX_SAS_ExecuteRequest.\r\n");
+                            LogError("Failure calling HTTPAPIEX_SAS_ExecuteRequest.");
                             result = NULL;
                         }
                         else
@@ -252,7 +252,7 @@ static BUFFER_HANDLE sendDeviceRegistryInfo(IOTHUB_ACCOUNT_INFO* accountInfo, BU
                             // to create another one.
                             if (statusCode != 409 && statusCode > 300)
                             {
-                                LogError("Http Failure status code %d.\r\n", statusCode);
+                                LogError("Http Failure status code %d.", statusCode);
                                 BUFFER_delete(responseContent);
                                 result = NULL;
                             }
@@ -270,7 +270,7 @@ static BUFFER_HANDLE sendDeviceRegistryInfo(IOTHUB_ACCOUNT_INFO* accountInfo, BU
         }
         else
         {
-            LogError("Http Failure with HTTPAPIEX_SAS_Create.\r\n");
+            LogError("Http Failure with HTTPAPIEX_SAS_Create.");
             result = NULL;
         }
     }
@@ -333,7 +333,7 @@ static int delete_Device(IOTHUB_ACCOUNT_INFO* accountInfo)
         BUFFER_HANDLE deleteDevice = sendDeviceRegistryInfo(accountInfo, NULL, HTTPAPI_REQUEST_DELETE);
         if (deleteDevice == NULL)
         {
-            LogError("Unable to delete created device %s.\r\n", accountInfo->deviceId);
+            LogError("Unable to delete created device %s.", accountInfo->deviceId);
             result = __LINE__;
         }
         else
@@ -356,32 +356,32 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
 
     if (sscanf(accountInfo->connString, "HostName=%n%*[^.]%n.%n%*[^;];%nSharedAccessKeyName=%n%*[^;];%nSharedAccessKey=%n", &beginHost, &endHost, &beginIothub, &endIothub, &beginName, &endName, &beginKey) != 0)
     {
-        LogError("Failure determining the string length parameters.\r\n");
+        LogError("Failure determining the string length parameters.");
         result = __LINE__;
     }
     else
     {
         if ((accountInfo->iothubName = (char*)malloc(endHost - beginHost + 1)) == NULL)
         {
-            LogError("Failure allocating iothubName.\r\n");
+            LogError("Failure allocating iothubName.");
             result = __LINE__;
         }
         else if ((accountInfo->hostname = (char*)malloc(endIothub - beginHost + 1)) == NULL)
         {
-            LogError("Failure allocating hostname.\r\n");
+            LogError("Failure allocating hostname.");
             free(accountInfo->iothubName);
             result = __LINE__;
         }
         else if ((accountInfo->keyName = (char*)malloc(endName - beginName + 1)) == NULL)
         {
-            LogError("Failure allocating hostName.\r\n");
+            LogError("Failure allocating hostName.");
             free(accountInfo->iothubName);
             free(accountInfo->hostname);
             result = __LINE__;
         }
         else if ((accountInfo->sharedAccessKey = (char*)malloc(totalLen + 1 - beginKey + 1)) == NULL)
         {
-            LogError("Failure allocating hostName.\r\n");
+            LogError("Failure allocating hostName.");
             free(accountInfo->iothubName);
             free(accountInfo->keyName);
             free(accountInfo->hostname);
@@ -392,7 +392,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
             accountInfo->keyName,
             accountInfo->sharedAccessKey) != 4)
         {
-            LogError("Failure determining the string values.\r\n");
+            LogError("Failure determining the string values.");
             free(accountInfo->iothubName);
             free(accountInfo->hostname);
             free(accountInfo->keyName);
@@ -431,7 +431,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice, const char* cal
 
         if (result->connString == NULL || result->eventhubConnString == NULL)
         {
-            LogError("Failure retrieving Connection Strings values.\r\n");
+            LogError("Failure retrieving Connection Strings values.");
             free(result);
             result = NULL;
         }

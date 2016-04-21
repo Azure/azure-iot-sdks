@@ -435,7 +435,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         // Temporary code till debug
         if (!notifyData->wasFound)
         {
-            LogError("IoTHub_MQTT_RecvMessage_E2ETest message was not found.\r\n");
+            LogError("IoTHub_MQTT_RecvMessage_E2ETest message was not found.");
         }
         else
         {

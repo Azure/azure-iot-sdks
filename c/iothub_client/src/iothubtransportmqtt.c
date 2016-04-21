@@ -658,7 +658,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transportState)
         else
         {
             result = __LINE__;
-        }
+    }
     }
     STRING_delete(emptyKeyName);
     STRING_delete(sasToken);
@@ -694,20 +694,20 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transportState)
             }
 
             if (makeConnection)
-            {
+    {
                 (void)tickcounter_get_current_ms(g_msgTickCounter, &transportState->connectTick);
-                if (SendMqttConnectMsg(transportState) != 0)
-                {
+        if (SendMqttConnectMsg(transportState) != 0)
+        {
                     transportState->connectFailCount++;
-                    result = __LINE__;
-                }
-                else
-                {
+            result = __LINE__;
+        }
+        else
+        {
                     transportState->connectFailCount = 0;
-                    transportState->connected = true;
-                    result = 0;
-                }
-            }
+            transportState->connected = true;
+            result = 0;
+        }
+    }
         }
 
         if (transportState->connected)

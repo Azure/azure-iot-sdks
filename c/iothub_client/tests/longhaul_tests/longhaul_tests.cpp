@@ -335,7 +335,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
         eventsPendingVerificationLockHandle = Lock_Init();
         if (eventsPendingVerificationLockHandle == NULL)
         {
-            LogError("Lock_Init failed for list of events pending verification.\r\n");
+            LogError("Lock_Init failed for list of events pending verification.");
         }
 
         DList_InitializeListHead(&eventsPendingVerification);
@@ -410,7 +410,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
                 {
                     if (difftime(time(NULL), sentEvent->time_sent) > MAX_EVENT_RECEIVED_WAIT_TIME)
                     {
-                        LogError("Event '%s' not received by IoT hub within %f seconds.\r\n", sentEvent->message, MAX_EVENT_RECEIVED_WAIT_TIME);
+                        LogError("Event '%s' not received by IoT hub within %f seconds.", sentEvent->message, MAX_EVENT_RECEIVED_WAIT_TIME);
 
                         ASSERT_FAIL("Event not received by IoT hub within expected time.\r\n");
                     }
@@ -475,7 +475,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
         // For mbed add the certificate information
         if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
         {
-            LogError("failure to set option \"TrustedCerts\"\r\n");
+            LogError("failure to set option \"TrustedCerts\"");
         }
 #endif
 
