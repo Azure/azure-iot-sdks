@@ -1,6 +1,6 @@
 [
   {
-    "deviceId": "Device11",
+    "deviceId": "SampleDevice-6f4760ce-0ed5-42b4-a6b6-aeacf94109b1",
     "serviceProperties": {
       "properties": {
         "CustomerId": "123456",
@@ -11,7 +11,7 @@
     }
   },
   {
-    "deviceId": "Device12",
+    "deviceId": "SampleDevice-e7331f5d-c1f9-4b92-81b4-3dadab014665",
     "serviceProperties": {
       "properties": {
         "CustomerId": "4829472",
@@ -22,7 +22,7 @@
     }
   },
   {
-    "deviceId": "Device13",
+    "deviceId": "SampleDevice-3fbe83c3-46a0-4fb5-9534-91c7982989b7",
     "serviceProperties": {
       "properties": {
         "CustomerId": "123456",
@@ -33,7 +33,7 @@
     }
   },
   {
-    "deviceId": "Device14",
+    "deviceId": "SampleDevice-636688be-e988-49c2-adc1-0d178ed0f3d5",
     "serviceProperties": {
       "properties": {
         "CustomerId": "985362",
@@ -44,7 +44,7 @@
     }
   },
   {
-    "deviceId": "Device15",
+    "deviceId": "SampleDevice-a7f8c6bd-e884-4611-9ab8-a28d9b24c9f6",
     "serviceProperties": {
       "properties": {
         "CustomerId": "985362",
@@ -55,7 +55,7 @@
     }
   },
   {
-    "deviceId": "Device16",
+    "deviceId": "SampleDevice-dea885f4-16d8-4a52-8c72-06e4c722c5ea",
     "serviceProperties": {
       "properties": {
         "CustomerId": "284721",
