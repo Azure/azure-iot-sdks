@@ -46,6 +46,9 @@ var translateError = function translateError(message, amqpError) {
   }
   else if (amqpError instanceof amqp10.Errors.AuthenticationError) {
     error = new errors.UnauthorizedError(message);
+  } else {
+    /*Codes_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_002: [If the AMQP error code is unknown, `translateError` should return a generic Javascript `Error` object.]*/
+    error = new Error(message);
   }
 
   /*Codes_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_001: [Any error object returned by `translateError` shall inherit from the generic `Error` Javascript object and have 2 properties:
