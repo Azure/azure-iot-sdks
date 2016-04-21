@@ -10,7 +10,7 @@ import iothub_client_mock
 from iothub_client_mock import *
 
 # connnection strings for mock testing
-connectionString = "HostName=mockhub.azure-devices.net;DeviceId=mockdevice;SharedAccessKey=Sj3IdHgrRmvWFzIwCMu0MKrSChIg8d244DOeFDAO7+k="
+connectionString = "HostName=mockhub.mock-devices.net;DeviceId=mockdevice;SharedAccessKey=1234567890123456789012345678901234567890ABCD"
 
 callback_key = ""
 callback_value = ""
