@@ -20,7 +20,7 @@ Run a simple Python sample on device
 
 **About this document**
 
-This document describes how to run the **iothub_client_sample_amqp.py** Python sample application. This multi-step process includes:
+This document describes how to run the **iothub_client_sample.py** Python sample application. This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -45,7 +45,7 @@ You should have the following items ready before beginning the process:
 
 - Navigate to the folder **python/device/samples** in your local copy of the repository.
 
-- Open the file **iothub_client_sample_amqp.py** in a text editor.
+- Open the file **iothub_client_sample.py** in a text editor.
 
 - Locate the following code in the file:
 
@@ -58,7 +58,7 @@ You should have the following items ready before beginning the process:
 - Run the sample application using the following command:
 
     ```
-	python iothub_client_sample_amqp.py
+	python iothub_client_sample.py
     ```
 
 - The sample application will send messages to your IoT hub. The **iothub-explorer** utility will display the messages as your IoT hub receives them.
@@ -66,7 +66,11 @@ You should have the following items ready before beginning the process:
 If you receive the error "ImportError: dynamic module does not define module export function (PyInit_iothub_client)" you may be running the samples with a different version of python than the iothub_client was build with. Following the [Prepare your development environment](#python-devbox-setup) to ensure the library is built with the desired python version
 
 # Experimenting with various transport protocols
-There is a sample to test each of the AMQP, HTTP and MQTT protocols. It is also possible to simply change the transport in the sample.
+There is a command line switch to test each of the AMQP, HTTP and MQTT protocols. It is also possible to simply change the transport in the sample.
+
+    ```
+	python iothub_client_sample.py -p <mqtt|http|amqp>
+    ```
 
 # Debugging the samples (and/or your code)
 [Visual Studio Code](https://code.visualstudio.com/) provides an excellent environment to write and debug Python code:
