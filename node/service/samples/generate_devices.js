@@ -11,7 +11,7 @@ var utilities = require('./utilities.js');
 var connectionString = '[IoT Hub Connection String]';
 var hostName = iothub.ConnectionString.parse(connectionString).HostName;
 
-utilities.loadDeviceData(function(err, deviceData) {
+utilities.loadDevicesData(function(err, deviceData) {
   // Step 1: create the registry object, that will be used to create devices
   var registry = iothub.Registry.fromConnectionString(connectionString);
   
