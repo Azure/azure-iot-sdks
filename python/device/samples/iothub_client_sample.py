@@ -7,9 +7,9 @@
 import random
 import time
 import sys
-import getopt
 import iothub_client
 from iothub_client import *
+from iothub_client_args import *
 
 # HTTP options
 # Because it can poll "after 9 seconds" polls will happen effectively
@@ -164,42 +164,19 @@ def usage():
     print("Usage: iothub_client_sample.py -p <protocol> -c <connectionstring>")
     print("    protocol        : <amqp, http, mqtt>")
     print("    connectionstring: <HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>>")
-    sys.exit(1)
 
 
 if __name__ == '__main__':
     print("\nPython %s" % sys.version)
     print("IoT Hub for Python SDK Version: %s" % iothub_client.__version__)
 
-    if len(sys.argv) > 1:
-        argv = sys.argv[1:]
-        try:
-            opts, args = getopt.getopt(
-                argv, "hp:c:", [
-                    "protocol=", "connectionstring="])
-        except getopt.GetoptError:
-            usage()
-            sys.exit(2)
-        for opt, arg in opts:
-            if opt == '-h':
-                usage()
-            elif opt in ("-p", "--protocol"):
-                protocol_string = arg.lower()
-                if (protocol_string == "amqp"):
-                    protocol = IoTHubTransportProvider.AMQP
-                elif (protocol_string == "mqtt"):
-                    protocol = IoTHubTransportProvider.MQTT
-                elif (protocol_string == "http"):
-                    protocol = IoTHubTransportProvider.HTTP
-                else:
-                    print("Error: unknown protocol")
-                    usage()
-            elif opt in ("-c", "--connectionstring"):
-                connection_string = arg
-
-    if (connection_string.find("HostName") != 0):
-        print("Error: not a valid connection string")
+    try:
+        (connection_string, protocol) = get_iothub_opt(
+            sys.argv[1:], connection_string, protocol)
+    except OptionError as o:
+        print(o)
         usage()
+        sys.exit(1)
 
     print("Starting the IoT Hub Python sample...")
     print("    Protocol %s" % protocol)
