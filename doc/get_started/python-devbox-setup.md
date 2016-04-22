@@ -44,6 +44,7 @@ The following instructions outline how you can build the libraries in Windows:
 1. Open a Visual Studio 2015 x86 Native Tools command prompt and navigate to the folder **python/build_all/windows** in your local copy of the repository.
 2. Run the script `build.cmd` in the **python\\build_all\\windows** directory.
 3. As a result, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
+4. In order to run the samples with a different Python version (e.g. 32bit vs. 64bit or 2.7 vs. 3.4) please rebuild the `iothub_client.pyd` extension.
 
 <a name="windows-cmake"/>
 ## Build the Python iothub_client module on Windows using cmake and boost libraries 
@@ -56,15 +57,18 @@ This step is only required once and only necessary for the cmake build:
 3. Unpack zip to a local folder, e.g. **C:\boost_1_60_0**.
 4. Navigate to the root folder of the boost library, e.g. **C:\boost_1_60_0**.
 5. Run the script `bootstrap.bat` in the boost folder.
-6. Run the build command `b2` in the same folder. For x64 builds use the build command `b2 address-model=64`.
-7. Set the environment variable BOOST_ROOT to the boost folder using the command `SET BOOST_ROOT=C:\boost_1_60_0`.
+6. At this point the desired Python version (e.g. V3.4 64bit) must be installed and active in the `PATH` environment variable.
+7. Run the build command `b2` in the same folder. For x64 builds use the build command `b2 address-model=64`.
+8. Set the environment variable **BOOST_ROOT** to the boost folder using the command `SET BOOST_ROOT=C:\boost_1_60_0`.
 
 Now the boost::python library is ready for use. 
+
+Important note: The boost libraries can only be used to build for a single Python version (e.g. V3.4 64bit). In order to build with cmake for another Python version, a clean bootstrap and build of the boost libraries for that version is necessary, or build errors will occur. It is possible to have multiple boost libraries for different Python versions side by side in different roots. Then the **BOOST_ROOT** folder must point to the appropriate boost library at cmake build time.
 
 ###The following instructions outline how you can build the Python extension module with cmake in Windows:
 
 1. Open a Visual Studio 2015 x86 Native Tools command prompt and navigate to the folder **python/build_all/windows** in your local copy of the repository.
-2. Verify that `BOOST_ROOT` points to the local boost installation.
+2. Verify that `BOOST_ROOT` points to the local boost installation for the right Python version.
 3. Run the script `build_client.cmd` in the **python\\build_all\\windows** directory.
 4. After a successful build, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
