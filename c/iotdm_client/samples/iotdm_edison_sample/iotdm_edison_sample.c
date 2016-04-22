@@ -16,13 +16,16 @@
 #include "threadapi.h"
 #include "device_object.h"
 #include "firmwareupdate_object.h"
+#include "config_object.h"
 #include "edison.h"
 
 
+void set_callbacks();
 IOTHUB_CLIENT_RESULT start_firmware_download(object_firmwareupdate *obj);
 IOTHUB_CLIENT_RESULT start_firmware_update(object_firmwareupdate *obj);
 IOTHUB_CLIENT_RESULT start_factory_reset(object_device *obj);
 IOTHUB_CLIENT_RESULT start_reboot(object_device *obj);
+IOTHUB_CLIENT_RESULT do_apply_config(object_config *obj);
 
 // To hardcode your connection string, put it here.  If you leave this as NULL,
 // we will look on the command line and in ~/.cs
@@ -156,26 +159,7 @@ int main(int argc, char *argv[])
     }
 
     set_device_state();
-    object_firmwareupdate *f_obj = get_firmwareupdate_object(0);
-    if (f_obj == NULL)
-    {
-        LogError("failure to get firmware update object for %p\r\n", IoTHubChannel);
-
-        return -1;
-    }
-    f_obj->firmwareupdate_packageuri_write_callback = start_firmware_download;
-    f_obj->firmwareupdate_update_execute_callback = start_firmware_update;
-
-    object_device*d_obj = get_device_object(0);
-    if (d_obj == NULL)
-    {
-        LogError("failure to get device object for %p\r\n", IoTHubChannel);
-
-        return -1;
-    }
-    d_obj->device_reboot_execute_callback = start_reboot;
-    d_obj->device_factoryreset_execute_callback = start_factory_reset;
-
+    set_callbacks();
 
     if (IOTHUB_CLIENT_OK != create_update_thread())
     {
@@ -223,6 +207,22 @@ void set_device_state()
     }
 
 }
+
+void set_callbacks()
+{
+    object_firmwareupdate *f_obj = get_firmwareupdate_object(0);
+    f_obj->firmwareupdate_packageuri_write_callback = start_firmware_download;
+    f_obj->firmwareupdate_update_execute_callback = start_firmware_update;
+
+    object_device*d_obj = get_device_object(0);
+    d_obj->device_reboot_execute_callback = start_reboot;
+    d_obj->device_factoryreset_execute_callback = start_factory_reset;
+
+    object_config *c_obj = get_config_object(0);
+    c_obj->config_apply_execute_callback = do_apply_config;
+
+}
+
 
 void update_firmware_udpate_progress()
 {
@@ -379,4 +379,11 @@ IOTHUB_CLIENT_RESULT create_update_thread()
 
     return result;
 }
+
+IOTHUB_CLIENT_RESULT do_apply_config(object_config *obj)
+{
+    LogInfo("** Applying Configuration - name = [%s] value = [%s]\r\n", obj->propval_config_name, obj->propval_config_value);
+    return IOTHUB_CLIENT_OK;
+}
+
  

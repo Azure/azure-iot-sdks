@@ -9,10 +9,14 @@
 #include "threadapi.h"
 #include "device_object.h"
 #include "firmwareupdate_object.h"
+#include "config_object.h"
 #include <stdlib.h>
 
 IOTHUB_CLIENT_RESULT start_simulated_firmware_download(object_firmwareupdate *obj);
 IOTHUB_CLIENT_RESULT start_simulated_firmware_update(object_firmwareupdate *obj);
+IOTHUB_CLIENT_RESULT do_reboot(object_device *obj);
+IOTHUB_CLIENT_RESULT do_factory_reset(object_device *obj);
+IOTHUB_CLIENT_RESULT do_apply_config(object_config *obj);
 
 static const char *connectionString = "[device connection string]";
 
@@ -83,6 +87,27 @@ void set_initial_firmware_version()
     (void)set_device_firmwareversion(0, rand() % 2 ? "1.0" : "2.0");
 }
 
+void set_initial_property_state()
+{
+    set_firmwareupdate_state(0, LWM2M_UPDATE_STATE_NONE);
+    set_firmwareupdate_updateresult(0, LWM2M_UPDATE_RESULT_DEFAULT);
+}
+
+void set_callbacks()
+{
+    object_firmwareupdate *obj = get_firmwareupdate_object(0);
+    obj->firmwareupdate_packageuri_write_callback = start_simulated_firmware_download;
+    obj->firmwareupdate_update_execute_callback = start_simulated_firmware_update;
+
+    object_device *device = get_device_object(0);
+    device->device_factoryreset_execute_callback = do_factory_reset;
+    device->device_reboot_execute_callback = do_reboot;
+
+    object_config *config = get_config_object(0);
+    config->config_apply_execute_callback = do_apply_config;
+}
+
+
 /**********************************************************************************
  * MAIN LOOP
  *
@@ -111,18 +136,9 @@ int main(int argc, char *argv[])
 
         return -1;
     }
-    
-    set_firmwareupdate_state(0, LWM2M_UPDATE_STATE_NONE);
-    set_firmwareupdate_updateresult(0, LWM2M_UPDATE_RESULT_DEFAULT);
-    object_firmwareupdate *obj = get_firmwareupdate_object(0);
-    if (obj == NULL)
-    {
-        LogError("failure to get firmware update object for %p\r\n", IoTHubChannel);
 
-        return -1;
-    }
-    obj->firmwareupdate_packageuri_write_callback = start_simulated_firmware_download;
-    obj->firmwareupdate_update_execute_callback = start_simulated_firmware_update;
+    set_initial_property_state();
+    set_callbacks();
 
     // override default version for this sample
     set_initial_firmware_version();
@@ -303,5 +319,23 @@ IOTHUB_CLIENT_RESULT create_update_thread()
     }
 
     return result;
+}
+
+IOTHUB_CLIENT_RESULT do_reboot(object_device *obj)
+{
+    LogInfo("** Rebooting device\r\n");
+    return IOTHUB_CLIENT_OK;
+}
+
+IOTHUB_CLIENT_RESULT do_factory_reset(object_device *obj)
+{
+    LogInfo("** Factory resetting device\r\n");
+    return IOTHUB_CLIENT_OK;
+}
+
+IOTHUB_CLIENT_RESULT do_apply_config(object_config *obj)
+{
+    LogInfo("** Applying Configuration - name = [%s] value = [%s]\r\n", obj->propval_config_name, obj->propval_config_value);
+    return IOTHUB_CLIENT_OK;
 }
 
