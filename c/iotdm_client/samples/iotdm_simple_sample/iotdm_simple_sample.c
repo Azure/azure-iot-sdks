@@ -9,11 +9,13 @@
 #include "threadapi.h"
 #include "device_object.h"
 #include "firmwareupdate_object.h"
+#include <stdlib.h>
 
 IOTHUB_CLIENT_RESULT start_simulated_firmware_download(object_firmwareupdate *obj);
 IOTHUB_CLIENT_RESULT start_simulated_firmware_update(object_firmwareupdate *obj);
 
 static const char *connectionString = "[device connection string]";
+
 
 // LWM2M Update State -- for /5/0/3 resource
 typedef enum FIRMWARE_UPDATE_STATE_TAG
@@ -73,6 +75,14 @@ SimulatedDeviceState *g_sds = NULL;
 // Forwards declarations
 IOTHUB_CLIENT_RESULT create_update_thread();
 
+const char target_version[] = "3.0";
+void set_initial_firmware_version()
+{
+    // randomly select either v1 or v2; target version after update will always be v3
+    srand(time(NULL));
+    (void)set_device_firmwareversion(0, rand() % 2 ? "1.0" : "2.0");
+}
+
 /**********************************************************************************
  * MAIN LOOP
  *
@@ -113,6 +123,9 @@ int main(int argc, char *argv[])
     }
     obj->firmwareupdate_packageuri_write_callback = start_simulated_firmware_download;
     obj->firmwareupdate_update_execute_callback = start_simulated_firmware_update;
+
+    // override default version for this sample
+    set_initial_firmware_version();
 
     if (IOTHUB_CLIENT_OK != create_update_thread())
     {
@@ -191,6 +204,7 @@ void update_firmware_udpate_progress(SimulatedDeviceState *sds)
             set_firmwareupdate_updateresult(0, LWM2M_UPDATE_RESULT_UPDATE_SUCCESSFUL);
             LogInfo("** %s - > APP_UPDATE_STATE_UPDATE_SUCCESSFUL\r\n", ENUM_TO_STRING(APP_UPDATE_STATE, sds->AppUpdateState));
             sds->AppUpdateState = APP_UPDATE_STATE_UPDATE_SUCCESSFUL;
+			set_device_firmwareversion(0, target_version);
         }
         break;
     case APP_UPDATE_STATE_UPDATE_SUCCESSFUL:
