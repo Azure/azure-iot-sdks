@@ -37,8 +37,8 @@ loadDevicesData(function (err, deviceData) {
     //jobClient.scheduleReboot(jobId, deviceId, function(err, result) {...});
     //jobClient.scheduleFactoryReset(jobId, deviceId, function(err, result) {...});
     //jobClient.scheduleDeviceConfigurationUpdate(jobId, deviceId, value, function(err, result) {...});
-    //jobClient.scheduleSystemPropertyRead(jobId, deviceId, propertyName, function(err, result) {...});
-    //jobClient.scheduleSystemPropertyWrite(jobId, deviceId, propertyName, function(err, result) {...});
+    //jobClient.scheduleDevicePropertyRead(jobId, deviceId, propertyName, function(err, result) {...});
+    //jobClient.scheduleDevicePropertyWrite(jobId, deviceId, propertyName, function(err, result) {...});
     jobClient.scheduleFirmwareUpdate(jobId, deviceIds, 'http://url.to.firmware.update', timeoutInMinutes, function (err, jobResp) {
       if (err) {
         // If there's an error object at this point, the job was not scheduled: there was a problem with the request, that should be explained by the error message
