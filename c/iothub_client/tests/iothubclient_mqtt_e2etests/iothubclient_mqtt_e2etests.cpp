@@ -403,7 +403,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
         IoTHubTest_Deinit(iotHubTestHandle);
 
-        LogInfo("IoTHub_MQTT_RecvMessage_E2ETest Message recv started.\r\n");
+        LogInfo("IoTHub_MQTT_RecvMessage_E2ETest Message recv started.");
 
         time_t beginOperation, nowTime;
         beginOperation = time(NULL);
@@ -439,7 +439,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         }
         else
         {
-            LogInfo("IoTHub_MQTT_RecvMessage_E2ETest message was successful.\r\n");
+            LogInfo("IoTHub_MQTT_RecvMessage_E2ETest message was successful.");
         }
 
         // cleanup
