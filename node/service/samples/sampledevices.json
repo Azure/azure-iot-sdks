@@ -1,0 +1,74 @@
+[
+    {
+      "deviceId": "Device11-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "serviceProperties": {
+        "properties": {
+          "CustomerId": "123456",
+          "ServiceBy": "Contoso",
+          "Weight": 1000,
+          "QoS": 10
+        },
+        "tags": [ "City:Seattle", "Bldg:109", "Floor:2", "Room:2817" ]
+      }
+    },
+    {
+      "deviceId": "Device21-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "serviceProperties": {
+        "properties": {
+          "CustomerId": "4829472",
+          "ServiceBy": "Contoso",
+          "Weight": 100,
+          "QoS": 3
+        },
+        "tags": [ "City:Seattle", "Bldg:109", "Floor:3", "Room:3121" ]
+      }
+    },
+    {
+      "deviceId": "Device31-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "serviceProperties": {
+        "properties": {
+          "CustomerId": "123456",
+          "ServiceBy": "Fabrikam",
+          "Weight": 2000,
+          "QoS": 4
+        },
+        "tags": [ "City:Seattle", "Bldg:109", "Floor:1", "Room:1924" ]
+      }
+    },
+    {
+      "deviceId": "Device41-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "serviceProperties": {
+        "properties": {
+          "CustomerId": "985362",
+          "ServiceBy": "Fabrikam",
+          "Weight": 3000,
+          "QoS": 6
+        },
+        "tags": [ "City:Seattle", "Bldg:109", "Floor:2", "Room:2963" ]
+      }
+    },
+    {
+      "deviceId": "Device51-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "serviceProperties": {
+        "properties": {
+          "CustomerId": "985362",
+          "ServiceBy": "Contoso",
+          "Weight": 50,
+          "QoS": 1
+        },
+        "tags": [ "City:Seattle", "Bldg:109", "Floor:3", "Room:3121" ]
+      }
+    },
+    {
+      "deviceId": "Device61-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "serviceProperties": {
+        "properties": {
+          "CustomerId": "284721",
+          "ServiceBy": "Contoso",
+          "Weight": 9000,
+          "QoS": 9
+        },
+        "tags": [ "City:Seattle", "Bldg:109", "Floor:1", "Room:1212" ]
+      }
+    }
+  ]

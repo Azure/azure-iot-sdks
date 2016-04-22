@@ -5,19 +5,13 @@
 
 var filterQuery = {
   filter: {
-    logicalOperator: "and",
-    filters: [
-      {
-        property: {
-          name: "QosLevel",
-          type: "service"
-        },
-        value: 1,
-        comparisonOperator: "gt",
-        type: "comparison"
-      }
-    ],
-    type: "logical"
+    property: {
+      name: "CustomerId",
+      type: "service"
+    },
+    value: 123456,
+    comparisonOperator: "eq",
+    type: "comparison"
   },
   project: null,
   aggregate: null,
@@ -32,7 +26,7 @@ var sortQuery = {
       {
           order: "asc",
           property: {
-              name: "CustomerId",
+              name: "QoS",
               type: "service"
           }
       }
@@ -40,23 +34,9 @@ var sortQuery = {
 };
 
 var aggregateQuery = {
-  filter: {
-    logicalOperator: "and",
-    filters: [
-      {
-        property: {
-          name: "CustomerId",
-          type: "service"
-        },
-        value: null,
-        comparisonOperator: "ne",
-        type: "comparison"
-      }
-    ],
-    type: "logical"
-  },
-   project: null,
-   aggregate: {
+  filter: null,
+  project: null,
+  aggregate: {
     keys: [
       {
         name: "CustomerId",
@@ -65,12 +45,12 @@ var aggregateQuery = {
     ],
     properties: [
       {
-        operator: "avg",
+        operator: "sum",
         property: {
-          name: "QosLevel",
+          name: "Weight",
           type: "service"
         },
-        columnName: "AvgQosLevel"
+        columnName: "TotalWeight"
       }
     ]
   },

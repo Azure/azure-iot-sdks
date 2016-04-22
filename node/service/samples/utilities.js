@@ -6,7 +6,7 @@
 var fs = require('fs');
 
 // This is a file that contains custom device description, tags, etc.
-var devicesFileName = 'sample_devices.json';
+var devicesFileName = 'sampledevices.json';
 
 // This is the output file that will contain all newly created device connection strings.
 var deviceCredentialsFile = 'devicecreds.txt';

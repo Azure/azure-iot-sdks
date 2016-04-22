@@ -5,7 +5,7 @@
 
 var iothub = require('azure-iothub');
 var uuid = require('uuid');
-var loadDevicesData = require('./common.js').loadDevicesData;
+var loadDevicesData = require('./utilities.js').loadDevicesData;
 
 // This variable must be populated with a connection string that has the permissions to schedule jobs on the IoT Hub instance.
 var connectionString = '[IoT Hub Connection String]';
