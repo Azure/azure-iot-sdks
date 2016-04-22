@@ -118,7 +118,7 @@ This section walks you through building, deploying and validating the IoT Client
 -   Run following commands to build the SDK:
 
         cd python/build_all/linux
-	sudo ./build.sh | tee LogFile.txt
+        sudo ./build.sh | tee LogFile.txt
 
     ***Note:*** *LogFile.txt in above command should be replaced with a file name where build output will be written.*
 
@@ -135,19 +135,9 @@ communication between your device and Azure IoT Hub. You will send messages to t
 
         cd azure-iot-sdks/python/device/samples/
 
--   There are different samples available for each supporting protocol. You can use any of these protocols to validate a sample on your device. Based on your choice of protocol, run the following command on device.
+-   Run the following command on the device:
 
-    **For AMQP protocol:**
-
-        nano iothub_client_sample_amqp.py
-
-    **For HTTP protocol:**
-
-        nano iothub_client_sample_http.py
-
-    **For MQTT protocol:**
-
-        nano iothub_client_sample_mqtt.py
+        nano iothub_client_sample.py
 
 -   This launches a console-based text editor. Scroll down to the
     connection information.
@@ -171,15 +161,15 @@ section. These will be needed in [Step 4](#Step-4-2-Share)
 
     **For AMQP protocol:**
 
-        python iothub_client_sample_amqp.py
+        python iothub_client_sample.py -p amqp
 
     **For HTTP protocol:**
 
-        python iothub_client_sample_http.py
+        python iothub_client_sample.py -p http
 
     **For MQTT protocol:**
 
-        python iothub_client_sample_mqtt.py
+        python iothub_client_sample.py -p mqtt
 
 -   See [Manage IoT Hub](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md>) to learn how to observe the messages IoT Hub receives from the application.
 
@@ -187,12 +177,15 @@ section. These will be needed in [Step 4](#Step-4-2-Share)
     incorrectly copied the device connection string.
 
     **If using AMQP protocol:**
+    
     ![SampleAMQP\_result\_terminal](images/python_amqp_send_message_device.png)
 
     **If using HTTP protocol:**
+    
     ![SampleHTTP\_result\_terminal](images/python_http_send_message_device.png)
 
     **If using MQTT protocol:**
+    
     ![SampleMQTT\_result\_terminal](images/python_mqtt_send_message_device.png)
 
 -   DeviceExplorer should show that IoT Hub has successfully received data sent
@@ -218,12 +211,15 @@ section. These will be needed in [Step 4](#Step-4-2-Share)
     client sample.
 
     **If using AMQP protocol:**
+    
     ![MessageSend\_terminal](images/python_amqp_receive_message_device.png)
 
     **If using HTTP protocol:**
+    
     ![MessageSend\_terminal](images/python_http_receive_message_device.png)
 
     **If using MQTT protocol:**
+    
     ![MessageSend\_terminal](images/python_mqtt_receive_message_device.png)
 
 <a name="Step-4-Package_Share"></a>

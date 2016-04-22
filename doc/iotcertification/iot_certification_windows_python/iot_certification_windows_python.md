@@ -113,7 +113,7 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
      
 3. Navigate to the folder python/device/samples in your local copy of the repository. 
 
-4. Open the file **iothub_client_sample_amqp.py**, **iothub_client_sample_http.py** or  **iothub_client_sample_mqtt.py** in a text editor.
+4. Open the file **iothub_client_sample.py** or  **iothub_client_sample_class.py** in a text editor.
 
 5. Locate the following code in the file:
 
@@ -125,15 +125,15 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
 	
 	**If HTTP protocol:**
 
-		python iothub_client_sample_http.py
+		python iothub_client_sample.py -p http
 
 	**If MQTT protocol:**
 
-		python iothub_client_sample_mqtt.py
+		python iothub_client_sample.py -p mqtt
 
 	**If AMQP protocol:**
 
-		python iothub_client_sample_amqp.py
+		python iothub_client_sample.py -p amqp
 
 8. Verify that the confirmation messages show an OK. If not, then you may have incorrectly copied the device hub connection information.
 
