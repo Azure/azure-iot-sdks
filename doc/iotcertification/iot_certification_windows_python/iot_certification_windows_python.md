@@ -82,7 +82,7 @@ Complete the following steps to set up your development environment:
 
 2. Install the latest x86 or x64 Python 2.7 client. The build needs a valid Python.exe in the path. Based on the active Python version (e.g. Python 2.7.11 x86 32bit) the build script choses the compiler.
 
-You can install the latest x86 or x64 Python 2.7 client from [python-2.7](https://www.python.org/downloads/).
+> You can install the latest x86 or x64 Python 2.7 client from [python-2.7](https://www.python.org/downloads/).
 
 <a name="Step_3_2:_Build"/>
 ## 3.3  Build the Python iothub_client module on Windows using Nuget packages (recommended)
@@ -205,9 +205,11 @@ Package the following artifacts from your device:
 
 3. All the screenshots that are shown above in "**Receive messages from IoT Hub**" section.
 
-4. Send us clear instructions of how to run this sample with your hardware (explicitly highlighting the new steps for customers). Please use the template available [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/templates/template-windows-python.md>) to create your device-specific instructions.
+4. Send us clear instructions of how to run this sample with your hardware (explicitly highlighting the new steps for customers).
+
+> Please use the template available [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/templates/template-windows-python.md>) to create your device-specific instructions.
 	
-	As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
+> As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
 
 <a name="Step_4_2:_Share"/>
 ## 4.2 Share package with the Azure IoT Certification Team
