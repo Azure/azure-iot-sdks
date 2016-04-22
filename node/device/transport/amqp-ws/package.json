@@ -5,9 +5,9 @@
   "author": "Microsoft Corporation",
   "license": "MIT",
   "dependencies": {
-    "azure-iot-common": "1.0.4",
-    "azure-iot-amqp-base": "1.0.4",
-    "azure-iot-device": "1.0.4",
+    "azure-iot-common": "1.0.5",
+    "azure-iot-amqp-base": "1.0.5",
+    "azure-iot-device": "1.0.5",
     "azure-iot-device-amqp": "1.0.4"
   },
   "devDependencies": {
