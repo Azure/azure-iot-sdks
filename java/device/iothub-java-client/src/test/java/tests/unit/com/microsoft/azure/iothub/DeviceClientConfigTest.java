@@ -106,7 +106,7 @@ public class DeviceClientConfigTest
         assertThat(testDeviceKey, is(expectedDeviceKey));
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_11_005: [The function shall return 600s.]
+    // Tests_SRS_DEVICECLIENTCONFIG_11_005: [The function shall return the value of TOKEN_VALID_SECS.]
     @Test
     public void getMessageValidSecsReturnsConstant() throws URISyntaxException
     {
@@ -117,7 +117,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
         long testMessageValidSecs = config.getTokenValidSecs();
 
-        final long expectedMessageValidSecs = 600;
+        final long expectedMessageValidSecs = config.TOKEN_VALID_SECS;
         assertThat(testMessageValidSecs, is(expectedMessageValidSecs));
     }
 
