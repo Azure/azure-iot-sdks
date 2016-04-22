@@ -77,10 +77,12 @@ Complete the following steps to set up your development environment:
 1. Download latest SDK using following command:
   
   ```
-    git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+  git clone --recursive https://github.com/Azure/azure-iot-sdks.git
   ```
 
-2. Install the latest x86 or x64 Python 2.7 client from [python-2.7](https://www.python.org/downloads/). The build needs a valid Python.exe in the path. Based on the active Python version (e.g. Python 2.7.11 x86 32bit) the build script choses the compiler.
+2. Install the latest x86 or x64 Python 2.7 client. The build needs a valid Python.exe in the path. Based on the active Python version (e.g. Python 2.7.11 x86 32bit) the build script choses the compiler.
+
+You can install the latest x86 or x64 Python 2.7 client from [python-2.7](https://www.python.org/downloads/).
 
 <a name="Step_3_2:_Build"/>
 ## 3.3  Build the Python iothub_client module on Windows using Nuget packages (recommended)
@@ -221,3 +223,4 @@ Once you shared the documents with us, we will contact you in the following 48 t
 # Step 5: Troubleshooting
 
 Please contact engineering support on <iotcert@microsoft.com> for help with  troubleshooting.
+
