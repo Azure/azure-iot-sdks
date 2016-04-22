@@ -15,8 +15,6 @@
 #include "iothubtransportamqp.h"
 #include "iothubtransportmqtt.h"
 
-namespace bp = boost::python;
-
 #ifndef IMPORT_NAME
 #define IMPORT_NAME iothub_client
 #endif
@@ -38,6 +36,11 @@ namespace bp = boost::python;
 // note: all new allocations throw a std::bad_alloc exception which trigger a MemoryError in Python
 //
 
+// helper to suppress AMQP console messages, comment function to get the output to console
+extern "C"
+void consolelogger_log(unsigned int options, char* format, ...)
+{}
+
 // helper classes for transitions between Python and C++ layer
 
 class ScopedGILAcquire
@@ -52,7 +55,6 @@ public:
     {
         PyGILState_Release(gil_state);
     }
-
 private:
     PyGILState_STATE gil_state;
 };
@@ -70,7 +72,6 @@ public:
         PyEval_RestoreThread(thread_state);
         thread_state = NULL;
     }
-
 private:
     PyThreadState * thread_state;
 };
@@ -102,7 +103,7 @@ public:
         exc = _exc;
         cls = _cls;
         // only display class names in camel case
-        func = (_func[0] != 'I') ? CamelToPy(_func): _func;
+        func = (_func[0] != 'I') ? CamelToPy(_func) : _func;
     }
 
     std::string exc;
@@ -131,7 +132,7 @@ private:
     {
         std::string py;
         std::string::size_type len = func.length();
-        for (std::string::size_type i = 0; i<len; i++)
+        for (std::string::size_type i = 0; i < len; i++)
         {
             char ch = func[i];
             if ((i > 0) && isupper(ch))
@@ -151,6 +152,7 @@ createExceptionClass(
     PyObject* baseTypeObj = PyExc_Exception
     )
 {
+    namespace bp = boost::python;
     using std::string;
     string scopeName = bp::extract<string>(bp::scope().attr("__name__"));
     string qualifiedName0 = scopeName + "." + name;
@@ -244,11 +246,13 @@ MapFilterCallback(
 class IoTHubMap
 {
 
+    bool filter;
     MAP_HANDLE mapHandle;
 
 public:
 
-    IoTHubMap(const IoTHubMap& map)
+    IoTHubMap(const IoTHubMap& map) :
+        filter(false)
     {
         mapHandle = Map_Clone(map.mapHandle);
         if (mapHandle == NULL)
@@ -257,7 +261,8 @@ public:
         }
     }
 
-    IoTHubMap()
+    IoTHubMap() :
+        filter(false)
     {
         mapHandle = Map_Create(NULL);
         if (mapHandle == NULL)
@@ -266,18 +271,31 @@ public:
         }
     }
 
-    IoTHubMap(boost::python::object &_mapFilterCallback)
+    IoTHubMap(boost::python::object &_mapFilterCallback) :
+        filter(false),
+        mapHandle(NULL)
     {
         MAP_FILTER_CALLBACK mapFilterFunc = NULL;
-        if (PyFunction_Check(_mapFilterCallback.ptr()))
+        if (PyCallable_Check(_mapFilterCallback.ptr()))
         {
-            mapFilterCallback = _mapFilterCallback;
-            mapFilterFunc = &MapFilterCallback;
+            if (PyCallable_Check(mapFilterCallback.ptr()))
+            {
+                PyErr_SetString(PyExc_TypeError, "Filter already in use");
+                boost::python::throw_error_already_set();
+                return;
+            }
+            else
+            {
+                mapFilterCallback = _mapFilterCallback;
+                mapFilterFunc = &MapFilterCallback;
+                filter = true;
+            }
         }
         else
         {
-            PyErr_SetString(PyExc_TypeError, "expected type function");
+            PyErr_SetString(PyExc_TypeError, "expected type callable");
             boost::python::throw_error_already_set();
+            return;
         }
         mapHandle = Map_Create(mapFilterFunc);
         if (mapHandle == NULL)
@@ -287,6 +305,7 @@ public:
     }
 
     IoTHubMap(MAP_HANDLE _mapHandle) :
+        filter(false),
         mapHandle(_mapHandle)
     {
         if (mapHandle == NULL)
@@ -298,19 +317,23 @@ public:
     ~IoTHubMap()
     {
         Destroy();
+        if (filter)
+        {
+            mapFilterCallback = boost::python::object();
+        }
     }
 
     static IoTHubMap *Create(boost::python::object& _mapFilterCallback)
     {
         MAP_FILTER_CALLBACK mapFilterFunc = NULL;
-        if (PyFunction_Check(_mapFilterCallback.ptr()))
+        if (PyCallable_Check(_mapFilterCallback.ptr()))
         {
             mapFilterCallback = _mapFilterCallback;
             mapFilterFunc = &MapFilterCallback;
         }
         else if (Py_None != _mapFilterCallback.ptr())
         {
-            PyErr_SetString(PyExc_TypeError, "Create expected type function or None");
+            PyErr_SetString(PyExc_TypeError, "Create expected type callable or None");
             boost::python::throw_error_already_set();
             return NULL;
         }
@@ -554,7 +577,7 @@ public:
         return new IoTHubMessage(IoTHubMessage_Clone(iotHubMessageHandle));
     }
 
-    PyObject* GetByteArray()
+    PyObject* GetBytearray()
     {
         const unsigned char* buffer;
         size_t size;
@@ -904,9 +927,9 @@ public:
         boost::python::object& userContext
         )
     {
-        if (!PyFunction_Check(messageCallback.ptr()))
+        if (!PyCallable_Check(messageCallback.ptr()))
         {
-            PyErr_SetString(PyExc_TypeError, "send_event_async expected type function");
+            PyErr_SetString(PyExc_TypeError, "send_event_async expected type callable");
             boost::python::throw_error_already_set();
             return;
         }
@@ -928,7 +951,11 @@ public:
     IOTHUB_CLIENT_STATUS GetSendStatus()
     {
         IOTHUB_CLIENT_STATUS iotHubClientStatus;
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_GetSendStatus(iotHubClientHandle, &iotHubClientStatus);
+        IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+        {
+            ScopedGILRelease release;
+            result = IoTHubClient_GetSendStatus(iotHubClientHandle, &iotHubClientStatus);
+        }
         if (result != IOTHUB_CLIENT_OK)
         {
             throw IoTHubClientError(__func__, result);
@@ -941,9 +968,9 @@ public:
         boost::python::object& userContext
         )
     {
-        if (!PyFunction_Check(messageCallback.ptr()))
+        if (!PyCallable_Check(messageCallback.ptr()))
         {
-            PyErr_SetString(PyExc_TypeError, "set_message_callback expected type function");
+            PyErr_SetString(PyExc_TypeError, "set_message_callback expected type callable");
             boost::python::throw_error_already_set();
             return;
         }
@@ -973,22 +1000,40 @@ public:
         boost::python::object& option
         )
     {
+        IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
 #ifdef IS_PY3
-        if (!PyLong_Check(option.ptr()))
+        if (PyUnicode_Check(option.ptr()))
         {
-            PyErr_SetString(PyExc_TypeError, "set_option expected type long");
+            std::string stringValue = boost::python::extract<std::string>(option);
+            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), stringValue.c_str());
+        }
+        else if (PyLong_Check(option.ptr()))
+        {
+            long value = boost::python::extract<long>(option);
+            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
+        }
+        else
+        {
+            PyErr_SetString(PyExc_TypeError, "set_option expected type long or unicode");
             boost::python::throw_error_already_set();
         }
-        long value = boost::python::extract<long>(option);
 #else
-        if (!PyInt_Check(option.ptr()))
+        if (PyString_Check(option.ptr()))
         {
-            PyErr_SetString(PyExc_TypeError, "set_option expected type int");
+            std::string stringValue = boost::python::extract<std::string>(option);
+            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), stringValue.c_str());
+        }
+        else if (PyInt_Check(option.ptr()))
+        {
+            int value = boost::python::extract<int>(option);
+            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
+        }
+        else
+        {
+            PyErr_SetString(PyExc_TypeError, "set_option expected type int or string");
             boost::python::throw_error_already_set();
         }
-        int value = boost::python::extract<int>(option);
 #endif
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
         if (result != IOTHUB_CLIENT_OK)
         {
             throw IoTHubClientError(__func__, result);
@@ -1031,19 +1076,19 @@ BOOST_PYTHON_MODULE(IMPORT_NAME)
     scope().attr("__version__") = IOTHUB_SDK_VERSION;
 
     // exception handlers
-    class_<IoTHubMapError>IoTHubMapErrorClass("IoTHubMapError", no_init);
+    class_<IoTHubMapError>IoTHubMapErrorClass("IoTHubMapErrorArg", init<std::string, MAP_RESULT>());
     IoTHubMapErrorClass.def_readonly("result", &IoTHubMapError::result);
     IoTHubMapErrorClass.def_readonly("func", &IoTHubMapError::func);
     IoTHubMapErrorClass.def("__str__", &IoTHubMapError::str);
     IoTHubMapErrorClass.def("__repr__", &IoTHubMapError::repr);
 
-    class_<IoTHubMessageError>IotHubMessageErrorClass("IoTHubMessageError", no_init);
+    class_<IoTHubMessageError>IotHubMessageErrorClass("IoTHubMessageErrorArg", init<std::string, IOTHUB_MESSAGE_RESULT>());
     IotHubMessageErrorClass.def_readonly("result", &IoTHubMessageError::result);
     IotHubMessageErrorClass.def_readonly("func", &IoTHubMessageError::func);
     IotHubMessageErrorClass.def("__str__", &IoTHubMessageError::str);
     IotHubMessageErrorClass.def("__repr__", &IoTHubMessageError::repr);
 
-    class_<IoTHubClientError>IotHubClientErrorClass("IoTHubClientError", no_init);
+    class_<IoTHubClientError>IotHubClientErrorClass("IoTHubClientErrorArg", init<std::string, IOTHUB_CLIENT_RESULT>());
     IotHubClientErrorClass.def_readonly("result", &IoTHubClientError::result);
     IotHubClientErrorClass.def_readonly("func", &IoTHubClientError::func);
     IotHubClientErrorClass.def("__str__", &IoTHubClientError::str);
@@ -1135,7 +1180,7 @@ BOOST_PYTHON_MODULE(IMPORT_NAME)
     class_<IoTHubMessage>("IoTHubMessage", no_init)
         .def(init<PyObject *>())
         .def(init<std::string>())
-        .def("get_bytearray", &IoTHubMessage::GetByteArray)
+        .def("get_bytearray", &IoTHubMessage::GetBytearray)
         .def("get_string", &IoTHubMessage::GetString)
         .def("get_content_type", &IoTHubMessage::GetContentType)
         .def("properties", &IoTHubMessage::Properties, return_value_policy<manage_new_object>())

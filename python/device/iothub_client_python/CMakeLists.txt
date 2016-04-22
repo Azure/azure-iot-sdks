@@ -50,6 +50,9 @@ endif()
 
 
 # get python
+# some versions of cmake shipped with Linux
+# can't find the Python version unless given a hint
+set(Python_ADDITIONAL_VERSIONS ${build_python})
 find_package(PythonLibs ${build_python} REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
 link_directories(${PYTHON_LIBRARIES})

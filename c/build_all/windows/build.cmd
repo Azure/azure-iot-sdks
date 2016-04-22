@@ -221,6 +221,7 @@ echo  --config ^<value^>      [Debug] build configuration (e.g. Debug, Release)
 echo  --platform ^<value^>    [Win32] build platform (e.g. Win32, x64, ...)
 echo  --run-e2e-tests       run end-to-end tests
 echo  --run-longhaul-tests  run long-haul tests
+echo  --use-websockets        Enables the support for AMQP over WebSockets.
 goto :eof
 
 

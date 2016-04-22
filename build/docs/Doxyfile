@@ -766,16 +766,16 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = mainpage.dox \
-                         ../../c/azure-c-shared-utility/c/inc/agenttime.h \
-                         ../../c/azure-c-shared-utility/c/inc/base64.h \
-                         ../../c/azure-c-shared-utility/c/inc/httpapi.h \
-                         ../../c/azure-c-shared-utility/c/inc/httpapi.h \
-                         ../../c/azure-c-shared-utility/c/inc/httpapiex.h \
-                         ../../c/azure-c-shared-utility/c/inc/httpheaders.h \
-                         ../../c/azure-c-shared-utility/c/inc/threadapi.h \
-                         ../../c/azure-c-shared-utility/c/inc/lock.h \
-                         ../../c/azure-c-shared-utility/c/inc/map.h \
-                         ../../c/iothub_client/inc/version.h \
+                         ../../c/azure-c-shared-utility/inc/agenttime.h \
+                         ../../c/azure-c-shared-utility/inc/base64.h \
+                         ../../c/azure-c-shared-utility/inc/httpapi.h \
+                         ../../c/azure-c-shared-utility/inc/httpapi.h \
+                         ../../c/azure-c-shared-utility/inc/httpapiex.h \
+                         ../../c/azure-c-shared-utility/inc/httpheaders.h \
+                         ../../c/azure-c-shared-utility/inc/threadapi.h \
+                         ../../c/azure-c-shared-utility/inc/lock.h \
+                         ../../c/azure-c-shared-utility/inc/map.h \
+                         ../../c/iothub_client/inc/iothub_client_version.h \
                          ../../c/iothub_client/inc/iothub_message.h \
                          ../../c/iothub_client/inc/iothub_client_ll.h \
                          ../../c/iothub_client/inc/iothub_client.h \
@@ -2043,7 +2043,7 @@ SEARCH_INCLUDES        = YES
 # preprocessor.
 # This tag requires that the tag SEARCH_INCLUDES is set to YES.
 
-INCLUDE_PATH           = ../../c/common/inc
+INCLUDE_PATH           = ../../c/azure-c-shared-utility/inc
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the

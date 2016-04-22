@@ -36,8 +36,8 @@ call pyenv.bat
 goto :nuget
 
 :NeedPython
-@Echo Azure IoT SDK needs Python 2.7 from 
-@Echo https://www.python.org/download/releases/2.7/ 
+@Echo Azure IoT SDK needs Python from 
+@Echo https://www.python.org/downloads/
 exit /b 1
 
 :nuget
