@@ -50,7 +50,7 @@ public final class DeviceClient
         int status = platformInit();
         if (status != 0)
         {
-        	 throw new IllegalStateException(
+             throw new IllegalStateException(
                      "Failed to initialize the platform. ");
         }
         
@@ -82,29 +82,29 @@ public final class DeviceClient
     
     public void destroy()
     {
-    	if (handle.getPointer().getInt(0) != 0)
-    	{
-    		Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_Destroy(handle.getPointer());
-    		platformDeInit();
-    		handle.getPointer().setInt(0, 0);
-    	}
+        if (handle.getPointer().getInt(0) != 0)
+        {
+            Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_Destroy(handle.getPointer());
+            platformDeInit();
+            handle.getPointer().setInt(0, 0);
+        }
     }
     
-    public int platformInit()
+    private int platformInit()
     {
-    	return Iothub_client_wrapperLibrary.INSTANCE.platform_init();
+        return Iothub_client_wrapperLibrary.INSTANCE.platform_init();
     }
     
-    public void platformDeInit()
+    private void platformDeInit()
     {
-    	Iothub_client_wrapperLibrary.INSTANCE.platform_deinit();
+        Iothub_client_wrapperLibrary.INSTANCE.platform_deinit();
     }
     
     @Override
     protected void finalize() throws Throwable
     {
         try{
-        	destroy();
+            destroy();
         }catch(Throwable t){
             throw t;
         }finally{

@@ -278,7 +278,6 @@ public class SendReceive
 
      System.out.println("Shutting down...");
      client.destroy();
-     client.platformDeInit();
  }
  
 }

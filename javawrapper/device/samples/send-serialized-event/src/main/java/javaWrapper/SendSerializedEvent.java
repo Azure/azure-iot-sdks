@@ -63,7 +63,6 @@ public class SendSerializedEvent {
                     Thread.sleep(1000);
                 }
                 client.destroy();
-		        client.platformDeInit();
             } catch (Exception e) 
             {
                 e.printStackTrace();

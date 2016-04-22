@@ -269,7 +269,7 @@ public interface Iothub_client_wrapperLibrary extends Library{
     public int Map_GetInternals(MAP_HANDLE handle, PointerByReference[] keys, PointerByReference[] values, IntByReference count);
     
     /*
-     *				platform.h.h		
+     *				platform.h
      */
     
     /*

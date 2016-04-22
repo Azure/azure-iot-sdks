@@ -144,7 +144,6 @@ public class SendEvents
 
         System.out.println("Shutting down...");
         client.destroy();
-        client.platformDeInit();
     }
 }
 
