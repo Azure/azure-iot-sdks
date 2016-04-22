@@ -1,6 +1,6 @@
 # Run the iotdm\_edison\_sample on Intel Edison
 
-This document describes how to prepare your Linux development environment to use with the *Microsoft Azure IoT Hub device management library for C* and run the iotdm\_edison\_sample application on Intel Edison.
+This document describes how to build and run the iotdm\_edison\_sample application on an Intel Edison device.
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
     git clone --recursive --branch dmpreview https://github.com/Azure/azure-iot-sdks.git
     ```
 
-    Note: **git** on Edison may not support the **submodule** command. In this case you see an error message for the above command. As a workaround you need to process the different submodules in a recursive way manually. In the **azure-iot-sdks** folder, execute the following command:
+    Note: **git** on Edison may not support the **submodule** command. In this case you see an error message for the above command. As a workaround you need to process the different submodules manually. In the **azure-iot-sdks** folder, execute the following command:
 
     ```
     find . –name .gitmodules
@@ -55,7 +55,7 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
     git clone <url> <path>
     ```
 
-    Where &lt;url&gt; and &lt;path&gt; come from the actual section of the .gitmodule you are processing. When you have processed a section, check if there are more submodules to process by executing:
+    ...where &lt;url&gt; and &lt;path&gt; come from the actual section of the .gitmodule you are processing. When you have processed a section, check if there are more submodules to process by executing:
 
     ```
     find . –name .gitmodules

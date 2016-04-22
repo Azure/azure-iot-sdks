@@ -20,7 +20,7 @@ To meet the wide range of device requirements in the Internet of Things space, t
 
 * Enables manageability for IoT devices by Azure IoT Hub services.
 *	Supports OMA Lightweight M2M protocol for IoT device management.
-*	Supports [CoAP](https://tools.ietf.org/html/rfc7252) over TCP/TLS and Azure IoT Hub authentication (SAS tokens).
+*	Supports [CoAP over TCP/TLS](https://tools.ietf.org/pdf/draft-ietf-core-coap-tcp-tls-01.pdf) and Azure IoT Hub authentication (SAS tokens).
 *	Based on the [Eclipse Wakaama](https://github.com/eclipse/wakaama) OSS project.
 *	Simplifies implementation of LWM2M protocol details by providing high-level API abstractions to LWM2M.
 
