@@ -582,7 +582,7 @@ static void destroyEventSender(AMQP_TRANSPORT_INSTANCE* transport_state)
 
 void on_event_sender_state_changed(void* context, MESSAGE_SENDER_STATE new_state, MESSAGE_SENDER_STATE previous_state)
 {
-	LogInfo("Event sender state changed [%d->%d]\r\n", previous_state, new_state);
+	LogInfo("Event sender state changed [%d->%d]", previous_state, new_state);
 }
 
 static int createEventSender(AMQP_TRANSPORT_INSTANCE* transport_state)

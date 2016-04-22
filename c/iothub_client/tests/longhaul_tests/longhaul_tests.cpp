@@ -349,7 +349,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
     {
 #ifdef MBED_BUILD_TIMESTAMP
         time_t time_sent = sendData->time_sent;
-        (void)LogInfo("VerifyMessageReceived[%s] sent on [%s]\r\n", sendData->message, ctime(&time_sent));
+        (void)LogInfo("VerifyMessageReceived[%s] sent on [%s]", sendData->message, ctime(&time_sent));
 
         int response = -1;
         scanf("%d", &response);
@@ -442,7 +442,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
 
             IoTHubTest_Deinit(devhubTestHandle);
 
-            LogInfo("Number of Events: Sent=%f, Received=%f; Travel Time (secs): Min=%f, Max=%f, Average=%f\r\n", 
+            LogInfo("Number of Events: Sent=%f, Received=%f; Travel Time (secs): Min=%f, Max=%f, Average=%f", 
                 numberOfEventsSent, numberOfEventsReceived, minEventTravelTime, maxEventTravelTime, avgEventTravelTime);
 
             Unlock(eventsPendingVerificationLockHandle);
@@ -454,7 +454,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
 
     void RunLongHaulTest(int totalRunTimeInSeconds, int eventFrequencyInHz)
     {
-        LogInfo("Starting Long Haul tests (totalRunTimeInSeconds=%d, eventFrequencyInHz=%d)\r\n", totalRunTimeInSeconds, eventFrequencyInHz);
+        LogInfo("Starting Long Haul tests (totalRunTimeInSeconds=%d, eventFrequencyInHz=%d)", totalRunTimeInSeconds, eventFrequencyInHz);
 
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig;
@@ -520,14 +520,14 @@ BEGIN_TEST_SUITE(longhaul_tests)
             WaitForFrequencyMatch(eventFrequencyInHz, loopInitialTimeInMilliseconds);
         }
 
-        LogInfo("1 tests ran, 0 failed, 1 succeeded.\r\n");
+        LogInfo("1 tests ran, 0 failed, 1 succeeded.");
 
         // cleanup
         IoTHubClient_Destroy(iotHubClientHandle);
 
         CompleteEventReceivedVerification();
 
-        LogInfo("Long Haul tests completed\r\n");
+        LogInfo("Long Haul tests completed");
     }
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
