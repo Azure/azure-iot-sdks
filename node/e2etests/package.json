@@ -10,7 +10,7 @@
     "amqp10": "^2.2.2",
     "azure-iot-common": "1.0.5",
     "azure-iot-device": "1.0.5",
-    "azure-iot-device-amqp": "1.0.4",
+    "azure-iot-device-amqp": "1.0.5",
     "azure-iot-device-http": "1.0.5",
     "azure-iothub": "1.0.5",
     "azure-storage": "^0.7.0",

@@ -20,10 +20,10 @@
         "http-base": "1.0.5",
         "mqtt-base": "1.0.5",
         "device": "1.0.5",
-        "device-amqp": "1.0.4",
-        "device-amqp-ws": "1.0.4",
+        "device-amqp": "1.0.5",
+        "device-amqp-ws": "1.0.5",
         "device-http": "1.0.5",
-        "device-mqtt": "1.0.4",
+        "device-mqtt": "1.0.5",
         "service": "1.0.5"
     },
     "iothub-explorer": "1.0.2",
