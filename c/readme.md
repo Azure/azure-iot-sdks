@@ -1,13 +1,13 @@
 # Microsoft Azure IoT device SDK for C
 
-The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
+The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub.
 
 The device library consists of a set of reusable components with abstract interfaces that enable pluggability between stock and custom modules.
 
 To meet the wide range of device requirements in the Internet of Things space, the C libraries are provided in source code form to support multiple form factors, operating systems, tools sets, protocols and communications patterns widely in use today.
 
 
-## Features
+## Messaging Features
 
  * Sends event data to Azure IoT based services.
  * Maps server commands to device functions.
@@ -15,6 +15,14 @@ To meet the wide range of device requirements in the Internet of Things space, t
  * Batches messages to improve communication efficiency.
  * Supports pluggable transport protocols. HTTPS, AMQP and MQTT are the protocols currently available now.
  * Supports pluggable serialization methods. JSON serialization is available now.
+
+## Device Management Features [PREVIEW]
+
+* Enables manageability for IoT devices by Azure IoT Hub services.
+*	Supports OMA Lightweight M2M protocol for IoT device management.
+*	Supports [CoAP](https://tools.ietf.org/html/rfc7252) over TCP/TLS and Azure IoT Hub authentication (SAS tokens).
+*	Based on the [Eclipse Wakaama](https://github.com/eclipse/wakaama) OSS project.
+*	Simplifies implementation of LWM2M protocol details by providing high-level API abstractions to LWM2M.
 
 
 The library code:
@@ -30,8 +38,13 @@ For information on how to use this library refer to the documents below:
 
 - [Prepare your development environment to use the Azure IoT device SDK for C](doc/devbox_setup.md)
 - [Setup IoT Hub](../doc/setup_iothub.md)
-- [Provision and manage devices](../doc/manage_iot_hub.md)
+- [Provision devices](../doc/manage_iot_hub.md)
 - [Azure IoT device SDK for C  tutorial](https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/)
+- [Getting started with Azure IoT Hub device management]() [PREVIEW]
+- [Create manageable devices with Azure IoT Hub]() [PREVIEW]
+- [Simulate a manage device using Windows]() [PREVIEW]
+- [Simulate a manage device using Linux]() [PREVIEW]
+- [Running the Intel Edison device management sample]() [PREVIEW]
 - [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
 - [How to port the C libraries to other OS platforms](doc/porting_guide.md)
 - [Cross compilation example](doc/SDK_cross_compile_example.md)
@@ -52,35 +65,47 @@ This folder contains platform-specific build scripts for the client libraries an
 
 The C library source code is contained in three directories: common, iothub_client and serializer. The Common folder contains components such as adapters and linked-list implementations used by all the C libraries. It includes the following subfolders:
 
-   * build: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
-   * doc: contains requirements, designs notes, manuals.
-   * inc: public include files.
-   * src: client libraries source files.
-   * tools: tools used for libraries.
-   * unittests: unit tests for source code.
+   * **build**: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
+   * **doc**: contains requirements, designs notes, manuals.
+   * **inc**: public include files.
+   * **src**: client libraries source files.
+   * **tools**: tools used for libraries.
+   * **unittests**: unit tests for source code.
 
 
 ### /iothub_client
 
 Contains Azure IoT Hub client components that provide the raw messaging capabilities of the library. Refer to the API documentation and samples for information on how to use it.
 
-   * build: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
-   * doc: contains requirements, designs notes, manuals.
-   * inc: public include files.
-   * src: client libraries source files.
-   * samples: contains the send event and receive message samples (with ports for the supported platforms).
-   * unittests: unit tests for source code.
+   * **build**: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
+   * **devdoc**: contains requirements, designs notes, manuals.
+   * **inc**: public include files.
+   * **src**: client libraries source files.
+   * **samples**: contains the send event and receive message samples (with ports for the supported platforms).
+   * **tests**: unit tests for source code.
+
+### /iotdm_client [PREVIEW]
+
+Contains the Azure IoT Hub device management library for C that enables the creation of IoT devices that can be managed by Azure IoT Hub. Device makers can use this library to report device properties (such as manufacturer information, serial number, model number, firmware version, and battery power level) and implement the execute actions required by device jobs, which enable remote actions such as firmware update, factory reset, reboot, and configuration update.  
+
+* **devdoc**: contains requirements, designs notes, manuals.
+* **inc**: public include files.
+* **lwm2m_objects**: public source files containing implementation of lwm2m objects.
+* **src**: client libraries source files.
+* **samples**: contains DM enabled device samples, e.g.: [iotdm_simple_sample](https://github.com/Azure/azure-iot-sdks/tree/dmpreview/c/iotdm_client/samples/iotdm_simple_sample) and  [iotdm_edison_sample](https://github.com/Azure/azure-iot-sdks/tree/dmpreview/c/iotdm_client/samples/iotdm_edison_sample)  
+* **tests**: unit tests for source code.
+* **tools**: tools used for libraries.
 
 ### /serializer
 
 Contains libraries that provide modeling and JSON serialization capabilities on top of the raw messaging library. These libraries facilitate uploading structured data and command and control for use with Azure IoT services. Refer to the API documentation and samples for information on how to use it.
 
-   * build: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
-   * doc: contains requirements, designs notes, manuals.
-   * inc: public include files.
-   * src: client libraries source files.
-   * samples: contains the send event and receive message samples (with ports for the supported platforms).
-   * unittests: unit tests for source code.
+   * **build**: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
+   * **devdoc**: contains requirements, designs notes, manuals.
+   * **inc**: public include files.
+   * **src**: client libraries source files.
+   * **samples**: contains the send event and receive message samples (with ports for the supported platforms).
+   * **unittests**: unit tests for source code.
 
 ### /testtools
 

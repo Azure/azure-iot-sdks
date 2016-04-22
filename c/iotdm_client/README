@@ -1,5 +1,2 @@
-to build the product for BB on UBUNTU:
-  - generate the scripts:
-    cmake -D CMAKE_C_COMPILER=arm-linux-gnueabi-gcc-4.6 .
-  - build:
-    cmake --build . (or make -f Makefile)
+
+# This folder contains the iothub C client
