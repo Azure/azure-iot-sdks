@@ -75,10 +75,14 @@ This section walks you through building, deploying and validating the IoT Client
 Complete the following steps to set up your development environment:
 
 1. Download latest SDK using following command:
+  
+  ```
+  git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+  ```
 
-		git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+2. Install the latest x86 or x64 Python 2.7 client. The build needs a valid Python.exe in the path. Based on the active Python version (e.g. Python 2.7.11 x86 32bit) the build script choses the compiler.
 
-2. install the latest x86 or x64 Python 2.7 client from [python-2.7](https://www.python.org/downloads/). The build needs a valid Python.exe in the path. Based on the active Python version (e.g. Python 2.7.11 x86 32bit) the build script choses the compiler 
+> You can install the latest x86 or x64 Python 2.7 client from [python-2.7](https://www.python.org/downloads/).
 
 <a name="Step_3_2:_Build"/>
 ## 3.3  Build the Python iothub_client module on Windows using Nuget packages (recommended)
@@ -136,20 +140,19 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
 		python iothub_client_sample.py -p amqp
 
 8. Verify that the confirmation messages show an OK. If not, then you may have incorrectly copied the device hub connection information.
-
-		
+  
   **If HTTP protocol:**	
-
-   ![DeviceExplorer\_Notification\_Send](images/terminal_message_send_from_device_http.png)
-	
-**If MQTT protocol:**
-
-![DeviceExplorer\_Notification\_Send](images/terminal_message_send_from_device_mqtt.png)
-
+  
+  ![DeviceExplorer\_Notification\_Send](images/terminal_message_send_from_device_http.png)
+  
+  **If MQTT protocol:**
+  
+  ![DeviceExplorer\_Notification\_Send](images/terminal_message_send_from_device_mqtt.png)
+  
   **If AMQP protocol:**
-  	
+  
   ![DeviceExplorer\_Notification\_Send](images/terminal_message_send_from_device_amqp.png)
-
+  
 9. You should be able to see the events received in the DeviceExplorer's data tab.
 
 	**If HTTP protocol:**	
@@ -196,13 +199,17 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
   
 Package the following artifacts from your device:
 
-1.  Build logs from section 3.2.
+1. Build logs from section 3.2.
+
 2. All the screenshots that are shown above in "**Send Device Events to IoT Hub**" section.
-3.  All the screenshots that are shown above in "**Receive messages from IoT Hub**" section.
-4.  Send us clear instructions of how to run this sample with your hardware
-    (explicitly highlighting the new steps for customers). Please use the template available [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/templates/template-windows-python.md>) to create your device-specific instructions.
-    
-    As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
+
+3. All the screenshots that are shown above in "**Receive messages from IoT Hub**" section.
+
+4. Send us clear instructions of how to run this sample with your hardware (explicitly highlighting the new steps for customers).
+
+> Please use the template available [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/templates/template-windows-python.md>) to create your device-specific instructions.
+	
+> As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
 
 <a name="Step_4_2:_Share"/>
 ## 4.2 Share package with the Azure IoT Certification Team
@@ -218,3 +225,4 @@ Once you shared the documents with us, we will contact you in the following 48 t
 # Step 5: Troubleshooting
 
 Please contact engineering support on <iotcert@microsoft.com> for help with  troubleshooting.
+
