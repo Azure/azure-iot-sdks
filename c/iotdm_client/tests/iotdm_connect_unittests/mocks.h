@@ -127,6 +127,9 @@ public:
     // int xio_open(XIO_HANDLE xio, ON_IO_OPEN_COMPLETE on_io_open_complete, void* on_io_open_complete_context, ON_BYTES_RECEIVED on_bytes_received, void* on_bytes_received_context, ON_IO_ERROR on_io_error, void* on_io_error_context);
     MOCK_STATIC_METHOD_7(, int, xio_open, XIO_HANDLE, socket_io, ON_IO_OPEN_COMPLETE, on_io_open_complete, void*, on_io_open_complete_context, ON_BYTES_RECEIVED, on_bytes_received, void*, on_bytes_received_context, ON_IO_ERROR, on_io_error, void*, on_io_error_context)
     MOCK_METHOD_END(int, (free(on_io_open_complete_context), 0))
+    // int xio_setoption(XIO_HANDLE xio, const char* optionName, const void* value)
+    MOCK_STATIC_METHOD_3(, int, xio_setoption, XIO_HANDLE, xio, const char*, optionName, const void*, value)
+    MOCK_METHOD_END(int, 0)
     // int xio_send(XIO_HANDLE socket_io, const void* buffer, size_t size, ON_SEND_COMPLETE on_send_complete, void* callback_context);
     MOCK_STATIC_METHOD_5(, int, xio_send, XIO_HANDLE, socket_io, const void*, buffer, size_t, size, ON_SEND_COMPLETE, on_send_complete, void*, callback_context)
     MOCK_METHOD_END(int, 0)
@@ -190,6 +193,7 @@ DECLARE_GLOBAL_MOCK_METHOD_0(iotdm_connect_mocks, , const IO_INTERFACE_DESCRIPTI
 DECLARE_GLOBAL_MOCK_METHOD_0(iotdm_connect_mocks, , const IO_INTERFACE_DESCRIPTION*, platform_get_default_tlsio);
 DECLARE_GLOBAL_MOCK_METHOD_3(iotdm_connect_mocks, , XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, io_create_parameters, LOGGER_LOG, logger_log);
 DECLARE_GLOBAL_MOCK_METHOD_7(iotdm_connect_mocks, , int, xio_open, XIO_HANDLE, socket_io, ON_IO_OPEN_COMPLETE, on_io_open_complete, void*, on_io_open_complete_context, ON_BYTES_RECEIVED, on_bytes_received, void*, on_bytes_received_context, ON_IO_ERROR, on_io_error, void*, on_io_error_context);
+DECLARE_GLOBAL_MOCK_METHOD_3(iotdm_connect_mocks, , int, xio_setoption, XIO_HANDLE, xio, const char*, optionName, const void*, value);
 DECLARE_GLOBAL_MOCK_METHOD_5(iotdm_connect_mocks, , int, xio_send, XIO_HANDLE, socket_io, const void*, buffer, size_t, size, ON_SEND_COMPLETE, on_send_complete, void*, callback_context);
 DECLARE_GLOBAL_MOCK_METHOD_3(iotdm_connect_mocks, , int, xio_close, XIO_HANDLE, xio, ON_IO_CLOSE_COMPLETE, on_io_close_complete, void*, callback_context);
 DECLARE_GLOBAL_MOCK_METHOD_1(iotdm_connect_mocks, , void, xio_destroy, XIO_HANDLE, xio);

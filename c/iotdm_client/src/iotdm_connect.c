@@ -184,8 +184,39 @@ void on_io_error(void* context)
     (void)dm_io_open(openContext);
 }
 
+static int set_keep_alive(CLIENT_DATA *cd)
+{
+    const int keepAlive = 1;
+    const int keepAliveTime = 180; // send keep-alive after 3 minutes of socket inactivity
+    const int keepAliveInterval = 10; // 10 seconds between keep-alive retries
+
+    int result = xio_setoption(cd->ioHandle, "tcp_keepalive", &keepAlive);
+    if (result != 0)
+    {
+        LogError("    xio_setoption(\"tcp_keepalive\") failed, returned = %d\r\n", result);
+    }
+    else
+    {
+        result = xio_setoption(cd->ioHandle, "tcp_keepalive_time", &keepAliveTime);
+        if (result != 0)
+        {
+            LogError("    xio_setoption(\"tcp_keepalive_time\") failed, returned = %d\r\n", result);
+        }
+        else
+        {
+            result = xio_setoption(cd->ioHandle, "tcp_keepalive_interval", &keepAliveInterval);
+            if (result != 0)
+            {
+                LogError("    xio_setoption(\"tcp_keepalive_interval\") failed, returned = %d\r\n", result);
+            }
+        }
+    }
+
+    return result;
+}
 
 XIO_HANDLE dm_io_create(const char* iotHubName);
+
 IOTHUB_CLIENT_RESULT iotdmc_register(CLIENT_DATA *cd, ON_REGISTER_COMPLETE onComplete, void* callbackContext)
 {
     IO_OPEN_COMPLETE_CONTEXT* openContext = malloc(sizeof(IO_OPEN_COMPLETE_CONTEXT));
@@ -211,7 +242,11 @@ IOTHUB_CLIENT_RESULT iotdmc_register(CLIENT_DATA *cd, ON_REGISTER_COMPLETE onCom
             int result = dm_io_open(openContext);
             if (result == 0)
             {
-                return IOTHUB_CLIENT_OK;
+                result = set_keep_alive(cd);
+                if (result == 0)
+                {
+                    return IOTHUB_CLIENT_OK;
+                }
             }
 
             LogError("    failed to open a connection to the service (error: %d)\n", result);
