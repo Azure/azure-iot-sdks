@@ -4,7 +4,16 @@
 #this is CMakeLists.txt for samples. There's noithig here, except redirections to 
 #individual samples
 
-add_subdirectory(iotdm_simple_sample)
+function(add_sample_directory whatIsBuilding)
+	add_subdirectory(${whatIsBuilding})
+
+	set_target_properties(${whatIsBuilding}
+			   PROPERTIES
+			   FOLDER "IotHub_DM_Samples")
+endfunction()
+
+
+add_sample_directory(iotdm_simple_sample)
 
 if(NOT WIN32)
     add_subdirectory(iotdm_edison_sample)
