@@ -8,8 +8,8 @@
   "bin": "iothub-explorer.js",
   "dependencies": {
     "amqp10": "2.1.2",
-    "azure-iot-common": "1.0.4",
-    "azure-iothub": "1.0.4",
+    "azure-iot-common": "1.0.5",
+    "azure-iothub": "1.0.5",
     "bluebird": "^3.0.1",
     "colors-tmpl": "^1.0.0",
     "nopt": "^3.0.4",

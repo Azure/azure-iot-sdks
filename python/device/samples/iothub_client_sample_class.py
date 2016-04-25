@@ -9,9 +9,19 @@ import time
 import sys
 import iothub_client
 from iothub_client import *
+from iothub_client_args import *
 
-receiveContext = 0
-avgWindSpeed = 10.0
+# HTTP options
+# Because it can poll "after 9 seconds" polls will happen effectively
+# at ~10 seconds.
+# Note that for scalabilty, the default value of minimumPollingTime
+# is 25 minutes. For more information, see:
+# https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
+timeout = 241000
+minimum_polling_time = 9
+
+receive_context = 0
+avg_wind_speed = 10.0
 message_count = 5
 received_count = 0
 
@@ -21,9 +31,9 @@ send_callbacks = 0
 
 # String containing Hostname, Device Id & Device Key in the format:
 # "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
-connectionString = "[device connection string]"
+connection_string = "[device connection string]"
 
-msgTxt = "{\"deviceId\": \"myPythonDevice\",\"windSpeed\": %.2f}"
+msg_txt = "{\"deviceId\": \"myPythonDevice\",\"windSpeed\": %.2f}"
 
 
 class HubManager(object):
@@ -34,10 +44,13 @@ class HubManager(object):
             protocol=IoTHubTransportProvider.AMQP):
         self.client_protocol = protocol
         self.client = IoTHubClient(connection_string, protocol)
+        if protocol == IoTHubTransportProvider.HTTP:
+            self.client.set_option("timeout", timeout)
+            self.client.set_option("MinimumPollingTime", minimum_polling_time)
         # some embedded platforms need certificate information
         # self.set_certificates()
         self.client.set_message_callback(
-            self._receive_message_callback, receiveContext)
+            self._receive_message_callback, receive_context)
 
     def set_certificates(self):
         from iothub_client_cert import certificates
@@ -54,22 +67,22 @@ class HubManager(object):
         print("Received Message [%d]:" % counter)
         print("    Data: <<<%s>>> & Size=%d" %
               (buffer[:size].decode('utf-8'), size))
-        mapProperties = message.properties()
-        keyValuePair = mapProperties.get_internals()
-        print("    Properties: %s" % keyValuePair)
+        map_properties = message.properties()
+        key_value_pair = map_properties.get_internals()
+        print("    Properties: %s" % key_value_pair)
         counter += 1
         receive_callbacks += 1
         print("    Total calls received: %d" % receive_callbacks)
         return IoTHubMessageDispositionResult.ACCEPTED
 
-    def _send_confirmation_callback(self, message, result, userContext):
+    def _send_confirmation_callback(self, message, result, user_context):
         global send_callbacks
         print(
             "Confirmation[%d] received for message with result = %s" %
-            (userContext, result))
-        mapProperties = message.properties()
-        keyValuePair = mapProperties.get_internals()
-        print("    Properties: %s" % keyValuePair)
+            (user_context, result))
+        map_properties = message.properties()
+        key_value_pair = map_properties.get_internals()
+        print("    Properties: %s" % key_value_pair)
         send_callbacks += 1
         print("    Total calls confirmed: %d" % send_callbacks)
 
@@ -78,22 +91,22 @@ class HubManager(object):
             event = IoTHubMessage(bytearray(event, 'utf8'))
 
         if len(properties) > 0:
-            propMap = event.properties()
+            prop_map = event.properties()
             for key in properties:
-                propMap.add(key, properties[key])
+                prop_map.add_or_update(key, properties[key])
 
         self.client.send_event_async(
             event, self._send_confirmation_callback, send_context)
 
 
-def main():
+def main(connection_string, protocol):
     try:
         print("\nPython %s\n" % sys.version)
         print(
             "IoT Hub for Python SDK Version: %s\n" %
             iothub_client.__version__)
 
-        hub_manager = HubManager(connectionString)
+        hub_manager = HubManager(connection_string, protocol)
 
         print(
             "Starting the IoT Hub Python sample using protocol %s..." %
@@ -104,12 +117,12 @@ def main():
             print("IoTHubClient sending %d messages" % message_count)
 
             for i in range(0, message_count):
-                msgTxtFormatted = msgTxt % (
-                    avgWindSpeed + (random.random() * 4 + 2))
+                msg_txt_formatted = msg_txt % (
+                    avg_wind_speed + (random.random() * 4 + 2))
                 msg_properties = {
                     "Property": "PropMsg_%d" % i
                 }
-                hub_manager.send_event(msgTxtFormatted, msg_properties, i)
+                hub_manager.send_event(msg_txt_formatted, msg_properties, i)
                 print(
                     "IoTHubClient.send_event_async accepted message [%d]"
                     " for transmission to IoT Hub." %
@@ -124,6 +137,7 @@ def main():
                 print("Send status: %s" % status)
                 time.sleep(10)
                 n += 1
+
     except IoTHubError as e:
         print("Unexpected error %s from IoTHub" % e)
         return
@@ -131,5 +145,18 @@ def main():
         print("IoTHubClient sample stopped")
 
 
+def usage():
+    print("Usage: iothub_client_sample_class.py -p <protocol> -c <connectionstring>")
+    print("    protocol        : <amqp, http, mqtt>")
+    print("    connectionstring: <HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>>")
+
 if __name__ == '__main__':
-    main()
+    try:
+        (connection_string, protocol) = get_iothub_opt(
+            sys.argv[1:], connection_string)
+    except OptionError as o:
+        print(o)
+        usage()
+        sys.exit(1)
+
+    main(connection_string, protocol)
