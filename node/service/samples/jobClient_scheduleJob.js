@@ -56,7 +56,7 @@ loadDevicesData(function (err, deviceData) {
               console.log('getJob failure: ' + err.message);
             } else {
               if (jobResp.status !== 'completed') {
-                console.log(jobResp.jobId + ' is ' + jobResp.status + ': ' + jobResp.progress + '%');
+                console.log(jobResp.jobId + ' is ' + jobResp.status);
               } else {
                 if(jobResp.failureReason) {
                   console.log(jobResp.jobId + ' failed: ' + jobResp.failureReason);

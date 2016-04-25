@@ -13,7 +13,7 @@ var registry = iothub.Registry.fromConnectionString(connectionString);
 console.log('**listing devices...');
 registry.list(function (err, deviceList) {
   deviceList.forEach(function (device) {
-    var key = device.authentication ? device.authentication.SymmetricKey.primaryKey : '<no primary key>';
+    var key = device.authentication ? device.authentication.symmetricKey.primaryKey : '<no primary key>';
     console.log(device.deviceId + ': ' + key);
   });
 

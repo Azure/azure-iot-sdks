@@ -9,7 +9,7 @@ var filterQuery = {
       name: "CustomerId",
       type: "service"
     },
-    value: 123456,
+    value: "123456",
     comparisonOperator: "eq",
     type: "comparison"
   },
