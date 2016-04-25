@@ -6,7 +6,6 @@
 var assert = require('chai').assert;
 var JobClient = require('../lib/job_client.js');
 var SimulatedHttp = require('./job_client_http_simulated.js');
-var JobResponse = require('../lib/job_response.js');
 var ConnectionString = require('../lib/connection_string.js');
 var endpoint = require('azure-iot-common').endpoint;
 var packageJson = require('../package.json');
@@ -16,7 +15,7 @@ var testDeviceId = "device-id-test";
 var packageUri = "www.bing.com";
 var timeout = 60;
 var testjobId = 'job-id-test';
-var testSysPropName = 'BatteryLevel';
+var testDevPropName = 'batteryLevel';
 var testValue = 'value';
 
 function bulkTests(Transport, goodConnectionString, badConnectionString) {
@@ -43,7 +42,6 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }
@@ -136,7 +134,6 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }
@@ -154,38 +151,37 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
 
         });
 
-        describe('#scheduleSystemPropertyRead', function () {
-            /* Tests_SRS_NODE_IOTHUB_JOBCLIENT_07_015: [ ScheduleSystemPropertyRead method shall throw ArgumentError if any argument contains a falsy value.] */
+        describe('#scheduleDevicePropertyRead', function () {
+            /* Tests_SRS_NODE_IOTHUB_JOBCLIENT_07_015: [ scheduleDevicePropertyRead method shall throw ArgumentError if any argument contains a falsy value.] */
             it('throws when jobId is null', function () {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString);
                 assert.throws(function () {
-                    jobClient.scheduleSystemPropertyRead(null, testDeviceId, testSysPropName);
+                    jobClient.scheduleDevicePropertyRead(null, testDeviceId, testDevPropName);
                 }, ReferenceError);
             });
 
             it('throws when deviceIds is null', function () {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString);
                 assert.throws(function () {
-                    jobClient.scheduleSystemPropertyRead(testjobId, null, testSysPropName);
+                    jobClient.scheduleDevicePropertyRead(testjobId, null, testDevPropName);
                 }, ReferenceError);
             });
 
             it('throws when propertyName is null', function () {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString);
                 assert.throws(function () {
-                    jobClient.scheduleSystemPropertyRead(testjobId, testDeviceId, null);
+                    jobClient.scheduleDevicePropertyRead(testjobId, testDeviceId, null);
                 }, ReferenceError);
             });
 
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub.]*/
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
-                jobClient.scheduleSystemPropertyRead(testjobId, testDeviceId, testSysPropName, function (err, jobResp) {
+                jobClient.scheduleDevicePropertyRead(testjobId, testDeviceId, testDevPropName, function (err, jobResp) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }
@@ -195,14 +191,14 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
             /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_003: [If an error is encountered while sending the request, it shall invoke the `done` callback function and pass the standard JavaScript `Error` object with a text description of the error (`err.message`).]*/
             it('sets err when bad connection is encountered', function (done) {
                 var jobClient = JobClient.fromConnectionString(badConnectionString, Transport);
-                jobClient.scheduleSystemPropertyRead(testjobId, testDeviceId, testSysPropName, function (err, jobResp) {
+                jobClient.scheduleDevicePropertyRead(testjobId, testDeviceId, testDevPropName, function (err, jobResp) {
                     assert.instanceOf(err, Error);
                     assert.isUndefined(jobResp);
                     done();
                 });
             });
             
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_07_016: [`scheduleSystemPropertyRead` shall construct an HTTP request using information supplied by the caller, as follows:
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_07_016: [`scheduleDevicePropertyRead` shall construct an HTTP request using information supplied by the caller, as follows:
             ```
                 PUT <path>?api-version=<version> HTTP/1.1
                 Authorization: <config.sharedAccessSignature>
@@ -212,7 +208,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                 {
                     "jobId":"<jobId>",
                     "jobParameters":{
-                        "SystemPropertyNames":"<propertyNames>",
+                        "DevicePropertyNames":"<propertyNames>",
                         "DeviceIds":<deviceIds>,
                         "jobType":"readDeviceProperties"
                     }
@@ -232,48 +228,47 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     var requestBody = JSON.parse(writeData);
                     assert.equal(requestBody.jobId, testjobId);
                     assert.isArray(requestBody.jobParameters.DeviceIds);
-                    assert.isArray(requestBody.jobParameters.SystemPropertyNames);
+                    assert.isArray(requestBody.jobParameters.DevicePropertyNames);
                     assert.equal(requestBody.jobParameters.jobType, 'readDeviceProperties');
                     done();
                 };
                 
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, SpyTransport);
-                jobClient.scheduleSystemPropertyRead(testjobId, testDeviceId, testSysPropName);
+                jobClient.scheduleDevicePropertyRead(testjobId, testDeviceId, testDevPropName);
             });
         });
 
-        describe('#scheduleSystemPropertyWrite', function () {
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_005: [** `scheduleSystemPropertyWrite` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.]*/
+        describe('#scheduleDevicePropertyWrite', function () {
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_005: [** `scheduleDevicePropertyWrite` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.]*/
             it('throws when jobId is null', function () {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString);
                 assert.throws(function () {
-                    jobClient.scheduleSystemPropertyWrite(null, testDeviceId, testSysPropName);
+                    jobClient.scheduleDevicePropertyWrite(null, testDeviceId, testDevPropName);
                 }, ReferenceError);
             });
 
             it('throws when deviceIds is null', function () {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString);
                 assert.throws(function () {
-                    jobClient.scheduleSystemPropertyWrite(testjobId, null, testSysPropName);
+                    jobClient.scheduleDevicePropertyWrite(testjobId, null, testDevPropName);
                 }, ReferenceError);
             });
 
             it('throws when propertyName is null', function () {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString);
                 assert.throws(function () {
-                    jobClient.scheduleSystemPropertyWrite(testjobId, testDeviceId, null);
+                    jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, null);
                 }, ReferenceError);
             });
 
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub.]*/
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
-                jobClient.scheduleSystemPropertyWrite(testjobId, testDeviceId, testSysPropName, function (err, jobResp) {
+                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testDevPropName, function (err, jobResp) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }
@@ -283,16 +278,16 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
             /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_003: [If an error is encountered while sending the request, it shall invoke the `done` callback function and pass the standard JavaScript `Error` object with a text description of the error (`err.message`).]*/
             it('sets err when bad connection is encountered', function (done) {
                 var jobClient = JobClient.fromConnectionString(badConnectionString, Transport);
-                jobClient.scheduleSystemPropertyWrite(testjobId, testDeviceId, testSysPropName, function (err, jobResp) {
+                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testDevPropName, function (err, jobResp) {
                     assert.instanceOf(err, Error);
                     assert.isUndefined(jobResp);
                     done();
                 });
             });
 
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_008: [If the `propertyNames` argument is not an array, then `scheduleSystemPropertyWrite` shall convert it to an array with one element before using it. ]*/
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_007: [If the `deviceIds` argument is not an array, then `scheduleSystemPropertyWrite` shall convert it to an array with one element before using it. ]*/
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_006: [`scheduleSystemPropertyWrite` shall construct an HTTP request using information supplied by the caller, as follows:
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_008: [If the `propertyNames` argument is not an array, then `scheduleDevicePropertyWrite` shall convert it to an array with one element before using it. ]*/
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_007: [If the `deviceIds` argument is not an array, then `scheduleDevicePropertyWrite` shall convert it to an array with one element before using it. ]*/
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_006: [`scheduleDevicePropertyWrite` shall construct an HTTP request using information supplied by the caller, as follows:
             ```
                 PUT <path>?api-version=<version> HTTP/1.1
                 Authorization: <config.sharedAccessSignature>
@@ -302,7 +297,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                 {
                     "jobId":"<jobId>",
                     "jobParameters":{
-                        "SystemPropertyNames":"<propertyNames>",
+                        "DevicePropertyNames":"<propertyNames>",
                         "DeviceIds":<deviceIds>,
                         "jobType":"writeDeviceProperties"
                     }
@@ -322,13 +317,13 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     var requestBody = JSON.parse(writeData);
                     assert.equal(requestBody.jobId, testjobId);
                     assert.isArray(requestBody.jobParameters.DeviceIds);
-                    assert.isArray(requestBody.jobParameters.SystemPropertyNames);
+                    assert.isArray(requestBody.jobParameters.DevicePropertyNames);
                     assert.equal(requestBody.jobParameters.jobType, 'writeDeviceProperties');
                     done();
                 };
                 
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, SpyTransport);
-                jobClient.scheduleSystemPropertyWrite(testjobId, testDeviceId, testSysPropName);
+                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testDevPropName);
             });
         });
 
@@ -348,7 +343,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                 }, ReferenceError);
             });
 
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub.]*/
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
@@ -356,7 +351,6 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }
@@ -428,7 +422,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                 }, ReferenceError);
             });
 
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub.]*/
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
@@ -436,7 +430,6 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }

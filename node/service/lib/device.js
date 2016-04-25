@@ -191,7 +191,7 @@ var SystemPropInfo = function (systemProp) {
             get: function () {
                 var regLifetime;
                 if (sysProp) {
-                    regLifetime = sysProp.RegistrationLifetime;
+                    regLifetime = sysProp.registrationLifetime;
                 }
                 return regLifetime;
             }
@@ -352,10 +352,15 @@ var AuthenticationMechanism = function (authInfo) {
  *                                  authenticate this device
  * @prop {Object}   serviceProperties Contains the Service Properties
  */
-module.exports = function Device(jsonData) {
+module.exports = function Device(sourceObj) {
   var body;
-  if (jsonData) {
-    body = JSON.parse(jsonData);
+  if (sourceObj) {
+    if (typeof sourceObj === 'string') {
+      body = JSON.parse(sourceObj);
+    } else {
+      body = sourceObj;
+    }
+    
     if (!body.deviceId) {
       throw new ReferenceError('Argument \'deviceId\' is ' + body.deviceId);
     }
@@ -384,8 +389,8 @@ module.exports = function Device(jsonData) {
         }
       },
       systemProperties: {
-          BatteryLevel: '',
-          BatteryStatus: '',
+          batteryLevel: '',
+          batteryStatus: '',
           currentTime: '',
           defaultMaxPeriod: '',
           defaultMinPeriod: '',

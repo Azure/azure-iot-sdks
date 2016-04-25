@@ -18,8 +18,7 @@ registry.list(function (err, deviceList) {
   });
 
   // Create a new device
-  var device = new iothub.Device(null);
-  device.deviceId = 'sample-device-' + Date.now();
+  var device = { deviceId : 'sample-device-' + Date.now() };
   console.log('\n**creating device \'' + device.deviceId + '\'');
   registry.create(device, printAndContinue('create', function next() {
 

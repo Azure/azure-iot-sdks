@@ -11,10 +11,10 @@ A `QueryExpression` object is used as a parameter to the `Registry.queryDevices`
     "filters": [
       {
         "property": {
-          "name": "Temperature",
-          "type": "system"
+          "name": "Manufacturer",
+          "type": "device"
         },
-        "value": 60,
+        "value": "Contoso",
         "comparisonOperator": "gt",
         "type": "comparison"
       },
@@ -23,19 +23,19 @@ A `QueryExpression` object is used as a parameter to the `Registry.queryDevices`
         "filters": [
           {
             "property": {
-              "name": "Humidity",
-              "type": "system"
+              "name": "FirmwareVersion",
+              "type": "device"
             },
-            "value": 45,
+            "value": 5,
             "comparisonOperator": "lt",
             "type": "comparison"
           },
           {
             "property": {
-              "name": "Humidity",
-              "type": "system"
+              "name": "FirmwareVersion",
+              "type": "device"
             },
-            "value": 75,
+            "value": 1,
             "comparisonOperator": "gt",
             "type": "comparison"
           }
@@ -139,5 +139,5 @@ A `SortExpression` object must have 2 properties:
 
 ## QueryProperty properties
 A `QueryProperty` object must have 2 properties:
-- `type` is the type of the property and must be one of the following strings: `system`, `service`, `custom`, `default`, `aggregated`.
+- `type` is the type of the property and must be one of the following strings: `device`, `service`, `default`, `aggregated`.
 - `name` is the property name and must be a `string`.

@@ -382,9 +382,9 @@ Registry.prototype.cancelJob = function (jobId, done) {
 
 function createDeviceArray(sourceArray) {
   var devList = [];
-  sourceArray.forEach(function (jsonElement) {
-    var devItem = new Device(JSON.stringify(jsonElement));
-    devList.push(devItem);
+  sourceArray.forEach(function (sourceDevice) {
+    var device = new Device(sourceDevice);
+    devList.push(device);
   });
   return devList;
 }

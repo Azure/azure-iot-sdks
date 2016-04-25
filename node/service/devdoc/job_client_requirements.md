@@ -44,10 +44,10 @@ The `fromSharedAccessSignature` static method returns a new instance of the JobC
 
 ### Common scheduled job requirements
 **SRS_NODE_IOTHUB_JOBCLIENT_05_003: [** If an error is encountered while sending the request, it shall invoke the `done` callback function and pass the standard JavaScript `Error` object with a text description of the error (`err.message`). **]**  
-**SRS_NODE_IOTHUB_JOBCLIENT_05_004: [** When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub. **]**
+**SRS_NODE_IOTHUB_JOBCLIENT_05_004: [** When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub. **]**
 
 ###scheduleFirmwareUpdate(jobId, deviceId, packageUri, timeout, done)
-The `scheduleFirmwareUpdate` method initiates a Firmware Update returning a `jobResponse` object.  
+The `scheduleFirmwareUpdate` method initiates a Firmware Update returning an object describing the job status.  
 **SRS_NODE_IOTHUB_JOBCLIENT_07_008: [**`scheduleFirmwareUpdate` method shall throw a `ReferenceError` if any argument contains a falsy value excluding the done parameter.**]**  
 **SRS_NODE_IOTHUB_JOBCLIENT_07_009: [**`scheduleFirmwareUpdate` shall construct an HTTP request using information supplied by the caller, as follows:
 ```
@@ -92,9 +92,9 @@ Host: <config.host>
 ```
 **]**  
 
-###scheduleSystemPropertyRead(jobId, deviceIds, propertyNames, done)
-**SRS_NODE_IOTHUB_JOBCLIENT_07_015: [** `scheduleSystemPropertyRead` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.**]**  
-**SRS_NODE_IOTHUB_JOBCLIENT_07_016: [** `scheduleSystemPropertyRead` shall construct an HTTP request using information supplied by the caller, as follows:
+###scheduleDevicePropertyRead(jobId, deviceIds, propertyNames, done)
+**SRS_NODE_IOTHUB_JOBCLIENT_07_015: [** `scheduleDevicePropertyRead` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.**]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_07_016: [** `scheduleDevicePropertyRead` shall construct an HTTP request using information supplied by the caller, as follows:
 ```
     PUT <path>?api-version=<version> HTTP/1.1
     Authorization: <config.sharedAccessSignature>
@@ -104,19 +104,19 @@ Host: <config.host>
     {
         "jobId":"<jobId>",
         "jobParameters":{
-            "SystemPropertyNames":"<propertyNames>",
+            "DevicePropertyNames":"<propertyNames>",
             "DeviceIds":<deviceIds>,
             "jobType":"readDeviceProperties"
         }
     }
 ```
 **]**  
-**SRS_NODE_IOTHUB_JOBCLIENT_07_017: [** If the `deviceIds` argument is not an array, then `scheduleSystemPropertyRead` shall convert it to an array with one element before using it.**]**  
-**SRS_NODE_IOTHUB_JOBCLIENT_07_018: [** If the `propertyNames` argument is not an array, then `scheduleSystemPropertyRead` shall convert it to an array with one element before using it.**]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_07_017: [** If the `deviceIds` argument is not an array, then `scheduleDevicePropertyRead` shall convert it to an array with one element before using it.**]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_07_018: [** If the `propertyNames` argument is not an array, then `scheduleDevicePropertyRead` shall convert it to an array with one element before using it.**]**  
 
-###scheduleSystemPropertyWrite(jobId, deviceIds, propertyNames, done)
-**SRS_NODE_IOTHUB_JOBCLIENT_16_005: [** `scheduleSystemPropertyWrite` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value. **]**  
-**SRS_NODE_IOTHUB_JOBCLIENT_16_006: [** `scheduleSystemPropertyWrite` shall construct an HTTP request using information supplied by the caller, as follows:
+###scheduleDevicePropertyWrite(jobId, deviceIds, propertyNames, done)
+**SRS_NODE_IOTHUB_JOBCLIENT_16_005: [** `scheduleDevicePropertyWrite` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value. **]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_16_006: [** `scheduleDevicePropertyWrite` shall construct an HTTP request using information supplied by the caller, as follows:
 ```
     PUT <path>?api-version=<version> HTTP/1.1
     Authorization: <config.sharedAccessSignature>
@@ -126,7 +126,7 @@ Host: <config.host>
     {
         "jobId":"<jobId>",
         "jobParameters":{
-            "SystemPropertyNames":"<propertyNames>",
+            "DevicePropertyNames":"<propertyNames>",
             "DeviceIds":<deviceIds>,
             "jobType":"writeDeviceProperties"
         }
@@ -134,8 +134,8 @@ Host: <config.host>
 ```
 **]**  
 
-**SRS_NODE_IOTHUB_JOBCLIENT_16_007: [** If the `deviceIds` argument is not an array, then `scheduleSystemPropertyWrite` shall convert it to an array with one element before using it. **]**  
-**SRS_NODE_IOTHUB_JOBCLIENT_16_008: [** If the `propertyNames` argument is not an array, then `scheduleSystemPropertyWrite` shall convert it to an array with one element before using it. **]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_16_007: [** If the `deviceIds` argument is not an array, then `scheduleDevicePropertyWrite` shall convert it to an array with one element before using it. **]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_16_008: [** If the `propertyNames` argument is not an array, then `scheduleDevicePropertyWrite` shall convert it to an array with one element before using it. **]**  
 
 ###scheduleReboot(jobId, deviceIds, done)
 **SRS_NODE_IOTHUB_JOBCLIENT_16_009: [** `scheduleReboot` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value. **]**  

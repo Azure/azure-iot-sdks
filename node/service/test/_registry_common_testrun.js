@@ -9,14 +9,14 @@ var Device = require('../lib/device.js');
 var Registry = require('../lib/registry.js');
 var RegistryHttp = require('../lib/registry_http.js');
 
-var deviceJson = JSON.stringify({
+var testDevice = {
   deviceId: 'testDevice' + Math.random(),
   status: 'Disabled'
-});
+};
 
 function badConfigTests(opName, badConnStrings, Transport, requestFn) {
 
-  /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_003: [When the get method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
+  /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_003: [When the get method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an object representing the new device identity returned from the IoT hub.]*/
   function makeRequestWith(connString, test, done) {
     var registry = Registry.fromConnectionString(connString, Transport);
     requestFn(registry, function (err, dev, res) {
@@ -107,7 +107,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       /*Tests_SRS_NODE_IOTHUB_REGISTRY_07_001: [The create method shall throw ArgumentError if the first argument does not contain a deviceId property.]*/
       it('throws when deviceInfo.deviceId is falsy', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        var deviceInfo = new Device(null);
+        var deviceInfo = {};
         assert.throws(function () {
           registry.create(deviceInfo);
         }, ArgumentError, 'The object \'deviceInfo\' is missing the property: deviceId');
@@ -129,25 +129,23 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       err - null
       body – the body of the HTTP response
       response - the Node.js http.ServerResponse object returned by the transport]*/
-      /*Tests_SRS_NODE_IOTHUB_REGISTRY_07_002: [When the create method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_07_002: [When the create method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an object representing the new device identity returned from the IoT hub.]*/
       it('creates a new device', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        var deviceInfo = new Device(deviceJson);
-        registry.create(deviceInfo, function (err, dev) {
+        registry.create(testDevice, function (err, dev) {
           if (err) {
             done(err);
           } else {
             assert.instanceOf(dev, Device);
-            assert.equal(deviceInfo.deviceId, dev.deviceId);
-            assert.notEqual(deviceInfo, dev);
+            assert.equal(testDevice.deviceId, dev.deviceId);
+            assert.notEqual(testDevice, dev);
             done();
           }
         });
       });
 
       badConfigTests('create device information', badConnectionStrings, Transport, function (registry, done) {
-        var deviceInfo = new Device(deviceJson);
-        registry.create(deviceInfo, done);
+        registry.create(testDevice, done);
       });
     });
 
@@ -161,7 +159,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       });
 
       /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_002: [The get method shall request metadata for the device (indicated by the deviceId argument) from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
-      /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_003: [When the get method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback, plus a Device object representing the device information returned from IoT Hub.]*/
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_003: [When the get method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback, plus an object representing the device information returned from IoT Hub.]*/
       /*Tests_SRS_NODE_IOTHUB_HTTP_05_004: [The getDevice method shall construct an HTTP request using information supplied by the caller, as follows:
       GET <path>?api-version=<version> HTTP/1.1
       Authorization: <config.sharedAccessSignature>
@@ -227,7 +225,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       /*Tests_SRS_NODE_IOTHUB_REGISTRY_07_003: [The update method shall throw ArgumentError if the first argument does not contain a deviceId property.]*/
       it('throws when deviceInfo.deviceId is falsy', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        var deviceInfo = new Device(null);
+        var deviceInfo = {};
         assert.throws(function () {
           registry.update(deviceInfo);
         }, ArgumentError, 'The object \'deviceInfo\' is missing the property: deviceId');
@@ -248,24 +246,22 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       err - null
       body – the body of the HTTP response
       response - the Node.js http.ServerResponse object returned by the transport]*/
-      /*Test_SRS_NODE_IOTHUB_REGISTRY_07_004: [When the update method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
+      /*Test_SRS_NODE_IOTHUB_REGISTRY_07_004: [When the update method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an object representing the new device identity returned from the IoT hub.]*/
       it('updates information about a device', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        var device = new Device(deviceJson);
-        registry.update(device, function (err, dev) {
+        registry.update(testDevice, function (err, dev) {
           if (err) {
             done(err);
           } else {
             assert.instanceOf(dev, Device);
-            assert.equal(device.deviceId, dev.deviceId);
+            assert.equal(testDevice.deviceId, dev.deviceId);
             done();
           }
         });
       });
 
       badConfigTests('update device information', badConnectionStrings, Transport, function (registry, done) {
-        var device = new Device(deviceJson);
-        registry.update(device, done);
+        registry.update(testDevice, done);
       });
     });
 
@@ -294,8 +290,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_005: [When the delete method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null).]*/
       it('deletes the given device', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        var deviceInfo = new Device(deviceJson);
-        registry.delete(deviceInfo.deviceId, function (err) {
+        registry.delete(testDevice.deviceId, function (err) {
           done(err);
         });
       });

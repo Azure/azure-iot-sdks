@@ -5,7 +5,6 @@
 
 var assert = require('chai').assert;
 var JobClient = require('../lib/job_client.js');
-var JobResponse = require('../lib/job_response.js');
 
 var testDeviceId = "device-id-test";
 var packageUri = "www.bing.com";
@@ -23,7 +22,6 @@ function commonTests(Transport, goodConnectionString) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }
@@ -38,7 +36,6 @@ function commonTests(Transport, goodConnectionString) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }
@@ -46,16 +43,15 @@ function commonTests(Transport, goodConnectionString) {
             });
         });
 
-        describe('#scheduleSystemPropertyRead', function () {
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub.]*/
+        describe('#scheduleDevicePropertyRead', function () {
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
-                jobClient.scheduleSystemPropertyRead(testjobId, testDeviceId, testSysPropName, function (err, jobResp) {
+                jobClient.scheduleDevicePropertyRead(testjobId, testDeviceId, testSysPropName, function (err, jobResp) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }
@@ -63,16 +59,15 @@ function commonTests(Transport, goodConnectionString) {
             });
         });
 
-        describe('#scheduleSystemPropertyWrite', function () {
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub.]*/
+        describe('#scheduleDevicePropertyWrite', function () {
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
-                jobClient.scheduleSystemPropertyWrite(testjobId, testDeviceId, testSysPropName, function (err, jobResp) {
+                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testSysPropName, function (err, jobResp) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }
@@ -81,7 +76,7 @@ function commonTests(Transport, goodConnectionString) {
         });
 
         describe('#scheduleReboot', function () {
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub.]*/
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
@@ -89,7 +84,6 @@ function commonTests(Transport, goodConnectionString) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }
@@ -98,7 +92,7 @@ function commonTests(Transport, goodConnectionString) {
         });
 
         describe('#scheduleFactoryReset', function () {
-            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub.]*/
+            /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
@@ -106,7 +100,6 @@ function commonTests(Transport, goodConnectionString) {
                     if (err) {
                         done(err);
                     } else {
-                        assert.instanceOf(jobResp, JobResponse);
                         assert.equal(jobResp.jobId, testjobId);
                         done();
                     }

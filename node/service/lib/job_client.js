@@ -5,7 +5,6 @@
 
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var ConnectionString = require('./connection_string.js');
-var JobResponse = require('./job_response.js');
 var endpoint = require('azure-iot-common').endpoint;
 var packageJson = require('../package.json');
 var SharedAccessSignature = require('./shared_access_signature.js');
@@ -81,7 +80,7 @@ JobClient.fromSharedAccessSignature = function fromSharedAccessSignature(value, 
 };
 
 /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_003: [If an error is encountered while sending the request, it shall invoke the `done` callback function and pass the standard JavaScript `Error` object with a text description of the error (`err.message`).]*/  
-/*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and a `JobResponse` object representing the new job created on the IoT Hub.]*/
+/*Codes_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
 
 JobClient.prototype._scheduleJob = function (jobDesc, done) {
     var config = this._config;
@@ -95,10 +94,7 @@ JobClient.prototype._scheduleJob = function (jobDesc, done) {
     var path = '/jobs/v2/' + jobDesc.jobId + endpoint.versionQueryString();
     this._httpTransport.sendHttpRequest('PUT', path, httpHeaders, config.host, JSON.stringify(jobDesc), function (err, body, response) {
         if (!err) {
-            var jobInfo;
-            if (body) {
-                jobInfo = new JobResponse(body);
-            }
+            var jobInfo = body ? JSON.parse(body) : null;
             done(null, jobInfo, response);
         }
         else {
@@ -119,10 +115,8 @@ JobClient.prototype._scheduleJob = function (jobDesc, done) {
  *                    timeout       Number of seconds before the operation times out
  * @param {Function}  done          function to call when the operation is
  *                                  complete. `done` will be called with three
- *                                  arguments: an Error object (can be null), a
- *                                  {@link module:azure-iothub.JobResponse|JobResponse}
- *                                  object representing the updated device
- *                                  identity, and a transport-specific response
+ *                                  arguments: an Error object (can be null), an
+ *                                  object representing the scheduled job, and a transport-specific response
  *                                  object useful for logging or debugging.
  */
 JobClient.prototype.scheduleFirmwareUpdate = function (jobId, deviceIds, packageUri, timeout, done) {
@@ -203,7 +197,7 @@ JobClient.prototype.scheduleDeviceConfigurationUpdate = function (jobId, deviceI
 };
 
 /**
- * @method            module:azure-iothub.JobClient#ScheduleSystemPropertyRead`
+ * @method            module:azure-iothub.JobClient#scheduleDevicePropertyRead`
  * @description       Schedules a Job to update the System defined Device Property value.
  * @param {Object}    jobId         An object which must include a `deviceId`
  *                                  property whose value is a valid device identifier.
@@ -211,14 +205,12 @@ JobClient.prototype.scheduleDeviceConfigurationUpdate = function (jobId, deviceI
  *                    propertyName  The Property to Read
  * @param {Function}  done          function to call when the operation is
  *                                  complete. `done` will be called with three
- *                                  arguments: an Error object (can be null), a
- *                                  {@link module:azure-iothub.JobResponse|JobResponse}
- *                                  object representing the updated device
- *                                  identity, and a transport-specific response
+ *                                  arguments: an Error object (can be null), an
+ *                                  object representing the scheduled job, and a transport-specific response
  *                                  object useful for logging or debugging.
  */
-JobClient.prototype.scheduleSystemPropertyRead = function (jobId, deviceIds, propertyName, done) {
-    /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_015: [ ScheduleSystemPropertyRead method shall throw ArgumentError if any argument contains a falsy value.] */
+JobClient.prototype.scheduleDevicePropertyRead = function (jobId, deviceIds, propertyName, done) {
+    /* Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_015: [ scheduleDevicePropertyRead method shall throw ArgumentError if any argument contains a falsy value.] */
     if (!jobId) throw new ReferenceError('The object \'jobId\' is not valid');
     if (!deviceIds) throw new ReferenceError('The object \'deviceIds\' is not valid');
     if (!propertyName) throw new ReferenceError('The object \'propertyName\' is not valid');
@@ -226,7 +218,7 @@ JobClient.prototype.scheduleSystemPropertyRead = function (jobId, deviceIds, pro
     if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
     if (!Array.isArray(propertyName)) propertyName = [propertyName];
 
-    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_016: [`scheduleSystemPropertyRead` shall construct an HTTP request using information supplied by the caller, as follows:
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_07_016: [`scheduleDevicePropertyRead` shall construct an HTTP request using information supplied by the caller, as follows:
     ```
         PUT <path>?api-version=<version> HTTP/1.1
         Authorization: <config.sharedAccessSignature>
@@ -236,26 +228,26 @@ JobClient.prototype.scheduleSystemPropertyRead = function (jobId, deviceIds, pro
         {
             "jobId":"<jobId>",
             "jobParameters":{
-                "SystemPropertyNames":"<propertyNames>",
+                "DevicePropertyNames":"<propertyNames>",
                 "DeviceIds":<deviceIds>,
                 "jobType":"readDeviceProperties"
             }
         }
     ```]*/
-    var sysPropUpdate = {
+    var devPropUpdate = {
         "jobId": jobId,
         "jobParameters": {
-            "SystemPropertyNames": propertyName,
+            "DevicePropertyNames": propertyName,
             "DeviceIds": deviceIds,
             "jobType": "readDeviceProperties"
         }
     };
 
-    this._scheduleJob(sysPropUpdate, done);
+    this._scheduleJob(devPropUpdate, done);
 };
 
 /**
- * @method            module:azure-iothub.JobClient#scheduleSystemPropertyWrite`
+ * @method            module:azure-iothub.JobClient#scheduleDevicePropertyWrite`
  * @description       Schedules a Job to update the System defined Device Property value.
  * @param {Object}    jobId         An object which must include a `deviceId`
  *                                  property whose value is a valid device identifier.
@@ -263,24 +255,22 @@ JobClient.prototype.scheduleSystemPropertyRead = function (jobId, deviceIds, pro
  *                    propertyName  The Property to write
  * @param {Function}  done          function to call when the operation is
  *                                  complete. `done` will be called with three
- *                                  arguments: an Error object (can be null), a
- *                                  {@link module:azure-iothub.JobResponse|JobResponse}
- *                                  object representing the updated device
- *                                  identity, and a transport-specific response
+ *                                  arguments: an Error object (can be null), an
+ *                                  object representing the scheduled job, and a transport-specific response
  *                                  object useful for logging or debugging.
  */
-JobClient.prototype.scheduleSystemPropertyWrite = function (jobId, deviceIds, propertyName, done) {
-    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_005: [** `scheduleSystemPropertyWrite` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.]*/
+JobClient.prototype.scheduleDevicePropertyWrite = function (jobId, deviceIds, propertyName, done) {
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_005: [** `scheduleDevicePropertyWrite` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.]*/
     if (!jobId) throw new ReferenceError('The object \'jobId\' is not valid');
     if (!deviceIds) throw new ReferenceError('The object \'deviceIds\' is not valid');
     if (!propertyName) throw new ReferenceError('The object \'propertyName\' is not valid');
 
-    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_007: [If the `deviceIds` argument is not an array, then `scheduleSystemPropertyWrite` shall convert it to an array with one element before using it. ]*/
-    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_008: [If the `propertyNames` argument is not an array, then `scheduleSystemPropertyWrite` shall convert it to an array with one element before using it. ]*/
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_007: [If the `deviceIds` argument is not an array, then `scheduleDevicePropertyWrite` shall convert it to an array with one element before using it. ]*/
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_008: [If the `propertyNames` argument is not an array, then `scheduleDevicePropertyWrite` shall convert it to an array with one element before using it. ]*/
     if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
     if (!Array.isArray(propertyName)) propertyName = [propertyName];
 
-    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_006: [`scheduleSystemPropertyWrite` shall construct an HTTP request using information supplied by the caller, as follows:
+    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_006: [`scheduleDevicePropertyWrite` shall construct an HTTP request using information supplied by the caller, as follows:
     ```
         PUT <path>?api-version=<version> HTTP/1.1
         Authorization: <config.sharedAccessSignature>
@@ -290,7 +280,7 @@ JobClient.prototype.scheduleSystemPropertyWrite = function (jobId, deviceIds, pr
         {
             "jobId":"<jobId>",
             "jobParameters":{
-                "SystemPropertyNames":"<propertyNames>",
+                "DevicePropertyNames":"<propertyNames>",
                 "DeviceIds":<deviceIds>,
                 "jobType":"writeDeviceProperties"
             }
@@ -299,7 +289,7 @@ JobClient.prototype.scheduleSystemPropertyWrite = function (jobId, deviceIds, pr
     var writeDeviceProp = {
         "jobId": jobId,
         "jobParameters": {
-            "SystemPropertyNames": propertyName,
+            "DevicePropertyNames": propertyName,
             "DeviceIds": deviceIds,
             "jobType": "writeDeviceProperties"
         }
@@ -316,10 +306,8 @@ JobClient.prototype.scheduleSystemPropertyWrite = function (jobId, deviceIds, pr
  *                    deviceId      A string that indicates the device(s) that is/are being rebooted 
  * @param {Function}  done          function to call when the operation is
  *                                  complete. `done` will be called with three
- *                                  arguments: an Error object (can be null), a
- *                                  {@link module:azure-iothub.JobResponse|JobResponse}
- *                                  object representing the updated device
- *                                  identity, and a transport-specific response
+ *                                  arguments: an Error object (can be null), an
+ *                                  object representing the scheduled job, and a transport-specific response
  *                                  object useful for logging or debugging.
  */
 JobClient.prototype.scheduleReboot = function (jobId, deviceIds, done) {
@@ -365,10 +353,8 @@ JobClient.prototype.scheduleReboot = function (jobId, deviceIds, done) {
  *                    deviceId      A string that indicates the device(s) that is/are being rebooted 
  * @param {Function}  done          function to call when the operation is
  *                                  complete. `done` will be called with three
- *                                  arguments: an Error object (can be null), a
- *                                  {@link module:azure-iothub.JobResponse|JobResponse}
- *                                  object representing the updated device
- *                                  identity, and a transport-specific response
+ *                                  arguments: an Error object (can be null), an
+ *                                  object representing the scheduled job, and a transport-specific response
  *                                  object useful for logging or debugging.
  */
 JobClient.prototype.scheduleFactoryReset = function (jobId, deviceIds, done) {
@@ -414,10 +400,8 @@ JobClient.prototype.scheduleFactoryReset = function (jobId, deviceIds, done) {
  *                           identifier.
  * @param {Function}  done   The function to call when the operation is
  *                           complete. `done` will be called with three
- *                           arguments: an Error object (can be null), a
- *                           {@link module:azure-iothub.JobResponse|JobResponse}
- *                           object representing the updated Job
- *                           identity, and a transport-specific response
+ *                           arguments: an Error object (can be null), an
+ *                           object representing the scheduled job, and a transport-specific response
  *                           object useful for logging or debugging.
  */
 JobClient.prototype.getJob = function (jobId, done) {
@@ -444,10 +428,7 @@ JobClient.prototype.getJob = function (jobId, done) {
         if (!done) return;
 
         if (!err) {
-            var jobInfo;
-            if (body) {
-                jobInfo = new JobResponse(body);
-            }
+            var jobInfo = body ? JSON.parse(body) : null;
             done(null, jobInfo, response);
         }
         else {
@@ -464,8 +445,7 @@ JobClient.prototype.getJob = function (jobId, done) {
  * @param {Function}  done   The function to call when the operation is
  *                           complete. `done` will be called with three
  *                           arguments: an Error object (can be null), an
- *                           array of {@link module:azure-iothub.JobResponse|JobResponse}
- *                           objects representing the Job
+ *                           array of objects representing the job
  *                           identities, and a transport-specific response
  *                           object useful for logging or debugging.
  */
@@ -492,13 +472,7 @@ JobClient.prototype.getJobs = function getJobs (done) {
 
         if (!err) {
             /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_017: [`getJobs` shall call the `done` callback with a `null` error object and an array of jobs if the request succeeds.]*/
-            var results = [];
-            if (body) {
-                var jobs = JSON.parse(body);
-                jobs.forEach(function (job) {
-                    results.push(new JobResponse(job));
-                });
-            }
+            var results = body ? JSON.parse(body) : null;
             done(null, results, response);
         }
         else {

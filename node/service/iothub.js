@@ -16,7 +16,6 @@ module.exports = {
   Device: require('./lib/device.js'),
   Http: require('./lib/registry_http.js'),
   JobClient: require('./lib/job_client.js'),
-  JobResponse: require('./lib/job_response.js'),
   Registry: require('./lib/registry.js'),
   SharedAccessSignature: require('./lib/shared_access_signature.js'),
   Amqp: require('./lib/amqp.js'),

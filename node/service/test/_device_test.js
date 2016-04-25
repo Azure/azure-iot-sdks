@@ -6,9 +6,9 @@
 var assert = require('chai').assert;
 var Device = require('../lib/device.js');
 
-var deviceJson = JSON.stringify({ deviceId: 'testDevice', generationId:'123456789012345678', etag:'' });
-var invalidDev = JSON.stringify({ deviceId: '' });
-var initializeDevice = { 
+var simpleDeviceJson = JSON.stringify({ deviceId: 'testDevice', generationId:'123456789012345678', etag:'' });
+
+var testDeviceObject = { 
   deviceId: 'fullDevice',
   generationId:'635756100743433650',
   etag:554111,
@@ -20,13 +20,38 @@ var initializeDevice = {
   lastActivityTime:'2015-08-26T01:00:51.6950626',
   cloudToDeviceMessageCount:4,
   isManaged:true,
-  authentication:
-    {symmetricKey: 
-      {primaryKey:"aBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJK=",secondaryKey:"ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="}},
-  systemProperties:
-    {batteryLevel:'90',batteryStatus:"good",currentTime:'2015-08-26T01:00:51.6950626',defaultMaxPeriod:'50',defaultMinPeriod:'1',deviceDescription:'devDesc' }
+  authentication: {
+    symmetricKey: {
+      primaryKey:"aBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJK=",
+      secondaryKey:"ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="
+    }
+  },
+  systemProperties: {
+    batteryLevel:'90',
+    batteryStatus:"good",
+    currentTime:'2015-08-26T01:00:51.6950626',
+    defaultMaxPeriod:'50',
+    defaultMinPeriod:'1',
+    deviceDescription:'devDesc',
+    firmwarePackage: 'firmwarePackage',
+    firmwarePackageName: 'firmwarePackageName',
+    firmwarePackageUri: 'http://firmwarePackage.uri',
+    firmwarePackageVersion: 'v2',
+    firmwareUpdateResult: 'booyah',
+    firmwareUpdateState: 'WA',
+    firmwareVersion: 'v2',
+    hardwareVersion: '0xF00',
+    manufacturer: 'Contoso',
+    memoryFree: '42',
+    memoryTotal: '4242',
+    modelNumber: '3',
+    registrationLifetime: 'registrationLifetime',
+    serialNumber: '1337',
+    timezone: 'PST',
+    utcOffset: 'UTC-7'
+  }
 };
-var fullDevice = JSON.stringify(initializeDevice);
+
 var deviceName = 'testDevice';
 var newDeviceName = 'newDeviceName';
 var newStatusReason = 'Status Reason';
@@ -40,7 +65,7 @@ function throwsRedefineError(device, fieldName, descriptor) {
 describe('Device', function () {
   describe('#enumerable', function() {
     it('is enumerable', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
 
       var allProps = [];
       for (var prop in device) {
@@ -64,7 +89,7 @@ describe('Device', function () {
 
   describe('#constructor', function () {
     it('creates a Device with the given id', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       assert.equal(device.deviceId, deviceName);
     });
 
@@ -74,41 +99,67 @@ describe('Device', function () {
           return new Device(ctorArg);
         }, ReferenceError);
       }
-      throwsReferenceError(invalidDev);
+      throwsReferenceError(JSON.stringify({ deviceId: '' }));
     });
-    
-    it('JSON is created correctly', function() {
-      var device = new Device(fullDevice);
-      var auth = device.authentication;
-      var sysProp = device.systemProperties;
-      
-      assert.equal(device.deviceId, initializeDevice.deviceId);
-      assert.equal(device.generationId, initializeDevice.generationId);
-      assert.equal(device.etag, initializeDevice.etag);
-      assert.equal(device.connectionState, initializeDevice.connectionState);
-      assert.equal(device.status, initializeDevice.status);
-      assert.equal(device.statusReason, initializeDevice.statusReason);
-      assert.equal(device.connectionStateUpdatedTime, initializeDevice.connectionStateUpdatedTime);
-      assert.equal(device.statusUpdatedTime, initializeDevice.statusUpdatedTime);
-      assert.equal(device.lastActivityTime, initializeDevice.lastActivityTime);
-      assert.equal(device.cloudToDeviceMessageCount, initializeDevice.cloudToDeviceMessageCount);
-      assert.equal(device.isManaged, initializeDevice.isManaged);
 
-      assert.equal(auth.symmetricKey.primaryKey, initializeDevice.authentication.symmetricKey.primaryKey);
-      assert.equal(auth.symmetricKey.secondaryKey, initializeDevice.authentication.symmetricKey.secondaryKey);
+    var verifyDeviceProperties = function(actual, expected) {
+      var auth = actual.authentication;
+      var sysProp = actual.systemProperties;
+      
+      assert.equal(actual.deviceId, expected.deviceId);
+      assert.equal(actual.generationId, expected.generationId);
+      assert.equal(actual.etag, expected.etag);
+      assert.equal(actual.connectionState, expected.connectionState);
+      assert.equal(actual.status, expected.status);
+      assert.equal(actual.statusReason, expected.statusReason);
+      assert.equal(actual.connectionStateUpdatedTime, expected.connectionStateUpdatedTime);
+      assert.equal(actual.statusUpdatedTime, expected.statusUpdatedTime);
+      assert.equal(actual.lastActivityTime, expected.lastActivityTime);
+      assert.equal(actual.cloudToDeviceMessageCount, expected.cloudToDeviceMessageCount);
+      assert.equal(actual.isManaged, expected.isManaged);
+
+      assert.equal(auth.symmetricKey.primaryKey, expected.authentication.symmetricKey.primaryKey);
+      assert.equal(auth.symmetricKey.secondaryKey, expected.authentication.symmetricKey.secondaryKey);
             
-      assert.equal(sysProp.batteryLevel, initializeDevice.systemProperties.batteryLevel);
-      assert.equal(sysProp.batteryStatus, initializeDevice.systemProperties.batteryStatus);
-      assert.equal(sysProp.currentTime, initializeDevice.systemProperties.currentTime);
-      assert.equal(sysProp.defaultMaxPeriod, initializeDevice.systemProperties.defaultMaxPeriod);
-      assert.equal(sysProp.defaultMinPeriod, initializeDevice.systemProperties.defaultMinPeriod);
-      assert.equal(sysProp.deviceDescription, initializeDevice.systemProperties.deviceDescription);
-    }); 
+      assert.equal(sysProp.batteryLevel, expected.systemProperties.batteryLevel);
+      assert.equal(sysProp.batteryStatus, expected.systemProperties.batteryStatus);
+      assert.equal(sysProp.currentTime, expected.systemProperties.currentTime);
+      assert.equal(sysProp.defaultMaxPeriod, expected.systemProperties.defaultMaxPeriod);
+      assert.equal(sysProp.defaultMinPeriod, expected.systemProperties.defaultMinPeriod);
+      assert.equal(sysProp.deviceDescription, expected.systemProperties.deviceDescription);
+      assert.equal(sysProp.firmwarePackage, expected.systemProperties.firmwarePackage);
+      assert.equal(sysProp.firmwarePackageName, expected.systemProperties.firmwarePackageName);
+      assert.equal(sysProp.firmwarePackageUri, expected.systemProperties.firmwarePackageUri);
+      assert.equal(sysProp.firmwarePackageVersion, expected.systemProperties.firmwarePackageVersion);
+      assert.equal(sysProp.firmwareUpdateResult, expected.systemProperties.firmwareUpdateResult);
+      assert.equal(sysProp.firmwareUpdateState, expected.systemProperties.firmwareUpdateState);
+      assert.equal(sysProp.firmwareVersion, expected.systemProperties.firmwareVersion);
+      assert.equal(sysProp.hardwareVersion, expected.systemProperties.hardwareVersion);
+      assert.equal(sysProp.manufacturer, expected.systemProperties.manufacturer);
+      assert.equal(sysProp.memoryFree, expected.systemProperties.memoryFree);
+      assert.equal(sysProp.memoryTotal, expected.systemProperties.memoryTotal);
+      assert.equal(sysProp.modelNumber, expected.systemProperties.modelNumber);
+      assert.equal(sysProp.registrationLifetime, expected.systemProperties.registrationLifetime);
+      assert.equal(sysProp.serialNumber, expected.systemProperties.serialNumber);
+      assert.equal(sysProp.timezone, expected.systemProperties.timezone);
+      assert.equal(sysProp.utcOffset, expected.systemProperties.utcOffset);
+    };
+
+    it('correctly creates a device from JSON', function() {
+      var deviceJsonString = JSON.stringify(testDeviceObject);
+      var deviceResult = new Device(deviceJsonString);
+      verifyDeviceProperties(deviceResult, testDeviceObject);
+    });
+
+    it('correctly creates a device from a duck-typed object', function() {
+      var deviceResult = new Device(testDeviceObject);
+      verifyDeviceProperties(deviceResult, testDeviceObject);
+    });
   });
 
   describe('#deviceId', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       
       throwsRedefineError(device, 'deviceId', { configurable: true });
       throwsRedefineError(device, 'deviceId', { enumerable: false });
@@ -131,7 +182,7 @@ describe('Device', function () {
 
   describe('#generationId', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       
       throwsRedefineError(device, 'generationId', { configurable: true });
       throwsRedefineError(device, 'generationId', { enumerable: false });
@@ -151,7 +202,7 @@ describe('Device', function () {
 
   describe('#etag', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       
       throwsRedefineError(device, 'etag', { configurable: true });
       throwsRedefineError(device, 'etag', { enumerable: false });
@@ -171,7 +222,7 @@ describe('Device', function () {
 
   describe('#connectionState', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       
       throwsRedefineError(device, 'connectionState', { configurable: true });
       throwsRedefineError(device, 'connectionState', { enumerable: false });
@@ -191,7 +242,7 @@ describe('Device', function () {
 
   describe('#status', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var fieldName = 'statusReason';
 
       throwsRedefineError(device, fieldName, { configurable: true });
@@ -216,7 +267,7 @@ describe('Device', function () {
     });
     
     it('Assignments allowed to enable and disabled', function() {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       assert.doesNotThrow(function() {
         device.status = 'Enabled';
         device.status = 'Disabled';
@@ -228,7 +279,7 @@ describe('Device', function () {
   
   describe('#statusReason', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var fieldName = 'statusReason';
       
       throwsRedefineError(device, fieldName, { configurable: true });
@@ -252,7 +303,7 @@ describe('Device', function () {
   
   describe('#connectionStateUpdatedTime', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var fieldName = 'connectionStateUpdatedTime';
       
       throwsRedefineError(device, fieldName, { configurable: true });
@@ -273,7 +324,7 @@ describe('Device', function () {
   
   describe('#statusUpdatedTime', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var fieldName = 'statusUpdatedTime';
       
       throwsRedefineError(device, fieldName, { configurable: true });
@@ -294,7 +345,7 @@ describe('Device', function () {
   
   describe('#lastActivityTime', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var fieldName = 'lastActivityTime';
       
       throwsRedefineError(device, fieldName, { configurable: true });
@@ -315,7 +366,7 @@ describe('Device', function () {
 
   describe('#cloudToDeviceMessageCount', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var fieldName = 'cloudToDeviceMessageCount';
       
       throwsRedefineError(device, fieldName, { configurable: true });
@@ -336,7 +387,7 @@ describe('Device', function () {
 
   describe('#authentication', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var fieldName = 'authentication';
       
       throwsRedefineError(device, fieldName, { configurable: true });
@@ -357,7 +408,7 @@ describe('Device', function () {
   
   describe('#isManaged', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var fieldName = 'isManaged';
       
       throwsRedefineError(device, fieldName, { configurable: true });
@@ -378,7 +429,7 @@ describe('Device', function () {
   
   describe('#serviceProperties', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var fieldName = 'serviceProperties';
       
       throwsRedefineError(device, fieldName, { configurable: true });
@@ -399,7 +450,7 @@ describe('Device', function () {
   
   describe('#systemProperties', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var fieldName = 'systemProperties';
       
       throwsRedefineError(device, fieldName, { configurable: true });
@@ -420,7 +471,7 @@ describe('Device', function () {
   
   describe('#batteryLevel', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var sysProp = device.systemProperties;
       var fieldName = 'batteryLevel';
       
@@ -438,7 +489,7 @@ describe('Device', function () {
 
   describe('#batteryStatus', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var sysProp = device.systemProperties;
       var fieldName = 'batteryStatus';
       
@@ -456,7 +507,7 @@ describe('Device', function () {
 
   describe('#currentTime', function () { 
     it('cannot be configured or deleted', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var sysProp = device.systemProperties;
       var fieldName = 'currentTime';
       
@@ -475,7 +526,7 @@ describe('Device', function () {
   
   describe('#enumerable', function() {
     it('is enumerable', function () {
-      var device = new Device(deviceJson);
+      var device = new Device(simpleDeviceJson);
       var sysProp = device.systemProperties;
 
       var allProps = [];
