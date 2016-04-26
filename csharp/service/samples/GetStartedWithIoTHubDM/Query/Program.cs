@@ -25,6 +25,7 @@ namespace Query
             {
                 Console.WriteLine("Connection not set in code.  You must pass a connection string.");
                 Console.WriteLine(AppDomain.CurrentDomain.FriendlyName + " <Your IoT Hub connection string>");
+                Console.WriteLine(AppDomain.CurrentDomain.FriendlyName + " will look for a file named devicecreds.txt in the working directory for device connection strings");
 
                 Environment.Exit(1);
             }
@@ -39,7 +40,7 @@ namespace Query
             QueryFilter().Wait();
 
             // Aggregate Query for Total Weight, Group by CustomerID
-            Console.WriteLine("\n\nQuerying for All Devices: Aggregated to Total Weight, Grouped by CustomerID ---");
+            Console.WriteLine("\n\nQuerying for All Devices: Aggregated to Total Weight, Grouped by CustomerId ---");
             QueryAggregate().Wait();
 
             // Sort by CustomerID
@@ -85,8 +86,7 @@ namespace Query
                         value = "123456",
                         comparisonOperator = "eq",
                         type = "comparison"
-                    },
-                    sort = new string[] { }
+                    }
                 }
             );
 
@@ -241,8 +241,13 @@ namespace Query
                 {
                     Console.Write(" {0} ", tag);
                 }
-                Console.Write("\n-- ServiceProps : ");
+                Console.Write("\n-- Service Properties : ");
                 foreach (var prop in d.ServiceProperties.Properties)
+                {
+                    Console.Write(" {0}:{1}", prop.Key, prop.Value);
+                }
+                Console.Write("\n-- Device Properties : ");
+                foreach (var prop in d.DeviceProperties)
                 {
                     Console.Write(" {0}:{1}", prop.Key, prop.Value);
                 }

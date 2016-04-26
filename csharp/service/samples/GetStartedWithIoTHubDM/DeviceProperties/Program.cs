@@ -57,7 +57,7 @@ namespace DeviceProperties
             // Display all device properties
             foreach (var property in device.DeviceProperties)
             {
-                Console.WriteLine("{0} : {1}", property.Key, property.Value.Value.ToString());
+                Console.WriteLine("{0} : {1}", property.Key, property.Value.Value?.ToString());
             }
 
             Console.WriteLine();
@@ -68,7 +68,9 @@ namespace DeviceProperties
         public async static Task<DevicePropertyValue> GetCurrentBatteryLevel(string deviceId)
         {
             var device = await registryManager.GetDeviceAsync(deviceId);
-            return device.DeviceProperties["BatteryLevel"];
+            DevicePropertyValue batteryLevel;
+            device.DeviceProperties.TryGetValue(DevicePropertyNames.BatteryLevel, out batteryLevel);
+            return batteryLevel;
         }
 
         public async static Task DeepReadFromPhysicalDevice()
@@ -79,7 +81,7 @@ namespace DeviceProperties
             {
                 DevicePropertyValue battery = await GetCurrentBatteryLevel(deviceId);
 
-                string propertyToRead = "BatteryLevel";
+                string propertyToRead = DevicePropertyNames.BatteryLevel;
 
                 Console.WriteLine("Reading {0} --- Current Value: {1} at {2}", 
                     propertyToRead, 
@@ -120,7 +122,7 @@ namespace DeviceProperties
                 jobResponse = await deviceJobClient.GetJobAsync(jobResponse.JobId);
                 Console.WriteLine("DevicePropertyRead job status is {0} {1} {2}", jobResponse.Status.ToString(), jobResponse.JobId.ToString(), jobResponse.FailureReason);
 
-                Thread.Sleep(3000);
+                await Task.Delay(TimeSpan.FromSeconds(3));
             }
 
             Console.WriteLine();
@@ -135,7 +137,7 @@ namespace DeviceProperties
             var deviceJobClient = JobClient.CreateFromConnectionString(connectionString);
             string jobId = "";
             
-            string propertyToSet = "Timezone";
+            string propertyToSet = DevicePropertyNames.Timezone;
             string setValue = "PST *** NEW - "+DateTime.Now.TimeOfDay.ToString();
 
             Console.WriteLine();
@@ -148,7 +150,7 @@ namespace DeviceProperties
             Console.WriteLine("Current Value of {0} : '{1}' at {2}",
                 propertyToSet,
                 device.DeviceProperties[propertyToSet].Value.ToString(),
-                device.DeviceProperties[propertyToSet].LastUpdatedTime.ToString());
+                device.DeviceProperties[propertyToSet].LastUpdatedTime.ToString("u"));
 
             var jobResponse = await deviceJobClient.ScheduleDevicePropertyWriteAsync(Guid.NewGuid().ToString(), deviceId, propertyToSet, setValue);
 
@@ -177,11 +179,11 @@ namespace DeviceProperties
             // Refresh the Device object
             device = await registryManager.GetDeviceAsync(deviceId);
 
-            string timezone = device.DeviceProperties["Timezone"].Value.ToString();
-            string setTime = device.DeviceProperties["Timezone"].LastUpdatedTime.ToString();
+            string timezone = device.DeviceProperties[DevicePropertyNames.Timezone].Value.ToString();
+            string setTime = device.DeviceProperties[DevicePropertyNames.Timezone].LastUpdatedTime.ToString();
 
             Console.WriteLine();
-            Console.WriteLine("After deep write new value for '{0}' : {1} Updated: {2}", "Timezone", timezone, setTime);
+            Console.WriteLine("After deep write new value for '{0}' : {1} Updated: {2}", DevicePropertyNames.Timezone, timezone, setTime);
 
             Console.WriteLine();
 
@@ -237,7 +239,7 @@ namespace DeviceProperties
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Caught " + ex.Message);
+                Console.WriteLine("Caught " + ex.ToString());
             }
         }
 

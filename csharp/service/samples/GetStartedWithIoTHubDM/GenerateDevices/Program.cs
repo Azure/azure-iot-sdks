@@ -57,7 +57,7 @@ namespace GenerateDevices
                     // Remove the device if it exists from a previous run of the sample
                     try
                     {
-                        registryManager.RemoveDeviceAsync(device.Id).Wait();
+                        await registryManager.RemoveDeviceAsync(device.Id);
                     }
                     catch(AggregateException aggregateEx)
                     {

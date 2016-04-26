@@ -103,12 +103,12 @@ namespace ExecuteFirmwareUpdate
 
             try
             {
-                JobQueryResult result = await deviceJobClient.QueryJobHistoryJsonAsync(json);
+                var result = await deviceJobClient.QueryJobHistoryJsonAsync(json);
 
-                JobResponse[] jobs = result.Result.ToArray();
+                var jobs = result.Result.ToArray();
 
                 // List query result
-                for (int i = 0; i < 7; i++)
+                for (int i = 0; i < jobs.Count(); i++)
                 {
                     JobResponse job = jobs[i];
 
@@ -124,7 +124,7 @@ namespace ExecuteFirmwareUpdate
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Caught " + ex.Message);
+                Console.WriteLine("Caught " + ex.ToString());
             }
         }
 
@@ -153,10 +153,8 @@ namespace ExecuteFirmwareUpdate
 
             Console.WriteLine("Active Devices running jobs");
             // List query result
-            foreach (JobResponse job in result.Result)
+            foreach (var job in result.Result)
             {
-                //JobResponse job = jobs[i];
-
                 Console.WriteLine("DeviceID: {0}\t\tJobId: {1}",
                     job.DeviceId,
                     job.JobId

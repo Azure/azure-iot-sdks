@@ -7,10 +7,18 @@ IF "%*"=="" (
   GOTO END
 )
 
+msbuild /ver
+IF %ERRORLEVEL% NEQ 0 (
+   ECHO Error : cannot find msbuild. Please run this script from a Visual Studio Tools command prompt.
+   GOTO END
+)
+
 set OUTPUTPATH=%~dp0
+set BINPATH=%OUTPUTPATH%\bin
+
+@setlocal
 set CMAKEOUTPUTDIR=%OUTPUTPATH%\cmake
 set "IOTHUB_CONNECTION_STRING=%*"
-set BINPATH=%OUTPUTPATH%\bin
 
 pushd %OUTPUTPATH%
 
@@ -43,6 +51,9 @@ ECHO Provisioning devices...
 pushd %BINPATH%
 GenerateDevices.exe %IOTHUB_CONNECTION_STRING%
 
+@endlocal
+
+cd %BINPATH%
 ECHO All done!
 ECHO You are now in a folder containing the sample applications.
 ECHO You can run each sample by calling it with the connection string as an argument.
