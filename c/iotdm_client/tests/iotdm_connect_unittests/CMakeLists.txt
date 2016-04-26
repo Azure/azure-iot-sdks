@@ -14,10 +14,13 @@ set(${theseTestsName}_c_files
     ${SHARED_UTIL_SRC_FOLDER}/gballoc.c
     ../../src/iotdm_connect.c
 	../../src/dm_create_tlsio.c
+    ../../../certs/certs.c
 )
 
 set(${theseTestsName}_h_files
     mocks.h
 )
+
+include_directories(../../../certs)
 
 build_test_artifacts(${theseTestsName} ON)

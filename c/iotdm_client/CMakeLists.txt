@@ -75,8 +75,10 @@ if(${no_tls})
         ./src/dm_create_socketio.c
     )
 else()
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/../certs)
     set(iotdm_client_c_files ${iotdm_client_c_files}
         ./src/dm_create_tlsio.c
+        ../certs/certs.c
     )
 endif()
 

@@ -4,9 +4,15 @@
 #include "xio.h"
 #include "tlsio.h"
 #include "platform.h"
+#include "certs.h"
 
 XIO_HANDLE dm_io_create(const char* iotHubName)
 {
     TLSIO_CONFIG config = { iotHubName, 5684 };
-    return xio_create(platform_get_default_tlsio(), &config, NULL);
+    XIO_HANDLE h = xio_create(platform_get_default_tlsio(), &config, NULL);
+    if (h != NULL)
+    {   
+        (void)xio_setoption(h, "TrustedCerts", certificates);
+    }
+    return h;
 }
