@@ -54,8 +54,9 @@ IF %ERRORLEVEL% NEQ 0 (
    GOTO END
 )
 
+popd
 ECHO Building service samples...
-set SOLUTIONFILE=..\GetStartedWithIoTHubDM\GetStartedWithIoTHubDM.sln
+set SOLUTIONFILE=.\GetStartedWithIoTHubDM\GetStartedWithIoTHubDM.sln
 nuget restore %SOLUTIONFILE%
 msbuild %SOLUTIONFILE% /p:OutputPath=%BINPATH% /fl /flp:logfile=samplesBuild.log
 IF %ERRORLEVEL% NEQ 0 (
