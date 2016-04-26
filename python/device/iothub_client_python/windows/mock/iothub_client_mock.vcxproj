@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\iothub_client_python.cpp" />
     <ClCompile Include="..\..\test\iothub_client_mock.cpp" />
     <ClCompile Include="..\dllmain.c" />
   </ItemGroup>
@@ -100,7 +101,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IOTHUB_CLIENT_PYTHON_HTTP_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IMPORT_NAME=iothub_client_mock;WIN32;_DEBUG;_WINDOWS;_USRDLL;IOTHUB_CLIENT_PYTHON_HTTP_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(PYTHON_PATH)\include;..\..\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -122,7 +123,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IOTHUB_CLIENT_PYTHON_HTTP_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IMPORT_NAME=iothub_client_mock;WIN32;_DEBUG;_WINDOWS;_USRDLL;IOTHUB_CLIENT_PYTHON_HTTP_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(PYTHON_PATH)\include;..\..\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -144,7 +145,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;IOTHUB_CLIENT_PYTHON_HTTP_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IMPORT_NAME=iothub_client_mock;WIN32;NDEBUG;_WINDOWS;_USRDLL;IOTHUB_CLIENT_PYTHON_HTTP_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(PYTHON_PATH)\include;..\..\src</AdditionalIncludeDirectories>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -173,7 +174,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;IOTHUB_CLIENT_PYTHON_HTTP_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IMPORT_NAME=iothub_client_mock;WIN32;NDEBUG;_WINDOWS;_USRDLL;IOTHUB_CLIENT_PYTHON_HTTP_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(PYTHON_PATH)\include;..\..\src</AdditionalIncludeDirectories>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
