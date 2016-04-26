@@ -86,6 +86,7 @@ def iothub_client_init():
     if iotHubClient.protocol == IoTHubTransportProvider.HTTP:
         iotHubClient.set_option("timeout", timeout)
         iotHubClient.set_option("MinimumPollingTime", minimum_polling_time)
+    iotHubClient.set_option("messageTimeout", 10000)
     # some embedded platforms need certificate information
     # set_certificates(iotHubClient)
     # to enable MQTT logging set to 1

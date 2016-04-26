@@ -32,9 +32,14 @@ if(WIN32)
         message(FATAL_ERROR "iothub_client_python needs Boost library")
     endif()
 else()
-    # Remove the period from python version for boost component
-    string(REPLACE "." "" boost_python ${build_python})
-    find_package(Boost COMPONENTS "python-py${boost_python}" REQUIRED)
+    # older boost-python libs didn't support versions
+    if (${build_python} STREQUAL "2.7")
+        find_package(Boost COMPONENTS python REQUIRED)
+    else()
+        # Remove the period from python version for boost component
+        string(REPLACE "." "" boost_python ${build_python})
+        find_package(Boost COMPONENTS "python-py${boost_python}" REQUIRED)
+    endif()
 endif()
 
 include_directories(${Boost_INCLUDE_DIRS})
