@@ -13,6 +13,17 @@ IF %ERRORLEVEL% NEQ 0 (
    GOTO END
 )
 
+rem ensure nuget.exe exists
+where /q nuget.exe
+if not !errorlevel! == 0 (
+@Echo Azure IoT SDK needs to download nuget.exe from https://www.nuget.org/nuget.exe 
+Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
+     if not exist .\nuget.exe (
+           echo nuget does not exist
+           exit /b 1
+     )
+)
+
 set OUTPUTPATH=%~dp0
 set BINPATH=%OUTPUTPATH%\bin
 

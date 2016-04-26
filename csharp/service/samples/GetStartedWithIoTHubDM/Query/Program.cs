@@ -51,6 +51,7 @@ namespace Query
             Console.WriteLine("\n\nQuerying devices with FirmwareVersion == '1.0' ---");
             DevicePropertyQuery().Wait();
 
+            registryManager.CloseAsync().Wait();
             Console.WriteLine("Done! Hit <Enter> to exit.");
             Console.ReadLine();
         }
@@ -249,7 +250,7 @@ namespace Query
                 Console.Write("\n-- Device Properties : ");
                 foreach (var prop in d.DeviceProperties)
                 {
-                    Console.Write(" {0}:{1}", prop.Key, prop.Value);
+                    Console.Write(" {0}:{1}", prop.Key, prop.Value.Value);
                 }
                 Console.WriteLine();
 

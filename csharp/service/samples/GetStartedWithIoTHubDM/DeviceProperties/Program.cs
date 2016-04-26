@@ -41,6 +41,7 @@ namespace DeviceProperties
 
             DeepWriteToPhysicalDevice().Wait();
 
+            registryManager.CloseAsync().Wait();
             Console.WriteLine("Done! Hit <Enter> to exit.");
             Console.ReadLine();
         }

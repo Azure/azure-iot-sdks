@@ -12,7 +12,6 @@ namespace ExecuteFirmwareUpdate
 {
     class Program
     {
-        static RegistryManager registryManager;
         static string packageURI = "http://the.firmware.package.location.com/";
         public static string connectionString = "";
 
