@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0.1-5) wily; urgency=low
+azure-iot-sdk-c (0.1.0.1-6) wily; urgency=low
 
   * Initial release
 
@@ -16,4 +16,7 @@ azure-iot-sdk-c (0.1.0.1-5) wily; urgency=low
 
   * change the mqtt timeout from 5 min to 4 due to the service disconnect (#451ab96)
 
- -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 20 Oct 2015 17:24:51 +0000
+  * Added a backoff for mqtt to not overload the network and enable sas token reset before expiration
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 22 Apr 2016 17:24:51 +0000
+
