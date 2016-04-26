@@ -118,7 +118,7 @@ BEGIN_TEST_SUITE(IoTDevice_UnitTests)
 
     TEST_SUITE_INITIALIZE(BeforeSuite)
     {
-        INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = MicroMockCreateMutex();
         ASSERT_IS_NOT_NULL(g_testByTest);
     }
@@ -126,7 +126,7 @@ BEGIN_TEST_SUITE(IoTDevice_UnitTests)
     TEST_SUITE_CLEANUP(AfterEachSuite)
     {
         MicroMockDestroyMutex(g_testByTest);
-        DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     /* Tests_SRS_DEVICE_05_014: [If any of the modelHandle, deviceHandle or deviceActionCallback arguments are NULL, Device_Create shall return DEVICE_INVALID_ARG.]*/

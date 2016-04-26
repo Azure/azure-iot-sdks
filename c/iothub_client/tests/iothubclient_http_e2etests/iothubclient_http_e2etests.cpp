@@ -310,7 +310,7 @@ static void EventData_Destroy(EXPECTED_SEND_DATA* data)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     platform_init();
     g_iothubAcctInfo1 = IoTHubAccount_Init(true, "http_e2e_test");
     ASSERT_IS_NOT_NULL(g_iothubAcctInfo1);
@@ -327,7 +327,7 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
 	IoTHubAccount_deinit(g_iothubAcctInfo2);
 	IoTHubAccount_deinit(g_iothubAcctInfo1);
     platform_deinit();
-    DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
+    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

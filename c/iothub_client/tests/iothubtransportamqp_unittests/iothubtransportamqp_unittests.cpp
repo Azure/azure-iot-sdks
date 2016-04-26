@@ -1367,7 +1367,7 @@ BEGIN_TEST_SUITE(iothubtransportamqp_unittests)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = MicroMockCreateMutex();
     ASSERT_IS_NOT_NULL(g_testByTest);
     
@@ -1390,7 +1390,7 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     BASEIMPLEMENTATION::STRING_delete(test_STRING_HANDLE_EMPTY);
 
     MicroMockDestroyMutex(g_testByTest);
-    DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
+    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
