@@ -114,7 +114,7 @@ Host: <config.host>
 **SRS_NODE_IOTHUB_JOBCLIENT_07_017: [** If the `deviceIds` argument is not an array, then `scheduleDevicePropertyRead` shall convert it to an array with one element before using it.**]**  
 **SRS_NODE_IOTHUB_JOBCLIENT_07_018: [** If the `propertyNames` argument is not an array, then `scheduleDevicePropertyRead` shall convert it to an array with one element before using it.**]**  
 
-###scheduleDevicePropertyWrite(jobId, deviceIds, propertyNames, done)
+###scheduleDevicePropertyWrite(jobId, deviceIds, properties, done)
 **SRS_NODE_IOTHUB_JOBCLIENT_16_005: [** `scheduleDevicePropertyWrite` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value. **]**  
 **SRS_NODE_IOTHUB_JOBCLIENT_16_006: [** `scheduleDevicePropertyWrite` shall construct an HTTP request using information supplied by the caller, as follows:
 ```
@@ -126,8 +126,8 @@ Host: <config.host>
     {
         "jobId":"<jobId>",
         "jobParameters":{
-            "DevicePropertyNames":"<propertyNames>",
-            "DeviceIds":<deviceIds>,
+            "DeviceProperties":"<properties>",
+            "DeviceIds": [ <deviceIds> ],
             "jobType":"writeDeviceProperties"
         }
     }
@@ -135,7 +135,7 @@ Host: <config.host>
 **]**  
 
 **SRS_NODE_IOTHUB_JOBCLIENT_16_007: [** If the `deviceIds` argument is not an array, then `scheduleDevicePropertyWrite` shall convert it to an array with one element before using it. **]**  
-**SRS_NODE_IOTHUB_JOBCLIENT_16_008: [** If the `propertyNames` argument is not an array, then `scheduleDevicePropertyWrite` shall convert it to an array with one element before using it. **]**  
+**SRS_NODE_IOTHUB_JOBCLIENT_16_008: [** The `properties` argument shall be an associative array of propertyNames and values. **]**
 
 ###scheduleReboot(jobId, deviceIds, done)
 **SRS_NODE_IOTHUB_JOBCLIENT_16_009: [** `scheduleReboot` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value. **]**  

@@ -15,8 +15,6 @@ var testDeviceId = "device-id-test";
 var packageUri = "www.bing.com";
 var timeout = 60;
 var testjobId = 'job-id-test';
-var testDevPropName = 'batteryLevel';
-var testValue = 'value';
 
 function bulkTests(Transport, goodConnectionString, badConnectionString) {
     describe('JobClient', function () {
@@ -37,6 +35,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
             });
 
             it('calls done callback with Job Id', function (done) {
+                var testValue = 'value';
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
                 jobClient.scheduleDeviceConfigurationUpdate(testjobId, testDeviceId, testValue, function (err, jobResp) {
                     if (err) {
@@ -152,6 +151,8 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
         });
 
         describe('#scheduleDevicePropertyRead', function () {
+            var testDevPropName = 'batteryLevel';
+
             /* Tests_SRS_NODE_IOTHUB_JOBCLIENT_07_015: [ scheduleDevicePropertyRead method shall throw ArgumentError if any argument contains a falsy value.] */
             it('throws when jobId is null', function () {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString);
@@ -239,22 +240,24 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
         });
 
         describe('#scheduleDevicePropertyWrite', function () {
+            var testDevProperty = { timezone: 'PST' };
+
             /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_16_005: [** `scheduleDevicePropertyWrite` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.]*/
             it('throws when jobId is null', function () {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString);
                 assert.throws(function () {
-                    jobClient.scheduleDevicePropertyWrite(null, testDeviceId, testDevPropName);
+                    jobClient.scheduleDevicePropertyWrite(null, testDeviceId, testDevProperty);
                 }, ReferenceError);
             });
 
             it('throws when deviceIds is null', function () {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString);
                 assert.throws(function () {
-                    jobClient.scheduleDevicePropertyWrite(testjobId, null, testDevPropName);
+                    jobClient.scheduleDevicePropertyWrite(testjobId, null, testDevProperty);
                 }, ReferenceError);
             });
 
-            it('throws when propertyName is null', function () {
+            it('throws when properties is null', function () {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString);
                 assert.throws(function () {
                     jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, null);
@@ -265,7 +268,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
-                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testDevPropName, function (err, jobResp) {
+                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testDevProperty, function (err, jobResp) {
                     if (err) {
                         done(err);
                     } else {
@@ -278,7 +281,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
             /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_003: [If an error is encountered while sending the request, it shall invoke the `done` callback function and pass the standard JavaScript `Error` object with a text description of the error (`err.message`).]*/
             it('sets err when bad connection is encountered', function (done) {
                 var jobClient = JobClient.fromConnectionString(badConnectionString, Transport);
-                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testDevPropName, function (err, jobResp) {
+                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testDevProperty, function (err, jobResp) {
                     assert.instanceOf(err, Error);
                     assert.isUndefined(jobResp);
                     done();
@@ -317,13 +320,14 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     var requestBody = JSON.parse(writeData);
                     assert.equal(requestBody.jobId, testjobId);
                     assert.isArray(requestBody.jobParameters.DeviceIds);
-                    assert.isArray(requestBody.jobParameters.DevicePropertyNames);
+                    assert.isOk(requestBody.jobParameters.DeviceProperties);
+                    assert.deepEqual(requestBody.jobParameters.DeviceProperties, testDevProperty);
                     assert.equal(requestBody.jobParameters.jobType, 'writeDeviceProperties');
                     done();
                 };
                 
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, SpyTransport);
-                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testDevPropName);
+                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testDevProperty);
             });
         });
 

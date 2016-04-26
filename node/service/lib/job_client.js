@@ -235,11 +235,11 @@ JobClient.prototype.scheduleDevicePropertyRead = function (jobId, deviceIds, pro
         }
     ```]*/
     var devPropUpdate = {
-        "jobId": jobId,
-        "jobParameters": {
-            "DevicePropertyNames": propertyName,
-            "DeviceIds": deviceIds,
-            "jobType": "readDeviceProperties"
+        jobId: jobId,
+        jobParameters: {
+            DevicePropertyNames: propertyName,
+            DeviceIds: deviceIds,
+            jobType: "readDeviceProperties"
         }
     };
 
@@ -252,23 +252,21 @@ JobClient.prototype.scheduleDevicePropertyRead = function (jobId, deviceIds, pro
  * @param {Object}    jobId         An object which must include a `deviceId`
  *                                  property whose value is a valid device identifier.
  *                    deviceId      A string that indicates the device that is being Updated 
- *                    propertyName  The Property to write
+ *                    properties    An associative array (dictionary) of property names and values to write to the devices.
  * @param {Function}  done          function to call when the operation is
  *                                  complete. `done` will be called with three
  *                                  arguments: an Error object (can be null), an
  *                                  object representing the scheduled job, and a transport-specific response
  *                                  object useful for logging or debugging.
  */
-JobClient.prototype.scheduleDevicePropertyWrite = function (jobId, deviceIds, propertyName, done) {
+JobClient.prototype.scheduleDevicePropertyWrite = function (jobId, deviceIds, properties, done) {
     /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_005: [** `scheduleDevicePropertyWrite` method shall throw a `ReferenceError` if any argument except 'done' contains a falsy value.]*/
     if (!jobId) throw new ReferenceError('The object \'jobId\' is not valid');
     if (!deviceIds) throw new ReferenceError('The object \'deviceIds\' is not valid');
-    if (!propertyName) throw new ReferenceError('The object \'propertyName\' is not valid');
+    if (!properties) throw new ReferenceError('The object \'properties\' is not valid');
 
     /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_007: [If the `deviceIds` argument is not an array, then `scheduleDevicePropertyWrite` shall convert it to an array with one element before using it. ]*/
-    /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_008: [If the `propertyNames` argument is not an array, then `scheduleDevicePropertyWrite` shall convert it to an array with one element before using it. ]*/
     if (!Array.isArray(deviceIds)) deviceIds = [deviceIds];
-    if (!Array.isArray(propertyName)) propertyName = [propertyName];
 
     /*Codes_SRS_NODE_IOTHUB_JOBCLIENT_16_006: [`scheduleDevicePropertyWrite` shall construct an HTTP request using information supplied by the caller, as follows:
     ```
@@ -280,18 +278,18 @@ JobClient.prototype.scheduleDevicePropertyWrite = function (jobId, deviceIds, pr
         {
             "jobId":"<jobId>",
             "jobParameters":{
-                "DevicePropertyNames":"<propertyNames>",
+                "DeviceProperties":"<properties>",
                 "DeviceIds":<deviceIds>,
                 "jobType":"writeDeviceProperties"
             }
         }
     ```]*/
     var writeDeviceProp = {
-        "jobId": jobId,
-        "jobParameters": {
-            "DevicePropertyNames": propertyName,
-            "DeviceIds": deviceIds,
-            "jobType": "writeDeviceProperties"
+        jobId: jobId,
+        jobParameters: {
+            DeviceProperties: properties,
+            DeviceIds: deviceIds,
+            jobType: "writeDeviceProperties"
         }
     };
 

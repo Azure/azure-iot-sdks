@@ -10,14 +10,13 @@ var testDeviceId = "device-id-test";
 var packageUri = "www.bing.com";
 var timeout = 60;
 var testjobId = 'job-id-test';
-var testSysPropName = 'BatteryLevel';
-var testValue = 'value';
 
 function commonTests(Transport, goodConnectionString) {
     describe('JobClient', function () {
         describe('#scheduleDeviceConfigurationUpdate', function () {
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
+                var testValue = 'value';
                 jobClient.scheduleDeviceConfigurationUpdate(testjobId, testDeviceId, testValue, function (err, jobResp) {
                     if (err) {
                         done(err);
@@ -44,11 +43,12 @@ function commonTests(Transport, goodConnectionString) {
         });
 
         describe('#scheduleDevicePropertyRead', function () {
+            var testDevPropName = 'BatteryLevel';
             /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
-                jobClient.scheduleDevicePropertyRead(testjobId, testDeviceId, testSysPropName, function (err, jobResp) {
+                jobClient.scheduleDevicePropertyRead(testjobId, testDeviceId, testDevPropName, function (err, jobResp) {
                     if (err) {
                         done(err);
                     } else {
@@ -60,11 +60,12 @@ function commonTests(Transport, goodConnectionString) {
         });
 
         describe('#scheduleDevicePropertyWrite', function () {
+            var testDevProperty = { timezone: 'PST' };
             /*Tests_SRS_NODE_IOTHUB_JOBCLIENT_05_004: [When the request completes, the callback function (indicated by the `done` argument) shall be invoked with an `Error` object (may be `null`), and an object representing the new job created on the IoT Hub.]*/
             it('calls done callback with Job Id', function (done) {
                 var jobClient = JobClient.fromConnectionString(goodConnectionString, Transport);
 
-                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testSysPropName, function (err, jobResp) {
+                jobClient.scheduleDevicePropertyWrite(testjobId, testDeviceId, testDevProperty, function (err, jobResp) {
                     if (err) {
                         done(err);
                     } else {
