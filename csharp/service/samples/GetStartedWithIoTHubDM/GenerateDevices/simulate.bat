@@ -1,0 +1,1 @@
+for /F "tokens=*" %%A in (devicecreds.txt) do (start ..\cmake\iotdm_client\samples\iotdm_simple_sample\Debug\iotdm_simple_sample.exe "%%A" && sleep 2)

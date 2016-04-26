@@ -31,7 +31,7 @@ var printResults = function (err, devices) {
 };
 
 // Querying for device using only tags just requires an array and a maximum number of devices that can be returned. 
-registry.queryDevicesByTags(['Floor:1'], 100, printResults);
+registry.queryDevicesByTags(['bacon'], 100, printResults);
 
 // The following three requests are defined in query_examples.js. 
 registry.queryDevices(queries.filterQuery, printResults);

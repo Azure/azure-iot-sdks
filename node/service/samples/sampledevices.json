@@ -1,6 +1,6 @@
 [
     {
-      "deviceId": "Device11-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "deviceId": "Device11-7ce4a850",
       "serviceProperties": {
         "properties": {
           "CustomerId": "123456",
@@ -8,11 +8,11 @@
           "Weight": 1000,
           "QoS": 10
         },
-        "tags": [ "City:Seattle", "Bldg:109", "Floor:2", "Room:2817" ]
+        "tags": [ "milk", "cookies", "sausage", "bacon" ]
       }
     },
     {
-      "deviceId": "Device21-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "deviceId": "Device21-7ce4a850",
       "serviceProperties": {
         "properties": {
           "CustomerId": "4829472",
@@ -20,11 +20,11 @@
           "Weight": 100,
           "QoS": 3
         },
-        "tags": [ "City:Seattle", "Bldg:109", "Floor:3", "Room:3121" ]
+        "tags": [ "lettuce", "parmesan", "chicken", "croutons" ]
       }
     },
     {
-      "deviceId": "Device31-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "deviceId": "Device31-7ce4a850",
       "serviceProperties": {
         "properties": {
           "CustomerId": "123456",
@@ -32,11 +32,11 @@
           "Weight": 2000,
           "QoS": 4
         },
-        "tags": [ "City:Seattle", "Bldg:109", "Floor:1", "Room:1924" ]
+        "tags": [ "steak", "buns", "tomatoes", "onions", "bacon" ]
       }
     },
     {
-      "deviceId": "Device41-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "deviceId": "Device41-7ce4a850",
       "serviceProperties": {
         "properties": {
           "CustomerId": "985362",
@@ -44,11 +44,11 @@
           "Weight": 3000,
           "QoS": 6
         },
-        "tags": [ "City:Seattle", "Bldg:109", "Floor:2", "Room:2963" ]
+        "tags": [ "apples", "pears", "strawberries", "oranges" ]
       }
     },
     {
-      "deviceId": "Device51-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "deviceId": "Device51-7ce4a850",
       "serviceProperties": {
         "properties": {
           "CustomerId": "985362",
@@ -56,11 +56,11 @@
           "Weight": 50,
           "QoS": 1
         },
-        "tags": [ "City:Seattle", "Bldg:109", "Floor:3", "Room:3121" ]
+        "tags": [ "duck", "oranges", "potatoes", "gravy" ]
       }
     },
     {
-      "deviceId": "Device61-7ce4a850-094a-4e31-829f-c073ef5dfbdd",
+      "deviceId": "Device61-7ce4a850",
       "serviceProperties": {
         "properties": {
           "CustomerId": "284721",
@@ -68,7 +68,7 @@
           "Weight": 9000,
           "QoS": 9
         },
-        "tags": [ "City:Seattle", "Bldg:109", "Floor:1", "Room:1212" ]
+        "tags": [ "bacon", "lettuce", "tomatoes", "mayo" ]
       }
     }
   ]
