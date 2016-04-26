@@ -59,14 +59,22 @@ namespace GenerateDevices
                     {
                         await registryManager.RemoveDeviceAsync(device.Id);
                     }
-                    catch(AggregateException aggregateEx)
+                    catch(Exception ex)
                     {
-                        foreach (var ex in aggregateEx.InnerExceptions)
+                        if (ex is AggregateException)
                         {
-                            if (!(ex is Microsoft.Azure.Devices.Common.Exceptions.DeviceNotFoundException))
+                            var aggregateEx = ex as AggregateException;
+                            foreach (var innerEx in aggregateEx.InnerExceptions)
                             {
-                                throw aggregateEx;
+                                if (!(innerEx is Microsoft.Azure.Devices.Common.Exceptions.DeviceNotFoundException))
+                                {
+                                    throw ex;
+                                }
                             }
+                        }
+                        else if (!(ex is Microsoft.Azure.Devices.Common.Exceptions.DeviceNotFoundException))
+                        {
+                            throw ex;
                         }
                     }
 
