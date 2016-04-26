@@ -15,8 +15,12 @@ IF %ERRORLEVEL% NEQ 0 (
 
 rem ensure nuget.exe exists
 where /q nuget.exe
-if not !errorlevel! == 0 (
+if not %errorlevel% == 0 (
 @Echo Azure IoT SDK needs to download nuget.exe from https://www.nuget.org/nuget.exe 
+@Echo https://www.nuget.org 
+choice /C yn /M "Do you want to download and run nuget.exe?" 
+if not %errorlevel%==1 goto :eof
+rem if nuget.exe is not found, then ask user
 Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
      if not exist .\nuget.exe (
            echo nuget does not exist
@@ -51,8 +55,9 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 ECHO Building service samples...
-
-msbuild ..\GetStartedWithIoTHubDM\GetStartedWithIoTHubDM.sln /p:OutputPath=%BINPATH% /fl /flp:logfile=samplesBuild.log
+set SOLUTIONFILE=..\GetStartedWithIoTHubDM\GetStartedWithIoTHubDM.sln
+nuget restore %SOLUTIONFILE%
+msbuild %SOLUTIONFILE% /p:OutputPath=%BINPATH% /fl /flp:logfile=samplesBuild.log
 IF %ERRORLEVEL% NEQ 0 (
    ECHO Error building samples.
    GOTO END
