@@ -5,14 +5,14 @@
   "author": "Microsoft Corporation",
   "license": "MIT",
   "dependencies": {
-    "azure-iot-common": "1.0.5"
+    "azure-iot-common": "1.0.5",
+    "debug": "^2.2.0"
   },
   "devDependencies": {
     "chai": "^3.3.0",
     "jshint": "^2.8.0",
     "mocha": "^2.3.3",
-    "istanbul": "^0.4.3",
-    "debug": "^2.2.0"
+    "istanbul": "^0.4.3"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",
