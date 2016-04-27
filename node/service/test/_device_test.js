@@ -26,7 +26,7 @@ var testDeviceObject = {
       secondaryKey:"ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="
     }
   },
-  systemProperties: {
+  deviceProperties: {
     batteryLevel:'90',
     batteryStatus:"good",
     currentTime:'2015-08-26T01:00:51.6950626',
@@ -104,7 +104,7 @@ describe('Device', function () {
 
     var verifyDeviceProperties = function(actual, expected) {
       var auth = actual.authentication;
-      var sysProp = actual.systemProperties;
+      var devProp = actual.deviceProperties;
       
       assert.equal(actual.deviceId, expected.deviceId);
       assert.equal(actual.generationId, expected.generationId);
@@ -121,28 +121,28 @@ describe('Device', function () {
       assert.equal(auth.symmetricKey.primaryKey, expected.authentication.symmetricKey.primaryKey);
       assert.equal(auth.symmetricKey.secondaryKey, expected.authentication.symmetricKey.secondaryKey);
             
-      assert.equal(sysProp.batteryLevel, expected.systemProperties.batteryLevel);
-      assert.equal(sysProp.batteryStatus, expected.systemProperties.batteryStatus);
-      assert.equal(sysProp.currentTime, expected.systemProperties.currentTime);
-      assert.equal(sysProp.defaultMaxPeriod, expected.systemProperties.defaultMaxPeriod);
-      assert.equal(sysProp.defaultMinPeriod, expected.systemProperties.defaultMinPeriod);
-      assert.equal(sysProp.deviceDescription, expected.systemProperties.deviceDescription);
-      assert.equal(sysProp.firmwarePackage, expected.systemProperties.firmwarePackage);
-      assert.equal(sysProp.firmwarePackageName, expected.systemProperties.firmwarePackageName);
-      assert.equal(sysProp.firmwarePackageUri, expected.systemProperties.firmwarePackageUri);
-      assert.equal(sysProp.firmwarePackageVersion, expected.systemProperties.firmwarePackageVersion);
-      assert.equal(sysProp.firmwareUpdateResult, expected.systemProperties.firmwareUpdateResult);
-      assert.equal(sysProp.firmwareUpdateState, expected.systemProperties.firmwareUpdateState);
-      assert.equal(sysProp.firmwareVersion, expected.systemProperties.firmwareVersion);
-      assert.equal(sysProp.hardwareVersion, expected.systemProperties.hardwareVersion);
-      assert.equal(sysProp.manufacturer, expected.systemProperties.manufacturer);
-      assert.equal(sysProp.memoryFree, expected.systemProperties.memoryFree);
-      assert.equal(sysProp.memoryTotal, expected.systemProperties.memoryTotal);
-      assert.equal(sysProp.modelNumber, expected.systemProperties.modelNumber);
-      assert.equal(sysProp.registrationLifetime, expected.systemProperties.registrationLifetime);
-      assert.equal(sysProp.serialNumber, expected.systemProperties.serialNumber);
-      assert.equal(sysProp.timezone, expected.systemProperties.timezone);
-      assert.equal(sysProp.utcOffset, expected.systemProperties.utcOffset);
+      assert.equal(devProp.batteryLevel, expected.deviceProperties.batteryLevel);
+      assert.equal(devProp.batteryStatus, expected.deviceProperties.batteryStatus);
+      assert.equal(devProp.currentTime, expected.deviceProperties.currentTime);
+      assert.equal(devProp.defaultMaxPeriod, expected.deviceProperties.defaultMaxPeriod);
+      assert.equal(devProp.defaultMinPeriod, expected.deviceProperties.defaultMinPeriod);
+      assert.equal(devProp.deviceDescription, expected.deviceProperties.deviceDescription);
+      assert.equal(devProp.firmwarePackage, expected.deviceProperties.firmwarePackage);
+      assert.equal(devProp.firmwarePackageName, expected.deviceProperties.firmwarePackageName);
+      assert.equal(devProp.firmwarePackageUri, expected.deviceProperties.firmwarePackageUri);
+      assert.equal(devProp.firmwarePackageVersion, expected.deviceProperties.firmwarePackageVersion);
+      assert.equal(devProp.firmwareUpdateResult, expected.deviceProperties.firmwareUpdateResult);
+      assert.equal(devProp.firmwareUpdateState, expected.deviceProperties.firmwareUpdateState);
+      assert.equal(devProp.firmwareVersion, expected.deviceProperties.firmwareVersion);
+      assert.equal(devProp.hardwareVersion, expected.deviceProperties.hardwareVersion);
+      assert.equal(devProp.manufacturer, expected.deviceProperties.manufacturer);
+      assert.equal(devProp.memoryFree, expected.deviceProperties.memoryFree);
+      assert.equal(devProp.memoryTotal, expected.deviceProperties.memoryTotal);
+      assert.equal(devProp.modelNumber, expected.deviceProperties.modelNumber);
+      assert.equal(devProp.registrationLifetime, expected.deviceProperties.registrationLifetime);
+      assert.equal(devProp.serialNumber, expected.deviceProperties.serialNumber);
+      assert.equal(devProp.timezone, expected.deviceProperties.timezone);
+      assert.equal(devProp.utcOffset, expected.deviceProperties.utcOffset);
     };
 
     it('correctly creates a device from JSON', function() {
@@ -448,10 +448,10 @@ describe('Device', function () {
     });
   });
   
-  describe('#systemProperties', function () { 
+  describe('#deviceProperties', function () { 
     it('cannot be configured or deleted', function () {
       var device = new Device(simpleDeviceJson);
-      var fieldName = 'systemProperties';
+      var fieldName = 'deviceProperties';
       
       throwsRedefineError(device, fieldName, { configurable: true });
       throwsRedefineError(device, fieldName, { enumerable: false });
@@ -464,25 +464,25 @@ describe('Device', function () {
       });
 
       assert.throws(function () {
-        delete device.systemProperties;
-      }, TypeError, 'Cannot delete property \'systemProperties\' of #<Device>');
+        delete device.deviceProperties;
+      }, TypeError, 'Cannot delete property \'deviceProperties\' of #<Device>');
     });
   });
   
   describe('#batteryLevel', function () { 
     it('cannot be configured or deleted', function () {
       var device = new Device(simpleDeviceJson);
-      var sysProp = device.systemProperties;
+      var devProp = device.deviceProperties;
       var fieldName = 'batteryLevel';
       
-      throwsRedefineError(sysProp, fieldName, { configurable: true });
-      throwsRedefineError(sysProp, fieldName, { enumerable: false });
-      throwsRedefineError(sysProp, fieldName, { set: function () { } });
-      throwsRedefineError(sysProp, fieldName, { get: function () { return deviceName; } });
-      throwsRedefineError(sysProp, fieldName, { value: 'world' });
+      throwsRedefineError(devProp, fieldName, { configurable: true });
+      throwsRedefineError(devProp, fieldName, { enumerable: false });
+      throwsRedefineError(devProp, fieldName, { set: function () { } });
+      throwsRedefineError(devProp, fieldName, { get: function () { return deviceName; } });
+      throwsRedefineError(devProp, fieldName, { value: 'world' });
 
       assert.doesNotThrow(function () {
-        Object.defineProperty(sysProp, fieldName, { enumerable: true }); // redefine to same value is ok
+        Object.defineProperty(devProp, fieldName, { enumerable: true }); // redefine to same value is ok
       });
     });
   });
@@ -490,17 +490,17 @@ describe('Device', function () {
   describe('#batteryStatus', function () { 
     it('cannot be configured or deleted', function () {
       var device = new Device(simpleDeviceJson);
-      var sysProp = device.systemProperties;
+      var devProp = device.deviceProperties;
       var fieldName = 'batteryStatus';
       
-      throwsRedefineError(sysProp, fieldName, { configurable: true });
-      throwsRedefineError(sysProp, fieldName, { enumerable: false });
-      throwsRedefineError(sysProp, fieldName, { set: function () { } });
-      throwsRedefineError(sysProp, fieldName, { get: function () { return deviceName; } });
-      throwsRedefineError(sysProp, fieldName, { value: 'world' });
+      throwsRedefineError(devProp, fieldName, { configurable: true });
+      throwsRedefineError(devProp, fieldName, { enumerable: false });
+      throwsRedefineError(devProp, fieldName, { set: function () { } });
+      throwsRedefineError(devProp, fieldName, { get: function () { return deviceName; } });
+      throwsRedefineError(devProp, fieldName, { value: 'world' });
 
       assert.doesNotThrow(function () {
-        Object.defineProperty(sysProp, fieldName, { enumerable: true }); // redefine to same value is ok
+        Object.defineProperty(devProp, fieldName, { enumerable: true }); // redefine to same value is ok
       });
     });
   });
@@ -508,17 +508,17 @@ describe('Device', function () {
   describe('#currentTime', function () { 
     it('cannot be configured or deleted', function () {
       var device = new Device(simpleDeviceJson);
-      var sysProp = device.systemProperties;
+      var devProp = device.deviceProperties;
       var fieldName = 'currentTime';
       
-      throwsRedefineError(sysProp, fieldName, { configurable: true });
-      throwsRedefineError(sysProp, fieldName, { enumerable: false });
-      throwsRedefineError(sysProp, fieldName, { set: function () { } });
-      throwsRedefineError(sysProp, fieldName, { get: function () { return deviceName; } });
-      throwsRedefineError(sysProp, fieldName, { value: 'world' });
+      throwsRedefineError(devProp, fieldName, { configurable: true });
+      throwsRedefineError(devProp, fieldName, { enumerable: false });
+      throwsRedefineError(devProp, fieldName, { set: function () { } });
+      throwsRedefineError(devProp, fieldName, { get: function () { return deviceName; } });
+      throwsRedefineError(devProp, fieldName, { value: 'world' });
 
       assert.doesNotThrow(function () {
-        Object.defineProperty(sysProp, fieldName, { enumerable: true }); // redefine to same value is ok
+        Object.defineProperty(devProp, fieldName, { enumerable: true }); // redefine to same value is ok
       });
     });
   });
@@ -527,11 +527,11 @@ describe('Device', function () {
   describe('#enumerable', function() {
     it('is enumerable', function () {
       var device = new Device(simpleDeviceJson);
-      var sysProp = device.systemProperties;
+      var devProp = device.deviceProperties;
 
       var allProps = [];
-      for (var prop in sysProp) {
-        if (sysProp.hasOwnProperty(prop)) {
+      for (var prop in devProp) {
+        if (devProp.hasOwnProperty(prop)) {
           allProps.push(prop.toString());
         }
       }

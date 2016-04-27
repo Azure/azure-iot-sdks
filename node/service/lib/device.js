@@ -3,15 +3,15 @@
 
 'use strict';
 
-var SystemPropInfo = function (systemProp) {
-    var sysProp = systemProp;
+var DevicePropInfo = function (deviceProp) {
+    var devProp = deviceProp;
     Object.defineProperties(this, {
         'batteryLevel': {
             enumerable: true,
             get: function () {
                 var batteryLevel;
-                if (sysProp) {
-                    batteryLevel = sysProp.batteryLevel;
+                if (devProp) {
+                    batteryLevel = devProp.batteryLevel;
                 }
                 return batteryLevel;
             }
@@ -20,8 +20,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var batteryStatus;
-                if (sysProp) {
-                    batteryStatus = sysProp.batteryStatus;
+                if (devProp) {
+                    batteryStatus = devProp.batteryStatus;
                 }
                 return batteryStatus;
             }
@@ -30,8 +30,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var currentTime;
-                if (sysProp) {
-                    currentTime = sysProp.currentTime;
+                if (devProp) {
+                    currentTime = devProp.currentTime;
                 }
                 return currentTime;
             }
@@ -40,8 +40,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var defaultMaxPeriod;
-                if (sysProp) {
-                    defaultMaxPeriod = sysProp.defaultMaxPeriod;
+                if (devProp) {
+                    defaultMaxPeriod = devProp.defaultMaxPeriod;
                 }
                 return defaultMaxPeriod;
             }
@@ -50,8 +50,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var defaultMinPeriod;
-                if (sysProp) {
-                    defaultMinPeriod = sysProp.defaultMinPeriod;
+                if (devProp) {
+                    defaultMinPeriod = devProp.defaultMinPeriod;
                 }
                 return defaultMinPeriod;
             }
@@ -60,8 +60,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var deviceDescription;
-                if (sysProp) {
-                    deviceDescription = sysProp.deviceDescription;
+                if (devProp) {
+                    deviceDescription = devProp.deviceDescription;
                 }
                 return deviceDescription;
             }
@@ -70,8 +70,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var firmwarePackage;
-                if (sysProp) {
-                    firmwarePackage = sysProp.firmwarePackage;
+                if (devProp) {
+                    firmwarePackage = devProp.firmwarePackage;
                 }
                 return firmwarePackage;
             }
@@ -80,8 +80,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var firmwarePackageName;
-                if (sysProp) {
-                    firmwarePackageName = sysProp.firmwarePackageName;
+                if (devProp) {
+                    firmwarePackageName = devProp.firmwarePackageName;
                 }
                 return firmwarePackageName;
             }
@@ -90,8 +90,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var firmwarePackageUri;
-                if (sysProp) {
-                    firmwarePackageUri = sysProp.firmwarePackageUri;
+                if (devProp) {
+                    firmwarePackageUri = devProp.firmwarePackageUri;
                 }
                 return firmwarePackageUri;
             }
@@ -100,8 +100,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var firmwarePackageVersion;
-                if (sysProp) {
-                    firmwarePackageVersion = sysProp.firmwarePackageVersion;
+                if (devProp) {
+                    firmwarePackageVersion = devProp.firmwarePackageVersion;
                 }
                 return firmwarePackageVersion;
             }
@@ -110,8 +110,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var firmwareUpdateResult;
-                if (sysProp) {
-                    firmwareUpdateResult = sysProp.firmwareUpdateResult;
+                if (devProp) {
+                    firmwareUpdateResult = devProp.firmwareUpdateResult;
                 }
                 return firmwareUpdateResult;
             }
@@ -120,8 +120,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var firmwareUpdateState;
-                if (sysProp) {
-                    firmwareUpdateState = sysProp.firmwareUpdateState;
+                if (devProp) {
+                    firmwareUpdateState = devProp.firmwareUpdateState;
                 }
                 return firmwareUpdateState;
             }
@@ -130,8 +130,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var firmwareVersion;
-                if (sysProp) {
-                    firmwareVersion = sysProp.firmwareVersion;
+                if (devProp) {
+                    firmwareVersion = devProp.firmwareVersion;
                 }
                 return firmwareVersion;
             }
@@ -140,8 +140,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var hardwareVersion;
-                if (sysProp) {
-                    hardwareVersion = sysProp.hardwareVersion;
+                if (devProp) {
+                    hardwareVersion = devProp.hardwareVersion;
                 }
                 return hardwareVersion;
             }
@@ -150,8 +150,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var manufacturer;
-                if (sysProp) {
-                    manufacturer = sysProp.manufacturer;
+                if (devProp) {
+                    manufacturer = devProp.manufacturer;
                 }
                 return manufacturer;
             }
@@ -160,8 +160,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var memoryFree;
-                if (sysProp) {
-                    memoryFree = sysProp.memoryFree;
+                if (devProp) {
+                    memoryFree = devProp.memoryFree;
                 }
                 return memoryFree;
             }
@@ -170,8 +170,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var memoryTotal;
-                if (sysProp) {
-                    memoryTotal = sysProp.memoryTotal;
+                if (devProp) {
+                    memoryTotal = devProp.memoryTotal;
                 }
                 return memoryTotal;
             }
@@ -180,8 +180,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var modelNumber;
-                if (sysProp) {
-                    modelNumber = sysProp.modelNumber;
+                if (devProp) {
+                    modelNumber = devProp.modelNumber;
                 }
                 return modelNumber;
             }
@@ -190,8 +190,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var regLifetime;
-                if (sysProp) {
-                    regLifetime = sysProp.registrationLifetime;
+                if (devProp) {
+                    regLifetime = devProp.registrationLifetime;
                 }
                 return regLifetime;
             }
@@ -200,8 +200,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var serialNumber;
-                if (sysProp) {
-                    serialNumber = sysProp.serialNumber;
+                if (devProp) {
+                    serialNumber = devProp.serialNumber;
                 }
                 return serialNumber;
             }
@@ -210,8 +210,8 @@ var SystemPropInfo = function (systemProp) {
             enumerable: true,
             get: function () {
                 var timezone;
-                if (sysProp) {
-                    timezone = sysProp.timezone;
+                if (devProp) {
+                    timezone = devProp.timezone;
                 }
                 return timezone;
             }
@@ -220,8 +220,8 @@ var SystemPropInfo = function (systemProp) {
            enumerable: true,
            get: function () {
                var utcOffset;
-               if (sysProp) {
-                   utcOffset = sysProp.utcOffset;
+               if (devProp) {
+                   utcOffset = devProp.utcOffset;
                }
                return utcOffset;
            }
@@ -351,6 +351,7 @@ var AuthenticationMechanism = function (authInfo) {
  * @prop {Object}   authentication  Contains the symmetric keys used to
  *                                  authenticate this device
  * @prop {Object}   serviceProperties Contains the Service Properties
+ * @prop {Object}   deviceProperties Contains the Service Properties
  */
 module.exports = function Device(sourceObj) {
   var body;
@@ -388,7 +389,7 @@ module.exports = function Device(sourceObj) {
           secondaryKey: null
         }
       },
-      systemProperties: {
+      deviceProperties: {
           batteryLevel: '',
           batteryStatus: '',
           currentTime: '',
@@ -521,17 +522,17 @@ module.exports = function Device(sourceObj) {
      }
   });  
   
-  Object.defineProperty(this, 'systemProperties', {
+  Object.defineProperty(this, 'deviceProperties', {
      enumerable: true,
      get: function() {
-         var sysProp;
-         if (body && body.systemProperties) {
-             sysProp = new SystemPropInfo(body.systemProperties);
+         var devProp;
+         if (body && body.deviceProperties) {
+             devProp = new DevicePropInfo(body.deviceProperties);
          }
          else {
-             sysProp = new SystemPropInfo(null);
+             devProp = new DevicePropInfo(null);
          }
-         return sysProp;         
+         return devProp;         
      } 
   }); 
 };
