@@ -271,16 +271,16 @@ IOTHUB_CLIENT_RESULT start_simulated_firmware_download(object_firmwareupdate *ob
 
 IOTHUB_CLIENT_RESULT start_simulated_firmware_update(object_firmwareupdate *obj)
 {
-    LogInfo("** firmware update request posted\r\n");
+    LogInfo("** firmware update request posted\n");
     if (g_sds->AppUpdateState == APP_UPDATE_STATE_DOWNLOAD_COMPLETE)
     {
-        LogInfo("** %s - > APP_UPDATE_STATE_UPDATE_COMMAND_RECEIVED\r\n", ENUM_TO_STRING(APP_UPDATE_STATE, g_sds->AppUpdateState));
+        LogInfo("** %s - > APP_UPDATE_STATE_UPDATE_COMMAND_RECEIVED\n", ENUM_TO_STRING(APP_UPDATE_STATE, g_sds->AppUpdateState));
         g_sds->AppUpdateState = APP_UPDATE_STATE_UPDATE_COMMAND_RECEIVED;
         return IOTHUB_CLIENT_OK;
     }
     else
     {
-        LogInfo("** returning failure. Invalid state -- state = %s\r\n", ENUM_TO_STRING(APP_UPDATE_STATE, g_sds->AppUpdateState));
+        LogInfo("** returning failure. Invalid state -- state = %s\n", ENUM_TO_STRING(APP_UPDATE_STATE, g_sds->AppUpdateState));
         return IOTHUB_CLIENT_INVALID_ARG;
     }
 }

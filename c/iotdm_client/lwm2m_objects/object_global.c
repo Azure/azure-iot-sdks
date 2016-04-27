@@ -74,6 +74,9 @@ uint8_t global_object_read(uint16_t instanceId, int *numDataP, lwm2m_data_t **da
         index++;
     } while (index < *numDataP && result == COAP_205_CONTENT);
 
+    fflush(stdout);
+    fflush(stderr);
+
     return result;
 }
 
@@ -117,12 +120,20 @@ uint8_t global_object_write(uint16_t instanceID, int numData, lwm2m_data_t *data
 
     } while (index < numData && result == COAP_204_CHANGED);
 
+    fflush(stdout);
+    fflush(stderr);
+
     return result;
 }
 
 uint8_t global_object_execute(uint16_t instanceID, uint16_t resourceID, uint8_t *buffer, int length, lwm2m_object_t *objectP)
 {
-    return dispatch_exec(objectP->objID, instanceID, resourceID);
+    uint8_t rv = dispatch_exec(objectP->objID, instanceID, resourceID);
+
+    fflush(stdout);
+    fflush(stderr);
+
+    return rv;
 }
 
 static uint8_t prv_OBJECT_delete(uint16_t id, lwm2m_object_t *objectP)

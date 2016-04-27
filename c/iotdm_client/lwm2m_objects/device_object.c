@@ -281,7 +281,7 @@ IOTHUB_CLIENT_RESULT on_read_device_batterystatus(object_device *obj, int *value
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_device_batterystatus;
-        LogInfo("returning %d for Device_BatteryStatus\r\n", *value);
+        LogInfo("returning %d for Device_BatteryStatus\n", *value);
     }
     return result;
 }
