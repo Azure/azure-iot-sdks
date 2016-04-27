@@ -1,0 +1,13 @@
+[Unit]
+Description=Azure IoT DM as a service.
+After=systemd-hostnamed.service
+ 
+[Service]
+ExecStartPre=/bin/systemctl start wpa_supplicant
+ 
+ExecStart=/usr/bin/iotdm_edison_sample --service
+Type=forking
+ 
+[Install]
+WantedBy=multi-user.target
+
