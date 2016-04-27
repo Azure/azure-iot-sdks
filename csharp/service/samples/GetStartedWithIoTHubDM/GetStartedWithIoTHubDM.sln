@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Query", "Query\Query.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Setup", "Utilities\Setup.csproj", "{2AC51539-F764-4574-AB87-18DE89769B3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceProperties", "DeviceProperties\DeviceProperties.csproj", "{9E9037E1-8144-4A97-AA89-1A502EB5D7D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceTwin", "DeviceTwin\DeviceTwin.csproj", "{9E9037E1-8144-4A97-AA89-1A502EB5D7D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

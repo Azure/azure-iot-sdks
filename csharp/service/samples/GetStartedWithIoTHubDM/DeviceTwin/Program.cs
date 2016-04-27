@@ -7,7 +7,7 @@ using Microsoft.Azure.Devices;
 using System.Threading;
 using Newtonsoft.Json;
 
-namespace DeviceProperties
+namespace DeviceTwin
 {
     class Program
     {

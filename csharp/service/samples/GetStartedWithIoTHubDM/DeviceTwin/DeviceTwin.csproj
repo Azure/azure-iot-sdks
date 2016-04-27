@@ -7,8 +7,8 @@
     <ProjectGuid>{9E9037E1-8144-4A97-AA89-1A502EB5D7D1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DeviceProperties</RootNamespace>
-    <AssemblyName>DeviceProperties</AssemblyName>
+    <RootNamespace>DeviceTwin</RootNamespace>
+    <AssemblyName>DeviceTwin</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
