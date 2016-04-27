@@ -18,6 +18,7 @@ pid_t child_download = -1;
 pid_t child_update = -1;
 pid_t child_factory_reset = -1;
 
+#define TEMP_ZIP_LOCATION "/home/root/nf.zip"
 #define DOWNLOAD_DESTINATION "/home/root/newFirmware.zip"
 
 void _system(const char *command)
@@ -232,7 +233,18 @@ bool use_wget(const char *uri)
     return ret;
 }
 
+const char *remove_file_prefix(const char *uri)
+{
+    if (uri[0] == 'f' && uri[1] == 'i' && uri[2] == 'l' && uri[3] == 'e' && uri[4] == ':' && uri[5] == '/' && uri[6] == '/')
+    {
+        return  uri+7;
+    }
+    else
+    {
+        return uri;
+    }
     
+}
 
 bool spawn_download_process(const char *uri)
 {
@@ -245,7 +257,8 @@ bool spawn_download_process(const char *uri)
     }
     else
     {
-        unlink("/home/root/newFirmware.zip");
+        unlink(TEMP_ZIP_LOCATION);
+        unlink(DOWNLOAD_DESTINATION);
 
         pid_t child = fork();
         if (child == 0)
@@ -254,18 +267,18 @@ bool spawn_download_process(const char *uri)
 
             if (use_wget(uri))
             {
-                sprintf(buffer, "/usr/bin/wget \"%s\" -O /home/root/nf.zip", uri);
+                sprintf(buffer, "/usr/bin/wget \"%s\" -O %s", uri, TEMP_ZIP_LOCATION);
                 _system(buffer);
                 
-                sprintf(buffer, "cp /home/root/nf.zip  \"%s\"", DOWNLOAD_DESTINATION);
+                sprintf(buffer, "mv %s  \"%s\"", TEMP_ZIP_LOCATION, DOWNLOAD_DESTINATION);
                 _system(buffer);
             }
             else
             {
-                sprintf(buffer, "cp \"%s\" \"%s\"", uri, DOWNLOAD_DESTINATION);
+                const char *src = remove_file_prefix(uri);
+                sprintf(buffer, "cp \"%s\" \"%s\"", src, DOWNLOAD_DESTINATION);
                 _system(buffer);
             }
-                
             
             LogInfo("** Download complete\r\n");
             exit(0);
