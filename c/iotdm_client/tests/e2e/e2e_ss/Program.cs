@@ -11,7 +11,9 @@
 
     class Program
     {
-        const double OneSecond = 1000;
+        const int    OneSecond = 1000;
+        const int    OneMinute = 60 * OneSecond;
+        const string WritePropertyError = "ERROR_WRITING_TO_DEVICE";
 
         static string             _cs;
         static JobClient          _dj;
@@ -103,10 +105,10 @@
             getDeviceTask.Wait();
 
             Device device = getDeviceTask.Result;
-            String retValue = String.Empty;
+            string retValue = String.Empty;
             try
             {
-                retValue = device.SystemProperties[property].Value.ToString();
+                retValue = device.DeviceProperties[property].Value.ToString();
             }
 
             catch (Exception ex)
@@ -130,6 +132,7 @@
 
                 else
                 {
+                    if (eArgs.Data.Contains("** ")) Console.WriteLine(eArgs.Data);
                     if (eArgs.Data.Contains("returning"))
                     {
                         // this is a 'read' operation
@@ -137,7 +140,7 @@
                         string propertyName = data[data.Length - 1];
                         if (_ReadTestCases.ContainsKey(propertyName))
                         {
-                            Console.WriteLine("Returning {0} is {1}", propertyName, data[2]);
+                            Console.WriteLine("Reading {0} is {1}", propertyName, data[2]);
                             _ReadTestCases[propertyName].ExpectedValue = data[2].Substring(1, data[2].Length - 2);
                         }
                     }
@@ -147,12 +150,17 @@
                         // this is a 'write' operation
                         string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         string propertyName = data[1];
+                        Console.WriteLine("{0} is being modified...", propertyName);
                         if (_WriteTestCases.ContainsKey(propertyName))
                         {
-                            string value = data[data.Length - 1].Substring(1, data[data.Length - 1].Length - 2);
+                            string rawValue = data[data.Length - 1];
+                            if ((rawValue.IndexOf('[') == 0) && (rawValue.IndexOf(']') > 0))
+                            {
+                                rawValue = rawValue.Substring(1, data[data.Length - 1].Length - 2);
+                            }
 
-                            Console.WriteLine("Setting {0} to {1}", propertyName, value);
-                            _WriteTestCases[propertyName].RecordedValue = value;
+                            Console.WriteLine("   new value '{0}':'{1}'", rawValue, data[data.Length - 1]);
+                            _WriteTestCases[propertyName].RecordedValue = rawValue;
                         }
                     }
 
@@ -218,18 +226,16 @@
 
                 else if (eArgs.Data.StartsWith("Observe Update"))
                 {
-                    Console.WriteLine(eArgs.Data);
                     string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
                     string uRI = data[1].Substring(7, data[0].Length - 1);
                     if (_ObserveTestCases.ContainsKey(uRI))
                     {
                         TestCase aCase = _ObserveTestCases[uRI];
-                        int      size = Int32.Parse(data[2]);
-                        aCase.ExpectedValue = data[3].Substring(0, size);
+                        aCase.ExpectedValue = data[2];
 
-                        Thread.Sleep(2000);
-                        aCase.RecordedValue = ReadPropertyThroughService(_ObserveTestCases[uRI].Name);
+                        aCase.RecordedValue = ReadPropertyThroughService(aCase.Name);
+                        Console.WriteLine("\n ** Observe Notify [{0}] Reported: {1}, Recorded: {2} **\n",
+                            aCase.Name, aCase.ExpectedValue, aCase.RecordedValue);
                     }
                 }
             }
@@ -336,9 +342,12 @@
             {
                 _dj = JobClient.CreateFromConnectionString(_cs);
 
+                /** wait for the service/client handshake to finish */
+                Thread.Sleep(2 * OneMinute);
+
                 while (_registered == false)
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(OneSecond);
                 }
 
                 foreach (var one in _ReadTestCases)
@@ -368,7 +377,7 @@
          *  arg[0] = full path to iotdm_simple_sample binary.
          *  arg[1] = IoT Hub connection string.
          */
-        static int Main(string[] args)
+                static int Main(string[] args)
         {
             if (args.Length != 2)
             {
@@ -392,14 +401,34 @@
             String connectionString = Register();
             var client = DmClient.Start(args[0], connectionString);
 
+            /**
+            returning -1 for Device_MemoryFree
+            returning -1 for Device_BatteryStatus
+            returning 94 for Device_BatteryLevel
+            returning [2.0] for Device_FirmwareVersion
+            returning [Device_HardwareVersion] for Device_HardwareVersion
+            returning [Device_SerialNumber] for Device_SerialNumber
+            returning [Device_ModelNumber] for Device_ModelNumber
+            returning [Device_DeviceType] for Device_DeviceType
+            returning [Device_Manufacturer] for Device_Manufacturer
+            returning -1 for LWM2MServer_DefaultMaximumPeriod
+            returning -1 for LWM2MServer_DefaultMinimumPeriod
+            returning -1 for LWM2MServer_Lifetime
+            */
+
             // the 'read' test cases.
-            var oneCase = new TestCase(SystemPropertyNames.FirmwareVersion, TestCase.TestType.Read);
+            var oneCase = new TestCase(DevicePropertyNames.FirmwareVersion, TestCase.TestType.Read);
             _ReadTestCases.Add("Device_FirmwareVersion", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.BatteryStatus, TestCase.TestType.Read);
+            _ReadTestCases.Add("-1", oneCase);
 
             // the 'write' test cases
-            oneCase = new TestCase(SystemPropertyNames.UtcOffset, TestCase.TestType.Write);
+            oneCase = new TestCase(DevicePropertyNames.UtcOffset, TestCase.TestType.Write);
             oneCase.ExpectedValue = "-10:00"; /* US/Hawaii timezone */
             _WriteTestCases.Add("Device_UtcOffset", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.BatteryLevel, TestCase.TestType.Write);
+            oneCase.ExpectedValue = WritePropertyError;
+            _WriteTestCases.Add("Device_BatteryLevel", oneCase);
 
             // the 'execute' test cases
             oneCase = new TestCase("Device_FactoryReset", TestCase.TestType.Execute);
@@ -414,8 +443,12 @@
              * Note that we are using a URI - This is a side effect of wakaama messages on stderr...
              *    Let's figure out a more generic way of identifying the URI!
              */
-            oneCase = new TestCase(SystemPropertyNames.BatteryLevel, TestCase.TestType.Observe);
+            oneCase = new TestCase(DevicePropertyNames.BatteryLevel, TestCase.TestType.Observe);
             _ObserveTestCases.Add("/3/0/9", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.FirmwareVersion, TestCase.TestType.Observe);
+            _ObserveTestCases.Add("/3/0/3", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.FirmwareUpdateState, TestCase.TestType.Observe);
+            _ObserveTestCases.Add("/5/0/3", oneCase);
 
             Thread thread = new Thread(new ThreadStart(RunTestCases));
             thread.Start();
@@ -424,7 +457,7 @@
              *  Start a timer for the process. The interval should be large enough to validate all tests.
              *  Care must be taken to ensure PMIN and PMAX, for example, are honored.
              */
-            _closer = new SysTimer(10 * 60 * OneSecond);
+            _closer = new SysTimer(25 * OneMinute);
             _closer.Elapsed += (sender, e) =>
             {
                 _clientReady.Set();
@@ -434,7 +467,9 @@
 
             _clientReady.WaitOne();
             if (_registered)
+            {
                 client.Stop();
+            }
 
             /** report -- */
 
@@ -466,12 +501,12 @@
                 var jobID = "Read" + propertyName + Guid.NewGuid().ToString();
 
                 Console.WriteLine("ReadPropertyThroughService({0})", propertyName);
-                Task<JobResponse> job = _dj.ScheduleSystemPropertyReadAsync(jobID, _deviceId, propertyName);
+                Task<JobResponse> job = _dj.ScheduleDevicePropertyReadAsync(jobID, _deviceId, propertyName);
                 job.Wait();
                 JobResponse rs = job.Result;
                 while (rs.Status < JobStatus.Completed)
                 {
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                     job = _dj.GetJobAsync(jobID);
                     job.Wait();
                     rs = job.Result;
@@ -498,12 +533,12 @@
             {
                 var jobID = "Write" + propertyName + Guid.NewGuid().ToString();
 
-                Task<JobResponse> job = _dj.ScheduleSystemPropertyWriteAsync(jobID, _deviceId, propertyName, propertyValue);
+                Task<JobResponse> job = _dj.ScheduleDevicePropertyWriteAsync(jobID, _deviceId, propertyName, propertyValue);
                 job.Wait();
                 JobResponse rs = job.Result;
                 while (rs.Status < JobStatus.Completed)
                 {
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                     job = _dj.GetJobAsync(jobID);
                     job.Wait();
                     rs = job.Result;
@@ -514,6 +549,16 @@
 
             catch (Exception ex)
             {
+                string keyCode = "_" + propertyName;
+                foreach (var x in _WriteTestCases.Keys)
+                {
+                    if ( x.Contains(keyCode) )
+                    {
+                        _WriteTestCases[x].RecordedValue = WritePropertyError;
+                        return true;
+                    }
+                }
+
                 Console.WriteLine(ex);
             }
 
@@ -540,7 +585,7 @@
 
                 else if (resourceName.Equals("FirmwareUpdate_Update"))
                 {
-                    job = _dj.ScheduleFirmwareUpdateAsync(jobID, _deviceId, "https://FakeURI", TimeSpan.MaxValue);
+                    job = _dj.ScheduleFirmwareUpdateAsync(jobID, _deviceId, "https://FakeURI", TimeSpan.FromMinutes(25));
                 }
 
                 if (job != null)
@@ -549,7 +594,7 @@
                     JobResponse rs = job.Result;
                     while (rs.Status < JobStatus.Completed)
                     {
-                        Thread.Sleep(2000);
+                        Thread.Sleep(1000);
                         job = _dj.GetJobAsync(jobID);
                         job.Wait();
                         rs = job.Result;
