@@ -215,6 +215,9 @@ java/device/doc/api_reference
 java/service/doc/api_reference
 c/build_all/windows/nuget.exe
 csharp/device/build/nuget.exe
+csharp/service/samples/nuget.exe
+csharp/service/samples/cmake/*
+csharp/service/samples/GetStartedWithIotHubDM/.vs/config/applicationhost.config
 
 # .NET Micro Framework Emulator files and folders
 OnBoardFlash.dat
