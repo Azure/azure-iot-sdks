@@ -10,60 +10,16 @@ namespace Microsoft.Azure.Devices
     /// </summary>
     public sealed class X509Thumbprint
     {
-        string primaryThumbprint;
-        string secondaryThumbprint;
-
         /// <summary>
         /// X509 client certificate primary thumbprint
         /// </summary>
         [JsonProperty(PropertyName = "primaryThumbprint")]
-        public string PrimaryThumbprint
-        {
-            get
-            {
-                return this.primaryThumbprint;
-            }
-
-            set
-            {
-               // ValidateDeviceAuthenticationKey(value, "PrimaryThumbprint");
-                this.primaryThumbprint = value;
-            }
-        }
+        public string PrimaryThumbprint { get; set; }
 
         /// <summary>
         /// X509 client certificate secondary thumbprint
         /// </summary>
         [JsonProperty(PropertyName = "secondaryThumbprint")]
-        public string SecondaryThumbprint
-        {
-            get
-            {
-                return this.secondaryThumbprint;
-            }
-
-            set
-            {
-              //  ValidateDeviceAuthenticationKey(value, "SecondaryKey");
-                this.secondaryThumbprint = value;
-            }
-        }
-
-        //static void ValidateDeviceAuthenticationKey(string key, string paramName)
-        //{
-        //    if (key != null)
-        //    {
-        //        int keyLength;
-        //        if (!Utils.IsValidBase64(key, out keyLength))
-        //        {
-        //            throw new ArgumentException(CommonResources.GetString(Resources.StringIsNotBase64, key), paramName);
-        //        }
-
-        //        if (keyLength < SecurityConstants.MinKeyLengthInBytes || keyLength > SecurityConstants.MaxKeyLengthInBytes)
-        //        {
-        //            throw new ArgumentException(CommonResources.GetString(Resources.DeviceKeyLengthInvalid, SecurityConstants.MinKeyLengthInBytes, SecurityConstants.MaxKeyLengthInBytes));
-        //        }
-        //    }
-        //}
+        public string SecondaryThumbprint { get; set; }
     }
 }
