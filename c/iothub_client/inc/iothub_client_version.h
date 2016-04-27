@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/** @file version.h
+/** @file iothub_client_version.h
 *	@brief Functions for managing the client SDK version.
 */
 
 #ifndef IOTHUB_CLIENT_VERSION_H
 #define IOTHUB_CLIENT_VERSION_H
 
-#define IOTHUB_SDK_VERSION "1.0.4"
+#define IOTHUB_SDK_VERSION "1.0.5"
 
 #ifdef __cplusplus
 extern "C"

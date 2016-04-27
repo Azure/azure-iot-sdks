@@ -73,15 +73,13 @@ And if you are looking for end to end samples that show how to do simple analyti
    - [Bulk Registry sample](node/service/samples/registry_sample.js): Shows how to create a set of device IDs in the device ID registry of IoT Hub in bulk from a Node.js application.
    - [Simple Cloud to Device messaging sample](node/service/samples/send_c2d_message.js) : Shows how to send messages to a device from a Node.js application through IoT Hub.
 - Python device SDK:   
-   - [Sample using AMQP](python/device/samples/iothub_client_sample_amqp.py): shows how to connect to IoT Hub and send and receive messages using the AMQP protocol.
-   - [Sample using HTTP](python/device/samples/iothub_client_sample_http.py): shows how to connect to IoT Hub and send and receive messages using the HTTP protocol.
-   - [Sample using MQTT](python/device/samples/iothub_client_sample_mqtt.py): shows how to connect to IoT Hub and send and receive messages using the MQTT protocol.
+   - [Simple Sample](python/device/samples/iothub_client_sample.py): shows how to connect to IoT Hub and send and receive messages using the AMQP, MQTT or HTTP protocol.
+   - [Class Sample using AMQP](python/device/samples/iothub_client_sample_class.py): shows how to connect to IoT Hub with a HubManager class to send and receive messages using the AMQP protocol.
 
 
 ## Contribution, feedback and issues
 
-If you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](contribute.md).
-If you encounter any bugs or have suggestions for new features, please file an issue in the [Issues](https://github.com/Azure/azure-iot-sdks/issues) section of the project.
+If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](CONTRIBUTING.md).
 
 ## Support
 

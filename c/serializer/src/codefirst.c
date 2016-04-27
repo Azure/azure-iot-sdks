@@ -19,7 +19,7 @@ DEFINE_ENUM_STRINGS(CODEFIRST_RESULT, CODEFIRST_ENUM_VALUES)
 DEFINE_ENUM_STRINGS(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES)
 
 #define LOG_CODEFIRST_ERROR \
-    LogError("(result = %s)\r\n", ENUM_TO_STRING(CODEFIRST_RESULT, result))
+    LogError("(result = %s)", ENUM_TO_STRING(CODEFIRST_RESULT, result))
 
 typedef struct DEVICE_HEADER_DATA_TAG
 {
@@ -69,7 +69,7 @@ static CODEFIRST_RESULT buildStructTypes(SCHEMA_HANDLE schemaHandle, const REFLE
             {
                 /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
                 result = CODEFIRST_SCHEMA_ERROR;
-                LogError("create struct failed %s\r\n", ENUM_TO_STRING(CODEFIRST_RESULT, result));
+                LogError("create struct failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
                 break;
             }
             else
@@ -86,7 +86,7 @@ static CODEFIRST_RESULT buildStructTypes(SCHEMA_HANDLE schemaHandle, const REFLE
                             {
                                 /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
                                 result = CODEFIRST_SCHEMA_ERROR;
-                                LogError("add struct property failed %s\r\n", ENUM_TO_STRING(CODEFIRST_RESULT, result));
+                                LogError("add struct property failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
                                 break;
                             }
                         }
@@ -243,7 +243,7 @@ void CodeFirst_Deinit(void)
     /*Codes_SRS_CODEFIRST_99_006:[If the module is not previously initialed, CodeFirst_Deinit shall do nothing.]*/
     if (g_state != CODEFIRST_STATE_INIT)
     {
-        LogError("CodeFirst_Deinit called when CodeFirst was not INIT\r\n");
+        LogError("CodeFirst_Deinit called when CodeFirst was not INIT");
     }
     else
     {
@@ -338,7 +338,7 @@ EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(void* deviceHandle, void* callback
     if (g_state != CODEFIRST_STATE_INIT)
     {
         result = EXECUTE_COMMAND_ERROR;
-        LogError("CodeFirst_InvokeAction called before init has an error %s \r\n", ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
+        LogError("CodeFirst_InvokeAction called before init has an error %s ", ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
     }
     /*Codes_SRS_CODEFIRST_99_066:[ If actionName, relativeActionPath or deviceHandle is NULL then EXECUTE_COMMAND_ERROR shall be returned*/
     else if ((actionName == NULL) ||
@@ -346,13 +346,13 @@ EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(void* deviceHandle, void* callback
         (relativeActionPath == NULL))
     {
         result = EXECUTE_COMMAND_ERROR;
-        LogError("action Name is NULL %s \r\n", ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
+        LogError("action Name is NULL %s ", ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
     }
     /*Codes_SRS_CODEFIRST_99_067:[ If parameterCount is greater than zero and parameterValues is NULL then EXECUTE_COMMAND_ERROR shall be returned.]*/
     else if ((parameterCount > 0) && (parameterValues == NULL))
     {
         result = EXECUTE_COMMAND_ERROR;
-        LogError("parameterValues error %s \r\n", ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
+        LogError("parameterValues error %s ", ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
     }
     else
     {
@@ -369,7 +369,7 @@ EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(void* deviceHandle, void* callback
         {
             /*Codes_SRS_CODEFIRST_99_141:[If a child model specified in the relativeActionPath argument cannot be found by CodeFirst_InvokeAction, it shall return EXECUTE_COMMAND_ERROR.] */
             result = EXECUTE_COMMAND_ERROR;
-            LogError("action %s was not found %s \r\n", actionName, ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
+            LogError("action %s was not found %s ", actionName, ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
         }
         else
         {
@@ -396,7 +396,7 @@ EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(void* deviceHandle, void* callback
 
     if (result == EXECUTE_COMMAND_ERROR)
     {
-        LogError(" %s \r\n", ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
+        LogError(" %s ", ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
     }
     return result;
 }
@@ -419,7 +419,7 @@ SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLEC
         {
             /* Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
             result = NULL;
-            LogError("schema init failed %s\r\n", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_SCHEMA_ERROR));
+            LogError("schema init failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_SCHEMA_ERROR));
         }
         else
         {
@@ -524,19 +524,19 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
         (model == NULL))
     {
         result = NULL;
-        LogError(" %s \r\n", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG));
+        LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG));
     }
     /* Codes_SRS_CODEFIRST_99_106:[If CodeFirst_CreateDevice is called when the modules is not initialized is shall return NULL.] */
     else if (g_state != CODEFIRST_STATE_INIT)
     {
         result = NULL;
-        LogError(" %s \r\n", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_NOT_INIT));
+        LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_NOT_INIT));
     }
     else if ((deviceHeader = (DEVICE_HEADER_DATA*)malloc(sizeof(DEVICE_HEADER_DATA))) == NULL)
     {
         /* Codes_SRS_CODEFIRST_99_102:[On any other errors, Device_Create shall return NULL.] */
         result = NULL;
-        LogError(" %s \r\n", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
+        LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
     }
     /* Codes_SRS_CODEFIRST_99_081:[CodeFirst_CreateDevice shall use Device_Create to create a device handle.] */
     /* Codes_SRS_CODEFIRST_99_082:[CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction as action callback argument.] */
@@ -547,7 +547,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
             free(deviceHeader);
             deviceHeader = NULL;
             result = NULL;
-            LogError(" %s \r\n", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
+            LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
         }
         else
         {
@@ -561,7 +561,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
 
                 /* Codes_SRS_CODEFIRST_99_084:[If Device_Create fails, CodeFirst_CreateDevice shall return NULL.] */
                 result = NULL;
-                LogError(" %s \r\n", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_DEVICE_FAILED));
+                LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_DEVICE_FAILED));
             }
             else if ((newDevices = (DEVICE_HEADER_DATA**)realloc(g_Devices, sizeof(DEVICE_HEADER_DATA*) * (g_DeviceCount + 1))) == NULL)
             {
@@ -571,7 +571,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
 
                 /* Codes_SRS_CODEFIRST_99_102:[On any other errors, Device_Create shall return NULL.] */
                 result = NULL;
-                LogError(" %s \r\n", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
+                LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
             }
             else
             {
@@ -910,7 +910,7 @@ EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* comman
         )
     {
         result = EXECUTE_COMMAND_ERROR;
-        LogError("invalid argument (NULL) passed to CodeFirst_ExecuteCommand void* device = %p, const char* command = %p\r\n", device, command);
+        LogError("invalid argument (NULL) passed to CodeFirst_ExecuteCommand void* device = %p, const char* command = %p", device, command);
     }
     else
     {
@@ -920,7 +920,7 @@ EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* comman
         {
             /*Codes_SRS_CODEFIRST_02_016: [If finding the device fails, then CodeFirst_ExecuteCommand shall return EXECUTE_COMMAND_ERROR.]*/
             result = EXECUTE_COMMAND_ERROR;
-            LogError("unable to find the device given by address %p\r\n", device);
+            LogError("unable to find the device given by address %p", device);
         }
         else
         {

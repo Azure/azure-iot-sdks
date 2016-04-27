@@ -213,7 +213,7 @@ static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 #define MICROMOCK_BOILERPLATE \
     TEST_SUITE_INITIALIZE(Before)                                               \
     {                                                                           \
-        INITIALIZE_MEMORY_DEBUG(g_dllByDll);                                    \
+        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);                                    \
         g_testByTest = MicroMockCreateMutex();                                  \
         ASSERT_IS_NOT_NULL(g_testByTest);                                       \
     }                                                                           \
@@ -221,7 +221,7 @@ static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
     TEST_SUITE_CLEANUP(After)                                                   \
     {                                                                           \
         MicroMockDestroyMutex(g_testByTest);                                    \
-        DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);                                  \
+        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);                                  \
     }                                                                           \
                                                                                 \
     TEST_FUNCTION_INITIALIZE(BeforeEach)                                        \

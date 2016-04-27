@@ -11,7 +11,7 @@ Configuration settings for an IoT Hub device client. Validates all user-defined 
 ```java
 public final class DeviceClientConfig
 {
-    public static final long TOKEN_VALID_SECS = 600;
+    public long TOKEN_VALID_SECS = 3600;
     public static final int DEFAULT_READ_TIMEOUT_MILLIS = 240000;
     public static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
 
@@ -87,7 +87,7 @@ public String getDeviceKey();
 public long getMessageValidSecs();
 ```
 
-** SRS_DEVICECLIENTCONFIG_11_005: [**The function shall return 600s.**] **
+** SRS_DEVICECLIENTCONFIG_11_005: [**The function shall return the value of TOKEN_VALID_SECS.**] **
 
 
 ### setMessageCallback

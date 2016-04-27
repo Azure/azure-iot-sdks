@@ -5,8 +5,10 @@
 
 compileAsC99()
 
+add_definitions( -DIMPORT_NAME=iothub_client_mock )
 set(iothub_client_mock_c_files
     ./iothub_client_mock.cpp
+    ../src/iothub_client_python.cpp
 )
 
 if(WIN32)

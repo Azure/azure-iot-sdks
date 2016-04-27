@@ -164,7 +164,7 @@ public class IotHubSasTokenTest
         String iotHubHostname = "sample-iothub-hostname.net";
         String deviceKey = "sample-device-key";
 
-        long token_valid_secs = DeviceClientConfig.TOKEN_VALID_SECS;
+        long token_valid_secs = 100;
         long expiryTimeTestErrorRange = 1;
 
         long expiryTimeBaseInSecs = System.currentTimeMillis() / 1000l + token_valid_secs + 1l;

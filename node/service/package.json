@@ -6,9 +6,9 @@
   "license": "MIT",
   "main": "iothub.js",
   "dependencies": {
-    "azure-iot-amqp-base": "^1.0.5",
-    "azure-iot-http-base": "^1.0.5",
-    "azure-iot-common": "^1.0.5",
+    "azure-iot-amqp-base": "1.0.5",
+    "azure-iot-http-base": "1.0.6",
+    "azure-iot-common": "1.0.5",
     "uuid": "^2.0.1"
   },
   "devDependencies": {

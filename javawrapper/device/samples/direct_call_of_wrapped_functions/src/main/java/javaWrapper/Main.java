@@ -91,6 +91,13 @@ public class Main {
         System.out.format("Using communication protocol %s.\n", protocolStr );
         
         System.out.println("library loaded");
+
+        int status = IoTHub.platform_init();
+        if (status != 0)
+        {
+        	 throw new IllegalStateException(
+                     "Failed to initialize the platform. ");
+        }
         
         if (protocolStr == "https")
         {

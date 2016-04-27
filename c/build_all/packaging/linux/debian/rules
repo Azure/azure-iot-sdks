@@ -19,10 +19,10 @@ include /usr/share/dpkg/default.mk
 
 # main packaging script based on dh7 syntax
 %:
-	dh $@ --buildsystem=cmake --DSYSINSTALL_BINDINGS=ON --Dskip_unittests=ON
+	dh $@ --buildsystem=cmake --DSYSINSTALL_BINDINGS=ON
 
 override_dh_auto_configure:
-	dh_auto_configure -O--buildsystem=cmake -O--DSYSINSTALL_BINDINGS=ON
+	dh_auto_configure -O--buildsystem=cmake -O--DSYSINSTALL_BINDINGS=ON -O--Dskip_unittests=ON
 
 override_dh_auto_install:
 	rm -f -r $$(pwd)/debian/tmp

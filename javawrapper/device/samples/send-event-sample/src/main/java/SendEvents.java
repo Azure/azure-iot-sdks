@@ -143,6 +143,7 @@ public class SendEvents
         scanner.nextLine();
 
         System.out.println("Shutting down...");
+        client.destroy();
     }
 }
 
