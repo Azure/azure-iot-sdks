@@ -130,7 +130,7 @@
                     Console.WriteLine("Device connected to DM channel");
                 }
 
-                else
+                else if (true == _registered)
                 {
                     if (eArgs.Data.Contains("** ")) Console.WriteLine(eArgs.Data);
                     if (eArgs.Data.Contains("returning"))
@@ -140,8 +140,17 @@
                         string propertyName = data[data.Length - 1];
                         if (_ReadTestCases.ContainsKey(propertyName))
                         {
-                            Console.WriteLine("Reading {0} is {1}", propertyName, data[2]);
-                            _ReadTestCases[propertyName].ExpectedValue = data[2].Substring(1, data[2].Length - 2);
+                            var aCase = _ReadTestCases[propertyName];
+                            if (null == aCase.ExpectedValue)
+                            {
+                                string rawValue = data[2];
+                                if ((rawValue.IndexOf('[') == 0) && (rawValue.IndexOf(']') > 0))
+                                {
+                                    rawValue = rawValue.Substring(1, rawValue.Length - 2);
+                                }
+
+                                aCase.ExpectedValue = rawValue;
+                            }
                         }
                     }
 
@@ -150,17 +159,19 @@
                         // this is a 'write' operation
                         string[] data = eArgs.Data.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         string propertyName = data[1];
-                        Console.WriteLine("{0} is being modified...", propertyName);
                         if (_WriteTestCases.ContainsKey(propertyName))
                         {
-                            string rawValue = data[data.Length - 1];
-                            if ((rawValue.IndexOf('[') == 0) && (rawValue.IndexOf(']') > 0))
+                            var aCase = _WriteTestCases[propertyName];
+                            if (null == aCase.RecordedValue)
                             {
-                                rawValue = rawValue.Substring(1, data[data.Length - 1].Length - 2);
-                            }
+                                string rawValue = data[data.Length - 1];
+                                if ((rawValue.IndexOf('[') == 0) && (rawValue.IndexOf(']') > 0))
+                                {
+                                    rawValue = rawValue.Substring(1, rawValue.Length - 2);
+                                }
 
-                            Console.WriteLine("   new value '{0}':'{1}'", rawValue, data[data.Length - 1]);
-                            _WriteTestCases[propertyName].RecordedValue = rawValue;
+                                aCase.RecordedValue = rawValue;
+                            }
                         }
                     }
 
@@ -172,7 +183,6 @@
 
                         if (_ExecuteTestCases.ContainsKey(propertyName))
                         {
-                            Console.WriteLine("Execute {0}", propertyName);
                             _ExecuteTestCases[propertyName].RecordedValue = "true";
                         }
                     }
@@ -187,6 +197,12 @@
                 if (done == false) break;
             }
 
+            foreach (var aCase in _ObserveTestCases)
+            {
+                done &= aCase.Value.HasRun;
+                if (done == false) break;
+            }
+
             foreach (var aCase in _WriteTestCases)
             {
                 done &= aCase.Value.HasRun;
@@ -194,12 +210,6 @@
             }
 
             foreach (var aCase in _ExecuteTestCases)
-            {
-                done &= aCase.Value.HasRun;
-                if (done == false) break;
-            }
-
-            foreach (var aCase in _ObserveTestCases)
             {
                 done &= aCase.Value.HasRun;
                 if (done == false) break;
@@ -234,8 +244,6 @@
                         aCase.ExpectedValue = data[2];
 
                         aCase.RecordedValue = ReadPropertyThroughService(aCase.Name);
-                        Console.WriteLine("\n ** Observe Notify [{0}] Reported: {1}, Recorded: {2} **\n",
-                            aCase.Name, aCase.ExpectedValue, aCase.RecordedValue);
                     }
                 }
             }
@@ -315,7 +323,7 @@
                 }
             }
 
-            public String  RecordedValue { get; set; }
+            public String RecordedValue { get; set; }
             public String ExpectedValue { get; set; }
 
             public TestCase(String name, TestType type)
@@ -326,7 +334,11 @@
 
             public bool IsValid
             {
-                get { return AreEqual(ExpectedValue, RecordedValue, Name); }
+                get
+                {
+                    string message = this.Type.ToString() + "_" + this.Name;
+                    return AreEqual(ExpectedValue, RecordedValue, message);
+                }
             }
 
             public bool HasRun
@@ -352,12 +364,17 @@
 
                 foreach (var one in _ReadTestCases)
                 {
+                    one.Value.ExpectedValue = null;
                     one.Value.RecordedValue = ReadPropertyThroughService(one.Value.Name);
                 }
 
                 foreach (var one in _WriteTestCases)
                 {
-                    WritePropertyThroughService(one.Value.Name, one.Value.ExpectedValue);
+                    one.Value.RecordedValue = null;
+                    if (false == WritePropertyThroughService(one.Value.Name, one.Value.ExpectedValue))
+                    {
+                        one.Value.RecordedValue = WritePropertyError;
+                    }
                 }
 
                 foreach (var one in _ExecuteTestCases)
@@ -377,7 +394,7 @@
          *  arg[0] = full path to iotdm_simple_sample binary.
          *  arg[1] = IoT Hub connection string.
          */
-                static int Main(string[] args)
+        static int Main(string[] args)
         {
             if (args.Length != 2)
             {
@@ -402,25 +419,39 @@
             var client = DmClient.Start(args[0], connectionString);
 
             /**
-            returning -1 for Device_MemoryFree
-            returning -1 for Device_BatteryStatus
-            returning 94 for Device_BatteryLevel
-            returning [2.0] for Device_FirmwareVersion
-            returning [Device_HardwareVersion] for Device_HardwareVersion
-            returning [Device_SerialNumber] for Device_SerialNumber
-            returning [Device_ModelNumber] for Device_ModelNumber
-            returning [Device_DeviceType] for Device_DeviceType
-            returning [Device_Manufacturer] for Device_Manufacturer
-            returning -1 for LWM2MServer_DefaultMaximumPeriod
-            returning -1 for LWM2MServer_DefaultMinimumPeriod
-            returning -1 for LWM2MServer_Lifetime
+            returning -1 for 
+
+            returning [Device_ModelNumber] for 
+            returning [Device_DeviceType] for 
+            returning [Device_Manufacturer] for 
+            returning -1 for 
+            returning -1 for 
+            returning -1 for 
             */
 
             // the 'read' test cases.
             var oneCase = new TestCase(DevicePropertyNames.FirmwareVersion, TestCase.TestType.Read);
             _ReadTestCases.Add("Device_FirmwareVersion", oneCase);
             oneCase = new TestCase(DevicePropertyNames.BatteryStatus, TestCase.TestType.Read);
-            _ReadTestCases.Add("-1", oneCase);
+            _ReadTestCases.Add("Device_BatteryStatus", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.BatteryLevel, TestCase.TestType.Read);
+            _ReadTestCases.Add("Device_BatteryLevel", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.HardwareVersion, TestCase.TestType.Read);
+            _ReadTestCases.Add("Device_HardwareVersion", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.SerialNumber, TestCase.TestType.Read);
+            _ReadTestCases.Add("Device_SerialNumber", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.MemoryFree, TestCase.TestType.Read);
+            _ReadTestCases.Add("Device_MemoryFree", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.ModelNumber, TestCase.TestType.Read);
+            _ReadTestCases.Add("Device_ModelNumber", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.Manufacturer, TestCase.TestType.Read);
+            _ReadTestCases.Add("Device_Manufacturer", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.DefaultMaxPeriod, TestCase.TestType.Read);
+            _ReadTestCases.Add("LWM2MServer_DefaultMaximumPeriod", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.DefaultMinPeriod, TestCase.TestType.Read);
+            _ReadTestCases.Add("LWM2MServer_DefaultMinimumPeriod", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.RegistrationLifetime, TestCase.TestType.Read);
+            _ReadTestCases.Add("LWM2MServer_Lifetime", oneCase);
 
             // the 'write' test cases
             oneCase = new TestCase(DevicePropertyNames.UtcOffset, TestCase.TestType.Write);
@@ -464,19 +495,50 @@
             };
 
             _closer.Start();
-
             _clientReady.WaitOne();
             if (_registered)
             {
                 client.Stop();
             }
 
-            /** report -- */
-
             thread.Abort();
             Unregister();
 
-            return 0;
+            /** report -- */
+            int nrErrorCases = 0;
+            foreach (var aCase in _ReadTestCases)
+            {
+                if (false == aCase.Value.IsValid)
+                {
+                    nrErrorCases ++;
+                }
+            }
+
+            foreach (var aCase in _WriteTestCases)
+            {
+                if (false == aCase.Value.IsValid)
+                {
+                    nrErrorCases++;
+                }
+            }
+
+            foreach (var aCase in _ExecuteTestCases)
+            {
+                if (false == aCase.Value.IsValid)
+                {
+                    nrErrorCases++;
+                }
+            }
+
+            foreach (var aCase in _ObserveTestCases)
+            {
+                if (false == aCase.Value.IsValid)
+                {
+                    nrErrorCases++;
+                }
+            }
+
+            return nrErrorCases;
         }
 
 
@@ -500,7 +562,6 @@
             {
                 var jobID = "Read" + propertyName + Guid.NewGuid().ToString();
 
-                Console.WriteLine("ReadPropertyThroughService({0})", propertyName);
                 Task<JobResponse> job = _dj.ScheduleDevicePropertyReadAsync(jobID, _deviceId, propertyName);
                 job.Wait();
                 JobResponse rs = job.Result;
@@ -512,10 +573,7 @@
                     rs = job.Result;
                 }
 
-                if (rs.Status == JobStatus.Completed)
-                {
-                    return getProperty(propertyName);
-                }
+                return getProperty(propertyName);
             }
 
             catch (Exception ex)
@@ -544,21 +602,11 @@
                     rs = job.Result;
                 }
 
-                return (rs.Status == JobStatus.Completed);
+                return ((rs.Status == JobStatus.Completed) && rs.StatusMessage.Equals("Devices: 1; Succeeded: 1; Failed: 0;"));
             }
 
             catch (Exception ex)
             {
-                string keyCode = "_" + propertyName;
-                foreach (var x in _WriteTestCases.Keys)
-                {
-                    if ( x.Contains(keyCode) )
-                    {
-                        _WriteTestCases[x].RecordedValue = WritePropertyError;
-                        return true;
-                    }
-                }
-
                 Console.WriteLine(ex);
             }
 
