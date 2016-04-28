@@ -31,14 +31,28 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     int* counter = (int*)userContextCallback;
     const unsigned char* buffer = NULL;
     size_t size = 0;
-    
+	const char* messageId;
+	const char* correlationId;
+
+	// AMQP message properties
+	if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
+	{
+		messageId = "<null>";
+	}
+
+	if ((correlationId = IoTHubMessage_GetCorrelationId(message)) == NULL)
+	{
+		correlationId = "<null>";
+	}
+
+	// AMQP message content.
     IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message);
 
     if (contentType == IOTHUBMESSAGE_BYTEARRAY)
     {
         if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK)
         {
-            (void)printf("Received Message [%d] with BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
+            (void)printf("Received Message [%d] (message-id: %s, correlation-id: %s) with BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId,(int)size, buffer, (int)size);
         }
         else
         {
@@ -49,7 +63,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     {
         if ((buffer = IoTHubMessage_GetString(message)) != NULL && (size = strlen(buffer)) > 0)
         {
-            (void)printf("Received Message [%d] with STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
+            (void)printf("Received Message [%d] (message-id: %s, correlation-id: %s) with STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
         }
         else
         {
