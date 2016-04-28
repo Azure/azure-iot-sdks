@@ -21,7 +21,11 @@ var hostName = iothub.ConnectionString.parse(connectionString).HostName;
 utilities.loadDevicesData(function(err, deviceData) {
   // Step 1: create the registry object, that will be used to create devices
   var registry = iothub.Registry.fromConnectionString(connectionString);
-  
+
+  if (fs.existsSync(utilities.deviceCredentialsFile)) {
+    fs.unlinkSync(utilities.deviceCredentialsFile);
+  }
+
   deviceData.forEach(function (deviceInfo) {
     // Step 2: create the new device using the deviceInfo structure that we just assembled (delete first just in case - ignore error if delete fails, means the device wasn't there).
     registry.delete(deviceInfo.deviceId, function() {

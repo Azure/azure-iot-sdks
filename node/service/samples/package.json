@@ -7,6 +7,7 @@
   "license": "MIT",
   "dependencies": {
     "azure-iothub": "1.1.0-dmpreview.1",
-    "azure-storage": "^0.7.0"
+    "azure-storage": "^0.7.0",
+    "uuid": "^2.0.2"
   }
 }

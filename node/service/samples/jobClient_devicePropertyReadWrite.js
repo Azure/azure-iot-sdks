@@ -19,13 +19,13 @@ var readDeviceTwin = function(deviceId, done) {
     if (err) {
       done(err);
     } else {
-      console.log('Device ID: ' + deviceInfo.deviceId);
-      for (var prop in deviceInfo.deviceProperties) {
-        if (deviceInfo.deviceProperties[prop]) {
-          console.log('\t' + prop + ': ' + deviceInfo.deviceProperties[prop].value);
-        }
-      }
-      
+      console.log('*** Reading from the device registry (shallow read):');
+      console.log('--- ' + deviceInfo.deviceId + ' ---');
+      var timezone = deviceInfo.deviceProperties.Timezone;
+      var batteryLevel = deviceInfo.deviceProperties.BatteryLevel;
+      console.log('    ' + 'BatteryLevel' + ': ' + (batteryLevel ? batteryLevel.value : ''));
+      console.log('    ' + 'Timezone' + ': ' + (timezone? timezone.value : ''));
+      console.log('-------------------------');
       done();
     }
   });
@@ -75,6 +75,7 @@ loadDevicesData(function (err, deviceData) {
       else {
         // Step 2: Do a "deep read": this means scheduling a job for the device to return the current state of the desired property.
         var readJobId = uuid.v4();
+        console.log('*** Starting a deep-read job (' + readJobId + ') to update the registry with the value from the device:');
         jobClient.scheduleDevicePropertyRead(readJobId, testDevice.deviceId, 'timezone', waitForJob(readJobId, function(err) {
           if (err) printError('Could schedule device property read');
           else {
@@ -84,11 +85,13 @@ loadDevicesData(function (err, deviceData) {
               else {
                 // Step 4: Do a "deep write": this means scheduling a job for the device to change a property on the device itself.
                 var writeJobId = uuid.v4();
+                console.log('*** Starting a deep-write job (' + writeJobId + ') to update the property value on the device:');
                 jobClient.scheduleDevicePropertyWrite(writeJobId, testDevice.deviceId, { timezone: 'PST' }, waitForJob(writeJobId, function(err) {
                   if (err) printError('Could schedule device property write', err);
                   else {
                     // Step 5: Now that the property has been updated we need to do a deep read again to update the property in the device twin.
                     var readAfterWriteJobId = uuid.v4();
+                    console.log('*** Starting a deep-read job (' + readAfterWriteJobId + ') to update the registry with the new value from the device:');
                     jobClient.scheduleDevicePropertyRead(readAfterWriteJobId, testDevice.deviceId, 'timezone', waitForJob(readAfterWriteJobId, function(err) {
                       if (err) printError('Could schedule device property read');
                       else {
