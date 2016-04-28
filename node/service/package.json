@@ -1,6 +1,6 @@
 {
   "name": "azure-iothub",
-  "version": "1.1.0-dmpreview.0",
+  "version": "1.1.0-dmpreview.1",
   "description": "Azure IoT SDK - IoT Hub",
   "author": "Microsoft Corporation",
   "license": "MIT",
