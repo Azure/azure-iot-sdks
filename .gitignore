@@ -21,6 +21,8 @@ x64/
 [Bb]in/
 [Oo]bj/
 !/build/release/
+node/service/samples/cmake/
+node/service/samples/devicecreds.txt
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/

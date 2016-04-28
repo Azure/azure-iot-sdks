@@ -5,10 +5,17 @@
 
 var iothub = require('azure-iothub');
 var fs = require('fs');
+var os = require('os');
 var utilities = require('./utilities.js');
 
+// the connection string needs to be passed as a command line param
+if(process.argv.length < 3) {
+  console.error('Please pass the Azure IoT Hub connection string as a parameter.');
+  process.exit(1);
+}
+
 // This is the input file that should be in the same folder as this sample, and contain the connection string to the IoT Hub service.
-var connectionString = '[IoT Hub Connection String]';
+var connectionString = process.argv[2];
 var hostName = iothub.ConnectionString.parse(connectionString).HostName;
 
 utilities.loadDevicesData(function(err, deviceData) {
@@ -25,7 +32,7 @@ utilities.loadDevicesData(function(err, deviceData) {
           console.log('device created: ' + result.deviceId);
           // Step 3: the device creation has succeeded. Generate the connection string and append it to the file containing device credentials for use with other samples.
           var deviceConnStr = "HostName=" + hostName + ';DeviceId=' + result.deviceId + ';SharedAccessKey=' + result.authentication.symmetricKey.primaryKey;
-          fs.appendFile(utilities.deviceCredentialsFile, deviceConnStr + '\r\n', function (err) {
+          fs.appendFile(utilities.deviceCredentialsFile, deviceConnStr + os.EOL, function (err) {
             if (err) {
               console.error('Could not write to device credentials file');
             }
