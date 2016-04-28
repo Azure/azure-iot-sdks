@@ -15,7 +15,11 @@
 
 # General
 - Documentation fixes
+
 - Bug fixes
+  
+	GitHub issue #454: message-id and correlation-id properties now are exposed when using AMQP transport on IoT Hub C Device Client;
+
 - Pull request merges
 
 # Internal Changes
