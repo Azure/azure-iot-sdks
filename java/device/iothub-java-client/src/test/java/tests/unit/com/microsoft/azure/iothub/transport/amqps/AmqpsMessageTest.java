@@ -5,7 +5,6 @@
 package tests.unit.com.microsoft.azure.iothub.transport.amqps;
 
 import com.microsoft.azure.iothub.transport.amqps.AmqpsMessage;
-import mockit.MockUp;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;

@@ -215,28 +215,27 @@ public class SendReceive
 
         System.out.println("Sending the following event messages: ");
 
-        new Thread(() -> {
-            for (int i = 0; i < numRequests; ++i)
+
+        for (int i = 0; i < numRequests; ++i)
+        {
+            String msgStr = "Event Message " + Integer.toString(i);
+            try
             {
-                String msgStr = "Event Message " + Integer.toString(i);
-                try
-                {
-                    Message msg = new Message(msgStr);
-                    msg.setProperty("messageCount", Integer.toString(i));
-                    System.out.println(msgStr);
-                    EventCallback eventCallback = new EventCallback();
-                    client.sendEventAsync(msg, eventCallback, i);
-                }
-                catch (Exception e)
-                {
-                }
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                Message msg = new Message(msgStr);
+                msg.setProperty("messageCount", Integer.toString(i));
+                System.out.println(msgStr);
+                EventCallback eventCallback = new EventCallback();
+                client.sendEventAsync(msg, eventCallback, i);
             }
-        }).start();
+            catch (Exception e)
+            {
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         System.out.println("Press any key to exit...");
 

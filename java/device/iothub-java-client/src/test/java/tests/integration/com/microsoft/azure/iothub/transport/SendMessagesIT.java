@@ -7,29 +7,28 @@ import com.microsoft.azure.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.iot.service.sdk.Device;
 import com.microsoft.azure.iot.service.sdk.RegistryManager;
 import com.microsoft.azure.iothub.*;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import tests.integration.com.microsoft.azure.iothub.TestUtils.*;
+import org.junit.*;
+import tests.integration.com.microsoft.azure.iothub.TestUtils.DeviceConnectionString;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class SendMessagesIT
 {
     private static String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static RegistryManager registryManager;
-    private Device deviceHttps;
-    private Device deviceAmqps;
-    private Device deviceMqtt;
+    private static Device deviceHttps;
+    private static Device deviceAmqps;
+    private static Device deviceMqtt;
 
-    @Before
-    public void setUp() throws Exception
+    // How much to wait until a message makes it to the server, in milliseconds
+    private Integer sendTimeout = 5000;
+
+    @BeforeClass
+    public static void setUp() throws Exception
     {
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
@@ -55,8 +54,8 @@ public class SendMessagesIT
         registryManager.addDevice(deviceMqtt);
     }
 
-    @After
-    public void TearDown() throws IOException, IotHubException
+    @AfterClass
+    public static void TearDown() throws IOException, IotHubException
     {
         registryManager.removeDevice(deviceHttps.getDeviceId());
         registryManager.removeDevice(deviceAmqps.getDeviceId());
@@ -75,12 +74,23 @@ public class SendMessagesIT
         {
             try
             {
-                CompletableFuture<Boolean> messageSent = new CompletableFuture<>();
+                Success messageSent = new Success();
                 EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, messageSent);
-                Boolean result = messageSent.get();
 
-                if (!result)
+                client.sendEventAsync(msg, callback, messageSent);
+
+                Integer waitDuration = 0;
+                while(true)
+                {
+                    Thread.sleep(100);
+                    waitDuration += 100;
+                    if (messageSent.getResult() || waitDuration > sendTimeout)
+                    {
+                        break;
+                    }
+                }
+
+                if (!messageSent.getResult())
                 {
                     Assert.fail("Sending message over HTTPS protocol failed");
                 }
@@ -106,12 +116,21 @@ public class SendMessagesIT
         {
             try
             {
-                CompletableFuture<Boolean> messageSent = new CompletableFuture<>();
+                Success messageSent = new Success();
                 EventCallback callback = new EventCallback();
                 client.sendEventAsync(msg, callback, messageSent);
-                Boolean result = messageSent.get();
 
-                if (!result)
+                Integer waitDuration = 0;
+                while(true)
+                {
+                    Thread.sleep(100);
+                    if (messageSent.getResult() || waitDuration > sendTimeout)
+                    {
+                        break;
+                    }
+                }
+
+                if (!messageSent.getResult())
                 {
                     Assert.fail("Sending message over AMQPS protocol failed");
                 }
@@ -137,12 +156,21 @@ public class SendMessagesIT
         {
             try
             {
-                CompletableFuture<Boolean> messageSent = new CompletableFuture<>();
+                Success messageSent = new Success();
                 EventCallback callback = new EventCallback();
                 client.sendEventAsync(msg, callback, messageSent);
-                Boolean result = messageSent.get();
 
-                if (!result)
+                Integer waitDuration = 0;
+                while(true)
+                {
+                    Thread.sleep(100);
+                    if (messageSent.getResult() || waitDuration > sendTimeout)
+                    {
+                        break;
+                    }
+                }
+
+                if (!messageSent.getResult())
                 {
                     Assert.fail("Sending message over MQTT protocol failed");
                 }
@@ -156,18 +184,34 @@ public class SendMessagesIT
         client.close();
     }
 
+    private class Success
+    {
+        public Boolean result = false;
+
+        public void setResult(Boolean result)
+        {
+            this.result = result;
+        }
+
+        public Boolean getResult()
+        {
+            return this.result;
+        }
+    }
+
+
     public class EventCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
-            CompletableFuture<Boolean> messageSent = (CompletableFuture<Boolean>)context;
+            Success success = (Success) context;
             if (status.equals(IotHubStatusCode.OK_EMPTY))
             {
-                messageSent.complete(true);
+                success.setResult(true);
             }
             else
             {
-                messageSent.complete(false);
+                success.setResult(false);
             }
         }
     }
