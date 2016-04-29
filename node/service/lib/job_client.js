@@ -5,7 +5,7 @@
 
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var ConnectionString = require('./connection_string.js');
-var endpoint = require('azure-iot-common').endpoint;
+var versionQueryString = require('./version_query_string.js');
 var packageJson = require('../package.json');
 var SharedAccessSignature = require('./shared_access_signature.js');
 var DefaultTransport = require('./job_client_http.js');
@@ -91,7 +91,7 @@ JobClient.prototype._scheduleJob = function (jobDesc, done) {
         'Content-Type': 'application/json; charset=utf-8',
     };
 
-    var path = '/jobs/v2/' + jobDesc.jobId + endpoint.versionQueryString();
+    var path = '/jobs/v2/' + jobDesc.jobId + versionQueryString();
     this._httpTransport.sendHttpRequest('PUT', path, httpHeaders, config.host, JSON.stringify(jobDesc), function (err, body, response) {
         if (!err) {
             var jobInfo = body ? JSON.parse(body) : null;
@@ -421,7 +421,7 @@ JobClient.prototype.getJob = function (jobId, done) {
         'UserAgent': packageJson.name + '/' + packageJson.version
     };
 
-    var path = '/jobs/v2/' + jobId + endpoint.versionQueryString();
+    var path = '/jobs/v2/' + jobId + versionQueryString();
     this._httpTransport.sendHttpRequest('GET', path, httpHeaders, config.host, null, function (err, body, response) {
         if (!done) return;
 
@@ -464,7 +464,7 @@ JobClient.prototype.getJobs = function getJobs (done) {
         'UserAgent': packageJson.name + '/' + packageJson.version
     };
 
-    var path = '/jobs/v2' + endpoint.versionQueryString();
+    var path = '/jobs/v2' + versionQueryString();
     this._httpTransport.sendHttpRequest('GET', path, httpHeaders, config.host, null, function (err, body, response) {
         if (!done) return;
 
@@ -507,7 +507,7 @@ JobClient.prototype.queryJobHistory = function (jobQuery, done) {
         'Content-Type': 'application/json; charset=utf-8',
     };
 
-    var path = '/jobs/v2/query' + endpoint.versionQueryString();
+    var path = '/jobs/v2/query' + versionQueryString();
     var queryContent = JSON.stringify(jobQuery);
     
     this._httpTransport.sendHttpRequest('POST', path, httpHeaders, config.host, queryContent, function (err, body, response) {

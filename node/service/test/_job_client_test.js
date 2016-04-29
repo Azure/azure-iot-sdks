@@ -7,7 +7,7 @@ var assert = require('chai').assert;
 var JobClient = require('../lib/job_client.js');
 var SimulatedHttp = require('./job_client_http_simulated.js');
 var ConnectionString = require('../lib/connection_string.js');
-var endpoint = require('azure-iot-common').endpoint;
+var versionQueryString = require('../lib/version_query_string.js');
 var packageJson = require('../package.json');
 var commonTests = require('./_job_client_common_testrun.js');
 
@@ -221,7 +221,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     var cs = ConnectionString.parse(goodConnectionString);
                     assert.equal(verb, 'PUT');
                     assert.equal(host, cs.HostName);
-                    assert.equal(path, '/jobs/v2/' + testjobId + endpoint.versionQueryString());
+                    assert.equal(path, '/jobs/v2/' + testjobId + versionQueryString());
                     assert.equal(headers.Accept, 'application/json');
                     assert.equal(headers['Content-Type'], 'application/json; charset=utf-8');
                     assert.isOk(headers.Authorization);
@@ -312,7 +312,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     var cs = ConnectionString.parse(goodConnectionString);
                     assert.equal(verb, 'PUT');
                     assert.equal(host, cs.HostName);
-                    assert.equal(path, '/jobs/v2/' + testjobId + endpoint.versionQueryString());
+                    assert.equal(path, '/jobs/v2/' + testjobId + versionQueryString());
                     assert.equal(headers.Accept, 'application/json');
                     assert.equal(headers['Content-Type'], 'application/json; charset=utf-8');
                     assert.isOk(headers.Authorization);
@@ -393,7 +393,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     var cs = ConnectionString.parse(goodConnectionString);
                     assert.equal(verb, 'PUT');
                     assert.equal(host, cs.HostName);
-                    assert.equal(path, '/jobs/v2/' + testjobId + endpoint.versionQueryString());
+                    assert.equal(path, '/jobs/v2/' + testjobId + versionQueryString());
                     assert.equal(headers.Accept, 'application/json');
                     assert.equal(headers['Content-Type'], 'application/json; charset=utf-8');
                     assert.isOk(headers.Authorization);
@@ -472,7 +472,7 @@ function bulkTests(Transport, goodConnectionString, badConnectionString) {
                     var cs = ConnectionString.parse(goodConnectionString);
                     assert.equal(verb, 'PUT');
                     assert.equal(host, cs.HostName);
-                    assert.equal(path, '/jobs/v2/' + testjobId + endpoint.versionQueryString());
+                    assert.equal(path, '/jobs/v2/' + testjobId + versionQueryString());
                     assert.equal(headers.Accept, 'application/json');
                     assert.equal(headers['Content-Type'], 'application/json; charset=utf-8');
                     assert.isOk(headers.Authorization);
