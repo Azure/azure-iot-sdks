@@ -24,9 +24,9 @@
         "device-amqp-ws": "1.0.5",
         "device-http": "1.0.6",
         "device-mqtt": "1.0.5",
-        "service": "1.1.0-dmpreview.2"
+        "service": "1.1.0-dmpreview.3"
     },
-    "iothub-explorer": "1.1.0-dmpreview.2",
+    "iothub-explorer": "1.1.0-dmpreview.3",
     "device-explorer": "1.0.4",
     "github-release": "v1.0.4"
 }
