@@ -169,4 +169,12 @@ SimulatedHttp.prototype.queryDevices = function(queryString, query, done) {
   }
 };
 
+SimulatedHttp.prototype.setServiceProperties = function (deviceId, serviceProperties, done) {
+  var testResponse = {
+    statusCode: 200
+  };
+
+  done(null, JSON.stringify(serviceProperties), testResponse);
+};
+
 module.exports = SimulatedHttp;

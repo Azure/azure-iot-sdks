@@ -462,4 +462,39 @@ Registry.prototype.queryDevices = function (query, done) {
   });
 };
 
+/**
+ * @method              module:azure-iothub.Registry#setServiceProperties
+ * @description         The setServiceProperties method will replace the existing service properties of a device.
+ * @param {Object}      deviceId           The identifier used to uniquely identify the device.
+ * @param {Object}      serviceProperties  The service properties that should replace the existing ones.
+ * @param {Function}    done               The function to call when the operation is
+ *                                         complete. `done` will be called with three arguments:
+ *                                         - an Error object (can be null)
+ *                                         - a result object that can be:
+ *                                           - an array of {@link module:azure-iothub.Device|Device}
+ *                                             objects representing the matching device
+ *                                             identities
+ *                                           - an associative array with the aggregate results 
+ *                                             if the query object requested an aggregation operation
+ *                                         - a transport-specific response object useful for logging or debugging.
+ */
+Registry.prototype.setServiceProperties = function (deviceId, serviceProperties, done) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_024: [A `ReferenceError` shall be thrown if `deviceId` is falsy.]*/
+  if (!deviceId) throw new ReferenceError('deviceId cannot be \'' + deviceId + '\'');
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_025: [A `ReferenceError` shall be thrown if `serviceProperties` is falsy.]*/
+  if (!serviceProperties) throw new ReferenceError('deviceId cannot be \'' + serviceProperties + '\'');
+
+  var path = endpoint.devicePath(deviceId) + '/serviceProperties' + versionQueryString();
+  this._transport.setServiceProperties(path, serviceProperties, function (err, body, response) {
+    if (err) {
+      /*SRS_NODE_IOTHUB_REGISTRY_16_026: [The `done` callback shall be called with an `Error` object if the request fails. ]*/
+      done(err);
+    } else {
+      /*SRS_NODE_IOTHUB_REGISTRY_16_027: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of service properties if the request succeeds.]*/
+      var serviceProperties = JSON.parse(body);
+      done(null, serviceProperties, response);
+    }
+  });
+};
+
 module.exports = Registry;

@@ -134,3 +134,11 @@ The `queryDevices` method will return a list of devices that match the query par
 **SRS_NODE_IOTHUB_REGISTRY_16_020: [** The `done` callback shall be called with an `Error` object if the request fails. **]**
 **SRS_NODE_IOTHUB_REGISTRY_16_021: [** The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is a simple array of `Device` objects corresponding to the devices matching the query if it uses projection. **]**
 **SRS_NODE_IOTHUB_REGISTRY_16_022: [** The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of results if the query was an aggregation query. **]**
+
+###setServiceProperties(deviceId, serviceProperties, done)
+The `setServiceProperties` method will replace the service properties of the device identified by `deviceId` with those provided in `serviceProperties`.
+**SRS_NODE_IOTHUB_REGISTRY_16_024: [** A `ReferenceError` shall be thrown if `deviceId` is falsy. **]**
+**SRS_NODE_IOTHUB_REGISTRY_16_025: [** A `ReferenceError` shall be thrown if `serviceProperties` is falsy. **]**
+**SRS_NODE_IOTHUB_REGISTRY_16_026: [** The `done` callback shall be called with an `Error` object if the request fails.  **]**
+**SRS_NODE_IOTHUB_REGISTRY_16_027: [** The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of service properties if the request succeeds. **]**
+ 

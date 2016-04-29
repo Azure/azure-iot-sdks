@@ -160,6 +160,17 @@ Host: [host-name]
 ``` 
 **]**
 
+###setServiceProperties(path, serviceProperties, done)
+**SRS_NODE_IOTHUB_HTTP_16_007: [** the `setServiceProperties` method shall construct an HTTP request using information supplied by the caller as follows:
+```
+PUT [path]?api-version=[version] HTTP/1.1
+Authorization: [config.sharedAccessSignature]
+Content-Type: application/json; charset=utf-8 
+Host: [host-name]
+[serviceProperties]
+```
+**]**
+
 ###All HTTP requests
 **SRS_NODE_IOTHUB_HTTP_05_007: [**If any registry operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]  
 **SRS_NODE_IOTHUB_HTTP_05_008: [**When any registry operation method receives an HTTP response with a status code ]= 300, it shall invoke the done callback function with the following arguments:

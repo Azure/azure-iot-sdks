@@ -314,7 +314,8 @@ Http.prototype.queryDevicesByTags = function (queryString, tagList, maxCount, do
     'Content-Type': 'application/json; charset=utf-8',
     'Authorization': config.sharedAccessSignature,
     'Accept': 'application/json',
-    'Host': config.host
+    'Host': config.host,
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
 
   var tagPath = tagList.join('%2C');
@@ -336,13 +337,44 @@ Http.prototype.queryDevices = function (queryString, query, done) {
     'Content-Type': 'application/json; charset=utf-8',
     'Authorization': config.sharedAccessSignature,
     'Accept': 'application/json',
-    'Host': config.host
+    'Host': config.host,
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
 
   var path = '/devices/query' + queryString;
   var body = JSON.stringify(query);
 
   var request = this._http.buildRequest('POST', path, httpHeaders, config.host, handleHttpResponse (done));
+  request.write(body);
+  request.end();
+};
+
+Http.prototype.setServiceProperties = function (path, serviceProperties, done) {
+  var config = this._config;
+
+  /*Codes_SRS_NODE_IOTHUB_HTTP_16_007: [The `setServiceProperties` method shall construct an HTTP request using information supplied by the caller as follows:
+  ```
+  PUT [path]?api-version=[version] HTTP/1.1
+  Authorization: [config.sharedAccessSignature]
+  Content-Type: application/json; charset=utf-8 
+  Host: [host-name]
+  User-Agent: 'azure-iothub/' + version
+  [serviceProperties]
+  ```]*/
+
+  var body = JSON.stringify(serviceProperties);
+
+  var httpHeaders = {
+    'If-Match': '"' + serviceProperties.etag + '"',
+    'Content-Type': 'application/json; charset=utf-8',
+    'Authorization': config.sharedAccessSignature,
+    'Accept': 'application/json',
+    'Host': config.host,
+    'User-Agent': PackageJson.name + '/' + PackageJson.version,
+    'Content-Length': body.length
+  };
+
+  var request = this._http.buildRequest('PUT', path, httpHeaders, config.host, handleHttpResponse (done));
   request.write(body);
   request.end();
 };
