@@ -265,6 +265,67 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       });
     });
 
+    describe('#setServiceProperties', function(){
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_024: [A `ReferenceError` shall be thrown if `deviceId` is falsy.]*/
+      [undefined, null, '', false].forEach(function(badDeviceId){
+        it('throws a ReferenceError if `deviceId` is \'' + badDeviceId + '\'', function(){
+          var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+          assert.throws(function() {
+            registry.setServiceProperties(badDeviceId, {});
+          });
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_025: [A `ReferenceError` shall be thrown if `serviceProperties` is falsy.]*/
+      [undefined, null, '', false].forEach(function(badProperties){
+        it('throws a ReferenceError if `serviceProperties` is \'' + badProperties + '\'', function(){
+          var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+          assert.throws(function() {
+            registry.setServiceProperties(deviceId, badProperties);
+          });
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_026: [The `done` callback shall be called with an `Error` object if the request fails. ]*/
+      it('calls the done callback with an Error object if the request fails', function(done) {
+        var FailingTransport = function() { };
+        FailingTransport.prototype.setServiceProperties = function(path, serviceProperties, callback) {
+          assert.isString(path);
+          assert.isOk(serviceProperties);
+          callback(new Error(deviceId + ':' + JSON.stringify(serviceProperties)));
+        };
+
+        var registry = Registry.fromConnectionString(goodConnectionString, FailingTransport);
+        var testServiceProperties = { TestProperty: 'TestValue' };
+        registry.setServiceProperties(testDevice.deviceId, testServiceProperties, function (err) {
+          assert.instanceOf(err, Error);
+          done();
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_027: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of service properties if the request succeeds.]*/
+      it('calls the done callback with a null error and an object containing the updated service properties', function(done) {
+        var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+        registry.get(testDevice.deviceId, function (err, deviceInfo) {
+          if (err) {
+            done(err);
+          } else {
+            var newProps = deviceInfo.serviceProperties;
+            newProps.properties.testProp = 'testValue';
+            registry.setServiceProperties(testDevice.deviceId, newProps, function (err, result, response) {
+              if (err) {
+                done(err);
+              } else {
+                assert.equal(response.statusCode, 200);
+                assert.equal(result.properties.testProp, 'testValue');
+                done();
+              }
+            });
+          }
+        });
+      });
+    });
+
     describe('#delete', function () {
       /*Tests_SRS_NODE_IOTHUB_REGISTRY_07_007: [The delete method shall throw ReferenceError if the supplied deviceId is falsy.]*/
       it('throws if deviceId is falsy', function () {
@@ -376,60 +437,6 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
           assert.isOk(result);
           assert.equal(response.statusCode, 200);
           done();
-        });
-      });
-    });
-
-    describe('#setServiceProperties', function(){
-      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_024: [A `ReferenceError` shall be thrown if `deviceId` is falsy.]*/
-      [undefined, null, '', false].forEach(function(badDeviceId){
-        it('throws a ReferenceError if `deviceId` is \'' + badDeviceId + '\'', function(){
-          var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-          assert.throws(function() {
-            registry.setServiceProperties(badDeviceId, {});
-          });
-        });
-      });
-
-      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_025: [A `ReferenceError` shall be thrown if `serviceProperties` is falsy.]*/
-      [undefined, null, '', false].forEach(function(badProperties){
-        it('throws a ReferenceError if `serviceProperties` is \'' + badProperties + '\'', function(){
-          var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-          assert.throws(function() {
-            registry.setServiceProperties(deviceId, badProperties);
-          });
-        });
-      });
-
-      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_026: [The `done` callback shall be called with an `Error` object if the request fails. ]*/
-      it('calls the done callback with an Error object if the request fails', function(done) {
-        var FailingTransport = function() { };
-        FailingTransport.prototype.setServiceProperties = function(path, serviceProperties, callback) {
-          assert.isString(path);
-          assert.isOk(serviceProperties);
-          callback(new Error(deviceId + ':' + JSON.stringify(serviceProperties)));
-        };
-
-        var registry = Registry.fromConnectionString(goodConnectionString, FailingTransport);
-        var testServiceProperties = { TestProperty: 'TestValue' };
-        registry.setServiceProperties(testDevice.deviceId, testServiceProperties, function (err) {
-          assert.instanceOf(err, Error);
-          done();
-        });
-      });
-
-      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_027: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of service properties if the request succeeds.]*/
-      it('calls the done callback with a null error and an object containing the updated service properties', function(done) {
-        var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        var testServiceProperties = { TestProperty: 'TestValue' };
-        registry.setServiceProperties(testDevice.deviceId, testServiceProperties, function (err, result, response) {
-          if (err) {
-            done(err);
-          } else {
-            assert.equal(response.statusCode, 200);
-            assert.deepEqual(result, testServiceProperties);
-            done();
-          }
         });
       });
     });
