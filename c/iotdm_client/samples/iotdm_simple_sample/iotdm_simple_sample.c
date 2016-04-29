@@ -211,7 +211,6 @@ void update_firmware_udpate_progress(SimulatedDeviceState *sds)
         sds->UpdateStartTime = time(NULL);
         LogInfo("** %s - > APP_UPDATE_STATE_UPDATE_IN_PROGRESS\r\n", ENUM_TO_STRING(APP_UPDATE_STATE, sds->AppUpdateState));
         sds->AppUpdateState = APP_UPDATE_STATE_UPDATE_IN_PROGRESS;
-        set_firmwareupdate_state(0, LWM2M_UPDATE_STATE_NONE);
         break;
     case APP_UPDATE_STATE_UPDATE_IN_PROGRESS:
         if ((time(NULL) - sds->UpdateStartTime) >= FLASH_TIME_S)
@@ -220,7 +219,8 @@ void update_firmware_udpate_progress(SimulatedDeviceState *sds)
             set_firmwareupdate_updateresult(0, LWM2M_UPDATE_RESULT_UPDATE_SUCCESSFUL);
             LogInfo("** %s - > APP_UPDATE_STATE_UPDATE_SUCCESSFUL\r\n", ENUM_TO_STRING(APP_UPDATE_STATE, sds->AppUpdateState));
             sds->AppUpdateState = APP_UPDATE_STATE_UPDATE_SUCCESSFUL;
-			set_device_firmwareversion(0, target_version);
+            set_firmwareupdate_state(0, LWM2M_UPDATE_STATE_NONE);
+            set_device_firmwareversion(0, target_version);
         }
         break;
     case APP_UPDATE_STATE_UPDATE_SUCCESSFUL:
