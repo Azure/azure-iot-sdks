@@ -311,6 +311,7 @@ Host: [host-name]]*/
 Http.prototype.queryDevicesByTags = function (queryString, tagList, maxCount, done) {
   var config = this._config;
   var httpHeaders = {
+    'Content-Type': 'application/json; charset=utf-8',
     'Authorization': config.sharedAccessSignature,
     'Accept': 'application/json',
     'Host': config.host
