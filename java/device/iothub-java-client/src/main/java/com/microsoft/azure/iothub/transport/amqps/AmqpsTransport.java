@@ -11,6 +11,7 @@ import com.microsoft.azure.iothub.transport.IotHubTransport;
 import com.microsoft.azure.iothub.transport.State;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Section;
@@ -346,12 +347,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     {
         // Codes_SRS_AMQPSTRANSPORT_15_035: [The function shall return true if the waiting list,
         // in progress list and callback list are all empty, and false otherwise.]
-        if (this.waitingMessages.isEmpty() && this.inProgressMessages.size() == 0 && this.callbackList.isEmpty())
-        {
-            return true;
-        }
+        return this.waitingMessages.isEmpty() && this.inProgressMessages.size() == 0 && this.callbackList.isEmpty();
 
-        return false;
     }
 
     /**
@@ -435,6 +432,23 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             properties.setMessageId(message.getMessageId());
         }
         outgoingMessage.setProperties(properties);
+
+        // Codes_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
+        if (message.getProperties().length > 0)
+        {
+            Map<String, String> userProperties = new HashMap<>(message.getProperties().length);
+            for(MessageProperty messageProperty : message.getProperties())
+            {
+                if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(messageProperty.getName()))
+                {
+                    userProperties.put(messageProperty.getName(), messageProperty.getValue());
+                }
+
+            }
+
+            ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
+            outgoingMessage.setApplicationProperties(applicationProperties);
+        }
 
         Binary binary = new Binary(message.getBytes());
         Section section = new Data(binary);

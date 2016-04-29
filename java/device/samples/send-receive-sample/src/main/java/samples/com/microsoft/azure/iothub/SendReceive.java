@@ -223,6 +223,8 @@ public class SendReceive
             {
                 Message msg = new Message(msgStr);
                 msg.setProperty("messageCount", Integer.toString(i));
+                msg.setProperty("key1", "value1");
+                msg.setProperty("key2", "value2");
                 System.out.println(msgStr);
                 EventCallback eventCallback = new EventCallback();
                 client.sendEventAsync(msg, eventCallback, i);

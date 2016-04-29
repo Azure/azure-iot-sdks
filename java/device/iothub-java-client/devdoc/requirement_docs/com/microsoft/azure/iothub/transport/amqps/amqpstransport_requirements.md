@@ -101,6 +101,8 @@ public void sendMessages() throws IOException;
 
 **SRS_AMQPSTRANSPORT_15_036: [**The function shall create a new Proton message from the IoTHub message.**]**
 
+**SRS_AMQPSTRANSPORT_15_038: [**The function shall add all user properties to the application properties of the Proton message.**]**
+
 **SRS_AMQPSTRANSPORT_15_037: [**The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.**]**
 
 

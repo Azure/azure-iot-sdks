@@ -5,6 +5,7 @@ package tests.integration.com.microsoft.azure.iothub.transport;
 
 import com.microsoft.azure.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.iot.service.sdk.Device;
+import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
 import com.microsoft.azure.iot.service.sdk.RegistryManager;
 import com.microsoft.azure.iot.service.sdk.ServiceClient;
 import com.microsoft.azure.iothub.*;
@@ -64,7 +65,7 @@ public class ReceiveMessagesIT
         messageProperties.put("name2", "value2");
         messageProperties.put("name3", "value3");
 
-        serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString);
+        serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         serviceClient.open();
     }
 

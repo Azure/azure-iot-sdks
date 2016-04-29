@@ -11,6 +11,8 @@ import com.microsoft.azure.iothub.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.iothub.transport.amqps.AmqpsMessage;
 import com.microsoft.azure.iothub.transport.amqps.AmqpsTransport;
 import mockit.*;
+import org.apache.qpid.proton.Proton;
+import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,7 +42,7 @@ public class AmqpsTransportTest
     AmqpsMessage mockAmqpsMessage;
 
     @Mocked
-    MessageImpl protonMessage;
+    MessageImpl mockProtonMessage;
 
     @Mocked
     IotHubCallbackPacket mockIotHubCallbackPacket;
@@ -390,6 +392,70 @@ public class AmqpsTransportTest
             {
                 mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
                 times = 0;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
+    @Test
+    public void sendMessagesAddsUserPropertiesToProtonApplicationProperties(
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubEventCallback mockCallback,
+            @Mocked final IotHubOutboundPacket mockPacket)
+            throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[] {1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]
+        {
+            new MessageProperty("key1", "value1"),
+            new MessageProperty("key2", "value2")
+        };
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                new MessageImpl();
+                result = mockProtonMessage;
+                mockMsg.getProperties();
+                result = iotHubMessageProperties;
+                mockConnection.sendMessage(mockProtonMessage);
+                result = 1;
+                new ApplicationProperties(userProperties);
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+                mockConnection.sendMessage(mockProtonMessage);
+                times = 1;
+                new ApplicationProperties(userProperties);
+                times = 1;
+                mockProtonMessage.setApplicationProperties((ApplicationProperties) any);
+                times = 1;
             }
         };
     }
