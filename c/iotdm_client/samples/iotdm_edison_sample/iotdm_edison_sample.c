@@ -330,7 +330,6 @@ IOTHUB_CLIENT_RESULT start_firmware_update(object_firmwareupdate *obj)
         {
             LogInfo("** %s - > APP_UPDATE_STATE_UPDATE_IN_PROGRESS\r\n", ENUM_TO_STRING(APP_UPDATE_STATE, update_state));
             update_state = APP_UPDATE_STATE_UPDATE_IN_PROGRESS;
-            set_firmwareupdate_state(0, LWM2M_UPDATE_STATE_NONE);
             return IOTHUB_CLIENT_OK;
         }
         else
