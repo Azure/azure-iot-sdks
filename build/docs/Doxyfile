@@ -766,15 +766,15 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = mainpage.dox \
-                         ../../c/azure-c-shared-utility/inc/agenttime.h \
-                         ../../c/azure-c-shared-utility/inc/base64.h \
-                         ../../c/azure-c-shared-utility/inc/httpapi.h \
-                         ../../c/azure-c-shared-utility/inc/httpapi.h \
-                         ../../c/azure-c-shared-utility/inc/httpapiex.h \
-                         ../../c/azure-c-shared-utility/inc/httpheaders.h \
-                         ../../c/azure-c-shared-utility/inc/threadapi.h \
-                         ../../c/azure-c-shared-utility/inc/lock.h \
-                         ../../c/azure-c-shared-utility/inc/map.h \
+                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/agenttime.h \
+                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/base64.h \
+                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/httpapi.h \
+                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/httpapi.h \
+                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/httpapiex.h \
+                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/httpheaders.h \
+                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/threadapi.h \
+                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/lock.h \
+                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/map.h \
                          ../../c/iothub_client/inc/iothub_client_version.h \
                          ../../c/iothub_client/inc/iothub_message.h \
                          ../../c/iothub_client/inc/iothub_client_ll.h \

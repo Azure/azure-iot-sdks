@@ -132,7 +132,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new AmqpsTransport((DeviceClientConfig) any, protocol);
+                new AmqpsTransport((DeviceClientConfig) any, false);
             }
         };
     }
@@ -172,7 +172,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new AmqpsTransport((DeviceClientConfig) any, protocol);
+                new AmqpsTransport((DeviceClientConfig) any, true);
             }
         };
     }

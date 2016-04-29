@@ -6,90 +6,91 @@
 package com.microsoft.azure.iothub.transport.amqps;
 
 import com.microsoft.azure.iothub.DeviceClientConfig;
-import com.microsoft.azure.iothub.IotHubClientProtocol;
 import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.net.IotHubUri;
+import com.microsoft.azure.iothub.transport.State;
 import com.microsoft.azure.iothub.transport.TransportUtils;
-import org.apache.qpid.proton.*;
-import org.apache.qpid.proton.engine.BaseHandler;
-import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.Proton;
+import org.apache.qpid.proton.amqp.Symbol;
+import org.apache.qpid.proton.amqp.messaging.Accepted;
+import org.apache.qpid.proton.amqp.messaging.Source;
+import org.apache.qpid.proton.amqp.messaging.Target;
+import org.apache.qpid.proton.amqp.transport.DeliveryState;
+import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
+import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.impl.WebSocketImpl;
 import org.apache.qpid.proton.message.Message;
+import org.apache.qpid.proton.reactor.FlowController;
+import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.TimeoutException;
+import java.nio.BufferOverflowException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 
 /**
- * An AMQPS IotHub Session for a device and an IotHub. This class contains functionality for
+ * An AMQPS IotHub connection between a device and an IoTHub. This class contains functionality for sending/receiving
+ * a message, and logic to re-establish the connection with the IoTHub in case it gets lost.
  */
-public final class AmqpsIotHubConnection extends BaseHandler {
-    private static final int DEFAULT_DELIVERY_WAIT_TIME_SECONDS = 5;
+public final class AmqpsIotHubConnection extends BaseHandler
+{
+    private int maxWaitTimeForOpeningConnection = 5000;
+    protected State state;
+    private Future reactorFuture;
 
-    private IotHubReactor iotHubReactor;
+    private static final String sendTag = "sender";
+    private static final String receiveTag = "receiver";
 
-    /** Future that gets completed once the reactor is ready to begin sending and receiving */
-    protected CompletableFuture<Boolean> reactorReady;
+    private static final String sendEndpointFormat = "/devices/%s/messages/events";
+    private final String sendEndpoint;
+    private static final String receiveEndpointFormat = "/devices/%s/messages/devicebound";
+    private final String receiveEndpoint;
 
-    /** The state of the Reactor. */
-    public enum ReactorState
-    {
-        OPEN, CLOSED
-    } ReactorState state;
+    private int linkCredit = -1;
+    /** The {@link Delivery} tag. */
+    private long nextTag = 0;
+    private static final String versionIdentifierKey = "com.microsoft:client-version";
+    private static final String webSocketPath = "/$iothub/websocket";
+    private static final String webSocketSubProtocol = "AMQPWSB10";
+    private static final int amqpPort = 5671;
+    private static final int amqpWebSocketPort = 443;
+    private String sasToken;
 
-    /** Semaphore to restrict multiple calls to asynchronously run the Reactor. */
-    private Semaphore reactorSemaphore = new Semaphore(1);
+    private Sender sender;
+    private Receiver receiver;
+    private Connection connection;
+    private Session session;
 
-    //==============================================================================
-    //Connection Variables
-    //==============================================================================
-    /** The address string of the IoT Hub. */
     private String hostName;
-    /** The username string to use SASL authentication. */
     private String userName;
-    /** The ID for the associated device. */
-    private String deviceID;
-    /** Indicates if use AMQP over WEBSOCKET or AMQP */
-    private final IotHubClientProtocol iotHubClientProtocol;
 
-    /** The {@link DeviceClientConfig} for the associated device. */
+    private final Boolean useWebSockets;
     protected DeviceClientConfig config;
 
-    //==============================================================================
-    //Sender Variables
-    //==============================================================================
-    /** Map of Proton-J {@link org.apache.qpid.proton.engine.Delivery} object hash codes to the corresponding message {@link Tuple}. */
-    private Map<Integer, Tuple<CompletableFuture<Boolean>, byte[], Object>> inProgressMessageMap;
-    /** Integer representing the maximum allowable size of the {@link AmqpsIotHubConnection#inProgressMessageMap}. This integer equals the AMQP link credit received when the Sender link is attached. */
-	private int maxQueueSize;
-
-    //==============================================================================
-    //Receiver Variables
-    //==============================================================================
-    /** Queue of messaged received. */
-    private Queue<Message> receivedMessageQueue;
-
-    //==============================================================================
-    //Class Variables
-    //==============================================================================
-    /** The underlying {@link AmqpsIotHubConnectionBaseHandler} implementing lower level callbacks.*/
-    private AmqpsIotHubConnectionBaseHandler amqpsHandler;
-    /** The completion status for this {@link AmqpsIotHubConnection}. */
-    private CompletableFuture<Boolean> completionStatus;
-    /** The last received {@link AmqpsMessage} from the {@link AmqpsIotHubConnectionBaseHandler}. */
-    private AmqpsMessage lastMessage = null;
+    private List<ServerListener> listeners = new ArrayList<>();
+    private ExecutorService executorService;
 
     /**
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
      *
      * @param config The {@link DeviceClientConfig} corresponding to the device associated with this {@link com.microsoft.azure.iothub.DeviceClient}.
+     * @param useWebSockets Whether the connection should use web sockets or not.
      */
-    public AmqpsIotHubConnection(DeviceClientConfig config, IotHubClientProtocol iotHubClientProtocol){
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_002: [The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.]
-        if(config == null){
+    public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets)
+    {
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
+        // any of the parameters of the configuration is null or empty.]
+        if(config == null)
+        {
             throw new IllegalArgumentException("The DeviceClientConfig cannot be null.");
         }
         if(config.getIotHubHostname() == null || config.getIotHubHostname().length() == 0)
@@ -109,449 +110,528 @@ public final class AmqpsIotHubConnection extends BaseHandler {
             throw new IllegalArgumentException("deviceKey cannot be null or empty.");
         }
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_001: [The constructor shall save the configuration.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_002: [The constructor shall save the configuration into private member variables.]
         this.config = config;
 
-        String iotHubHostname = this.config.getIotHubHostname();
-        String iotHubName = this.config.getIotHubName();
         String deviceId = this.config.getDeviceId();
-        String iotHubUser = deviceId + "@sas." + iotHubName;
+        String iotHubName = this.config.getIotHubName();
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_006: [The constructor shall initialize a new private map for messages that are in progress.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_007: [The constructor shall initialize new private Futures for the status of the Connection and Reactor.]
-        this.hostName = iotHubHostname;
-        this.userName = iotHubUser;
-        this.deviceID = deviceId;
-        this.iotHubClientProtocol = iotHubClientProtocol;
+        this.userName = deviceId + "@sas." + iotHubName;
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_004: [The constructor shall set it’s state to CLOSED.]
-        this.state = ReactorState.CLOSED;
-
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_005: [The constructor shall initialize a new private queue for received messages.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_006: [The constructor shall initialize a new private map for messages that are in progress.]
-        receivedMessageQueue = new LinkedBlockingQueue<>();
-        inProgressMessageMap = new HashMap<>();
-
-        this.maxQueueSize = -1;
-
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_007: [The constructor shall initialize new private Futures for the status of the Connection and Reactor.]
-        completionStatus = new CompletableFuture<>();
-        reactorReady = new CompletableFuture<>();
-    }
-
-    /**
-     * Opens the {@link AmqpsIotHubConnection} creating a new {@link AmqpsIotHubConnectionBaseHandler}.
-     * <p>
-     *     If the current {@link AmqpsIotHubConnection.ReactorState} is not OPEN, this method
-     *     will create a new {@link IotHubSasToken} and use it to create a new {@link AmqpsIotHubConnectionBaseHandler}. This method will
-     *     start the {@link Reactor}, set the current {@link AmqpsIotHubConnection.ReactorState}
-     *     to OPEN, and open the {@link AmqpsIotHubConnection} for sending.
-     * </p>
-     *
-     * @throws IOException if the {@link AmqpsIotHubConnectionBaseHandler} has not been initialized.
-     * @throws InterruptedException if there is a problem acquiring the semaphore for the {@link Reactor}.
-     * @throws ExecutionException If the {@link CompletableFuture} in {@link AmqpsIotHubConnection#reactorReady()} completed exceptionally
-     */
-    public void open() throws IOException, InterruptedException, ExecutionException {
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_011: [If the AMQPS connection is already open, the function shall do nothing.]
-        if(this.state != ReactorState.OPEN)
+        this.useWebSockets = useWebSockets;
+        if (useWebSockets)
         {
-            IotHubSasToken sasToken = new IotHubSasToken(
-                    IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceKey(),
-                    System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
-
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_008: [The function shall initialize its AmqpsIotHubConnectionBaseHandler
-            // using the saved host name, user name, device ID and sas token.]
-            this.amqpsHandler = new AmqpsIotHubConnectionBaseHandler(this.hostName,
-                    this.userName, sasToken.toString(), this.deviceID, this.iotHubClientProtocol, this);
-
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_009: [The function shall open the Amqps connection and trigger the Reactor (Proton) to begin running.]
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_012: [If the AmqpsIotHubConnectionBaseHandler becomes invalidated before the Reactor (Proton) starts, the function shall throw an IOException.]
-            this.startReactorAsync();
-
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_010: [Once the Reactor (Proton) is ready, the function shall set its state to OPEN.]
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_031: [ The function shall get the link credit from it's AmqpsIotHubConnectionBaseHandler and set the private maxQueueSize member variable. ]
-			// Codes_SRS_AMQPSIOTHUBCONNECTION_14_032: [ The function shall successfully complete it’s CompletableFuture status member variable. ]
-			try {
-                this.reactorReady();
-                //This is a blocking call, will return once the link credit is available from the AmqpsIotHubBaseHandler
-                this.maxQueueSize = this.amqpsHandler.getLinkCredit();
-            }catch(TimeoutException e){
-                this.amqpsHandler.shutdown();
-                throw new ExecutionException("The request to get the link credit from the AmqpsIotHubBaseHandler timed out.", e);
-            }catch(Exception e){
-                this.amqpsHandler.shutdown();
-                throw e;
-            }
-            this.completionStatus.complete(new Boolean(true));
-            this.state = ReactorState.OPEN;
-        }
-        //TODO: Should this wrap all exceptions in an IOException and only throw that?
-    }
-
-    /**
-     * Closes the {@link AmqpsIotHubConnection} and invalidates the {@link Reactor} object.
-     * <p>
-     *     If the current {@link AmqpsIotHubConnection.ReactorState} is not CLOSED, this function
-     *     will invalidate the current {@link Reactor} object, set the current {@link AmqpsIotHubConnection.ReactorState}
-     *     to CLOSED, and free the current {@link AmqpsIotHubConnectionBaseHandler}.
-     * </p>
-     */
-    public synchronized void close(){
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_013: [The function shall invalidate the private Reactor (Proton) member variable.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_014: [The function shall free the AmqpsIotHubConnectionBaseHandler.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_015: [The function shall close the AMQPS connection.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_016: [If the AMQPS connection is already closed, the function shall do nothing.]
-		// Codes_SRS_AMQPSIOTHUBCONNECTION_14_033: [The function shall close the AmqpsIotHubConnectionBaseHandler.]
-		// Codes_SRS_AMQPSIOTHUBCONNECTION_14_034: [The function shall exceptionally complete all remaining messages that are currently in progress and clear the queue.]
-		if(this.state != ReactorState.CLOSED)
-        {
-            this.amqpsHandler.shutdown();
-            this.clearInProgressMap();
-            this.freeReactor();
-            this.freeHandler();
-            this.state = ReactorState.CLOSED;
-            this.maxQueueSize = -1;
-        }
-    }
-
-    /**
-     * Pulls a message from the {@link AmqpsIotHubConnection} if there is one to receive.
-     * @return the first received/unconsumed message. Null if there are no messages to consume.
-     * @throws IOException if the {@link AmqpsIotHubConnectionBaseHandler} has not been initialized.
-     */
-    public Message consumeMessage() throws IOException {
-        Message message = null;
-
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_019: [The function shall attempt to remove a message from the queue.]
-        if (this.receivedMessageQueue.size() > 0)
-        {
-            message = this.receivedMessageQueue.remove();
-            this.lastMessage = (AmqpsMessage) message;
-        }
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_020: [The function shall return the message if one was pulled from the queue, otherwise it shall return null.]
-        return message;
-    }
-
-    /**
-     * Sends the message result for the previously received
-     * message.
-     *
-     * @param result the message result (one of {@link IotHubMessageResult#COMPLETE},
-     *               {@link IotHubMessageResult#ABANDON}, or {@link IotHubMessageResult#REJECT}).
-     *
-     * @throws IllegalStateException if {@code sendMessageResult} is called before
-     * {@link #consumeMessage()} is called and has returned a {@link Message}.
-     * @throws IOException if the IoT Hub could not be reached or if any other exception is thrown while attempting to acknowledge.
-     */
-    public void sendMessageResult(IotHubMessageResult result) throws IOException {
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_024: [If the AMQPS Connection is closed, the function shall throw an IllegalStateException.]
-        if(this.state == ReactorState.CLOSED){
-            throw new IllegalStateException("The AMQPS IotHub Connection is currently closed. Call open() before attempting to acknowledge a message.");
-        }
-
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_022: [If sendMessageResult(result) is called before a message is received, the function shall throw an IllegalStateException.]
-        if (this.lastMessage == null)
-        {
-            throw new IllegalStateException("Cannot send a message "
-                    + "result before a message is received.");
-        }
-
-        try {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_021: [If the message result is COMPLETE, ABANDON, or REJECT, the function shall acknowledge the last message with acknowledgement type COMPLETE, ABANDON, or REJECT respectively.]
-            switch (result) {
-                case COMPLETE:
-                    this.lastMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
-                    break;
-                case REJECT:
-                    this.lastMessage.acknowledge(AmqpsMessage.ACK_TYPE.REJECT);
-                    break;
-                case ABANDON:
-                    this.lastMessage.acknowledge(AmqpsMessage.ACK_TYPE.ABANDON);
-                    break;
-                default:
-                    // should never happen.
-                    throw new IllegalStateException(
-                            "Invalid IoT Hub message result.");
-            }
-        } catch(Exception e){
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_023: [If the acknowledgement fails, the function shall throw an IOException.]
-            throw new IOException(e);
-        }
-    }
-
-    /**
-     * Creates a binary message using the given content string and queues it for sending.
-     * @param content The content string to send.
-     * @return A {@link Boolean} {@link CompletableFuture} representing the whether the message has been sent and received.
-     * @throws IOException If the current {@link AmqpsIotHubConnection.ReactorState} is CLOSED or if {@link AmqpsIotHubConnectionBaseHandler} has not been initialized.
-     */
-    public CompletableFuture<Boolean> scheduleSend(String content) throws IOException {
-        return this.scheduleSend(content.getBytes(StandardCharsets.UTF_8));
-    }
-
-    /**
-     * Creates a binary message using the given content array and queues it for sending.
-     * @param content The content byte array of the message to send.
-     * @return A {@link Boolean} {@link CompletableFuture} representing the whether the message has been sent and received.
-     * @throws IOException If the current {@link AmqpsIotHubConnection.ReactorState} is CLOSED or if {@link AmqpsIotHubConnectionBaseHandler} has not been initialized.
-     */
-    public CompletableFuture<Boolean> scheduleSend(byte[] content) throws IOException {
-        // Codes_SRS_AMQPSSENDER_14_011: [If a messageId is not provided, the function shall create a binary message using the given content and a null messageId.]
-        return this.scheduleSend(content, null);
-    }
-
-    /**
-     * Creates a binary message using the given content array and messageId. Initializes and starts the Proton reactor. Sends the created message.
-     * @param content The content byte array of the message to send.
-     * @param messageId The messageId of the message.
-     * @return A {@link Boolean} {@link CompletableFuture} representing the whether the message has been sent and received.
-     * @throws IOException If the current {@link AmqpsIotHubConnection.ReactorState} is CLOSED or if {@link AmqpsIotHubConnectionBaseHandler} has not been initialized.
-     */
-    public CompletableFuture<Boolean> scheduleSend(byte[] content, Object messageId) throws IOException {
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_029: [If the AMQPS Connection is closed, the function shall throw an IllegalStateException.]
-        if(this.state == ReactorState.CLOSED){
-            throw new IllegalStateException("The AMQPS IotHub Connection is currently closed. Call open() before attempting to schedule a message.");
-        }
-
-        if(amqpsHandler != null) {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_026: [The function shall create a new CompletableFuture for the message acknowledgement.]
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_027: [The function shall create a new Tuple containing the CompletableFuture, message content, and message ID.
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_028: [The function shall acquire a lock and attempt to send the message.]
-            CompletableFuture<Boolean> future = new CompletableFuture<>();
-            Tuple<CompletableFuture<Boolean>, byte[], Object> message = new Tuple(future, content, messageId);
-            send(message);
-            return future;
-        } else {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_025: [If the AmqpsIotHubConnectionBaseHandler has not been initialized, the function shall throw a new IOException and exceptionally complete it’s CompletableFuture status member variable with the same exception.]
-            this.completionStatus.completeExceptionally(new IOException("The Handler has not been initialized. Call open before sending."));
-            throw new IOException("The Handler has not been initialized. Call open before sending.");
-        }
-    }
-
-    //==============================================================================
-    //Protected Methods
-    //==============================================================================
-
-    /**
-     * This blocking function attempts to send the message passed in as a parameter.
-     * This {@link AmqpsIotHubConnection} handles all calls to this method.
-     *
-     * <p>
-     *     Only the first call to this method will result in an attempt to send. Until the message has been sent, all other
-     *     calls to this method will block. Once a message has been sent and this method notified that it has been sent,
-     *     this method will be invoked again if was previously another call to send a message.
-     *
-     *     If a message has been passed down to the handler for sending but the message isn't sent after a default constant number of
-     *     seconds, the {@link AmqpsTransport} will set an ERROR status code on the message and it will placed back onto the queue.
-     * </p>
-     * @throws IOException If {@link AmqpsIotHubConnectionBaseHandler} has not been initialized.
-     */
-    protected synchronized void send(Tuple<CompletableFuture<Boolean>, byte[], Object> message) throws IOException
-    {
-        if(this.state == ReactorState.CLOSED)
-        {
-            throw new IllegalStateException("The AMQPS IotHub Connection is currently closed. Call open() before attempting to send a message.");
-        }
-        if(message != null)
-        {
-            if (this.inProgressMessageMap.size() >= this.maxQueueSize * 0.9)
-            {
-                message.V1.completeExceptionally(new Throwable("Insufficient link credit to send message."));
-            }
-            else
-            {
-                try
-                {
-                    //Use the content and ID fields of the input message to have the handler create and send the message
-                    CompletableFuture<Integer> deliveryFuture = amqpsHandler.createBinaryMessage(message.V2, message.V3);
-
-                    //Wait for a period of time before rejecting the message
-                    new Thread(() ->
-                    {
-                        try
-                        {
-                            Thread.sleep(DEFAULT_DELIVERY_WAIT_TIME_SECONDS * 1000);
-                            deliveryFuture.completeExceptionally(new Throwable("Default timeout exceeded before this message was sent."));
-                        }
-                        catch (InterruptedException e)
-                        {
-                            e.printStackTrace();
-                        }
-                    }).start();
-
-                    //Wait for the deliveryFuture to be completed, providing the delivery hash code.
-                    //When this future completes, the message has been SENT
-                    Integer deliveryHash = deliveryFuture.get();
-                    inProgressMessageMap.put(deliveryHash, message);
-                }
-                // There was a problem sending, exceptionally complete the future causing the message to be put back on the queue.
-                catch (Exception e)
-                {
-                    if (message != null)
-                    {
-                        message.V1.completeExceptionally(e);
-                    }
-                    this.fail(e);
-                }
-            }
+            this.hostName = String.format("%s:%d", this.config.getIotHubHostname(), amqpWebSocketPort);
         }
         else
         {
-            throw new IOException("Cannot send an unitialized message.");
+            this.hostName = String.format("%s:%d", this.config.getIotHubHostname(), amqpPort);
         }
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_003: [The constructor shall initialize the sender and receiver
+        // endpoint private member variables using the send/receiveEndpointFormat constants and device id.]
+        this.sendEndpoint = String.format(sendEndpointFormat, deviceId);
+        this.receiveEndpoint = String.format(receiveEndpointFormat, deviceId);
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_004: [The constructor shall initialize a new Handshaker
+        // (Proton) object to handle communication handshake.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_005: [The constructor shall initialize a new FlowController
+        // (Proton) object to handle communication flow.]
+        add(new Handshaker());
+        add(new FlowController());
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_006: [The constructor shall set its state to CLOSED.]
+        this.state = State.CLOSED;
     }
 
     /**
-     * Informs the {@link AmqpsTransport} that the message corresponding to the {@link org.apache.qpid.proton.engine.Delivery}
-     * {@code hash} has or has not been successfully received by the service using the boolean {@code result}.
-     *
-     * @param hash The hash code of the {@link org.apache.qpid.proton.engine.Delivery} corresponding to the message.
-     * @param result The boolean result status of the sent message.
-     */
-    protected synchronized void acknowledge(int hash, boolean result){
-        Tuple<CompletableFuture<Boolean>, byte[], Object> item = inProgressMessageMap.remove(hash);
-        item.V1.complete(new Boolean(result));
-        //If the message queue has been successfully exhausted, complete the completionStatus future successfully.
-    }
-
-    /**
-     * Adds a message to the received message queue.
-     * @param m The received message.
-     */
-    protected void addMessage(Message m) {
-        this.receivedMessageQueue.add(m);
-    }
-
-    /**
-     * Invalidates the {@link Reactor} member variable.
-     */
-    protected void freeReactor(){
-        this.iotHubReactor = null;
-    }
-
-    /**
-     * Invalidates the {@link AmqpsIotHubConnectionBaseHandler} member variable.
-     */
-    protected void freeHandler(){
-        this.amqpsHandler = null;
-    }
-
-    /**
-     *
-     */
-    protected void clearInProgressMap(){
-        for (Tuple<CompletableFuture<Boolean>, byte[], Object> item : this.inProgressMessageMap.values()) {
-            item.V1.completeExceptionally(new Throwable("Connection closed before message acknowledgement received."));
-        }
-        this.inProgressMessageMap.clear();
-    }
-
-    /**
-     * Every {@link AmqpsIotHubConnection} has a {@link CompletableFuture} {@code completionStatus} variable. This can be used by the {@link AmqpsTransport}
-     * to know when/if the {@link AmqpsIotHubConnection} has completed work successfully or not.
-     *
+     * Opens the {@link AmqpsIotHubConnection}.
      * <p>
-     *     The {@code completionStatus} variable is completed whenever the {@link AmqpsIotHubConnection} has exhausted the current message
-     *     queue successfully or whenever there is an error sending a message.
+     *     If the current connection is not open, this method
+     *     will create a new {@link IotHubSasToken}. This method will
+     *     start the {@link Reactor}, set the connection to open and make it ready for sending.
      * </p>
-     * @return The boolean value of the completion status.
-     * @throws ExecutionException If this future completed exceptionally
-     * @throws InterruptedException If the current thread was interrupted
+     *
+     * @throws IOException If the reactor could not be initialized.
      */
-    protected boolean getCompletionStatus() throws ExecutionException, InterruptedException {
-        boolean value = this.completionStatus.get().booleanValue();
-        return value;
-    }
+    public void open() throws IOException
+    {
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_007: [If the AMQPS connection is already open, the function shall do nothing.]
+        if(this.state == State.CLOSED)
+        {
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_008: [The function shall create a new sasToken valid for the duration
+            // specified in config to be used for the communication with IoTHub.]
+            this.sasToken = new IotHubSasToken(
+                    IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
+                    this.config.getDeviceKey(),
+                    System.currentTimeMillis() / 1000L + this.config.getTokenValidSecs() + 1L).toString();
 
-    /**
-     * Waits if necessary and returns once the reactor is ready.
-     * @throws ExecutionException If this future completed exceptionally
-     * @throws InterruptedException If the current thread was interrupted
-     */
-    protected void reactorReady() throws ExecutionException, InterruptedException{
-        this.reactorReady.get();
-    }
+			try
+            {
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
+                this.reactorFuture = this.startReactorAsync();
 
-    /**
-     * Completes the {@link CompletableFuture} {@code completionStatus} variable with an exception using the given string.
-     * @param s The string content to place in the thrown exception.
-     */
-    protected void fail(String s) {
-        //TODO: Should also exceptionally complete anything currently in the queue that hasn't been sent.
-        this.completionStatus = new CompletableFuture<>();
-        this.completionStatus.completeExceptionally(new Throwable(s));
-    }
-
-    protected void fail(Throwable t){
-        this.completionStatus = new CompletableFuture<>();
-        this.completionStatus.completeExceptionally(t);
-    }
-
-    //==============================================================================
-    //Private Methods
-    //==============================================================================
-
-    /**
-     * Asynchronously runs the Proton {@link Reactor} accepting and sending messages. Any other call to this method on this
-     * {@link AmqpsIotHubConnection} will block until the {@link Reactor} terminates and this {@link AmqpsIotHubConnection} closes.
-     * Normally, this method should only be called once by the {@link #open()} method until the {@link AmqpsIotHubConnection} has been closed.
-     * @throws IOException if the {@link AmqpsIotHubConnectionBaseHandler} has not been initialized.
-     * @throws InterruptedException if there is a problem acquiring the semaphore.
-     */
-    private synchronized void startReactorAsync() throws IOException, InterruptedException {
-        //Acquire permit to continue execution of this method and spawn a new thread.
-        reactorSemaphore.acquire();
-
-        if(this.amqpsHandler != null) {
-            Reactor reactor = Proton.reactor(this);
-            this.iotHubReactor = new IotHubReactor(reactor);
-
-            new Thread(() -> {
-                try {
-                    iotHubReactor.run();
-
-                    //Release the semaphore and make permit available allowing for the next reactor thread to spawn.
-                    reactorSemaphore.release();
-                }
-                catch(Exception e)
-                {
-                    reactorSemaphore.release();
-                }
-            }).start();
-        } else {
-            throw new IOException("The Handler has not been initialized. Ensure that the AmqpsIotHubConnection is in an OPEN state by calling open().");
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_010: [The function shall wait for the reactor to be ready and for
+                // enough link credit to become available.]
+                this.connectionReady();
+            }
+            catch(Exception e)
+            {
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger
+                // the reactor, the function shall close the connection and throw an IOException.]
+                this.close();
+                throw new IOException("Error opening Amqp connection: ", e);
+            }
         }
     }
 
-    //==============================================================================
-    //Reactor Overrides
-    //==============================================================================
+    /**
+     * Closes the {@link AmqpsIotHubConnection}.
+     * <p>
+     *     If the current connection is not closed, this function
+     *     will set the current state to closed and invalidate all connection related variables.
+     * </p>
+     */
+    public void close()
+    {
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048 [If the AMQPS connection is already closed, the function shall do nothing.]
+        if (this.state != State.CLOSED)
+        {
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to CLOSED.]
+            this.state = State.CLOSED;
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall close the AMQPS sender and receiver links,
+            // the AMQPS session and the AMQPS connection.]
+            this.sender.close();
+            this.receiver.close();
+            this.session.close();
+            this.connection.close();
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
+            this.reactorFuture.cancel(true);
+            this.executorService.shutdown();
+        }
+    }
+
+    /**
+     * Creates a binary message using the given content and messageId. Sends the created message using the sender link.
+     * @param message The message to be sent.
+     * @return An {@link Integer} representing the hash of the message, or -1 if the connection is closed.
+     */
+    public Integer sendMessage(Message message)
+    {
+        Integer deliveryHash;
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_015: [If the state of the connection is CLOSED or there is not enough
+        // credit, the function shall return -1.]
+        if (this.state == State.CLOSED || this.linkCredit <= 0)
+        {
+            deliveryHash = -1;
+        }
+        else
+        {
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_016: [The function shall encode the message and copy the contents to the byte buffer.]
+            byte[] msgData = new byte[1024];
+            int length;
+
+            while (true)
+            {
+                try
+                {
+                    length = message.encode(msgData, 0, msgData.length);
+                    break;
+                }
+                catch (BufferOverflowException e)
+                {
+                    msgData = new byte[msgData.length * 2];
+                }
+            }
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_017: [The function shall set the delivery tag for the sender.]
+            byte[] tag = String.valueOf(this. nextTag++).getBytes();
+            Delivery dlv = sender.delivery(tag);
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_018: [The function shall attempt to send the message using the sender link.]
+            sender.send(msgData, 0, length);
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_019: [The function shall advance the sender link.]
+            sender.advance();
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_020: [The function shall set the delivery hash to the value returned by the sender link.]
+            deliveryHash = dlv.hashCode();
+        }
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_021: [The function shall return the delivery hash.]
+        return deliveryHash;
+    }
+
+    /**
+     * Sends the message result for the previously received message.
+     *
+     * @param message the message to be acknowledged.
+     * @param result the message result (one of {@link IotHubMessageResult#COMPLETE},
+     *               {@link IotHubMessageResult#ABANDON}, or {@link IotHubMessageResult#REJECT}).
+     */
+    public Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult result)
+    {
+        Boolean ackResult = false;
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_022: [If the AMQPS Connection is closed, the function shall return false.]
+        if(this.state != State.CLOSED)
+        {
+            try
+            {
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_023: [If the message result is COMPLETE, ABANDON, or REJECT,
+                // the function shall acknowledge the last message with acknowledgement type COMPLETE, ABANDON, or REJECT respectively.]
+                switch (result)
+                {
+                    case COMPLETE:
+                        message.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+                        break;
+                    case REJECT:
+                        message.acknowledge(AmqpsMessage.ACK_TYPE.REJECT);
+                        break;
+                    case ABANDON:
+                        message.acknowledge(AmqpsMessage.ACK_TYPE.ABANDON);
+                        break;
+                    default:
+                        // should never happen.
+                        throw new IllegalStateException("Invalid IoT Hub message result.");
+                }
+
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_024: [The function shall return true after the message was acknowledged.]
+                ackResult = true;
+            }
+            catch (Exception e)
+            {
+                //do nothing, since ackResult is already false
+            }
+        }
+        return ackResult;
+    }
+
+    /**
+     * Event handler for the connection init event
+     * @param event The Proton Event object.
+     */
+    @Override
+    public void onConnectionInit(Event event)
+    {
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_025: [The event handler shall get the Connection (Proton) object from the event handler and set the host name on the connection.]
+        this.connection = event.getConnection();
+        this.connection.setHostname(this.hostName);
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_026: [The event handler shall create a Session (Proton) object from the connection.]
+        this.session = this.connection.session();
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_027: [The event handler shall create a Receiver and Sender (Proton) links and set the protocol tag on them to a predefined constant.]
+        this.receiver = this.session.receiver(receiveTag);
+        this.sender = this.session.sender(sendTag);
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_028: [The Receiver and Sender links shall have the properties set to client version identifier.]
+        Map<Symbol, Object> properties = new HashMap<>();
+        properties.put(Symbol.getSymbol(versionIdentifierKey), TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion);
+        this.receiver.setProperties(properties);
+        this.sender.setProperties(properties);
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_029: [The event handler shall open the connection, session, sender and receiver objects.]
+        this.connection.open();
+        this.session.open();
+        receiver.open();
+        sender.open();
+    }
+
+    /**
+     * Event handler for the connection bound event. Sets Sasl authentication and proper authentication mode.
+     * @param event The Proton Event object.
+     */
+    @Override
+    public void onConnectionBound(Event event)
+    {
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_030: [The event handler shall get the Transport (Proton) object from the event.]
+        Transport transport = event.getConnection().getTransport();
+        if(transport != null){
+
+            if (this.useWebSockets)
+            {
+                WebSocketImpl webSocket = (WebSocketImpl) transport.webSocket();
+                webSocket.configure(this.hostName, webSocketPath, 0, webSocketSubProtocol, null, null);
+            }
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_031: [The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.]
+            Sasl sasl = transport.sasl();
+            sasl.plain(this.userName, this.sasToken);
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_032: [The event handler shall set ANONYMOUS_PEER authentication mode on the domain of the Transport.]
+            SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
+            domain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
+            transport.ssl(domain);
+        }
+    }
 
     /**
      * Event handler for reactor init event.
      * @param event Proton Event object
      */
     @Override
-    public void onReactorInit(Event event){
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_14_030: [The event handler shall set the member AmqpsIotHubConnectionBaseHandler object to handle the connection events.]
-        event.getReactor().connection(this.amqpsHandler);
+    public void onReactorInit(Event event)
+    {
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
+        event.getReactor().connection(this);
     }
 
-    //==============================================================================
-    //Private Classes
-    //==============================================================================
+    /**
+     * Event handler for the delivery event. This method handles both sending and receiving a message.
+     * @param event The Proton Event object.
+     */
+    @Override
+    public void onDelivery(Event event)
+    {
+        if(event.getLink().getName().equals(receiveTag))
+        {
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_034: [If this link is the Receiver link, the event handler shall get the Receiver and Delivery (Proton) objects from the event.]
+            Receiver receiveLink = (Receiver) event.getLink();
+            Delivery delivery = receiveLink.current();
+            if (delivery.isReadable() && !delivery.isPartial()) {
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_035: [The event handler shall read the received buffer.]
+                int size = delivery.pending();
+                byte[] buffer = new byte[size];
+                int read = receiveLink.recv(buffer, 0, buffer.length);
+                receiveLink.advance();
 
-    private class Tuple<T1,T2,T3>{
-        public T1 V1;
-        public T2 V2;
-        public T3 V3;
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_036: [The event handler shall create an AmqpsMessage object from the decoded buffer.]
+                AmqpsMessage msg = new AmqpsMessage();
 
-        public Tuple(T1 V1, T2 V2, T3 V3){
-            this.V1 = V1;
-            this.V2 = V2;
-            this.V3 = V3;
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_037: [The event handler shall set the AmqpsMessage Deliver (Proton) object.]
+                msg.setDelivery(delivery);
+                msg.decode(buffer, 0, read);
+
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_049: [All the listeners shall be notified that a message was received from the server.]
+                this.messageReceivedFromServer(msg);
+            }
         }
+        else
+        {
+            //Sender specific section for dispositions it receives
+            if(event.getType() == Event.Type.DELIVERY)
+            {
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
+                Delivery d = event.getDelivery();
+                DeliveryState remoteState = d.getRemoteState();
+
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_039: [The event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.]
+                boolean state = remoteState.equals(Accepted.getInstance());
+                //let any listener know that the message was received by the server
+                for(ServerListener listener : listeners)
+                {
+                    listener.messageSent(d.hashCode(), state);
+                }
+            }
+        }
+    }
+
+    /**
+     * Event handler for the link flow event. Handles sending a single message.
+     * @param event The Proton Event object.
+     */
+    @Override
+    public void onLinkFlow(Event event)
+    {
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_040: [The event handler shall save the remaining link credit.]
+        this.linkCredit = event.getLink().getCredit();
+    }
+
+    /**
+     * Event handler for the link remote open event. This signifies that the
+     * {@link org.apache.qpid.proton.reactor.Reactor} is ready, so we set the connection to OPEN.
+     * @param event The Proton Event object.
+     */
+    @Override
+    public void onLinkRemoteOpen(Event event)
+    {
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_041: [The connection state shall be considered OPEN when the sender link is open remotely.]
+        Link link = event.getLink();
+        if (link.getName().equals(sendTag))
+        {
+            this.state = State.OPEN;
+        }
+    }
+
+    /**
+     * Event handler for the link remote close event. This triggers reconnection attempts until successful.
+     * Both sender and receiver links closing trigger this event, so we only handle one of them,
+     * since the other is redundant.
+     * @param event The Proton Event object.
+     */
+    @Override
+    public void onLinkRemoteClose(Event event)
+    {
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_042 [The event handler shall attempt to reconnect to the IoTHub.]
+        if (event.getLink().getName().equals(sendTag))
+        {
+            reconnect();
+        }
+    }
+
+    /**
+     * Event handler for the link init event. Sets the proper target address on the link.
+     * @param event The Proton Event object.
+     */
+    @Override
+    public void onLinkInit(Event event)
+    {
+        Link link = event.getLink();
+        if(link.getName().equals(sendTag))
+        {
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_043: [If the link is the Sender link, the event handler shall create a new Target (Proton) object using the sender endpoint address member variable.]
+            Target t = new Target();
+            t.setAddress(this.sendEndpoint);
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_044: [If the link is the Sender link, the event handler shall set its target to the created Target (Proton) object.]
+            link.setTarget(t);
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_045: [If the link is the Sender link, the event handler shall set the SenderSettleMode to UNSETTLED.]
+            link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
+        }
+        else
+        {
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_046: [If the link is the Receiver link, the event handler shall create a new Source (Proton) object using the receiver endpoint address member variable.]
+            Source source = new Source();
+            source.setAddress(this.receiveEndpoint);
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_047: [If the link is the Receiver link, the event handler shall set its source to the created Source (Proton) object.]
+            link.setSource(source);
+        }
+    }
+
+    /**
+     * Event handler for the transport error event. This triggers reconnection attempts until successful.
+     * @param event The Proton Event object.
+     */
+    @Override
+    public void onTransportError(Event event)
+    {
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to reconnect to IoTHub.]
+        this.reconnect();
+    }
+
+    /**
+     * Asynchronously runs the Proton {@link Reactor} accepting and sending messages.
+     * @throws IOException if there is an issue creating the reactor.
+     */
+    private Future startReactorAsync() throws IOException
+    {
+        Reactor reactor = Proton.reactor(this);
+        IotHubReactor iotHubReactor = new IotHubReactor(reactor);
+
+        executorService = Executors.newFixedThreadPool(1);
+        ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor);
+        return executorService.submit(reactorRunner);
+    }
+
+    /**
+     * Waits for the reactor to be ready and for enough link credit to be available.
+     * @throws InterruptedException If the current thread was interrupted
+     */
+    private void connectionReady() throws InterruptedException
+    {
+        int waitTime = 0;
+        while(state == State.CLOSED || this.linkCredit == -1)
+        {
+            Thread.sleep(100);
+            waitTime+=100;
+            if (waitTime > maxWaitTimeForOpeningConnection)
+            {
+                throw new InterruptedException("Waited too long for the connection to open.");
+            }
+        }
+        System.out.println("Connection with the server established successfully.");
+    }
+
+    /**
+     * Subscribe a listener to the list of listeners.
+     * @param listener the listener to be subscribed.
+     */
+    public void addListener(ServerListener listener)
+    {
+        listeners.add(listener);
+    }
+
+    /**
+     * Notifies all listeners that the connection was lost and attempts to reconnect to the IoTHub
+     * using an exponential backoff interval.
+     */
+    private void reconnect()
+    {
+        this.close();
+
+        for(ServerListener listener : listeners)
+        {
+            listener.connectionLost();
+        }
+
+        int currentReconnectionAttempt = 1;
+        while (this.state == State.CLOSED)
+        {
+            try
+            {
+                this.open();
+            }
+            catch (IOException e)
+            {
+                try
+                {
+                    System.out.println("Lost connection to the server. Reconnection attempt " + currentReconnectionAttempt++ + "...");
+                    Thread.sleep(TransportUtils.generateSleepInterval(currentReconnectionAttempt));
+                }
+                catch (InterruptedException ex)
+                {
+                    // do nothing, reconnection attempts will continue
+                }
+            }
+        }
+    }
+
+    /**
+     * Notifies all the listeners that a message was received from the server.
+     * @param msg The message received from server.
+     */
+    private void messageReceivedFromServer(AmqpsMessage msg)
+    {
+        for(ServerListener listener : listeners)
+        {
+            listener.messageReceived(msg);
+        }
+    }
+
+    /**
+     * Class which runs the reactor.
+     */
+    private class ReactorRunner implements Callable
+    {
+        private IotHubReactor iotHubReactor;
+
+        ReactorRunner(IotHubReactor iotHubReactor)
+        {
+            this.iotHubReactor = iotHubReactor;
+        }
+
+        @Override
+        public Object call()
+        {
+            iotHubReactor.run();
+            return null;
+        }
+    }
+
+    /**
+     * Create Proton SslDomain object from Address using the given Ssl mode
+     * @param mode Proton enum value of requested Ssl mode
+     * @return the created Ssl domain
+     */
+    private SslDomain makeDomain(SslDomain.Mode mode)
+    {
+        SslDomain domain = Proton.sslDomain();
+        domain.init(mode);
+
+        return domain;
     }
 }

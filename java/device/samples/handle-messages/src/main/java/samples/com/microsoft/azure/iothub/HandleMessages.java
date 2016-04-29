@@ -105,8 +105,7 @@ public class HandleMessages
      * @param args args[0] = IoT Hub connection string; args[1] = protocol (one
      * of 'https', 'amqps', 'mqtt' or 'amqps_ws', optional).
      */
-    public static void main(String[] args)
-            throws IOException, URISyntaxException
+    public static void main(String[] args) throws IOException, URISyntaxException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -161,8 +160,7 @@ public class HandleMessages
         }
 
         System.out.println("Successfully read input parameters.");
-        System.out.format("Using communication protocol %s.\n",
-                protocol.name());
+        System.out.format("Using communication protocol %s.\n", protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
 
