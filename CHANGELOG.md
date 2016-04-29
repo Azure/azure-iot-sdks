@@ -6,6 +6,7 @@
 
 # Java SDK
 - Device SDK is now Java 7 compatible. It can be used to target Android projects 4.0.3 or higher with HTTPS and MQTT protocols.
+- Device SDK - fixed a bug which was preventing message properties being sent over AMQP protocol.
 
 # C# Device SDK
 - Something that changed in the C# sdk
