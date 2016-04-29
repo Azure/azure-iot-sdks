@@ -1603,6 +1603,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         IoTHubClient_Destroy(iotHubClient);
     }
 
+    /* IoTHubClient_SetOption */
+
     /*Tests_SRS_IOTHUBCLIENT_02_034: [If parameter iotHubClientHandle is NULL then IoTHubClient_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
     TEST_FUNCTION(IoTHubClient_SetOption_with_NULL_handle_fails)
     {
@@ -1620,7 +1622,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
     }
 
     /*Tests_SRS_IOTHUBCLIENT_02_035: [If parameter optionName is NULL then IoTHubClient_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
-    TEST_FUNCTION(IoTHubClient_SetOption_with_NULL_optioName_fails)
+    TEST_FUNCTION(IoTHubClient_SetOption_with_NULL_optionName_fails)
     {
         /// arrange
         CIoTHubClientMocks mocks;
@@ -1660,6 +1662,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
     }
 
     /*Tests_SRS_IOTHUBCLIENT_02_038: [If optionName doesn't match one of the options handled by this module then IoTHubClient_SetOption shall call IoTHubClient_LL_SetOption passing the same parameters and return what IoTHubClient_LL_SetOption returns.]*/
+    /* Tests_SRS_IOTHUBCLIENT_01_041: [ IoTHubClient_SetOption shall be made thread-safe by using the lock created in IoTHubClient_Create. ]*/
     TEST_FUNCTION(IoTHubClient_SetOption_happy_path)
     {
         /// arrange
@@ -1668,7 +1671,9 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         IOTHUB_CLIENT_HANDLE handle = IoTHubClient_Create(&TEST_CONFIG);
         mocks.ResetAllCalls();
 
+        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         EXPECTED_CALL(mocks, IoTHubClient_LL_SetOption(IGNORED_PTR_ARG, "a", "b"));
+        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
         ///act
         auto result = IoTHubClient_SetOption(handle, "a", "b");
@@ -1690,8 +1695,33 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         IOTHUB_CLIENT_HANDLE handle = IoTHubClient_Create(&TEST_CONFIG);
         mocks.ResetAllCalls();
 
+        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         EXPECTED_CALL(mocks, IoTHubClient_LL_SetOption(IGNORED_PTR_ARG, "a", "b"))
             .SetReturn(IOTHUB_CLIENT_ERROR);
+        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+
+        ///act
+        auto result = IoTHubClient_SetOption(handle, "a", "b");
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(handle);
+    }
+
+    /* Tests_SRS_IOTHUBCLIENT_01_042: [ If acquiring the lock fails, IoTHubClient_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(when_Lock_fails_IoTHubClient_SetOption_fails)
+    {
+        /// arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE handle = IoTHubClient_Create(&TEST_CONFIG);
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
+            .SetReturn(LOCK_ERROR);
 
         ///act
         auto result = IoTHubClient_SetOption(handle, "a", "b");
