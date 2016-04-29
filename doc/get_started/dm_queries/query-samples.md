@@ -215,8 +215,8 @@ To get Page 2, reissue the same query with an additional filter where JobId > Jo
 
 ``` js
 {
-    "filter": {        
-        "filters": [            
+    "filter": {
+        "filters": [
           {
               "property": {
                   "name": "ParentJobId",
@@ -235,7 +235,7 @@ To get Page 2, reissue the same query with an additional filter where JobId > Jo
               "comparisonOperator": "gt",
               "type": "comparison"
           }
-        ],        
+        ],
         "logicalOperator": "and",
         "type": "logical"
     }
