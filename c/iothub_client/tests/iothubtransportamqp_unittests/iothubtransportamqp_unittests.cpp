@@ -225,7 +225,7 @@ static BINARY_DATA* saved_message_get_body_amqp_data_binary_data;
 static PROPERTIES_HANDLE* saved_message_get_properties_properties;
 static AMQP_VALUE* saved_properties_get_message_id_value;
 static AMQP_VALUE* saved_properties_get_correlation_id_value;
-static char* test_amqpvalue_get_string_values[] = {"abcd", "bike", "ball", "boat", "kyte"};
+static const char* test_amqpvalue_get_string_values[] = {"abcd", "bike", "ball", "boat", "kyte"};
 static int test_amqpvalue_get_string_index = 0;
 static int test_amqpvalue_get_string_length = 5;
 
@@ -546,6 +546,10 @@ public:
 		saved_message_get_properties_properties = properties;
 	MOCK_METHOD_END(int, 0)
 
+    MOCK_STATIC_METHOD_1(, void, properties_destroy, PROPERTIES_HANDLE, properties)
+        /*because */
+    MOCK_VOID_METHOD_END()
+
     // cbs.h
     MOCK_STATIC_METHOD_3(, CBS_HANDLE, cbs_create, SESSION_HANDLE, session, ON_AMQP_MANAGEMENT_STATE_CHANGED, on_amqp_management_state_changed, void*, callback_context)
     MOCK_METHOD_END(CBS_HANDLE, TEST_CBS)
@@ -847,11 +851,12 @@ DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , int, tlsio_schannel_se
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, tlsio_schannel_dowork, CONCRETE_IO_HANDLE, tls_io);
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , const IO_INTERFACE_DESCRIPTION*, tlsio_schannel_get_interface_description);
 
-// AMQP
+// AMQPctest
 // amqp_definitions.h
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, properties_get_message_id, PROPERTIES_HANDLE, properties, AMQP_VALUE*, message_id_value);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, properties_get_correlation_id, PROPERTIES_HANDLE, properties, AMQP_VALUE*, correlation_id_value);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, message_get_properties, MESSAGE_HANDLE, message, PROPERTIES_HANDLE*, properties);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, properties_destroy, PROPERTIES_HANDLE, properties);
 
 // amqpvalue.h
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, amqpvalue_destroy, AMQP_VALUE, value);
@@ -3106,10 +3111,12 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_succeeds)
 
 	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
 	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
-	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(NULL, NULL)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
 
 	// readPropertiesFromuAMQPMessage()
 	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+    STRICT_EXPECTED_CALL(mocks, properties_destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
 
 	EXPECTED_CALL(mocks, properties_get_message_id(NULL, NULL)).SetReturn(0);
 	EXPECTED_CALL(mocks, amqpvalue_get_type(NULL)).SetReturn(AMQP_TYPE_MAP);
