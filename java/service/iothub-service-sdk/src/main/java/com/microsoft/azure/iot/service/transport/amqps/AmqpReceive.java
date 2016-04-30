@@ -84,15 +84,14 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
     }
 
     /**
-     * Syncronized call to receive feedback batch
+     * Synchronized call to receive feedback batch
      * Hide the event based receiving mechanism from the user API
-     * @param deviceId The device name string
      * @param timeoutMs The timeout in milliseconds to wait for feedback
      * @return The received feedback batch
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
-    public synchronized FeedbackBatch receive(String deviceId, long timeoutMs) throws IOException, InterruptedException
+    public synchronized FeedbackBatch receive(long timeoutMs) throws IOException, InterruptedException
     {
         feedbackBatch = null;
         if  (amqpReceiveHandler != null)

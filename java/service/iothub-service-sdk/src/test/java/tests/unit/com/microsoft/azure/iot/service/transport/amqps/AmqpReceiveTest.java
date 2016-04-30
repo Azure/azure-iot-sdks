@@ -110,7 +110,7 @@ public class AmqpReceiveTest
             }
         };
         // Act
-        amqpReceive.receive(deviceId, timeoutMs);
+        amqpReceive.receive(timeoutMs);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_005: [The function shall initialize the Proton reactor object]
@@ -138,7 +138,7 @@ public class AmqpReceiveTest
             }
         };
         // Act
-        amqpReceive.receive(deviceId, timeoutMs);
+        amqpReceive.receive(timeoutMs);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall throw IOException if the send handler object is not initialized]
@@ -155,7 +155,7 @@ public class AmqpReceiveTest
         int timeoutMs = 1;
         AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
         // Act
-        amqpReceive.receive(deviceId, timeoutMs);
+        amqpReceive.receive(timeoutMs);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_010: [The function shall parse the received Json string to FeedbackBath object]
