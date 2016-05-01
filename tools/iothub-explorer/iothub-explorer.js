@@ -40,6 +40,7 @@ nopt.typeDefs.Count = {
 
 var expected = {
   'ack': ['none', 'negative', 'positive', 'full'],
+  'async': Boolean,
   'connection-string': Boolean,
   'duration': Count,
   'display': String,
@@ -292,10 +293,7 @@ else if (command === 'get-job') {
     
     jobClient.getJob(arg1, function (err, job) {
       if (err) serviceError(err);
-      var output = parsed.raw ?
-        JSON.stringify(job) :
-        '\n' + prettyjson.render(job);
-      console.log(output);
+      printJob(job);
     });
 }
 else if (command === 'read') {
@@ -310,47 +308,52 @@ else if (command === 'read') {
 
   jobClient.scheduleDevicePropertyRead(jobId, devices, arg2, function (err, job) {
     if (err) serviceError(err);
-    var interval = setInterval(function () {
-      jobClient.getJob(jobId, function (err, job) {
-        if (err) serviceError(err);
-        if (job.status === 'completed') {
-          clearInterval(interval);
-          
-          var status = {};
-          job.statusMessage.split(';').forEach(function (elem) {
-            if (elem.length) {
-              var pair = elem.split(':');
-              status[pair[0].trim()] = parseInt(pair[1]);
-            }
-          });
-          if (status.Succeeded === 0) {
-            serviceError(new Error('Could not read property'));
-          }
-          else {
-            if (!parsed.raw && status.Failed > 0) {
-              console.log(colorsTmpl('\n' + '{red}Failed to read property \'' + arg2 + '\' on ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '.{/red}'));
-            }
-            var registry = connString ?
-              Registry.fromConnectionString(connString) :
-              Registry.fromSharedAccessSignature(sas.toString());
-            devices.forEach(function (deviceId) {
-              registry.get(deviceId, function (err, twin) {
-                if (err) serviceError(err);
-                var result = {
-                  deviceId: deviceId,
-                  deviceProperties: {}
-                };
-                result.deviceProperties[arg2] = twin.deviceProperties[arg2];
-                var output = parsed.raw ?
-                  JSON.stringify(result) :
-                  '\n' + prettyjson.render(result);
-                console.log(output);
-              });
+    if (parsed.async) {
+      printJob(job);
+    }
+    else {
+      var interval = setInterval(function () {
+        jobClient.getJob(jobId, function (err, job) {
+          if (err) serviceError(err);
+          if (job.status === 'completed') {
+            clearInterval(interval);
+            
+            var status = {};
+            job.statusMessage.split(';').forEach(function (elem) {
+              if (elem.length) {
+                var pair = elem.split(':');
+                status[pair[0].trim()] = parseInt(pair[1]);
+              }
             });
+            if (status.Succeeded === 0) {
+              serviceError(new Error('Failed to read property from device' + (status.Failed > 1 ? 's' : '')));
+            }
+            else {
+              if (!parsed.raw && status.Failed > 0) {
+                console.log(colorsTmpl('\n' + '{red}Failed to read property on ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '.{/red}'));
+              }
+              var registry = connString ?
+                Registry.fromConnectionString(connString) :
+                Registry.fromSharedAccessSignature(sas.toString());
+              devices.forEach(function (deviceId) {
+                registry.get(deviceId, function (err, twin) {
+                  if (err) serviceError(err);
+                  var result = {
+                    deviceId: deviceId,
+                    deviceProperties: {}
+                  };
+                  result.deviceProperties[arg2] = twin.deviceProperties[arg2];
+                  var output = parsed.raw ?
+                    JSON.stringify(result) :
+                    '\n' + prettyjson.render(result);
+                  console.log(output);
+                });
+              });
+            }
           }
-        }
-      });
-    }, 2000);
+        });
+      }, 2000);
+    }
   });
 }
 else {
@@ -452,6 +455,13 @@ function printDevice(device) {
   console.log(output);
 }
 
+function printJob(job) {
+  var output = parsed.raw ?
+    JSON.stringify(job) :
+    '\n' + prettyjson.render(job);
+  console.log(output);
+}
+
 function usage() {
   console.log(colorsTmpl([
     '',
@@ -493,9 +503,9 @@ function usage() {
     '{yellow}Device management commands{/yellow}',
     '  {white}[<connection-string>] {green}get-job{/green} <job-id>{/white}',
     '    {grey}Displays information about the given job.{/grey}',
-    '  {white}[<connection-string>] {green}read{/green} <device-ids> <device-property>{/white}',
+    '  {white}[<connection-string>] {green}read{/green} <device-ids> <device-property> [--async]{/white}',
     '    {grey}Reads and displays the given property from one or more devices (aka "deep read").{/grey}',
-    '  {white}[<connection-string>] {green}write{/green} <device-ids> <device-property> <value>{/white}',
+    '  {white}[<connection-string>] {green}write{/green} <device-ids> <device-property> <value> [--async]{/white}',
     '    {grey}Writes the given property to one or more devices (aka "deep write").{/grey}',
     '  {white}[<connection-string>] {green}firmware-update{/green} <device-ids> <firmware-uri> [--async] [--timeout=<num-minutes>]{/white}',
     '    {grey}Issues a command to one or more devices to update their firmware to the specified image.',
