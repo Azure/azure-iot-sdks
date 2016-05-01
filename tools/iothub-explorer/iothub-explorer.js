@@ -298,15 +298,16 @@ else if (command === 'get-job') {
 }
 else if (command === 'read') {
   if (!arg1) inputError('No device IDs given');
-  if (!arg2) inputError('No device property given');
+  if (!arg2) inputError('No device properties given');
 
   var jobId = uuid.v4();
-  var devices = arg1.split(',');
+  var devices = arrayFromCommaDelimitedList(arg1);
+  var properties = arrayFromCommaDelimitedList(arg2);
   var jobClient = connString ? 
     JobClient.fromConnectionString(connString) :
     JobClient.fromSharedAccessSignature(sas.toString());
 
-  jobClient.scheduleDevicePropertyRead(jobId, devices, arg2, function (err, job) {
+  jobClient.scheduleDevicePropertyRead(jobId, devices, properties, function (err, job) {
     if (err) serviceError(err);
     if (parsed.async) {
       printJob(job);
@@ -343,7 +344,9 @@ else if (command === 'read') {
                     deviceId: deviceId,
                     deviceProperties: {}
                   };
-                  result.deviceProperties[arg2] = twin.deviceProperties[arg2];
+                  properties.forEach(function (value) {
+                    result.deviceProperties[value] = twin.deviceProperties[value];
+                  });
                   var output = parsed.raw ?
                     JSON.stringify(result) :
                     '\n' + prettyjson.render(result);
@@ -362,7 +365,7 @@ else if (command === 'write') {
   if (!arg2) inputError('No device properties given');
 
   var jobId = uuid.v4();
-  var devices = arg1.split(',');
+  var devices = arrayFromCommaDelimitedList(arg1);
   var properties;
   
   try {
@@ -411,6 +414,10 @@ else if (command === 'write') {
 else {
   inputError('\'' + command + '\' is not a valid command');
   usage();
+}
+
+function arrayFromCommaDelimitedList(str) {
+  return str.split(',').map(function (value) { return value.trim(); });
 }
 
 function inputError(message) {
@@ -471,7 +478,7 @@ function connectionString(device) {
 function printDevice(device) {
   var filtered = {};
   if (parsed.display) {
-    var props = parsed.display.split(',');
+    var props = arrayFromCommaDelimitedList(parsed.display);
     props.forEach(function (prop) {
       prop = prop.trim();
       var parts = prop.split('.');
@@ -555,9 +562,9 @@ function usage() {
     '{yellow}Device management commands{/yellow}',
     '  {white}[<connection-string>] {green}get-job{/green} <job-id>{/white}',
     '    {grey}Displays information about the given job.{/grey}',
-    '  {white}[<connection-string>] {green}read{/green} <device-ids> <device-property> [--async]{/white}',
-    '    {grey}Reads and displays the given property from one or more devices (aka "deep read").{/grey}',
-    '  {white}[<connection-string>] {green}write{/green} <device-ids> <device-property> [--async]{/white}',
+    '  {white}[<connection-string>] {green}read{/green} <device-ids> <device-properties> [--async]{/white}',
+    '    {grey}Reads and displays properties, given as a comma-delimted list of names, from one or more devices (aka "deep read").{/grey}',
+    '  {white}[<connection-string>] {green}write{/green} <device-ids> <device-properties> [--async]{/white}',
     '    {grey}Writes properties, given as a JSON object, to one or more devices (aka "deep write").{/grey}',
     '  {white}[<connection-string>] {green}firmware-update{/green} <device-ids> <firmware-uri> [--async] [--timeout=<num-minutes>]{/white}',
     '    {grey}Issues a command to one or more devices to update their firmware to the specified image.',
