@@ -283,6 +283,21 @@ else if (command === 'receive') {
     }
   });
 }
+else if (command === 'get-job') {
+  if (!arg1) inputError('No job ID given');
+  
+  var jobClient = connString ? 
+    JobClient.fromConnectionString(connString) :
+    JobClient.fromSharedAccessSignature(sas.toString());
+    
+    jobClient.getJob(arg1, function (err, job) {
+      if (err) serviceError(err);
+      var output = parsed.raw ?
+        JSON.stringify(job) :
+        '\n' + prettyjson.render(job);
+      console.log(output);
+    });
+}
 else if (command === 'read') {
   if (!arg1) inputError('No device IDs given');
   if (!arg2) inputError('No device property given');
@@ -476,8 +491,8 @@ function usage() {
     '    {grey}Receives feedback about the delivery of cloud-to-device messages; optionally exits after receiving {white}n{/white} messages.{/grey}',
     '',
     '{yellow}Device management commands{/yellow}',
-    '  {white}[<connection-string>] {green}get-jobs{/green} <job-ids>{/white}',
-    '    {grey}Displays information about jobs corresponding to the given comma-delimited list of IDs.{/grey}',
+    '  {white}[<connection-string>] {green}get-job{/green} <job-id>{/white}',
+    '    {grey}Displays information about the given job.{/grey}',
     '  {white}[<connection-string>] {green}read{/green} <device-ids> <device-property>{/white}',
     '    {grey}Reads and displays the given property from one or more devices (aka "deep read").{/grey}',
     '  {white}[<connection-string>] {green}write{/green} <device-ids> <device-property> <value>{/white}',
@@ -491,7 +506,7 @@ function usage() {
     '    {grey}Issues a command to one or more devices to reboot.{/grey}',
     '',
     '  {white}<device-ids>{/white} {grey}is comma-delimited.{/grey}',
-    '  {grey}Use the{/grey} {white}--async{/white} {grey}option to display the job ID and return immediately. The job ID can be given to{/grey} {green}get-jobs{/green}{grey}.{/grey}',
+    '  {grey}Use the{/grey} {white}--async{/white} {grey}option to display the job ID and return immediately. The job ID can be given to{/grey} {green}get-job{/green}{grey}.{/grey}',
     '',
     '{yellow}Miscellaneous commands{/yellow}',
     '  {green}help{/green}',
