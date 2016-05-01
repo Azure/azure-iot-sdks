@@ -43,4 +43,7 @@ cd $build_root/python/device/tests/
 echo "python${PYTHON_VERSION}" iothub_client_ut.py
 "python${PYTHON_VERSION}" iothub_client_ut.py
 [ $? -eq 0 ] || exit $?
+echo "python${PYTHON_VERSION}" iothub_client_map_test.py
+"python${PYTHON_VERSION}" iothub_client_map_test.py
+[ $? -eq 0 ] || exit $?
 cd $build_root

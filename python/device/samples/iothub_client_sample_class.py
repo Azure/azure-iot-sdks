@@ -20,6 +20,11 @@ from iothub_client_args import *
 timeout = 241000
 minimum_polling_time = 9
 
+# messageTimeout - the maximum time in milliseconds until a message times out.
+# The timeout period starts at IoTHubClient.send_event_async. 
+# By default, messages do not expire.
+message_timeout = 10000
+
 receive_context = 0
 avg_wind_speed = 10.0
 message_count = 5
@@ -47,10 +52,11 @@ class HubManager(object):
         if protocol == IoTHubTransportProvider.HTTP:
             self.client.set_option("timeout", timeout)
             self.client.set_option("MinimumPollingTime", minimum_polling_time)
+        # set the time until a message times out
+        self.client.set_option("messageTimeout", message_timeout)
         # some embedded platforms need certificate information
         # self.set_certificates()
-        self.client.set_message_callback(
-            self._receive_message_callback, receive_context)
+        self.client.set_message_callback(self._receive_message_callback, receive_context)
 
     def set_certificates(self):
         from iothub_client_cert import certificates
@@ -152,8 +158,7 @@ def usage():
 
 if __name__ == '__main__':
     try:
-        (connection_string, protocol) = get_iothub_opt(
-            sys.argv[1:], connection_string)
+        (connection_string, protocol) = get_iothub_opt(sys.argv[1:], connection_string)
     except OptionError as o:
         print(o)
         usage()

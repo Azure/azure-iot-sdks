@@ -20,6 +20,11 @@ from iothub_client_args import *
 timeout = 241000
 minimum_polling_time = 9
 
+# messageTimeout - the maximum time in milliseconds until a message times out.
+# The timeout period starts at IoTHubClient.send_event_async. 
+# By default, messages do not expire.
+message_timeout = 10000
+
 receive_context = 0
 avg_wind_speed = 10.0
 message_count = 5
@@ -55,8 +60,7 @@ def receive_message_callback(message, counter):
     buffer = message.get_bytearray()
     size = len(buffer)
     print("Received Message [%d]:" % counter)
-    print("    Data: <<<%s>>> & Size=%d" %
-          (buffer[:size].decode('utf-8'), size))
+    print("    Data: <<<%s>>> & Size=%d" % (buffer[:size].decode('utf-8'), size))
     map_properties = message.properties()
     key_value_pair = map_properties.get_internals()
     print("    Properties: %s" % key_value_pair)
@@ -86,7 +90,8 @@ def iothub_client_init():
     if iotHubClient.protocol == IoTHubTransportProvider.HTTP:
         iotHubClient.set_option("timeout", timeout)
         iotHubClient.set_option("MinimumPollingTime", minimum_polling_time)
-    iotHubClient.set_option("messageTimeout", 10000)
+    # set the time until a message times out
+    iotHubClient.set_option("messageTimeout", message_timeout)
     # some embedded platforms need certificate information
     # set_certificates(iotHubClient)
     # to enable MQTT logging set to 1
@@ -124,8 +129,7 @@ def iothub_client_sample_run():
                     avg_wind_speed + (random.random() * 4 + 2))
                 # messages can be encoded as string or bytearray
                 if (i & 1) == 1:
-                    message = IoTHubMessage(
-                        bytearray(msg_txt_formatted, 'utf8'))
+                    message = IoTHubMessage(bytearray(msg_txt_formatted, 'utf8'))
                 else:
                     message = IoTHubMessage(msg_txt_formatted)
                 # optional: assign ids
@@ -135,8 +139,7 @@ def iothub_client_sample_run():
                 prop_map = message.properties()
                 prop_text = "PropMsg_%d" % i
                 prop_map.add("Property", prop_text)
-                iotHubClient.send_event_async(
-                    message, send_confirmation_callback, i)
+                iotHubClient.send_event_async(message, send_confirmation_callback, i)
                 print(
                     "IoTHubClient.send_event_async accepted message [%d]"
                     " for transmission to IoT Hub." %
@@ -172,8 +175,7 @@ if __name__ == '__main__':
     print("IoT Hub for Python SDK Version: %s" % iothub_client.__version__)
 
     try:
-        (connection_string, protocol) = get_iothub_opt(
-            sys.argv[1:], connection_string, protocol)
+        (connection_string, protocol) = get_iothub_opt(sys.argv[1:], connection_string, protocol)
     except OptionError as o:
         print(o)
         usage()
