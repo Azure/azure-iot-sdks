@@ -14,6 +14,7 @@ var colorsTmpl = require('colors-tmpl');
 var Https = require('azure-iothub').Https;
 var Client = require('azure-iothub').Client;
 var Registry = require('azure-iothub').Registry;
+var JobClient = require('azure-iothub').JobClient;
 var Message = require('azure-iot-common').Message;
 var EventHubClient = require('./lib/eventhubclient.js');
 var ConnectionString = require('azure-iothub').ConnectionString;
@@ -280,6 +281,61 @@ else if (command === 'receive') {
         });
       });
     }
+  });
+}
+else if (command === 'read') {
+  if (!arg1) inputError('No device IDs given');
+  if (!arg2) inputError('No device property given');
+
+  var jobId = uuid.v4();
+  var devices = arg1.split(',');
+  var jobClient = connString ? 
+    JobClient.fromConnectionString(connString) :
+    JobClient.fromSharedAccessSignature(sas.toString());
+
+  jobClient.scheduleDevicePropertyRead(jobId, devices, arg2, function (err, job) {
+    if (err) serviceError(err);
+    var interval = setInterval(function () {
+      jobClient.getJob(jobId, function (err, job) {
+        if (err) serviceError(err);
+        if (job.status === 'completed') {
+          clearInterval(interval);
+          
+          var status = {};
+          job.statusMessage.split(';').forEach(function (elem) {
+            if (elem.length) {
+              var pair = elem.split(':');
+              status[pair[0].trim()] = parseInt(pair[1]);
+            }
+          });
+          if (status.Succeeded === 0) {
+            serviceError(new Error('Could not read property'));
+          }
+          else {
+            if (!parsed.raw && status.Failed > 0) {
+              console.log(colorsTmpl('\n' + '{red}Failed to read property \'' + arg2 + '\' on ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '.{/red}'));
+            }
+            var registry = connString ?
+              Registry.fromConnectionString(connString) :
+              Registry.fromSharedAccessSignature(sas.toString());
+            devices.forEach(function (deviceId) {
+              registry.get(deviceId, function (err, twin) {
+                if (err) serviceError(err);
+                var result = {
+                  deviceId: deviceId,
+                  deviceProperties: {}
+                };
+                result.deviceProperties[arg2] = twin.deviceProperties[arg2];
+                var output = parsed.raw ?
+                  JSON.stringify(result) :
+                  '\n' + prettyjson.render(result);
+                console.log(output);
+              });
+            });
+          }
+        }
+      });
+    }, 2000);
   });
 }
 else {
