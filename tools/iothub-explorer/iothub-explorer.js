@@ -325,13 +325,14 @@ else if (command === 'read') {
                 status[pair[0].trim()] = parseInt(pair[1]);
               }
             });
-            if (status.Succeeded === 0) {
-              serviceError(new Error('Failed to read property from device' + (status.Failed > 1 ? 's' : '')));
+            if (!parsed.raw && status.Succeeded > 0) {
+              console.log(colorsTmpl('\n' + '{green}Read succeeded for ' + status.Succeeded + ' device' + (status.Succeeded > 1 ? 's' : '') + '{/green}'));
             }
-            else {
-              if (!parsed.raw && status.Failed > 0) {
-                console.log(colorsTmpl('\n' + '{red}Failed to read property on ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '.{/red}'));
-              }
+            if (!parsed.raw && status.Failed > 0) {
+              console.log(colorsTmpl('\n' + '{red}Read failed for ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '{/red}'));
+            }
+            if (status.Succeeded > 0)
+            {
               var registry = connString ?
                 Registry.fromConnectionString(connString) :
                 Registry.fromSharedAccessSignature(sas.toString());
@@ -349,6 +350,57 @@ else if (command === 'read') {
                   console.log(output);
                 });
               });
+            }
+          }
+        });
+      }, 2000);
+    }
+  });
+}
+else if (command === 'write') {
+  if (!arg1) inputError('No device IDs given');
+  if (!arg2) inputError('No device properties given');
+
+  var jobId = uuid.v4();
+  var devices = arg1.split(',');
+  var properties;
+  
+  try {
+    properties = JSON.parse(arg2);
+  }
+  catch (e) {
+    if (e instanceof SyntaxError) inputError('Properties information isn\'t valid JSON');
+    else throw e;
+  }
+
+  var jobClient = connString ? 
+    JobClient.fromConnectionString(connString) :
+    JobClient.fromSharedAccessSignature(sas.toString());
+
+  jobClient.scheduleDevicePropertyWrite(jobId, devices, properties, function (err, job) {
+    if (err) serviceError(err);
+    if (parsed.async) {
+      printJob(job);
+    }
+    else {
+      var interval = setInterval(function () {
+        jobClient.getJob(jobId, function (err, job) {
+          if (err) serviceError(err);
+          if (job.status === 'completed') {
+            clearInterval(interval);
+            
+            var status = {};
+            job.statusMessage.split(';').forEach(function (elem) {
+              if (elem.length) {
+                var pair = elem.split(':');
+                status[pair[0].trim()] = parseInt(pair[1]);
+              }
+            });
+            if (!parsed.raw && status.Succeeded > 0) {
+              console.log(colorsTmpl('\n' + '{green}Write succeeded for ' + status.Succeeded + ' device' + (status.Succeeded > 1 ? 's' : '') + '{/green}'));
+            }
+            if (!parsed.raw && status.Failed > 0) {
+              console.log(colorsTmpl('\n' + '{red}Write failed for ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '{/red}'));
             }
           }
         });
@@ -505,8 +557,8 @@ function usage() {
     '    {grey}Displays information about the given job.{/grey}',
     '  {white}[<connection-string>] {green}read{/green} <device-ids> <device-property> [--async]{/white}',
     '    {grey}Reads and displays the given property from one or more devices (aka "deep read").{/grey}',
-    '  {white}[<connection-string>] {green}write{/green} <device-ids> <device-property> <value> [--async]{/white}',
-    '    {grey}Writes the given property to one or more devices (aka "deep write").{/grey}',
+    '  {white}[<connection-string>] {green}write{/green} <device-ids> <device-property> [--async]{/white}',
+    '    {grey}Writes properties, given as a JSON object, to one or more devices (aka "deep write").{/grey}',
     '  {white}[<connection-string>] {green}firmware-update{/green} <device-ids> <firmware-uri> [--async] [--timeout=<num-minutes>]{/white}',
     '    {grey}Issues a command to one or more devices to update their firmware to the specified image.',
     '    The job will fail if it does not complete within the given timeout period; default timeout is one hour.{/grey}',
