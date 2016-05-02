@@ -24,18 +24,13 @@ typedef void(*ON_DM_CONNECT_COMPLETE)(IOTHUB_CLIENT_RESULT result, void *context
 /** @brief      Creates a IoT DM client for communication with an existing
 *               IoT DM Service using the specified connection string parameter.
 *
-*   @param      connectionString    Pointer to a character string.
+*   @param      connectionString    Pointer to a character string representing a device connection.
 *               transport           Connection type. Reserved for future use.
 *
-*			    Sample connection string:
-*				    <blockquote>
-*					    <pre>HostName=[IoT DM name goes here].[IoT DM suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessKey=[Device key goes here];</pre>
-*				    </blockquote>
-*
-*   @return     A non-NULL @c IOTHUB_CLIENT_HANDLE value that is used when
+*   @return     A non-NULL @c IOTHUB_CHANNEL_HANDLE value that is used when
 *               invoking other functions for IoT DM client and @c NULL on failure.
 */
-IOTHUB_CHANNEL_HANDLE IoTHubClient_DM_Open(const char *connectionString, IOTHUB_TRANSPORT transport);
+extern IOTHUB_CHANNEL_HANDLE IoTHubClient_DM_Open(const char *connectionString, IOTHUB_TRANSPORT transport);
 
 
 /**
@@ -44,7 +39,7 @@ IOTHUB_CHANNEL_HANDLE IoTHubClient_DM_Open(const char *connectionString, IOTHUB_
 *
 *   @param      iotDMClientHandle   The handle created by a call to the create function.
 */
-void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
+extern void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
 
 /**
 *   @brief      Creates the default LWM2M objects provided in the SDK. Upon success,
@@ -53,18 +48,19 @@ void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
 *
 *   @param      iotDMClientHandle   The handle created by a call to the create function.
 *
-*   @return     IOTDM_CLIENT_OK upon success or an error code upon failure.
+*   @return     IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-IOTHUB_CLIENT_RESULT IoTHubClient_DM_CreateDefaultObjects(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_DM_CreateDefaultObjects(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
 
 
-/** @brief      Starts the client and remain running.
+/** @brief      Starts the client and remain running. A high level function which makes use
+*               of IoTHubClient_DM_Connect and IoTHubClient_DM_DoWork.
 *
 *   @param      iotDMClientHandle   The handle created by a call to the create function.
 *
-*   @return     IOTDM_CLIENT_OK upon success or an error code upon failure.
+*   @return     IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
 
 
 /** @brief      Connects the client to the the IoT DM service represented in the iotDMClientHandle.
@@ -73,9 +69,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
 *               onComplete          The pointer to a function to be called when the connection is completed.
 *               callbackContext     The pointer to a chunck of memory to be interpreted by the call back function.
 *
-*   @return     IOTDM_CLIENT_OK upon success or an error code upon failure.
+*   @return     IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHandle, ON_DM_CONNECT_COMPLETE onComplete, void *callbackContext);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHandle, ON_DM_CONNECT_COMPLETE onComplete, void *callbackContext);
 
 
 /** @brief      Performs one unit of work. One unit of work consists of serveral steps as follows:
@@ -84,8 +80,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHa
 *
 *   @param      iotDMClientHandle   The handle created by a call to the create function.
 *
-*   @return     TRUE if work is succesfully completed.
+*   @return     true if work is succesfully completed.
 */
-bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
+extern bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
 
 #endif /* IOTHUB_LWM2M_H */
