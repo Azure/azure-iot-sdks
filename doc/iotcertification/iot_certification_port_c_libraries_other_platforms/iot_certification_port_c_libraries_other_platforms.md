@@ -90,7 +90,7 @@ To run DeviceExplorer tool, use following configuration string as described in [
     f. Save this information in Notepad. You will need this information in
     later steps.
 
-***Not running Windows on your PC?*** - Please send us an email on <iotcert@microsoft.com> and we will follow up with you with instructions.
+***Not running Windows on your PC?*** - Please follow the instructions [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md>) to provision your device and get its credentials.
 
 <a name="Step_3"/>
 # Step 3: Build and Validate the sample using C client libraries
@@ -149,7 +149,7 @@ Package the following artifacts from your device:
 
 3.  All the screenshots that belong to "**Receive messages from IoT Hub**" section.
 
-4.  Create a document that explains how to run the sample with your hardware (explicitly highlighting the new steps for customers). As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/c/doc>).
+4.  Create a document that explains how to run the sample with your hardware (explicitly highlighting the new steps for customers). As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
 
 <a name="Step_4_2"/>
 ## 4.2 Share with the Azure IoT Certification team

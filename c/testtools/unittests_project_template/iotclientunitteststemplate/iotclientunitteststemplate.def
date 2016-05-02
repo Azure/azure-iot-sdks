@@ -1,7 +1,0 @@
-﻿; IotClientUnitTestsTemplate.def : Declares the module parameters.
-
-LIBRARY      "IotClientUnitTestsTemplate.DLL"
-
-EXPORTS
-	DllCanUnloadNow            PRIVATE
-	DllGetClassObject          PRIVATE

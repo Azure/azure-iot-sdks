@@ -18,5 +18,5 @@ module.exports = {
   Registry: require('./lib/registry.js'),
   SharedAccessSignature: require('./lib/shared_access_signature.js'),
   Amqp: require('./lib/amqp.js'),
-  AmqpWs: require('./lib/amqp-ws.js'),
+  AmqpWs: require('./lib/amqp_ws.js'),
 };

@@ -4,9 +4,20 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-#define IMPORT_NAME iothub_client_mock
+#include <boost/python.hpp>
+#include <string>
+#include <vector>
+#include <list>
 
-#include "iothub_client_python.cpp"
+#include "azure_c_shared_utility/platform.h"
+#include "iothub_client.h"
+#include "iothub_client_version.h"
+#include "iothub_message.h"
+#include "iothubtransporthttp.h"
+#include "iothubtransportamqp.h"
+#include "iothubtransportmqtt.h"
+
+#define IMPORT_NAME iothub_client_mock
 
 // "platform.h"
 

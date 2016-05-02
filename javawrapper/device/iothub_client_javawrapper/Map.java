@@ -47,7 +47,11 @@ public class Map
     
     public void mapDestroy()
     {
-        Iothub_client_wrapperLibrary.INSTANCE.Map_Destroy(mapHandle);
+        if (mapHandle.getPointer().getInt(0) != 0)
+        {
+        	Iothub_client_wrapperLibrary.INSTANCE.Map_Destroy(mapHandle);
+        	mapHandle.getPointer().setInt(0, 0);
+        }
     }
     
     public MAP_HANDLE mapClone()
@@ -107,4 +111,15 @@ public class Map
         return keyPairValue;
     }
     
+    @Override
+    protected void finalize() throws Throwable
+    {
+        try{
+        	mapDestroy();
+        }catch(Throwable t){
+            throw t;
+        }finally{
+            super.finalize();
+        }
+    }
 }

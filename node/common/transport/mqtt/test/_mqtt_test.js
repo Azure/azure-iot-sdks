@@ -7,7 +7,7 @@ var assert = require('chai').assert;
 
 var Mqtt = require('../lib/mqtt.js');
 var PackageJson = require('../package.json');
-var fakemqtt = require('./_fake_mqtt.js');
+var FakeMqtt = require('./_fake_mqtt.js');
 var Message = require('azure-iot-common').Message;
 
 describe('Mqtt', function () {
@@ -107,6 +107,7 @@ describe('Mqtt', function () {
         sharedAccessSignature: "sasToken"
       };
 
+      var fakemqtt = new FakeMqtt();
       var transport = new Mqtt(config, fakemqtt);
       transport.connect(function () {
         transport.client.publishShouldSucceed(true);
@@ -119,6 +120,7 @@ describe('Mqtt', function () {
           }
         });
       });
+      fakemqtt.emit('connect', { connack: true });
     });
 
     // Publish errors are handled with a callback, so 'error' should be subscribed only once when connecting, to get link errors.
@@ -129,6 +131,7 @@ describe('Mqtt', function () {
         sharedAccessSignature: "sasToken"
       };
 
+      var fakemqtt = new FakeMqtt();
       var transport = new Mqtt(config, fakemqtt);
       transport.connect(function () {
         assert.equal(transport.client.listeners('error').length, 1);
@@ -137,6 +140,49 @@ describe('Mqtt', function () {
           assert.equal(transport.client.listeners('error').length, 1);
           done();
         });
+      });
+
+      fakemqtt.emit('connect', { connack: true });
+    });
+  });
+
+  describe('#open', function() {
+    it('calls the done callback once successfully connected to the server', function(done) {
+      var config = {
+        host: "host.name",
+        deviceId: "deviceId",
+        sharedAccessSignature: "sasToken"
+      };
+
+      var fakemqtt = new FakeMqtt();
+      var transport = new Mqtt(config, fakemqtt);
+      transport.connect(function(err) {
+        if(err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+
+      fakemqtt.emit('connect', { connack: true });
+    });
+
+    ['close', 'offline', 'error', 'disconnect'].forEach(function(event) {
+      it('calls the done callback with an error if we get the \'' + event + '\' event before connect', function(done) {
+        var config = {
+          host: "host.name",
+          deviceId: "deviceId",
+          sharedAccessSignature: "sasToken"
+        };
+
+        var fakemqtt = new FakeMqtt();
+        var transport = new Mqtt(config, fakemqtt);
+        transport.connect(function(err) {
+          assert.isNotNull(err);
+          done();
+        });
+
+        fakemqtt.emit(event, new Error('could not connect'));
       });
     });
   });

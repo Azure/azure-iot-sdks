@@ -20,7 +20,7 @@ BUFFER_HANDLE DataSerializer_Encode(MULTITREE_HANDLE multiTreeHandle, DATA_SERIA
     if (multiTreeHandle == NULL || encodeFunc == NULL)
     {
         pBuffer = NULL;
-        LogError("(Error code: %s)\r\n", ENUM_TO_STRING(DATA_SERIALIZER_RESULT, DATA_SERIALIZER_INVALID_ARG) );
+        LogError("(Error code: %s)", ENUM_TO_STRING(DATA_SERIALIZER_RESULT, DATA_SERIALIZER_INVALID_ARG) );
     }
     else
     {
@@ -29,7 +29,7 @@ BUFFER_HANDLE DataSerializer_Encode(MULTITREE_HANDLE multiTreeHandle, DATA_SERIA
         if (pBuffer == NULL)
         {
             /* Codes_SRS_DATA_SERIALIZER_07_010: [Upon a DATA_SERIALIZER_ENCODE_FUNC failure the DataSerializer_Encode function shall return NULL.] */
-            LogError("(Error code: %s)\r\n", ENUM_TO_STRING(DATA_SERIALIZER_RESULT, DATA_SERIALIZER_ERROR) );
+            LogError("(Error code: %s)", ENUM_TO_STRING(DATA_SERIALIZER_RESULT, DATA_SERIALIZER_ERROR) );
         }
     }
     /* Codes_SRS_DATA_SERIALIZER_07_002: [DataSerializer_Encode shall return a valid BUFFER_HANDLE when the function executes successfully.] */
@@ -44,7 +44,7 @@ MULTITREE_HANDLE DataSerializer_Decode(BUFFER_HANDLE data, DATA_SERIALIZER_DECOD
     if (data == NULL || decodeFunc == NULL)
     {
         multiTreeHandle = NULL;
-        LogError("(Error code: %s)\r\n", ENUM_TO_STRING(DATA_SERIALIZER_RESULT, DATA_SERIALIZER_INVALID_ARG) );
+        LogError("(Error code: %s)", ENUM_TO_STRING(DATA_SERIALIZER_RESULT, DATA_SERIALIZER_INVALID_ARG) );
     }
     else
     {
@@ -53,7 +53,7 @@ MULTITREE_HANDLE DataSerializer_Decode(BUFFER_HANDLE data, DATA_SERIALIZER_DECOD
         if (multiTreeHandle == NULL)
         {
             /* Codes_SRS_DATA_SERIALIZER_07_013: [Upon a DATA_SERIALIZER_DECODE_FUNC callback failure the DataSerializer_Encode function Shall return NULL.] */
-            LogError("(Error code: %s)\r\n", ENUM_TO_STRING(DATA_SERIALIZER_RESULT, DATA_SERIALIZER_ERROR) );
+            LogError("(Error code: %s)", ENUM_TO_STRING(DATA_SERIALIZER_RESULT, DATA_SERIALIZER_ERROR) );
         }
     }
 

@@ -327,8 +327,11 @@ public final class DeviceClient implements Closeable
                 RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_HTTPS;
                 break;
             case AMQPS:
+                this.transport = new AmqpsTransport(this.config, false);
+                RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_AMQPS;
+                break;
             case AMQPS_WS:
-                this.transport = new AmqpsTransport(this.config, protocol);
+                this.transport = new AmqpsTransport(this.config, true);
                 RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_AMQPS;
                 break;
             case MQTT:

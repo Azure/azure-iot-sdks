@@ -19,7 +19,7 @@ public final class DeviceClientConfig
      * SAS token. Use {@link #getTokenValidSecs()} instead in case the field becomes
      * configurable later on.
      */
-    public static final long TOKEN_VALID_SECS = 600;
+    public long TOKEN_VALID_SECS = 3600;
 
     /** The default value for readTimeoutMillis. */
     public static final int DEFAULT_READ_TIMEOUT_MILLIS = 240000;
@@ -143,7 +143,7 @@ public final class DeviceClientConfig
      */
     public long getTokenValidSecs()
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_005: [The function shall return 600.]
+        // Codes_SRS_DEVICECLIENTCONFIG_11_005: [The function shall return the value of TOKEN_VALID_SECS.]
         return TOKEN_VALID_SECS;
     }
 

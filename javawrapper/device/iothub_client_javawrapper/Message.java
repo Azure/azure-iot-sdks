@@ -106,7 +106,11 @@ public class Message
     
     public void destroy()
     {
-        Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_Destroy(messageHandle);
+    	if (messageHandle.getPointer().getInt(0) != 0)
+    	{
+    		Iothub_client_wrapperLibrary.INSTANCE.IoTHubMessage_Destroy(messageHandle);
+    		messageHandle.getPointer().setInt(0, 0);
+    	}
     }
     
     IOTHUB_MESSAGE_HANDLE getMessageHandle()
@@ -117,5 +121,17 @@ public class Message
     public void setMessageHandle(IOTHUB_MESSAGE_HANDLE _messageHandle)
     {
         messageHandle = _messageHandle;
+    }
+    
+    @Override
+    protected void finalize() throws Throwable
+    {
+        try{
+        	destroy();
+        }catch(Throwable t){
+            throw t;
+        }finally{
+            super.finalize();
+        }
     }
 }

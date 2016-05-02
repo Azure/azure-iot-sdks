@@ -14,7 +14,7 @@
 
 DEFINE_ENUM_STRINGS(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_RESULT_VALUES);
 
-#define LOG_SCHEMA_SERIALIZER_ERROR(result) LogError("(result = %s)\r\n", ENUM_TO_STRING(SCHEMA_SERIALIZER_RESULT, (result)))
+#define LOG_SCHEMA_SERIALIZER_ERROR(result) LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_SERIALIZER_RESULT, (result)))
 
 static const char* ConvertType(const char* sourceType)
 {
@@ -41,7 +41,7 @@ SCHEMA_SERIALIZER_RESULT SchemaSerializer_SerializeCommandMetadata(SCHEMA_MODEL_
         (schemaText == NULL))
     {
         result = SCHEMA_SERIALIZER_INVALID_ARG;
-        LogError("(result = %s), modelHandle = %p, schemaText = %p\r\n", ENUM_TO_STRING(SCHEMA_SERIALIZER_RESULT, result), modelHandle, schemaText);
+        LogError("(result = %s), modelHandle = %p, schemaText = %p", ENUM_TO_STRING(SCHEMA_SERIALIZER_RESULT, result), modelHandle, schemaText);
     }
     else
     {
@@ -80,7 +80,7 @@ SCHEMA_SERIALIZER_RESULT SchemaSerializer_SerializeCommandMetadata(SCHEMA_MODEL_
                     (Schema_GetModelActionArgumentCount(actionHandle, &argCount) != SCHEMA_OK))
                 {
                     /* Codes_SRS_SCHEMA_SERIALIZER_01_015: [If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR.] */
-                    LogError("Failed encoding action.\r\n");
+                    LogError("Failed encoding action.");
                     break;
                 }
                 else
@@ -103,7 +103,7 @@ SCHEMA_SERIALIZER_RESULT SchemaSerializer_SerializeCommandMetadata(SCHEMA_MODEL_
                             (STRING_concat(schemaText, ConvertType(argType)) != 0))
                         {
                             /* Codes_SRS_SCHEMA_SERIALIZER_01_015: [If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR.] */
-                            LogError("Failed encoding argument.\r\n");
+                            LogError("Failed encoding argument.");
                             break;
                         }
                         else
@@ -113,7 +113,7 @@ SCHEMA_SERIALIZER_RESULT SchemaSerializer_SerializeCommandMetadata(SCHEMA_MODEL_
                                 if (STRING_concat(schemaText, "\"},") != 0)
                                 {
                                     /* Codes_SRS_SCHEMA_SERIALIZER_01_015: [If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR.] */
-                                    LogError("Failed to concatenate arg end.\r\n");
+                                    LogError("Failed to concatenate arg end.");
                                     break;
                                 }
                             }
@@ -122,7 +122,7 @@ SCHEMA_SERIALIZER_RESULT SchemaSerializer_SerializeCommandMetadata(SCHEMA_MODEL_
                                 if (STRING_concat(schemaText, "\"}") != 0)
                                 {
                                     /* Codes_SRS_SCHEMA_SERIALIZER_01_015: [If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR.] */
-                                    LogError("Failed to concatenate arg end.\r\n");
+                                    LogError("Failed to concatenate arg end.");
                                     break;
                                 }
                             }
@@ -139,7 +139,7 @@ SCHEMA_SERIALIZER_RESULT SchemaSerializer_SerializeCommandMetadata(SCHEMA_MODEL_
                         if (STRING_concat(schemaText, "]},") != 0)
                         {
                             /* Codes_SRS_SCHEMA_SERIALIZER_01_015: [If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR.] */
-                            LogError("Failed to concatenate.\r\n");
+                            LogError("Failed to concatenate.");
                             break;
                         }
                     }
@@ -148,7 +148,7 @@ SCHEMA_SERIALIZER_RESULT SchemaSerializer_SerializeCommandMetadata(SCHEMA_MODEL_
                         if (STRING_concat(schemaText, "]}") != 0)
                         {
                             /* Codes_SRS_SCHEMA_SERIALIZER_01_015: [If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR.] */
-                            LogError("Failed to concatenate.\r\n");
+                            LogError("Failed to concatenate.");
                             break;
                         }
                     }
@@ -162,7 +162,7 @@ SCHEMA_SERIALIZER_RESULT SchemaSerializer_SerializeCommandMetadata(SCHEMA_MODEL_
             else if (STRING_concat(schemaText, "]") != 0)
             {
                 /* Codes_SRS_SCHEMA_SERIALIZER_01_015: [If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR.] */
-                LogError("Failed to concatenate commands object end.\r\n");
+                LogError("Failed to concatenate commands object end.");
                 result = SCHEMA_SERIALIZER_ERROR;
             }
             else

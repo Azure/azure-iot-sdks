@@ -185,8 +185,10 @@ Http.prototype.getReceiver = function getReceiver(done) {
 /*Codes_SRS_NODE_DEVICE_HTTP_16_004: [The ‘setOptions’ method shall call the setOptions method of the HTTP Receiver with the options parameter.]*/
 /*Codes_SRS_NODE_DEVICE_HTTP_16_005: [The ‘setOptions’ method shall call the ‘done’ callback when finished.]*/
 Http.prototype.setOptions = function (options, done) {
-  this._receiver.setOptions(options);
-  done(null, new results.TransportConfigured());
+  this.getReceiver(function (err, receiver) {
+    receiver.setOptions(options);
+    done(null, new results.TransportConfigured());
+  });
 };
 
 /**

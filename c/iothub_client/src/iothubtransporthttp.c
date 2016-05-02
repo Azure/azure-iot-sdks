@@ -302,7 +302,7 @@ static bool create_abandonHTTPrelativePathBegin(HTTPTRANSPORT_PERDEVICE_DATA* ha
             ))
         {
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_025: [ If creating the abandonHTTPrelativePathBegin fails then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
-			LogError("unable to create abandon path string.\r\n");
+			LogError("unable to create abandon path string.");
             STRING_delete(handleData->abandonHTTPrelativePathBegin);
             result = false;
         }
@@ -356,7 +356,7 @@ static bool create_deviceSASObject(HTTPTRANSPORT_PERDEVICE_DATA* handleData, STR
 					/*Codes_SRS_TRANSPORTMULTITHTTP_17_035: [The keyName is shortened to zero length, if that fails then IoTHubTransportHttp_Create shall fail and return NULL.]*/
                     if (STRING_empty(keyName) != 0)
                     {
-                        LogError("Unable to form the device key name for the SAS\r\n");
+                        LogError("Unable to form the device key name for the SAS");
                         result = false;
                     }
                     else
@@ -698,31 +698,31 @@ TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* con
     if (config == NULL)
     {
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_001: [If parameter config is NULL, then IoTHubTransportHttp_Create shall return NULL.]*/
-        LogError("invalid arg (configuration is missing)\r\n");
+        LogError("invalid arg (configuration is missing)");
         result = NULL;
     }
     else if (config->upperConfig == NULL)
     {
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_002: [ If field transportConfig is NULL, then IoTHubTransportHttp_Create shall return NULL. ]*/
-        LogError("invalid arg (upperConfig is NULL)\r\n");
+        LogError("invalid arg (upperConfig is NULL)");
         result = NULL;
     }
     else if (config->upperConfig->protocol == NULL)
     {
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields protocol, iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]*/
-        LogError("invalid arg (protocol is NULL)\r\n");
+        LogError("invalid arg (protocol is NULL)");
         result = NULL;
     }
     else if (config->upperConfig->iotHubName == NULL)
     {
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields protocol, iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]*/
-        LogError("invalid arg (iotHubName is NULL)\r\n");
+        LogError("invalid arg (iotHubName is NULL)");
         result = NULL;
     }
     else if (config->upperConfig->iotHubSuffix == NULL)
     {
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields protocol, iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]*/
-        LogError("invalid arg (iotHubSuffix is NULL)\r\n");
+        LogError("invalid arg (iotHubSuffix is NULL)");
         result = NULL;
     }
     else
@@ -732,7 +732,7 @@ TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* con
         if (result == NULL)
         {
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_131: [ If allocation fails, IoTHubTransportHttp_Create shall fail and return NULL. ]*/
-            LogError("unable to malloc\r\n");
+            LogError("unable to malloc");
         }
         else
         {
@@ -792,7 +792,7 @@ int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
     if (handle == NULL)
     {
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_103: [ If parameter deviceHandle is NULL then IoTHubTransportHttp_Subscribe shall fail and return a non-zero value. ]*/
-        LogError("invalid arg passed to IoTHubTransportHttp_Subscribe\r\n");
+        LogError("invalid arg passed to IoTHubTransportHttp_Subscribe");
         result = __LINE__;
     }
     else
@@ -835,12 +835,12 @@ void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
     }
 		else
 		{
-			LogError("Device not found to unsuscribe.\r\n");
+			LogError("Device not found to unsuscribe.");
 }
     }
 	else
 	{
-		LogError("Null handle passed to Unsuscribe.\r\n");
+		LogError("Null handle passed to Unsuscribe.");
 	}
 }
 
@@ -855,7 +855,7 @@ static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* pro
     if (Map_GetInternals(map, &keys, &values, &count) != MAP_OK)
     {
         result = __LINE__;
-        LogError("error while Map_GetInternals\r\n");
+        LogError("error while Map_GetInternals");
     }
     else
     {
@@ -874,12 +874,12 @@ static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* pro
             {
                 /*go ahead and return it*/
                 result = __LINE__;
-                LogError("failed STRING_concat\r\n");
+                LogError("failed STRING_concat");
             }
             else if (appendMapToJSON(existing, keys, values, count) != 0)
             {
                 result = __LINE__;
-                LogError("unable to append the properties\r\n");
+                LogError("unable to append the properties");
             }
             else
             {
@@ -906,7 +906,7 @@ static int appendMapToJSON(STRING_HANDLE existing, const char* const* keys, cons
     {
         /*go on and return it*/
         result = __LINE__;
-        LogError("STRING_construct failed\r\n");
+        LogError("STRING_construct failed");
     }
     else
     {
@@ -921,7 +921,7 @@ static int appendMapToJSON(STRING_HANDLE existing, const char* const* keys, cons
                 (STRING_concat(existing, "\"") == 0)
                 ))
             {
-                LogError("unable to STRING_concat\r\n");
+                LogError("unable to STRING_concat");
                 break;
             }
         }
@@ -934,7 +934,7 @@ static int appendMapToJSON(STRING_HANDLE existing, const char* const* keys, cons
         else if (STRING_concat(existing, "}") != 0)
         {
             result = __LINE__;
-            LogError("unable to STRING_concat\r\n");
+            LogError("unable to STRING_concat");
         }
         else
         {
@@ -960,7 +960,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
         result = STRING_construct("{\"body\":\"");
         if (result == NULL)
         {
-            LogError("unable to STRING_construct\r\n");
+            LogError("unable to STRING_construct");
         }
         else
         {
@@ -969,7 +969,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
 
             if (IoTHubMessage_GetByteArray(message->messageHandle, &source, &size) != IOTHUB_MESSAGE_OK)
             {
-                LogError("unable to get the data for the message.\r\n");
+                LogError("unable to get the data for the message.");
                 STRING_delete(result);
                 result = NULL;
             }
@@ -978,7 +978,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
                 STRING_HANDLE encoded = Base64_Encode_Bytes(source, size);
                 if (encoded == NULL)
                 {
-                    LogError("unable to Base64_Encode_Bytes.\r\n");
+                    LogError("unable to Base64_Encode_Bytes.");
                     STRING_delete(result);
                     result = NULL;
                 }
@@ -994,7 +994,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
                     {
                         STRING_delete(result);
                         result = NULL;
-                        LogError("unable to STRING_concat_with_STRING.\r\n");
+                        LogError("unable to STRING_concat_with_STRING.");
                     }
                     else
                     {
@@ -1014,14 +1014,14 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
         result = STRING_construct("{\"body\":");
         if (result == NULL)
         {
-            LogError("unable to STRING_construct\r\n");
+            LogError("unable to STRING_construct");
         }
         else
         {
             const char* source = IoTHubMessage_GetString(message->messageHandle);
             if (source == NULL)
             {
-                LogError("unable to IoTHubMessage_GetString\r\n");
+                LogError("unable to IoTHubMessage_GetString");
                 STRING_delete(result);
                 result = NULL;
             }
@@ -1030,7 +1030,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
                 STRING_HANDLE asJson = STRING_new_JSON(source);
                 if (asJson == NULL)
                 {
-                    LogError("unable to STRING_new_JSON\r\n");
+                    LogError("unable to STRING_new_JSON");
                     STRING_delete(result);
                     result = NULL;
                 }
@@ -1062,7 +1062,7 @@ static STRING_HANDLE make1EventJSONitem(PDLIST_ENTRY item, size_t *messageSizeCo
     }
     default:
     {
-        LogError("an unknown message type was encountered (%d)\r\n", contentType);
+        LogError("an unknown message type was encountered (%d)", contentType);
         result = NULL; /*unknown message type*/
         break;
     }
@@ -1087,7 +1087,7 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_PERDEVICE_DATA* deviceData,
     *payload = STRING_construct("[");
     if (*payload == NULL)
     {
-        LogError("unable to STRING_construct\r\n");
+        LogError("unable to STRING_construct");
         result = MAKE_PAYLOAD_ERROR;
     }
     else
@@ -1221,7 +1221,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
             if (HTTPHeaders_ReplaceHeaderNameValuePair(deviceData->eventHTTPrequestHeaders, CONTENT_TYPE, APPLICATION_VND_MICROSOFT_IOTHUB_JSON) != HTTP_HEADERS_OK)
             {
                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_055: [If updating Content-Type fails for any reason, then _DoWork shall advance to the next action.] */
-                LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair\r\n");
+                LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair");
             }
             else
             {
@@ -1235,7 +1235,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                     BUFFER_HANDLE temp = BUFFER_new();
                     if (temp == NULL)
                     {
-                        LogError("unable to BUFFER_new\r\n");
+                        LogError("unable to BUFFER_new");
                         /*Codes_SRS_TRANSPORTMULTITHTTP_17_067: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.]*/
                         reversePutListBackIn(&(deviceData->eventConfirmations), deviceData->waitingToSend);
                     }
@@ -1243,7 +1243,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                     {
                         if (BUFFER_build(temp, (const unsigned char*)STRING_c_str(payload), STRING_length(payload)) != 0)
                         {
-                            LogError("unable to BUFFER_build\r\n");
+                            LogError("unable to BUFFER_build");
                             //items go back to waitingToSend
                             /*Codes_SRS_TRANSPORTMULTITHTTP_17_067: [If there is no valid payload, IoTHubTransportHttp_DoWork shall advance to the next activity.]*/
                             reversePutListBackIn(&(deviceData->eventConfirmations), deviceData->waitingToSend);
@@ -1264,7 +1264,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                 NULL
                                 )) != HTTPAPIEX_OK)
                             {
-                                LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
+                                LogError("unable to HTTPAPIEX_ExecuteRequest");
                                 //items go back to waitingToSend
                                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_069: [if HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
                                 reversePutListBackIn(&(deviceData->eventConfirmations), deviceData->waitingToSend);
@@ -1280,7 +1280,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                 {
                                     //items go back to waitingToSend
                                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_069: [if HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
-                                    LogError("unexpected HTTP status code (%u)\r\n", statusCode);
+                                    LogError("unexpected HTTP status code (%u)", statusCode);
                                     reversePutListBackIn(&(deviceData->eventConfirmations), deviceData->waitingToSend);
                                 }
                             }
@@ -1297,7 +1297,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                 }
                 case MAKE_PAYLOAD_ERROR:
                 {
-                    LogError("unrecoverable errors while building a batch message\r\n");
+                    LogError("unrecoverable errors while building a batch message");
                     break;
                 }
                 case MAKE_PAYLOAD_NO_ITEMS:
@@ -1307,7 +1307,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                 }
                 default:
                 {
-                    LogError("internal error: switch's default branch reached when never intended\r\n");
+                    LogError("internal error: switch's default branch reached when never intended");
                     break;
                 }
                 }
@@ -1335,7 +1335,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                     )
                 ))
             {
-                LogError("unable to get the message content\r\n");
+                LogError("unable to get the message content");
                 /*go on...*/
             }
             else
@@ -1356,7 +1356,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                     if (clonedEventHTTPrequestHeaders == NULL)
                     {
                         /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
-                        LogError("HTTPHeaders_Clone failed\r\n");
+                        LogError("HTTPHeaders_Clone failed");
                     }
                     else
                     {
@@ -1364,7 +1364,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                         if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, CONTENT_TYPE, APPLICATION_OCTET_STREAM) != HTTP_HEADERS_OK)
                         {
                             /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
-                            LogError("HTTPHeaders_ReplaceHeaderNameValuePair failed\r\n");
+                            LogError("HTTPHeaders_ReplaceHeaderNameValuePair failed");
                         }
                         else
                         {
@@ -1376,7 +1376,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                             if (Map_GetInternals(map, &keys, &values, &count) != MAP_OK)
                             {
                                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_078: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
-                                LogError("unable to Map_GetInternals\r\n");
+                                LogError("unable to Map_GetInternals");
                             }
                             else
                             {
@@ -1403,7 +1403,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                         if (temp == NULL)
                                         {
                                             /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
-                                            LogError("unable to STRING_construct\r\n");
+                                            LogError("unable to STRING_construct");
                                             goOn = false;
                                         }
                                         else
@@ -1411,7 +1411,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                             if (STRING_concat(temp, keys[i]) != 0)
                                             {
                                                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
-                                                LogError("unable to STRING_concat\r\n");
+                                                LogError("unable to STRING_concat");
                                                 goOn = false;
                                             }
                                             else
@@ -1419,7 +1419,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                                 if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, STRING_c_str(temp), values[i]) != HTTP_HEADERS_OK)
                                                 {
                                                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
-                                                    LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair\r\n");
+                                                    LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair");
                                                     goOn = false;
                                                 }
                                             }
@@ -1434,7 +1434,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                 {
                                     if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, IOTHUB_MESSAGE_ID, msgId) != HTTP_HEADERS_OK)
                                     {
-                                        LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair\r\n");
+                                        LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair");
                                         goOn = false;
                                     }
                                 }
@@ -1444,7 +1444,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                 {
                                     if (HTTPHeaders_ReplaceHeaderNameValuePair(clonedEventHTTPrequestHeaders, IOTHUB_CORRELATION_ID, corrId) != HTTP_HEADERS_OK)
                                     {
-                                        LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair\r\n");
+                                        LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair");
                                         goOn = false;
                                     }
                                 }
@@ -1459,13 +1459,13 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                     BUFFER_HANDLE toBeSend = BUFFER_new();
                                     if (toBeSend == NULL)
                                     {
-                                        LogError("unable to BUFFER_new\r\n");
+                                        LogError("unable to BUFFER_new");
                                     }
                                     else
                                     {
                                         if (BUFFER_build(toBeSend, messageContent, originalMessageSize) != 0)
                                         {
-                                            LogError("unable to BUFFER_build\r\n");
+                                            LogError("unable to BUFFER_build");
                                         }
                                         else
                                         {
@@ -1483,7 +1483,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                                 NULL
                                                 )) != HTTPAPIEX_OK)
                                             {
-                                                LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
+                                                LogError("unable to HTTPAPIEX_ExecuteRequest");
                                             }
                                             else
                                             {
@@ -1497,7 +1497,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                                 else
                                                 {
                                                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_081: [If HTTPAPIEX_SAS_ExecuteRequest fails or the http status code >=300 then IoTHubTransportHttp_DoWork shall not do any other action (it is assumed at the next _DoWork it shall be retried).] */
-                                                    LogError("unexpected HTTP status code (%u)\r\n", statusCode);
+                                                    LogError("unexpected HTTP status code (%u)", statusCode);
                                                 }
                                             }
                                         }
@@ -1559,7 +1559,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-        LogError("unable to STRING_clone\r\n");
+        LogError("unable to STRING_clone");
     }
     else
     {
@@ -1569,7 +1569,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-            LogError("unable to STRING_construct_n\r\n");
+            LogError("unable to STRING_construct_n");
         }
         else
         {
@@ -1581,7 +1581,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 				/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                LogError("unable to STRING_concat\r\n");
+                LogError("unable to STRING_concat");
             }
             else
             {
@@ -1591,7 +1591,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 					/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 					/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 					/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                    LogError("unable to HTTPHeaders_Alloc\r\n");
+                    LogError("unable to HTTPHeaders_Alloc");
                 }
                 else
                 {
@@ -1604,7 +1604,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 						/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 						/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 						/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                        LogError("unable to HTTPHeaders_AddHeaderNameValuePair\r\n");
+                        LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
                     }
                     else
                     {
@@ -1624,7 +1624,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 							/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 							/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 							/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                            LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
+                            LogError("unable to HTTPAPIEX_ExecuteRequest");
                         }
                         else
                         {
@@ -1633,7 +1633,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-                                LogError("unexpected status code returned %u (was expecting 204)\r\n", statusCode);
+                                LogError("unexpected status code returned %u (was expecting 204)", statusCode);
                             }
                             else
                             {
@@ -1669,7 +1669,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
         if (responseHTTPHeaders == NULL)
         {
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_085: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
-            LogError("unable to HTTPHeaders_Alloc\r\n");
+            LogError("unable to HTTPHeaders_Alloc");
         }
         else
         {
@@ -1677,7 +1677,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
             if (responseContent == NULL)
             {
                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_085: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
-                LogError("unable to BUFFER_new\r\n");
+                LogError("unable to BUFFER_new");
             }
             else
             {
@@ -1705,7 +1705,7 @@ responseContent: a new instance of buffer]
                     != HTTPAPIEX_OK)
                 {
                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_085: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
-                    LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
+                    LogError("unable to HTTPAPIEX_ExecuteRequest");
                 }
                 else
                 { 
@@ -1729,7 +1729,7 @@ responseContent: a new instance of buffer]
                     else if (statusCode != 200)
                     {
                         /*Codes_SRS_TRANSPORTMULTITHTTP_17_086: [If the HTTPAPIEX_SAS_ExecuteRequest executed successfully then status code shall be examined. Any status code different than 200 causes _DoWork to advance to the next action.] */
-                        LogError("expected status code was 200, but actually was received %u... moving on\r\n", statusCode);
+                        LogError("expected status code was 200, but actually was received %u... moving on", statusCode);
                     }
                     else
                     {
@@ -1737,7 +1737,7 @@ responseContent: a new instance of buffer]
                         const char* etagValue = HTTPHeaders_FindHeaderValue(responseHTTPHeaders, "ETag");
                         if (etagValue == NULL)
                         {
-                            LogError("unable to find a received header called \"E-Tag\"\r\n");
+                            LogError("unable to find a received header called \"E-Tag\"");
                         }
                         else
                         {
@@ -1749,7 +1749,7 @@ responseContent: a new instance of buffer]
                                 (etagValue[etagsize - 1] != '"')
                                 )
                             {
-                                LogError("ETag is not a valid quoted string\r\n");
+                                LogError("ETag is not a valid quoted string");
                             }
                             else
                             {
@@ -1758,7 +1758,7 @@ responseContent: a new instance of buffer]
                                 if (receivedMessage == NULL)
                                 {
                                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_092: [If assembling the message fails in any way, then _DoWork shall "abandon" the message.]*/
-                                    LogError("unable to IoTHubMessage_CreateFromByteArray, trying to abandon the message... \r\n");
+                                    LogError("unable to IoTHubMessage_CreateFromByteArray, trying to abandon the message... ");
                                     abandonOrAcceptMessage(handleData, deviceData, etagValue, ABANDON);
                                 }
                                 else
@@ -1768,7 +1768,7 @@ responseContent: a new instance of buffer]
                                     size_t nHeaders;
                                     if (HTTPHeaders_GetHeaderCount(responseHTTPHeaders, &nHeaders) != HTTP_HEADERS_OK)
                                     {
-                                        LogError("unable to get the count of HTTP headers\r\n");
+                                        LogError("unable to get the count of HTTP headers");
                                         abandonOrAcceptMessage(handleData, deviceData, etagValue, ABANDON);
                                     }
                                     else
@@ -1899,7 +1899,7 @@ void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HAN
     }
 	else
 	{
-		LogError("Invalid Argument NULL call on DoWork.\r\n");
+		LogError("Invalid Argument NULL call on DoWork.");
     }
 }
 
@@ -1911,12 +1911,12 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE hand
     {
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_111: [ IoTHubTransportHttp_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter. ]*/
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("Invalid handle to IoTHubClient HTTP transport instance.\r\n");
+        LogError("Invalid handle to IoTHubClient HTTP transport instance.");
     }
     else if (iotHubClientStatus == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("Invalid pointer to output parameter IOTHUB_CLIENT_STATUS.\r\n");
+        LogError("Invalid pointer to output parameter IOTHUB_CLIENT_STATUS.");
     }
     else
     {
@@ -1926,7 +1926,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE hand
 		{
 			/*Codes_SRS_TRANSPORTMULTITHTTP_17_139: [ If the device structure is not found, then this function shall fail and return with IOTHUB_CLIENT_INVALID_ARG. ]*/
 			result = IOTHUB_CLIENT_INVALID_ARG;
-			LogError("Device not found in transport list.\r\n");
+			LogError("Device not found in transport list.");
 		}
 		else
 		{
@@ -1961,7 +1961,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_LL_HANDLE handle, c
         )
     { 
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("invalid parameter (NULL) passed to IoTHubTransportHttp_SetOption\r\n");
+        LogError("invalid parameter (NULL) passed to IoTHubTransportHttp_SetOption");
     }
     else
     {
@@ -1994,12 +1994,12 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_LL_HANDLE handle, c
             else if (HTTPAPIEX_result == HTTPAPIEX_INVALID_ARG)
             {
                 result = IOTHUB_CLIENT_INVALID_ARG;
-                LogError("HTTPAPIEX_SetOption failed\r\n");
+                LogError("HTTPAPIEX_SetOption failed");
             }
             else
             {
                 result = IOTHUB_CLIENT_ERROR;
-                LogError("HTTPAPIEX_SetOption failed\r\n");
+                LogError("HTTPAPIEX_SetOption failed");
             }
         }
     }

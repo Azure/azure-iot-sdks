@@ -21,7 +21,13 @@ public class IotHubReactor
     {
         this.reactor.setTimeout(10);
         this.reactor.start();
-        while(this.reactor.process()) {}
+        while(this.reactor.process())
+        {
+            if(Thread.currentThread().isInterrupted())
+            {
+                return;
+            }
+        }
         this.reactor.stop();
     }
 }

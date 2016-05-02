@@ -36,6 +36,10 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
     * To build with python 3.4 or 3.5, run `./build.sh --build-python 3.4` or `./build.sh --build-python 3.5` respectively 
 5. After a successful build, the `iothub_client.so` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
+###Known build issues: 
+1. On some small footprint Linux devices, like a *Raspberry Pi* using Raspbian OS, the following build error may occur: `virtual memory exhausted: Cannot allocate memory`. In such a case please try to increase the swap file size on your platform and retry the build.
+2. CentOS7: Only Python 2.7 is supported due to a missing boost-python3 library package.
+
 <a name="windows"/>
 ## Build the Python iothub_client module on Windows using Nuget packages (recommended)
 
@@ -44,6 +48,7 @@ The following instructions outline how you can build the libraries in Windows:
 1. Open a Visual Studio 2015 x86 Native Tools command prompt and navigate to the folder **python/build_all/windows** in your local copy of the repository.
 2. Run the script `build.cmd` in the **python\\build_all\\windows** directory.
 3. As a result, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
+4. In order to run the samples with a different Python version (e.g. 32bit vs. 64bit or 2.7 vs. 3.4) please rebuild the `iothub_client.pyd` extension.
 
 <a name="windows-cmake"/>
 ## Build the Python iothub_client module on Windows using cmake and boost libraries 
@@ -56,17 +61,22 @@ This step is only required once and only necessary for the cmake build:
 3. Unpack zip to a local folder, e.g. **C:\boost_1_60_0**.
 4. Navigate to the root folder of the boost library, e.g. **C:\boost_1_60_0**.
 5. Run the script `bootstrap.bat` in the boost folder.
-6. Run the build command `b2` in the same folder. For x64 builds use the build command `b2 address-model=64`.
-7. Set the environment variable BOOST_ROOT to the boost folder using the command `SET BOOST_ROOT=C:\boost_1_60_0`.
+6. At this point the desired Python version (e.g. V3.4 64bit) must be installed and active in the `PATH` environment variable.
+7. Run the build command `b2` in the same folder. For x64 builds use the build command `b2 address-model=64`.
+8. Set the environment variable **BOOST_ROOT** to the boost folder using the command `SET BOOST_ROOT=C:\boost_1_60_0`.
 
 Now the boost::python library is ready for use. 
+
+Important note: The boost libraries can only be used to build for a single Python version (e.g. V3.4 64bit). In order to build with cmake for another Python version, a clean bootstrap and build of the boost libraries for that version is necessary, or build errors will occur. It is possible to have multiple boost libraries for different Python versions side by side in different roots. Then the **BOOST_ROOT** folder must point to the appropriate boost library at cmake build time.
 
 ###The following instructions outline how you can build the Python extension module with cmake in Windows:
 
 1. Open a Visual Studio 2015 x86 Native Tools command prompt and navigate to the folder **python/build_all/windows** in your local copy of the repository.
-2. Verify that `BOOST_ROOT` points to the local boost installation.
+2. Verify that `BOOST_ROOT` points to the local boost installation for the right Python version.
 3. Run the script `build_client.cmd` in the **python\\build_all\\windows** directory.
 4. After a successful build, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
+
+To use the iothub_client extension for native code debugging with [Python Tools for Visual Studio] run the script: `build_client.cmd -config Debug` to get the full debug symbol support.
 
 <a name="samplecode"/>
 ## Sample applications
@@ -74,6 +84,7 @@ Now the boost::python library is ready for use.
 This repository contains various Python sample applications that illustrate how to use the Microsoft Azure IoT SDK for Python. To learn how to run a sample application that sends messages to an IoT hub, see [Getting started - running a Python sample application][getstarted].
 
 [python-2.7 or python-3.5]: https://www.python.org/downloads/
+[Python Tools for Visual Studio]: https://www.visualstudio.com/en-us/features/python-vs.aspx
 [setup-devbox]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
 [getstarted]: python-run-sample.md
 [boost-zip]: http://www.boost.org/users/history/version_1_60_0.html

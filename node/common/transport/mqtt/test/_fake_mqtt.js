@@ -21,13 +21,9 @@ var FakeMqtt = function() {
     }
   };
 
-  setTimeout(function(){
-    this.emit('connect');
-  }.bind(this), 0);
-};
-
-FakeMqtt.connect = function() {
-  return new FakeMqtt();
+  this.connect = function() {
+    return this;
+  };
 };
 
 util.inherits(FakeMqtt, EventEmitter);

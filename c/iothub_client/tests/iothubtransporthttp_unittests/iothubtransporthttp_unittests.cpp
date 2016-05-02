@@ -1672,7 +1672,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
         g_testByTest = MicroMockCreateMutex();
         ASSERT_IS_NOT_NULL(g_testByTest);
         /*the size of bigBuffer needs to be such that it doesn't fit alone 1 payload of 256KB.*/ /*assume a limit of "less than 1 than 256"*/
@@ -1703,7 +1703,7 @@ BEGIN_TEST_SUITE(iothubtransporthttp)
         free(bigBufferOverflow);
 
         MicroMockDestroyMutex(g_testByTest);
-        DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

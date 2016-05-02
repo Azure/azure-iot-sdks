@@ -32,7 +32,7 @@ This document provides step by step guidance to IoT hardware publishers on how t
 **Prepare**
 
 Before executing any of the steps below, read through each process, step
-by step to ensure end to end understanding.
+by step to ensure end to end understanding. Follow the instructions [here](<https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md>) to prepare your development environment. 
 
 You should have the following items ready before beginning the process:
 
@@ -87,9 +87,7 @@ To run DeviceExplorer tool, use following configuration string as described in [
     
     f. Save this information in Notepad. You will need this information in later steps.
 
-**Not running Windows on your PC?** - Please send us an email on 
-<iotcert@microsoft.com> and we will follow up with you witAzure IoT SDKh
-instructions.
+***Not running Windows on your PC?*** - Please follow the instructions [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md>) to provision your device and get its credentials.
 
 <a name="Step_3_Build_and_Validate"/>
 # Step 3: Build and Validate the Sample using C Client Libraries 
@@ -218,9 +216,9 @@ Package the following artifacts from your device:
 2. All the screenshots that are shown above in "**Send Device Events to IoT Hub**" section.
 3.  All the screenshots that are shown above in "**Receive messages from IoT Hub**" section.
 4.  Send us clear instructions of how to run this sample with your hardware
-    (explicitly highlighting the new steps for customers). As a
-    guideline on how the instructions should look please refer the
-    examples published on github repository [here](https://github.com/Azure/azure-iot-sdks/tree/master/csharp/doc).
+    (explicitly highlighting the new steps for customers). Please use the template available [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/templates/template-windows-c.md>) to create your device-specific instructions.
+    
+    As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
 
 <a name="Step_4_2_Share"/>
 ## 4.2 Share package with the Azure IoT Certification Team

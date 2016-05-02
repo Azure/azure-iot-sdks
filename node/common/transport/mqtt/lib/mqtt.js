@@ -73,24 +73,25 @@ Mqtt.prototype.connect = function (done) {
     var errCallback = function (error) {
       done(error);
     };
+    
     this.client.on('error', errCallback);
-
-    this.client.on('close', function () {
-      debug('Device connection to the server has been closed');
-      this._receiver = null;
-    }.bind(this));
-
-    this.client.on('offline', function () {
-      debug('Device is offline');
-    }.bind(this));
-
-    this.client.on('reconnect', function () {
-      debug('Device is trying to reconnect');
-    }.bind(this));
+    this.client.on('close', errCallback);
+    this.client.on('offline', errCallback);
+    this.client.on('disconnect', errCallback);
 
     this.client.on('connect', function (connack) {
       debug('Device is connected');
       debug('CONNACK: ' + JSON.stringify(connack));
+
+      this.client.removeListener('close', errCallback);
+      this.client.removeListener('offline', errCallback);
+      this.client.removeListener('disconnect', errCallback);
+
+      this.client.on('close', function () {
+        debug('Device connection to the server has been closed');
+        this._receiver = null;
+      }.bind(this));
+
       done(null, connack);
     }.bind(this));
   }

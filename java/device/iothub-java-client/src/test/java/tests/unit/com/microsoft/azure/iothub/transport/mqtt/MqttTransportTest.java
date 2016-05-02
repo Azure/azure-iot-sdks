@@ -8,7 +8,6 @@ import com.microsoft.azure.iothub.transport.IotHubCallbackPacket;
 import com.microsoft.azure.iothub.transport.IotHubOutboundPacket;
 import com.microsoft.azure.iothub.transport.mqtt.MqttIotHubConnection;
 import com.microsoft.azure.iothub.transport.mqtt.MqttTransport;
-
 import junit.framework.AssertionFailedError;
 import mockit.*;
 import org.junit.Test;
@@ -21,7 +20,6 @@ import java.util.Queue;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 public class MqttTransportTest {

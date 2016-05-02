@@ -951,7 +951,11 @@ public:
     IOTHUB_CLIENT_STATUS GetSendStatus()
     {
         IOTHUB_CLIENT_STATUS iotHubClientStatus;
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_GetSendStatus(iotHubClientHandle, &iotHubClientStatus);
+        IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+        {
+            ScopedGILRelease release;
+            result = IoTHubClient_GetSendStatus(iotHubClientHandle, &iotHubClientStatus);
+        }
         if (result != IOTHUB_CLIENT_OK)
         {
             throw IoTHubClientError(__func__, result);
