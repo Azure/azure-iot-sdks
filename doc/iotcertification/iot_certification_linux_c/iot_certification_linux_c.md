@@ -115,13 +115,13 @@ This section walks you through building, deploying and validating the IoT Client
 
         sudo apt-get update
 
-        sudo apt-get install -y curl libcurl4-openssl-dev build-essential cmake git
+        sudo apt-get install -y curl uuid-dev libcurl4-openssl-dev build-essential cmake git
 
     **Fedora**
 
         sudo dnf check-update -y
 
-        sudo dnf install libcurl-devel openssl-devel gcc-c++ make cmake git
+        sudo dnf install uuid-devel libcurl-devel openssl-devel gcc-c++ make cmake git
 
     **Any Other Linux OS**
 
@@ -193,11 +193,6 @@ This section walks you through building, deploying and validating the IoT Client
             Endpoint=[Event Hub-compatible endpoint];SharedAccessKeyName=[IOTHUB_POLICY_NAME];SharedAccessKey=[IOTHUB_POLICY_KEY]
         
     -   **IOTHUB_EVENTHUB_CONSUMER_GROUP:** Set value as **$Default**
-    -   **IOTHUB_EVENTHUB_LISTEN_NAME:** Name of your Event Hub
-    -   **IOTHUB_SHARED_ACCESS_SIGNATURE:** this value can be generated from DeviceExplorer
-
-        Go to **Configuration** tab &minus;&gt; Click **Generate SAS** button
-        
     -   **IOTHUB_PARTITION_COUNT:** Partition count from azure portal, as shown in figure below.
 
         ![](images/azure-portal-partition-count.png)
