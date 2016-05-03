@@ -469,6 +469,9 @@ void on_dm_connect_complete(IOTHUB_CLIENT_RESULT result, void* context)
     *((IOTHUB_CLIENT_RESULT *) context) = result;
 }
 
+
+#include <thr/xtimec.h>
+
 /***------------------------------------------------------------------- */
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
@@ -495,6 +498,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
         {
             return IOTHUB_CLIENT_ERROR;
         }
+
+
+        struct xtime tm;
+        int wait_result;
+        xtime_get(&tm, TIME_UTC);
 
         Lock(cd->push_event_lock);
         if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
