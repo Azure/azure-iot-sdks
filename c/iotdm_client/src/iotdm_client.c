@@ -9,6 +9,8 @@
 #include "firmwareupdate_object.h"
 #include "lwm2mserver_object.h"
 
+// missing from string.h because POSIX support is turned off.
+char *strdup(const char *s);
 
 static const char HOSTNAME_TOKEN[] = "HostName";
 static const char DEVICEID_TOKEN[] = "DeviceId";

@@ -136,9 +136,10 @@ if(WIN32)
 else()
     add_definitions(-D_POSIX_C_SOURCE=200112L)
     add_definitions("-Wno-unused-result")
-    add_definitions("-Wno-implicit-function-declaration")
+    set (CMAKE_C_FLAGS "-Wno-implicit-function-declaration ${CMAKE_C_FLAGS}")
     add_definitions("-Wno-int-to-pointer-cast")
-    add_definitions("-std=c99")
+    add_definitions("-Wno-format")
+    set (CMAKE_C_FLAGS "--std=c11 ${CMAKE_C_FLAGS}")
 endif(WIN32)
 
 add_library(iotdm_client
