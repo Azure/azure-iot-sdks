@@ -411,6 +411,48 @@ else if (command === 'write') {
     }
   });
 }
+else if (command === 'reboot')
+{
+  if (!arg1) inputError('No device IDs given');
+
+  var jobId = uuid.v4();
+  var devices = arrayFromCommaDelimitedList(arg1);
+
+  var jobClient = connString ?
+    JobClient.fromConnectionString(connString) :
+    JobClient.fromSharedAccessSignature(sas.toString());
+
+  jobClient.scheduleReboot(jobId, devices, function (err, job) {
+    if (err) serviceError(err);
+    if (parsed.async) {
+      printJob(job);
+    }
+    else {
+      var interval = setInterval(function () {
+        jobClient.getJob(jobId, function (err, job) {
+          if (err) serviceError(err);
+          if (job.status === 'completed') {
+            clearInterval(interval);
+            
+            var status = {};
+            job.statusMessage.split(';').forEach(function (elem) {
+              if (elem.length) {
+                var pair = elem.split(':');
+                status[pair[0].trim()] = parseInt(pair[1]);
+              }
+            });
+            if (!parsed.raw && status.Succeeded > 0) {
+              console.log(colorsTmpl('\n' + '{green}Reboot succeeded for ' + status.Succeeded + ' device' + (status.Succeeded > 1 ? 's' : '') + '{/green}'));
+            }
+            if (!parsed.raw && status.Failed > 0) {
+              console.log(colorsTmpl('\n' + '{red}Reboot failed for ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '{/red}'));
+            }
+          }
+        });
+      }, 2000);
+    }
+  });
+}
 else {
   inputError('\'' + command + '\' is not a valid command');
   usage();
