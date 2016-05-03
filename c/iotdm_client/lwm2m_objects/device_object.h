@@ -22,8 +22,6 @@ extern "C"
 {
 #endif
 
-DISPATCHER_FORWARD_DECLARATIONS(object_device);
-
 // LWM2M Object IDs and Property IDs for device object
 #define OID_DEVICE 3
 #define PID_DEVICE_MANUFACTURER 0

@@ -16,6 +16,8 @@
 #include "iotdm_dispatchers.h"
 #include "lwm2mserver_object.h"
 
+DISPATCHER_FORWARD_DECLARATIONS(object_lwm2mserver);
+
 // Property Indices for for lwm2mserver object
 #define INDEX_LWM2MSERVER_LIFETIME 0
 #define INDEX_LWM2MSERVER_DEFAULTMINIMUMPERIOD 1
@@ -42,7 +44,7 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_lifetime(uint16_t instanceId, int value)
     {
         if (obj->propval_lwm2mserver_lifetime != value)
         {
-            LogInfo("LWM2MServer_Lifetime being set to %d\r\n", value);
+            LogInfo("LWM2MServer_Lifetime being set to %d\n", value);
             obj->propval_lwm2mserver_lifetime = value;
 
             obj->resourceUpdated[INDEX_LWM2MSERVER_LIFETIME] = (char)true;
@@ -63,7 +65,7 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultminimumperiod(uint16_t instanceId, i
     {
         if (obj->propval_lwm2mserver_defaultminimumperiod != value)
         {
-            LogInfo("LWM2MServer_DefaultMinimumPeriod being set to %d\r\n", value);
+            LogInfo("LWM2MServer_DefaultMinimumPeriod being set to %d\n", value);
             obj->propval_lwm2mserver_defaultminimumperiod = value;
 
             obj->resourceUpdated[INDEX_LWM2MSERVER_DEFAULTMINIMUMPERIOD] = (char)true;
@@ -84,7 +86,7 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultmaximumperiod(uint16_t instanceId, i
     {
         if (obj->propval_lwm2mserver_defaultmaximumperiod != value)
         {
-            LogInfo("LWM2MServer_DefaultMaximumPeriod being set to %d\r\n", value);
+            LogInfo("LWM2MServer_DefaultMaximumPeriod being set to %d\n", value);
             obj->propval_lwm2mserver_defaultmaximumperiod = value;
 
             obj->resourceUpdated[INDEX_LWM2MSERVER_DEFAULTMAXIMUMPERIOD] = (char)true;
@@ -143,7 +145,7 @@ IOTHUB_CLIENT_RESULT create_lwm2mserver_object(IOTHUB_CLIENT_HANDLE h, uint16_t 
             res = add_dm_object(&object_lwm2mserver_instance_list, obj);
             if (res != IOTHUB_CLIENT_OK)
             {
-                LogError("adding LWM2M Server object to object list\r\n");
+                LogError("adding LWM2M Server object to object list\n");
 
                 destroy_lwm2mserver_object(obj);
                 obj = NULL;

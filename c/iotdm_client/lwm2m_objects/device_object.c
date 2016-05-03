@@ -1,3 +1,5 @@
+DISPATCHER_FORWARD_DECLARATIONS(object_device);
+
 
 
 // Copyright (c) Microsoft. All rights reserved.
@@ -53,7 +55,7 @@ IOTHUB_CLIENT_RESULT on_read_device_manufacturer(object_device *obj, char **valu
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_device_manufacturer);
-        LogInfo("returning [%s] for Device_Manufacturer\r\n", *value);
+        LogInfo("returning [%s] for Device_Manufacturer\n", *value);
     }
     return result;
 }
@@ -68,7 +70,7 @@ IOTHUB_CLIENT_RESULT on_read_device_modelnumber(object_device *obj, char **value
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_device_modelnumber);
-        LogInfo("returning [%s] for Device_ModelNumber\r\n", *value);
+        LogInfo("returning [%s] for Device_ModelNumber\n", *value);
     }
     return result;
 }
@@ -83,7 +85,7 @@ IOTHUB_CLIENT_RESULT on_read_device_serialnumber(object_device *obj, char **valu
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_device_serialnumber);
-        LogInfo("returning [%s] for Device_SerialNumber\r\n", *value);
+        LogInfo("returning [%s] for Device_SerialNumber\n", *value);
     }
     return result;
 }
@@ -98,7 +100,7 @@ IOTHUB_CLIENT_RESULT on_read_device_firmwareversion(object_device *obj, char **v
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_device_firmwareversion);
-        LogInfo("returning [%s] for Device_FirmwareVersion\r\n", *value);
+        LogInfo("returning [%s] for Device_FirmwareVersion\n", *value);
     }
     return result;
 }
@@ -106,7 +108,7 @@ IOTHUB_CLIENT_RESULT on_read_device_firmwareversion(object_device *obj, char **v
 IOTHUB_CLIENT_RESULT on_exec_device_reboot(object_device *obj)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_NOT_IMPLEMENTED;
-    LogInfo("inside execute handler for Device_Reboot\r\n");
+    LogInfo("inside execute handler for Device_Reboot\n");
     if (obj->device_reboot_execute_callback != NULL)
     {
         result = obj->device_reboot_execute_callback(obj);
@@ -117,7 +119,7 @@ IOTHUB_CLIENT_RESULT on_exec_device_reboot(object_device *obj)
 IOTHUB_CLIENT_RESULT on_exec_device_factoryreset(object_device *obj)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_NOT_IMPLEMENTED;
-    LogInfo("inside execute handler for Device_FactoryReset\r\n");
+    LogInfo("inside execute handler for Device_FactoryReset\n");
     if (obj->device_factoryreset_execute_callback != NULL)
     {
         result = obj->device_factoryreset_execute_callback(obj);
@@ -135,7 +137,7 @@ IOTHUB_CLIENT_RESULT on_read_device_batterylevel(object_device *obj, int *value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_device_batterylevel;
-        LogInfo("returning %d for Device_BatteryLevel\r\n", *value);
+        LogInfo("returning %d for Device_BatteryLevel\n", *value);
     }
     return result;
 }
@@ -150,7 +152,7 @@ IOTHUB_CLIENT_RESULT on_read_device_memoryfree(object_device *obj, int *value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_device_memoryfree;
-        LogInfo("returning %d for Device_MemoryFree\r\n", *value);
+        LogInfo("returning %d for Device_MemoryFree\n", *value);
     }
     return result;
 }
@@ -165,7 +167,7 @@ IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, int *value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_device_currenttime;
-        LogInfo("returning %d for Device_CurrentTime\r\n", *value);
+        LogInfo("returning %d for Device_CurrentTime\n", *value);
     }
     return result;
 }
@@ -173,7 +175,7 @@ IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, int *value)
 IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, int value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Device_CurrentTime being set to %d\r\n", value);
+    LogInfo("Device_CurrentTime being set to %d\n", value);
     obj->propval_device_currenttime = value;
 
     if (obj->device_currenttime_write_callback != NULL)
@@ -193,7 +195,7 @@ IOTHUB_CLIENT_RESULT on_read_device_utcoffset(object_device *obj, char **value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_device_utcoffset);
-        LogInfo("returning [%s] for Device_UtcOffset\r\n", *value);
+        LogInfo("returning [%s] for Device_UtcOffset\n", *value);
     }
     return result;
 }
@@ -201,7 +203,7 @@ IOTHUB_CLIENT_RESULT on_read_device_utcoffset(object_device *obj, char **value)
 IOTHUB_CLIENT_RESULT on_write_device_utcoffset(object_device *obj, char* value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Device_UtcOffset being set to [%s]\r\n", value);
+    LogInfo("Device_UtcOffset being set to [%s]\n", value);
     lwm2m_free(obj->propval_device_utcoffset);
     obj->propval_device_utcoffset = lwm2m_strdup(value);
 
@@ -222,7 +224,7 @@ IOTHUB_CLIENT_RESULT on_read_device_timezone(object_device *obj, char **value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_device_timezone);
-        LogInfo("returning [%s] for Device_Timezone\r\n", *value);
+        LogInfo("returning [%s] for Device_Timezone\n", *value);
     }
     return result;
 }
@@ -230,7 +232,7 @@ IOTHUB_CLIENT_RESULT on_read_device_timezone(object_device *obj, char **value)
 IOTHUB_CLIENT_RESULT on_write_device_timezone(object_device *obj, char* value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Device_Timezone being set to [%s]\r\n", value);
+    LogInfo("Device_Timezone being set to [%s]\n", value);
     lwm2m_free(obj->propval_device_timezone);
     obj->propval_device_timezone = lwm2m_strdup(value);
 
@@ -251,7 +253,7 @@ IOTHUB_CLIENT_RESULT on_read_device_devicetype(object_device *obj, char **value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_device_devicetype);
-        LogInfo("returning [%s] for Device_DeviceType\r\n", *value);
+        LogInfo("returning [%s] for Device_DeviceType\n", *value);
     }
     return result;
 }
@@ -266,7 +268,7 @@ IOTHUB_CLIENT_RESULT on_read_device_hardwareversion(object_device *obj, char **v
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_device_hardwareversion);
-        LogInfo("returning [%s] for Device_HardwareVersion\r\n", *value);
+        LogInfo("returning [%s] for Device_HardwareVersion\n", *value);
     }
     return result;
 }
@@ -296,7 +298,7 @@ IOTHUB_CLIENT_RESULT on_read_device_memorytotal(object_device *obj, int *value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_device_memorytotal;
-        LogInfo("returning %d for Device_MemoryTotal\r\n", *value);
+        LogInfo("returning %d for Device_MemoryTotal\n", *value);
     }
     return result;
 }

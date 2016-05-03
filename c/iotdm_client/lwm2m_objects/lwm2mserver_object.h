@@ -22,8 +22,6 @@ extern "C"
 {
 #endif
 
-DISPATCHER_FORWARD_DECLARATIONS(object_lwm2mserver);
-
 // LWM2M Object IDs and Property IDs for lwm2mserver object
 #define OID_LWM2MSERVER 1
 #define PID_LWM2MSERVER_LIFETIME 1

@@ -1,3 +1,5 @@
+DISPATCHER_FORWARD_DECLARATIONS(object_firmwareupdate);
+
 
 
 // Copyright (c) Microsoft. All rights reserved.
@@ -107,7 +109,7 @@ IOTHUB_CLIENT_RESULT on_read_firmwareupdate_pkgname(object_firmwareupdate *obj, 
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_firmwareupdate_pkgname);
-        LogInfo("returning [%s] for FirmwareUpdate_PkgName\r\n", *value);
+        LogInfo("returning [%s] for FirmwareUpdate_PkgName\n", *value);
     }
     return result;
 }
@@ -122,7 +124,7 @@ IOTHUB_CLIENT_RESULT on_read_firmwareupdate_pkgversion(object_firmwareupdate *ob
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_firmwareupdate_pkgversion);
-        LogInfo("returning [%s] for FirmwareUpdate_PkgVersion\r\n", *value);
+        LogInfo("returning [%s] for FirmwareUpdate_PkgVersion\n", *value);
     }
     return result;
 }
