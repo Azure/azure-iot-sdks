@@ -3031,7 +3031,7 @@ TEST_FUNCTION(AMQP_DoWork_send_one_message_succeeds)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
@@ -3094,7 +3094,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_succeeds)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3289,7 +3289,7 @@ TEST_FUNCTION(AMQP_Subscribe_and_messagereceiver_create_succeeds)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
