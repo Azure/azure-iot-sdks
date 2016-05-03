@@ -9,7 +9,7 @@
 #include "firmwareupdate_object.h"
 #include "lwm2mserver_object.h"
 
-// missing from string.h because POSIX support is turned off.
+// missing from string.h because of convoluted preprocessor stuff
 #ifndef WIN32
 char *strdup(const char *s);
 #endif // WIN32
