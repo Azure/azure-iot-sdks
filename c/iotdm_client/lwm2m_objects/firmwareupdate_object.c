@@ -1,5 +1,3 @@
-DISPATCHER_FORWARD_DECLARATIONS(object_firmwareupdate);
-
 
 
 // Copyright (c) Microsoft. All rights reserved.

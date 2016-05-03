@@ -1,5 +1,3 @@
-DISPATCHER_FORWARD_DECLARATIONS(object_lwm2mserver);
-
 
 
 // Copyright (c) Microsoft. All rights reserved.
