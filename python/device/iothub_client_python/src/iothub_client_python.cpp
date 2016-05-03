@@ -247,11 +247,13 @@ class IoTHubMap
 {
 
     bool filter;
+    bool ownHandle;
     MAP_HANDLE mapHandle;
 
 public:
 
     IoTHubMap(const IoTHubMap& map) :
+        ownHandle(true),
         filter(false)
     {
         mapHandle = Map_Clone(map.mapHandle);
@@ -262,6 +264,7 @@ public:
     }
 
     IoTHubMap() :
+        ownHandle(true),
         filter(false)
     {
         mapHandle = Map_Create(NULL);
@@ -272,6 +275,7 @@ public:
     }
 
     IoTHubMap(boost::python::object &_mapFilterCallback) :
+        ownHandle(true),
         filter(false),
         mapHandle(NULL)
     {
@@ -304,7 +308,8 @@ public:
         }
     }
 
-    IoTHubMap(MAP_HANDLE _mapHandle) :
+    IoTHubMap(MAP_HANDLE _mapHandle, bool _ownHandle = true) :
+        ownHandle(_ownHandle),
         filter(false),
         mapHandle(_mapHandle)
     {
@@ -344,7 +349,10 @@ public:
     {
         if (mapHandle != NULL)
         {
-            Map_Destroy(mapHandle);
+            if (ownHandle)
+            {
+                Map_Destroy(mapHandle);
+            }
             mapHandle = NULL;
         }
     }
@@ -502,10 +510,12 @@ class IoTHubMessage
 {
 
     IOTHUB_MESSAGE_HANDLE iotHubMessageHandle;
+    IoTHubMap *iotHubMapProperties;
 
 public:
 
-    IoTHubMessage(const IoTHubMessage& message)
+    IoTHubMessage(const IoTHubMessage& message) :
+        iotHubMapProperties(NULL)
     {
         iotHubMessageHandle = IoTHubMessage_Clone(message.iotHubMessageHandle);
         if (iotHubMessageHandle == NULL)
@@ -515,6 +525,7 @@ public:
     }
 
     IoTHubMessage(IOTHUB_MESSAGE_HANDLE _iotHubMessageHandle) :
+        iotHubMapProperties(NULL),
         iotHubMessageHandle(_iotHubMessageHandle)
     {
         if (_iotHubMessageHandle == NULL)
@@ -523,7 +534,8 @@ public:
         }
     }
 
-    IoTHubMessage(std::string source)
+    IoTHubMessage(std::string source) :
+        iotHubMapProperties(NULL)
     {
         iotHubMessageHandle = IoTHubMessage_CreateFromString(source.c_str());
         if (iotHubMessageHandle == NULL)
@@ -532,7 +544,8 @@ public:
         }
     }
 
-    IoTHubMessage(PyObject *pyObject)
+    IoTHubMessage(PyObject *pyObject) :
+        iotHubMapProperties(NULL)
     {
         if (!PyByteArray_Check(pyObject)) {
             PyErr_SetString(PyExc_TypeError, "expected type bytearray");
@@ -552,6 +565,10 @@ public:
     ~IoTHubMessage()
     {
         Destroy();
+        if (iotHubMapProperties != NULL)
+        {
+            delete iotHubMapProperties;
+        }
     }
 
     static IoTHubMessage *CreateFromByteArray(PyObject *pyObject)
@@ -606,7 +623,11 @@ public:
 
     IoTHubMap *Properties()
     {
-        return new IoTHubMap(Map_Clone(IoTHubMessage_Properties(iotHubMessageHandle)));
+        if (iotHubMapProperties == NULL)
+        {
+            iotHubMapProperties = new IoTHubMap(IoTHubMessage_Properties(iotHubMessageHandle), false);
+        }
+        return iotHubMapProperties;
     }
 
     const char *GetMessageId()
@@ -1220,7 +1241,7 @@ BOOST_PYTHON_MODULE(IMPORT_NAME)
         .def("get_bytearray", &IoTHubMessage::GetBytearray)
         .def("get_string", &IoTHubMessage::GetString)
         .def("get_content_type", &IoTHubMessage::GetContentType)
-        .def("properties", &IoTHubMessage::Properties, return_value_policy<manage_new_object>())
+        .def("properties", &IoTHubMessage::Properties, return_internal_reference<1>())
         .add_property("message_id", &IoTHubMessage::GetMessageId, &IoTHubMessage::SetMessageId)
         .add_property("correlation_id", &IoTHubMessage::GetCorrelationId, &IoTHubMessage::SetCorrelationId)
         // Python helpers
