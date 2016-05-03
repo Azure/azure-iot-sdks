@@ -859,7 +859,10 @@ public:
         ) :
         protocol(_protocol)
     {
-        iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString.c_str(), GetProtocol(_protocol));
+        {
+            ScopedGILRelease release;
+            iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString.c_str(), GetProtocol(_protocol));
+        }
         if (iotHubClientHandle == NULL)
         {
             throw IoTHubClientError(__func__, IOTHUB_CLIENT_ERROR);
@@ -878,7 +881,10 @@ public:
         config.iotHubSuffix = _config.iotHubSuffix.c_str();
         config.protocolGatewayHostName = _config.protocolGatewayHostName.c_str();
         protocol = _config.protocol;
-        iotHubClientHandle = IoTHubClient_Create(&config);
+        {
+            ScopedGILRelease release;
+            iotHubClientHandle = IoTHubClient_Create(&config);
+        }
         if (iotHubClientHandle == NULL)
         {
             throw IoTHubClientError(__func__, IOTHUB_CLIENT_ERROR);
@@ -895,7 +901,10 @@ public:
         IOTHUB_TRANSPORT_PROVIDER _protocol
         )
     {
-        return new IoTHubClient(IoTHubClient_CreateFromConnectionString(connectionString.c_str(), GetProtocol(_protocol)), _protocol);
+        {
+            ScopedGILRelease release;
+            return new IoTHubClient(IoTHubClient_CreateFromConnectionString(connectionString.c_str(), GetProtocol(_protocol)), _protocol);
+        }
     }
 
     static IoTHubClient const *Create(
@@ -909,14 +918,20 @@ public:
         config.iotHubName = _config->iotHubName.c_str();
         config.iotHubSuffix = _config->iotHubSuffix.c_str();
         config.protocolGatewayHostName = _config->protocolGatewayHostName.c_str();
-        return new IoTHubClient(IoTHubClient_Create(&config), _config->protocol);
+        {
+            ScopedGILRelease release;
+            return new IoTHubClient(IoTHubClient_Create(&config), _config->protocol);
+        }
     }
 
     void Destroy()
     {
         if (iotHubClientHandle != NULL)
         {
-            IoTHubClient_Destroy(iotHubClientHandle);
+            {
+                ScopedGILRelease release;
+                IoTHubClient_Destroy(iotHubClientHandle);
+            }
             iotHubClientHandle = NULL;
         }
     }
@@ -977,7 +992,11 @@ public:
         ReceiveContext *receiveContext = new ReceiveContext();
         receiveContext->messageCallback = messageCallback;
         receiveContext->userContext = userContext;
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, receiveContext);
+        IOTHUB_CLIENT_RESULT result;
+        {
+            ScopedGILRelease release;
+            result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, receiveContext);
+        }
         if (result != IOTHUB_CLIENT_OK)
         {
             throw IoTHubClientError(__func__, result);
@@ -987,7 +1006,11 @@ public:
     time_t GetLastMessageReceiveTime()
     {
         time_t lastMessageReceiveTime;
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_GetLastMessageReceiveTime(iotHubClientHandle, &lastMessageReceiveTime);
+        IOTHUB_CLIENT_RESULT result;
+        {
+            ScopedGILRelease release;
+            result = IoTHubClient_GetLastMessageReceiveTime(iotHubClientHandle, &lastMessageReceiveTime);
+        }
         if (result != IOTHUB_CLIENT_OK)
         {
             throw IoTHubClientError(__func__, result);
@@ -1005,12 +1028,19 @@ public:
         if (PyUnicode_Check(option.ptr()))
         {
             std::string stringValue = boost::python::extract<std::string>(option);
-            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), stringValue.c_str());
+            {
+                ScopedGILRelease release;
+                result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), stringValue.c_str());
+            }
         }
         else if (PyLong_Check(option.ptr()))
         {
-            long value = boost::python::extract<long>(option);
-            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
+            // Cast to 64 bit value, as SetOption expects 64 bit for some integer options
+            uint64_t value = (uint64_t)boost::python::extract<long>(option);
+            {
+                ScopedGILRelease release;
+                result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
+            }
         }
         else
         {
@@ -1021,12 +1051,19 @@ public:
         if (PyString_Check(option.ptr()))
         {
             std::string stringValue = boost::python::extract<std::string>(option);
-            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), stringValue.c_str());
+            {
+                ScopedGILRelease release;
+                result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), stringValue.c_str());
+            }
         }
         else if (PyInt_Check(option.ptr()))
         {
-            int value = boost::python::extract<int>(option);
-            result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
+            // Cast to 64 bit value, as SetOption expects 64 bit for some integer options
+            uint64_t value = (uint64_t)boost::python::extract<int>(option);
+            {
+                ScopedGILRelease release;
+                result = IoTHubClient_SetOption(iotHubClientHandle, optionName.c_str(), &value);
+            }
         }
         else
         {
