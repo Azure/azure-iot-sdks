@@ -29,7 +29,7 @@ extern "C"
     extern TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config);
     extern void IoTHubTransportHttp_Destroy(TRANSPORT_LL_HANDLE handle);
 
-	extern IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
+	extern IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend);
 	extern void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
 
     extern int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle);
@@ -117,9 +117,9 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 
 `IoTHubTransportHttp_Register` shall bind an IoT Hub device to a transport handle and return a device handle for subsequent device specific calls to this API.
 
-**SRS_TRANSPORTMULTITHTTP_17_142: [** If `handle` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_014: [** If parameter `deviceId` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_015: [** If parameter `deviceKey` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_142: [** If `handle` is `NULL` or `device` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_014: [** If IOTHUB_DEVICE_CONFIG field `deviceId` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_015: [** If IOTHUB_DEVICE_CONFIG fields `deviceKey` and `deviceSasToken` are `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_143: [** If parameter `iotHubClientHandle` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_016: [** If parameter `waitingToSend` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_137: [** `IoTHubTransportHttp_Register` shall search the devices list for any device matching name `deviceId`. If `deviceId` is found it shall return NULL. **]**   
@@ -127,6 +127,8 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 **SRS_TRANSPORTMULTITHTTP_17_134: [** If deviceId is not created, then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_135: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "deviceKey") from deviceKey.  **]**   
 **SRS_TRANSPORTMULTITHTTP_17_136: [** If deviceKey is not created, then `IoTHubTransportHttp_Register` shall fail and return `NULL`.   **]**   
+**SRS_TRANSPORTMULTITHTTP_03_135: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "deviceSasToken") from deviceSasToken.  **]**   
+**SRS_TRANSPORTMULTITHTTP_03_136: [** If deviceSasToken is not created, then `IoTHubTransportHttp_Register` shall fail and return `NULL`.   **]**   
 **SRS_TRANSPORTMULTITHTTP_17_017: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(deviceId) + "/messages/events" + APIVERSION. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_018: [** If creating the string fail for any reason then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_019: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(deviceId) + "/messages/devicebound" + APIVERSION. **]**   

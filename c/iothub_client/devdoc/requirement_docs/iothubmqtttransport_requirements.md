@@ -10,7 +10,7 @@ IoTHubMQTTTransport is the library that enables communications with MQTT message
 extern TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config);
 extern void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle);
 
-extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend);
+extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, PDLIST_ENTRY waitingToSend);
 extern void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
     
 extern int IoTHubTransportMqtt_Subscribe(IOTHUB_DEVICE_HANDLE handle);
@@ -57,7 +57,8 @@ extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE han
 This function registers a device with the transport.  The MQTT transport only supports a single device established on create, so this function will prevent multiple devices from being registered.
 
 **SRS_IOTHUB_MQTT_TRANSPORT_17_001: [** `IoTHubTransportMqtt_Register` shall return `NULL` if the `TRANSPORT_LL_HANDLE` is `NULL`.**]**   
-**SRS_IOTHUB_MQTT_TRANSPORT_17_002: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `deviceId`, `deviceKey` or `waitingToSend` are `NULL`.**]**     
+**SRS_IOTHUB_MQTT_TRANSPORT_17_002: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `device`, `waitingToSend` are `NULL`.**]**     
+**SRS_IOTHUB_MQTT_TRANSPORT_03_001: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `deviceId`, or both `deviceKey` and `deviceSasToken` are `NULL`.**]**     
 **SRS_IOTHUB_MQTT_TRANSPORT_17_003: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `deviceId` or `deviceKey` do not match the `deviceId` and `deviceKey` passed in during `IoTHubTransportMqtt_Create`.**]**      
 **SRS_IOTHUB_MQTT_TRANSPORT_17_004: [** `IoTHubTransportMqtt_Register` shall return the `TRANSPORT_LL_HANDLE` as the `IOTHUB_DEVICE_HANDLE`. **]**    
 

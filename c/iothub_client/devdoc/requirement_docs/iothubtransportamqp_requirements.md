@@ -18,14 +18,14 @@ Last requirement IDs used:
 #IoTHubTransportAMQP Requirements
 
 
-
+ 
 ##Overview
 <p class='description'>
 This module provides an implementation of the transport layer of the IoT Hub client based on the AMQP API, which implements the AMQP protocol.  
 Access to the static functions described in this document is possible through the set of function pointers provided by the function AMQP_Protocol.  
 </p>
-  
-  
+   
+   
 ##Exposed API
 
 ```c
@@ -35,7 +35,7 @@ static void IoTHubTransportAMQP_Destroy(TRANSPORT_LL_HANDLE handle)
 
 static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 
-static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend)
+static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 
 static void IoTHubTransportAMQP_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 
@@ -48,13 +48,12 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetSendStatus(IOTHUB_DEVICE_HAND
 static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE handle, const char* option, const void* value);
 ```
   
- </br> 
+ </br>     
  ###IoTHubTransportAMQP_Create
 
 <p class='description'>
 This function creates all the inner components required by the IoT Hub client to work properly, returning a handle for a structure that represents it.
 </p>
-
 **SRS_IOTHUBTRANSPORTAMQP_09_005: [**If parameter config (or its fields) is NULL then IoTHubTransportAMQP_Create shall fail and return NULL.**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_006: [**IoTHubTransportAMQP_Create shall fail and return NULL if any fields of the config structure are NULL.**]**
@@ -86,7 +85,7 @@ This function creates all the inner components required by the IoT Hub client to
 
 **SRS_IOTHUBTRANSPORTAMQP_09_017: [**If IoTHubTransportAMQP_Create fails to initialize handle->sasTokenKeyName with a zero-length STRING the function shall fail and return NULL.**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_018: [**IoTHubTransportAMQP_Create shall store a copy of config->deviceKey (passed by upper layer) into the transport’s own deviceKey field**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_018: [**IoTHubTransportAMQP_Create shall store a copy of config->deviceKey or config->deviceSasToken (passed by upper layer) into the transport’s own deviceKey field or deviceSasToken field.**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_135: [**If creating the config->deviceKey fails for any reason then IoTHubTransportAMQP_Create shall fail and return NULL.**]**
 
@@ -110,7 +109,7 @@ double cbs_request_timeout	30000 (milliseconds)
 **SRS_IOTHUBTRANSPORTAMQP_09_023: [**If IoTHubTransportAMQP_Create succeeds it shall return a non-NULL pointer to the structure that represents the transport.**]**
   
   
-</br>
+</br>  
 ###IoTHubTransportAMQP_Destroy
 
 This function will close connection established through AMQP API, as well as destroy all the components allocated internally for its proper functionality.
@@ -141,7 +140,7 @@ This function will close connection established through AMQP API, as well as des
 **SRS_IOTHUBTRANSPORTAMQP_09_150: [**IoTHubTransportAMQP_Destroy shall destroy the transport instance**]**
   
   
-</br>
+</br>  
 ###IoTHubTransportAMQP_DoWork
   
   
@@ -153,8 +152,8 @@ This function will close connection established through AMQP API, as well as des
 
 **SRS_IOTHUBTRANSPORTAMQP_09_147: [**IoTHubTransportAMQP_DoWork shall save a reference to the client handle in transport_state->iothub_client_handle**]**
   
-  
- </br>
+
+</br>  
 ####Connection Establishment
 
 **SRS_IOTHUBTRANSPORTAMQP_09_055: [**If the transport handle has a NULL connection, IoTHubTransportAMQP_DoWork shall instantiate and initialize the AMQP components and establish the connection**]**
@@ -262,7 +261,7 @@ Summary of internal AMQP parameters:
 **SRS_IOTHUBTRANSPORTAMQP_09_084: [**IoTHubTransportAMQP_DoWork shall wait for ‘cbs_request_timeout’ milliseconds for the cbs_put_token() to complete before failing due to timeout**]**
   
   
-</br>
+</br>  
 ####Send Events
 
 **SRS_IOTHUBTRANSPORTAMQP_09_086: [**IoTHubTransportAMQP_DoWork shall move queued events to an “in-progress” list right before processing them for sending**]**
@@ -309,8 +308,8 @@ For each property:
   
   
 **SRS_IOTHUBTRANSPORTAMQP_09_112: [**If message_add_body_amqp_data() fails, IoTHubTransportAMQP_DoWork notify the failure, roll back the event to waitToSent list and return**]**
-  
-  
+
+
 **SRS_IOTHUBTRANSPORTAMQP_09_097: [**IoTHubTransportAMQP_DoWork shall pass the encoded AMQP message to AMQP for sending (along with on_message_send_complete callback) using messagesender_send()**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_113: [**If messagesender_send() fails, IoTHubTransportAMQP_DoWork notify the failure, roll back the event to waitToSent list and return**]**
@@ -330,7 +329,7 @@ For each property:
 **SRS_IOTHUBTRANSPORTAMQP_09_103: [**IoTHubTransportAMQP_DoWork shall invoke connection_dowork() on AMQP for triggering sending and receiving messages**]**
   
   
-</br>
+</br>  
 ####Receive Messages
 
 **SRS_IOTHUBTRANSPORTAMQP_09_121: [**IoTHubTransportAMQP_DoWork shall create an AMQP message_receiver if transport_state->message_receive is NULL and transport_state->receive_messages is true**]**
@@ -385,6 +384,7 @@ Reading AMQP optional properties (AMQP 1.0) 'message-id' and 'correlation-id':
 Reading the AMQP message content, notifying the message reception:
 </p>
 
+
 **SRS_IOTHUBTRANSPORTAMQP_09_104: [**The callback ‘on_message_received’ shall invoke IoTHubClient_LL_MessageCallback() passing the client and the incoming message handles as parameters**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_105: [**The callback ‘on_message_received’ shall return the result of messaging_delivery_accepted() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ACCEPTED**]**
@@ -400,13 +400,15 @@ Reading the AMQP message content, notifying the message reception:
 
 **SRS_IOTHUBTRANSPORTUAMQP_17_005: [**IoTHubTransportAMQP_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.**]**
 
-**SRS_IOTHUBTRANSPORTUAMQP_17_001: [**IoTHubTransportAMQP_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.**]**
+**SRS_IOTHUBTRANSPORTUAMQP_17_001: [**IoTHubTransportAMQP_Register shall return NULL if device, or waitingToSend are NULL.**]**
 
-**SRS_IOTHUBTRANSPORTUAMQP_17_002: [**IoTHubTransportAMQP_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.**]**
+**SRS_IOTHUBTRANSPORTUAMQP_03_001: [**IoTHubTransportAMQP_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.**]**
+
+**SRS_IOTHUBTRANSPORTUAMQP_17_002: [**IoTHubTransportAMQP_Register shall return NULL if deviceId or deviceKey or deviceSasToken do not match the deviceId, deviceKey or deviceSasToken passed in during IoTHubTransportAMQP_Create.**]**
 
 **SRS_IOTHUBTRANSPORTUAMQP_17_003: [**IoTHubTransportAMQP_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE.**]**
-  
-</br>
+
+</br>   
 ###IoTHubTransportAMQP_Unregister
 
 This function is intended to remove a device as registered with the transport.  As there is only one IoT Hub Device per AMQP transport established on create, this function is a placeholder not intended to do meaningful work.
@@ -414,7 +416,7 @@ This function is intended to remove a device as registered with the transport.  
 SRS_IOTHUBTRANSPORTUAMQP_17_004: [**IoTHubTransportAMQP_Unregister shall return.**]**
   
   
-</br>
+</br>  
 ###IoTHubTransportAMQP_Subscribe
 
 <p class='description'>
@@ -424,7 +426,7 @@ This function enables the transport to notify the upper client layer of new mess
 
 **SRS_IOTHUBTRANSPORTAMQP_09_038: [**IoTHubTransportAMQP_Subscribe shall set transport_handle->receive_messages to true and return success code.**]**
   
-</br>
+</br>  
 ###IoTHubTransportAMQP_Unsubscribe
 
 <p class='description'>
@@ -435,7 +437,7 @@ This function disables the notifications to the upper client layer of new messag
 **SRS_IOTHUBTRANSPORTAMQP_09_040: [**IoTHubTransportAMQP_Unsubscribe shall set transport_handle->receive_messages to false and return success code.**]**
   
   
-</br>
+</br>  
 ###IoTHubTransportAMQP_GetSendStatus
 
 **SRS_IOTHUBTRANSPORTAMQP_09_041: [**IoTHubTransportAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.**]**
@@ -467,7 +469,7 @@ This function disables the notifications to the upper client layer of new messag
 <tr><td>sas_token_refresh_time</td><td>0 to TIME_MAX (milliseconds)</td><td>Default: sas_token_lifetime/2	Maximum period of time for the transport to wait before refreshing the SAS token it created previously.</td></tr>
 <tr><td>cbs_request_timeout</td><td>1 to TIME_MAX (milliseconds)</td><td>Default: 30 millisecond	Maximum time the transport waits for  AMQP cbs_put_token() to complete before marking it a failure.</td></tr>
 <table>
-  
+    
 **SRS_IOTHUBTRANSPORTAMQP_09_047: [**If the option name does not match one of the options handled by this module, then IoTHubTransportAMQP_SetOption shall get  the handle to the XIO and invoke the xio_setoption passing down the option name and value parameters.**]**
 
 **SRS_IOTHUBTRANSPORTUAMQP_03_001: [**If xio_setoption fails,  IoTHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_ERROR.**]**

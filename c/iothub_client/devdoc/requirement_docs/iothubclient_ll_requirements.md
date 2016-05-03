@@ -43,16 +43,19 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
     const char* deviceId;
     const char* deviceKey;
+    const char* deviceSasToken;
     const char* iotHubName;
     const char* iotHubSuffix;
     const char* protocolGatewayHostName;
 } IOTHUB_CLIENT_CONFIG;
+
 typedef struct IOTHUB_CLIENT_DEVICE_CONFIG_TAG
 {
 	IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
 	void * transportHandle;
 	const char* deviceId;
 	const char* deviceKey;
+  const char* deviceSasToken;
 } IOTHUB_CLIENT_DEVICE_CONFIG;
 
 
@@ -82,11 +85,11 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_LL_CreateFromConnectionString(const cha
 **SRS_IOTHUBCLIENT_LL_12_012: [**If the allocation failed IoTHubClient_LL_CreateFromConnectionString  returns NULL.**]**  
 **SRS_IOTHUBCLIENT_LL_12_005: [**IoTHubClient_LL_CreateFromConnectionString shall try to parse the connectionString input parameter for the following structure: "Key1=value1;key2=value2;key3=value3..."**]** 
 **SRS_IOTHUBCLIENT_LL_12_013: [**If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL**]**  
-**SRS_IOTHUBCLIENT_LL_12_006: [**IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey.**]**  
+**SRS_IOTHUBCLIENT_LL_12_006: [**IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey or SharedAccessSignature.**]**  
 **SRS_IOTHUBCLIENT_LL_12_014: [**If either of key is missing then IoTHubClient_LL_CreateFromConnectionString returns NULL **]** 
 **SRS_IOTHUBCLIENT_LL_12_009: [**IoTHubClient_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator**]** 
 **SRS_IOTHUBCLIENT_LL_12_015: [**If the string split failed, IoTHubClient_LL_CreateFromConnectionString returns NULL **]** 
-**SRS_IOTHUBCLIENT_LL_12_010: [**IoTHubClient_LL_CreateFromConnectionString shall fill up the IOTHUB_CLIENT_CONFIG structure using the following mapping: iotHubName = Name, iotHubSuffix = Suffix, deviceId = DeviceId, deviceKey = SharedAccessKey**]** 
+**SRS_IOTHUBCLIENT_LL_12_010: [**IoTHubClient_LL_CreateFromConnectionString shall fill up the IOTHUB_CLIENT_CONFIG structure using the following mapping: iotHubName = Name, iotHubSuffix = Suffix, deviceId = DeviceId, deviceKey = SharedAccessKey or deviceSasToken = SharedAccessSignature**]** 
 **SRS_IOTHUBCLIENT_LL_12_011: [**IoTHubClient_LL_CreateFromConnectionString shall call into the IoTHubClient_LL_Create API with the current structure and returns with the return value of it**]** 
 **SRS_IOTHUBCLIENT_LL_12_016: [**IoTHubClient_LL_CreateFromConnectionString shall return NULL if IoTHubClient_LL_Create call fails**]** 
 **SRS_IOTHUBCLIENT_LL_04_001: [**IoTHubClient_LL_CreateFromConnectionString shall verify the existence of key/value pair GatewayHostName. If it does exist it shall pass the value to IoTHubClient_LL_Create API.**]** 
@@ -101,8 +104,8 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* c
 **SRS_IOTHUBCLIENT_LL_02_046: [** If creating the `TICK_COUNTER_HANDLE` fails then `IoTHubClient_LL_Create` shall fail and return NULL. **]**
 **SRS_IOTHUBCLIENT_LL_02_004: [**Otherwise IoTHubClient_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.**]** 
 **SRS_IOTHUBCLIENT_LL_02_006: [**IoTHubClient_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.**]** 
-**SRS_IOTHUBCLIENT_LL_02_007: [**If the underlaying layer _Create function fails them IoTHubClient_LL_Create shall fail and return NULL.**]** 
-**SRS_IOTHUBCLIENT_LL_17_008: [**IoTHubClient_LL_Create shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.**]** 
+**SRS_IOTHUBCLIENT_LL_02_007: [**If the underlaying layer _Create function fails them IoTHubClient_LL_Create shall fail and return NULL.**]**
+**SRS_IOTHUBCLIENT_LL_17_008: [**IoTHubClient_LL_Create shall call the transport _Register function with a populated structure of type IOTHUB_DEVICE_CONFIG and waitingToSend list.**]** 
 **SRS_IOTHUBCLIENT_LL_17_009: [**If the _Register function fails, this function shall fail and return NULL.**]** 
 **SRS_IOTHUBCLIENT_LL_02_008: [**Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.**]** 
 
@@ -117,7 +120,7 @@ extern  IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(IOTHUB_CLIEN
 **SRS_IOTHUBCLIENT_LL_02_048: [** If creating the handle fails, then IoTHubClient_LL_CreateWithTransport shall fail and return NULL **]**
 **SRS_IOTHUBCLIENT_LL_17_004: [**IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.**]** 
 **SRS_IOTHUBCLIENT_LL_17_005: [**IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.**]** 
-**SRS_IOTHUBCLIENT_LL_17_006: [**IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.**]** 
+**SRS_IOTHUBCLIENT_LL_17_006: [**IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the IOTHUB_DEVICE_CONFIG populated structure and waitingToSend list.**]** 
 **SRS_IOTHUBCLIENT_LL_17_007: [**If the _Register function fails, this function shall fail and return NULL.**]** 
 
 ###IoTHubClient_LL_Destroy
