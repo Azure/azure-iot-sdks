@@ -1,3 +1,5 @@
+DISPATCHER_FORWARD_DECLARATIONS(object_config);
+
 
 
 // Copyright (c) Microsoft. All rights reserved.
@@ -42,7 +44,7 @@ IOTHUB_CLIENT_RESULT on_read_config_name(object_config *obj, char **value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_config_name);
-        LogInfo("returning [%s] for Config_Name\r\n", *value);
+        LogInfo("returning [%s] for Config_Name\n", *value);
     }
     return result;
 }
@@ -50,7 +52,7 @@ IOTHUB_CLIENT_RESULT on_read_config_name(object_config *obj, char **value)
 IOTHUB_CLIENT_RESULT on_write_config_name(object_config *obj, char* value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Config_Name being set to [%s]\r\n", value);
+    LogInfo("Config_Name being set to [%s]\n", value);
     lwm2m_free(obj->propval_config_name);
     obj->propval_config_name = lwm2m_strdup(value);
 
@@ -71,7 +73,7 @@ IOTHUB_CLIENT_RESULT on_read_config_value(object_config *obj, char **value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_config_value);
-        LogInfo("returning [%s] for Config_Value\r\n", *value);
+        LogInfo("returning [%s] for Config_Value\n", *value);
     }
     return result;
 }
@@ -79,7 +81,7 @@ IOTHUB_CLIENT_RESULT on_read_config_value(object_config *obj, char **value)
 IOTHUB_CLIENT_RESULT on_write_config_value(object_config *obj, char* value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Config_Value being set to [%s]\r\n", value);
+    LogInfo("Config_Value being set to [%s]\n", value);
     lwm2m_free(obj->propval_config_value);
     obj->propval_config_value = lwm2m_strdup(value);
 
@@ -93,7 +95,7 @@ IOTHUB_CLIENT_RESULT on_write_config_value(object_config *obj, char* value)
 IOTHUB_CLIENT_RESULT on_exec_config_apply(object_config *obj)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_NOT_IMPLEMENTED;
-    LogInfo("inside execute handler for Config_Apply\r\n");
+    LogInfo("inside execute handler for Config_Apply\n");
     if (obj->config_apply_execute_callback != NULL)
     {
         result = obj->config_apply_execute_callback(obj);

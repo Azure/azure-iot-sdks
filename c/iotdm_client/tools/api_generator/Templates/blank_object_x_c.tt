@@ -24,6 +24,8 @@ var allProps = Program.GetListOfPropertiesToGenerate(ObjectName);
 #include "iotdm_dispatchers.h"
 #include "<#= ObjectCodeName.ToLower() #>_object.h"
 
+DISPATCHER_FORWARD_DECLARATIONS(<#= ObjectStructName #>);
+
 // Property Indices for for <#= ObjectCodeName #> object
 <#
 foreach (var prop in allProps)
@@ -89,7 +91,7 @@ foreach (var prop in allProps)
 #>
         if ((obj-><#= prop.SampleVariableName #> == NULL) || strcmp(obj-><#= prop.SampleVariableName #>, value))
         {
-            LogInfo("<#= prop.PropertyName #> being set to [%s]\r\n", value);
+            LogInfo("<#= prop.PropertyName #> being set to [%s]\n", value);
             lwm2m_free(obj-><#= prop.SampleVariableName #>);
             obj-><#= prop.SampleVariableName #> = lwm2m_strdup(value);
 
@@ -104,7 +106,7 @@ foreach (var prop in allProps)
 #>
         if (obj-><#= prop.SampleVariableName #> != value)
         {
-            LogInfo("<#= prop.PropertyName #> being set to %f\r\n", value);
+            LogInfo("<#= prop.PropertyName #> being set to %f\n", value);
             (obj-><#= prop.SampleVariableName #> = value;
 
             obj->resourceUpdated[INDEX_<#= prop.PropertyName.ToUpper() #>] = (char)true;
@@ -119,7 +121,7 @@ foreach (var prop in allProps)
 #>
         if (obj-><#= prop.SampleVariableName #> != value)
         {
-            LogInfo("<#= prop.PropertyName #> being set to %d\r\n", value);
+            LogInfo("<#= prop.PropertyName #> being set to %d\n", value);
             obj-><#= prop.SampleVariableName #> = value;
 
             obj->resourceUpdated[INDEX_<#= prop.PropertyName.ToUpper() #>] = (char)true;
@@ -197,7 +199,7 @@ IOTHUB_CLIENT_RESULT create_<#= ObjectCodeName #>_object(IOTHUB_CLIENT_HANDLE h,
             res = add_dm_object(&<#= ObjectStructName #>_instance_list, obj);
             if (res != IOTHUB_CLIENT_OK)
             {
-                LogError("adding <#= ObjectName #> object to object list\r\n");
+                LogError("adding <#= ObjectName #> object to object list\n");
 
                 destroy_<#= ObjectCodeName #>_object(obj);
                 obj = NULL;

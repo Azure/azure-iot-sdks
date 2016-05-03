@@ -22,8 +22,6 @@ extern "C"
 {
 #endif
 
-DISPATCHER_FORWARD_DECLARATIONS(object_firmwareupdate);
-
 // LWM2M Object IDs and Property IDs for firmwareupdate object
 #define OID_FIRMWAREUPDATE 5
 #define PID_FIRMWAREUPDATE_PACKAGE 0

@@ -22,8 +22,6 @@ extern "C"
 {
 #endif
 
-DISPATCHER_FORWARD_DECLARATIONS(object_config);
-
 // LWM2M Object IDs and Property IDs for config object
 #define OID_CONFIG 10241
 #define PID_CONFIG_NAME 1

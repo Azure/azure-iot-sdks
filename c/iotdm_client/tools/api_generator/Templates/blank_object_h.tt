@@ -32,8 +32,6 @@ extern "C"
 {
 #endif
 
-DISPATCHER_FORWARD_DECLARATIONS(<#= ObjectStructName #>);
-
 // LWM2M Object IDs and Property IDs for <#= ObjectCodeName #> object
 #define OID_<#= ObjectCodeName.ToUpper() #> <#= ObjectId #>
 <#
