@@ -243,6 +243,7 @@
                         TestCase aCase = _ObserveTestCases[uRI];
                         aCase.ExpectedValue = data[2];
 
+                        Thread.Sleep(500);
                         aCase.RecordedValue = ReadPropertyThroughService(aCase.Name);
                     }
                 }
@@ -418,17 +419,6 @@
             String connectionString = Register();
             var client = DmClient.Start(args[0], connectionString);
 
-            /**
-            returning -1 for 
-
-            returning [Device_ModelNumber] for 
-            returning [Device_DeviceType] for 
-            returning [Device_Manufacturer] for 
-            returning -1 for 
-            returning -1 for 
-            returning -1 for 
-            */
-
             // the 'read' test cases.
             var oneCase = new TestCase(DevicePropertyNames.FirmwareVersion, TestCase.TestType.Read);
             _ReadTestCases.Add("Device_FirmwareVersion", oneCase);
@@ -538,6 +528,9 @@
                 }
             }
 
+            int nrCases = _ReadTestCases.Count + _WriteTestCases.Count + _ExecuteTestCases.Count + _ObserveTestCases.Count;
+            Console.WriteLine("\n--------\n\t{0} cases failed out of {1} tests.\n--------\n", nrErrorCases, nrCases);
+
             return nrErrorCases;
         }
 
@@ -567,13 +560,14 @@
                 JobResponse rs = job.Result;
                 while (rs.Status < JobStatus.Completed)
                 {
-                    Thread.Sleep(1000);
                     job = _dj.GetJobAsync(jobID);
                     job.Wait();
                     rs = job.Result;
                 }
 
-                return getProperty(propertyName);
+                string rv = getProperty(propertyName);
+
+                return rv;
             }
 
             catch (Exception ex)
@@ -596,7 +590,6 @@
                 JobResponse rs = job.Result;
                 while (rs.Status < JobStatus.Completed)
                 {
-                    Thread.Sleep(1000);
                     job = _dj.GetJobAsync(jobID);
                     job.Wait();
                     rs = job.Result;
