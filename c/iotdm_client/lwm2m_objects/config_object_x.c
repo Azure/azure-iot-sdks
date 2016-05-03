@@ -25,9 +25,9 @@ DISPATCHER_FORWARD_DECLARATIONS(object_config);
 
 void set_default_config_property_values(object_config *obj);
 IOTHUB_CLIENT_RESULT on_read_config_name(object_config *obj, char **value);
-IOTHUB_CLIENT_RESULT on_write_config_name(object_config *obj, char* value);
+IOTHUB_CLIENT_RESULT on_write_config_name(object_config *obj, const char *value);
 IOTHUB_CLIENT_RESULT on_read_config_value(object_config *obj, char **value);
-IOTHUB_CLIENT_RESULT on_write_config_value(object_config *obj, char* value);
+IOTHUB_CLIENT_RESULT on_write_config_value(object_config *obj, const char *value);
 IOTHUB_CLIENT_RESULT on_exec_config_apply(object_config *obj);
 
 
@@ -35,7 +35,7 @@ IOTHUB_CLIENT_RESULT on_exec_config_apply(object_config *obj);
  * Config setters
  *
  **********************************************************************************/
-IOTHUB_CLIENT_RESULT set_config_name(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_config_name(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_config *obj = get_object_instance(OID_CONFIG, instanceId);
@@ -57,7 +57,7 @@ IOTHUB_CLIENT_RESULT set_config_name(uint16_t instanceId, char* value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_config_value(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_config_value(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_config *obj = get_object_instance(OID_CONFIG, instanceId);

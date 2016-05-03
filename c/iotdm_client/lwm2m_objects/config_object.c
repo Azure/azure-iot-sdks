@@ -47,7 +47,7 @@ IOTHUB_CLIENT_RESULT on_read_config_name(object_config *obj, char **value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_config_name(object_config *obj, char* value)
+IOTHUB_CLIENT_RESULT on_write_config_name(object_config *obj, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     LogInfo("Config_Name being set to [%s]\n", value);
@@ -76,7 +76,7 @@ IOTHUB_CLIENT_RESULT on_read_config_value(object_config *obj, char **value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_config_value(object_config *obj, char* value)
+IOTHUB_CLIENT_RESULT on_write_config_value(object_config *obj, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     LogInfo("Config_Value being set to [%s]\n", value);

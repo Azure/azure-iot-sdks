@@ -876,6 +876,10 @@ private string GetWritePrototype(PropertyToGenerate prop)
     {
         return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, " + prop.PropertyTypeCodeName + " value, size_t length)";
     }
+    else if (prop.Type == LWM2MObjectItemType.String)
+    {
+        return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, const char *value)";
+    }
     else
     {
         return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, " + prop.PropertyTypeCodeName + " value)";
@@ -884,10 +888,13 @@ private string GetWritePrototype(PropertyToGenerate prop)
 
 private string GetSetterPrototype(PropertyToGenerate prop)
 {
-// BKTODO: should this return result or void?
     if (prop.Type == LWM2MObjectItemType.Opaque)
     {
         return "IOTHUB_CLIENT_RESULT set_" + prop.PropertyName.ToLower() + "(uint16_t instanceId, " + prop.PropertyTypeCodeName + " value, size_t length)";
+    }
+    else if (prop.Type == LWM2MObjectItemType.String)
+    {
+        return "IOTHUB_CLIENT_RESULT set_" + prop.PropertyName.ToLower() + "(uint16_t instanceId, const char *value)";
     }
     else
     {

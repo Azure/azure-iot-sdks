@@ -47,9 +47,9 @@ IOTHUB_CLIENT_RESULT on_read_device_memoryfree(object_device *obj, int *value);
 IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, int *value);
 IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, int value);
 IOTHUB_CLIENT_RESULT on_read_device_utcoffset(object_device *obj, char **value);
-IOTHUB_CLIENT_RESULT on_write_device_utcoffset(object_device *obj, char* value);
+IOTHUB_CLIENT_RESULT on_write_device_utcoffset(object_device *obj, const char *value);
 IOTHUB_CLIENT_RESULT on_read_device_timezone(object_device *obj, char **value);
-IOTHUB_CLIENT_RESULT on_write_device_timezone(object_device *obj, char* value);
+IOTHUB_CLIENT_RESULT on_write_device_timezone(object_device *obj, const char *value);
 IOTHUB_CLIENT_RESULT on_read_device_devicetype(object_device *obj, char **value);
 IOTHUB_CLIENT_RESULT on_read_device_hardwareversion(object_device *obj, char **value);
 IOTHUB_CLIENT_RESULT on_read_device_batterystatus(object_device *obj, int *value);
@@ -60,7 +60,7 @@ IOTHUB_CLIENT_RESULT on_read_device_memorytotal(object_device *obj, int *value);
  * Device setters
  *
  **********************************************************************************/
-IOTHUB_CLIENT_RESULT set_device_manufacturer(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_device_manufacturer(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -82,7 +82,7 @@ IOTHUB_CLIENT_RESULT set_device_manufacturer(uint16_t instanceId, char* value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_modelnumber(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_device_modelnumber(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -104,7 +104,7 @@ IOTHUB_CLIENT_RESULT set_device_modelnumber(uint16_t instanceId, char* value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_serialnumber(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_device_serialnumber(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -126,7 +126,7 @@ IOTHUB_CLIENT_RESULT set_device_serialnumber(uint16_t instanceId, char* value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_firmwareversion(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_device_firmwareversion(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -211,7 +211,7 @@ IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, int value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_utcoffset(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_device_utcoffset(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -233,7 +233,7 @@ IOTHUB_CLIENT_RESULT set_device_utcoffset(uint16_t instanceId, char* value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_timezone(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_device_timezone(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -255,7 +255,7 @@ IOTHUB_CLIENT_RESULT set_device_timezone(uint16_t instanceId, char* value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_devicetype(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_device_devicetype(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -277,7 +277,7 @@ IOTHUB_CLIENT_RESULT set_device_devicetype(uint16_t instanceId, char* value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_hardwareversion(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_device_hardwareversion(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
