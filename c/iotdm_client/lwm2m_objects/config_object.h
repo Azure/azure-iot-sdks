@@ -51,8 +51,8 @@ IOTHUB_CLIENT_RESULT create_config_object(IOTHUB_CLIENT_HANDLE h, uint16_t *inst
 object_config *get_config_object(uint16_t instanceId);
 
 // Property setters for config object
-IOTHUB_CLIENT_RESULT set_config_name(uint16_t instanceId, char* value);
-IOTHUB_CLIENT_RESULT set_config_value(uint16_t instanceId, char* value);
+IOTHUB_CLIENT_RESULT set_config_name(uint16_t instanceId, const char *value);
+IOTHUB_CLIENT_RESULT set_config_value(uint16_t instanceId, const char *value);
 
 #ifdef __cplusplus
 }

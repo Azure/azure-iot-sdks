@@ -83,7 +83,7 @@ const char target_version[] = "3.0";
 void set_initial_firmware_version()
 {
     // randomly select either v1 or v2; target version after update will always be v3
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     (void)set_device_firmwareversion(0, rand() % 2 ? "1.0" : "2.0");
 }
 

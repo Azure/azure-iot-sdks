@@ -42,7 +42,7 @@ IOTHUB_CLIENT_RESULT on_write_firmwareupdate_package(object_firmwareupdate *obj,
     return IOTHUB_CLIENT_NOT_IMPLEMENTED;
 }
 
-IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *obj, char* value)
+IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *obj, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     LogInfo("FirmwareUpdate_PackageUri being set to [%s]\n", value);

@@ -63,8 +63,8 @@ object_firmwareupdate *get_firmwareupdate_object(uint16_t instanceId);
 // Property setters for firmwareupdate object
 IOTHUB_CLIENT_RESULT set_firmwareupdate_state(uint16_t instanceId, int value);
 IOTHUB_CLIENT_RESULT set_firmwareupdate_updateresult(uint16_t instanceId, int value);
-IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgname(uint16_t instanceId, char* value);
-IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgversion(uint16_t instanceId, char* value);
+IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgname(uint16_t instanceId, const char *value);
+IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgversion(uint16_t instanceId, const char *value);
 
 #ifdef __cplusplus
 }

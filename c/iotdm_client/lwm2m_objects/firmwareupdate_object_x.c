@@ -29,7 +29,7 @@ DISPATCHER_FORWARD_DECLARATIONS(object_firmwareupdate);
 
 void set_default_firmwareupdate_property_values(object_firmwareupdate *obj);
 IOTHUB_CLIENT_RESULT on_write_firmwareupdate_package(object_firmwareupdate *obj, void* value, size_t length);
-IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *obj, char* value);
+IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *obj, const char *value);
 IOTHUB_CLIENT_RESULT on_exec_firmwareupdate_update(object_firmwareupdate *obj);
 IOTHUB_CLIENT_RESULT on_read_firmwareupdate_state(object_firmwareupdate *obj, int *value);
 IOTHUB_CLIENT_RESULT on_read_firmwareupdate_updateresult(object_firmwareupdate *obj, int *value);
@@ -83,7 +83,7 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_updateresult(uint16_t instanceId, int va
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgname(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgname(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_firmwareupdate *obj = get_object_instance(OID_FIRMWAREUPDATE, instanceId);
@@ -105,7 +105,7 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgname(uint16_t instanceId, char* value
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgversion(uint16_t instanceId, char* value)
+IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgversion(uint16_t instanceId, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_firmwareupdate *obj = get_object_instance(OID_FIRMWAREUPDATE, instanceId);

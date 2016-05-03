@@ -198,7 +198,7 @@ IOTHUB_CLIENT_RESULT on_read_device_utcoffset(object_device *obj, char **value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_device_utcoffset(object_device *obj, char* value)
+IOTHUB_CLIENT_RESULT on_write_device_utcoffset(object_device *obj, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     LogInfo("Device_UtcOffset being set to [%s]\n", value);
@@ -227,7 +227,7 @@ IOTHUB_CLIENT_RESULT on_read_device_timezone(object_device *obj, char **value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_device_timezone(object_device *obj, char* value)
+IOTHUB_CLIENT_RESULT on_write_device_timezone(object_device *obj, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     LogInfo("Device_Timezone being set to [%s]\n", value);
