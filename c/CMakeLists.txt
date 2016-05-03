@@ -59,8 +59,12 @@ endif()
 
 
 add_subdirectory(azure-c-shared-utility)
-add_subdirectory(azure-uamqp-c)
-add_subdirectory(azure-umqtt-c)
+if (${use_amqp})
+    add_subdirectory(azure-uamqp-c)
+endif()
+if (${use_mqtt})
+    add_subdirectory(azure-umqtt-c)
+endif()
 
 enable_testing()
 
