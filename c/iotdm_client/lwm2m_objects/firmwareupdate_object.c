@@ -45,7 +45,7 @@ IOTHUB_CLIENT_RESULT on_write_firmwareupdate_package(object_firmwareupdate *obj,
 IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *obj, const char *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("FirmwareUpdate_PackageUri being set to [%s]\n", value);
+    LogInfo("FirmwareUpdate_PackageUri being set to [%s]", value);
     lwm2m_free(obj->propval_firmwareupdate_packageuri);
     obj->propval_firmwareupdate_packageuri = lwm2m_strdup(value);
 
@@ -59,7 +59,7 @@ IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *o
 IOTHUB_CLIENT_RESULT on_exec_firmwareupdate_update(object_firmwareupdate *obj)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_NOT_IMPLEMENTED;
-    LogInfo("inside execute handler for FirmwareUpdate_Update\n");
+    LogInfo("inside execute handler for FirmwareUpdate_Update");
     if (obj->firmwareupdate_update_execute_callback != NULL)
     {
         result = obj->firmwareupdate_update_execute_callback(obj);
@@ -77,7 +77,7 @@ IOTHUB_CLIENT_RESULT on_read_firmwareupdate_state(object_firmwareupdate *obj, in
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_firmwareupdate_state;
-        LogInfo("returning %d for FirmwareUpdate_State\n", *value);
+        LogInfo("returning %d for FirmwareUpdate_State", *value);
     }
     return result;
 }
@@ -92,7 +92,7 @@ IOTHUB_CLIENT_RESULT on_read_firmwareupdate_updateresult(object_firmwareupdate *
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_firmwareupdate_updateresult;
-        LogInfo("returning %d for FirmwareUpdate_UpdateResult\n", *value);
+        LogInfo("returning %d for FirmwareUpdate_UpdateResult", *value);
     }
     return result;
 }
@@ -107,7 +107,7 @@ IOTHUB_CLIENT_RESULT on_read_firmwareupdate_pkgname(object_firmwareupdate *obj, 
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_firmwareupdate_pkgname);
-        LogInfo("returning [%s] for FirmwareUpdate_PkgName\n", *value);
+        LogInfo("returning [%s] for FirmwareUpdate_PkgName", *value);
     }
     return result;
 }
@@ -122,7 +122,7 @@ IOTHUB_CLIENT_RESULT on_read_firmwareupdate_pkgversion(object_firmwareupdate *ob
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = lwm2m_strdup(obj->propval_firmwareupdate_pkgversion);
-        LogInfo("returning [%s] for FirmwareUpdate_PkgVersion\n", *value);
+        LogInfo("returning [%s] for FirmwareUpdate_PkgVersion", *value);
     }
     return result;
 }

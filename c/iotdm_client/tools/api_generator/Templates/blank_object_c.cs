@@ -199,7 +199,7 @@ var allProps = Program.GetListOfPropertiesToGenerate(ObjectName);
             
             #line default
             #line hidden
-            this.Write("\\n\", *value);\r\n");
+            this.Write("\", *value);\r\n");
             
             #line 80 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_c.tt"
 
@@ -223,7 +223,7 @@ var allProps = Program.GetListOfPropertiesToGenerate(ObjectName);
             
             #line default
             #line hidden
-            this.Write("\\n\", *value);\r\n");
+            this.Write("\", *value);\r\n");
             
             #line 86 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_c.tt"
 
@@ -248,7 +248,7 @@ var allProps = Program.GetListOfPropertiesToGenerate(ObjectName);
             
             #line default
             #line hidden
-            this.Write("\\n\", *value);\r\n");
+            this.Write("\", *value);\r\n");
             
             #line 93 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_c.tt"
 
@@ -303,7 +303,7 @@ var allProps = Program.GetListOfPropertiesToGenerate(ObjectName);
             
             #line default
             #line hidden
-            this.Write(" being set to [%s]\\n\", value);\r\n    lwm2m_free(obj->");
+            this.Write(" being set to [%s]\", value);\r\n    lwm2m_free(obj->");
             
             #line 121 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
@@ -348,7 +348,7 @@ var allProps = Program.GetListOfPropertiesToGenerate(ObjectName);
             
             #line default
             #line hidden
-            this.Write(" being set to %f\\n\", value);\r\n    (obj->");
+            this.Write(" being set to %f\", value);\r\n    (obj->");
             
             #line 135 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
@@ -387,7 +387,7 @@ var allProps = Program.GetListOfPropertiesToGenerate(ObjectName);
             
             #line default
             #line hidden
-            this.Write(" being set to %d\\n\", value);\r\n    obj->");
+            this.Write(" being set to %d\", value);\r\n    obj->");
             
             #line 149 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
@@ -443,7 +443,7 @@ var allProps = Program.GetListOfPropertiesToGenerate(ObjectName);
             
             #line default
             #line hidden
-            this.Write("\\n\");\r\n    if (obj->");
+            this.Write("\");\r\n    if (obj->");
             
             #line 171 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToLower()));

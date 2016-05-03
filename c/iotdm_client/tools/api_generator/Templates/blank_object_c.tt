@@ -76,20 +76,20 @@ void set_default_<#= ObjectCodeName #>_property_values(<#= ObjectStructName #> *
                 case LWM2MObjectItemType.String:
 #>
         *value = lwm2m_strdup(obj-><#= prop.SampleVariableName #>);
-        LogInfo("returning [%s] for <#= prop.PropertyName #>\n", *value);
+        LogInfo("returning [%s] for <#= prop.PropertyName #>", *value);
 <#
                     break;
                 case LWM2MObjectItemType.Float:
 #>
         *value = obj-><#= prop.SampleVariableName #>;
-        LogInfo("returning %f for <#= prop.PropertyName #>\n", *value);
+        LogInfo("returning %f for <#= prop.PropertyName #>", *value);
 <#
                     break;
                 case LWM2MObjectItemType.Integer:
                 case LWM2MObjectItemType.Time:
 #>
         *value = obj-><#= prop.SampleVariableName #>;
-        LogInfo("returning %d for <#= prop.PropertyName #>\n", *value);
+        LogInfo("returning %d for <#= prop.PropertyName #>", *value);
 <#
                     break;
                 }
@@ -117,7 +117,7 @@ void set_default_<#= ObjectCodeName #>_property_values(<#= ObjectStructName #> *
                     case LWM2MObjectItemType.String:
 #>
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("<#= prop.PropertyName #> being set to [%s]\n", value);
+    LogInfo("<#= prop.PropertyName #> being set to [%s]", value);
     lwm2m_free(obj-><#= prop.SampleVariableName #>);
     obj-><#= prop.SampleVariableName #> = lwm2m_strdup(value);
 
@@ -131,7 +131,7 @@ void set_default_<#= ObjectCodeName #>_property_values(<#= ObjectStructName #> *
                 case LWM2MObjectItemType.Float:
 #>
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("<#= prop.PropertyName #> being set to %f\n", value);
+    LogInfo("<#= prop.PropertyName #> being set to %f", value);
     (obj-><#= prop.SampleVariableName #> = value;
 
     if (obj-><#= prop.PropertyName.ToLower() #>_write_callback != NULL)
@@ -145,7 +145,7 @@ void set_default_<#= ObjectCodeName #>_property_values(<#= ObjectStructName #> *
                 case LWM2MObjectItemType.Time:
 #>
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("<#= prop.PropertyName #> being set to %d\n", value);
+    LogInfo("<#= prop.PropertyName #> being set to %d", value);
     obj-><#= prop.SampleVariableName #> = value;
 
     if (obj-><#= prop.PropertyName.ToLower() #>_write_callback != NULL)
@@ -167,7 +167,7 @@ void set_default_<#= ObjectCodeName #>_property_values(<#= ObjectStructName #> *
 <#= GetExecutePrototype(prop) #>
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_NOT_IMPLEMENTED;
-    LogInfo("inside execute handler for <#= prop.PropertyName #>\n");
+    LogInfo("inside execute handler for <#= prop.PropertyName #>");
     if (obj-><#= prop.PropertyName.ToLower() #>_execute_callback != NULL)
     {
         result = obj-><#= prop.PropertyName.ToLower() #>_execute_callback(obj);

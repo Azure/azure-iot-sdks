@@ -262,7 +262,7 @@ foreach (var prop in allProps)
             
             #line default
             #line hidden
-            this.Write(" being set to [%s]\\n\", value);\r\n            lwm2m_free(obj->");
+            this.Write(" being set to [%s]\", value);\r\n            lwm2m_free(obj->");
             
             #line 95 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
@@ -308,7 +308,7 @@ foreach (var prop in allProps)
             
             #line default
             #line hidden
-            this.Write(" being set to %f\\n\", value);\r\n            (obj->");
+            this.Write(" being set to %f\", value);\r\n            (obj->");
             
             #line 110 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
@@ -348,7 +348,7 @@ foreach (var prop in allProps)
             
             #line default
             #line hidden
-            this.Write(" being set to %d\\n\", value);\r\n            obj->");
+            this.Write(" being set to %d\", value);\r\n            obj->");
             
             #line 125 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
@@ -526,7 +526,7 @@ foreach (var prop in allProps)
             
             #line default
             #line hidden
-            this.Write(" object to object list\\n\");\r\n\r\n                destroy_");
+            this.Write(" object to object list\");\r\n\r\n                destroy_");
             
             #line 204 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));

@@ -43,7 +43,7 @@ IOTHUB_CLIENT_RESULT on_read_lwm2mserver_lifetime(object_lwm2mserver *obj, int *
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_lwm2mserver_lifetime;
-        LogInfo("returning %d for LWM2MServer_Lifetime\n", *value);
+        LogInfo("returning %d for LWM2MServer_Lifetime", *value);
     }
     return result;
 }
@@ -51,7 +51,7 @@ IOTHUB_CLIENT_RESULT on_read_lwm2mserver_lifetime(object_lwm2mserver *obj, int *
 IOTHUB_CLIENT_RESULT on_write_lwm2mserver_lifetime(object_lwm2mserver *obj, int value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("LWM2MServer_Lifetime being set to %d\n", value);
+    LogInfo("LWM2MServer_Lifetime being set to %d", value);
     obj->propval_lwm2mserver_lifetime = value;
 
     if (obj->lwm2mserver_lifetime_write_callback != NULL)
@@ -71,7 +71,7 @@ IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultminimumperiod(object_lwm2mserver
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_lwm2mserver_defaultminimumperiod;
-        LogInfo("returning %d for LWM2MServer_DefaultMinimumPeriod\n", *value);
+        LogInfo("returning %d for LWM2MServer_DefaultMinimumPeriod", *value);
     }
     return result;
 }
@@ -79,7 +79,7 @@ IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultminimumperiod(object_lwm2mserver
 IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("LWM2MServer_DefaultMinimumPeriod being set to %d\n", value);
+    LogInfo("LWM2MServer_DefaultMinimumPeriod being set to %d", value);
     obj->propval_lwm2mserver_defaultminimumperiod = value;
 
     if (obj->lwm2mserver_defaultminimumperiod_write_callback != NULL)
@@ -99,7 +99,7 @@ IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultmaximumperiod(object_lwm2mserver
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_lwm2mserver_defaultmaximumperiod;
-        LogInfo("returning %d for LWM2MServer_DefaultMaximumPeriod\n", *value);
+        LogInfo("returning %d for LWM2MServer_DefaultMaximumPeriod", *value);
     }
     return result;
 }
@@ -107,7 +107,7 @@ IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultmaximumperiod(object_lwm2mserver
 IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("LWM2MServer_DefaultMaximumPeriod being set to %d\n", value);
+    LogInfo("LWM2MServer_DefaultMaximumPeriod being set to %d", value);
     obj->propval_lwm2mserver_defaultmaximumperiod = value;
 
     if (obj->lwm2mserver_defaultmaximumperiod_write_callback != NULL)

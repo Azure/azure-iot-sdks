@@ -10,7 +10,9 @@
 #include "lwm2mserver_object.h"
 
 // missing from string.h because POSIX support is turned off.
+#ifndef WIN32
 char *strdup(const char *s);
+#endif // WIN32
 
 static const char HOSTNAME_TOKEN[] = "HostName";
 static const char DEVICEID_TOKEN[] = "DeviceId";
