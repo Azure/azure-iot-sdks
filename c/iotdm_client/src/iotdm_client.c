@@ -470,6 +470,38 @@ void on_dm_connect_complete(IOTHUB_CLIENT_RESULT result, void* context)
 }
 
 
+/**
+*  {BEGIN} Should be implemented by a platform adapter
+*/
+#if defined(WIN32)
+#include <thr/xtimec.h>
+#else
+#include <time.h>
+#endif
+unsigned long get_milliseconds()
+{
+#if defined(WIN32)
+
+    struct xtime tm;
+    int wait_result;
+    xtime_get(&tm, TIME_UTC);
+
+    return (tm.sec + (tm.nsec / 1000000L));
+
+#else
+
+    struct timespec tm;
+    clock_gettime(-1, &tm);
+
+    return (tm.tv_sec + (tm.tv_nsec / 1000000L));
+
+#endif
+}
+/**
+*  {END} Should be implemented by a platform adapter
+*/
+
+
 /***------------------------------------------------------------------- */
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
@@ -477,12 +509,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
     int connectResult = IOTHUB_CLIENT_OK;
 
     IOTHUB_CLIENT_RESULT result = IoTHubClient_DM_Connect(iotDMClientHandle, on_dm_connect_complete, &connectResult);
-    if (result != IOTHUB_CLIENT_OK)
-    {
-        return result;
-    }
-
-    while (true)
+    while (result == IOTHUB_CLIENT_OK)
     {
         // If the asynchronous call to IoTHubClient_DM_Connect above eventually fails,
         // then exit this blocking function. If the connection is still pending, or if the
@@ -492,19 +519,33 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
             return connectResult;
         }
 
-        if (!IoTHubClient_DM_DoWork(iotDMClientHandle))
+        if (IoTHubClient_DM_DoWork(iotDMClientHandle))
         {
-            return IOTHUB_CLIENT_ERROR;
+            unsigned long toWait = get_milliseconds() + 1000;
+            Lock(cd->push_event_lock);
+            if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
+            {
+                return IOTHUB_CLIENT_ERROR;
+            }
+            Unlock(cd->push_event_lock);
+            toWait -= get_milliseconds();
+
+            /**
+            *   If Condition_wait takes longer than a few milliseconds, we should proceed to Do_work as
+            *   this would signal that an update has taken place. 50 milliseconds is long enough to indicate
+            *   that work is available. It is also short enough to prevent false positives.
+            */
+            if (toWait > 950)
+            {
+                ThreadAPI_Sleep(toWait);
+            }
         }
 
-        Lock(cd->push_event_lock);
-        if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
+        else
         {
-            return IOTHUB_CLIENT_ERROR;
+            result = IOTHUB_CLIENT_ERROR;
         }
-        Unlock(cd->push_event_lock);
-
-        ThreadAPI_Sleep(1000);
     }
-}
 
+    return result;
+}
