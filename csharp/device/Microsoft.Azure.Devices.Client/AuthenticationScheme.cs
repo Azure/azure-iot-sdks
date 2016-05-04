@@ -4,7 +4,7 @@
 namespace Microsoft.Azure.Devices.Client
 {
     /// <summary>
-    /// Specifies the Authentication Scheme used by Device Clienty
+    /// Specifies the Authentication Scheme used by Device Client
     /// </summary>
     public enum AuthenticationScheme
     {
