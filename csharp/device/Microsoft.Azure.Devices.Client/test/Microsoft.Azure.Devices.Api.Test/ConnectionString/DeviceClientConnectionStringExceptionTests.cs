@@ -133,6 +133,42 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             string connectionString = null;
             var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
         }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void DeviceClient_ConnectionString_BadAuthScheme_ExceptionTest()
+        {
+            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=Xyz;DeviceId=device;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
+            var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void DeviceClient_ConnectionString_X509AuthScheme_ExceptionTest()
+        {
+            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=X509;DeviceId=device;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
+            var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void DeviceClient_ConnectionString_SASAuthScheme_ExceptionTest()
+        {
+            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=SAS;DeviceId=device";
+            var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void DeviceClient_ConnectionString_SASSignature_ExceptionTest()
+        {
+            string connectionString = "HostName=acme.azure-devices.net;DeviceId=device1;AuthScheme=x509;SharedAccessSignature=SharedAccessSignature sr=dh%3a%2f%2facme.azure-devices.net&sig=poifbMLdBGtCJknubF2FW6FLn5vND5k1IKoeQ%2bONgkE%3d&se=87824124985&skn=AllAccessKey";
+            var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
+        }
     }
 }
 
