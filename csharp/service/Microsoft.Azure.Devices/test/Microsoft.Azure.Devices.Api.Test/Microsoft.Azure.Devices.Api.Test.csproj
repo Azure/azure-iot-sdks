@@ -69,6 +69,7 @@
     <Compile Include="ClientWebSocketTransportTests.cs" />
     <Compile Include="ConnectionString\ServiceClientConnectionStringExceptionTests.cs" />
     <Compile Include="ConnectionString\ServiceClientConnectionStringTests.cs" />
+    <Compile Include="DeviceAuthenticationTests.cs" />
     <Compile Include="ExportImportDeviceTests.cs" />
     <Compile Include="RegistryManagerTests.cs" />
     <Compile Include="MessageTests.cs" />

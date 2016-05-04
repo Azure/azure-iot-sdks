@@ -52,7 +52,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             iotHubConnectionStringBuilder.DeviceId = this.DeviceId;
-            iotHubConnectionStringBuilder.AuthMechanism = "X509";
+            iotHubConnectionStringBuilder.AuthScheme = AuthenticationScheme.X509;
             iotHubConnectionStringBuilder.Certificate = this.Certificate;
             iotHubConnectionStringBuilder.SharedAccessSignature = null;
             iotHubConnectionStringBuilder.SharedAccessKey = null;

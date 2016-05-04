@@ -84,13 +84,13 @@ namespace Microsoft.Azure.Devices
                 throw new ArgumentException(ApiResources.ETagSetWhileRegisteringDevice);
             }
 
+            ValidateDeviceAuthentication(device.Authentication, device.Id);
+
             // auto generate keys if not specified
             if (device.Authentication == null)
             {
                 device.Authentication = new AuthenticationMechanism();
             }
-
-            ValidateDeviceAuthentication(device.Authentication);
 
             return this.httpClientHelper.PutAsync(GetRequestUri(device.Id), device, PutOperationType.CreateEntity, null, cancellationToken);
         }
@@ -155,13 +155,13 @@ namespace Microsoft.Azure.Devices
                 throw new ArgumentException(ApiResources.ETagNotSetWhileUpdatingDevice);
             }
 
+            ValidateDeviceAuthentication(device.Authentication, device.Id);
+
             // auto generate keys if not specified
             if (device.Authentication == null)
             {
                 device.Authentication = new AuthenticationMechanism();
             }
-
-            ValidateDeviceAuthentication(device.Authentication);
 
             var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
             errorMappingOverrides.Add(HttpStatusCode.PreconditionFailed, async (responseMessage) => new PreconditionFailedException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)));
@@ -368,13 +368,13 @@ namespace Microsoft.Azure.Devices
 
             foreach (var device in devices)
             {
+                ValidateDeviceAuthentication(device.Authentication, device.Id);
+
                 // auto generate keys if not specified
                 if (device.Authentication == null)
                 {
                     device.Authentication = new AuthenticationMechanism();
                 }
-
-                ValidateDeviceAuthentication(device.Authentication);
             }
 
             var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
@@ -598,17 +598,45 @@ namespace Microsoft.Azure.Devices
             }
         }
 
-        static void ValidateDeviceAuthentication(AuthenticationMechanism authenticationMechanism)
+        //static void ValidateDeviceAuthentication(AuthenticationMechanism authenticationMechanism)
+        //{
+        //    if (authenticationMechanism.SymmetricKey != null)
+        //    {
+        //        // either both keys should be specified or neither once should be specified (in which case 
+        //        // we will create both the keys in the service)
+        //        if (string.IsNullOrWhiteSpace(authenticationMechanism.SymmetricKey.PrimaryKey) ^ string.IsNullOrWhiteSpace(authenticationMechanism.SymmetricKey.SecondaryKey))
+        //        {
+        //            throw new ArgumentException(ApiResources.DeviceKeysInvalid);
+        //        }
+        //    }
+        //}
+
+        public static bool ValidateDeviceAuthentication(AuthenticationMechanism authentication, string deviceId)
         {
-            if (authenticationMechanism.SymmetricKey != null)
+            if (authentication != null)
             {
-                // either both keys should be specified or neither once should be specified (in which case 
-                // we will create both the keys in the service)
-                if (string.IsNullOrWhiteSpace(authenticationMechanism.SymmetricKey.PrimaryKey) ^ string.IsNullOrWhiteSpace(authenticationMechanism.SymmetricKey.SecondaryKey))
+                // Both symmetric keys and X.509 cert thumbprints cannot be specified for the same device
+                bool symmetricKeyIsSet = !authentication.SymmetricKey?.IsEmpty() ?? false;
+                bool x509ThumbprintIsSet = !authentication.X509Thumbprint?.IsEmpty() ?? false;
+
+                if (symmetricKeyIsSet && x509ThumbprintIsSet)
                 {
-                    throw new ArgumentException(ApiResources.DeviceKeysInvalid);
+                    throw new ArgumentException(ApiResources.DeviceAuthenticationInvalid.FormatInvariant(deviceId ?? string.Empty));
+                }
+
+                // Validate X.509 thumbprints or SymmetricKeys since we should not have both at the same time
+                if (x509ThumbprintIsSet)
+                {
+                    return authentication.X509Thumbprint.IsValid(true);
+                }
+                else if (symmetricKeyIsSet)
+                {
+                    return authentication.SymmetricKey.IsValid(true);
                 }
             }
+
+            // return true even if authentication is null
+            return true;
         }
 
         void EnsureInstanceNotClosed()

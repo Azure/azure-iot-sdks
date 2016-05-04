@@ -5,11 +5,15 @@ namespace Microsoft.Azure.Devices.Client.Test
 {
     using System;
     using Microsoft.Azure.Devices.Client;
+    using Microsoft.Azure.Devices.Client.ApiTest;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
     public class TransportSettingsTests
     {
+        const string LocalCertFilename = "..\\..\\Microsoft.Azure.Devices.Api.Test\\LocalNoChain.pfx";
+        const string LocalCertPasswordFile = "..\\..\\Microsoft.Azure.Devices.Api.Test\\TestCertsPassword.txt";
+
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         [TestMethod]
         [TestCategory("CIT")]
@@ -145,6 +149,30 @@ namespace Microsoft.Azure.Devices.Client.Test
             connectionPoolSettings.Pooling = false;
             var transportSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 200, connectionPoolSettings);
             Assert.IsTrue(transportSetting.AmqpConnectionPoolSettings.Pooling == false, "Pooling should be off");
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("TransportSettings")]
+        public void X509Certificate_AmqpTransportSettingsTest()
+        {
+            string hostName = "acme.azure-devices.net";
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
+
+            var deviceClient = DeviceClient.Create(hostName, authMethod, new ITransportSettings[] { new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 100) });
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("TransportSettings")]
+        public void X509Certificate_Http1TransportSettingsTest()
+        {
+            string hostName = "acme.azure-devices.net";
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
+
+            var deviceClient = DeviceClient.Create(hostName, authMethod, new ITransportSettings[] { new Http1TransportSettings()});
         }
     }
 }

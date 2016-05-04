@@ -3,9 +3,11 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
-    public enum CredentialScope
+    public enum AuthenticationScheme
     {
-        IotHub,
-        Device
+        // Shared Access Signature
+        SAS = 0,
+        // X509 Certificate
+        X509 = 1
     }
 }

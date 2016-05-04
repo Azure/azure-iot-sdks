@@ -135,6 +135,7 @@
     <Compile Include="Common\PerfectHash.cs" />
     <Compile Include="Common\TaskConstants.cs" />
     <Compile Include="Common\TaskUtils.cs" />
+    <Compile Include="AuthenticationScheme.cs" />
     <Compile Include="DeviceAuthenticationWithX509Certificate.cs" />
     <Compile Include="IotHubDeviceScopeConnectionPool.cs" />
     <Compile Include="IotHubScopeConnectionPool.cs" />
@@ -188,7 +189,6 @@
     <Compile Include="Common\TrackingHelper.cs" />
     <Compile Include="Common\Utils.cs" />
     <Compile Include="Common\WaitCallbackActionItem.cs" />
-    <Compile Include="CredentialScope.cs" />
     <Compile Include="Common\WebApi\CustomHeaderConstants.cs" />
     <Compile Include="DeliveryAcknowledgement.cs" />
     <Compile Include="Common\Exceptions\DeviceAlreadyExistsException.cs" />

@@ -10,7 +10,6 @@ namespace Microsoft.Azure.Devices.Client
 #if !NETMF
     using System.Collections.Generic;
     using System.Globalization;
-    using System.Linq.Expressions;
     using System.Text.RegularExpressions;
     using System.Net;
     using SharedAccessSignatureParser = Microsoft.Azure.Devices.Client.SharedAccessSignature;
@@ -36,18 +35,18 @@ namespace Microsoft.Azure.Devices.Client
 #endif
 
 #if !NETMF
-        static readonly string HostNamePropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.HostName)).Body).Member.Name; // todo: replace with nameof()
-        static readonly string DeviceIdPropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.DeviceId)).Body).Member.Name; // todo: replace with nameof()
-        static readonly string SharedAccessKeyNamePropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.SharedAccessKeyName)).Body).Member.Name; // todo: replace with nameof()
-        static readonly string SharedAccessKeyPropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.SharedAccessKey)).Body).Member.Name; // todo: replace with nameof()
-        static readonly string SharedAccessSignaturePropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.SharedAccessSignature)).Body).Member.Name; // todo: replace with nameof();
-        static readonly string AuthMechanismPropertyName = ((MemberExpression)((Expression<Func<IotHubConnectionStringBuilder, string>>)(_ => _.AuthMechanism)).Body).Member.Name; // todo: replace with nameof()
+        static readonly string HostNamePropertyName = nameof(HostName);
+        static readonly string DeviceIdPropertyName = nameof(DeviceId);
+        static readonly string SharedAccessKeyNamePropertyName = nameof(SharedAccessKeyName); 
+        static readonly string SharedAccessKeyPropertyName = nameof(SharedAccessKey); 
+        static readonly string SharedAccessSignaturePropertyName = nameof(SharedAccessSignature); 
+        static readonly string AuthSchemePropertyName =  nameof(AuthScheme);
         static readonly Regex HostNameRegex = new Regex(@"[a-zA-Z0-9_\-\.]+$", regexOptions);
         static readonly Regex DeviceIdRegex = new Regex(@"^[A-Za-z0-9\-:.+%_#*?!(),=@;$']{1,128}$", regexOptions);
         static readonly Regex SharedAccessKeyNameRegex = new Regex(@"^[a-zA-Z0-9_\-@\.]+$", regexOptions);
         static readonly Regex SharedAccessKeyRegex = new Regex(@"^.+$", regexOptions);
         static readonly Regex SharedAccessSignatureRegex = new Regex(@"^.+$", regexOptions);
-        static readonly Regex AuthMechanismRegex = new Regex(@"^[a-zA-Z0-9_\-@\.]+$", regexOptions);
+        static readonly Regex AuthSchemeRegex = new Regex(@"^[SAS|X509]+$", regexOptions);
 #endif
 
         string hostName;
@@ -136,7 +135,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         public string SharedAccessSignature { get; internal set; }
 
-        public string AuthMechanism { get; internal set; }
+        public AuthenticationScheme AuthScheme { get; internal set; }
 
         internal string IotHubName 
         {
@@ -168,7 +167,7 @@ namespace Microsoft.Azure.Devices.Client
             stringBuilder.AppendKeyValuePairIfNotEmpty(SharedAccessKeyNamePropertyName, this.SharedAccessKeyName);
             stringBuilder.AppendKeyValuePairIfNotEmpty(SharedAccessKeyPropertyName, this.SharedAccessKey);
             stringBuilder.AppendKeyValuePairIfNotEmpty(SharedAccessSignaturePropertyName, this.SharedAccessSignature);
-            stringBuilder.AppendKeyValuePairIfNotEmpty(AuthMechanismPropertyName, this.AuthMechanism);
+            stringBuilder.AppendKeyValuePairIfNotEmpty(AuthSchemePropertyName, this.AuthScheme);
             if (stringBuilder.Length > 0)
             {
                 stringBuilder.Remove(stringBuilder.Length - 1, 1);
@@ -229,7 +228,7 @@ namespace Microsoft.Azure.Devices.Client
             this.SharedAccessKeyName = GetConnectionStringOptionalValue(map, SharedAccessKeyNamePropertyName);
             this.SharedAccessKey = GetConnectionStringOptionalValue(map, SharedAccessKeyPropertyName);
             this.SharedAccessSignature = GetConnectionStringOptionalValue(map, SharedAccessSignaturePropertyName);
-            this.AuthMechanism = GetConnectionStringOptionalValue(map, AuthMechanismPropertyName);
+            this.AuthScheme =  GetConnectionStringOptionalValueOrDefault<AuthenticationScheme>(map, AuthSchemePropertyName, GetAuthScheme, true);
 #endif
             this.Validate();
         }
@@ -243,11 +242,23 @@ namespace Microsoft.Azure.Devices.Client
 
             if (!(this.SharedAccessKey.IsNullOrWhiteSpace() ^ this.SharedAccessSignature.IsNullOrWhiteSpace()))
             {
-                if (!string.Equals(this.AuthMechanism, "X509", StringComparison.OrdinalIgnoreCase))
+#if !WINDOWS_UWP && !PCL && !NETMF
+                if (this.AuthScheme != AuthenticationScheme.X509)
                 {
+#endif
                     throw new ArgumentException("Should specify either SharedAccessKey or SharedAccessSignature if X.509 certificate is not used");
+#if !WINDOWS_UWP && !PCL && !NETMF
                 }
+#endif
             }
+
+#if !WINDOWS_UWP && !PCL && !NETMF
+            if ((this.AuthScheme == AuthenticationScheme.X509 || this.Certificate != null) &&
+                (!this.SharedAccessKey.IsNullOrWhiteSpace() || !this.SharedAccessSignature.IsNullOrWhiteSpace()))
+            {
+                throw new ArgumentException("Should not specify either SharedAccessKey or SharedAccessSignature if X.509 certificate is used");
+            }
+#endif
 
             if (this.IotHubName.IsNullOrWhiteSpace())
             {
@@ -274,7 +285,7 @@ namespace Microsoft.Azure.Devices.Client
             ValidateFormatIfSpecified(this.SharedAccessKeyName, SharedAccessKeyNamePropertyName, SharedAccessKeyNameRegex);
             ValidateFormatIfSpecified(this.SharedAccessKey, SharedAccessKeyPropertyName, SharedAccessKeyRegex);
             ValidateFormatIfSpecified(this.SharedAccessSignature, SharedAccessSignaturePropertyName, SharedAccessSignatureRegex);
-            ValidateFormatIfSpecified(this.AuthMechanism, AuthMechanismPropertyName, AuthMechanismRegex);
+            ValidateFormatIfSpecified(this.AuthScheme.ToString(), AuthSchemePropertyName, AuthSchemeRegex);
 #endif
         }
 
@@ -377,6 +388,25 @@ namespace Microsoft.Azure.Devices.Client
 #endif
             string iotHubName = index >= 0 ? hostName.Substring(0, index) : null;
             return iotHubName;
+        }
+
+        static bool GetAuthScheme(string input, bool ignoreCase, out AuthenticationScheme authScheme)
+        {
+            authScheme = AuthenticationScheme.SAS;
+            if (string.Equals(input, AuthenticationScheme.SAS.ToString(), ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+            {
+                authScheme = AuthenticationScheme.SAS;
+            }
+            else if (string.Equals(input, AuthenticationScheme.X509.ToString(), ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+            {
+                authScheme = AuthenticationScheme.X509;
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

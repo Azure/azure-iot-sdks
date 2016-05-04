@@ -54,6 +54,9 @@
     <Compile Include="..\Microsoft.Azure.Devices.Client\AuthenticationMethodFactory.cs">
       <Link>AuthenticationMethodFactory.cs</Link>
     </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\AuthenticationScheme.cs">
+      <Link>AuthenticationScheme.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Api\ClientApiVersionHelper.cs">
       <Link>ClientApiVersionHelper.cs</Link>
     </Compile>
@@ -231,12 +234,6 @@
     <Compile Include="..\Microsoft.Azure.Devices.Client\Common\WebApi\CustomHeaderConstants.cs">
       <Link>CustomHeaderConstants.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.Azure.Devices.Client\CredentialScope.cs">
-      <Link>CredentialScope.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.Azure.Devices.Client\CredentialType.cs">
-      <Link>CredentialType.cs</Link>
-    </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\DeliveryAcknowledgement.cs">
       <Link>DeliveryAcknowledgement.cs</Link>
     </Compile>
@@ -257,7 +254,7 @@
     </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\Http1TransportSettings.cs">
       <Link>Http1TransportSettings.cs</Link>
-    </Compile>    
+    </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\IAuthenticationMethod.cs">
       <Link>IAuthenticationMethod.cs</Link>
     </Compile>

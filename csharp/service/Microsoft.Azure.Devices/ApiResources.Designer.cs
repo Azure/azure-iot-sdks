@@ -88,6 +88,15 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Device {0} can use either symmetric keys or thumbprints..
+        /// </summary>
+        internal static string DeviceAuthenticationInvalid {
+            get {
+                return ResourceManager.GetString("DeviceAuthenticationInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The device identifier {0} is invalid..
         /// </summary>
         internal static string DeviceIdInvalid {
@@ -111,6 +120,15 @@ namespace Microsoft.Azure.Devices {
         internal static string DeviceKeysInvalid {
             get {
                 return ResourceManager.GetString("DeviceKeysInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Either both primary and secondary keys must be specified or neither one to auto generate on service side..
+        /// </summary>
+        internal static string DeviceKeysInvalid1 {
+            get {
+                return ResourceManager.GetString("DeviceKeysInvalid1", resourceCulture);
             }
         }
         
@@ -264,6 +282,15 @@ namespace Microsoft.Azure.Devices {
         internal static string SizeExceedsRemainingBufferSpace {
             get {
                 return ResourceManager.GetString("SizeExceedsRemainingBufferSpace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid X.509 thumbprint.
+        /// </summary>
+        internal static string StringIsNotThumbprint {
+            get {
+                return ResourceManager.GetString("StringIsNotThumbprint", resourceCulture);
             }
         }
     }

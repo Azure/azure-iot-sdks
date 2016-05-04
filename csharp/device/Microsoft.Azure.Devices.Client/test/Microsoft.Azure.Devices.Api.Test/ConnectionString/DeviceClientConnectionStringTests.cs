@@ -4,7 +4,6 @@
 namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
 {
     using System;
-    using System.Security.Cryptography.X509Certificates;
     using Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Devices.Client.ApiTest;
     using Microsoft.Azure.Devices.Client.Transport;
@@ -13,6 +12,9 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
     [TestClass]
     public class DeviceClientConnectionStringTests
     {
+        const string LocalCertFilename = "..\\..\\Microsoft.Azure.Devices.Api.Test\\LocalNoChain.pfx";
+        const string LocalCertPasswordFile = "..\\..\\Microsoft.Azure.Devices.Api.Test\\TestCertsPassword.txt";
+
         [TestMethod]
         [TestCategory("CIT")]
         public void DeviceClient_Create_DeviceScope_SharedAccessSignature_Test()
@@ -79,15 +81,69 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
 
         [TestMethod]
         [TestCategory("CIT")]
-        public void DeviceClient_ConnectionString_X509Certificate_Test()
+        public void DeviceClient_ConnectionString_X509Certificate_DefaultTest()
         {
             string hostName = "acme.azure-devices.net";
-
-            var cert = CertificateHelper.InstallCertificateFromFile("device.pfx", "device.txt");
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
             var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
 
             var deviceClient = DeviceClient.Create(hostName, authMethod);
+        }
 
+        [TestMethod]
+        [TestCategory("CIT")]
+        public void DeviceClient_ConnectionString_X509Certificate_AmqpTest()
+        {
+            string hostName = "acme.azure-devices.net";
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
+
+            var deviceClient = DeviceClient.Create(hostName, authMethod, TransportType.Amqp);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        public void DeviceClient_ConnectionString_X509Certificate_AmqpWsTest()
+        {
+            string hostName = "acme.azure-devices.net";
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
+
+            var deviceClient = DeviceClient.Create(hostName, authMethod, TransportType.Amqp_WebSocket_Only);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        public void DeviceClient_ConnectionString_X509Certificate_AmqpTcpTest()
+        {
+            string hostName = "acme.azure-devices.net";
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
+
+            var deviceClient = DeviceClient.Create(hostName, authMethod, TransportType.Amqp_Tcp_Only);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        public void DeviceClient_ConnectionString_X509Certificate_HttpTest()
+        {
+            string hostName = "acme.azure-devices.net";
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
+
+            var deviceClient = DeviceClient.Create(hostName, authMethod, TransportType.Http1);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void DeviceClient_ConnectionString_X509Certificate_MqttTest()
+        {
+            string hostName = "acme.azure-devices.net";
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
+
+            var deviceClient = DeviceClient.Create(hostName, authMethod, TransportType.Mqtt);
         }
 
         [TestMethod]

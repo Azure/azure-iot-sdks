@@ -46,6 +46,42 @@ namespace Microsoft.Azure.Devices
             }
         }
 
+        /// <summary>
+        /// Checks if the contents are valid
+        /// </summary>
+        /// <param name="throwArgumentException"></param>
+        /// <returns>bool</returns>
+        public bool IsValid(bool throwArgumentException)
+        {
+            if (!this.IsEmpty())
+            {
+                // either both keys should be specified or neither once should be specified (in which case we will create both the keys in the service)
+                // we do allow primary and secondary keys to be identical
+                if (string.IsNullOrWhiteSpace(this.PrimaryKey) || string.IsNullOrWhiteSpace(this.SecondaryKey))
+                {
+                    if (throwArgumentException)
+                    {
+                        throw new ArgumentException(ApiResources.DeviceKeysInvalid);
+                    }
+
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if the fields are populated
+        /// </summary>
+        /// <returns>bool</returns>
+        public bool IsEmpty()
+        {
+            return string.IsNullOrWhiteSpace(this.PrimaryKey) && string.IsNullOrWhiteSpace(this.SecondaryKey);
+        }
+
         static void ValidateDeviceAuthenticationKey(string key, string paramName)
         {
             if (key != null)

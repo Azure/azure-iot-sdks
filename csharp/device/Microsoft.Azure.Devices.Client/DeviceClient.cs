@@ -138,45 +138,7 @@ namespace Microsoft.Azure.Devices.Client
 #if !WINDOWS_UWP && !PCL && !NETMF
             if (authenticationMethod is DeviceAuthenticationWithX509Certificate)
             {
-                switch (transportType)
-                {
-                    case TransportType.Amqp:
-                        return CreateFromConnectionString(connectionStringBuilder.ToString(), new ITransportSettings[]
-                        {
-                            new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
-                            {
-                                ClientCertificate = connectionStringBuilder.Certificate
-                            },
-                            new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
-                            {
-                                ClientCertificate = connectionStringBuilder.Certificate
-                            },
-                        });
-                    case TransportType.Amqp_Tcp_Only:
-                        return CreateFromConnectionString(connectionStringBuilder.ToString(), new ITransportSettings[]
-                        {
-                            new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
-                            {
-                                ClientCertificate = connectionStringBuilder.Certificate
-                            }
-                        });
-                    case TransportType.Amqp_WebSocket_Only:
-                        return CreateFromConnectionString(connectionStringBuilder.ToString(), new ITransportSettings[]
-                        {
-                            new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
-                            {
-                                ClientCertificate = connectionStringBuilder.Certificate
-                            }
-                        });
-                    case TransportType.Http1:
-                        return CreateFromConnectionString(connectionStringBuilder.ToString(), new ITransportSettings[]
-                        {
-                            new Http1TransportSettings()
-                            {
-                                ClientCertificate = connectionStringBuilder.Certificate
-                            }
-                        });
-                }
+                return CreateFromConnectionString(connectionStringBuilder.ToString(), PopulateCertificateInTransportSettings(connectionStringBuilder, transportType));
             }
 #endif
             return CreateFromConnectionString(connectionStringBuilder.ToString(), transportType);
@@ -203,6 +165,12 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authenticationMethod);
+#if !WINDOWS_UWP && !PCL && !NETMF
+            if (authenticationMethod is DeviceAuthenticationWithX509Certificate)
+            {
+                return CreateFromConnectionString(connectionStringBuilder.ToString(), PopulateCertificateInTransportSettings(connectionStringBuilder, transportSettings));
+            }
+#endif
             return CreateFromConnectionString(connectionStringBuilder.ToString(), transportSettings);
         }
 #endif
@@ -791,7 +759,7 @@ namespace Microsoft.Azure.Devices.Client
                     await helper.CloseAsync();
 
 #if WINDOWS_UWP
-    // UWP does not use sockets
+                    // UWP does not use sockets
                     if (!(exception is IotHubCommunicationException || exception is TimeoutException || exception is AggregateException))
 #else
                     if (!(exception is IotHubCommunicationException || exception is TimeoutException || exception is SocketException || exception is AggregateException))
@@ -838,5 +806,73 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ObjectDisposedException("DeviceClient object is closed.");
             }
         }
+
+#if !WINDOWS_UWP && !PCL
+        static ITransportSettings[] PopulateCertificateInTransportSettings(IotHubConnectionStringBuilder connectionStringBuilder, TransportType transportType)
+        {
+            switch (transportType)
+            {
+                case TransportType.Amqp:
+                    return new ITransportSettings[]
+                    {
+                        new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        },
+                        new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        },
+                    };
+                case TransportType.Amqp_Tcp_Only:
+                    return new ITransportSettings[]
+                    {
+                        new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        }
+                    };
+                case TransportType.Amqp_WebSocket_Only:
+                    return new ITransportSettings[]
+                    {
+                        new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        }
+                    };
+                case TransportType.Http1:
+                    return new ITransportSettings[]
+                    {
+                        new Http1TransportSettings()
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        }
+                    };
+                default:
+                    throw new InvalidOperationException("Unsupported Transport {0}".FormatInvariant(transportType));
+            }
+        }
+
+        static ITransportSettings[] PopulateCertificateInTransportSettings(IotHubConnectionStringBuilder connectionStringBuilder, ITransportSettings[] transportSettings)
+        {
+            foreach (var transportSetting in  transportSettings)
+            {
+                switch (transportSetting.GetTransportType())
+                {
+                    case TransportType.Amqp_WebSocket_Only:
+                    case TransportType.Amqp_Tcp_Only:
+                        ((AmqpTransportSettings)transportSetting).ClientCertificate = connectionStringBuilder.Certificate;
+                        break;
+                    case TransportType.Http1:
+                        ((Http1TransportSettings)transportSetting).ClientCertificate = connectionStringBuilder.Certificate;
+                        break;
+                    case TransportType.Mqtt:
+                        throw new InvalidOperationException("Unsupported Transport {0}".FormatInvariant(transportSetting.GetTransportType()));
+                }
+            }
+
+            return transportSettings;
+        }
+#endif
     }
 }
