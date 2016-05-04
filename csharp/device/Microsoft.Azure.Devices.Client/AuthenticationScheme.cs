@@ -3,7 +3,10 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
-    public enum AuthenticationScheme
+    /// <summary>
+    /// Specifies the Authentication Scheme used by Device Client
+    /// </summary>
+    public enum S
     {
         // Shared Access Signature
         SAS = 0,
