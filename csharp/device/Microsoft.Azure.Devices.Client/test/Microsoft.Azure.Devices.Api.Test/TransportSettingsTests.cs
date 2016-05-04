@@ -174,5 +174,17 @@ namespace Microsoft.Azure.Devices.Client.Test
 
             var deviceClient = DeviceClient.Create(hostName, authMethod, new ITransportSettings[] { new Http1TransportSettings()});
         }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("TransportSettings")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void NullX509Certificate_AmqpTransportSettingsTest()
+        {
+            string hostName = "acme.azure-devices.net";
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", null);
+
+            var deviceClient = DeviceClient.Create(hostName, authMethod, new ITransportSettings[] { new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 100) });
+        }
     }
 }

@@ -138,6 +138,11 @@ namespace Microsoft.Azure.Devices.Client
 #if !WINDOWS_UWP && !PCL && !NETMF
             if (authenticationMethod is DeviceAuthenticationWithX509Certificate)
             {
+                if (connectionStringBuilder.Certificate == null)
+                {
+                    throw new ArgumentException("certificate must be present in DeviceAuthenticationWithX509Certificate");
+                }
+
                 return CreateFromConnectionString(connectionStringBuilder.ToString(), PopulateCertificateInTransportSettings(connectionStringBuilder, transportType));
             }
 #endif
@@ -168,6 +173,11 @@ namespace Microsoft.Azure.Devices.Client
 #if !WINDOWS_UWP && !PCL && !NETMF
             if (authenticationMethod is DeviceAuthenticationWithX509Certificate)
             {
+                if (connectionStringBuilder.Certificate == null)
+                {
+                    throw new ArgumentException("certificate must be present in DeviceAuthenticationWithX509Certificate");
+                }
+
                 return CreateFromConnectionString(connectionStringBuilder.ToString(), PopulateCertificateInTransportSettings(connectionStringBuilder, transportSettings));
             }
 #endif

@@ -187,7 +187,7 @@
     <value>The device identifier {0} is invalid.</value>
   </data>
   <data name="DeviceAuthenticationInvalid" xml:space="preserve">
-    <value>Device {0} can use either symmetric keys or thumbprints.</value>
+    <value>Device {0} cannot specify both symmetric keys and thumbprints.</value>
   </data>
   <data name="DeviceKeysInvalid1" xml:space="preserve">
     <value>Either both primary and secondary keys must be specified or neither one to auto generate on service side.</value>

@@ -88,7 +88,7 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Device {0} can use either symmetric keys or thumbprints..
+        ///   Looks up a localized string similar to Device {0} cannot specify both symmetric keys and thumbprints..
         /// </summary>
         internal static string DeviceAuthenticationInvalid {
             get {

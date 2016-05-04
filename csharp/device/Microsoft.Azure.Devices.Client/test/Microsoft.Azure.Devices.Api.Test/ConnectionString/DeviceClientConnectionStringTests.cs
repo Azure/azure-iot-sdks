@@ -148,6 +148,17 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
 
         [TestMethod]
         [TestCategory("CIT")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void DeviceClient_ConnectionString_X509Certificate_NullCertificateTest()
+        {
+            string hostName = "acme.azure-devices.net";
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", null);
+
+            var deviceClient = DeviceClient.Create(hostName, authMethod, TransportType.Amqp_WebSocket_Only);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
         public void DeviceClient_IotHubConnectionStringBuilder_Test()
         {
             string connectionString = "HostName=acme.azure-devices.net;SharedAccessKeyName=AllAccessKey;DeviceId=device1;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";

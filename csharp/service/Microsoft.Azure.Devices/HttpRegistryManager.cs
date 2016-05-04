@@ -598,19 +598,6 @@ namespace Microsoft.Azure.Devices
             }
         }
 
-        //static void ValidateDeviceAuthentication(AuthenticationMechanism authenticationMechanism)
-        //{
-        //    if (authenticationMechanism.SymmetricKey != null)
-        //    {
-        //        // either both keys should be specified or neither once should be specified (in which case 
-        //        // we will create both the keys in the service)
-        //        if (string.IsNullOrWhiteSpace(authenticationMechanism.SymmetricKey.PrimaryKey) ^ string.IsNullOrWhiteSpace(authenticationMechanism.SymmetricKey.SecondaryKey))
-        //        {
-        //            throw new ArgumentException(ApiResources.DeviceKeysInvalid);
-        //        }
-        //    }
-        //}
-
         public static bool ValidateDeviceAuthentication(AuthenticationMechanism authentication, string deviceId)
         {
             if (authentication != null)
