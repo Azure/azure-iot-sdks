@@ -402,7 +402,9 @@ Reading the AMQP message content, notifying the message reception:
 
 **SRS_IOTHUBTRANSPORTUAMQP_17_001: [**IoTHubTransportAMQP_Register shall return NULL if device, or waitingToSend are NULL.**]**
 
-**SRS_IOTHUBTRANSPORTUAMQP_03_001: [**IoTHubTransportAMQP_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.**]**
+**SRS_IOTHUBTRANSPORTUAMQP_03_002: [**IoTHubTransportAMQP_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.**]**
+
+**SRS_IOTHUBTRANSPORTUAMQP_03_003: [**IoTHubTransportAMQP_Register shall return NULL if both deviceKey and deviceSasToken are not NULL.**]**
 
 **SRS_IOTHUBTRANSPORTUAMQP_17_002: [**IoTHubTransportAMQP_Register shall return NULL if deviceId or deviceKey or deviceSasToken do not match the deviceId, deviceKey or deviceSasToken passed in during IoTHubTransportAMQP_Create.**]**
 

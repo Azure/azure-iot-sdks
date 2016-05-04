@@ -3739,6 +3739,30 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_and_deviceSasToken_nul
 
 	///cleanup
 	IoTHubTransportHttp_Destroy(handle);
+}
+
+/* Tests_SRS_TRANSPORTMULTITHTTP_03_015: [If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are both NOT NULL, then IoTHubTransportHttp_Register shall return NULL.]*/
+TEST_FUNCTION(IoTHubTransportHttp_Register_both_deviceKey_and_deviceSasToken_are_provided_returns_null)
+{
+	///arrange
+	CIoTHubTransportHttpMocks mocks;
+	IOTHUB_DEVICE_CONFIG myDevice;
+	myDevice.deviceId = TEST_DEVICE_ID;
+	myDevice.deviceKey = TEST_DEVICE_KEY;
+	myDevice.deviceSasToken = TEST_DEVICE_TOKEN;
+
+	auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+	mocks.ResetAllCalls();
+
+	///act
+	auto devHandle = IoTHubTransportHttp_Register(handle, &myDevice, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+	///assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	///cleanup
+	IoTHubTransportHttp_Destroy(handle);
 
 }
 

@@ -118,8 +118,9 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 `IoTHubTransportHttp_Register` shall bind an IoT Hub device to a transport handle and return a device handle for subsequent device specific calls to this API.
 
 **SRS_TRANSPORTMULTITHTTP_17_142: [** If `handle` is `NULL` or `device` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
-**SRS_TRANSPORTMULTITHTTP_17_014: [** If IOTHUB_DEVICE_CONFIG field `deviceId` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_014: [** If IOTHUB_DEVICE_CONFIG field `deviceId` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**
 **SRS_TRANSPORTMULTITHTTP_17_015: [** If IOTHUB_DEVICE_CONFIG fields `deviceKey` and `deviceSasToken` are `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
+**SRS_TRANSPORTMULTITHTTP_03_015: [** If IOTHUB_DEVICE_CONFIG fields `deviceKey` and `deviceSasToken` are both NOT `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**
 **SRS_TRANSPORTMULTITHTTP_17_143: [** If parameter `iotHubClientHandle` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_016: [** If parameter `waitingToSend` is `NULL`, then `IoTHubTransportHttp_Register` shall return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_137: [** `IoTHubTransportHttp_Register` shall search the devices list for any device matching name `deviceId`. If `deviceId` is found it shall return NULL. **]**   

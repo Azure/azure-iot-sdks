@@ -1261,6 +1261,11 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, co
 		{
 			result = NULL;
 		}
+		// Codes_SRS_IOTHUB_MQTT_TRANSPORT_03_002: [ IoTHubTransportMqtt_Register shall return NULL if both deviceKey and deviceSasToken are provided.]
+		else if ((device->deviceKey != NULL) && (device->deviceSasToken != NULL))
+		{
+			result = NULL;
+		}
 		else
 		{
 			// Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_003: [ IoTHubTransportMqtt_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportMqtt_Create.]

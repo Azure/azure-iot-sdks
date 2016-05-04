@@ -4521,7 +4521,7 @@ TEST_FUNCTION(AMQP_Register_transport_device_null_returns_null)
 	cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_03_001: [IoTHubTransportAMQP_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.]
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_03_002: [IoTHubTransportAMQP_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.]
 TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_and_deviceSasToken_null_returns_null)
 {
 	// arrange
@@ -4530,6 +4530,39 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_and_deviceSasToken_null_ret
 	device.deviceId = TEST_DEVICE_ID;
 	device.deviceKey = NULL;
 	device.deviceSasToken = NULL;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+
+	// assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_03_003: [IoTHubTransportAMQP_Register shall return NULL if both deviceKey and deviceSasToken are not NULL.] 
+TEST_FUNCTION(AMQP_Register_transport_deviceKey_and_deviceSasToken_provided_returns_null)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = TEST_DEVICE_ID;
+	device.deviceKey = TEST_DEVICE_KEY;
+	device.deviceSasToken = TEST_DEVICE_SAS;
 
 	DLIST_ENTRY wts;
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);

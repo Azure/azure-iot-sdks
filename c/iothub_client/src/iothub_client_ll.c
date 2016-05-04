@@ -222,6 +222,10 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
 				{
 					LogError("deviceKey/deviceSasToken not found");
 				}
+				else if (config->deviceKey != NULL && config->deviceSasToken != NULL)
+				{
+					LogError("Both device Key & SAS token are defined. Only one should be provided.");
+				}
 				else
 				{
 					/* SRS_IOTHUBCLIENT_LL_12_011: [IoTHubClient_LL_CreateFromConnectionString shall call into the IoTHubClient_LL_Create API with the current structure and returns with the return value of it] */

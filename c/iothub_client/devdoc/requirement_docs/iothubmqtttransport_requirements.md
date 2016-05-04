@@ -59,6 +59,7 @@ This function registers a device with the transport.  The MQTT transport only su
 **SRS_IOTHUB_MQTT_TRANSPORT_17_001: [** `IoTHubTransportMqtt_Register` shall return `NULL` if the `TRANSPORT_LL_HANDLE` is `NULL`.**]**   
 **SRS_IOTHUB_MQTT_TRANSPORT_17_002: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `device`, `waitingToSend` are `NULL`.**]**     
 **SRS_IOTHUB_MQTT_TRANSPORT_03_001: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `deviceId`, or both `deviceKey` and `deviceSasToken` are `NULL`.**]**     
+**SRS_IOTHUB_MQTT_TRANSPORT_03_002: [** `IoTHubTransportMqtt_Register` shall return `NULL` if both `deviceKey` and `deviceSasToken` are provided.**]**
 **SRS_IOTHUB_MQTT_TRANSPORT_17_003: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `deviceId` or `deviceKey` do not match the `deviceId` and `deviceKey` passed in during `IoTHubTransportMqtt_Create`.**]**      
 **SRS_IOTHUB_MQTT_TRANSPORT_17_004: [** `IoTHubTransportMqtt_Register` shall return the `TRANSPORT_LL_HANDLE` as the `IOTHUB_DEVICE_HANDLE`. **]**    
 

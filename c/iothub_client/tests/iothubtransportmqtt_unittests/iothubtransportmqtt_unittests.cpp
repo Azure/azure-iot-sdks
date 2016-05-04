@@ -42,6 +42,7 @@ extern "C" void gballoc_free(void* ptr);
 
 static const char* TEST_DEVICE_ID = "thisIsDeviceID";
 static const char* TEST_DEVICE_KEY = "thisIsDeviceKey";
+static const char* TEST_DEVICE_SAS = "thisIsDeviceSasToken";
 static const char* TEST_IOTHUB_NAME = "thisIsIotHubName";
 static const char* TEST_IOTHUB_SUFFIX = "thisIsIotHubSuffix";
 static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME = "ssl://thisIsAGatewayHostName.net";
@@ -602,6 +603,20 @@ static void SetupIothubTransportConfig(IOTHUBTRANSPORT_CONFIG* config, const cha
 	g_iothubClientConfig.protocol = MQTT_Protocol;
 	g_iothubClientConfig.deviceId = deviceId;
 	g_iothubClientConfig.deviceKey = deviceKey;
+	g_iothubClientConfig.iotHubName = iotHubName;
+	g_iothubClientConfig.iotHubSuffix = iotHubSuffix;
+	g_iothubClientConfig.protocolGatewayHostName = protocolGatewayHostName;
+	config->waitingToSend = &g_waitingToSend;
+	config->upperConfig = &g_iothubClientConfig;
+}
+
+static void SetupIothubTransportConfigWithKeyAndSasToken(IOTHUBTRANSPORT_CONFIG* config, const char* deviceId, const char* deviceKey, const char* deviceSasToken,
+	const char* iotHubName, const char* iotHubSuffix, const char* protocolGatewayHostName)
+{
+	g_iothubClientConfig.protocol = MQTT_Protocol;
+	g_iothubClientConfig.deviceId = deviceId;
+	g_iothubClientConfig.deviceKey = deviceKey;
+	g_iothubClientConfig.deviceSasToken = deviceSasToken;
 	g_iothubClientConfig.iotHubName = iotHubName;
 	g_iothubClientConfig.iotHubSuffix = iotHubSuffix;
 	g_iothubClientConfig.protocolGatewayHostName = protocolGatewayHostName;
@@ -3442,6 +3457,29 @@ TEST_FUNCTION(IoTHubTransportMqtt_Register_deviceKey_null_and_deviceSasToken_nul
 	IOTHUBTRANSPORT_CONFIG config = { 0 };
 	SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 	IOTHUB_DEVICE_CONFIG deviceConfig = { TEST_DEVICE_ID, NULL, NULL };
+
+	auto handle = IoTHubTransportMqtt_Create(&config);
+	mocks.ResetAllCalls();
+
+	// act
+	auto devHandle = IoTHubTransportMqtt_Register(handle, &deviceConfig, TEST_IOTHUB_CLIENT_LL_HANDLE, config.waitingToSend);
+
+	// assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	//cleanup
+	IoTHubTransportMqtt_Destroy(handle);
+}
+
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_03_002: [ IoTHubTransportMqtt_Register shall return NULL if both deviceKey and deviceSasToken are provided.]
+TEST_FUNCTION(IoTHubTransportMqtt_Register_deviceKey_and_deviceSasToken_both_provided_returns_null)
+{
+	// arrange
+	CIoTHubTransportMqttMocks mocks;
+	IOTHUBTRANSPORT_CONFIG config = { 0 };
+	SetupIothubTransportConfigWithKeyAndSasToken(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_DEVICE_SAS, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+	IOTHUB_DEVICE_CONFIG deviceConfig = { TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_DEVICE_SAS };
 
 	auto handle = IoTHubTransportMqtt_Create(&config);
 	mocks.ResetAllCalls();

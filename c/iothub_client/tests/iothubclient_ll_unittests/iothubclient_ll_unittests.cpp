@@ -629,6 +629,124 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceSasToken_suc
 	IoTHubClient_LL_Destroy(result);
 }
 
+/* SRS_IOTHUBCLIENT_LL_03_010: [IoTHubClient_LL_CreateFromConnectionString shall return NULL if both a deviceKey & a deviceSasToken are specified.] */
+TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceKey_and_DeviceSasToken_fails)
+{
+	///arrange
+	CIoTHubClientLLMocks mocks;
+	STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+
+	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+		.IgnoreArgument(1);
+
+	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR));
+	STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
+	STRICT_EXPECTED_CALL(mocks, STRING_new());
+	STRICT_EXPECTED_CALL(mocks, STRING_new());
+	STRICT_EXPECTED_CALL(mocks, STRING_new());
+	STRICT_EXPECTED_CALL(mocks, STRING_new());
+
+	/* loop 1 - HostName*/
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(0);
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(0);
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+		.SetReturn(TEST_HOSTNAME_TOKEN);
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(0);
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(0);
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+
+	/* loop 2 - DeviceId */
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(0);
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+		.SetReturn(TEST_DEVICEID_TOKEN);
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+		.SetReturn(TEST_CHAR);
+
+	/* loop 3 - DeviceSasToken */
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(0);
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(0);
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+		.SetReturn(TEST_DEVICESAS_TOKEN);
+	STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+		.SetReturn(TEST_CHAR);
+
+	/* loop 4 - DeviceKey */
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(0);
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(0);
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+		.SetReturn(TEST_DEVICEKEY_TOKEN);
+	STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+		.IgnoreArgument(1);
+	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+		.SetReturn(TEST_CHAR);
+
+	/* loop exit */
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+		.SetReturn(1);
+
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+
+	EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+
+	EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+
+	/* underlying IoTHubClient_LL_Create call */
+
+	//STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+	//	.IgnoreArgument(1);
+	//STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+	//	.IgnoreArgument(1);
+
+	//STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+
+	//STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
+	//	.IgnoreArgument(1);
+
+	//STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
+	//	.IgnoreArgument(1)
+	//	.SetReturn((TRANSPORT_LL_HANDLE)0x42);
+
+	//STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+	//	.IgnoreArgument(1);
+	//STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+	//	.IgnoreAllArguments();
+
+	///act
+	auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
+
+	///assert
+	ASSERT_ARE_EQUAL(void_ptr, NULL, result);
+	mocks.AssertActualAndExpectedCalls();
+
+	///cleanup
+	IoTHubClient_LL_Destroy(result);
+}
+
 /* Tests_SRS_IOTHUBCLIENT_LL_04_001: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of key/value pair GatewayHostName. If it does exist it shall pass the value to IoTHubClient_LL_Create API.] */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_withGatewayHostName_succeeds)
 {

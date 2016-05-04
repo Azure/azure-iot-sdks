@@ -1556,8 +1556,13 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE han
 	{
 		AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)handle;
 
-		// Codes_SRS_IOTHUBTRANSPORTUAMQP_03_001: [IoTHubTransportAMQP_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.**]*/
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_03_002: [IoTHubTransportAMQP_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.**]
 		if ((device->deviceId == NULL) || (device->deviceSasToken == NULL && device->deviceKey == NULL))
+		{
+			result = NULL;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_03_003: [IoTHubTransportAMQP_Register shall return NULL if both deviceKey and deviceSasToken are not NULL.]
+		else if ( (device->deviceSasToken != NULL) && (device->deviceKey != NULL) )
 		{
 			result = NULL;
 		}

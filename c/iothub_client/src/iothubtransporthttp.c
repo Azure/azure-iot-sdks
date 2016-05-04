@@ -505,7 +505,13 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, co
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_014: [ If IOTHUB_DEVICE_CONFIG field deviceId is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_016: [ If parameter waitingToSend is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
 		/*Codes_SRS_TRANSPORTMULTITHTTP_17_143: [ If parameter iotHubClientHandle is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
-		LogError("All parameters must be non-NULL");
+		LogError("Some parameters expected to be non-NULL");
+		result = NULL;
+	}
+	else if ( (device->deviceKey != NULL) && (device->deviceSasToken != NULL) )
+	{
+		/* Codess_SRS_TRANSPORTMULTITHTTP_03_015: [If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are both NOT NULL, then IoTHubTransportHttp_Register shall return NULL.]*/
+		LogError("deviceKey & deviceSasToken cannot be both defined.");
 		result = NULL;
 	}
 	else
