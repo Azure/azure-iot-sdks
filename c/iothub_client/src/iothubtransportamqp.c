@@ -386,6 +386,7 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
 				return_value = __LINE__;
 			}
 		}
+        properties_destroy(uamqp_message_properties);
 	}
 
 	return return_value;

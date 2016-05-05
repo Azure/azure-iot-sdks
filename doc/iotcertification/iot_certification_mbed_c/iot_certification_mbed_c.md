@@ -1,4 +1,4 @@
-How to Certify IoT devices running Mbed OS with Azure IoT SDK
+﻿How to Certify IoT devices running Mbed OS with Azure IoT SDK
 ===
 ---
 
@@ -201,9 +201,9 @@ This section walks you through building, deploying and validating the IoT Client
          http://developer.mbed.org/users/mbed_official/code/mbed-rtos/
          http://mbed.org/users/mbed_official/code/mbed/
 
-21.  Import Proton library by repeating Steps 16 and 17 and enter the following URL into the Source URL field. Once done click **Import**:
+21.  Import the azure-uamqp-c library by repeating Steps 16 and 17 and enter the following URL into the Source URL field. Once done click **Import**:
 
-         http://developer.mbed.org/users/AzureIoTClient/code/proton-c-mbed/
+         https://developer.mbed.org/users/AzureIoTClient/code/azure_uamqp_c/
 
 22.  Click **Compile** from main menu to build the program. If the build is successful, a .bin file with the name of your project will get generated. Save this file on your machine. It will be used in next step.
     ![Import\_Library](images/3_2_06.png)

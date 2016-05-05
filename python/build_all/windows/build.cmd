@@ -138,6 +138,8 @@ if %run-ut%==1 (
     cd %build-root%\device\tests
     python iothub_client_ut.py
     if ERRORLEVEL 1 exit /b 1
+    python iothub_client_map_test.py
+    if ERRORLEVEL 1 exit /b 1
     echo Python unit test PASSED
 )
 
