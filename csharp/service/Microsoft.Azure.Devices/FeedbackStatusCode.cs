@@ -15,6 +15,7 @@ namespace Microsoft.Azure.Devices
         Success = 0,
         Expired = 1,
         DeliveryCountExceeded = 2,
-        Rejected = 3
+        Rejected = 3,
+        Purged = 4
     }
 }

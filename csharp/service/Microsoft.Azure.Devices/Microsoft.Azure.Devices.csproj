@@ -218,6 +218,7 @@
     <Compile Include="IHttpClientHelper.cs" />
     <Compile Include="ImportDevicesRequest.cs" />
     <Compile Include="ImportMode.cs" />
+    <Compile Include="PurgeMessageQueueResult.cs" />
     <Compile Include="IotHubApiResources.cs" />
     <Compile Include="IotHubConnection.cs" />
     <Compile Include="IotHubConnectionString.cs" />
