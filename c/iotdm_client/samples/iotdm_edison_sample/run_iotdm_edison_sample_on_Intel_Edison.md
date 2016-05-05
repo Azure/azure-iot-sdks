@@ -43,22 +43,25 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
     git clone --recursive --branch dmpreview https://github.com/Azure/azure-iot-sdks.git
     ```
 
-    Note: **git** on Edison may not support the **submodule** command. In this case you see an error message for the above command. As a workaround you need to process the different submodules manually. In the **azure-iot-sdks** folder, execute the following command:
+    Note: **git** on Edison does not support the **submodule** command. You need to process the submodules manually. To do that follow the steps below:
 
     ```
-    find . –name .gitmodules
-    ```
-
-    Navigate to each directory with a **.gitmodules** file and **cat** the content of the file. For each section in the file, execute the following command:
-
-    ```
-    git clone <url> <path>
-    ```
-
-    ...where &lt;url&gt; and &lt;path&gt; come from the actual section of the .gitmodule you are processing. When you have processed a section, check if there are more submodules to process by executing:
-
-    ```
-    find . –name .gitmodules
+    cd ~/azure-iot-sdks
+    mkdir -p c/azure-c-shared-utility
+    pushd c/azure-c-shared-utility
+    git clone https://github.com/Azure/azure-c-shared-utility.git .
+    git checkout d22667f741684b4e79f471d2057103aa796a52e8
+    popd
+    mkdir -p c/wakaama
+    pushd c/wakaama
+    git clone https://github.com/mhshami01/wakaama.git .
+    git checkout edb4a4a50f5f8184b309a79ed55c1294943ce587
+    popd
+    mkdir -p c/wakaama/tests/utils/tinydtls
+    pushd c/wakaama/tests/utils/tinydtls
+    git clone https://git.eclipse.org/r/tinydtls/org.eclipse.tinydtls .
+    git checkout f623c23ba4b9589147a19ef25a31b4cd0a7514e3
+    popd
     ```
 
 3.  Configure the IoTHub connection in the source (optional)
@@ -75,7 +78,7 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
 
     ```
     cd ~/azure-iot-sdks/c/build_all/linux
-    ./build.sh
+    ./build.sh --skip-e2e-tests --skip-unittests --no-mqtt --no-amqp --no-http
     ```
 
 5.  Run the sample
@@ -84,7 +87,7 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
 
     ```
     cd ~/cmake/iotdm_client/samples/iotdm_edison_sample/
-    ./iotdm\_edison\_sample "[device connection string]"
+    ./iotdm_edison_sample "[device connection string]"
     ```
 
     Note to rebuild an individual component, you can run make in ~/cmake/path/to/component you want to rebuild. To rebuild iotdm_simple_sample after changing the connection string simply type:
@@ -93,6 +96,31 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
     make
     ```    
     When the iotdm\_simple\_sample runs, the device is ready to receive and process requests from the IoT Hub service. Notice that when the device connects to IoT Hub, the service will automatically start to observe resources on the device. The device libraries will invoke the device callbacks to retrieve the latest values from the device and provide them to the service.
+
+
+## Running a firmware update job on the Intel Edison
+
+1.  Create an image using the instructions in [How to create a firmware image for Intel Edison](https://github.com/Azure/azure-iot-sdks/blob/dmpreview/c/iotdm_client/samples/iotdm_edison_sample/how_to_create_an_image_for_Intel_Edison.md)
+
+2.  Transfer your new image “edison.zip” to your Edison device. Place it in the folder ~/home/root/
+
+3.  In your ~/home/root/ folder create a file called "**.cs**" and add your device connection string to it. Save the file.
+
+4.  Run the iotdm\_edison\_sample application you created earlier:
+
+    ```
+    cd ~/cmake/iotdm_client/samples/iotdm_edison_sample/
+    ./iotdm_edison_sample
+    ```    
+
+5. To apply the new image on your Edison device use the ScheduleFirmwareUpdateAsync in the IoT Hub .NET Service SDK or the JobClient\#scheduleFirmwareUpdate in the Node.js service SDK. As the packageURI parameter use "file:////home/root/edison.zip" (note the 4 backslashes is intentional)
+
+    After the firmware has been applied and the machine reboots, you can prepare your machine to accept a new firmware job by typing the following commands:
+
+    ```
+    killall iotdm_edison_sample
+    ./iotdm_edison_sample
+    ```
 
 [Setup your IoT hub]: https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md
 [Provision your device and get its credentials]: https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md

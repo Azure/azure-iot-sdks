@@ -40,11 +40,11 @@ For information on how to use this library refer to the documents below:
 - [Setup IoT Hub](../doc/setup_iothub.md)
 - [Provision devices](../doc/manage_iot_hub.md)
 - [Azure IoT device SDK for C  tutorial](https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/)
-- [Getting started with Azure IoT Hub device management]() [PREVIEW]
-- [Create manageable devices with Azure IoT Hub]() [PREVIEW]
-- [Simulate a manage device using Windows]() [PREVIEW]
-- [Simulate a manage device using Linux]() [PREVIEW]
-- [Running the Intel Edison device management sample]() [PREVIEW]
+- [Getting started with Azure IoT Hub device management](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-device-management-get-started/) [PREVIEW]
+- [Create manageable devices with Azure IoT Hub](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-device-management-library/) [PREVIEW]
+- [How to use the device twin](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-device-management-device-twin/) [PREVIEW]
+- [How to find device twins using queries](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-device-management-device-query/) [PREVIEW]
+- [How to use device jobs to update device firmware](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-device-management-device-jobs/) [PREVIEW]
 - [Setup a Protocol Gateway - (i.e. MQTT)](https://github.com/Azure/azure-iot-protocol-gateway/blob/master/README.md)
 - [How to port the C libraries to other OS platforms](doc/porting_guide.md)
 - [Cross compilation example](doc/SDK_cross_compile_example.md)
