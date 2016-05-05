@@ -305,6 +305,29 @@ namespace Microsoft.Azure.Devices
                     cancellationToken);
         }
 
+        public async Task<T> DeleteAsync<T>(
+            Uri requestUri,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            IDictionary<string, string> customHeaders,
+            CancellationToken cancellationToken)
+        {
+            T result = default(T);
+
+            await this.ExecuteAsync(
+                    HttpMethod.Delete,
+                    new Uri(this.baseAddress, requestUri),
+                    (requestMsg, token) =>
+                    {
+                        AddCustomHeaders(requestMsg, customHeaders);
+                        return TaskHelpers.CompletedTask;
+                    },
+                    async (message, token) => result = await ReadResponseMessageAsync<T>(message, token),
+                    errorMappingOverrides,
+                    cancellationToken);
+
+            return result;
+        }
+
         Task ExecuteAsync(
             HttpMethod httpMethod,
             Uri requestUri,

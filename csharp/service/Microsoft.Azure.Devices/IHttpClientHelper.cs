@@ -54,5 +54,11 @@ namespace Microsoft.Azure.Devices
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
             IDictionary<string, string> customHeaders, 
             CancellationToken cancellationToken) where T: IETagHolder;
+
+        Task<T> DeleteAsync<T>(
+            Uri requestUri,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            IDictionary<string, string> customHeaders,
+            CancellationToken cancellationToken);
     }
 }
