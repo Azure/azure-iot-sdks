@@ -55,7 +55,7 @@ You should have the following items ready before beginning the process:
 
     Make sure to select the **Universal Windows App Development Tools**, the component required for writing apps Windows 10:
 
-    ![Universal Windows App Development Tools](./pngs/install_tools_for_windows10.png)
+    ![Universal Windows App Development Tools](./media/install_tools_for_windows10.png)
 
 <a name="Build"></a>
 # Step 3: Build and Run the sample
