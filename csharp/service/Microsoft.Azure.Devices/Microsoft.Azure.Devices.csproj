@@ -200,6 +200,7 @@
     <Compile Include="DeliveryFailureReason.cs" />
     <Compile Include="Device.cs" />
     <Compile Include="DeviceConnectionState.cs" />
+    <Compile Include="BulkRegistryOperationResult.cs" />
     <Compile Include="DeviceStatus.cs" />
     <Compile Include="EndpointKind.cs" />
     <Compile Include="ETagHolder.cs" />
@@ -217,6 +218,7 @@
     <Compile Include="IAuthorizationHeaderProvider.cs" />
     <Compile Include="IHttpClientHelper.cs" />
     <Compile Include="ImportDevicesRequest.cs" />
+    <Compile Include="DeviceRegistryOperationError.cs" />
     <Compile Include="ImportMode.cs" />
     <Compile Include="PurgeMessageQueueResult.cs" />
     <Compile Include="IotHubApiResources.cs" />

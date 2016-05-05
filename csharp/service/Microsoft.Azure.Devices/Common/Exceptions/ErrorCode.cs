@@ -19,6 +19,8 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
         ImportWarningExistsError = 400009,
         InvalidSchemaVersion = 400010,
         DeviceDefinedMultipleTimes = 400011,
+        DeserializationError = 400012,
+        BulkRegistryOperationFailure = 400013,
 
         //Unauthorized - 401
         IotHubNotFound = 401001,
