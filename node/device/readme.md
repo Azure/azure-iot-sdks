@@ -26,6 +26,10 @@ Device SDK subfolders under **node/device**:
 
 Protocol-independent device SDK package.
 
+### /node-red
+
+Node-RED node implementation.
+
 ### /samples
 
 Sample applications excercising basic features.
