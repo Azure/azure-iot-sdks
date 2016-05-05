@@ -60,7 +60,7 @@ This section shows you how to set up a development environment for the Azure IoT
 
 This script builds the **iothub_client** and **serializer** libraries and their associated samples in a folder called "cmake" inside you home folder.
 
- > Note: you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/run_sample_on_desktop_linux.md).
+ > Note: you will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](linux-desktop-c.md).
 
  <a name="buildrunapp"/>
 ## Run the sample

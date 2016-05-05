@@ -33,6 +33,6 @@ This folder contains the service SDK library for Java.
 
 This folder contains various Java samples that illustrate how to use the service SDK library.
 
-[devbox-setup]: doc/devbox_setup.md
-[run-java-sample]: doc/run_sample_on_java.md
+[devbox-setup]: ../../doc/get_started/java-devbox-setup-service.md
+[run-java-sample]: ../../doc/get_started/java-run-service-sample.md
 

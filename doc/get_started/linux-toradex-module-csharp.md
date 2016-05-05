@@ -67,7 +67,7 @@ You should have the following items ready before beginning the process:
 
 3.   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the **Device Client HTTPS Sample** application and how to send cloud-to-device messages to the **Device Client HTTPS Sample** application.
 
-[run_sample_on_desktop_windows]: https://github.com/Azure/azure-iot-sdks/blob/master/csharp/device/doc/run_sample_on_desktop_windows.md
+[run_sample_on_desktop_windows]: windows-desktop-csharp.md
 [toradex_image_update]: http://developer.toradex.com/knowledge-base/how-to-setup-environment-for-embedded-linux-application-development#Linux_Image_Update
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
