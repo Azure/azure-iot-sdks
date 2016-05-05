@@ -1,5 +1,6 @@
 # C Device SDK
 - Something that changed in the C sdk
+- Cloud-to-Device message application properties exposed by AMQP transport to IoT client layer.
 
 # Node SDK
 - Something that changed in the Node sdk

@@ -20,6 +20,7 @@ namespace Microsoft.Azure.Devices
     {
         static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(100);
         const string StatisticsUriFormat = "/statistics/service?" + ClientApiVersionHelper.ApiVersionQueryString;
+        const string PurgeMessageQueueFormat = "/devices/{0}/commands?" + ClientApiVersionHelper.ApiVersionQueryString;
 
         readonly IotHubConnection iotHubConnection;
         readonly TimeSpan openTimeout;
@@ -49,6 +50,11 @@ namespace Microsoft.Azure.Devices
                 ExceptionHandlingHelper.GetDefaultErrorMapping(),
                 DefaultOperationTimeout,
                 client => {});
+        }
+                
+        internal AmqpServiceClient(IotHubConnectionString iotHubConnectionString, bool useWebSocketOnly, IHttpClientHelper httpClientHelper) : base()
+        {            
+            this.httpClientHelper = httpClientHelper;
         }
 
         public TimeSpan OpenTimeout
@@ -135,6 +141,18 @@ namespace Microsoft.Azure.Devices
             }
         }
 
+        public override Task<PurgeMessageQueueResult> PurgeMessageQueueAsync(string deviceId)
+        {
+            return this.PurgeMessageQueueAsync(deviceId, CancellationToken.None);
+        }
+
+        public override Task<PurgeMessageQueueResult> PurgeMessageQueueAsync(string deviceId, CancellationToken cancellationToken)
+        {
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
+            errorMappingOverrides.Add(HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new DeviceNotFoundException(deviceId)));
+            return this.httpClientHelper.DeleteAsync<PurgeMessageQueueResult>(GetPurgeMessageQueueAsyncUri(deviceId), errorMappingOverrides, null, cancellationToken);
+        }
+
         public override FeedbackReceiver<FeedbackBatch> GetFeedbackReceiver()
         {
             return this.feedbackReceiver;
@@ -179,6 +197,11 @@ namespace Microsoft.Azure.Devices
         static Uri GetStatisticsUri()
         {
             return new Uri(StatisticsUriFormat, UriKind.Relative);
+        }
+
+        static Uri GetPurgeMessageQueueAsyncUri(string deviceId)
+        {
+            return new Uri(PurgeMessageQueueFormat.FormatInvariant(deviceId), UriKind.Relative);
         }
     }
 }

@@ -75,5 +75,8 @@ cd ..\..\device\tests
 @Echo python iothub_client_ut.py
 python iothub_client_ut.py
 if ERRORLEVEL 1 exit /b 1
+@Echo python iothub_client_map_test.py
+python iothub_client_map_test.py
+if ERRORLEVEL 1 exit /b 1
 echo Python unit test PASSED
 cd %build-root%

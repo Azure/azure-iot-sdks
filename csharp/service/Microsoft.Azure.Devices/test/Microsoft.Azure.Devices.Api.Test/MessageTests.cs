@@ -5,9 +5,13 @@ namespace Microsoft.Azure.Devices.Api.Test
 {
     using System;
     using System.IO;
+    using System.Net;
+    using System.Net.Http;
     using System.Text;
 
     using Microsoft.Azure.Devices;
+    using Microsoft.Azure.Devices.Common;
+    using Microsoft.Azure.Devices.Common.Exceptions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -145,6 +149,16 @@ namespace Microsoft.Azure.Devices.Api.Test
             msg.Dispose();
 
             ms.Write(Encoding.UTF8.GetBytes("howdy"), 0, 5);
+        }
+
+        [TestCategory("CIT")]
+        [TestMethod]
+        public void HttpExceptionMappingTest_BulkRegistryOperationFailure()
+        {
+            var message = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            message.Headers.Add(CommonConstants.IotHubErrorCode, ErrorCode.BulkRegistryOperationFailure.ToString());
+            bool isMappedToException = HttpClientHelper.IsMappedToException(message);
+            Assert.IsFalse(isMappedToException, "BulkRegistryOperationFailures should not be mapped to exceptions");
         }
     }
 }

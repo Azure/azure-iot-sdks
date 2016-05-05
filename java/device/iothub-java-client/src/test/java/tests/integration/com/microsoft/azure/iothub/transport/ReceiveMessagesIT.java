@@ -10,7 +10,7 @@ import com.microsoft.azure.iot.service.sdk.RegistryManager;
 import com.microsoft.azure.iot.service.sdk.ServiceClient;
 import com.microsoft.azure.iothub.*;
 import org.junit.*;
-import tests.integration.com.microsoft.azure.iothub.TestUtils.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.iothub.DeviceConnectionString;
 
 import java.io.IOException;
 import java.lang.reflect.Field;

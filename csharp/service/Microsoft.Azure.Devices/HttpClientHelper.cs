@@ -18,6 +18,7 @@ namespace Microsoft.Azure.Devices
     
     using Microsoft.Azure.Devices.Common;
     using Microsoft.Azure.Devices.Common.Exceptions;
+    using Microsoft.Azure.Devices.Common.Extensions;
 
     sealed class HttpClientHelper : IHttpClientHelper
     {
@@ -305,6 +306,29 @@ namespace Microsoft.Azure.Devices
                     cancellationToken);
         }
 
+        public async Task<T> DeleteAsync<T>(
+            Uri requestUri,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            IDictionary<string, string> customHeaders,
+            CancellationToken cancellationToken)
+        {
+            T result = default(T);
+
+            await this.ExecuteAsync(
+                    HttpMethod.Delete,
+                    new Uri(this.baseAddress, requestUri),
+                    (requestMsg, token) =>
+                    {
+                        AddCustomHeaders(requestMsg, customHeaders);
+                        return TaskHelpers.CompletedTask;
+                    },
+                    async (message, token) => result = await ReadResponseMessageAsync<T>(message, token),
+                    errorMappingOverrides,
+                    cancellationToken);
+
+            return result;
+        }
+
         Task ExecuteAsync(
             HttpMethod httpMethod,
             Uri requestUri,
@@ -317,17 +341,37 @@ namespace Microsoft.Azure.Devices
                 httpMethod,
                 requestUri,
                 modifyRequestMessageAsync,
-                message => message.IsSuccessStatusCode,
+                IsMappedToException,
                 processResponseMessageAsync,
                 errorMappingOverrides,
                 cancellationToken);
+        }
+
+        public static bool IsMappedToException(HttpResponseMessage message)
+        {
+            bool isMappedToException = !message.IsSuccessStatusCode;
+
+            // Get any IotHubErrorCode information from the header for special case exemption of exception throwing
+            string iotHubErrorCodeAsString = message.Headers.GetFirstValueOrNull(CommonConstants.IotHubErrorCode);
+            ErrorCode iotHubErrorCode;
+            if (Enum.TryParse(iotHubErrorCodeAsString, out iotHubErrorCode))
+            {
+                switch (iotHubErrorCode)
+                {
+                    case ErrorCode.BulkRegistryOperationFailure:
+                        isMappedToException = false;
+                        break;
+                }
+            }
+
+            return isMappedToException;
         }
 
         async Task ExecuteAsync(
             HttpMethod httpMethod,
             Uri requestUri,
             Func<HttpRequestMessage, CancellationToken, Task> modifyRequestMessageAsync,
-            Func<HttpResponseMessage, bool> isSuccessful,
+            Func<HttpResponseMessage, bool> isMappedToException,
             Func<HttpResponseMessage, CancellationToken, Task> processResponseMessageAsync,
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
             CancellationToken cancellationToken)
@@ -353,7 +397,7 @@ namespace Microsoft.Azure.Devices
                         throw new InvalidOperationException("The response message was null when executing operation {0}.".FormatInvariant(httpMethod));
                     }
 
-                    if (isSuccessful(responseMsg))
+                    if (!isMappedToException(responseMsg))
                     {
                         if (processResponseMessageAsync != null)
                         {
@@ -407,7 +451,7 @@ namespace Microsoft.Azure.Devices
                     throw new IotHubException(ex.Message, ex);
                 }
 
-                if (!isSuccessful(responseMsg))
+                if (isMappedToException(responseMsg))
                 {
                     Exception mappedEx = await MapToExceptionAsync(responseMsg, mergedErrorMapping);
                     throw mappedEx;

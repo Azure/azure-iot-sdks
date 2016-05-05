@@ -189,6 +189,9 @@ std::ostream& operator<<(std::ostream& left, const BINARY_DATA bindata)
 #define TEST_PROPERTY_2_KEY_UAMQP_VALUE     (AMQP_VALUE)0x305
 #define TEST_PROPERTY_2_VALUE_UAMQP_VALUE   (AMQP_VALUE)0x306
 #define TEST_MESSAGE_HANDLE (MESSAGE_HANDLE)0x440
+#define TEST_MAP_HANDLE (MAP_HANDLE)0x448
+#define TEST_AMQP_MAP_VALUE (AMQP_VALUE)0x449
+
 
 static const char* const no_property_keys[] = { "test_property_key" };
 static const char* const no_property_values[] = { "test_property_value" };
@@ -225,9 +228,12 @@ static BINARY_DATA* saved_message_get_body_amqp_data_binary_data;
 static PROPERTIES_HANDLE* saved_message_get_properties_properties;
 static AMQP_VALUE* saved_properties_get_message_id_value;
 static AMQP_VALUE* saved_properties_get_correlation_id_value;
-static const char* test_amqpvalue_get_string_values[] = {"abcd", "bike", "ball", "boat", "kyte"};
+static const char* test_amqpvalue_get_string_values[] = {"abcd", "bike", "ball", "boat", "kite", "bell", "boys", "girl", "monk", "wolf"};
 static int test_amqpvalue_get_string_index = 0;
-static int test_amqpvalue_get_string_length = 5;
+static int test_amqpvalue_get_string_length = 10;
+static AMQP_VALUE test_message_get_application_properties_return = TEST_AMQP_MAP_VALUE;
+
+static int test_amqpvalue_get_map_pair_count = 1;
 
 // **  Mocks **
 TYPED_MOCK_CLASS(CIoTHubTransportAMQPMocks, CGlobalMock)
@@ -277,6 +283,9 @@ public:
     /* Map mocks */
     MOCK_STATIC_METHOD_4(, MAP_RESULT, Map_GetInternals, MAP_HANDLE, handle, const char*const**, keys, const char*const**, values, size_t*, count);
     MOCK_METHOD_END(MAP_RESULT, MAP_OK)
+
+	MOCK_STATIC_METHOD_3(, MAP_RESULT, Map_AddOrUpdate, MAP_HANDLE, handle, const char*, key, const char*, value)
+	MOCK_METHOD_END(MAP_RESULT, MAP_OK)
 
     /* crt_abstractions mocks */
     MOCK_STATIC_METHOD_2(, int, mallocAndStrcpy_s, char**, destination, const char*, source)
@@ -534,9 +543,19 @@ public:
 
     // AMQP Mocks
 	// amqp_definitions.h
+	MOCK_STATIC_METHOD_2(, int, amqpvalue_get_map_pair_count, AMQP_VALUE, map, uint32_t*, pair_count)
+		*pair_count = test_amqpvalue_get_map_pair_count;
+	MOCK_METHOD_END(int, 0)
+
+	MOCK_STATIC_METHOD_4(, int, amqpvalue_get_map_key_value_pair, AMQP_VALUE, map, uint32_t, index, AMQP_VALUE*, key, AMQP_VALUE*, value)
+	MOCK_METHOD_END(int, 0)
+
 	MOCK_STATIC_METHOD_2(, int, properties_get_message_id, PROPERTIES_HANDLE, properties, AMQP_VALUE*, message_id_value)
 		saved_properties_get_message_id_value = message_id_value;
 	MOCK_METHOD_END(int, 0)
+
+	MOCK_STATIC_METHOD_1(, AMQP_VALUE, amqpvalue_get_inplace_described_value, AMQP_VALUE, value)
+	MOCK_METHOD_END(AMQP_VALUE, 0)
 
 	MOCK_STATIC_METHOD_2(, int, properties_get_correlation_id, PROPERTIES_HANDLE, properties, AMQP_VALUE*, correlation_id_value)
 		saved_properties_get_correlation_id_value = correlation_id_value;
@@ -603,6 +622,10 @@ public:
     // message.h
     MOCK_STATIC_METHOD_0(, MESSAGE_HANDLE, message_create)
     MOCK_METHOD_END(MESSAGE_HANDLE, NULL)
+
+	MOCK_STATIC_METHOD_2(, int, message_get_application_properties, MESSAGE_HANDLE, message, AMQP_VALUE*, application_properties)
+		*application_properties = test_message_get_application_properties_return;
+	MOCK_METHOD_END(int, 0)
 
     MOCK_STATIC_METHOD_2(, int, message_set_application_properties, MESSAGE_HANDLE, message, AMQP_VALUE, application_properties);
     MOCK_METHOD_END(int, 0)
@@ -761,8 +784,6 @@ public:
 // ** End Mocks **
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , static STRING_HANDLE, concat3Params, const char*, prefix, const char*, infix, const char*, suffix);
 
-DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubTransportAMQPMocks, , MAP_RESULT, Map_GetInternals, MAP_HANDLE, handle, const char*const**, keys, const char*const**, values, size_t*, count);
-
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromByteArray, const unsigned char*, buffre, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, IoTHubMessage_Destroy, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
@@ -814,6 +835,9 @@ DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubTransportAMQPMocks, , STRING_HANDLE, SASToke
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, mallocAndStrcpy_s, char**, destination, const char*, source);
 
+// map.h
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , MAP_RESULT, Map_AddOrUpdate, MAP_HANDLE, handle, const char*, key, const char*, value);
+DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubTransportAMQPMocks, , MAP_RESULT, Map_GetInternals, MAP_HANDLE, handle, const char*const**, keys, const char*const**, values, size_t*, count);
 
 // platform.h
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , int, platform_init);
@@ -853,9 +877,11 @@ DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , const IO_INTERFACE_DES
 
 // AMQPctest
 // amqp_definitions.h
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, amqpvalue_get_map_pair_count, AMQP_VALUE, map, uint32_t*, pair_count);
+DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubTransportAMQPMocks, , int, amqpvalue_get_map_key_value_pair, AMQP_VALUE, map, uint32_t, index, AMQP_VALUE*, key, AMQP_VALUE*, value);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , AMQP_VALUE, amqpvalue_get_inplace_described_value, AMQP_VALUE, value);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, properties_get_message_id, PROPERTIES_HANDLE, properties, AMQP_VALUE*, message_id_value);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, properties_get_correlation_id, PROPERTIES_HANDLE, properties, AMQP_VALUE*, correlation_id_value);
-DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, message_get_properties, MESSAGE_HANDLE, message, PROPERTIES_HANDLE*, properties);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, properties_destroy, PROPERTIES_HANDLE, properties);
 
 // amqpvalue.h
@@ -890,12 +916,14 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, link_set_attach_p
 
 
 // message.h
-DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , MESSAGE_HANDLE, message_create);
-DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, message_set_application_properties, MESSAGE_HANDLE, message, AMQP_VALUE, application_properties);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, message_add_body_amqp_data, MESSAGE_HANDLE, message, BINARY_DATA, binary_data);
+DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , MESSAGE_HANDLE, message_create);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, message_destroy, MESSAGE_HANDLE, message);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , int, message_get_body_amqp_data, MESSAGE_HANDLE, message, size_t, index, BINARY_DATA*, binary_data);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, message_get_body_type, MESSAGE_HANDLE, message, MESSAGE_BODY_TYPE*, body_type);
-DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, message_destroy, MESSAGE_HANDLE, message);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, message_get_properties, MESSAGE_HANDLE, message, PROPERTIES_HANDLE*, properties);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, message_get_application_properties, MESSAGE_HANDLE, message, AMQP_VALUE*, application_properties);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, message_set_application_properties, MESSAGE_HANDLE, message, AMQP_VALUE, application_properties);
 
 // message_receiver.h
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , MESSAGE_RECEIVER_HANDLE, messagereceiver_create, LINK_HANDLE, link, ON_MESSAGE_RECEIVER_STATE_CHANGED, on_message_receiver_state_changed, void*, context);
@@ -3080,7 +3108,17 @@ TEST_FUNCTION(AMQP_DoWork_send_one_message_succeeds)
 /* Test_SRS_IOTHUBTRANSPORTAMQP_09_163: [The correlation-id property shall be read from the uAMQP message by calling properties_get_correlation_id.] */
 /* Test_SRS_IOTHUBTRANSPORTAMQP_09_165: [The correlation-id value shall be retrieved from the AMQP_VALUE as char* by calling amqpvalue_get_string.] */
 /* Test_SRS_IOTHUBTRANSPORTAMQP_09_167: [The correlation-id property shall be set on the IOTHUB_MESSAGE_HANDLE by calling IoTHubMessage_SetCorrelationId, passing the value read from the uAMQP message.] */
-TEST_FUNCTION(AMQP_DoWork_receive_message_succeeds)
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_169: [The callback ‘on_message_received’ shall read the application properties from the uAMQP message and set it on the IoT Hub Message if any are provided.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_170: [The IOTHUB_MESSAGE_HANDLE properties shall be retrieved using IoTHubMessage_Properties.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_171: [uAMQP message application properties shall be retrieved using message_get_application_properties.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_173: [The actual uAMQP message application properties should be extracted from the result of message_get_application_properties using amqpvalue_get_inplace_described_value.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_175: [The number of items in the uAMQP message application properties shall be obtained using amqpvalue_get_map_pair_count.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_177: [‘on_message_received’ shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_178: [The uAMQP application property name and value shall be obtained using amqpvalue_get_map_key_value_pair.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_180: [The uAMQP application property name shall be extracted as string using amqpvalue_get_string.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_182: [The uAMQP application property value shall be extracted as string using amqpvalue_get_string.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_184: [The application property name and value shall be added to IOTHUB_MESSAGE_HANDLE properties using Map_AddOrUpdate.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_read_properties_succeeds)
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
@@ -3128,6 +3166,27 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_succeeds)
 	EXPECTED_CALL(mocks, amqpvalue_get_string(NULL, NULL)).SetReturn(0);
 	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_SetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE, test_amqpvalue_get_string_values[1])).SetReturn(IOTHUB_MESSAGE_OK);
 
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 2;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(TEST_MAP_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_get_application_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_inplace_described_value(NULL)).SetReturn(TEST_AMQP_MAP_VALUE);
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_pair_count(TEST_AMQP_MAP_VALUE, NULL)).IgnoreArgument(2).SetReturn(0);
+	
+	// First property.
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_key_value_pair(TEST_AMQP_MAP_VALUE, 0, NULL, NULL)).IgnoreArgument(3).IgnoreArgument(4).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_string(NULL, NULL)).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_string(NULL, NULL)).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_HANDLE, test_amqpvalue_get_string_values[2], test_amqpvalue_get_string_values[3])).SetReturn(MAP_OK);
+
+	// Second property.
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_key_value_pair(TEST_AMQP_MAP_VALUE, 1, NULL, NULL)).IgnoreArgument(3).IgnoreArgument(4).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_string(NULL, NULL)).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_string(NULL, NULL)).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_HANDLE, test_amqpvalue_get_string_values[4], test_amqpvalue_get_string_values[5])).SetReturn(MAP_OK);
+
+	// End of on_message_received()
 	STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_ACCEPTED);
 	STRICT_EXPECTED_CALL(mocks, messaging_delivery_accepted());
 	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
@@ -3135,6 +3194,628 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_succeeds)
 	// act
 	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
 	
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_186: [If IoTHubMessage_Properties fails, the error shall be notified and ‘on_message_received’ shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received’ fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_IoTHubMessage_Properties_fails)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+	int subscribe_result;
+
+	resetTestSuiteState();
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, config, current_time);
+	setupSuccessfulDoWork(transport, mocks, config, current_time, MESSAGERECEIVER_CREATE);
+
+	subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	mocks.ResetAllCalls();
+
+	test_amqpvalue_get_string_index = 0;
+
+	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+
+	// readPropertiesFromuAMQPMessage()
+	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 2;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn((MAP_HANDLE)NULL);
+
+	// End of on_message_received()
+	STRICT_EXPECTED_CALL(mocks, messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading application properties"));
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
+
+	// act
+	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_172: [If message_get_application_properties fails, the error shall be notified and ‘on_message_received’ shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received’ fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_message_get_application_properties_fails)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+	int subscribe_result;
+
+	resetTestSuiteState();
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, config, current_time);
+	setupSuccessfulDoWork(transport, mocks, config, current_time, MESSAGERECEIVER_CREATE);
+
+	subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	mocks.ResetAllCalls();
+
+	test_amqpvalue_get_string_index = 0;
+
+	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+
+	// readPropertiesFromuAMQPMessage()
+	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 2;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(TEST_MAP_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_get_application_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// End of on_message_received()
+	STRICT_EXPECTED_CALL(mocks, messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading application properties"));
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
+
+	// act
+	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_174: [If amqpvalue_get_inplace_described_value fails, the error shall be notified and ‘on_message_received’ shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received’ fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_inplace_described_value_fails)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+	int subscribe_result;
+
+	resetTestSuiteState();
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, config, current_time);
+	setupSuccessfulDoWork(transport, mocks, config, current_time, MESSAGERECEIVER_CREATE);
+
+	subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	mocks.ResetAllCalls();
+
+	test_amqpvalue_get_string_index = 0;
+
+	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+
+	// readPropertiesFromuAMQPMessage()
+	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 2;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(TEST_MAP_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_get_application_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_inplace_described_value(NULL)).SetReturn((AMQP_VALUE)NULL);
+
+	// End of on_message_received()
+	STRICT_EXPECTED_CALL(mocks, messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading application properties"));
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
+
+	// act
+	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_176: [If amqpvalue_get_map_pair_count fails, the error shall be notified and ‘on_message_received’ shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received’ fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_map_pair_count_fails)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+	int subscribe_result;
+
+	resetTestSuiteState();
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, config, current_time);
+	setupSuccessfulDoWork(transport, mocks, config, current_time, MESSAGERECEIVER_CREATE);
+
+	subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	mocks.ResetAllCalls();
+
+	test_amqpvalue_get_string_index = 0;
+
+	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+
+	// readPropertiesFromuAMQPMessage()
+	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 2;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(TEST_MAP_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_get_application_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_inplace_described_value(NULL)).SetReturn(TEST_AMQP_MAP_VALUE);
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_pair_count(TEST_AMQP_MAP_VALUE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// End of on_message_received()
+	STRICT_EXPECTED_CALL(mocks, messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading application properties"));
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
+
+	// act
+	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_187: [If message_get_application_properties succeeds but returns a NULL application properties map (there are no properties), ‘on_message_received’ shall continue normally.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_NO_app_properties_succeeds)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+	int subscribe_result;
+
+	resetTestSuiteState();
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, config, current_time);
+	setupSuccessfulDoWork(transport, mocks, config, current_time, MESSAGERECEIVER_CREATE);
+
+	subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	mocks.ResetAllCalls();
+
+	test_amqpvalue_get_string_index = 0;
+
+	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+
+	// readPropertiesFromuAMQPMessage()
+	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 2;
+	test_message_get_application_properties_return = NULL;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(TEST_MAP_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_get_application_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	
+	// End of on_message_received()
+	STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_ACCEPTED);
+	STRICT_EXPECTED_CALL(mocks, messaging_delivery_accepted());
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
+
+	// act
+	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
+
+	test_message_get_application_properties_return = TEST_AMQP_MAP_VALUE;
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_177: [‘on_message_received’ shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_EMPTY_app_properties_succeeds)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+	int subscribe_result;
+
+	resetTestSuiteState();
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, config, current_time);
+	setupSuccessfulDoWork(transport, mocks, config, current_time, MESSAGERECEIVER_CREATE);
+
+	subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	mocks.ResetAllCalls();
+
+	test_amqpvalue_get_string_index = 0;
+
+	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+
+	// readPropertiesFromuAMQPMessage()
+	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 0;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(TEST_MAP_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_get_application_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_inplace_described_value(NULL)).SetReturn(TEST_AMQP_MAP_VALUE);
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_pair_count(TEST_AMQP_MAP_VALUE, NULL)).IgnoreArgument(2).SetReturn(0);
+
+	// End of on_message_received()
+	STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(IOTHUBMESSAGE_ACCEPTED);
+	STRICT_EXPECTED_CALL(mocks, messaging_delivery_accepted());
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
+
+	// act
+	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_179: [If amqpvalue_get_map_key_value_pair fails, the error shall be notified and ‘on_message_received’ shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received’ fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_map_key_value_pair_fails)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+	int subscribe_result;
+
+	resetTestSuiteState();
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, config, current_time);
+	setupSuccessfulDoWork(transport, mocks, config, current_time, MESSAGERECEIVER_CREATE);
+
+	subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	mocks.ResetAllCalls();
+
+	test_amqpvalue_get_string_index = 0;
+
+	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+
+	// readPropertiesFromuAMQPMessage()
+	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 2;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(TEST_MAP_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_get_application_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_inplace_described_value(NULL)).SetReturn(TEST_AMQP_MAP_VALUE);
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_pair_count(TEST_AMQP_MAP_VALUE, NULL)).IgnoreArgument(2).SetReturn(0);
+
+	// First property.
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_key_value_pair(TEST_AMQP_MAP_VALUE, 0, NULL, NULL)).IgnoreArgument(3).IgnoreArgument(4).SetReturn(1);
+
+	// End of on_message_received()
+	STRICT_EXPECTED_CALL(mocks, messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading application properties"));
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
+
+	// act
+	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_181: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received’ shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received’ fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_string_name_fails)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+	int subscribe_result;
+
+	resetTestSuiteState();
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, config, current_time);
+	setupSuccessfulDoWork(transport, mocks, config, current_time, MESSAGERECEIVER_CREATE);
+
+	subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	mocks.ResetAllCalls();
+
+	test_amqpvalue_get_string_index = 0;
+
+	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+
+	// readPropertiesFromuAMQPMessage()
+	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 2;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(TEST_MAP_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_get_application_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_inplace_described_value(NULL)).SetReturn(TEST_AMQP_MAP_VALUE);
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_pair_count(TEST_AMQP_MAP_VALUE, NULL)).IgnoreArgument(2).SetReturn(0);
+
+	// First property.
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_key_value_pair(TEST_AMQP_MAP_VALUE, 0, NULL, NULL)).IgnoreArgument(3).IgnoreArgument(4).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_string(NULL, NULL)).SetReturn(1);
+
+	// End of on_message_received()
+	STRICT_EXPECTED_CALL(mocks, messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading application properties"));
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
+
+	// act
+	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_183: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received’ shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received’ fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_string_value_fails)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+	int subscribe_result;
+
+	resetTestSuiteState();
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, config, current_time);
+	setupSuccessfulDoWork(transport, mocks, config, current_time, MESSAGERECEIVER_CREATE);
+
+	subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	mocks.ResetAllCalls();
+
+	test_amqpvalue_get_string_index = 0;
+
+	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+
+	// readPropertiesFromuAMQPMessage()
+	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 2;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(TEST_MAP_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_get_application_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_inplace_described_value(NULL)).SetReturn(TEST_AMQP_MAP_VALUE);
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_pair_count(TEST_AMQP_MAP_VALUE, NULL)).IgnoreArgument(2).SetReturn(0);
+	
+	// First property.
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_key_value_pair(TEST_AMQP_MAP_VALUE, 0, NULL, NULL)).IgnoreArgument(3).IgnoreArgument(4).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_string(NULL, NULL)).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_string(NULL, NULL)).SetReturn(1);
+
+	// End of on_message_received()
+	STRICT_EXPECTED_CALL(mocks, messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading application properties"));
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
+
+	// act
+	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_185: [If Map_AddOrUpdate fails, the error shall be notified and ‘on_message_received’ shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received’ fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_Map_AddOrUpdate_fails)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+	int subscribe_result;
+
+	resetTestSuiteState();
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	mocks.ResetAllCalls();
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, config, current_time);
+	setupSuccessfulDoWork(transport, mocks, config, current_time, MESSAGERECEIVER_CREATE);
+
+	subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	mocks.ResetAllCalls();
+
+	test_amqpvalue_get_string_index = 0;
+
+	STRICT_EXPECTED_CALL(mocks, message_get_body_type(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, message_get_body_amqp_data(TEST_MESSAGE_HANDLE, 0, NULL)).IgnoreArgument(3).SetReturn(0);
+	EXPECTED_CALL(mocks, IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(TEST_IOTHUB_MESSAGE_HANDLE);
+
+	// readPropertiesFromuAMQPMessage()
+	STRICT_EXPECTED_CALL(mocks, message_get_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(1);
+
+	// readApplicationPropertiesFromuAMQPMessage
+	test_amqpvalue_get_map_pair_count = 2;
+
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(TEST_MAP_HANDLE);
+	STRICT_EXPECTED_CALL(mocks, message_get_application_properties(TEST_MESSAGE_HANDLE, NULL)).IgnoreArgument(2).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_inplace_described_value(NULL)).SetReturn(TEST_AMQP_MAP_VALUE);
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_pair_count(TEST_AMQP_MAP_VALUE, NULL)).IgnoreArgument(2).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, amqpvalue_get_map_key_value_pair(TEST_AMQP_MAP_VALUE, 0, NULL, NULL)).IgnoreArgument(3).IgnoreArgument(4).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_string(NULL, NULL)).SetReturn(0);
+	EXPECTED_CALL(mocks, amqpvalue_get_string(NULL, NULL)).SetReturn(0);
+	STRICT_EXPECTED_CALL(mocks, Map_AddOrUpdate(TEST_MAP_HANDLE, test_amqpvalue_get_string_values[0], test_amqpvalue_get_string_values[1])).SetReturn(MAP_ERROR);
+
+	// End of on_message_received()
+	STRICT_EXPECTED_CALL(mocks, messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading application properties"));
+	STRICT_EXPECTED_CALL(mocks, IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
+
+
+	// act
+	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
+
 	// assert
 	mocks.AssertActualAndExpectedCalls();
 

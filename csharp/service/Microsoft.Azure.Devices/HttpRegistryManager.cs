@@ -45,7 +45,7 @@ namespace Microsoft.Azure.Devices
         {
             if (httpClientHelper == null)
             {
-                throw new ArgumentNullException("httpClientHelper");
+                throw new ArgumentNullException(nameof(httpClientHelper));
             }
 
             this.iotHubName = iotHubName;
@@ -102,31 +102,23 @@ namespace Microsoft.Azure.Devices
 
         public override Task<string[]> AddDevicesAsync(IEnumerable<Device> devices, CancellationToken cancellationToken)
         {
-            if (devices == null)
-            {
-                throw new ArgumentNullException("devices");
-            }
+            return this.BulkDeviceOperationsAsync<string[]>(
+                GenerateExportImportDeviceListForBulkOperations(devices, ImportMode.Create), 
+                ClientApiVersionHelper.ApiVersionQueryStringGA, 
+                cancellationToken);
+        }
 
-            if (!devices.Any())
-            {
-                throw new ArgumentException("devices");
-            }
+        public override Task<BulkRegistryOperationResult> AddDevices2Async(IEnumerable<Device> devices)
+        {
+            return this.AddDevices2Async(devices, CancellationToken.None);
+        }
 
-            var exportImportDeviceList = new List<ExportImportDevice>(devices.Count());
-            foreach (var device in devices)
-            {
-                ValidateDeviceId(device);
-
-                if (!string.IsNullOrEmpty(device.ETag))
-                {
-                    throw new ArgumentException(ApiResources.ETagSetWhileRegisteringDevice);
-                }
-
-                var exportImportDevice = new ExportImportDevice(device, ImportMode.Create);
-                exportImportDeviceList.Add(exportImportDevice);
-            }
-
-            return this.BulkDeviceOperationsAsync(exportImportDeviceList, cancellationToken);
+        public override Task<BulkRegistryOperationResult> AddDevices2Async(IEnumerable<Device> devices, CancellationToken cancellationToken)
+        {
+            return this.BulkDeviceOperationsAsync<BulkRegistryOperationResult>(
+                GenerateExportImportDeviceListForBulkOperations(devices, ImportMode.Create),
+                ClientApiVersionHelper.ApiVersionQueryString, 
+                cancellationToken);
         }
 
         public override Task<Device> UpdateDeviceAsync(Device device)
@@ -163,13 +155,17 @@ namespace Microsoft.Azure.Devices
                 device.Authentication = new AuthenticationMechanism();
             }
 
-            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
-            errorMappingOverrides.Add(HttpStatusCode.PreconditionFailed, async (responseMessage) => new PreconditionFailedException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)));
-            errorMappingOverrides.Add(HttpStatusCode.NotFound, async responseMessage =>
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>()
             {
-                var responseContent = await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage);
-                return (Exception) new DeviceNotFoundException(responseContent, (Exception) null);
-            });
+                { HttpStatusCode.PreconditionFailed, async (responseMessage) => new PreconditionFailedException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)) },
+                { HttpStatusCode.NotFound, async responseMessage =>
+                                           {
+                                               string responseContent = await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage);
+                                               return (Exception) new DeviceNotFoundException(responseContent, (Exception) null);
+                                           }
+                }
+
+            };
 
             PutOperationType operationType = forceUpdate ? PutOperationType.ForceUpdateEntity : PutOperationType.UpdateEntity;
 
@@ -183,31 +179,23 @@ namespace Microsoft.Azure.Devices
 
         public override Task<string[]> UpdateDevicesAsync(IEnumerable<Device> devices, bool forceUpdate, CancellationToken cancellationToken)
         {
-            if (devices == null)
-            {
-                throw new ArgumentNullException("devices");
-            }
+            return this.BulkDeviceOperationsAsync<string[]>(
+                GenerateExportImportDeviceListForBulkOperations(devices, forceUpdate ? ImportMode.Update : ImportMode.UpdateIfMatchETag),
+                ClientApiVersionHelper.ApiVersionQueryStringGA, 
+                cancellationToken);
+        }
 
-            if (!devices.Any())
-            {
-                throw new ArgumentException("devices");
-            }
+        public override Task<BulkRegistryOperationResult> UpdateDevices2Async(IEnumerable<Device> devices)
+        {
+            return this.UpdateDevices2Async(devices, false, CancellationToken.None);
+        }
 
-            var exportImportDeviceList = new List<ExportImportDevice>(devices.Count());
-            foreach (var device in devices)
-            {
-                ValidateDeviceId(device);
-
-                if (string.IsNullOrWhiteSpace(device.ETag) && !forceUpdate)
-                {
-                    throw new ArgumentException(ApiResources.ETagNotSetWhileUpdatingDevice);
-                }
-
-                var exportImportDevice = new ExportImportDevice(device, forceUpdate ? ImportMode.Update : ImportMode.UpdateIfMatchETag);
-                exportImportDeviceList.Add(exportImportDevice);
-            }
-
-            return this.BulkDeviceOperationsAsync(exportImportDeviceList, cancellationToken);
+        public override Task<BulkRegistryOperationResult> UpdateDevices2Async(IEnumerable<Device> devices, bool forceUpdate, CancellationToken cancellationToken)
+        {
+            return this.BulkDeviceOperationsAsync<BulkRegistryOperationResult>(
+                GenerateExportImportDeviceListForBulkOperations(devices, forceUpdate ? ImportMode.Update : ImportMode.UpdateIfMatchETag), 
+                ClientApiVersionHelper.ApiVersionQueryString, 
+                cancellationToken);
         }
 
         public override Task RemoveDeviceAsync(string deviceId)
@@ -253,33 +241,25 @@ namespace Microsoft.Azure.Devices
             return this.RemoveDevicesAsync(devices, false, CancellationToken.None);
         }
 
-        public override Task<string[]> RemoveDevicesAsync(IEnumerable<Device> devices, bool forceDelete, CancellationToken cancellationToken)
+        public override Task<string[]> RemoveDevicesAsync(IEnumerable<Device> devices, bool forceRemove, CancellationToken cancellationToken)
         {
-            if (devices == null)
-            {
-                throw new ArgumentNullException("devices");
-            }
+            return this.BulkDeviceOperationsAsync<string[]>(
+                GenerateExportImportDeviceListForBulkOperations(devices, forceRemove ? ImportMode.Delete : ImportMode.DeleteIfMatchETag),
+                ClientApiVersionHelper.ApiVersionQueryStringGA, 
+                cancellationToken);
+        }
 
-            if (!devices.Any())
-            {
-                throw new ArgumentException("devices");
-            }
+        public override Task<BulkRegistryOperationResult> RemoveDevices2Async(IEnumerable<Device> devices)
+        {
+            return this.RemoveDevices2Async(devices, false, CancellationToken.None);
+        }
 
-            var exportImportDeviceList = new List<ExportImportDevice>(devices.Count());
-            foreach (var device in devices)
-            {
-                ValidateDeviceId(device);
-
-                if (string.IsNullOrWhiteSpace(device.ETag) && !forceDelete)
-                {
-                    throw new ArgumentException(ApiResources.ETagNotSetWhileDeletingDevice);
-                }
-
-                var exportImportDevice = new ExportImportDevice(device, forceDelete ? ImportMode.Delete : ImportMode.DeleteIfMatchETag);
-                exportImportDeviceList.Add(exportImportDevice);
-            }
-
-            return this.BulkDeviceOperationsAsync(exportImportDeviceList, cancellationToken);
+        public override Task<BulkRegistryOperationResult> RemoveDevices2Async(IEnumerable<Device> devices, bool forceRemove, CancellationToken cancellationToken)
+        {
+            return this.BulkDeviceOperationsAsync<BulkRegistryOperationResult>(
+                GenerateExportImportDeviceListForBulkOperations(devices, forceRemove ? ImportMode.Delete : ImportMode.DeleteIfMatchETag),
+                ClientApiVersionHelper.ApiVersionQueryString, 
+                cancellationToken);
         }
 
         public override Task<RegistryStatistics> GetRegistryStatisticsAsync()
@@ -290,8 +270,11 @@ namespace Microsoft.Azure.Devices
         public override Task<RegistryStatistics> GetRegistryStatisticsAsync(CancellationToken cancellationToken)
         {
             this.EnsureInstanceNotClosed();
-            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
-            errorMappingOverrides.Add(HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new IotHubNotFoundException(this.iotHubName)));
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>()
+            {
+                { HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new IotHubNotFoundException(this.iotHubName)) }
+            };
+
             return this.httpClientHelper.GetAsync<RegistryStatistics>(GetStatisticsUri(), errorMappingOverrides, null, cancellationToken);
         }
 
@@ -308,11 +291,11 @@ namespace Microsoft.Azure.Devices
             }
 
             this.EnsureInstanceNotClosed();
-            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
-            errorMappingOverrides.Add(HttpStatusCode.NotFound, async responseMessage =>
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>()
             {
-                return (Exception)new DeviceNotFoundException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage));
-            });
+                { HttpStatusCode.NotFound, async responseMessage => new DeviceNotFoundException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)) }
+            };
+
             return this.httpClientHelper.GetAsync<Device>(GetRequestUri(deviceId), errorMappingOverrides, null, false, cancellationToken);
         }
 
@@ -347,26 +330,95 @@ namespace Microsoft.Azure.Devices
         /// </param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (disposing && this.httpClientHelper != null)
             {
-                if (this.httpClientHelper != null)
-                {
-                    this.httpClientHelper.Dispose();
-                    this.httpClientHelper = null;
-                }
+                this.httpClientHelper.Dispose();
+                this.httpClientHelper = null;
             }
         }
 
-        Task<string[]> BulkDeviceOperationsAsync(IEnumerable<ExportImportDevice> devices, CancellationToken cancellationToken)
+        static IEnumerable<ExportImportDevice> GenerateExportImportDeviceListForBulkOperations(IEnumerable<Device> devices, ImportMode importMode)
+        {
+            if (devices == null)
+            {
+                throw new ArgumentNullException(nameof(devices));
+            }
+
+            if (!devices.Any())
+            {
+                throw new ArgumentException(nameof(devices));
+            }
+
+            var exportImportDeviceList = new List<ExportImportDevice>(devices.Count());
+            foreach (Device device in devices)
+            {
+                ValidateDeviceId(device);
+
+                switch (importMode)
+                {
+                    case ImportMode.Create:
+                        if (!string.IsNullOrWhiteSpace(device.ETag))
+                        {
+                            throw new ArgumentException(ApiResources.ETagSetWhileRegisteringDevice);
+                        }
+                        break;
+
+                    case ImportMode.Update:
+                        // No preconditions
+                        break;
+
+                    case ImportMode.UpdateIfMatchETag:
+                        if (string.IsNullOrWhiteSpace(device.ETag))
+                        {
+                            throw new ArgumentException(ApiResources.ETagNotSetWhileUpdatingDevice);
+                        }
+                        break;
+
+                    case ImportMode.Delete:
+                        // No preconditions
+                        break;
+
+                    case ImportMode.DeleteIfMatchETag:
+                        if (string.IsNullOrWhiteSpace(device.ETag))
+                        {
+                            throw new ArgumentException(ApiResources.ETagNotSetWhileDeletingDevice);
+                        }
+                        break;
+
+                    default:
+                        throw new ArgumentException("ImportMode not handled: " + importMode);
+                }
+
+                var exportImportDevice = new ExportImportDevice(device, importMode);
+                exportImportDeviceList.Add(exportImportDevice);
+            }
+
+            return exportImportDeviceList;
+        }
+
+        Task<T> BulkDeviceOperationsAsync<T>(IEnumerable<ExportImportDevice> devices, string version, CancellationToken cancellationToken)
+        {
+            this.BulkDeviceOperationSetup(devices);
+
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
+            {
+                { HttpStatusCode.RequestEntityTooLarge, async responseMessage => new TooManyDevicesException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)) },
+                { HttpStatusCode.BadRequest, async responseMessage => new ArgumentException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)) }
+            };
+
+            return this.httpClientHelper.PostAsync<IEnumerable<ExportImportDevice>, T>(GetBulkRequestUri(version), devices, errorMappingOverrides, null, cancellationToken);
+        }
+        
+        void BulkDeviceOperationSetup(IEnumerable<ExportImportDevice> devices)
         {
             this.EnsureInstanceNotClosed();
 
             if (devices == null)
             {
-                throw new ArgumentNullException("devices");
+                throw new ArgumentNullException(nameof(devices));
             }
 
-            foreach (var device in devices)
+            foreach (ExportImportDevice device in devices)
             {
                 ValidateDeviceAuthentication(device.Authentication, device.Id);
 
@@ -377,11 +429,6 @@ namespace Microsoft.Azure.Devices
                 }
             }
 
-            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
-            errorMappingOverrides.Add(HttpStatusCode.RequestEntityTooLarge, async (responseMessage) => new TooManyDevicesException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)));
-            errorMappingOverrides.Add(HttpStatusCode.BadRequest, async (responseMessage) => new ArgumentException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)));
-
-            return this.httpClientHelper.PostAsync<IEnumerable<ExportImportDevice>, string[]>(GetRequestUri(string.Empty), devices, errorMappingOverrides, null, cancellationToken);
         }
 
         internal override Task ExportRegistryAsync(string storageAccountConnectionString, string containerName)
@@ -392,11 +439,13 @@ namespace Microsoft.Azure.Devices
         internal override Task ExportRegistryAsync(string storageAccountConnectionString, string containerName, CancellationToken cancellationToken)
         {
             this.EnsureInstanceNotClosed();
-            
-            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
-            errorMappingOverrides.Add(HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new IotHubNotFoundException(this.iotHubName)));
 
-            return this.httpClientHelper.PostAsync<ExportImportRequest>(
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
+            {
+                { HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new IotHubNotFoundException(this.iotHubName)) }
+            };
+
+            return this.httpClientHelper.PostAsync(
                 GetAdminUri("exportRegistry"),
                 new ExportImportRequest
                 {
@@ -417,10 +466,12 @@ namespace Microsoft.Azure.Devices
         {
             this.EnsureInstanceNotClosed();
 
-            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
-            errorMappingOverrides.Add(HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new IotHubNotFoundException(this.iotHubName)));
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
+            {
+                { HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new IotHubNotFoundException(this.iotHubName)) }
+            };
 
-            return this.httpClientHelper.PostAsync<ExportImportRequest>(
+            return this.httpClientHelper.PostAsync(
                 GetAdminUri("importRegistry"),
                 new ExportImportRequest
                 {
@@ -454,11 +505,22 @@ namespace Microsoft.Azure.Devices
 
         public override Task<JobProperties> ExportDevicesAsync(string exportBlobContainerUri, bool excludeKeys, CancellationToken ct)
         {
+            return this.ExportDevicesAsync(exportBlobContainerUri, null, excludeKeys, ct);
+        }
+
+        public override Task<JobProperties> ExportDevicesAsync(string exportBlobContainerUri, string outputBlobName, bool excludeKeys)
+        {
+            return this.ExportDevicesAsync(exportBlobContainerUri, outputBlobName, excludeKeys, CancellationToken.None);
+        }
+
+        public override Task<JobProperties> ExportDevicesAsync(string exportBlobContainerUri, string outputBlobName, bool excludeKeys, CancellationToken ct)
+        {
             var jobProperties = new JobProperties()
             {
                 Type = JobType.ExportDevices,
                 OutputBlobContainerUri = exportBlobContainerUri,
-                ExcludeKeysInExport = excludeKeys
+                ExcludeKeysInExport = excludeKeys,
+                OutputBlobName = outputBlobName
             };
 
             return this.CreateJobAsync(jobProperties, ct);
@@ -471,21 +533,32 @@ namespace Microsoft.Azure.Devices
 
         public override Task<JobProperties> ImportDevicesAsync(string importBlobContainerUri, string outputBlobContainerUri, CancellationToken ct)
         {
+            return this.ImportDevicesAsync(importBlobContainerUri, outputBlobContainerUri, null, ct);
+        }
+
+        public override Task<JobProperties> ImportDevicesAsync(string importBlobContainerUri, string outputBlobContainerUri, string inputBlobName)
+        {
+            return this.ImportDevicesAsync(importBlobContainerUri, outputBlobContainerUri, inputBlobName, CancellationToken.None);
+        }
+
+        public override Task<JobProperties> ImportDevicesAsync(string importBlobContainerUri, string outputBlobContainerUri, string inputBlobName, CancellationToken ct)
+        {
             var jobProperties = new JobProperties()
             {
                 Type = JobType.ImportDevices,
                 InputBlobContainerUri = importBlobContainerUri,
-                OutputBlobContainerUri = outputBlobContainerUri
+                OutputBlobContainerUri = outputBlobContainerUri,
+                InputBlobName = inputBlobName
             };
 
             return this.CreateJobAsync(jobProperties, ct);
         }
-        
+
         Task<JobProperties> CreateJobAsync(JobProperties jobProperties, CancellationToken ct)
         {
             this.EnsureInstanceNotClosed();
 
-            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>()
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
             {
                 { HttpStatusCode.Forbidden, responseMessage => Task.FromResult((Exception) new JobQuotaExceededException())}
             };
@@ -502,8 +575,10 @@ namespace Microsoft.Azure.Devices
         {
             this.EnsureInstanceNotClosed();
             
-            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
-            errorMappingOverrides.Add(HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new JobNotFoundException(jobId)));
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
+            {
+                { HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new JobNotFoundException(jobId)) }
+            };
 
             return this.httpClientHelper.GetAsync<JobProperties>(
                 GetJobUri("/{0}".FormatInvariant(jobId)),
@@ -527,13 +602,16 @@ namespace Microsoft.Azure.Devices
         {
             this.EnsureInstanceNotClosed();
 
-            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
-            errorMappingOverrides.Add(HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new JobNotFoundException(jobId)));
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
+            {
+                { HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new JobNotFoundException(jobId)) }
+            };
 
             IETagHolder jobETag = new ETagHolder()
             {
                 ETag = jobId
             };
+
             return this.httpClientHelper.DeleteAsync(
                 GetJobUri("/{0}".FormatInvariant(jobId)),
                 jobETag,
@@ -544,13 +622,17 @@ namespace Microsoft.Azure.Devices
         
         Task RemoveDeviceAsync(string deviceId, IETagHolder eTagHolder, CancellationToken cancellationToken)
         {
-            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
-            errorMappingOverrides.Add(HttpStatusCode.NotFound, async responseMessage =>
-            {                
-                var responseContent = await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage);
-                return (Exception) new DeviceNotFoundException(responseContent, (Exception) null);
-            });
-            errorMappingOverrides.Add(HttpStatusCode.PreconditionFailed, async (responseMessage) => new PreconditionFailedException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)));
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
+            {
+                { HttpStatusCode.NotFound, async responseMessage =>
+                                           {
+                                               string responseContent = await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage);
+                                               return new DeviceNotFoundException(responseContent, (Exception) null);
+                                           }
+                },
+                { HttpStatusCode.PreconditionFailed, async responseMessage => new PreconditionFailedException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)) }
+            };
+            
             return this.httpClientHelper.DeleteAsync(GetRequestUri(deviceId), eTagHolder, errorMappingOverrides, null, cancellationToken);
         }
 
@@ -558,6 +640,11 @@ namespace Microsoft.Azure.Devices
         {
             deviceId = WebUtility.UrlEncode(deviceId);
             return new Uri(RequestUriFormat.FormatInvariant(deviceId, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
+        }
+
+        static Uri GetBulkRequestUri(string apiVersionQueryString)
+        {
+            return new Uri(RequestUriFormat.FormatInvariant(string.Empty, apiVersionQueryString), UriKind.Relative);
         }
 
         static Uri GetJobUri(string jobId)
@@ -584,7 +671,7 @@ namespace Microsoft.Azure.Devices
         {
             if (device == null)
             {
-                throw new ArgumentNullException("device");
+                throw new ArgumentNullException(nameof(device));
             }
 
             if (string.IsNullOrWhiteSpace(device.Id))

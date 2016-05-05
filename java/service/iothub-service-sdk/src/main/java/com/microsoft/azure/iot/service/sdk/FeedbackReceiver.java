@@ -118,7 +118,7 @@ public class FeedbackReceiver extends Receiver
             throw new IOException("AMQP receiver is not initialized");
         }
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_010: [The function shall call receive() on the member AMQPReceive object and return with the result]
-        return this.amqpReceive.receive(this.deviceId, timeoutMs);
+        return this.amqpReceive.receive(timeoutMs);
     }
 
     /**
