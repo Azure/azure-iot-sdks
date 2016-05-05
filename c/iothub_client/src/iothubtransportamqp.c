@@ -392,6 +392,95 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
 	return return_value;
 }
 
+static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, MESSAGE_HANDLE uamqp_message)
+{
+	int result;
+	AMQP_VALUE uamqp_app_properties;
+	int property_count;
+	MAP_HANDLE iothub_message_properties_map;
+
+	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_170: [The IOTHUB_MESSAGE_HANDLE properties shall be retrieved using IoTHubMessage_Properties.]
+	if ((iothub_message_properties_map = IoTHubMessage_Properties(iothub_message_handle)) == NULL)
+	{
+		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_186: [If IoTHubMessage_Properties fails, the error shall be notified and ‘on_message_received’ shall continue.]
+		LogError("Failed to get property map from IoTHub message.");
+		result = __LINE__;
+	}
+	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_171: [uAMQP message application properties shall be retrieved using message_get_application_properties.]
+	else if ((result = message_get_application_properties(uamqp_message, &uamqp_app_properties)) != 0)
+	{
+		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_172: [If message_get_application_properties fails, the error shall be notified and ‘on_message_received’ shall continue.]
+		LogError("Failed reading the incoming uAMQP message properties (return code %d).", result);
+		result = __LINE__;
+	}
+	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_187: [If message_get_application_properties succeeds but returns a NULL application properties map (there are no properties), ‘on_message_received’ shall continue normally.]
+	else if (uamqp_app_properties == NULL)
+	{
+		result = 0;
+	}
+	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_173: [The actual uAMQP message application properties should be extracted from the result of message_get_application_properties using amqpvalue_get_inplace_described_value.]
+	else if ((uamqp_app_properties = amqpvalue_get_inplace_described_value(uamqp_app_properties)) == NULL)
+	{
+		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_174: [If amqpvalue_get_inplace_described_value fails, the error shall be notified and ‘on_message_received’ shall continue.]
+		LogError("Failed getting the map of uAMQP message application properties (return code %d).", result);
+		result = __LINE__;
+	}
+	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_175: [The number of items in the uAMQP message application properties shall be obtained using amqpvalue_get_map_pair_count.]
+	else if ((result = amqpvalue_get_map_pair_count(uamqp_app_properties, &property_count)) != 0)
+	{
+		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_176: [If amqpvalue_get_map_pair_count fails, the error shall be notified and ‘on_message_received’ shall continue.]
+		LogError("Failed reading the number of values in the uAMQP property map (return code %d).", result);
+		result = __LINE__;
+	}
+	else
+	{
+		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_177: [‘on_message_received’ shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.]
+		size_t i;
+		for (i = 0; i < property_count; i++)
+		{
+			AMQP_VALUE map_key_name;
+			AMQP_VALUE map_key_value;
+			char *key_name;
+			char* key_value;
+
+			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_178: [The uAMQP application property name and value shall be obtained using amqpvalue_get_map_key_value_pair.]
+			if ((result = amqpvalue_get_map_key_value_pair(uamqp_app_properties, i, &map_key_name, &map_key_value)) != 0)
+			{
+				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_179: [If amqpvalue_get_map_key_value_pair fails, the error shall be notified and ‘on_message_received’ shall continue.]
+				LogError("Failed reading the key/value pair from the uAMQP property map (return code %d).", result);
+				result = __LINE__;
+				break;
+			}
+			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_180: [The uAMQP application property name shall be extracted as string using amqpvalue_get_string.]
+			else if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
+			{
+				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_181: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received’ shall continue.]
+				LogError("Failed parsing the uAMQP property name (return code %d).", result);
+				result = __LINE__;
+				break;
+			}
+			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_182: [The uAMQP application property value shall be extracted as string using amqpvalue_get_string.]
+			else if ((result = amqpvalue_get_string(map_key_value, &key_value)) != 0)
+			{
+				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_183: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received’ shall continue.]
+				LogError("Failed parsing the uAMQP property value (return code %d).", result);
+				result = __LINE__;
+				break;
+			}
+			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_184: [The application property name and value shall be added to IOTHUB_MESSAGE_HANDLE properties using Map_AddOrUpdate.]
+			else if (Map_AddOrUpdate(iothub_message_properties_map, key_name, key_value) != MAP_OK)
+			{
+				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_185: [If Map_AddOrUpdate fails, the error shall be notified and ‘on_message_received’ shall continue.]
+				LogError("Failed to add/update IoTHub message property map.");
+				result = __LINE__;
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
 static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_result)
 {
 	IOTHUB_MESSAGE_LIST* message = (IOTHUB_MESSAGE_LIST*)context;
@@ -441,7 +530,6 @@ static void on_put_token_complete(void* context, CBS_OPERATION_RESULT operation_
 static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
 {
     AMQP_VALUE result = NULL;
-    IOTHUBMESSAGE_DISPOSITION_RESULT disposition_result;
 
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_104: [The callback 'on_message_received' shall invoke IoTHubClient_LL_MessageCallback() passing the client and the incoming message handles as parameters] 
     IOTHUB_MESSAGE_HANDLE iothub_message = NULL;
@@ -469,9 +557,10 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
 
     if (iothub_message == NULL)
     {
-        disposition_result = IOTHUBMESSAGE_REJECTED;
         LogError("Transport failed processing the message received.");
-    }
+
+		result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading message body");
+	}
 	else
     {
 		/* Codes_SRS_IOTHUBTRANSPORTAMQP_09_153: [The callback ‘on_message_received’ shall read the message-id property from the uAMQP message and set it on the IoT Hub Message if the property is defined.] */
@@ -481,23 +570,37 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
 			LogError("Transport failed reading properties of the message received.");
 		}
 
-        disposition_result = IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, iothub_message);
+		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_169: [The callback ‘on_message_received’ shall read the application properties from the uAMQP message and set it on the IoT Hub Message if any are provided.]
+		if (readApplicationPropertiesFromuAMQPMessage(iothub_message, message) != 0)
+		{
+			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received’ fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+			LogError("Transport failed reading application properties of the message received.");
+			
+			result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading application properties");
+		}
+		else
+		{
+			IOTHUBMESSAGE_DISPOSITION_RESULT disposition_result;
+			
+			disposition_result = IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, iothub_message);
 
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_105: [The callback 'on_message_received' shall return the result of messaging_delivery_accepted() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ACCEPTED] 
-        if (disposition_result == IOTHUBMESSAGE_ACCEPTED)
-        {
-            result = messaging_delivery_accepted();
-        }
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_106: [The callback 'on_message_received' shall return the result of messaging_delivery_released() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ABANDONED] 
-        else if (disposition_result == IOTHUBMESSAGE_ABANDONED)
-        {
-            result = messaging_delivery_released();
-        }
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_107: [The callback 'on_message_received' shall return the result of messaging_delivery_rejected("Rejected by application", "Rejected by application") if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_REJECTED] 
-        else if (disposition_result == IOTHUBMESSAGE_REJECTED)
-        {
-            result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
-        }
+			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_105: [The callback 'on_message_received' shall return the result of messaging_delivery_accepted() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ACCEPTED] 
+			if (disposition_result == IOTHUBMESSAGE_ACCEPTED)
+			{
+				result = messaging_delivery_accepted();
+			}
+			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_106: [The callback 'on_message_received' shall return the result of messaging_delivery_released() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ABANDONED] 
+			else if (disposition_result == IOTHUBMESSAGE_ABANDONED)
+			{
+				result = messaging_delivery_released();
+			}
+			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_107: [The callback 'on_message_received' shall return the result of messaging_delivery_rejected("Rejected by application", "Rejected by application") if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_REJECTED] 
+			else if (disposition_result == IOTHUBMESSAGE_REJECTED)
+			{
+				result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
+			}
+		}
+
         IoTHubMessage_Destroy(iothub_message);
     }
 
