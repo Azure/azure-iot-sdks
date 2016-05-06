@@ -78,7 +78,6 @@ cmake "$build_root"
 
 # make!
 echo Building device client sample...
-#make --jobs=$(nproc) iotdm_simple_sample
 make --jobs="$numprocs" iotdm_simple_sample
 
 popd
