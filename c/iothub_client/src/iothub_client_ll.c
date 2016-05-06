@@ -50,7 +50,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
 	/*Codes_SRS_IOTHUBCLIENT_LL_05_002: [IoTHubClient_LL_CreateFromConnectionString shall print the version string to standard output.]*/
 	LogInfo("IoT Hub SDK for C, version %s", IoTHubClient_GetVersionString());
 
-	/* SRS_IOTHUBCLIENT_LL_12_003: [IoTHubClient_LL_CreateFromConnectionString shall verify the input parameter and if it is NULL then return NULL] */
+	/* Codes_SRS_IOTHUBCLIENT_LL_12_003: [IoTHubClient_LL_CreateFromConnectionString shall verify the input parameter and if it is NULL then return NULL] */
 	if (connectionString == NULL)
 	{
 		LogError("Input parameter is NULL: connectionString");
@@ -61,11 +61,11 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
 	}
 	else
 	{
-		/* SRS_IOTHUBCLIENT_LL_12_004: [IoTHubClient_LL_CreateFromConnectionString shall allocate IOTHUB_CLIENT_CONFIG structure] */
+		/* Codes_SRS_IOTHUBCLIENT_LL_12_004: [IoTHubClient_LL_CreateFromConnectionString shall allocate IOTHUB_CLIENT_CONFIG structure] */
 		IOTHUB_CLIENT_CONFIG* config = malloc(sizeof(IOTHUB_CLIENT_CONFIG));
 		if (config == NULL)
 		{
-			/* SRS_IOTHUBCLIENT_LL_12_012: [If the allocation failed IoTHubClient_LL_CreateFromConnectionString  returns NULL]  */
+			/* Codes_SRS_IOTHUBCLIENT_LL_12_012: [If the allocation failed IoTHubClient_LL_CreateFromConnectionString  returns NULL]  */
 			LogError("Malloc failed");
 			return NULL;
 		}
@@ -117,8 +117,8 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
 			{
 				LogError("Error creating HostSuffix String");
 			}
-			/* SRS_IOTHUBCLIENT_LL_12_005: [IoTHubClient_LL_CreateFromConnectionString shall try to parse the connectionString input parameter for the following structure: "Key1=value1;key2=value2;key3=value3..."] */
-			/* SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey or SharedAccessSignature.]  */
+			/* Codes_SRS_IOTHUBCLIENT_LL_12_005: [IoTHubClient_LL_CreateFromConnectionString shall try to parse the connectionString input parameter for the following structure: "Key1=value1;key2=value2;key3=value3..."] */
+			/* Codes_SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey or SharedAccessSignature.]  */
 			else
 			{
 				while ((STRING_TOKENIZER_get_next_token(tokenizer1, tokenString, "=") == 0))
@@ -132,11 +132,11 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
 					{
 						if (tokenString != NULL)
 						{
-							/* SRS_IOTHUBCLIENT_LL_12_010: [IoTHubClient_LL_CreateFromConnectionString shall fill up the IOTHUB_CLIENT_CONFIG structure using the following mapping: iotHubName = Name, iotHubSuffix = Suffix, deviceId = DeviceId, deviceKey = SharedAccessKey or deviceSasToken = SharedAccessSignature] */
+							/* Codes_SRS_IOTHUBCLIENT_LL_12_010: [IoTHubClient_LL_CreateFromConnectionString shall fill up the IOTHUB_CLIENT_CONFIG structure using the following mapping: iotHubName = Name, iotHubSuffix = Suffix, deviceId = DeviceId, deviceKey = SharedAccessKey or deviceSasToken = SharedAccessSignature] */
 							const char* s_token = STRING_c_str(tokenString);
 							if (strcmp(s_token, HOSTNAME_TOKEN) == 0)
 							{
-								/* SRS_IOTHUBCLIENT_LL_12_009: [IoTHubClient_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator] */
+								/* Codes_SRS_IOTHUBCLIENT_LL_12_009: [IoTHubClient_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator] */
 								STRING_TOKENIZER_HANDLE tokenizer2 = NULL;
 								if ((tokenizer2 = STRING_TOKENIZER_create(valueString)) == NULL)
 								{
@@ -145,7 +145,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
 								}
 								else
 								{
-									/* SRS_IOTHUBCLIENT_LL_12_015: [If the string split failed, IoTHubClient_LL_CreateFromConnectionString returns NULL ] */
+									/* Codes_SRS_IOTHUBCLIENT_LL_12_015: [If the string split failed, IoTHubClient_LL_CreateFromConnectionString returns NULL ] */
 									if (STRING_TOKENIZER_get_next_token(tokenizer2, hostNameString, ".") != 0)
 									{
 										LogError("Tokenizer error");
@@ -228,7 +228,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
 				}
 				else
 				{
-					/* SRS_IOTHUBCLIENT_LL_12_011: [IoTHubClient_LL_CreateFromConnectionString shall call into the IoTHubClient_LL_Create API with the current structure and returns with the return value of it] */
+					/* Codes_SRS_IOTHUBCLIENT_LL_12_011: [IoTHubClient_LL_CreateFromConnectionString shall call into the IoTHubClient_LL_Create API with the current structure and returns with the return value of it] */
 					result = IoTHubClient_LL_Create(config);
 					if (result == NULL)
 					{
@@ -328,39 +328,29 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
 				}
 				else
 				{
-					IOTHUB_DEVICE_CONFIG* deviceConfig = (IOTHUB_DEVICE_CONFIG*)malloc(sizeof(IOTHUB_DEVICE_CONFIG));
+                    IOTHUB_DEVICE_CONFIG deviceConfig;
 
-					if (deviceConfig == NULL)
+					deviceConfig.deviceId = config->deviceId;
+					deviceConfig.deviceKey = config->deviceKey;
+					deviceConfig.deviceSasToken = config->deviceSasToken;
+
+					/*Codes_SRS_IOTHUBCLIENT_LL_17_008: [IoTHubClient_LL_Create shall call the transport _Register function with a populated structure of type IOTHUB_DEVICE_CONFIG and waitingToSend list.] */
+					if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(handleData->transportHandle, &deviceConfig, handleData, &(handleData->waitingToSend))) == NULL)
 					{
-						LogError("malloc failed\r\n");
+						/*Codes_SRS_IOTHUBCLIENT_LL_17_009: [If the _Register function fails, this function shall fail and return NULL.]*/
+						LogError("Registering device in transport failed");
+						handleData->IoTHubTransport_Destroy(handleData->transportHandle);
+						tickcounter_destroy(handleData->tickCounter);
+						free(handleData);
 						result = NULL;
 					}
-
 					else
 					{
-						deviceConfig->deviceId = config->deviceId;
-						deviceConfig->deviceKey = config->deviceKey;
-						deviceConfig->deviceSasToken = config->deviceSasToken;
-
-						/*Codes_SRS_IOTHUBCLIENT_LL_17_008: [IoTHubClient_LL_Create shall call the transport _Register function with a populated structure of type IOTHUB_DEVICE_CONFIG and waitingToSend list.] */
-						if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(handleData->transportHandle, deviceConfig, handleData, &(handleData->waitingToSend))) == NULL)
-						{
-							/*Codes_SRS_IOTHUBCLIENT_LL_17_009: [If the _Register function fails, this function shall fail and return NULL.]*/
-							LogError("Registering device in transport failed");
-							handleData->IoTHubTransport_Destroy(handleData->transportHandle);
-							tickcounter_destroy(handleData->tickCounter);
-							free(handleData);
-							free(deviceConfig);
-							result = NULL;
-						}
-						else
-						{
-							/*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.] */
-							handleData->isSharedTransport = false;
-							/*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
-							handleData->currentMessageTimeout = 0;
-							result = handleData;
-						}
+						/*Codes_SRS_IOTHUBCLIENT_LL_02_008: [Otherwise, IoTHubClient_LL_Create shall succeed and return a non-NULL handle.] */
+						handleData->isSharedTransport = false;
+						/*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
+						handleData->currentMessageTimeout = 0;
+						result = handleData;
 					}
 				}
 			}
@@ -412,38 +402,28 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
 				handleData->transportHandle = config->transportHandle;
 
 
-				IOTHUB_DEVICE_CONFIG* deviceConfig = (IOTHUB_DEVICE_CONFIG*)malloc(sizeof(IOTHUB_DEVICE_CONFIG));
+                IOTHUB_DEVICE_CONFIG deviceConfig;
 
-				if (deviceConfig == NULL)
+				deviceConfig.deviceId = config->deviceId;
+				deviceConfig.deviceKey = config->deviceKey;
+				deviceConfig.deviceSasToken = config->deviceSasToken;
+
+				/*Codes_SRS_IOTHUBCLIENT_LL_17_006: [IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the IOTHUB_DEVICE_CONFIG populated structure and waitingToSend list.]*/
+				if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(config->transportHandle, &deviceConfig, handleData, &(handleData->waitingToSend))) == NULL)
 				{
-					LogError("malloc failed\r\n");
+					/*Codes_SRS_IOTHUBCLIENT_LL_17_007: [If the _Register function fails, this function shall fail and return NULL.]*/
+					LogError("Registering device in transport failed");
+					tickcounter_destroy(handleData->tickCounter);
+					free(handleData);
 					result = NULL;
 				}
-
 				else
 				{
-					deviceConfig->deviceId = config->deviceId;
-					deviceConfig->deviceKey = config->deviceKey;
-					deviceConfig->deviceSasToken = config->deviceSasToken;
-
-					/*Codes_SRS_IOTHUBCLIENT_LL_17_006: [IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the IOTHUB_DEVICE_CONFIG populated structure and waitingToSend list.]*/
-					if ((handleData->deviceHandle = handleData->IoTHubTransport_Register(config->transportHandle, deviceConfig, handleData, &(handleData->waitingToSend))) == NULL)
-					{
-						/*Codes_SRS_IOTHUBCLIENT_LL_17_007: [If the _Register function fails, this function shall fail and return NULL.]*/
-						LogError("Registering device in transport failed");
-						tickcounter_destroy(handleData->tickCounter);
-						free(handleData);
-						free(deviceConfig);
-						result = NULL;
-					}
-					else
-					{
-						/*Codes_SRS_IOTHUBCLIENT_LL_17_005: [IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.]*/
-						handleData->isSharedTransport = true;
-						/*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
-						handleData->currentMessageTimeout = 0;
-						result = handleData;
-					}
+					/*Codes_SRS_IOTHUBCLIENT_LL_17_005: [IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.]*/
+					handleData->isSharedTransport = true;
+					/*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
+					handleData->currentMessageTimeout = 0;
+					result = handleData;
 				}
 			}
 		}

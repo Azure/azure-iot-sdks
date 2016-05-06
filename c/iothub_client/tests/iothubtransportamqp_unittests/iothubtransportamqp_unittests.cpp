@@ -1067,9 +1067,9 @@ static void setExpectedCallsForTransportCreateUpTo(CIoTHubTransportAMQPMocks& mo
 		}
 		else if (step == STEP_CREATE_DEVICEKEY)
 		{
-			STRICT_EXPECTED_CALL(mocks, STRING_new());
-			STRICT_EXPECTED_CALL(mocks, STRING_copy(0, config->upperConfig->deviceKey)).IgnoreArgument(1);
-		}
+            STRICT_EXPECTED_CALL(mocks, STRING_new());
+            STRICT_EXPECTED_CALL(mocks, STRING_copy(0, config->upperConfig->deviceKey)).IgnoreArgument(1);
+        }
 	}
 }
 
@@ -1605,6 +1605,27 @@ TEST_FUNCTION(AMQP_Create_with_config_deviceKey_and_deviceSasToken_NULL_fails)
 	// assert
 	ASSERT_IS_NULL(transportHandle);
 }
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_03_001: [IoTHubTransportAMQP_Create shall fail and return NULL if both deviceKey & deviceSasToken fields are NOT NULL.]
+TEST_FUNCTION(AMQP_Create_with_config_deviceKey_and_deviceSasToken_defined_fails)
+{
+    // arrange
+    DLIST_ENTRY wts;
+    TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+
+    IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_DEVICE_SAS, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+
+    IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+    // act
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
+
+    // assert
+    ASSERT_IS_NULL(transportHandle);
+}
+
+
 
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_008: [IoTHubTransportAMQP_Create shall fail and return NULL if any config field of type string is zero length.] 
 TEST_FUNCTION(AMQP_Create_with_config_hubName_NULL_fails)

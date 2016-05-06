@@ -31,7 +31,8 @@ IoTHubTransportMqtt_Create shall create a TRANSPORT_LL_HANDLE that can be furthe
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_001: [**If parameter config is NULL then IoTHubTransportMqtt_Create shall return NULL.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_002: [**If the parameter config's variables upperConfig or waitingToSend are NULL then IoTHubTransportMqtt_Create shall return NULL.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_003: [**If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransportMqtt_Create shall return NULL.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_003: [**If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransportMqtt_Create shall return NULL.**]** 
+**SRS_IOTHUB_MQTT_TRANSPORT_03_003: [**If both deviceKey & deviceSasToken fields are NOT NULL then IoTHubTransportMqtt_Create shall return NULL.**]**
 **SRS_IOTHUB_MQTT_TRANSPORT_07_004: [**If the config's waitingToSend variable is NULL then IoTHubTransportMqtt_Create shall return NULL.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_005: [**If the upperConfig's variables deviceKey, iotHubName, or iotHubSuffix are empty strings then IoTHubTransportMqtt_Create shall return NULL.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_006: [**If the upperConfig's variables deviceId is an empty strings or length is greater then 128 then IoTHubTransportMqtt_Create shall return NULL.**]**  
@@ -51,7 +52,7 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle)
 
 ## IoTHubTransportMqtt_Register
 ```c
-extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend);
+extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(RANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, PDLIST_ENTRY waitingToSend);
 ```
 
 This function registers a device with the transport.  The MQTT transport only supports a single device established on create, so this function will prevent multiple devices from being registered.

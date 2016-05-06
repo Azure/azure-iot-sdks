@@ -180,39 +180,39 @@ public:
 
 		MOCK_STATIC_METHOD_1(, int, DList_RemoveEntryList, PDLIST_ENTRY, listEntry)
 		int result2 = BASEIMPLEMENTATION::DList_RemoveEntryList(listEntry);
-	MOCK_METHOD_END(int, result2)
+	    MOCK_METHOD_END(int, result2)
 
 		MOCK_STATIC_METHOD_1(, PDLIST_ENTRY, DList_RemoveHeadList, PDLIST_ENTRY, listHead)
 		PDLIST_ENTRY entry = BASEIMPLEMENTATION::DList_RemoveHeadList(listHead);
-	MOCK_METHOD_END(PDLIST_ENTRY, entry)
+	    MOCK_METHOD_END(PDLIST_ENTRY, entry)
 
 		MOCK_STATIC_METHOD_2(, int, mallocAndStrcpy_s, char**, destination, const char*, source)
 		MOCK_METHOD_END(int, (*destination = (char*)BASEIMPLEMENTATION::gballoc_malloc(strlen(source) + 1), strcpy(*destination, source), 0))
 
 		MOCK_STATIC_METHOD_1(, void*, gballoc_malloc, size_t, size)
 		void* result2;
-	currentmalloc_call++;
-	if (whenShallmalloc_fail>0)
-	{
-		if (currentmalloc_call == whenShallmalloc_fail)
-		{
-			result2 = (void*)NULL;
-		}
-		else
-		{
-			result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
-		}
-	}
-	else
-	{
-		result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
-	}
-	MOCK_METHOD_END(void*, result2);
+        currentmalloc_call++;
+        if (whenShallmalloc_fail>0)
+        {
+	        if (currentmalloc_call == whenShallmalloc_fail)
+	        {
+		        result2 = (void*)NULL;
+	        }
+	        else
+	        {
+		        result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
+	        }
+        }
+        else
+        {
+	        result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
+        }
+        MOCK_METHOD_END(void*, result2);
 
-	MOCK_STATIC_METHOD_2(, void*, gballoc_realloc, void*, ptr, size_t, size)
+	    MOCK_STATIC_METHOD_2(, void*, gballoc_realloc, void*, ptr, size_t, size)
 		MOCK_METHOD_END(void*, BASEIMPLEMENTATION::gballoc_realloc(ptr, size));
 
-	MOCK_STATIC_METHOD_1(, void, gballoc_free, void*, ptr)
+    MOCK_STATIC_METHOD_1(, void, gballoc_free, void*, ptr)
 		BASEIMPLEMENTATION::gballoc_free(ptr);
 	MOCK_VOID_METHOD_END()
 
@@ -603,7 +603,8 @@ static void SetupIothubTransportConfig(IOTHUBTRANSPORT_CONFIG* config, const cha
 	g_iothubClientConfig.protocol = MQTT_Protocol;
 	g_iothubClientConfig.deviceId = deviceId;
 	g_iothubClientConfig.deviceKey = deviceKey;
-	g_iothubClientConfig.iotHubName = iotHubName;
+    g_iothubClientConfig.deviceSasToken = NULL;
+    g_iothubClientConfig.iotHubName = iotHubName;
 	g_iothubClientConfig.iotHubSuffix = iotHubSuffix;
 	g_iothubClientConfig.protocolGatewayHostName = protocolGatewayHostName;
 	config->waitingToSend = &g_waitingToSend;
@@ -771,8 +772,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_with_NULL_protocol_gateway_hostname_Suc
 	IOTHUBTRANSPORT_CONFIG config = { 0 };
 	SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, NULL);
 
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
@@ -819,7 +820,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_Succeed)
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
@@ -864,7 +865,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_hostAddress_fails)
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
@@ -926,6 +927,22 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_with_empty_device_key_fails)
 	ASSERT_IS_NULL(result);
 }
 
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_03_003: [If both deviceKey & deviceSasToken fields are NOT NULL then IoTHubTransportMqtt_Create shall return NULL.]*/
+TEST_FUNCTION(IoTHubTransportMqtt_Create_with_both_deviceKey_and_deviceSasToken_defined_fails)
+{
+    // arrange
+    CIoTHubTransportMqttMocks mocks;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+
+    SetupIothubTransportConfigWithKeyAndSasToken(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_DEVICE_SAS, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    // act
+    auto result = IoTHubTransportMqtt_Create(&config);
+
+    // assert
+    ASSERT_IS_NULL(result);
+}
+
 /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransportMqtt_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransportMqtt_Create_with_empty_iothub_name_fails)
 {
@@ -954,7 +971,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_String_construct_fails_fail
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
@@ -991,7 +1008,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_string_contruct_for_message
 
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
@@ -1024,7 +1041,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_string_construct_sasTokenSr
 	whenShallSTRING_construct_fail = 3;
 
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
@@ -1052,7 +1069,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_state_Allocation_fails_fail
 	SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
 	whenShallmalloc_fail = 1;
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
 	// act
 	auto result = IoTHubTransportMqtt_Create(&config);
@@ -1072,7 +1089,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_mqtt_client_init_Create_fai
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
-	EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_ID));
 	STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
@@ -3493,6 +3510,31 @@ TEST_FUNCTION(IoTHubTransportMqtt_Register_deviceKey_and_deviceSasToken_both_pro
 
 	//cleanup
 	IoTHubTransportMqtt_Destroy(handle);
+}
+
+// SRS_IOTHUB_MQTT_TRANSPORT_17_004: [IoTHubTransportMqtt_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE.]
+TEST_FUNCTION(IoTHubTransportMqtt_Register_deviceKey_null_and_deviceSas_valid_succeeds)
+{
+    // arrange
+    CIoTHubTransportMqttMocks mocks;
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfigWithKeyAndSasToken(&config, TEST_DEVICE_ID, NULL, TEST_DEVICE_SAS, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    IOTHUB_DEVICE_CONFIG deviceConfig = { TEST_DEVICE_ID, NULL, TEST_DEVICE_SAS };
+
+    auto handle = IoTHubTransportMqtt_Create(&config);
+    mocks.ResetAllCalls();
+
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+
+    // act
+    auto devHandle = IoTHubTransportMqtt_Register(handle, &deviceConfig, TEST_IOTHUB_CLIENT_LL_HANDLE, config.waitingToSend);
+
+    // assert
+    ASSERT_IS_NOT_NULL(devHandle);
+    mocks.AssertActualAndExpectedCalls();
+
+    //cleanup
+    IoTHubTransportMqtt_Destroy(handle);
 }
 
 // Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransportMqtt_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.]

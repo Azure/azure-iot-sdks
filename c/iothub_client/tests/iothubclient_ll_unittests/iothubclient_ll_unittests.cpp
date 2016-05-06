@@ -495,11 +495,6 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceKey_succeeds
 	EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 
 	/* underlying IoTHubClient_LL_Create call */
-	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-		.IgnoreArgument(1);
-	STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-		.IgnoreArgument(1);
-
 	STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
 	STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
@@ -509,13 +504,16 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceKey_succeeds
 		.IgnoreArgument(1)
 		.SetReturn((TRANSPORT_LL_HANDLE)0x42);
 
-	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(sizeof(IOTHUB_DEVICE_CONFIG)))
 		.IgnoreArgument(1);
 
 	STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
 		.IgnoreAllArguments();
 
-	///act
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    
+    ///act
 	auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
 
 	///assert
@@ -599,11 +597,6 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceSasToken_suc
 	EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 
 	/* underlying IoTHubClient_LL_Create call */
-	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-		.IgnoreArgument(1);
-	STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-		.IgnoreArgument(1);
-
 	STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
 	STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
@@ -618,7 +611,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceSasToken_suc
 	STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
 		.IgnoreAllArguments();
 
-	///act
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    
+    ///act
 	auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
 
 	///assert
@@ -821,6 +817,8 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_withGatewayHostName_suc
 	/* loop exit */
 	EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
 		.SetReturn(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
 
 	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
 	EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
@@ -834,10 +832,6 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_withGatewayHostName_suc
 	EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 
 	/* underlying IoTHubClient_LL_Create call */
-	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-		.IgnoreArgument(1);
-	STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-		.IgnoreArgument(1);
 	STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
 	STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
@@ -936,10 +930,6 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_withoutGatewayHostName_
 	EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 
 	/* underlying IoTHubClient_LL_Create call */
-	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-		.IgnoreArgument(1);
-	STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-		.IgnoreArgument(1);
 	STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
 	STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
@@ -953,7 +943,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_withoutGatewayHostName_
 	STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
 		.IgnoreAllArguments();
 
-	///act
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    
+    ///act
 	auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
 
 	///assert
@@ -2069,11 +2062,6 @@ TEST_FUNCTION(IoTHubClient_LL_Create_fails_when_underlying_transport_register_fa
 	STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG))
 		.IgnoreArgument(1);
 
-	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-		.IgnoreArgument(1);
-	STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-		.IgnoreArgument(1);
-
 	STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
 		.IgnoreAllArguments()
 		.SetFailReturn((IOTHUB_DEVICE_HANDLE)NULL);
@@ -2111,15 +2099,12 @@ TEST_FUNCTION(IoTHubClient_LL_Create_suceeds)
 		.IgnoreArgument(1)
 		.SetReturn((TRANSPORT_LL_HANDLE)0x42);
 
-	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-		.IgnoreArgument(1);
-
 	STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register((TRANSPORT_LL_HANDLE)0x42, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
 		.IgnoreArgument(2)
 		.IgnoreArgument(3)
 		.IgnoreArgument(4);
-
-	///act
+   
+    ///act
 	auto result = IoTHubClient_LL_Create(&TEST_CONFIG);
 
 	///assert
@@ -2175,9 +2160,6 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_Succeeds)
 	device.deviceKey = TEST_DEVICE_CONFIG.deviceKey;
 	device.deviceSasToken = NULL;
 
-	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-		.IgnoreArgument(1);
-
 	STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
 	STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
@@ -2210,11 +2192,6 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_transport_register_fails_retur
 	device.deviceId = TEST_DEVICE_CONFIG.deviceId;
 	device.deviceKey = TEST_DEVICE_CONFIG.deviceKey;
 	device.deviceSasToken = NULL;
-
-	STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-		.IgnoreArgument(1);
-	STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
-		.IgnoreArgument(1);
 
 	STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 	STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))

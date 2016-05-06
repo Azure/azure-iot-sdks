@@ -422,6 +422,12 @@ static void destroy_deviceKey(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
 	handleData->deviceKey = NULL;
 }
 
+static void destroy_deviceSas(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
+{
+    STRING_delete(handleData->deviceSasToken);
+    handleData->deviceSasToken = NULL;
+}
+
 static bool create_deviceKey(HTTPTRANSPORT_PERDEVICE_DATA* handleData, const char * deviceKey)
 {
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_135: [ IoTHubTransportHttp_Register shall create an immutable string (further called "deviceKey") from deviceKey. ]*/
@@ -454,7 +460,7 @@ static bool create_deviceSasToken(HTTPTRANSPORT_PERDEVICE_DATA* handleData, cons
 	if (handleData->deviceSasToken == NULL)
 	{
 		/*Codes_SRS_TRANSPORTMULTITHTTP_03_136: [ If deviceSasToken is not created, then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
-		LogError("STRING_construct deviceKey failed");
+		LogError("STRING_construct deviceSasToken failed");
 		result = false;
 	}
 	else
@@ -535,18 +541,16 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, co
 			bool was_resultCreated_ok = ((result = malloc(sizeof(HTTPTRANSPORT_PERDEVICE_DATA))) != NULL);
 			bool was_create_deviceId_ok = was_resultCreated_ok && create_deviceId(result, device->deviceId);
 
-			if (was_create_deviceId_ok)
+			if (was_create_deviceId_ok && (device->deviceSasToken != NULL))
 			{
-				if (device->deviceSasToken != NULL)
-				{
-					was_create_deviceSasToken_ok = create_deviceSasToken(result, device->deviceSasToken);
-					result->deviceKey = NULL;
-				}
-				else if (device->deviceKey != NULL)
-				{
-					was_create_deviceKey_ok = create_deviceKey(result, device->deviceKey);
-					result->deviceSasToken = NULL;
-				}
+				was_create_deviceSasToken_ok = create_deviceSasToken(result, device->deviceSasToken);
+				result->deviceKey = NULL;
+                result->sasObject = NULL;
+			}
+			if (was_create_deviceId_ok && (device->deviceKey != NULL))
+			{
+				was_create_deviceKey_ok = create_deviceKey(result, device->deviceKey);
+				result->deviceSasToken = NULL;
 			}
 
 			bool was_eventHTTPrelativePath_ok = (was_create_deviceKey_ok || was_create_deviceSasToken_ok) && create_eventHTTPrelativePath(result, device->deviceId);
@@ -602,6 +606,7 @@ static void destroy_perDeviceData(HTTPTRANSPORT_PERDEVICE_DATA * perDeviceItem)
 {
 	destroy_deviceId(perDeviceItem);
 	destroy_deviceKey(perDeviceItem);
+    destroy_deviceSas(perDeviceItem);
 	destroy_eventHTTPrelativePath(perDeviceItem);
 	destroy_messageHTTPrelativePath(perDeviceItem);
 	destroy_eventHTTPrequestHeaders(perDeviceItem);
@@ -1532,7 +1537,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
 												{
 													r = HTTPAPIEX_ERROR;
 													/*Codes_SRS_TRANSPORTMULTITHTTP_03_002: [If the result of the invocation of HTTPHeaders_ReplaceHeaderNameValuePair is NOT HTTP_HEADERS_OK then fallthrough.]*/
-													LogError("Unable to replace the old SAS Token.\r\n");
+													LogError("Unable to replace the old SAS Token.");
 												}
 
 												/*Codes_SRS_TRANSPORTMULTITHTTP_03_003: [If a deviceSasToken exists, IoTHubTransportHttp_DoWork shall call HTTPAPIEX_ExecuteRequest passing the following parameters] */
@@ -1547,7 +1552,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
 													NULL
 													)) != HTTPAPIEX_OK)
 												{
-													LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
+													LogError("Unable to HTTPAPIEX_ExecuteRequest.");
 												}
 											}
 											else
@@ -1700,7 +1705,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 							{
 								r = HTTPAPIEX_ERROR;
 								/*Codes_SRS_TRANSPORTMULTITHTTP_03_002: [If the result of the invocation of HTTPHeaders_ReplaceHeaderNameValuePair is NOT HTTP_HEADERS_OK then fallthrough.]*/
-								LogError("Unable to replace the old SAS Token.\r\n");
+								LogError("Unable to replace the old SAS Token.");
 							}
 							else if ((r = HTTPAPIEX_ExecuteRequest(
 								handleData->httpApiExHandle,
@@ -1716,7 +1721,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_098: [Abandoning the message is considered successful if the HTTPAPIEX_SAS_ExecuteRequest doesn't fail and the statusCode is 204.]*/
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_100: [Accepting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
 								/*Codes_SRS_TRANSPORTMULTITHTTP_17_102: [Rejecting a message is successful when HTTPAPIEX_SAS_ExecuteRequest completes successfully and the status code is 204.] */
-								LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
+								LogError("Unable to HTTPAPIEX_ExecuteRequest.");
 							}
 						}
 						else if ((r = HTTPAPIEX_SAS_ExecuteRequest(
@@ -1800,7 +1805,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
 						{
 							r = HTTPAPIEX_ERROR;
 							/*Codes_SRS_TRANSPORTMULTITHTTP_03_002: [If the result of the invocation of HTTPHeaders_ReplaceHeaderNameValuePair is NOT HTTP_HEADERS_OK then fallthrough.]*/
-							LogError("Unable to replace the old SAS Token.\r\n");
+							LogError("Unable to replace the old SAS Token.");
 						}
 						else if ((r = HTTPAPIEX_ExecuteRequest(
 							handleData->httpApiExHandle,
@@ -1814,7 +1819,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
 							)) != HTTPAPIEX_OK)
 						{
 							/*Codes_SRS_TRANSPORTMULTITHTTP_17_085: [If the call to HTTPAPIEX_SAS_ExecuteRequest did not executed successfully or building any part of the prerequisites of the call fails, then _DoWork shall advance to the next action in this description.] */
-							LogError("unable to HTTPAPIEX_ExecuteRequest\r\n");
+							LogError("Unable to HTTPAPIEX_ExecuteRequest.");
 						}
 					}
 

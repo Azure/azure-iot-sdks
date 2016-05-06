@@ -58,6 +58,8 @@ This function creates all the inner components required by the IoT Hub client to
 
 **SRS_IOTHUBTRANSPORTAMQP_09_006: [**IoTHubTransportAMQP_Create shall fail and return NULL if any fields of the config structure are NULL.**]**
 
+**SRS_IOTHUBTRANSPORTAMQP_03_001: [**IoTHubTransportAMQP_Create shall fail and return NULL if both deviceKey & deviceSasToken fields are NOT NULL.**]**
+
 **SRS_IOTHUBTRANSPORTAMQP_09_007: [**IoTHubTransportAMQP_Create shall fail and return NULL if the deviceId length is greater than 128.**]**
  
 **SRS_IOTHUBTRANSPORTAMQP_09_008: [**IoTHubTransportAMQP_Create shall fail and return NULL if any config field of type string is zero length.**]**
@@ -406,7 +408,7 @@ Reading the AMQP message content, notifying the message reception:
 
 **SRS_IOTHUBTRANSPORTUAMQP_03_003: [**IoTHubTransportAMQP_Register shall return NULL if both deviceKey and deviceSasToken are not NULL.**]**
 
-**SRS_IOTHUBTRANSPORTUAMQP_17_002: [**IoTHubTransportAMQP_Register shall return NULL if deviceId or deviceKey or deviceSasToken do not match the deviceId, deviceKey or deviceSasToken passed in during IoTHubTransportAMQP_Create.**]**
+**SRS_IOTHUBTRANSPORTUAMQP_17_002: [**IoTHubTransportAMQP_Register shall return NULL if deviceId or deviceKey do not match the deviceId, or deviceKey passed in during IoTHubTransportAMQP_Create.**]**
 
 **SRS_IOTHUBTRANSPORTUAMQP_17_003: [**IoTHubTransportAMQP_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE.**]**
 

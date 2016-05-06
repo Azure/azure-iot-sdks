@@ -625,53 +625,60 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transportState)
 
 	// Not checking the success of this variable, if fail it will fail in the SASToken creation and return false;
 	STRING_HANDLE emptyKeyName = STRING_new();
-	STRING_HANDLE sasToken = NULL;
-	if (transportState->sasTokenFromUser)
-	{
-		sasToken = STRING_clone(transportState->sasTokenSr);
-	}
-	else
-	{
-		sasToken = SASToken_Create(transportState->device_key, transportState->sasTokenSr, emptyKeyName, expiryTime);
-	}
+    if (emptyKeyName == NULL)
+    {
+        result = __LINE__;
+    }
+    else
+    {
+        STRING_HANDLE sasToken = NULL;
+        if (transportState->sasTokenFromUser)
+        {
+            sasToken = STRING_clone(transportState->sasTokenSr);
+        }
+        else
+        {
+            sasToken = SASToken_Create(transportState->device_key, transportState->sasTokenSr, emptyKeyName, expiryTime);
+        }
 
-	if (sasToken == NULL)
-	{
-		result = __LINE__;
-	}
-	else
-	{
-		MQTT_CLIENT_OPTIONS options = { 0 };
-		options.clientId = (char*)STRING_c_str(transportState->device_id);
-		options.willMessage = NULL;
-		options.username = (char*)STRING_c_str(transportState->configPassedThroughUsername);
-		options.password = (char*)STRING_c_str(sasToken);
-		options.keepAliveInterval = transportState->keepAliveValue;
-		options.useCleanSession = false;
-		options.qualityOfServiceValue = DELIVER_AT_LEAST_ONCE;
+        if (sasToken == NULL)
+        {
+            result = __LINE__;
+        }
+        else
+        {
+            MQTT_CLIENT_OPTIONS options = { 0 };
+            options.clientId = (char*)STRING_c_str(transportState->device_id);
+            options.willMessage = NULL;
+            options.username = (char*)STRING_c_str(transportState->configPassedThroughUsername);
+            options.password = (char*)STRING_c_str(sasToken);
+            options.keepAliveInterval = transportState->keepAliveValue;
+            options.useCleanSession = false;
+            options.qualityOfServiceValue = DELIVER_AT_LEAST_ONCE;
 
-		if (GetTransportProviderIfNecessary(transportState) == 0)
-		{
-			if (mqtt_client_connect(transportState->mqttClient, transportState->xioTransport, &options) != 0)
-			{
-				LogError("failure connecting to address %s:%d.", STRING_c_str(transportState->hostAddress), transportState->portNum);
-				xio_destroy(transportState->xioTransport);
-				transportState->xioTransport = NULL;
-				result = __LINE__;
-			}
-			else
-			{
-				(void)tickcounter_get_current_ms(g_msgTickCounter, &transportState->mqtt_connect_time);
-				result = 0;
-			}
-		}
-		else
-		{
-			result = __LINE__;
-		}
-	}
-	STRING_delete(emptyKeyName);
-	STRING_delete(sasToken);
+            if (GetTransportProviderIfNecessary(transportState) == 0)
+            {
+                if (mqtt_client_connect(transportState->mqttClient, transportState->xioTransport, &options) != 0)
+                {
+                    LogError("failure connecting to address %s:%d.", STRING_c_str(transportState->hostAddress), transportState->portNum);
+                    xio_destroy(transportState->xioTransport);
+                    transportState->xioTransport = NULL;
+                    result = __LINE__;
+                }
+                else
+                {
+                    (void)tickcounter_get_current_ms(g_msgTickCounter, &transportState->mqtt_connect_time);
+                    result = 0;
+                }
+            }
+            else
+            {
+                result = __LINE__;
+            }
+        }
+        STRING_delete(emptyKeyName);
+        STRING_delete(sasToken);
+    }
 	return result;
 }
 
@@ -768,110 +775,116 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
 		free(state);
 		state = NULL;
 	}
-	else if ((upperConfig->deviceKey != NULL) && ((state->device_key = STRING_construct(upperConfig->deviceKey)) == NULL))
-	{
-		LogError("Could not create device key for MQTT");
-		STRING_delete(state->device_id);
-		free(state);
-		state = NULL;
-	}
-	else if ((upperConfig->deviceSasToken != NULL) && ((state->sasTokenSr = STRING_construct(upperConfig->deviceSasToken)) == NULL))
-	{
-		LogError("Could not create Sas Token Sr String");
-		STRING_delete(state->device_id);
-		STRING_delete(state->device_key);
-		free(state);
-		state = NULL;
-	}
-	else if ((upperConfig->deviceSasToken == NULL) && ((state->sasTokenSr = ConstructSasToken(upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId)) == NULL))
-	{
-		LogError("Could not create Sas Token Sr String.");
-		STRING_delete(state->device_id);
-		STRING_delete(state->device_key);
-		free(state);
-		state = NULL;
-	}
-	else if ( (state->mqttEventTopic = ConstructEventTopic(upperConfig->deviceId) ) == NULL)
-	{
-		LogError("Could not create mqttEventTopic for MQTT");
-		STRING_delete(state->sasTokenSr);
-		STRING_delete(state->device_key);
-		STRING_delete(state->device_id);
-		free(state);
-		state = NULL;
-	}
-	else if ((state->mqttMessageTopic = ConstructMessageTopic(upperConfig->deviceId) ) == NULL)
-	{
-		LogError("Could not create mqttMessageTopic for MQTT");
-		STRING_delete(state->mqttEventTopic);
-		STRING_delete(state->sasTokenSr);
-		STRING_delete(state->device_key);
-		STRING_delete(state->device_id);
-		free(state);
-		state = NULL;
-	}
-	else
-	{
-		state->mqttClient = mqtt_client_init(MqttRecvCallback, MqttOpCompleteCallback, state, defaultPrintLogFunction);
-		if (state->mqttClient == NULL)
-		{
-			STRING_delete(state->mqttEventTopic);
-			STRING_delete(state->mqttMessageTopic);
-			STRING_delete(state->sasTokenSr);
-			STRING_delete(state->device_key);
-			STRING_delete(state->device_id);
-			free(state);
-			state = NULL;
-		}
-		else
-		{
-			/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [The hostname shall be constructed using the iothubname and iothubSuffix.] */
-			// TODO: need to strip the ssl or http or tls
-			char tempAddress[DEFAULT_TEMP_STRING_LEN];
-			(void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
-			if ((state->hostAddress = STRING_construct(tempAddress)) == NULL)
-			{
-				STRING_delete(state->mqttEventTopic);
-				STRING_delete(state->mqttMessageTopic);
-				STRING_delete(state->sasTokenSr);
-				STRING_delete(state->device_key);
-				STRING_delete(state->device_id);
-				free(state);
-				state = NULL;
-			}
-			else if ((state->configPassedThroughUsername = buildConfigForUsername(upperConfig)) == NULL)
-			{
-				STRING_delete(state->hostAddress);
-				STRING_delete(state->mqttEventTopic);
-				STRING_delete(state->mqttMessageTopic);
-				STRING_delete(state->sasTokenSr);
-				STRING_delete(state->device_key);
-				STRING_delete(state->device_id);
-				free(state);
-				state = NULL;
-			}
-			else
-			{
-				/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_010: [IoTHubTransportMqtt_Create shall allocate memory to save its internal state where all topics, hostname, device_id, device_key, sasTokenSr and client handle shall be saved.] */
-				DList_InitializeListHead(&(state->waitingForAck));
-				state->sasTokenFromUser = (upperConfig->deviceSasToken == NULL) ? false : true;
-				state->destroyCalled = false;
-				state->isRegistered = false;
-				state->subscribed = false;
-				state->connected = false;
-				state->receiveMessages = false;
-				state->packetId = 1;
-				state->llClientHandle = NULL;
-				state->xioTransport = NULL;
-				state->portNum = DEFAULT_PORT_NUMBER;
-				state->waitingToSend = waitingToSend;
-				state->currPacketState = CONNECT_TYPE;
-				state->keepAliveValue = DEFAULT_MQTT_KEEPALIVE;
-				state->connectFailCount = 0;
-				state->connectTick = 0;
-			}
-		}
-	}
+    else
+    {
+        state->device_key = NULL;
+        state->sasTokenSr = NULL;
+
+        if ((upperConfig->deviceKey != NULL) && ((state->device_key = STRING_construct(upperConfig->deviceKey)) == NULL))
+        {
+            LogError("Could not create device key for MQTT");
+            STRING_delete(state->device_id);
+            free(state);
+            state = NULL;
+        }
+        else if ((upperConfig->deviceSasToken != NULL) && ((state->sasTokenSr = STRING_construct(upperConfig->deviceSasToken)) == NULL))
+        {
+            LogError("Could not create Sas Token Sr String");
+            STRING_delete(state->device_id);
+            STRING_delete(state->device_key);
+            free(state);
+            state = NULL;
+        }
+        else if ((upperConfig->deviceSasToken == NULL) && ((state->sasTokenSr = ConstructSasToken(upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId)) == NULL))
+        {
+            LogError("Could not create Sas Token Sr String.");
+            STRING_delete(state->device_id);
+            STRING_delete(state->device_key);
+            free(state);
+            state = NULL;
+        }
+        else if ((state->mqttEventTopic = ConstructEventTopic(upperConfig->deviceId)) == NULL)
+        {
+            LogError("Could not create mqttEventTopic for MQTT");
+            STRING_delete(state->sasTokenSr);
+            STRING_delete(state->device_key);
+            STRING_delete(state->device_id);
+            free(state);
+            state = NULL;
+        }
+        else if ((state->mqttMessageTopic = ConstructMessageTopic(upperConfig->deviceId)) == NULL)
+        {
+            LogError("Could not create mqttMessageTopic for MQTT");
+            STRING_delete(state->mqttEventTopic);
+            STRING_delete(state->sasTokenSr);
+            STRING_delete(state->device_key);
+            STRING_delete(state->device_id);
+            free(state);
+            state = NULL;
+        }
+        else
+        {
+            state->mqttClient = mqtt_client_init(MqttRecvCallback, MqttOpCompleteCallback, state, defaultPrintLogFunction);
+            if (state->mqttClient == NULL)
+            {
+                STRING_delete(state->mqttEventTopic);
+                STRING_delete(state->mqttMessageTopic);
+                STRING_delete(state->sasTokenSr);
+                STRING_delete(state->device_key);
+                STRING_delete(state->device_id);
+                free(state);
+                state = NULL;
+            }
+            else
+            {
+                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [The hostname shall be constructed using the iothubname and iothubSuffix.] */
+                // TODO: need to strip the ssl or http or tls
+                char tempAddress[DEFAULT_TEMP_STRING_LEN];
+                (void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
+                if ((state->hostAddress = STRING_construct(tempAddress)) == NULL)
+                {
+                    STRING_delete(state->mqttEventTopic);
+                    STRING_delete(state->mqttMessageTopic);
+                    STRING_delete(state->sasTokenSr);
+                    STRING_delete(state->device_key);
+                    STRING_delete(state->device_id);
+                    free(state);
+                    state = NULL;
+                }
+                else if ((state->configPassedThroughUsername = buildConfigForUsername(upperConfig)) == NULL)
+                {
+                    STRING_delete(state->hostAddress);
+                    STRING_delete(state->mqttEventTopic);
+                    STRING_delete(state->mqttMessageTopic);
+                    STRING_delete(state->sasTokenSr);
+                    STRING_delete(state->device_key);
+                    STRING_delete(state->device_id);
+                    free(state);
+                    state = NULL;
+                }
+                else
+                {
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_010: [IoTHubTransportMqtt_Create shall allocate memory to save its internal state where all topics, hostname, device_id, device_key, sasTokenSr and client handle shall be saved.] */
+                    DList_InitializeListHead(&(state->waitingForAck));
+                    state->sasTokenFromUser = (upperConfig->deviceSasToken == NULL) ? false : true;
+                    state->destroyCalled = false;
+                    state->isRegistered = false;
+                    state->subscribed = false;
+                    state->connected = false;
+                    state->receiveMessages = false;
+                    state->packetId = 1;
+                    state->llClientHandle = NULL;
+                    state->xioTransport = NULL;
+                    state->portNum = DEFAULT_PORT_NUMBER;
+                    state->waitingToSend = waitingToSend;
+                    state->currPacketState = CONNECT_TYPE;
+                    state->keepAliveValue = DEFAULT_MQTT_KEEPALIVE;
+                    state->connectFailCount = 0;
+                    state->connectTick = 0;
+                }
+            }
+        }
+    }
 	return state;
 }
 
@@ -915,10 +928,16 @@ extern TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONF
 	/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, both deviceKey and deviceSasToken, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransportMqtt_Create shall return NULL.] */
 	else if ((config->upperConfig->deviceSasToken != NULL) && (strlen(config->upperConfig->deviceSasToken) == 0))
 	{
-		LogError("Invalid Argument: deviceSasToken is empty\r\n");
+		LogError("Invalid Argument: deviceSasToken is empty");
 		result = NULL;
 	}
-	/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransportMqtt_Create shall return NULL.] */
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_03_003: [If both deviceKey & deviceSasToken fields are NOT NULL then IoTHubTransportMqtt_Create shall return NULL.] */
+    else if ((config->upperConfig->deviceKey != NULL) && (config->upperConfig->deviceSasToken != NULL))
+    {
+        LogError("Invalid Argument: cannot have both deviceKey and deviceSasToken defined");
+        result = NULL;
+    }
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransportMqtt_Create shall return NULL.] */
 	else if (strlen(config->upperConfig->iotHubName) == 0)
 	{
 		LogError("Invalid Argument: iotHubName is empty");
@@ -1246,7 +1265,8 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, co
 	// Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_002: [ IoTHubTransportMqtt_Register shall return NULL if device or waitingToSend are NULL.]
 	if ((handle == NULL) || (device == NULL) || (waitingToSend == NULL))
 	{
-		result = NULL;
+        LogError("IoTHubTransportMqtt_Register: handle, device or waitingToSend is NULL.");
+        result = NULL;
 	}
 	else
 	{
@@ -1255,27 +1275,32 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, co
 		// Codes_SRS_IOTHUB_MQTT_TRANSPORT_03_001: [ IoTHubTransportMqtt_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.]
 		if (device->deviceId == NULL)
 		{
-			result = NULL;
+            LogError("IoTHubTransportMqtt_Register: deviceId is NULL.");
+            result = NULL;
 		}
 		else if ((device->deviceKey == NULL) && (device->deviceSasToken == NULL))
 		{
-			result = NULL;
+            LogError("IoTHubTransportMqtt_Register: deviceKey and deviceSasToken are NULL.");
+            result = NULL;
 		}
 		// Codes_SRS_IOTHUB_MQTT_TRANSPORT_03_002: [ IoTHubTransportMqtt_Register shall return NULL if both deviceKey and deviceSasToken are provided.]
 		else if ((device->deviceKey != NULL) && (device->deviceSasToken != NULL))
 		{
-			result = NULL;
+            LogError("IoTHubTransportMqtt_Register: Both deviceKey and deviceSasToken are defined. Only one can be used.");
+            result = NULL;
 		}
 		else
 		{
 			// Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_003: [ IoTHubTransportMqtt_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportMqtt_Create.]
 			if (strcmp(STRING_c_str(transportState->device_id), device->deviceId) != 0)
 			{
-				result = NULL;
+                LogError("IoTHubTransportMqtt_Register: deviceId does not match.");
+                result = NULL;
 			}
 			else if ((device->deviceKey != NULL) && (strcmp(STRING_c_str(transportState->device_key), device->deviceKey) != 0))
 			{
-				result = NULL;
+                LogError("IoTHubTransportMqtt_Register: deviceKey does not match.");
+                result = NULL;
 			}
 			else
 			{

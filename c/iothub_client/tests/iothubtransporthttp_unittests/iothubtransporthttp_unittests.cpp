@@ -134,6 +134,13 @@ static const IOTHUB_DEVICE_CONFIG TEST_DEVICE_2 =
 	NULL
 };
 
+static const IOTHUB_DEVICE_CONFIG TEST_DEVICE_3 =
+{
+    TEST_DEVICE_ID,
+    NULL,
+    TEST_DEVICE_TOKEN
+};
+
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_CONFIG =
 {
 	HTTP_Protocol,                                  /* IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;   */
@@ -1610,12 +1617,12 @@ static void setupRegisterHappyPathWithSasToken(CIoTHubTransportHttpMocks &mocks,
 	setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
 	setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 	setupRegisterHappyPathcreate_deviceSasToken(mocks, deallocateCreated);
-	//setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
-	//setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
+	setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
+	setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
 	setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
 	setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
 	setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
-	setupRegisterHappyPathsasObject(mocks, deallocateCreated);
+	//setupRegisterHappyPathsasObject(mocks, deallocateCreated);
 	setupRegisterHappyPathDeviceListAdd(mocks, deallocateCreated);
 	setupRegisterHappyPatheventConfirmations(mocks, deallocateCreated);
 }
@@ -2165,6 +2172,9 @@ TEST_FUNCTION(IoTHubTransportHttp_Destroy_succeeds_One_Registered_device)
 
 	STRICT_EXPECTED_CALL(mocks, gballoc_free(handle));
 
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);                                             //STRING_HANDLE deviceSasToken;
+
 	///act
 	IoTHubTransportHttp_Destroy(handle);
 
@@ -2214,6 +2224,51 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_success_fun_
 
 	///cleanup
 	IoTHubTransportHttp_Destroy(handle);
+
+}
+
+//Tests_SRS_TRANSPORTMULTITHTTP_17_133: [ IoTHubTransportHttp_Register shall create an immutable string (further called "deviceId") from config->deviceConfig->deviceId. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_03_135: [ IoTHubTransportHttp_Register shall create an immutable string (further called "deviceSasToken") from deviceSasToken.]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_017: [ IoTHubTransportHttp_Register shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/events" + APIVERSION. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_017: [ IoTHubTransportHttp_Register shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/events" + APIVERSION. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_021: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "event HTTP request headers") consisting of the following fixed field names and values: "iothub-to":"/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/events"; "Authorization":""
+//"Accept":"application/json"
+//"Connection" : "Keep-Alive" ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_132: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "message HTTP request headers") consisting of the following fixed field names and values:
+//"Authorization": "" ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_024: [ IoTHubTransportHttp_Register shall create a STRING containing: "/devices/" + URL_ENCODED(device id) +"/messages/deviceBound/" called abandonHTTPrelativePathBegin. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_026: [ IoTHubTransportHttp_Register shall invoke URL_EncodeString with an argument of device id. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_028: [ IoTHubTransportHttp_Register shall invoke STRING_clone using the previously created hostname. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_030: [ IoTHubTransportHttp_Register shall invoke STRING_concat with arguments uriResource and the string "/devices/". ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_031: [ IoTHubTransportHttp_Register shall invoke STRING_concat_with_STRING with arguments uriResource and keyName. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_033: [ IoTHubTransportHttp_Register shall invoke STRING_construct with an argument of config->deviceConfig->deviceKey. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_035: [ The keyName is shortened to zero length, if that fails then IoTHubTransportHttp_Register shall fail and return NULL. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_036: [ IoTHubTransportHttp_Register shall invoke HTTPAPIEX_SAS_Create with arguments key, uriResource, and keyName. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_038: [ Otherwise, IoTHubTransportHttp_Register shall allocate the IOTHUB_DEVICE_HANDLE structure. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_040: [ IoTHubTransportHttp_Register shall put event HTTP relative path, message HTTP relative path, event HTTP request headers, message HTTP request headers, abandonHTTPrelativePathBegin, HTTPAPIEX_SAS_HANDLE, and the device handle into a device structure. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_128: [ IoTHubTransportHttp_Register shall mark this device as unsubscribed. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_041: [ IoTHubTransportHttp_Register shall call VECTOR_push_back to store the new device information. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_043: [ Upon success, IoTHubTransportHttp_Register shall store the transport handle, iotHubClientHandle, and the waitingToSend queue in the device handle return a non-NULL value. ]
+TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceSas_success_fun_time)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+
+    auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    mocks.ResetAllCalls();
+
+    setupRegisterHappyPathWithSasToken(mocks, false);
+
+    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_3, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    ///assert
+
+    ASSERT_IS_NOT_NULL(devHandle);
+    ASSERT_ARE_NOT_EQUAL(void_ptr, handle, devHandle);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubTransportHttp_Destroy(handle);
 
 }
 
@@ -3616,6 +3671,34 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceKey_fails)
 	IoTHubTransportHttp_Destroy(handle);
 }
 
+//Tests_SRS_TRANSPORTMULTITHTTP_03_136: [ If deviceSasToken is not created, then IoTHubTransportHttp_Register shall fail and return NULL.]
+TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceSasToken_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    mocks.ResetAllCalls();
+    currentSTRING_construct_call = 0;
+
+    bool deallocateCreated = true;
+    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
+    setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
+
+    whenShallSTRING_construct_fail = 2;
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_TOKEN));
+
+    ///act
+    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_3, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+
+    ///assert
+    ASSERT_IS_NULL(devHandle);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}
+
 //Tests_SRS_TRANSPORTMULTITHTTP_17_134: [ If deviceId is not created, then IoTHubTransportHttp_Register shall fail and return NULL. ]
 TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceId_fails)
 {
@@ -3859,6 +3942,9 @@ TEST_FUNCTION(IoTHubTransportHttp_Unregister_superHappyFunPath)
 		.IgnoreArgument(2);
 	STRICT_EXPECTED_CALL(mocks, gballoc_free(devHandle));
 
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);                                             //STRING_HANDLE deviceSasToken;
+
 	///act
 	IoTHubTransportHttp_Unregister(devHandle);
 
@@ -3891,6 +3977,9 @@ TEST_FUNCTION(IoTHubTransportHttp_Unregister_2nd_device_superHappyFunPath)
 		.IgnoreArgument(1)
 		.IgnoreArgument(2);
 	STRICT_EXPECTED_CALL(mocks, gballoc_free(devHandle1));
+
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);                                             //STRING_HANDLE deviceSasToken;
 
 	///act
 	IoTHubTransportHttp_Unregister(devHandle1);

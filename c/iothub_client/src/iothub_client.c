@@ -227,6 +227,8 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
 				deviceConfig.deviceId = config->deviceId;
 				deviceConfig.deviceKey = config->deviceKey;
 				deviceConfig.protocol = config->protocol;
+                deviceConfig.deviceSasToken = config->deviceSasToken;
+                deviceConfig.protocol = config->protocol;
 
 				/*Codes_SRS_IOTHUBCLIENT_17_003: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLLTransport on transportHandle to get lower layer transport. ]*/
 				deviceConfig.transportHandle = IoTHubTransport_GetLLTransport(transportHandle);
