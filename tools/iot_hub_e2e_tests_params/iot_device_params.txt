@@ -1,6 +1,4 @@
-IOTHUB_CONNECTION_STRING=<HostName=...>
-IOTHUB_DEVICE_ID=
-IOTHUB_DEVICE_KEY=
-IOTHUB_EVENTHUB_CONNECTION_STRING=<Endpoint=...>
+IOTHUB_CONNECTION_STRING=HostName=iot-sdks-test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=OJdGPkx9HgWecCSECw7D7Hv8AuiKE+A7TWjAcEUv5tk=
+IOTHUB_EVENTHUB_CONNECTION_STRING=Endpoint=sb://iothub-ns-iot-sdks-t-451-fb196789f5.servicebus.windows.net/;SharedAccessKey=OJdGPkx9HgWecCSECw7D7Hv8AuiKE+A7TWjAcEUv5tk=
 IOTHUB_EVENTHUB_CONSUMER_GROUP=$Default
 IOTHUB_PARTITION_COUNT=16
