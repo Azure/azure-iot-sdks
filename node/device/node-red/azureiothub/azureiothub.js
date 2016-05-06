@@ -14,7 +14,6 @@ module.exports = function (RED) {
     var client = null;
     var clientConnectionString = "";
     var clientProtocol = "";
-    var pendingMessage = null;
     var node = null;
     var nodeConfig = null;
 
@@ -46,27 +45,25 @@ module.exports = function (RED) {
     };
 
     var sendMessageToIoTHub = function (message, reconnect) {
-        if ((client == null) || reconnect) {
+        if (!client || reconnect) {
             node.log('Connection to IoT Hub not established or configuration changed. Reconnecting.');
-            // Store the message data to send it once the connection is established
-            pendingMessage = message;
             // Update the connection string
             clientConnectionString = node.credentials.connectionstring;
             // update the protocol
             clientProtocol = nodeConfig.protocol;
 
             // If client was previously connected, disconnect first
-            if (client != null)
+            if (client)
                 disconnectFromIoTHub();
 
             // Connect the IoT Hub
-            connectToIoTHub();
+            connectToIoTHub(message);
         } else {
             sendData(message);
         }
     };
 
-    var connectToIoTHub = function () {
+    var connectToIoTHub = function (pendingMessage) {
         node.log('Connecting to Azure IoT Hub:\n   Protocol: ' + clientProtocol + '\n   Connection string :' + clientConnectionString);
         client = Client.fromConnectionString(clientConnectionString, Protocols[clientProtocol]);
         client.open(function (err) {
@@ -78,20 +75,19 @@ module.exports = function (RED) {
                 setStatus(statusEnum.connected);
 
                 // Check if a message is pending and send it 
-                if (pendingMessage != null) {
+                if (pendingMessage) {
                     node.log('Message is pending. Sending it to Azure IoT Hub.');
                     // Send the pending message
                     sendData(pendingMessage);
-                    pendingMessage = null;
                 }
 
                 client.on('message', function (msg) {
                     // We received a message
                     node.log('Message received from Azure IoT Hub\n   Id: ' + msg.messageId + '\n   Payload: ' + msg.data);
-                    var debugMsg = new Message();
-                    debugMsg.payload = msg.data;
+                    var outpuMessage = new Message();
+                    outpuMessage.payload = msg.data;
                     setStatus(statusEnum.received);
-                    node.send(debugMsg);
+                    node.send(outpuMessage);
                     client.complete(msg, printResultFor('Completed'));
                 });
 
@@ -108,7 +104,7 @@ module.exports = function (RED) {
     };
 
     var disconnectFromIoTHub = function () {
-        if (client != null) {
+        if (client) {
             node.log('Disconnecting from Azure IoT Hub');
             client.removeAllListeners();
             client.close(printResultFor('close'));

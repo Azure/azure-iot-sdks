@@ -36,7 +36,7 @@ Node-RED module for Azure IoT Hub.
 
 ### /samples
 
-Sample applications excercising basic features.
+Sample applications exercising basic features.
 
 ### /transport
 
