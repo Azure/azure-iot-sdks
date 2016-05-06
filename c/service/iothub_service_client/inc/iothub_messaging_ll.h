@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// This file is under development and it is subject to change
+
 #ifndef IOTHUB_MESSAGING_LL_H
 #define IOTHUB_MESSAGING_LL_H
 

@@ -127,8 +127,8 @@ typedef struct IOTHUB_CLIENT_CONFIG_TAG
 **SRS_TRANSPORTMULTITHTTP_17_133: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "deviceId") from config->deviceConfig->deviceId. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_134: [** If deviceId is not created, then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_135: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "deviceKey") from deviceKey.  **]**   
-**SRS_TRANSPORTMULTITHTTP_17_136: [** If deviceKey is not created, then `IoTHubTransportHttp_Register` shall fail and return `NULL`.   **]**   
-**SRS_TRANSPORTMULTITHTTP_03_135: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "deviceSasToken") from deviceSasToken.  **]**   
+**SRS_TRANSPORTMULTITHTTP_17_136: [** If deviceKey is not created, then `IoTHubTransportHttp_Register` shall fail and return `NULL`.   **]**
+**SRS_TRANSPORTMULTITHTTP_03_135: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "deviceSasToken") from deviceSasToken.  **]**
 **SRS_TRANSPORTMULTITHTTP_03_136: [** If deviceSasToken is not created, then `IoTHubTransportHttp_Register` shall fail and return `NULL`.   **]**   
 **SRS_TRANSPORTMULTITHTTP_17_017: [** `IoTHubTransportHttp_Register` shall create an immutable string (further called "event HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(deviceId) + "/messages/events" + APIVERSION. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_018: [** If creating the string fail for any reason then `IoTHubTransportHttp_Register` shall fail and return `NULL`. **]**   
