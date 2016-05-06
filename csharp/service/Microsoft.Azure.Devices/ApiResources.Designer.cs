@@ -124,15 +124,6 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Either both primary and secondary keys must be specified or neither one to auto generate on service side..
-        /// </summary>
-        internal static string DeviceKeysInvalid1 {
-            get {
-                return ResourceManager.GetString("DeviceKeysInvalid1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The ETag should be set while deleting the device..
         /// </summary>
         internal static string ETagNotSetWhileDeletingDevice {

@@ -189,9 +189,6 @@
   <data name="DeviceAuthenticationInvalid" xml:space="preserve">
     <value>Device {0} cannot specify both symmetric keys and thumbprints.</value>
   </data>
-  <data name="DeviceKeysInvalid1" xml:space="preserve">
-    <value>Either both primary and secondary keys must be specified or neither one to auto generate on service side.</value>
-  </data>
   <data name="StringIsNotThumbprint" xml:space="preserve">
     <value>'{0}' is not a valid X.509 thumbprint</value>
   </data>

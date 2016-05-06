@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [TestCategory("Auth")]
         public async Task DeviceAuthenticationGoodAuthConfigTest1()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceGoodAuthConfig = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -43,9 +43,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceGoodAuthConfig);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceGoodAuthConfig);
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [TestCategory("Auth")]
         public async Task DeviceAuthenticationGoodAuthConfigTest2()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceGoodAuthConfig = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -72,9 +72,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceGoodAuthConfig);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceGoodAuthConfig);
         }
 
         [TestMethod]
@@ -82,7 +82,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [TestCategory("Auth")]
         public async Task DeviceAuthenticationGoodAuthConfigTest3()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceGoodAuthConfig = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -101,9 +101,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceGoodAuthConfig);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceGoodAuthConfig);
         }
 
         [TestMethod]
@@ -111,7 +111,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [TestCategory("Auth")]
         public async Task DeviceAuthenticationGoodAuthConfigTest4()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceGoodAuthConfig = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -130,9 +130,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceGoodAuthConfig);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceGoodAuthConfig);
         }
 
         [TestMethod]
@@ -140,7 +140,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [TestCategory("Auth")]
         public async Task DeviceAuthenticationGoodAuthConfigTest5()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceGoodAuthConfig = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -159,9 +159,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceGoodAuthConfig);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceGoodAuthConfig);
         }
 
         [TestMethod]
@@ -429,7 +429,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeviceAuthenticationBadThumbprintTest1()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceBadThumbprint = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -448,9 +448,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadThumbprint);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceBadThumbprint);
         }
 
         [TestMethod]
@@ -459,7 +459,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeviceAuthenticationBadThumbprintTest2()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceBadThumbprint = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -478,9 +478,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadThumbprint);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceBadThumbprint);
         }
 
         [TestMethod]
@@ -489,7 +489,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeviceAuthenticationBadThumbprintTest3()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceBadThumbprint = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -508,9 +508,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadThumbprint);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceBadThumbprint);
         }
 
         [TestMethod]
@@ -519,7 +519,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeviceAuthenticationBadThumbprintTest4()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceBadThumbprint = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -538,9 +538,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadThumbprint);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceBadThumbprint);
         }
 
         [TestMethod]
@@ -549,7 +549,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeviceAuthenticationBadThumbprintTest5()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceBadThumbprint = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -568,9 +568,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadThumbprint);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceBadThumbprint);
         }
 
         [TestMethod]
@@ -579,7 +579,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeviceAuthenticationBadThumbprintTest6()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceBadThumbprint = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -598,9 +598,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadThumbprint);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceBadThumbprint);
         }
 
         [TestMethod]
@@ -609,7 +609,7 @@ namespace Microsoft.Azure.Devices.Api.Test
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeviceAuthenticationBadThumbprintTest7()
         {
-            var deviceBadAuthConfig = new Device("123")
+            var deviceBadThumbprint = new Device("123")
             {
                 ConnectionState = DeviceConnectionState.Connected,
                 Authentication = new AuthenticationMechanism()
@@ -628,9 +628,9 @@ namespace Microsoft.Azure.Devices.Api.Test
                 restOp =>
                     restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(),
                         It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
-                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadAuthConfig);
+                        It.IsAny<CancellationToken>())).ReturnsAsync(deviceBadThumbprint);
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
-            await registryManager.AddDeviceAsync(deviceBadAuthConfig);
+            await registryManager.AddDeviceAsync(deviceBadThumbprint);
         }
     }
 }
