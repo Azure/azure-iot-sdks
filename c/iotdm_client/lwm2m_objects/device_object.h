@@ -17,6 +17,13 @@
 
 #include "iothub_client.h"
 
+#ifdef __MACH__
+#include "liblwm2m.h"
+#include "list.h"
+#include "iotdm_dispatchers.h"
+#endif
+
+
 #ifdef __cplusplus
 extern "C"
 {

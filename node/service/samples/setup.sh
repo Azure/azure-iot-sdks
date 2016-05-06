@@ -24,6 +24,19 @@ usage()
 }
 
 # -----------------------------------------------------------------------------
+# Determine the number of processors we can take advantage of during a make
+# -----------------------------------------------------------------------------
+numprocs=1
+unameVal=`uname`
+
+if [[ "$unameVal" == 'Darwin' ]]; 
+then
+    numprocs=`sysctl -n hw.ncpu`
+else
+    numprocs=$(nproc)
+fi
+
+# -----------------------------------------------------------------------------
 # -- Check for environment pre-requisites. This script requires
 # -- that the following programs work:
 # --     cmake, node, npm
@@ -65,7 +78,7 @@ cmake "$build_root"
 
 # make!
 echo Building device client sample...
-make --jobs=$(nproc) iotdm_simple_sample
+make --jobs="$numprocs" iotdm_simple_sample
 
 popd
 
