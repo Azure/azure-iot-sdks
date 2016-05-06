@@ -50,5 +50,5 @@ In order for `Blob_UploadFromSASURI` to call `HTTPAPIEX_ExecuteRequest` it will 
 **SRS_BLOB_02_011: [** If any of the previous steps related to building the `HTTPAPI_EX_ExecuteRequest` parameters fails, then `Blob_UploadFromSASURI` shall fail and return `BLOB_ERROR`. **]**
 **SRS_BLOB_02_012: [** `Blob_UploadFromSASURI` shall call `HTTPAPIEX_ExecuteRequest` passing the parameters previously build. **]**
 **SRS_BLOB_02_013: [** If `HTTPAPIEX_ExecuteRequest` fails, then `Blob_UploadFromSASURI` shall fail and return `BLOB_HTTP_ERROR`. **]**
-**SRS_BLOB_02_014: [** If the `statusCode` returned by `HTTPAPIEX_ExecuteRequest` is bigger or equal to 300, then `Blob_UploadFromSASURI` shall fail and return `BLOB_HTTP_ERROR`. **]**
+**SRS_BLOB_02_014: [** If the `statusCode` returned by `HTTPAPIEX_ExecuteRequest` is greater or equal to 300, then `Blob_UploadFromSASURI` shall fail and return `BLOB_HTTP_ERROR`. **]**
 **SRS_BLOB_02_015: [** Otherwise, `HTTPAPIEX_ExecuteRequest` shall succeed and return `BLOB_OK`. **]**

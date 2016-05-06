@@ -3,7 +3,31 @@
 
 #include "blob.h"
 
-BLOB_RESULT Blob_UploadFromSASURI(const char* SASURI, const unsigned char* source, size_t size)
+BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size)
 {
-    return BLOB_OK; /*TODO: write real code here*/
+    BLOB_RESULT result;
+    if (SASURI == NULL)
+    {
+        LogError("parameter SASURI is NULL");
+        result = BLOB_INVALID_ARG;
+    }
+    else
+    {
+        if (
+            (
+                (size > 0) &&
+                (source == NULL)
+            ) ||
+            (source >=64*1024*1024)
+            )
+        {
+            LogError("combination of source = %p and size = %zd is invalid", source, size);
+            result = BLOB_INVALID_ARG;
+        }
+        else
+        {
+            
+        }
+    }
+    return result;
 }
