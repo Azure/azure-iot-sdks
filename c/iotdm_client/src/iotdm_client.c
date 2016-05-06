@@ -475,6 +475,9 @@ void on_dm_connect_complete(IOTHUB_CLIENT_RESULT result, void* context)
 */
 #if defined(WIN32)
 #include <thr/xtimec.h>
+#elif __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
 #else
 #include <time.h>
 #endif
@@ -487,7 +490,14 @@ unsigned long get_milliseconds()
     xtime_get(&tm, TIME_UTC);
 
     return (tm.sec + (tm.nsec / 1000000L));
-
+#elif __MACH__
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    
+    return mts.tv_sec + (mts.tv_nsec / 1000000L);
 #else
 
     struct timespec tm;
