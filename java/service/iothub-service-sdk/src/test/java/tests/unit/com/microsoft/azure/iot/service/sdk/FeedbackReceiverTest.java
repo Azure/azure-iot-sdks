@@ -257,7 +257,7 @@ public class FeedbackReceiverTest
         new Expectations()
         {
             {
-                amqpReceive.receive(anyString, Deencapsulation.getField(feedbackReceiver, "DEFAULT_TIMEOUT_MS"));
+                amqpReceive.receive(Deencapsulation.getField(feedbackReceiver, "DEFAULT_TIMEOUT_MS"));
             }
         };
         // Act
@@ -298,7 +298,7 @@ public class FeedbackReceiverTest
         new Expectations()
         {
             {
-                amqpReceive.receive(anyString, timeoutMs);
+                amqpReceive.receive(timeoutMs);
             }
         };
         // Act
@@ -368,7 +368,7 @@ public class FeedbackReceiverTest
         new Expectations()
         {
             {
-                amqpReceive.receive(anyString, Deencapsulation.getField(feedbackReceiver, "DEFAULT_TIMEOUT_MS"));
+                amqpReceive.receive(Deencapsulation.getField(feedbackReceiver, "DEFAULT_TIMEOUT_MS"));
                 feedbackReceiver.receive();
             }
         };
@@ -393,7 +393,7 @@ public class FeedbackReceiverTest
         new Expectations()
         {
             {
-                amqpReceive.receive(anyString, timeoutMs);
+                amqpReceive.receive(timeoutMs);
                 feedbackReceiver.receive(anyLong);
             }
         };

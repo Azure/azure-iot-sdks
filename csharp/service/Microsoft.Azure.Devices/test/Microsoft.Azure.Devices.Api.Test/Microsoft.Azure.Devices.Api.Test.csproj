@@ -70,6 +70,7 @@
     <Compile Include="ConnectionString\ServiceClientConnectionStringExceptionTests.cs" />
     <Compile Include="ConnectionString\ServiceClientConnectionStringTests.cs" />
     <Compile Include="ExportImportDeviceTests.cs" />
+    <Compile Include="ServiceClientTests.cs" />
     <Compile Include="RegistryManagerTests.cs" />
     <Compile Include="MessageTests.cs" />
     <Compile Include="TestAssert.cs" />

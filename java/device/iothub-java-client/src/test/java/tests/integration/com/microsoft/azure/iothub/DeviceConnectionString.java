@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package tests.integration.com.microsoft.azure.iothub.TestUtils;
+package tests.integration.com.microsoft.azure.iothub;
 
 import com.microsoft.azure.iot.service.sdk.Device;
 

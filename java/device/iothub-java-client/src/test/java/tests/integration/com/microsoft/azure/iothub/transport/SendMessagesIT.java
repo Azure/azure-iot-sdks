@@ -8,7 +8,9 @@ import com.microsoft.azure.iot.service.sdk.Device;
 import com.microsoft.azure.iot.service.sdk.RegistryManager;
 import com.microsoft.azure.iothub.*;
 import org.junit.*;
-import tests.integration.com.microsoft.azure.iothub.TestUtils.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.iothub.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.iothub.EventCallback;
+import tests.integration.com.microsoft.azure.iothub.Success;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -33,7 +35,7 @@ public class SendMessagesIT
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
         {
-            if (envName.equals(iotHubonnectionStringEnvVarName.toString()))
+            if (envName.equals(iotHubonnectionStringEnvVarName))
             {
                 iotHubConnectionString = env.get(envName);
             }
@@ -182,37 +184,5 @@ public class SendMessagesIT
         }
 
         client.close();
-    }
-
-    private class Success
-    {
-        public Boolean result = false;
-
-        public void setResult(Boolean result)
-        {
-            this.result = result;
-        }
-
-        public Boolean getResult()
-        {
-            return this.result;
-        }
-    }
-
-
-    public class EventCallback implements IotHubEventCallback
-    {
-        public void execute(IotHubStatusCode status, Object context)
-        {
-            Success success = (Success) context;
-            if (status.equals(IotHubStatusCode.OK_EMPTY))
-            {
-                success.setResult(true);
-            }
-            else
-            {
-                success.setResult(false);
-            }
-        }
     }
 }
