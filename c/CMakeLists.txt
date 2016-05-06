@@ -164,6 +164,7 @@ if(${run_e2e_tests})
     add_subdirectory(testtools)
 endif()
 
+add_subdirectory(blob)
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
 if(NOT "${build_python}" STREQUAL "OFF")
