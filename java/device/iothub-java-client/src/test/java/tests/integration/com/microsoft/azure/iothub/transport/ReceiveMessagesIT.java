@@ -5,23 +5,18 @@ package tests.integration.com.microsoft.azure.iothub.transport;
 
 import com.microsoft.azure.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.iot.service.sdk.Device;
+import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
 import com.microsoft.azure.iot.service.sdk.RegistryManager;
 import com.microsoft.azure.iot.service.sdk.ServiceClient;
 import com.microsoft.azure.iothub.*;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import tests.integration.com.microsoft.azure.iothub.TestUtils.DeviceConnectionString;
+import org.junit.*;
+import tests.integration.com.microsoft.azure.iothub.DeviceConnectionString;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class ReceiveMessagesIT
 {
@@ -30,12 +25,17 @@ public class ReceiveMessagesIT
     private static String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static RegistryManager registryManager;
-    private Device deviceHttps;
-    private Device deviceAmqps;
-    private Device deviceMqtt;
+    private static Device deviceHttps;
+    private static Device deviceAmqps;
+    private static Device deviceMqtt;
 
-    @Before
-    public void setUp() throws Exception
+    private static ServiceClient serviceClient;
+
+    // How much to wait until receiving a message from the server, in milliseconds
+    private Integer receiveTimeout = 5000;
+
+    @BeforeClass
+    public static void setUp() throws Exception
     {
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
@@ -64,11 +64,15 @@ public class ReceiveMessagesIT
         messageProperties.put("name1", "value1");
         messageProperties.put("name2", "value2");
         messageProperties.put("name3", "value3");
+
+        serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
+        serviceClient.open();
     }
 
-    @After
-    public void TearDown() throws IOException, IotHubException
+    @AfterClass
+    public static void TearDown() throws IOException, IotHubException
     {
+        serviceClient.close();
         registryManager.removeDevice(deviceHttps.getDeviceId());
         registryManager.removeDevice(deviceAmqps.getDeviceId());
         registryManager.removeDevice(deviceMqtt.getDeviceId());
@@ -85,22 +89,34 @@ public class ReceiveMessagesIT
 
         try
         {
-            CompletableFuture<Boolean> messageReceived = new CompletableFuture<>();
+            Success messageReceived = new Success();
             com.microsoft.azure.iothub.MessageCallback callback = new MessageCallback();
             client.setMessageCallback(callback, messageReceived);
 
-            ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString);
             String messageString = "Java service e2e test message to be received over Https protocol";
             com.microsoft.azure.iot.service.sdk.Message serviceMessage = new com.microsoft.azure.iot.service.sdk.Message(messageString);
-            serviceMessage.setProperties(this.messageProperties);
-            serviceClient.open();
+            serviceMessage.setProperties(messageProperties);
             String deviceId = deviceHttps.getDeviceId();
             serviceClient.send(deviceId, serviceMessage);
-            serviceClient.close();
 
-            Boolean result = messageReceived.get(5, TimeUnit.SECONDS);
 
-            if (!result)
+            Integer waitDuration = 0;
+            while(true)
+            {
+                waitDuration += 100;
+                if (messageReceived.getResult() || waitDuration > receiveTimeout)
+                {
+                    break;
+                }
+                Thread.sleep(100);
+            }
+
+            if (waitDuration > receiveTimeout)
+            {
+                Assert.fail("Receiving messages over HTTPS protocol timed out.");
+            }
+
+            if (!messageReceived.getResult())
             {
                 Assert.fail("Receiving message over HTTPS protocol failed");
             }
@@ -125,22 +141,33 @@ public class ReceiveMessagesIT
 
         try
         {
-            CompletableFuture<Boolean> messageReceived = new CompletableFuture<>();
+            Success messageReceived = new Success();
             com.microsoft.azure.iothub.MessageCallback callback = new MessageCallback();
             client.setMessageCallback(callback, messageReceived);
 
-            ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString);
             String messageString = "Java service e2e test message to be received over Amqps protocol";
             com.microsoft.azure.iot.service.sdk.Message serviceMessage = new com.microsoft.azure.iot.service.sdk.Message(messageString);
-            serviceMessage.setProperties(this.messageProperties);
-            serviceClient.open();
+            serviceMessage.setProperties(messageProperties);
             String deviceId = deviceAmqps.getDeviceId();
             serviceClient.send(deviceId, serviceMessage);
-            serviceClient.close();
 
-            Boolean result = messageReceived.get(5, TimeUnit.SECONDS);
+            Integer waitDuration = 0;
+            while(true)
+            {
+                waitDuration += 100;
+                if (messageReceived.getResult() || waitDuration > receiveTimeout)
+                {
+                    break;
+                }
+                Thread.sleep(100);
+            }
 
-            if (!result)
+            if (waitDuration > receiveTimeout)
+            {
+                Assert.fail("Receiving messages over AMQPS protocol timed out.");
+            }
+
+            if (!messageReceived.getResult())
             {
                 Assert.fail("Receiving message over AMQPS protocol failed");
             }
@@ -162,21 +189,32 @@ public class ReceiveMessagesIT
 
         try
         {
-            CompletableFuture<Boolean> messageReceived = new CompletableFuture<>();
+            Success messageReceived = new Success();
             com.microsoft.azure.iothub.MessageCallback callback = new MessageCallbackMqtt();
             client.setMessageCallback(callback, messageReceived);
 
-            ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString);
             String messageString = "Java service e2e test message to be received over Mqtt protocol";
             com.microsoft.azure.iot.service.sdk.Message serviceMessage = new com.microsoft.azure.iot.service.sdk.Message(messageString);
-            serviceClient.open();
             String deviceId = deviceMqtt.getDeviceId();
             serviceClient.send(deviceId, serviceMessage);
-            serviceClient.close();
 
-            Boolean result = messageReceived.get(5, TimeUnit.SECONDS);
+            Integer waitDuration = 0;
+            while(true)
+            {
+                waitDuration += 100;
+                if (messageReceived.getResult() || waitDuration > receiveTimeout)
+                {
+                    break;
+                }
+                Thread.sleep(100);
+            }
 
-            if (!result)
+            if (waitDuration > receiveTimeout)
+            {
+                Assert.fail("Receiving messages over MQTT protocol timed out.");
+            }
+
+            if (!messageReceived.getResult())
             {
                 Assert.fail("Receiving message over MQTT protocol failed");
             }
@@ -196,7 +234,7 @@ public class ReceiveMessagesIT
         {
             Boolean resultValue = true;
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesIT.messageProperties;
-            CompletableFuture<Boolean> messageReceived = (CompletableFuture<Boolean>)context;
+            Success messageReceived = (Success)context;
             MessageProperty[] messagePropertiesFromService = msg.getProperties();
             if (messageProperties.size() != messagePropertiesFromService.length)
             {
@@ -214,19 +252,33 @@ public class ReceiveMessagesIT
                     }
                 }
             }
-            messageReceived.complete(resultValue);
+            messageReceived.setResult(resultValue);
             return IotHubMessageResult.COMPLETE;
         }
     }
 
-    public class MessageCallbackMqtt implements com.microsoft.azure.iothub.MessageCallback
+    private class MessageCallbackMqtt implements com.microsoft.azure.iothub.MessageCallback
     {
         public IotHubMessageResult execute(Message msg, Object context)
         {
-            Boolean resultValue = true;
-            CompletableFuture<Boolean> messageReceived = (CompletableFuture<Boolean>)context;
-            messageReceived.complete(resultValue);
+            Success messageReceived = (Success)context;
+            messageReceived.setResult(true);
             return IotHubMessageResult.COMPLETE;
+        }
+    }
+
+    private class Success
+    {
+        public Boolean result = false;
+
+        public void setResult(Boolean result)
+        {
+            this.result = result;
+        }
+
+        public Boolean getResult()
+        {
+            return this.result;
         }
     }
 }

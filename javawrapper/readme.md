@@ -1,4 +1,4 @@
-# Microsoft Azure IoT device SDK for java
+# Microsoft Azure IoT device SDK for java (wrapper library)
 
 The Microsoft Azure IoT device SDK for java facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.
 The javamodule is built as a wrapper around the native C SDK.

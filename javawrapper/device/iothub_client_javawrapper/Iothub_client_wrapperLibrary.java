@@ -268,6 +268,19 @@ public interface Iothub_client_wrapperLibrary extends Library{
      */
     public int Map_GetInternals(MAP_HANDLE handle, PointerByReference[] keys, PointerByReference[] values, IntByReference count);
     
+    /*
+     *				platform.h
+     */
+    
+    /*
+     * Original signature : int platform_init(void)
+     */
+    public int platform_init();
+    
+    /*
+     * Original signature : void platform_deinit(void)
+     */
+    public void platform_deinit();
     
     
     public interface IotHubEventCallback extends Callback {

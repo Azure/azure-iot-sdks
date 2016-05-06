@@ -12,7 +12,7 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.codec.binary.Base64;
 
 /** Builds the authorization signature as a composition of functions. */
 public final class SignatureHelper
@@ -52,7 +52,7 @@ public final class SignatureHelper
     public static byte[] decodeDeviceKeyBase64(String deviceKey)
     {
         // Codes_SRS_SIGNATUREHELPER_11_003: [The function shall decode the device key using Base64.]
-        return DatatypeConverter.parseBase64Binary(deviceKey);
+        return Base64.decodeBase64(deviceKey.getBytes());
     }
 
     /**
@@ -102,8 +102,7 @@ public final class SignatureHelper
     public static byte[] encodeSignatureBase64(byte[] sig)
     {
         // Codes_SRS_SIGNATUREHELPER_11_006: [The function shall encode the signature using Base64.]
-        return DatatypeConverter.printBase64Binary(sig)
-                .getBytes(SIGNATURE_CHARSET);
+        return Base64.encodeBase64(sig);
     }
 
     /**

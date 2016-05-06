@@ -7,6 +7,7 @@ import com.microsoft.azure.iothub.*;
 import com.microsoft.azure.iothub.transport.IotHubCallbackPacket;
 import com.microsoft.azure.iothub.transport.IotHubOutboundPacket;
 import com.microsoft.azure.iothub.transport.IotHubTransport;
+import com.microsoft.azure.iothub.transport.State;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -31,12 +32,7 @@ public final class MqttTransport implements IotHubTransport
     protected final Object sendMessagesLock = new Object();
     protected final Object handleMessageLock = new Object();
 
-    /** The state of the MQTT transport. */
-    protected enum MqttTransportState {
-        OPEN, CLOSED
-    }
-
-    protected MqttTransportState state;
+    protected State state;
 
     /** The MQTT connection.*/
     protected MqttIotHubConnection mqttIotHubConnection;
@@ -64,7 +60,7 @@ public final class MqttTransport implements IotHubTransport
         // for completed messages whose callbacks are waiting to be invoked.]
         this.callbackList = new LinkedList<>();
         this.config = config;
-        this.state = MqttTransportState.CLOSED;
+        this.state = State.CLOSED;
     }
 
     /**
@@ -76,7 +72,7 @@ public final class MqttTransport implements IotHubTransport
     public void open() throws IOException
     {
         // Codes_SRS_MQTTTRANSPORT_15_004: [If the MQTT connection is already open, the function shall do nothing.]
-        if(this.state == MqttTransportState.OPEN)
+        if(this.state == State.OPEN)
         {
             return;
         }
@@ -86,7 +82,7 @@ public final class MqttTransport implements IotHubTransport
         this.mqttIotHubConnection = new MqttIotHubConnection(this.config);
         this.mqttIotHubConnection.open();
 
-        this.state = MqttTransportState.OPEN;
+        this.state = State.OPEN;
     }
 
     /**
@@ -97,7 +93,7 @@ public final class MqttTransport implements IotHubTransport
     public void close()
     {
         // Codes_SRS_MQTTTRANSPORT_15_006: [If the MQTT connection is closed, the function shall do nothing.]
-        if (this.state == MqttTransportState.CLOSED)
+        if (this.state == State.CLOSED)
         {
             return;
         }
@@ -105,7 +101,7 @@ public final class MqttTransport implements IotHubTransport
         // Codes_SRS_MQTTTRANSPORT_15_005: [The function shall close the MQTT connection
         // with the IoT Hub given in the configuration.]
         this.mqttIotHubConnection.close();
-        this.state = MqttTransportState.CLOSED;
+        this.state = State.CLOSED;
     }
 
     /**
@@ -128,7 +124,7 @@ public final class MqttTransport implements IotHubTransport
         {
             // Codes_SRS_MQTTTRANSPORT_15_008: [If the transport is closed,
             // the function shall throw an IllegalStateException.]
-            if (this.state == MqttTransportState.CLOSED)
+            if (this.state == State.CLOSED)
             {
                 throw new IllegalStateException("Cannot add a message to an MQTT transport that is closed.");
             }
@@ -157,7 +153,7 @@ public final class MqttTransport implements IotHubTransport
         {
             // Codes_SRS_MQTTTRANSPORT_15_012: [If the MQTT connection is closed,
             // the function shall throw an IllegalStateException.]
-            if (this.state == MqttTransportState.CLOSED)
+            if (this.state == State.CLOSED)
             {
                 throw new IllegalStateException("MQTT transport is closed.");
             }
@@ -204,7 +200,7 @@ public final class MqttTransport implements IotHubTransport
         {
             // Codes_SRS_MQTTTRANSPORT_15_014: [If the transport is closed,
             // the function shall throw an IllegalStateException.]
-            if (this.state == MqttTransportState.CLOSED)
+            if (this.state == State.CLOSED)
             {
                 throw new IllegalStateException("MQTT transport is closed.");
             }
@@ -241,7 +237,7 @@ public final class MqttTransport implements IotHubTransport
         {
             // Codes_SRS_MQTTTRANSPORT_15_018: [If the MQTT connection is closed,
             // the function shall throw an IllegalStateException.]
-            if (this.state == MqttTransportState.CLOSED)
+            if (this.state == State.CLOSED)
             {
                 throw new IllegalStateException("MQTT transport is closed.");
             }

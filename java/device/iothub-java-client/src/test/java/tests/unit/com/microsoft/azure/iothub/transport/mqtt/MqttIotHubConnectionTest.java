@@ -8,6 +8,7 @@ import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.net.IotHubUri;
+import com.microsoft.azure.iothub.transport.State;
 import com.microsoft.azure.iothub.transport.TransportUtils;
 import com.microsoft.azure.iothub.transport.mqtt.MqttIotHubConnection;
 import mockit.Deencapsulation;
@@ -259,7 +260,7 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.open();
 
-        MqttConnectOptions actualConnectionOptions = Deencapsulation.getField(connection, "connectionOptions");
+        final MqttConnectOptions actualConnectionOptions = Deencapsulation.getField(connection, "connectionOptions");
 
         String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion, "UTF-8");
         assertEquals(iotHubHostName + "/" + deviceId + "/" + clientIdentifier, actualConnectionOptions.getUserName());
@@ -269,8 +270,8 @@ public class MqttIotHubConnectionTest
 
         assertEquals(expectedSasToken, actualUserPassword);
 
-        MqttIotHubConnection.ConnectionState expectedState = MqttIotHubConnection.ConnectionState.OPEN;
-        MqttIotHubConnection.ConnectionState actualState =  Deencapsulation.getField(connection, "state");
+        State expectedState = State.OPEN;
+        State actualState =  Deencapsulation.getField(connection, "state");
         assertEquals(expectedState, actualState);
 
         new Verifications()
@@ -348,8 +349,8 @@ public class MqttIotHubConnectionTest
         connection.open();
         connection.close();
 
-        MqttIotHubConnection.ConnectionState expectedState = MqttIotHubConnection.ConnectionState.CLOSED;
-        MqttIotHubConnection.ConnectionState actualState =  Deencapsulation.getField(connection, "state");
+        State expectedState = State.CLOSED;
+        State actualState =  Deencapsulation.getField(connection, "state");
         assertEquals(expectedState, actualState);
 
         MqttAsyncClient actualClient = Deencapsulation.getField(connection, "asyncClient");
@@ -383,8 +384,8 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.close();
 
-        MqttIotHubConnection.ConnectionState expectedState = MqttIotHubConnection.ConnectionState.CLOSED;
-        MqttIotHubConnection.ConnectionState actualState =  Deencapsulation.getField(connection, "state");
+        State expectedState = State.CLOSED;
+        State actualState =  Deencapsulation.getField(connection, "state");
         assertEquals(expectedState, actualState);
     }
 

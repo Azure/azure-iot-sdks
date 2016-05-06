@@ -2,7 +2,7 @@
  
 ## Overview
 
-An AMQPS IotHub Session for a device and an IotHub.
+An AMQPS IotHub connection between a device and an IoTHub. This class contains functionality for sending/receiving a message, and logic to re-establish the connection with the IoTHub in case it gets lost.
 
 ## References
 
@@ -11,13 +11,21 @@ An AMQPS IotHub Session for a device and an IotHub.
 ```java
 public final class AmqpsIotHubConnection extends BaseHandler
 {
-	public AmqpsIotHubConnection(DeviceClientConfig config);
-	public void open() throws IOException, InterruptedException, ExecutionException;
-	public synchronized void close();
-	public Message consumeMessage() throws IOException;
-	public void sendMessageRestult(IotHubMessageResult result) throws IOException;
-	public CompletableFuture<Boolean> scheduleSend(byte[] content[, Object messageId);
+	public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets);
+	public void open() throws IOException;
+	public void close();
+    public Integer sendMessage(Message message)
+    public Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult result);
+	
+	public void onConnectionInit(Event event);
+	public void onConnectionBound(Event event);
 	public void onReactorInit(Event event);
+	public void onDelivery(Event event);
+	public void onLinkFlow(Event event);
+	public void onLinkRemoteClose(Event event);
+	public void onLinkRemoteOpen(Event event);
+	public void onLinkInit(Event event);
+	public void onTransportError(Event event);
 }
 ```
 
@@ -25,41 +33,38 @@ public final class AmqpsIotHubConnection extends BaseHandler
 ### AmqpsIotHubConnection
 
 ```java
-public AmqpsIotHubConnection(DeviceClientConfig config);
+public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets);
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_14_001: [**The constructor shall save the configuration.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_001: [**The constructor shall throw IllegalArgumentException if any of the parameters of the configuration is null or empty.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_002: [**The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_002: [**The constructor shall save the configuration into private member variables.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_004: [**The constructor shall set its state to CLOSED.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_003: [**The constructor shall initialize the sender and receiver endpoint private member variables using the send/receiveEndpointFormat constants and device id.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_005: [**The constructor shall initialize a new private queue for received messages.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_004: [**The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_006: [**The constructor shall initialize a new private map for messages that are in progress.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_005: [**The constructor shall initialize a new FlowController (Proton) object to handle communication flow.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_007: [**The constructor shall initialize new private Futures for the status of the Connection and Reactor.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_006: [**The constructor shall set its state to CLOSED.**]**
 
 
 ### open
 
 ```java
-public void open() throws IOException, InterruptedException, ExecutionException
+public void open() throws IOException
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_14_008: [**The function shall initialize its AmqpsIotHubConnectionBaseHandler using the saved host name, user name, device ID and sas token.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_007: [**If the AMQPS connection is already open, the function shall do nothing.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_009: [**The function shall open the Amqps connection and trigger the Reactor (Proton) to begin running.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_008: [**The function shall create a new sasToken valid for the duration specified in config to be used for the communication with IoTHub.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_010: [**Once the Reactor (Proton) is ready, the function shall set its state to OPEN.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_009: [**The function shall trigger the Reactor (Proton) to begin running.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_011: [**If the AMQPS connection is already open, the function shall do nothing.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_010: [**The function shall wait for the reactor to be ready and for enough link credit to become available.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_012: [**If the AmqpsIotHubConnectionBaseHandler becomes invalidated before the Reactor (Proton) starts, the function shall throw an IOException.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_011: [**If any exception is thrown while attempting to trigger the reactor, the function shall close the connection and throw an IOException.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_031: [** The function shall get the link credit from its AmqpsIotHubConnectionBaseHandler and set the private maxQueueSize member variable. **]**
-
-**SRS_AMQPSIOTHUBCONNECTION_14_032: [** The function shall successfully complete it’s CompletableFuture status member variable. **]**
 
 ### close
 
@@ -67,59 +72,77 @@ public void open() throws IOException, InterruptedException, ExecutionException
 public synchronized void close()
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_14_013: [**The function shall invalidate the private Reactor (Proton) member variable.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_048 [**If the AMQPS connection is already closed, the function shall do nothing.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_014: [**The function shall free the AmqpsIotHubConnectionBaseHandler.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_012: [**The function shall set the status of the AMQPS connection to CLOSED.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_015: [**The function shall close the AMQPS connection.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_013: [**The function shall close the AMQPS sender and receiver links, the AMQP session and the AMQP connection.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_016: [**If the AMQPS connection is already closed, the function shall do nothing.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_014: [**The function shall stop the Proton reactor.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_033: [**The function shall close the AmqpsIotHubConnectionBaseHandler.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_034: [**The function shall exceptionally complete all remaining messages that are currently in progress and clear the queue.**]**
-
-### consumeMessage
+### sendMessage
 
 ```java
-public Message consumeMessage() throws IOException
+public Integer sendMessage(Message message)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_14_019: [**The function shall attempt to remove a message from the queue.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_015: [**If the state of the connection is CLOSED or there is not enough credit, the function shall return -1.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_020: [**The function shall return the message if one was pulled from the queue, otherwise it shall return null.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_016: [**The function shall encode the message and copy the contents to the byte buffer.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_017: [**The function shall set the delivery tag for the sender.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_018: [**The function shall attempt to send the message using the sender link.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_019: [**The function shall advance the sender link.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_020: [**The function shall set the delivery hash to the value returned by the sender link.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_021: [**The function shall return the delivery hash.**]**
 
 
 ### sendMessageResult
 
 ```java
-public void sendMessageResult(IotHubMessageResult result) throws IOException
+public Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult result)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_14_021: [**If the message result is COMPLETE, ABANDON, or REJECT, the function shall acknowledge the last message with acknowledgement type COMPLETE, ABANDON, or REJECT respectively.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_022: [**If the AMQPS Connection is closed, the function shall return false.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_022: [**If sendMessageResult(result) is called before a message is received, the function shall throw an IllegalStateException.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_023: [**If the message result is COMPLETE, ABANDON, or REJECT, the function shall acknowledge the last message with acknowledgement type COMPLETE, ABANDON, or REJECT respectively.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_023: [**If the acknowledgement fails, the function shall throw an IOException.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_14_024: [**If the AMQPS Connection is closed, the function shall throw an IllegalStateException.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_024: [**The function shall return true after the message was acknowledged.**]**
 
 
-### scheduleSend
+## onConnectionInit
 
 ```java
-public CompletableFuture<Boolean> scheduleSend(byte[] content[, Object messageId) throws IOException
+public void onConnectionInit(Event event)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_14_025: [**If the AmqpsIotHubConnectionBaseHandler has not been initialized, the function shall throw a new IOException and exceptionally complete it’s CompletableFuture status member variable with the same exception.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_025: [**The event handler shall get the Connection (Proton) object from the event handler and set the host name on the connection.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_026: [**The function shall create a new CompletableFuture for the message acknowledgement.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_026: [**The event handler shall create a Session (Proton) object from the connection.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_027: [**The function shall create a new Tuple containing the CompletableFuture, message content, and message ID.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_027: [**The event handler shall create a Receiver and Sender (Proton) links and set the protocol tag on them to a predefined constant.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_028: [**The function shall acquire a lock and attempt to send the message.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_028: [**The Receiver and Sender links shall have the properties set to client version identifier.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_14_029: [**If the AMQPS Connection is closed, the function shall throw an IllegalStateException.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_029: [**The event handler shall open the connection, session, sender and receiver objects.**]**
+
+
+## onConnectionBound
+
+```java
+public void onConnectionBound(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_15_030: [**The event handler shall get the Transport (Proton) object from the event.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_031: [**The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_032: [**The event handler shall set ANONYMOUS_PEER authentication mode on the domain of the Transport.**]**
 
 
 ## onReactorInit
@@ -128,4 +151,78 @@ public CompletableFuture<Boolean> scheduleSend(byte[] content[, Object messageId
 public void onReactorInit(Event event)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_14_030: [**The event handler shall set the member AmqpsIotHubConnectionBaseHandler object to handle the connection events.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_033: [**The event handler shall set the current handler to handle the connection events.**]**
+
+
+## onDelivery
+
+```java
+public void onDelivery(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_15_034: [**If this link is the Receiver link, the event handler shall get the Receiver and Delivery (Proton) objects from the event.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_035: [**The event handler shall read the received buffer.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_036: [**The event handler shall create an AmqpsMessage object from the decoded buffer.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_037: [**The event handler shall set the AmqpsMessage Deliver (Proton) object.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_038: [**If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_039: [**The event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_049: [**All the listeners shall be notified that a message was received from the server.**]**
+
+
+## onLinkFlow
+
+```java
+public void onLinkFlow(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_15_040 [**The event handler shall save the remaining link credit.**]**
+
+
+## onLinkRemoteOpen
+
+```java
+public void onLinkRemoteOpen(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_15_041 [**The connection state shall be considered OPEN when the sender link is open remotely.**]**
+
+
+## onLinkRemoteClose
+
+```java
+public void onLinkRemoteClose(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_15_042 [**The event handler shall attempt to reconnect to the IoTHub.**]**
+
+
+## onLinkInit
+
+```java
+public void onLinkInit(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_15_043: [**If the link is the Sender link, the event handler shall create a new Target (Proton) object using the sender endpoint address member variable.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_044: [**If the link is the Sender link, the event handler shall set its target to the created Target (Proton) object.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_045: [**If the link is the Sender link, the event handler shall set the SenderSettleMode to UNSETTLED.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_046: [**If the link is the Receiver link, the event handler shall create a new Source (Proton) object using the receiver endpoint address member variable.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_047: [**If the link is the Receiver link, the event handler shall set its source to the created Source (Proton) object.**]**
+
+
+## onTransportError
+
+```java
+public void onTransportError(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_15_048 [**The event handler shall attempt to reconnect to IoTHub.**]**

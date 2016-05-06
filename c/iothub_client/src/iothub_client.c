@@ -154,7 +154,6 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
     return result;
 }
 
-
 IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
 {
     /* Codes_SRS_IOTHUBCLIENT_01_001: [IoTHubClient_Create shall allocate a new IoTHubClient instance and return a non-NULL handle to it.] */
@@ -228,6 +227,8 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
 				deviceConfig.deviceId = config->deviceId;
 				deviceConfig.deviceKey = config->deviceKey;
 				deviceConfig.protocol = config->protocol;
+                deviceConfig.deviceSasToken = config->deviceSasToken;
+                deviceConfig.protocol = config->protocol;
 
 				/*Codes_SRS_IOTHUBCLIENT_17_003: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLLTransport on transportHandle to get lower layer transport. ]*/
 				deviceConfig.transportHandle = IoTHubTransport_GetLLTransport(transportHandle);
@@ -515,12 +516,24 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHan
     else
     {
         IOTHUB_CLIENT_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_INSTANCE*)iotHubClientHandle;
-        /*Codes_SRS_IOTHUBCLIENT_02_038: [If optionName doesn't match one of the options handled by this module then IoTHubClient_SetOption shall call IoTHubClient_LL_SetOption passing the same parameters and return what IoTHubClient_LL_SetOption returns.] */
-        result = IoTHubClient_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);
 
-        if (result != IOTHUB_CLIENT_OK)
+        /* Codes_SRS_IOTHUBCLIENT_01_041: [ IoTHubClient_SetOption shall be made thread-safe by using the lock created in IoTHubClient_Create. ]*/
+        if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
         {
-            LogError("IoTHubClient_LL_SetOption failed");
+            /* Codes_SRS_IOTHUBCLIENT_01_042: [ If acquiring the lock fails, IoTHubClient_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_ERROR. ]*/
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not acquire lock");
+        }
+        else
+        {
+            /*Codes_SRS_IOTHUBCLIENT_02_038: [If optionName doesn't match one of the options handled by this module then IoTHubClient_SetOption shall call IoTHubClient_LL_SetOption passing the same parameters and return what IoTHubClient_LL_SetOption returns.] */
+            result = IoTHubClient_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);
+            if (result != IOTHUB_CLIENT_OK)
+            {
+                LogError("IoTHubClient_LL_SetOption failed");
+            }
+
+            Unlock(iotHubClientInstance->LockHandle);
         }
     }
     return result;
