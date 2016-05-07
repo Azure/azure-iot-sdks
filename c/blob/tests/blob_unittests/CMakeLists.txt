@@ -5,6 +5,9 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC11()
+
+add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+
 set(theseTestsName blob_unittests )
 
 set(${theseTestsName}_test_files
