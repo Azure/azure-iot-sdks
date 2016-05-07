@@ -43,7 +43,7 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 *
 * @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSASURI, const char*, SASURI, const unsigned char*, source, size_t, size);
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSasUri, const char*, SASURI, const unsigned char*, source, size_t, size);
 
 #ifdef __cplusplus
 }
