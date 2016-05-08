@@ -26,7 +26,7 @@
         "device-mqtt": "1.0.5",
         "service": "1.1.0-dmpreview.3"
     },
-    "iothub-explorer": "1.1.0-dmpreview.3",
+    "iothub-explorer": "1.1.0-dmpreview.4",
     "device-explorer": "1.0.4",
     "github-release": "v1.0.4"
 }
