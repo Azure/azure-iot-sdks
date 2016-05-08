@@ -411,6 +411,50 @@ else if (command === 'write') {
     }
   });
 }
+else if (command === 'firmware-update')
+{
+  if (!arg1) inputError('No device IDs given');
+  if (!arg2) inputError('No firmware image URI given');
+
+  var jobId = uuid.v4();
+  var devices = arrayFromCommaDelimitedList(arg1);
+  var timeout = parsed.timeout || 60; // default is one hour
+
+  var jobClient = connString ?
+    JobClient.fromConnectionString(connString) :
+    JobClient.fromSharedAccessSignature(sas.toString());
+
+  jobClient.scheduleFirmwareUpdate(jobId, devices, arg2, timeout, function (err, job) {
+    if (err) serviceError(err);
+    if (parsed.async) {
+      printJob(job);
+    }
+    else {
+      var interval = setInterval(function () {
+        jobClient.getJob(jobId, function (err, job) {
+          if (err) serviceError(err);
+          if (job.status === 'completed') {
+            clearInterval(interval);
+
+            var status = {};
+            job.statusMessage.split(';').forEach(function (elem) {
+              if (elem.length) {
+                var pair = elem.split(':');
+                status[pair[0].trim()] = parseInt(pair[1]);
+              }
+            });
+            if (!parsed.raw && status.Succeeded > 0) {
+              console.log(colorsTmpl('\n' + '{green}Firmware update succeeded for ' + status.Succeeded + ' device' + (status.Succeeded > 1 ? 's' : '') + '{/green}'));
+            }
+            if (!parsed.raw && status.Failed > 0) {
+              console.log(colorsTmpl('\n' + '{red}Firmware update failed for ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '{/red}'));
+            }
+          }
+        });
+      }, 2000);
+    }
+  });
+}
 else if (command === 'factory-reset')
 {
   if (!arg1) inputError('No device IDs given');
