@@ -1,4 +1,29 @@
 # C Device SDK
+- 
+
+# Java SDK
+- 
+
+# C# Service SDK
+- 
+
+# Node Device Client
+- 
+
+# Python SDK
+- 
+
+# General
+- 
+
+# Bug fixes
+
+- 
+
+
+Release for May 6, 2016
+
+# C Device SDK
 - Cloud-to-Device message application properties exposed by AMQP transport to IoT client layer.
 - Parse for a device SAS token input part of the device connection string.
 - Added support for AMQP on Arduino Yun builds
