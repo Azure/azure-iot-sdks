@@ -488,7 +488,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_HTTPAPIEX_Create_fails)
     ///cleanup
 }
 
-/*Tests_SRS_BLOB_02_005: [ If the hostname cannot be copied, then Blob_UploadFromSasUri shall fail and return BLOB_ERROR. ]*/
+/*Tests_SRS_BLOB_02_016: [ If the hostname copy cannot be made then then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
 TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_malloc_fails)
 {
     ///arrange
@@ -508,7 +508,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_malloc_fails)
     ///cleanup
 }
 
-/*Tests_SRS_BLOB_02_005: [ If the hostname cannot be copied, then Blob_UploadFromSasUri shall fail and return BLOB_ERROR. ]*/
+/*Tests_SRS_BLOB_02_005: [ If the hostname cannot be determined, then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
 TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_1)
 {
     ///arrange
@@ -518,13 +518,13 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_1)
     BLOB_RESULT result = Blob_UploadFromSasUri("https:\\h.h\\doms", &c, sizeof(c)); /*wrong format for protocol, notice it is actually http:\h.h\doms (missing a \ from http)*/
 
     ///assert
-    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ERROR, result);
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     ///cleanup
 }
 
-/*Tests_SRS_BLOB_02_005: [ If the hostname cannot be copied, then Blob_UploadFromSasUri shall fail and return BLOB_ERROR. ]*/
+/*Tests_SRS_BLOB_02_005: [ If the hostname cannot be determined, then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
 TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_2)
 {
     ///arrange
@@ -534,7 +534,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_2)
     BLOB_RESULT result = Blob_UploadFromSasUri("https:\\\\h.h", &c, sizeof(c)); /*there's no relative path here*/
 
     ///assert
-    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ERROR, result);
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     ///cleanup

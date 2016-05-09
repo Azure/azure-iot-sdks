@@ -37,7 +37,8 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
 **SRS_BLOB_02_002: [** If `source` is NULL and `size` is not zero then `Blob_UploadFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
 **SRS_BLOB_02_003: [** If `size` is bigger or equal to 64M then `Blob_UploadFromSasUri` shall fail and return `BLOB_NOT_IMPLEMENTED`. **]**
 **SRS_BLOB_02_004: [** `Blob_UploadFromSasUri` shall copy from `SASURI` the hostname to a new const char\*. **]** 
-**SRS_BLOB_02_005: [** If the hostname cannot be copied, then `Blob_UploadFromSasUri` shall fail and return `BLOB_ERROR`. **]**
+**SRS_BLOB_02_005: [** If the hostname cannot be determined, then `Blob_UploadFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
+**SRS_BLOB_02_016: [** If the hostname copy cannot be made then then `Blob_UploadFromSasUri` shall fail and return `BLOB_ERROR` **]**
 **SRS_BLOB_02_006: [** `Blob_UploadFromSasUri` shall create a new `HTTPAPI_EX_HANDLE` by calling `HTTPAPIEX_Create` passing the hostname. **]**
 **SRS_BLOB_02_007: [** If `HTTPAPIEX_Create` fails then `Blob_UploadFromSasUri` shall fail and return `BLOB_ERROR`. **]**
 

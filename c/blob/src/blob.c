@@ -47,9 +47,9 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
             const char* hostnameBegin = strstr(SASURI, ":\\\\");
             if (hostnameBegin == NULL)
             {
-                /*Codes_SRS_BLOB_02_005: [ If the hostname cannot be copied, then Blob_UploadFromSasUri shall fail and return BLOB_ERROR. ]*/
+                /*Codes_SRS_BLOB_02_005: [ If the hostname cannot be determined, then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
                 LogError("hostname cannot be determined");
-                result = BLOB_ERROR;
+                result = BLOB_INVALID_ARG;
             }
             else
             {
@@ -57,9 +57,9 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                 const char* hostnameEnd = strchr(hostnameBegin, '\\');
                 if (hostnameEnd == NULL)
                 {
-                    /*Codes_SRS_BLOB_02_005: [ If the hostname cannot be copied, then Blob_UploadFromSasUri shall fail and return BLOB_ERROR. ]*/
+                    /*Codes_SRS_BLOB_02_005: [ If the hostname cannot be determined, then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
                     LogError("hostname cannot be determined");
-                    result = BLOB_ERROR;
+                    result = BLOB_INVALID_ARG;
                 }
                 else
                 {
@@ -67,7 +67,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                     char* hostname = (char*)malloc(hostnameSize + 1); /*+1 because of '\0' at the end*/
                     if (hostname == NULL)
                     {
-                        /*Codes_SRS_BLOB_02_005: [ If the hostname cannot be copied, then Blob_UploadFromSasUri shall fail and return BLOB_ERROR. ]*/
+                        /*Codes_SRS_BLOB_02_016: [ If the hostname copy cannot be made then then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
                         LogError("oom - out of memory");
                         result = BLOB_ERROR;
                     }
@@ -119,6 +119,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                     else
                                     {
                                         int statusCode;
+                                        /*Codes_SRS_BLOB_02_012: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest passing the parameters previously build. ]*/
                                         if (HTTPAPIEX_ExecuteRequest(httpApiExHandle, HTTPAPI_REQUEST_PUT, relativePath, requestHttpHeaders, requestBuffer, &statusCode, NULL, NULL) != HTTPAPIEX_OK)
                                         {
                                             /*Codes_SRS_BLOB_02_013: [ If HTTPAPIEX_ExecuteRequest fails, then Blob_UploadFromSasUri shall fail and return BLOB_HTTP_ERROR. ]*/
