@@ -526,12 +526,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
         if (IoTHubClient_DM_DoWork(iotDMClientHandle))
         {
             unsigned long toWait = get_milliseconds() + 1000;
-            Lock(cd->push_event_lock);
-            if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
-            {
-                return IOTHUB_CLIENT_ERROR;
-            }
-            Unlock(cd->push_event_lock);
+        Lock(cd->push_event_lock);
+        if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
+        {
+            return IOTHUB_CLIENT_ERROR;
+        }
+        Unlock(cd->push_event_lock);
             toWait -= get_milliseconds();
 
             /**
@@ -548,8 +548,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
         else
         {
             result = IOTHUB_CLIENT_ERROR;
-        }
     }
+}
 
     return result;
 }
