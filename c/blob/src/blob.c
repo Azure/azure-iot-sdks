@@ -5,6 +5,7 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
+#include "azure_c_shared_utility\gballoc.h"
 
 #include "blob.h"
 
@@ -48,7 +49,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
             {
                 /*Codes_SRS_BLOB_02_005: [ If the hostname cannot be copied, then Blob_UploadFromSasUri shall fail and return BLOB_ERROR. ]*/
                 LogError("hostname cannot be determined");
-                result = BLOB_INVALID_ARG;
+                result = BLOB_ERROR;
             }
             else
             {
@@ -58,7 +59,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                 {
                     /*Codes_SRS_BLOB_02_005: [ If the hostname cannot be copied, then Blob_UploadFromSasUri shall fail and return BLOB_ERROR. ]*/
                     LogError("hostname cannot be determined");
-                    result = BLOB_INVALID_ARG;
+                    result = BLOB_ERROR;
                 }
                 else
                 {
@@ -87,7 +88,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                         else
                         {
                             /*Codes_SRS_BLOB_02_008: [ Blob_UploadFromSasUri shall compute the relative path of the request from the SASURI parameter. ]*/
-                            const char* relativePath = hostnameEnd + 1; /*this is where the relative path begins in the SasUri*/
+                            const char* relativePath = hostnameEnd; /*this is where the relative path begins in the SasUri*/
 
                             /*Codes_SRS_BLOB_02_010: [ Blob_UploadFromSasUri shall create a BUFFER_HANDLE from source and size parameters. ]*/
                             BUFFER_HANDLE requestBuffer = BUFFER_create(source, size);
