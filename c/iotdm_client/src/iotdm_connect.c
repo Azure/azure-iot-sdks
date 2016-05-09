@@ -6,7 +6,6 @@
 
 #include <ctype.h>
 
-
 STRING_HANDLE iotdmc_SAS_create(const char* iotHubName, const char* deviceKey)
 {
     STRING_HANDLE retValue = NULL;
@@ -149,6 +148,13 @@ int dm_io_open(IO_OPEN_COMPLETE_CONTEXT *openContext)
         if (retValue == 0)
         {
             return 0;
+        }
+
+        retValue = xio_close(cd->ioHandle,  NULL, NULL);
+        if (retValue != 0)
+        {
+            LogError("xio_close failed");
+            // What to do here?  Swallow and continue for now.
         }
 
         LogInfo("Retry open in %d seconds\n", retry);
