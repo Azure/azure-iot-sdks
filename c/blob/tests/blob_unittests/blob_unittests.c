@@ -20,10 +20,10 @@ static void my_gballoc_free(void* s)
 }
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility\httpapiex.h"
-#include "azure_c_shared_utility\buffer_.h"
-#include "azure_c_shared_utility\httpheaders.h"
-#include "azure_c_shared_utility\gballoc.h"
+#include "azure_c_shared_utility/httpapiex.h"
+#include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/httpheaders.h"
+#include "azure_c_shared_utility/gballoc.h"
 #undef ENABLE_MOCKS
 
 #include "blob.h"
