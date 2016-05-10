@@ -85,7 +85,7 @@ namespace Microsoft.Azure.Devices
                    HttpMethod.Get,
                    new Uri(this.baseAddress, requestUri),
                    (requestMsg, token) => AddCustomHeaders(requestMsg, customHeaders),
-                   message => message.IsSuccessStatusCode || message.StatusCode == HttpStatusCode.NotFound,
+                   message => !(message.IsSuccessStatusCode || message.StatusCode == HttpStatusCode.NotFound),
                    async (message, token) => result = message.StatusCode == HttpStatusCode.NotFound ? (default(T)) : await ReadResponseMessageAsync<T>(message, token),
                    errorMappingOverrides,
                    cancellationToken);

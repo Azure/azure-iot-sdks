@@ -15,7 +15,11 @@
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
+/*String containing Hostname, Device Id & Device Key in the format:                         */
+/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
+/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
 static const char* connectionString = "[device connection string]";
+
 static int callbackCounter;
 
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);

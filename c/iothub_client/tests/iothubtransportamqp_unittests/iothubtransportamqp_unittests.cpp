@@ -133,6 +133,7 @@ std::ostream& operator<<(std::ostream& left, const BINARY_DATA bindata)
 // Control parameters
 #define TEST_DEVICE_ID "deviceid"
 #define TEST_DEVICE_KEY "devicekey"
+#define TEST_DEVICE_SAS "deviceSas"
 #define TEST_IOT_HUB_NAME "servername"
 #define TEST_IOT_HUB_SUFFIX "domainname"
 #define TEST_PROT_GW_HOSTNAME NULL
@@ -413,6 +414,9 @@ public:
         int local_result = BASEIMPLEMENTATION::STRING_copy(s1, s2);
     MOCK_METHOD_END(int, local_result)
 
+		MOCK_STATIC_METHOD_1(, STRING_HANDLE, STRING_clone, STRING_HANDLE, sHandle)
+		STRING_HANDLE new_handle = BASEIMPLEMENTATION::STRING_clone(sHandle);
+	MOCK_METHOD_END(STRING_HANDLE, new_handle)
 
     /* BUFFER Mocks */
     MOCK_STATIC_METHOD_0(, BUFFER_HANDLE, BUFFER_new)
@@ -815,6 +819,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , size_t, STRING_length,
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , int, STRING_empty, STRING_HANDLE, s)
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , STRING_HANDLE, STRING_new)
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, STRING_copy, STRING_HANDLE, s1, const char*, s2);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , STRING_HANDLE, STRING_clone, STRING_HANDLE, sHandle)
 
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , BUFFER_HANDLE, BUFFER_new);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, BUFFER_delete, BUFFER_HANDLE, handle);
@@ -1580,7 +1585,7 @@ TEST_FUNCTION(AMQP_Create_with_config_deviceId_too_long_fails)
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
         "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678",
-        TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_KEY, TEST_DEVICE_SAS, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     
@@ -1611,14 +1616,14 @@ TEST_FUNCTION(AMQP_Create_with_config_deviceId_NULL_fails)
 }
 
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_008: [IoTHubTransportAMQP_Create shall fail and return NULL if any config field of type string is zero length.] 
-TEST_FUNCTION(AMQP_Create_with_config_deviceKey_NULL_fails)
+TEST_FUNCTION(AMQP_Create_with_config_deviceKey_and_deviceSasToken_NULL_fails)
 {
     // arrange
     DLIST_ENTRY wts;
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, NULL, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
@@ -1629,6 +1634,27 @@ TEST_FUNCTION(AMQP_Create_with_config_deviceKey_NULL_fails)
     ASSERT_IS_NULL(transportHandle);
 }
 
+// Tests_SRS_IOTHUBTRANSPORTAMQP_03_001: [IoTHubTransportAMQP_Create shall fail and return NULL if both deviceKey & deviceSasToken fields are NOT NULL.]
+TEST_FUNCTION(AMQP_Create_with_config_deviceKey_and_deviceSasToken_defined_fails)
+{
+    // arrange
+    DLIST_ENTRY wts;
+    TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+
+    IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_DEVICE_SAS, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+
+    IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+    // act
+    TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
+
+    // assert
+    ASSERT_IS_NULL(transportHandle);
+}
+
+
+
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_008: [IoTHubTransportAMQP_Create shall fail and return NULL if any config field of type string is zero length.] 
 TEST_FUNCTION(AMQP_Create_with_config_hubName_NULL_fails)
 {
@@ -1637,7 +1663,7 @@ TEST_FUNCTION(AMQP_Create_with_config_hubName_NULL_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, NULL, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
@@ -1656,7 +1682,7 @@ TEST_FUNCTION(AMQP_Create_with_config_hubSuffix_NULL_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, NULL, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, NULL, TEST_PROT_GW_HOSTNAME };
 
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
@@ -1700,7 +1726,7 @@ TEST_FUNCTION(AMQP_Create_transport_state_allocation_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
@@ -1720,7 +1746,7 @@ TEST_FUNCTION(AMQP_Create_transport_state_allocation_fails)
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_014: [IoTHubTransportAMQP_Create shall create an immutable string, referred to as targetAddress, from the following parts: "amqps://" + devicesPath + "/messages/events".]
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_053: [IoTHubTransportAMQP_Create shall define the source address for receiving messages as "amqps://" + devicesPath + "/messages/devicebound", stored in the transport handle as messageReceiveAddress]
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_016: [IoTHubTransportAMQP_Create shall initialize handle->sasTokenKeyName with a zero-length STRING_HANDLE instance.] 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_018: [IoTHubTransportAMQP_Create shall store a copy of config->deviceKey (passed by upper layer) into the transport's own deviceKey field] 
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_018: [IoTHubTransportAMQP_Create shall store a copy of config->deviceKey (passed by upper layer) into the transport’s own deviceKey field.] 
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_023: [If IoTHubTransportAMQP_Create succeeds it shall return a non-NULL pointer to the structure that represents the transport.] 
 TEST_FUNCTION(AMQP_Create_succeeds)
 {
@@ -1732,7 +1758,7 @@ TEST_FUNCTION(AMQP_Create_succeeds)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     mocks.ResetAllCalls();
@@ -1760,7 +1786,7 @@ TEST_FUNCTION(AMQP_Create_devicesPath_malloc_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     const char* devicesPath = TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID;
@@ -1790,7 +1816,7 @@ TEST_FUNCTION(AMQP_Create_devicesPath_STRING_construct_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     const char* devicesPath = TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID;
@@ -1822,7 +1848,7 @@ TEST_FUNCTION(AMQP_Create_targetAddress_malloc_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     const char* targetAddress = "amqps://" TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/events";
@@ -1852,7 +1878,7 @@ TEST_FUNCTION(AMQP_Create_targetAddress_STRING_construct_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     const char* targetAddress = "amqps://" TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/events";
@@ -1884,7 +1910,7 @@ TEST_FUNCTION(AMQP_Create_receiveAddress_malloc_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     const char* receiveAddress = "amqps://"  TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/devicebound";
@@ -1914,7 +1940,7 @@ TEST_FUNCTION(AMQP_Create_receiveAddress_STRING_construct_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     const char* receiveAddress = "amqps://"  TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX "/devices/" TEST_DEVICE_ID "/messages/devicebound";
@@ -1946,7 +1972,7 @@ TEST_FUNCTION(AMQP_Create_sasTokenKeyName_allocation_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     mocks.ResetAllCalls();
@@ -1973,7 +1999,7 @@ TEST_FUNCTION(AMQP_Create_deviceKey_allocation_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     mocks.ResetAllCalls();
@@ -2000,7 +2026,7 @@ TEST_FUNCTION(AMQP_Create_deviceKey_copy_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     mocks.ResetAllCalls();
@@ -2038,7 +2064,7 @@ TEST_FUNCTION(AMQP_Destroy_succeeds_no_DoWork)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
@@ -2066,7 +2092,7 @@ TEST_FUNCTION(AMQP_DoWork_transport_handle_NULL_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     mocks.ResetAllCalls();
@@ -2089,7 +2115,7 @@ TEST_FUNCTION(AMQP_DoWork_client_handle_NULL_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
@@ -2117,7 +2143,7 @@ TEST_FUNCTION(AMQP_DoWork_saslmechanism_create_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
@@ -2151,7 +2177,7 @@ TEST_FUNCTION(AMQP_DoWork_saslio_create_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
@@ -2184,7 +2210,7 @@ TEST_FUNCTION(AMQP_DoWork_connection_create2_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
@@ -2218,7 +2244,7 @@ TEST_FUNCTION(AMQP_DoWork_session_create_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
@@ -2254,7 +2280,7 @@ TEST_FUNCTION(AMQP_DoWork_cbs_create_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
@@ -2288,7 +2314,7 @@ TEST_FUNCTION(AMQP_DoWork_cbs_open_fails)
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
@@ -2321,7 +2347,7 @@ TEST_FUNCTION(AMQP_DoWork_SASToken_create_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
@@ -2356,7 +2382,7 @@ TEST_FUNCTION(AMQP_DoWork_cbs_put_token_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
@@ -2393,7 +2419,7 @@ TEST_FUNCTION(AMQP_DoWork_CBS_auth_timeout_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
@@ -2427,7 +2453,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_source_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
@@ -2466,7 +2492,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_target_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
@@ -2508,7 +2534,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_link_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
@@ -2553,7 +2579,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
@@ -2607,7 +2633,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_open_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     time_t current_time = time(NULL);
@@ -2664,7 +2690,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_source_create_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -2707,7 +2733,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_target_create_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -2752,7 +2778,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_link_create_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -2799,7 +2825,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_settle_mode_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -2848,7 +2874,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_create_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -2906,7 +2932,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_open_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -2967,10 +2993,10 @@ TEST_FUNCTION(AMQP_DoWork_expired_SASToken_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
-    time_t expiration_time = addSecondsToTime(current_time, (TEST_SAS_TOKEN_LIFETIME_MS/2)/1000 + 1);
+	time_t expiration_time = addSecondsToTime(current_time, (TEST_SAS_TOKEN_LIFETIME_MS / 2) / 1000 + 1);
 
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
     int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
@@ -3011,7 +3037,7 @@ TEST_FUNCTION(AMQP_DoWork_succeeds_when_2_waiting_to_send_messages_are_in_the_li
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
     
@@ -3054,7 +3080,7 @@ TEST_FUNCTION(AMQP_DoWork_send_one_message_succeeds)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
@@ -3127,7 +3153,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_read_properties_succeeds)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3213,7 +3239,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_IoTHubMessage_Propertie
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3271,7 +3297,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_message_get_application
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3330,7 +3356,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_inplace_d
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3370,7 +3396,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_inplace_d
 
 	// act
 	saved_on_message_received_callback(saved_on_message_received_context, TEST_MESSAGE_HANDLE);
-
+	
 	// assert
 	mocks.AssertActualAndExpectedCalls();
 
@@ -3390,7 +3416,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_map_pair_
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3450,7 +3476,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_NO_app_properties_succeeds)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3512,7 +3538,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_EMPTY_app_properties_succeeds)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3574,7 +3600,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_map_key_v
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3638,7 +3664,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_string_na
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3703,7 +3729,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_string_va
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3769,7 +3795,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_Map_AddOrUpdate_fails)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -3835,7 +3861,7 @@ TEST_FUNCTION(AMQP_GetSendStatus_idle_succeeds)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -3870,7 +3896,7 @@ TEST_FUNCTION(AMQP_GetSendStatus_inProgress_not_empty_succeeds)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -3905,7 +3931,7 @@ TEST_FUNCTION(AMQP_GetSendStatus_waitingToSend_not_empty_succeeds)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -3938,7 +3964,7 @@ TEST_FUNCTION(AMQP_Subscribe_NULL_transport_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
@@ -3965,7 +3991,7 @@ TEST_FUNCTION(AMQP_Subscribe_and_messagereceiver_create_succeeds)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 	int subscribe_result;
@@ -4003,7 +4029,7 @@ TEST_FUNCTION(AMQP_Unsubscribe_NULL_transport_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
@@ -4029,7 +4055,7 @@ TEST_FUNCTION(AMQP_SetOption_NULL_transport_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
@@ -4056,7 +4082,7 @@ TEST_FUNCTION(AMQP_SetOption_NULL_option_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
@@ -4084,7 +4110,7 @@ TEST_FUNCTION(AMQP_SetOption_NULL_value_fails)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
@@ -4111,7 +4137,7 @@ TEST_FUNCTION(AMQP_SetOption_invokes_xio_setoption_succeeds)
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	const char* SOME_OPTION = "AnOption";
@@ -4146,7 +4172,7 @@ TEST_FUNCTION(AMQP_SetOption_fails_when_xio_setoption_fails)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 	const char* SOME_OPTION = "AnOption";
@@ -4182,7 +4208,7 @@ TEST_FUNCTION(when_getting_the_properties_map_for_a_message_to_be_sent_fails_AMQ
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4240,7 +4266,7 @@ TEST_FUNCTION(when_getting_the_internals_for_the_properties_map_for_a_message_to
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4308,7 +4334,7 @@ TEST_FUNCTION(AMQP_DoWork_encodes_two_properties_on_an_IoTHub_Message_before_giv
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4383,7 +4409,7 @@ TEST_FUNCTION(when_creating_the_property_map_fails_AMQP_DoWork_completes_the_mes
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4448,7 +4474,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_1st_property_key_fails_AMQP_
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4516,7 +4542,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_1st_property_value_fails_AMQ
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4587,7 +4613,7 @@ TEST_FUNCTION(when_setting_the_value_for_the_1st_property_fails_AMQP_DoWork_comp
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4661,7 +4687,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_for_key_of_the_2nd_property_
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4736,7 +4762,7 @@ TEST_FUNCTION(when_creating_the_uAMQP_value_for_the_for_value_of_the_2nd_propert
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4813,7 +4839,7 @@ TEST_FUNCTION(when_setting_the_2nd_property_on_the_uAMQP_map_fails_AMQP_DoWork_c
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4894,7 +4920,7 @@ TEST_FUNCTION(when_setting_the_message_properties_fails_AMQP_DoWork_completes_th
     BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
     TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
     IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
     IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
     time_t current_time = time(NULL);
 
@@ -4972,12 +4998,16 @@ TEST_FUNCTION(AMQP_Register_transport_success_returns_transport)
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = TEST_DEVICE_ID;
+	device.deviceKey = TEST_DEVICE_KEY;
+	device.deviceSasToken = NULL;
 
 	DLIST_ENTRY wts;
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
@@ -4994,7 +5024,7 @@ TEST_FUNCTION(AMQP_Register_transport_success_returns_transport)
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NOT_NULL(devHandle);
@@ -5010,17 +5040,21 @@ TEST_FUNCTION(AMQP_Register_twice_returns_null_second_time)
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = TEST_DEVICE_ID;
+	device.deviceKey = TEST_DEVICE_KEY;
+	device.deviceSasToken = NULL;
 
 	DLIST_ENTRY wts;
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
 	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 	mocks.ResetAllCalls();
 
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
@@ -5033,7 +5067,7 @@ TEST_FUNCTION(AMQP_Register_twice_returns_null_second_time)
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle2 = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle2 = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle2);
@@ -5049,12 +5083,16 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_mismatch_returns_null)
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = TEST_DEVICE_ID;
+	device.deviceKey = "this is a different device key";
+	device.deviceSasToken = NULL;
 
 	DLIST_ENTRY wts;
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
@@ -5071,7 +5109,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_mismatch_returns_null)
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, "this is a different device key", TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -5087,12 +5125,16 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_mismatch_returns_null)
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = "not the right devId";
+	device.deviceKey = TEST_DEVICE_KEY;
+	device.deviceSasToken = NULL;
 
 	DLIST_ENTRY wts;
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
@@ -5108,7 +5150,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_mismatch_returns_null)
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, "not the right devId", TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -5124,12 +5166,16 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_null_returns_null)
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = NULL;
+	device.deviceKey = TEST_DEVICE_KEY;
+	device.deviceSasToken = NULL;
 
 	DLIST_ENTRY wts;
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
@@ -5137,7 +5183,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_null_returns_null)
 	mocks.ResetAllCalls();
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, NULL, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -5148,8 +5194,8 @@ TEST_FUNCTION(AMQP_Register_transport_deviceId_null_returns_null)
 	cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQP_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
-TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_returns_null)
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQP_Register shall return NULL if device or waitingToSend are NULL.] 
+TEST_FUNCTION(AMQP_Register_transport_device_null_returns_null)
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
@@ -5158,7 +5204,7 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_returns_null)
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
@@ -5166,7 +5212,73 @@ TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_returns_null)
 	mocks.ResetAllCalls();
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, NULL, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, NULL, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+
+	// assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_03_002: [IoTHubTransportAMQP_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.]
+TEST_FUNCTION(AMQP_Register_transport_deviceKey_null_and_deviceSasToken_null_returns_null)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = TEST_DEVICE_ID;
+	device.deviceKey = NULL;
+	device.deviceSasToken = NULL;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+
+	// assert
+	ASSERT_IS_NULL(devHandle);
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+	cleanupList(config.waitingToSend);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTUAMQP_03_003: [IoTHubTransportAMQP_Register shall return NULL if both deviceKey and deviceSasToken are not NULL.] 
+TEST_FUNCTION(AMQP_Register_transport_deviceKey_and_deviceSasToken_provided_returns_null)
+{
+	// arrange
+	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = TEST_DEVICE_ID;
+	device.deviceKey = TEST_DEVICE_KEY;
+	device.deviceSasToken = TEST_DEVICE_SAS;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+	mocks.ResetAllCalls();
+
+	// act
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -5182,12 +5294,16 @@ TEST_FUNCTION(AMQP_Register_transport_wts_null_returns_null)
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = "not the right devId";
+	device.deviceKey = TEST_DEVICE_KEY;
+	device.deviceSasToken = NULL;
 
 	DLIST_ENTRY wts;
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
@@ -5195,7 +5311,7 @@ TEST_FUNCTION(AMQP_Register_transport_wts_null_returns_null)
 	mocks.ResetAllCalls();
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, "not the right devId", TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, NULL);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, NULL);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -5211,6 +5327,10 @@ TEST_FUNCTION(AMQP_Register_transport_null_returns_null)
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = TEST_DEVICE_ID;
+	device.deviceKey = TEST_DEVICE_KEY;
+	device.deviceSasToken = NULL;
 
 	DLIST_ENTRY wts;
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
@@ -5220,7 +5340,7 @@ TEST_FUNCTION(AMQP_Register_transport_null_returns_null)
 	mocks.ResetAllCalls();
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NULL(devHandle);
@@ -5235,18 +5355,22 @@ TEST_FUNCTION(AMQP_Unregister_transport_success)
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = TEST_DEVICE_ID;
+	device.deviceKey = TEST_DEVICE_KEY;
+	device.deviceSasToken = NULL;
 
 	DLIST_ENTRY wts;
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
 	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
 
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	mocks.ResetAllCalls();
 
@@ -5265,17 +5389,21 @@ TEST_FUNCTION(AMQP_Register_transport_Register_Unregister_Register_success_retur
 {
 	// arrange
 	CIoTHubTransportAMQPMocks mocks;
+	IOTHUB_DEVICE_CONFIG device;
+	device.deviceId = TEST_DEVICE_ID;
+	device.deviceKey = TEST_DEVICE_KEY;
+	device.deviceSasToken = NULL;
 
 	DLIST_ENTRY wts;
 	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
 	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
 	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
 	time_t current_time = time(NULL);
 
 	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
-	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 	transport_interface->IoTHubTransport_Unregister(devHandle);
 	mocks.ResetAllCalls();
 
@@ -5289,7 +5417,7 @@ TEST_FUNCTION(AMQP_Register_transport_Register_Unregister_Register_success_retur
 	EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
 
 	// act
-	IOTHUB_DEVICE_HANDLE devHandle2 = transport_interface->IoTHubTransport_Register(transport, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+	IOTHUB_DEVICE_HANDLE devHandle2 = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
 
 	// assert
 	ASSERT_IS_NOT_NULL(devHandle2);

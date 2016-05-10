@@ -154,7 +154,6 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
     return result;
 }
 
-
 IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
 {
     /* Codes_SRS_IOTHUBCLIENT_01_001: [IoTHubClient_Create shall allocate a new IoTHubClient instance and return a non-NULL handle to it.] */
@@ -228,6 +227,8 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
 				deviceConfig.deviceId = config->deviceId;
 				deviceConfig.deviceKey = config->deviceKey;
 				deviceConfig.protocol = config->protocol;
+                deviceConfig.deviceSasToken = config->deviceSasToken;
+                deviceConfig.protocol = config->protocol;
 
 				/*Codes_SRS_IOTHUBCLIENT_17_003: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLLTransport on transportHandle to get lower layer transport. ]*/
 				deviceConfig.transportHandle = IoTHubTransport_GetLLTransport(transportHandle);

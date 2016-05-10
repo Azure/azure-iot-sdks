@@ -69,6 +69,8 @@ typedef struct AMQP_TRANSPORT_STATE_TAG
     int iotHubPort;
     // Key associated to the device to be used.
     STRING_HANDLE deviceKey;
+	// SAS associated to the device to be used.
+	STRING_HANDLE deviceSasToken;
     // Address to which the transport will connect to and send events.
     STRING_HANDLE targetAddress;
     // Address to which the transport will connect to and receive messages from.
@@ -560,7 +562,7 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
         LogError("Transport failed processing the message received.");
 
 		result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading message body");
-	}
+    }
 	else
     {
 		/* Codes_SRS_IOTHUBTRANSPORTAMQP_09_153: [The callback ‘on_message_received’ shall read the message-id property from the uAMQP message and set it on the IoT Hub Message if the property is defined.] */
@@ -581,24 +583,24 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
 		else
 		{
 			IOTHUBMESSAGE_DISPOSITION_RESULT disposition_result;
-			
-			disposition_result = IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, iothub_message);
 
-			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_105: [The callback 'on_message_received' shall return the result of messaging_delivery_accepted() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ACCEPTED] 
-			if (disposition_result == IOTHUBMESSAGE_ACCEPTED)
-			{
-				result = messaging_delivery_accepted();
-			}
-			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_106: [The callback 'on_message_received' shall return the result of messaging_delivery_released() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ABANDONED] 
-			else if (disposition_result == IOTHUBMESSAGE_ABANDONED)
-			{
-				result = messaging_delivery_released();
-			}
-			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_107: [The callback 'on_message_received' shall return the result of messaging_delivery_rejected("Rejected by application", "Rejected by application") if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_REJECTED] 
-			else if (disposition_result == IOTHUBMESSAGE_REJECTED)
-			{
-				result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
-			}
+        disposition_result = IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, iothub_message);
+
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_105: [The callback 'on_message_received' shall return the result of messaging_delivery_accepted() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ACCEPTED] 
+        if (disposition_result == IOTHUBMESSAGE_ACCEPTED)
+        {
+            result = messaging_delivery_accepted();
+        }
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_106: [The callback 'on_message_received' shall return the result of messaging_delivery_released() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ABANDONED] 
+        else if (disposition_result == IOTHUBMESSAGE_ABANDONED)
+        {
+            result = messaging_delivery_released();
+        }
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_107: [The callback 'on_message_received' shall return the result of messaging_delivery_rejected("Rejected by application", "Rejected by application") if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_REJECTED] 
+        else if (disposition_result == IOTHUBMESSAGE_REJECTED)
+        {
+            result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
+        }
 		}
 
         IoTHubMessage_Destroy(iothub_message);
@@ -772,16 +774,25 @@ static int startAuthentication(AMQP_TRANSPORT_INSTANCE* transport_state)
                                                            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_083: [Each new SAS token created by the transport shall be valid for up to 'sas_token_lifetime' milliseconds from the time of creation]
     size_t new_expiry_time = sas_token_create_time + (transport_state->sas_token_lifetime / 1000);
 
-    STRING_HANDLE newSASToken = SASToken_Create(transport_state->deviceKey, transport_state->devicesPath, transport_state->sasTokenKeyName, new_expiry_time);
+	STRING_HANDLE newSASToken;
+
+	if (transport_state->deviceSasToken == NULL)
+	{
+		newSASToken = SASToken_Create(transport_state->deviceKey, transport_state->devicesPath, transport_state->sasTokenKeyName, new_expiry_time);
+	}
+	else
+	{
+		newSASToken = STRING_clone(transport_state->deviceSasToken);
+	}
 
     if (newSASToken == NULL)
     {
-        LogError("Could not generate a new SAS token for the CBS");
+		LogError("Could not generate a new SAS token for the CBS.");
         result = RESULT_FAILURE;
     }
     else if (cbs_put_token(transport_state->cbs, CBS_AUDIENCE, STRING_c_str(transport_state->devicesPath), STRING_c_str(newSASToken), on_put_token_complete, transport_state) != RESULT_OK)
     {
-        LogError("Failed applying new SAS token to CBS");
+		LogError("Failed applying new SAS token to CBS.");
         result = RESULT_FAILURE;
     }
     else
@@ -1147,7 +1158,14 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
 
 static bool isSasTokenRefreshRequired(AMQP_TRANSPORT_INSTANCE* transport_state)
 {
+	if (transport_state->deviceSasToken != NULL)
+	{
+		return false;
+	}
+	else
+	{
     return ((getSecondsSinceEpoch() - transport_state->current_sas_token_create_time) >= (transport_state->sas_token_refresh_time / 1000)) ? true : false;
+}
 }
 
 static void prepareForConnectionRetry(AMQP_TRANSPORT_INSTANCE* transport_state)
@@ -1174,6 +1192,7 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
         LogError("IoTHub AMQP client transport null configuration parameter.");
     }
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_006: [IoTHubTransportAMQP_Create shall fail and return NULL if any fields of the config structure are NULL.]
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_03_001: [IoTHubTransportAMQP_Create shall fail and return NULL if both deviceKey & deviceSasToken fields are NOT NULL.]
     else if (config->upperConfig->protocol == NULL)
     {
         LogError("Invalid configuration (NULL protocol detected)");
@@ -1182,9 +1201,13 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
     {
         LogError("Invalid configuration (NULL deviceId detected)");
     }
-    else if (config->upperConfig->deviceKey == NULL)
+    else if (config->upperConfig->deviceKey == NULL && config->upperConfig->deviceSasToken == NULL)
     {
-        LogError("Invalid configuration (NULL deviceKey detected)");
+        LogError("Invalid configuration (NULL deviceKey/deviceSasToken detected)");
+    }
+    else if (config->upperConfig->deviceKey != NULL && config->upperConfig->deviceSasToken != NULL)
+    {
+        LogError("Invalid configuration (Both deviceKey and deviceSasToken are defined)");
     }
     else if (config->upperConfig->iotHubName == NULL)
     {
@@ -1200,12 +1223,19 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
     }
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_008: [IoTHubTransportAMQP_Create shall fail and return NULL if any config field of type string is zero length.] 
     else if ((deviceIdLength = strlen(config->upperConfig->deviceId)) == 0 ||
-        (strlen(config->upperConfig->deviceKey) == 0) ||
         (strlen(config->upperConfig->iotHubName) == 0) ||
         (strlen(config->upperConfig->iotHubSuffix) == 0))
     {
-        LogError("Zero-length config parameter (deviceId, deviceKey, iotHubName or iotHubSuffix)");
+		LogError("Zero-length config parameter (deviceId, iotHubName or iotHubSuffix)");
     }
+	else if ((config->upperConfig->deviceKey != NULL) && (strlen(config->upperConfig->deviceKey) == 0))
+	{
+		LogError("Zero-length config parameter (deviceKey)");
+	}
+	else if ((config->upperConfig->deviceSasToken != NULL) && (strlen(config->upperConfig->deviceSasToken) == 0))
+	{
+		LogError("Zero-length config parameter (deviceSasToken)");
+	}
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_007: [IoTHubTransportAMQP_Create shall fail and return NULL if the deviceId length is greater than 128.]
     else if (deviceIdLength > 128U)
     {
@@ -1230,6 +1260,7 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
             transport_state->iotHubHostFqdn = NULL;
             transport_state->iotHubPort = DEFAULT_IOTHUB_AMQP_PORT;
             transport_state->deviceKey = NULL;
+			transport_state->deviceSasToken = NULL;
             transport_state->devicesPath = NULL;
             transport_state->messageReceiveAddress = NULL;
             transport_state->sasTokenKeyName = NULL;
@@ -1291,10 +1322,19 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
                 // Codes_SRS_IOTHUBTRANSPORTAMQP_09_017: [If IoTHubTransportAMQP_Create fails to initialize handle->sasTokenKeyName with a zero-length STRING the function shall fail and return NULL.] 
                 LogError("Failed to allocate transport_state->sasTokenKeyName.");
                 cleanup_required = true;
+			}
+			else if (config->upperConfig->deviceSasToken != NULL)
+			{
+				if ((transport_state->deviceSasToken = STRING_construct(config->upperConfig->deviceSasToken)) == NULL)
+				{
+					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_019: [If IoTHubTransportAMQP_Create fails to copy config->deviceKey, the function shall fail and return NULL.]
+					LogError("Failed to allocate transport_state->deviceSasToken.");
+					cleanup_required = true;
             }
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_018: [IoTHubTransportAMQP_Create shall store a copy of config->deviceKey (passed by upper layer) into the transport's own deviceKey field] 
-            else if ((transport_state->deviceKey = STRING_new()) == NULL ||
-                STRING_copy(transport_state->deviceKey, config->upperConfig->deviceKey) != 0)
+			}
+            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_018: [IoTHubTransportAMQP_Create shall store a copy of config->deviceKey (passed by upper layer) into the transport’s own deviceKey field.] 
+            else if ((config->upperConfig->deviceKey != NULL) && ((transport_state->deviceKey = STRING_new()) == NULL ||
+                STRING_copy(transport_state->deviceKey, config->upperConfig->deviceKey) != 0))
             {
                 // Codes_SRS_IOTHUBTRANSPORTAMQP_09_019: [If IoTHubTransportAMQP_Create fails to copy config->deviceKey, the function shall fail and return NULL.]
                 LogError("Failed to allocate transport_state->deviceKey.");
@@ -1316,6 +1356,8 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
 
     if (cleanup_required)
     {
+		if (transport_state->deviceSasToken != NULL)
+			STRING_delete(transport_state->deviceSasToken);
         if (transport_state->deviceKey != NULL)
             STRING_delete(transport_state->deviceKey);
         if (transport_state->sasTokenKeyName != NULL)
@@ -1603,12 +1645,12 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE ha
     return result;
 }
 
-static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
+static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
     IOTHUB_DEVICE_HANDLE result;
-    // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQP_Register shall return NULL if deviceId, deviceKey or waitingToSend are NULL.] 
+	// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQP_Register shall return NULL if device, or waitingToSend are NULL.] 
     // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQP_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.]
-    if ((handle == NULL) || (deviceId == NULL) || (deviceKey == NULL) || (waitingToSend == NULL))
+	if ((handle == NULL) || (device == NULL) || (waitingToSend == NULL))
     {
         result = NULL;
     }
@@ -1616,10 +1658,22 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE han
     {
         AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)handle;
 
-        STRING_HANDLE devicesPath = concat3Params(STRING_c_str(transport_state->iotHubHostFqdn), "/devices/", deviceId);
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_03_002: [IoTHubTransportAMQP_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.**]
+		if ((device->deviceId == NULL) || (device->deviceSasToken == NULL && device->deviceKey == NULL))
+		{
+			result = NULL;
+		}
+		// Codes_SRS_IOTHUBTRANSPORTUAMQP_03_003: [IoTHubTransportAMQP_Register shall return NULL if both deviceKey and deviceSasToken are not NULL.]
+		else if ( (device->deviceSasToken != NULL) && (device->deviceKey != NULL) )
+		{
+			result = NULL;
+		}
+		else
+		{
+			STRING_HANDLE devicesPath = concat3Params(STRING_c_str(transport_state->iotHubHostFqdn), "/devices/", device->deviceId);
         if (devicesPath == NULL)
         {
-            LogError("Could not create a comparison string");
+				LogError("Could not create devicesPath");
             result = NULL;
         }
         else
@@ -1630,7 +1684,7 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE han
                 LogError("Attemping to add new device to AMQP transport, not allowed.");
                 result = NULL;
             }
-            else if (strcmp(STRING_c_str(transport_state->deviceKey), deviceKey) != 0)
+				else if ((transport_state->deviceSasToken == NULL) && strcmp(STRING_c_str(transport_state->deviceKey), device->deviceKey) != 0)
             {
                 LogError("Attemping to add new device to AMQP transport, not allowed.");
                 result = NULL;
@@ -1639,7 +1693,7 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE han
             {
                 if (transport_state->isRegistered == true)
                 {
-                    LogError("Transport already has device registered by id: [%s]", deviceId);
+						LogError("Transport already has device registered by id: [%s]", device->deviceId);
                     result = NULL;
                 }
                 else
@@ -1652,6 +1706,7 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE han
             STRING_delete(devicesPath);
         }
     }
+	}
 
     return result;
 }
