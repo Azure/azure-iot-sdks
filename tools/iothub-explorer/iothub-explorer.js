@@ -293,7 +293,7 @@ else if (command === 'get-job') {
     
     jobClient.getJob(arg1, function (err, job) {
       if (err) serviceError(err);
-      printJob(job);
+      printResult(job);
     });
 }
 else if (command === 'read') {
@@ -308,56 +308,24 @@ else if (command === 'read') {
     JobClient.fromSharedAccessSignature(sas.toString());
 
   jobClient.scheduleDevicePropertyRead(jobId, devices, properties, function (err, job) {
-    if (err) serviceError(err);
-    if (parsed.async) {
-      printJob(job);
-    }
-    else {
-      var interval = setInterval(function () {
-        jobClient.getJob(jobId, function (err, job) {
+    handleJobScheduled(err, job, 'Read', function () {
+      var registry = connString ?
+        Registry.fromConnectionString(connString) :
+        Registry.fromSharedAccessSignature(sas.toString());
+      devices.forEach(function (deviceId) {
+        registry.get(deviceId, function (err, twin) {
           if (err) serviceError(err);
-          if (job.status === 'completed') {
-            clearInterval(interval);
-            
-            var status = {};
-            job.statusMessage.split(';').forEach(function (elem) {
-              if (elem.length) {
-                var pair = elem.split(':');
-                status[pair[0].trim()] = parseInt(pair[1]);
-              }
-            });
-            if (!parsed.raw && status.Succeeded > 0) {
-              console.log(colorsTmpl('\n' + '{green}Read succeeded for ' + status.Succeeded + ' device' + (status.Succeeded > 1 ? 's' : '') + '{/green}'));
-            }
-            if (!parsed.raw && status.Failed > 0) {
-              console.log(colorsTmpl('\n' + '{red}Read failed for ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '{/red}'));
-            }
-            if (status.Succeeded > 0)
-            {
-              var registry = connString ?
-                Registry.fromConnectionString(connString) :
-                Registry.fromSharedAccessSignature(sas.toString());
-              devices.forEach(function (deviceId) {
-                registry.get(deviceId, function (err, twin) {
-                  if (err) serviceError(err);
-                  var result = {
-                    deviceId: deviceId,
-                    deviceProperties: {}
-                  };
-                  properties.forEach(function (value) {
-                    result.deviceProperties[value] = twin.deviceProperties[value];
-                  });
-                  var output = parsed.raw ?
-                    JSON.stringify(result) :
-                    '\n' + prettyjson.render(result);
-                  console.log(output);
-                });
-              });
-            }
-          }
+          var result = {
+            deviceId: deviceId,
+            deviceProperties: {}
+          };
+          properties.forEach(function (value) {
+            result.deviceProperties[value] = twin.deviceProperties[value];
+          });
+          printResult(result);
         });
-      }, 2000);
-    }
+      });
+    });
   });
 }
 else if (command === 'write') {
@@ -381,34 +349,7 @@ else if (command === 'write') {
     JobClient.fromSharedAccessSignature(sas.toString());
 
   jobClient.scheduleDevicePropertyWrite(jobId, devices, properties, function (err, job) {
-    if (err) serviceError(err);
-    if (parsed.async) {
-      printJob(job);
-    }
-    else {
-      var interval = setInterval(function () {
-        jobClient.getJob(jobId, function (err, job) {
-          if (err) serviceError(err);
-          if (job.status === 'completed') {
-            clearInterval(interval);
-            
-            var status = {};
-            job.statusMessage.split(';').forEach(function (elem) {
-              if (elem.length) {
-                var pair = elem.split(':');
-                status[pair[0].trim()] = parseInt(pair[1]);
-              }
-            });
-            if (!parsed.raw && status.Succeeded > 0) {
-              console.log(colorsTmpl('\n' + '{green}Write succeeded for ' + status.Succeeded + ' device' + (status.Succeeded > 1 ? 's' : '') + '{/green}'));
-            }
-            if (!parsed.raw && status.Failed > 0) {
-              console.log(colorsTmpl('\n' + '{red}Write failed for ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '{/red}'));
-            }
-          }
-        });
-      }, 2000);
-    }
+    handleJobScheduled(err, job, 'Write');
   });
 }
 else if (command === 'firmware-update')
@@ -425,34 +366,7 @@ else if (command === 'firmware-update')
     JobClient.fromSharedAccessSignature(sas.toString());
 
   jobClient.scheduleFirmwareUpdate(jobId, devices, arg2, timeout, function (err, job) {
-    if (err) serviceError(err);
-    if (parsed.async) {
-      printJob(job);
-    }
-    else {
-      var interval = setInterval(function () {
-        jobClient.getJob(jobId, function (err, job) {
-          if (err) serviceError(err);
-          if (job.status === 'completed') {
-            clearInterval(interval);
-
-            var status = {};
-            job.statusMessage.split(';').forEach(function (elem) {
-              if (elem.length) {
-                var pair = elem.split(':');
-                status[pair[0].trim()] = parseInt(pair[1]);
-              }
-            });
-            if (!parsed.raw && status.Succeeded > 0) {
-              console.log(colorsTmpl('\n' + '{green}Firmware update succeeded for ' + status.Succeeded + ' device' + (status.Succeeded > 1 ? 's' : '') + '{/green}'));
-            }
-            if (!parsed.raw && status.Failed > 0) {
-              console.log(colorsTmpl('\n' + '{red}Firmware update failed for ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '{/red}'));
-            }
-          }
-        });
-      }, 2000);
-    }
+    handleJobScheduled(err, job, 'Firmware update');
   });
 }
 else if (command === 'factory-reset')
@@ -467,34 +381,7 @@ else if (command === 'factory-reset')
     JobClient.fromSharedAccessSignature(sas.toString());
 
   jobClient.scheduleFactoryReset(jobId, devices, function (err, job) {
-    if (err) serviceError(err);
-    if (parsed.async) {
-      printJob(job);
-    }
-    else {
-      var interval = setInterval(function () {
-        jobClient.getJob(jobId, function (err, job) {
-          if (err) serviceError(err);
-          if (job.status === 'completed') {
-            clearInterval(interval);
-            
-            var status = {};
-            job.statusMessage.split(';').forEach(function (elem) {
-              if (elem.length) {
-                var pair = elem.split(':');
-                status[pair[0].trim()] = parseInt(pair[1]);
-              }
-            });
-            if (!parsed.raw && status.Succeeded > 0) {
-              console.log(colorsTmpl('\n' + '{green}Factory reset succeeded for ' + status.Succeeded + ' device' + (status.Succeeded > 1 ? 's' : '') + '{/green}'));
-            }
-            if (!parsed.raw && status.Failed > 0) {
-              console.log(colorsTmpl('\n' + '{red}Factory reset failed for ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '{/red}'));
-            }
-          }
-        });
-      }, 2000);
-    }
+    handleJobScheduled(err, job, 'Factory reset');
   });
 }
 else if (command === 'reboot')
@@ -509,39 +396,46 @@ else if (command === 'reboot')
     JobClient.fromSharedAccessSignature(sas.toString());
 
   jobClient.scheduleReboot(jobId, devices, function (err, job) {
-    if (err) serviceError(err);
-    if (parsed.async) {
-      printJob(job);
-    }
-    else {
-      var interval = setInterval(function () {
-        jobClient.getJob(jobId, function (err, job) {
-          if (err) serviceError(err);
-          if (job.status === 'completed') {
-            clearInterval(interval);
-            
-            var status = {};
-            job.statusMessage.split(';').forEach(function (elem) {
-              if (elem.length) {
-                var pair = elem.split(':');
-                status[pair[0].trim()] = parseInt(pair[1]);
-              }
-            });
-            if (!parsed.raw && status.Succeeded > 0) {
-              console.log(colorsTmpl('\n' + '{green}Reboot succeeded for ' + status.Succeeded + ' device' + (status.Succeeded > 1 ? 's' : '') + '{/green}'));
-            }
-            if (!parsed.raw && status.Failed > 0) {
-              console.log(colorsTmpl('\n' + '{red}Reboot failed for ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '{/red}'));
-            }
-          }
-        });
-      }, 2000);
-    }
+    handleJobScheduled(err, job, 'Reboot');
   });
 }
 else {
   inputError('\'' + command + '\' is not a valid command');
   usage();
+}
+
+function handleJobScheduled(err, job, opName, onJobSucceeded) {
+  if (err) serviceError(err);
+  if (parsed.async) {
+    printResult(job);
+  }
+  else {
+    var interval = setInterval(function () {
+      jobClient.getJob(jobId, function (err, job) {
+        if (err) serviceError(err);
+        if (job.status === 'completed') {
+          clearInterval(interval);
+          
+          var status = {};
+          job.statusMessage.split(';').forEach(function (elem) {
+            if (elem.length) {
+              var pair = elem.split(':');
+              status[pair[0].trim()] = parseInt(pair[1]);
+            }
+          });
+          if (!parsed.raw && status.Succeeded > 0) {
+            console.log(colorsTmpl('\n' + '{green}' + opName + ' succeeded for ' + status.Succeeded + ' device' + (status.Succeeded > 1 ? 's' : '') + '{/green}'));
+          }
+          if (!parsed.raw && status.Failed > 0) {
+            console.log(colorsTmpl('\n' + '{red}' + opName + ' failed for ' + status.Failed + ' device' + (status.Failed > 1 ? 's' : '') + '{/red}'));
+          }
+          if (onJobSucceeded && status.Succeeded > 0) {
+            onJobSucceeded();
+          }
+        }
+      });
+    }, 2000);
+  }
 }
 
 function arrayFromCommaDelimitedList(str) {
@@ -562,7 +456,7 @@ function inputError(message) {
     if (message.lastIndexOf('Error:', 0) === 0) {
       message = message.slice('Error:'.length);
     }
-    console.log(colorsTmpl('\n{bold}{red}Error{/red}{/bold}' + message));
+    console.log(colorsTmpl('\n{bold}{red}Error{/red}{/bold} ' + message));
   }
   process.exit(1);
 }
@@ -636,13 +530,10 @@ function printDevice(device) {
     result.push({ connectionString: connectionString(device) });
   }
 
-  var output = parsed.raw ?
-    JSON.stringify(result) :
-    '\n' + prettyjson.render(result);
-  console.log(output);
+  printResult(result);
 }
 
-function printJob(job) {
+function printResult(job) {
   var output = parsed.raw ?
     JSON.stringify(job) :
     '\n' + prettyjson.render(job);
