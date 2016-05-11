@@ -150,8 +150,8 @@ int dm_io_open(IO_OPEN_COMPLETE_CONTEXT *openContext)
             return 0;
         }
 
-        retValue = xio_close(cd->ioHandle,  NULL, NULL);
-        if (retValue != 0)
+        int retValue2 = xio_close(cd->ioHandle,  NULL, NULL);
+        if (retValue2 != 0)
         {
             LogError("xio_close failed");
             // What to do here?  Swallow and continue for now.
