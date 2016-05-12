@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+// cOpyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <cstdlib>
@@ -369,6 +369,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         EventData_Destroy(sendData);
     }
 
+#if 0
     TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest)
     {
         // arrange
@@ -445,4 +446,6 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         MessageData_Destroy(notifyData);
         IoTHubClient_Destroy(iotHubClientHandle);
     }
+#endif
+
 END_TEST_SUITE(iothubclient_mqtt_e2etests)
