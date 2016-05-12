@@ -26,7 +26,7 @@
         "device-mqtt": "1.0.6",
         "service": "1.0.8"
     },
-    "iothub-explorer": "1.0.5",
+    "iothub-explorer": "1.0.6",
     "device-explorer": "1.0.5",
     "github-release": "v1.0.5"
 }

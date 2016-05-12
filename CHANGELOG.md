@@ -44,6 +44,7 @@ Release for May 6, 2016
 
 # General
 - Documentation fixes
+- Allow iothub-explorer users to generate device SAS tokens with 'sas-token' command
 
 # Bug fixes
 
