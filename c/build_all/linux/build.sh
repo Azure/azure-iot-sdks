@@ -7,7 +7,7 @@ set -e
 script_dir=$(cd "$(dirname "$0")" && pwd)
 build_root=$(cd "${script_dir}/../.." && pwd)
 log_dir=$build_root
-run_e2e_tests=ON
+run_e2e_tests=OFF
 run_longhaul_tests=OFF
 build_amqp=ON
 build_http=ON
