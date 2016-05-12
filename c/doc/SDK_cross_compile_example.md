@@ -46,7 +46,7 @@ Unfortunately, this does not give us all the files that are required to build th
 ```
 cd ~/RPiTools/tools/arm-bcm2708/\
 gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf
-rsync -rl --safe-links pi@&lt;*your Pi identifier*&gt;:/{lib,usr} .
+rsync -rl --safe-links pi@<your Pi identifier>:/{lib,usr} .
 ```
 In the above command replace &lt;*your Pi identifier*&gt; with the IP address of your Raspberry Pi. If you no longer have a user identity on your Raspberry Pi called pi, then you will need to substitute an existing user identity.
 
