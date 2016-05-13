@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (prefetchCount <= 0)
             {
-                throw new ArgumentOutOfRangeException("prefetchCount", "Must be greater than zero");
+                throw new ArgumentOutOfRangeException(nameof(prefetchCount), "Must be greater than zero");
             }
 
             switch (transportType)
@@ -58,6 +58,8 @@ namespace Microsoft.Azure.Devices.Client
             return this.transportType;
         }
 
+        public TimeSpan DefaultReceiveTimeout => this.operationTimeout;
+
         public TimeSpan OperationTimeout {
             get { return this.operationTimeout; }
             set { this.SetOperationTimeout(value); }
@@ -73,27 +75,27 @@ namespace Microsoft.Azure.Devices.Client
 
         public AmqpConnectionPoolSettings AmqpConnectionPoolSettings { get; set; }
 
-        void SetOperationTimeout(TimeSpan operationTimeout)
+        void SetOperationTimeout(TimeSpan timeout)
         {
-            if (operationTimeout > TimeSpan.Zero)
+            if (timeout > TimeSpan.Zero)
             {
-                this.operationTimeout = operationTimeout;
+                this.operationTimeout = timeout;
             }
             else
             {
-                throw new ArgumentOutOfRangeException("operationTimeout");
+                throw new ArgumentOutOfRangeException(nameof(timeout));
             }
         }
 
-        void SetOpenTimeout(TimeSpan openTimeout)
+        void SetOpenTimeout(TimeSpan timeout)
         {
-            if (openTimeout > TimeSpan.Zero)
+            if (timeout > TimeSpan.Zero)
             {
-                this.openTimeout = openTimeout;
+                this.openTimeout = timeout;
             }
             else
             {
-                throw new ArgumentOutOfRangeException("openTimeout");
+                throw new ArgumentOutOfRangeException(nameof(timeout));
             }
         }
     }

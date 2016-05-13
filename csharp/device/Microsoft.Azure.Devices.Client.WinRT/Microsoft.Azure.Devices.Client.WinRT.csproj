@@ -213,6 +213,13 @@
     <Compile Include="$(DeviceClientDir)\Transport\HttpTransportHandler.cs" />
     <Compile Include="$(DeviceClientDir)\Transport\IHttpClientHelper.cs" />
     <Compile Include="$(DeviceClientDir)\Transport\TransportHandlerBase.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\IotHubClientException.cs"/>
+    <Compile Include="$(DeviceClientDir)\Common\Exceptions\IotHubClientTransientException.cs"/>
+    <Compile Include="$(DeviceClientDir)\IDelegatingHandler.cs"/>
+    <Compile Include="$(DeviceClientDir)\Transport\DefaultDelegatingHandler.cs"/>
+    <Compile Include="$(DeviceClientDir)\Transport\ErrorDelegatingHandler.cs"/>
+    <Compile Include="$(DeviceClientDir)\Transport\GateKeeperDelegatingHandler.cs"/>
+    <Compile Include="$(DeviceClientDir)\Transport\TransportHandler.cs"/>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="$(DeviceClientDir)\AmqpTransportSettings.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Client\IotHubAmqpProperty.cs" />
@@ -225,6 +232,7 @@
     <Compile Include="$(DeviceClientDir)\ITransportSettings.cs" />
     <Compile Include="$(DeviceClientDir)\Transport\AmqpClientHelper.cs" />
     <Compile Include="$(DeviceClientDir)\Transport\AmqpTransportHandler.cs" />
+    <Compile Include="TaskConstants.cs" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="Resources.resw" />

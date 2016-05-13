@@ -22,7 +22,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
         readonly Queue<TWork> backlogQueue;
         readonly TaskCompletionSource completionSource;
-        State state;
+        protected States State { get; set; }
 
         public SimpleWorkQueue(Func<IChannelHandlerContext, TWork, Task> worker)
         {
@@ -45,18 +45,18 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         /// <param name="workItem"></param>
         public virtual void Post(IChannelHandlerContext context, TWork workItem)
         {
-            switch (this.state)
+            switch (this.State)
             {
-                case State.Idle:
+                case States.Idle:
                     this.backlogQueue.Enqueue(workItem);
-                    this.state = State.Processing;
+                    this.State = States.Processing;
                     this.StartWorkQueueProcessingAsync(context);
                     break;
-                case State.Processing:
-                case State.FinalProcessing:
+                case States.Processing:
+                case States.FinalProcessing:
                     this.backlogQueue.Enqueue(workItem);
                     break;
-                case State.Aborted:
+                case States.Aborted:
                     ReferenceCountUtil.Release(workItem);
                     break;
                 default:
@@ -69,40 +69,53 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         /// </summary>
         public void Complete()
         {
-            switch (this.state)
+            switch (this.State)
             {
-                case State.Idle:
+                case States.Idle:
                     this.completionSource.TryComplete();
                     break;
-                case State.Processing:
-                    this.state = State.FinalProcessing;
+                case States.Processing:
+                    this.State = States.FinalProcessing;
                     break;
-                case State.FinalProcessing:
-                case State.Aborted:
+                case States.FinalProcessing:
+                case States.Aborted:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        public void Abort()
+
+        public virtual void Abort()
         {
-            switch (this.state)
+            Abort(null);
+        }
+
+        public virtual void Abort(Exception exception)
+        {
+            switch (this.State)
             {
-                case State.Idle:
-                case State.Processing:
-                case State.FinalProcessing:
-                    this.state = State.Aborted;
+                case States.Idle:
+                case States.Processing:
+                case States.FinalProcessing:
+                    this.State = States.Aborted;
 
                     Queue<TWork> queue = this.backlogQueue;
                     while (queue.Count > 0)
                     {
                         TWork workItem = queue.Dequeue();
                         ReferenceCountUtil.Release(workItem);
-                        (workItem as ICancellable)?.Cancel();
+                        if (exception == null)
+                        {
+                            (workItem as ICancellable)?.Cancel();
+                        }
+                        else
+                        {
+                            (workItem as ICancellable)?.Abort(exception);
+                        }
                     }
                     break;
-                case State.Aborted:
+                case States.Aborted:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -119,19 +132,19 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             try
             {
                 Queue<TWork> queue = this.backlogQueue;
-                while (queue.Count > 0 && this.state != State.Aborted)
+                while (queue.Count > 0 && this.State != States.Aborted)
                 {
                     TWork workItem = queue.Dequeue();
                     await this.DoWorkAsync(context, workItem);
                 }
 
-                switch (this.state)
+                switch (this.State)
                 {
-                    case State.Processing:
-                        this.state = State.Idle;
+                    case States.Processing:
+                        this.State = States.Idle;
                         break;
-                    case State.FinalProcessing:
-                    case State.Aborted:
+                    case States.FinalProcessing:
+                    case States.Aborted:
                         this.completionSource.TryComplete();
                         break;
                     default:
@@ -145,7 +158,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             }
         }
 
-        enum State
+        protected enum States
         {
             Idle,
             Processing,

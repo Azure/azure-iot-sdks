@@ -3,6 +3,7 @@
 
 namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 {
+    using System;
     using DotNetty.Codecs.Mqtt.Packets;
     using DotNetty.Common.Concurrency;
 
@@ -15,6 +16,11 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         public void Cancel()
         {
             this.Completion.TrySetCanceled();
+        }
+
+        public void Abort(Exception exception)
+        {
+            this.Completion.TrySetException(exception);
         }
     }
 }

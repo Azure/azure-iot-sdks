@@ -58,28 +58,28 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DotNetty.Buffers, Version=0.2.3.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DotNetty.Buffers-signed.0.2.3\lib\net45\DotNetty.Buffers.dll</HintPath>
+    <Reference Include="DotNetty.Buffers, Version=0.3.0.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetty.Buffers-signed.0.3.0\lib\net45\DotNetty.Buffers.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DotNetty.Codecs, Version=0.2.3.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DotNetty.Codecs-signed.0.2.3\lib\net45\DotNetty.Codecs.dll</HintPath>
+    <Reference Include="DotNetty.Codecs, Version=0.3.0.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetty.Codecs-signed.0.3.0\lib\net45\DotNetty.Codecs.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DotNetty.Codecs.Mqtt, Version=0.2.3.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DotNetty.Codecs.Mqtt-signed.0.2.3\lib\net45\DotNetty.Codecs.Mqtt.dll</HintPath>
+    <Reference Include="DotNetty.Codecs.Mqtt, Version=0.3.0.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetty.Codecs.Mqtt-signed.0.3.0\lib\net45\DotNetty.Codecs.Mqtt.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DotNetty.Common, Version=0.2.3.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DotNetty.Common-signed.0.2.3\lib\net45\DotNetty.Common.dll</HintPath>
+    <Reference Include="DotNetty.Common, Version=0.3.0.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetty.Common-signed.0.3.0\lib\net45\DotNetty.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DotNetty.Handlers, Version=0.2.3.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DotNetty.Handlers-signed.0.2.3\lib\net45\DotNetty.Handlers.dll</HintPath>
+    <Reference Include="DotNetty.Handlers, Version=0.3.0.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetty.Handlers-signed.0.3.0\lib\net45\DotNetty.Handlers.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DotNetty.Transport, Version=0.2.3.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DotNetty.Transport-signed.0.2.3\lib\net45\DotNetty.Transport.dll</HintPath>
+    <Reference Include="DotNetty.Transport, Version=0.3.0.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetty.Transport-signed.0.3.0\lib\net45\DotNetty.Transport.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Azure.Amqp, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -88,6 +88,10 @@
     </Reference>
     <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8\Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.ServiceRuntime, Version=2.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -132,13 +136,20 @@
     <Compile Include="Common\Exceptions\IotHubClientException.cs" />
     <Compile Include="AmqpTransportSettings.cs" />
     <Compile Include="Common\PerfectHash.cs" />
+    <Compile Include="Common\Exceptions\IotHubClientTransientException.cs" />
     <Compile Include="Common\TaskConstants.cs" />
     <Compile Include="Common\TaskUtils.cs" />
+    <Compile Include="Transport\DefaultDelegatingHandler.cs" />
+    <Compile Include="IDelegatingHandler.cs" />
     <Compile Include="IotHubDeviceScopeConnectionPool.cs" />
     <Compile Include="IotHubScopeConnectionPool.cs" />
     <Compile Include="IotHubSingleTokenConnection.cs" />
     <Compile Include="IotHubDeviceMuxConnection.cs" />
     <Compile Include="IotHubTokenRefresher.cs" />
+    <Compile Include="Transport\Mqtt\TransientErrorIgnoreStrategy.cs" />
+    <Compile Include="Transport\RetryDelegatingHandler.cs" />
+    <Compile Include="Transport\RoutingDelegatingHandler.cs" />
+    <Compile Include="Transport\TransportHandler.cs" />
     <Compile Include="Transport\AmqpClientHelper.cs" />
     <Compile Include="Common\UrlEncodedDictionarySerializer.cs" />
     <Compile Include="Common\ActionItem.cs" />
@@ -204,10 +215,13 @@
     <Compile Include="Common\Fx.cs" />
     <Compile Include="Common\FxTrace.cs" />
     <Compile Include="Common\HashCode.cs" />
+    <Compile Include="Transport\Mqtt\ConcurrentObjectPool.cs" />
+    <Compile Include="Transport\ErrorDelegatingHandler.cs" />
     <Compile Include="Transport\Mqtt\ICancellable.cs" />
     <Compile Include="Transport\Mqtt\ISessionContextProvider.cs" />
     <Compile Include="Http1TransportSettings.cs" />
     <Compile Include="Transport\HttpClientHelper.cs" />
+    <Compile Include="Transport\Mqtt\MqttTransportHandler.cs" />
     <Compile Include="Transport\Mqtt\OrderedTwoPhaseWorkQueue.cs" />
     <Compile Include="Transport\Mqtt\PublishWorkItem.cs" />
     <Compile Include="Transport\Mqtt\ReferenceCountedObjectContainer.cs" />
@@ -219,7 +233,6 @@
     <Compile Include="Common\ReadOnlyMergeDictionary.cs" />
     <Compile Include="Transport\Mqtt\SessionContextProvider.cs" />
     <Compile Include="Transport\Mqtt\MqttIotHubAdapter.cs" />
-    <Compile Include="Transport\Mqtt\MqttTransportHandler.cs" />
     <Compile Include="Transport\HttpTransportHandler.cs" />
     <Compile Include="IAuthenticationMethod.cs" />
     <Compile Include="AuthenticationMethodFactory.cs" />
@@ -250,10 +263,9 @@
     <Compile Include="DeviceClient.cs" />
     <Compile Include="Transport\Mqtt\ChannelMessageProcessingException.cs" />
     <Compile Include="Transport\Mqtt\MqttTransportSettings.cs" />
-    <Compile Include="Transport\Mqtt\SingleInstanceEventLoopGroup.cs" />
     <Compile Include="Transport\Mqtt\Util.cs" />
     <Compile Include="Transport\Mqtt\WillMessage.cs" />
-    <Compile Include="Transport\TransportHandlerBase.cs" />
+    <Compile Include="Transport\GateKeeperDelegatingHandler.cs" />
     <Compile Include="Common\Security\SecurityConstants.cs" />
     <Compile Include="Common\Security\SecurityHelper.cs" />
     <Compile Include="Common\Security\StringValidationHelper.cs" />
