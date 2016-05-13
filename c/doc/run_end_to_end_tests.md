@@ -36,9 +36,6 @@ This document describes how to run the end to end tests.
 	  
 	  Note: IOTHUB_EVENTHUB_CONSUMER_GROUP is optional. If not provided, the assumed value is "$Default".
 
-    ![](../../tools/DeviceExplorer/doc/media/device_explorer/iotgetstart1.png)
-
-
 <a name="windows_client"/>
 ## Run end to end tests on a Windows development environment
 
