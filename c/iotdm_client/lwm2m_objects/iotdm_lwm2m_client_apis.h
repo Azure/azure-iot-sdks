@@ -11,7 +11,7 @@
 #ifndef IOTDM_LWM2M_CLIENT_APIS_H
 #define IOTDM_LWM2M_CLIENT_APIS_H
 
-#include "iothub_lwm2m.h"
+#include "iotdm_client.h"
 
 // --------------------------------------------------------------------------
 // PROPERTY AND ACTION PROTOTYPES

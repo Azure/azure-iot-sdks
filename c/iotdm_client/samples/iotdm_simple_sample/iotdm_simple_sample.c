@@ -5,7 +5,7 @@
 // APPLICATION TEMPLATE FOR IoTHub LWM2M client code
 //
 
-#include "iothub_lwm2m.h"
+#include "iotdm_client.h"
 #include "threadapi.h"
 #include "device_object.h"
 #include "firmwareupdate_object.h"

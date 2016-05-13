@@ -12,7 +12,7 @@
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 
-#include "iothub_lwm2m.h"
+#include "iotdm_client.h"
 #include "threadapi.h"
 #include "device_object.h"
 #include "firmwareupdate_object.h"

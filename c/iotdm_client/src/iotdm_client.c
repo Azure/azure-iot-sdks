@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "iothub_lwm2m.h"
+#include "iotdm_client.h"
 #undef LOG
 #include "iotdm_internal.h"
 #include "device_object.h"

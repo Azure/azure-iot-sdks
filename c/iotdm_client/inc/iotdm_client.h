@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef IOTHUB_LWM2M_H
-#define IOTHUB_LWM2M_H
+#ifndef IOTDM_CLIENT_H
+#define IOTDM_CLIENT_H
 
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
@@ -84,4 +84,4 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMC
 */
 extern bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
 
-#endif /* IOTHUB_LWM2M_H */
+#endif /* IOTDM_CLIENT_H */

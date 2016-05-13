@@ -83,7 +83,7 @@ else()
 endif()
 
 set(iotdm_client_h_files
-    ./inc/iothub_lwm2m.h 
+    ./inc/iotdm_client.h 
     ${IOTHUB_CLIENT_SRC_DIR}/iotdm_internal.h
 )
 
