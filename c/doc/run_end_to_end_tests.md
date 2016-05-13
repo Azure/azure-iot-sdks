@@ -36,12 +36,6 @@ This document describes how to run the end to end tests.
 	  
 	  Note: IOTHUB_EVENTHUB_CONSUMER_GROUP is optional. If not provided, the assumed value is "$Default".
 
-    - Populate the following variables in the "iot_device_params.txt" by extracting the information from Device Explorer.
-
-      - IOTHUB_DEVICE_ID=[The ID for the devie you created under the Management tab]
-      - IOTHUB_DEVICE_KEY=[The key for the devie you created under the Management tab]
-      - IOTHUB_SHARED_ACCESS_SIGNATURE=[By clicking the "Generate SAS" button]
-
     ![](../../tools/DeviceExplorer/doc/media/device_explorer/iotgetstart1.png)
 
 
