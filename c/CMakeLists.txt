@@ -166,6 +166,7 @@ endif()
 
 add_subdirectory(blob)
 add_subdirectory(iothub_client)
+add_subdirectory(service)
 add_subdirectory(serializer)
 if(NOT "${build_python}" STREQUAL "OFF")
     add_subdirectory(../python/device/iothub_client_python python)
