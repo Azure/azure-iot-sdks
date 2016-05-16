@@ -150,6 +150,7 @@
                                 }
 
                                 aCase.ExpectedValue = rawValue;
+                                Console.WriteLine("Property: {0} expected '{1}'", propertyName, rawValue);
                             }
                         }
                     }
@@ -171,6 +172,7 @@
                                 }
 
                                 aCase.RecordedValue = rawValue;
+                                Console.WriteLine("Property: {0} recorded '{1}'", propertyName, rawValue);
                             }
                         }
                     }
@@ -245,6 +247,7 @@
 
                         Thread.Sleep(500);
                         aCase.RecordedValue = ReadPropertyThroughService(aCase.Name);
+                        Console.WriteLine("Property: {0} Observed '{1}'", aCase.Name, aCase.RecordedValue);
                     }
                 }
             }
@@ -262,7 +265,7 @@
                     FileName = exeName,
                     CreateNoWindow = true,
                     UseShellExecute = false,
-                    Arguments = connectionString,
+                    Arguments = "-cs " + connectionString,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true
                 };
@@ -367,6 +370,7 @@
                 {
                     one.Value.ExpectedValue = null;
                     one.Value.RecordedValue = ReadPropertyThroughService(one.Value.Name);
+                    Console.WriteLine("Property: {0} recorded '{1}'", one.Value.Name, one.Value.RecordedValue);
                 }
 
                 foreach (var one in _WriteTestCases)
@@ -478,7 +482,7 @@
              *  Start a timer for the process. The interval should be large enough to validate all tests.
              *  Care must be taken to ensure PMIN and PMAX, for example, are honored.
              */
-            _closer = new SysTimer(25 * OneMinute);
+            _closer = new SysTimer(15 * OneMinute);
             _closer.Elapsed += (sender, e) =>
             {
                 _clientReady.Set();
