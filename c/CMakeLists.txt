@@ -160,7 +160,7 @@ else()
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_pthreads.c)
 endif()
 
-if(${run_e2e_tests})
+if(${run_e2e_tests} OR ${run_longhaul_tests})
     add_subdirectory(testtools)
 endif()
 

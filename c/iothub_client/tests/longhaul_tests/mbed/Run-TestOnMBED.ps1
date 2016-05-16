@@ -2,9 +2,10 @@ PARAM (
 	$TestBinaryFilePath = $null, 
 	$MBEDUsbDriveLetter = $null, 
 	$Port = $(throw "Parameter 'Port' must be provided."), 
-	$BaudRate = 115200,
+	$BaudRate = 9600,
 	$EventHubListenTimeoutInSeconds = 10,
-	$DependencyPaths = $null)
+	$SerialPortBinPath = $null,
+	$NugetDependenciesPackageConfig = "..\..\..\..\..\tools\DeviceExplorer\DeviceExplorer\packages.config")
 
 Import-Module ".\MBED.psm1";
 
@@ -29,75 +30,40 @@ $ReturnCodes = New-Enum @{
     "TestTimedOut" = 30;
 }
 
-
 $ReturnCode = $ReturnCodes.None;
 
-$IoTHubClientParams = @{
-    "IoTHubConnString?"               = $env:IOTHUB_CONNECTION_STRING;
-    "DeviceId?"                       = $env:IOTHUB_DEVICE_ID;
-    "DeviceKey?"                      = $env:IOTHUB_DEVICE_KEY;
-    "EventhubConsumerGroup?"          = $env:IOTHUB_EVENTHUB_CONSUMER_GROUP;
-    "EventhubListenName?"             = $env:IOTHUB_EVENTHUB_LISTEN_NAME;
-    "SharedAccessSignature?"          = $($env:IOTHUB_SHARED_ACCESS_SIGNATURE -REPLACE "SharedAccessSignature ", "");
-    
-    "IoTHubEventHubConnectionString?" = $env:IOTHUB_EVENTHUB_CONNECTION_STRING;
-    "IoTPartitionCount?"              = $env:IOTHUB_PARTITION_COUNT;
-    "EventHubConnectionString?"       = $env:IOTHUB_EVENTHUB_CONNECTION_STRING;
-    "EventHubName?"                   = $env:EVENTHUB_NAME;
-    "EventHubPartitionCount?"         = $env:EVENTHUB_PARTITION_COUNT
-}
 
-
-# Verifying expected parameters
+# Begin
 
 $ScriptState = $ScriptStates.Initializing;
-
-$AllExpectedVariablesSet = $true;
-foreach ($item in $IoTHubClientParams.Keys)
-{
-    if ($IoTHubClientParams[$item] -EQ $null)
-    {
-        Write-Message -Error "Could not find expected parameter [$item].";
-        $AllExpectedVariablesSet = $false;
-    }
-}
-
-if ($AllExpectedVariablesSet -EQ $false)
-{
-    Write-Message -Error "Not all the expected IoT Hub Client parameters are set on the environment variables. Please set them before running the tests.";
-
-    return $ReturnCodes.InvalidArgument;
-}
 
 
 # Loading dependency binaries
 
-if ([String]::IsNullOrWhiteSpace($DependencyPaths))
+Write-Message "Loading dependencies through nuget."
+
+if ((Get-Command nuget -ErrorAction SilentlyContinue) -EQ $null)
 {
-	Write-Message -Error "Please provide a valid path to Azure SDK and SerialPort binaries ('$DependencyPaths' is invalid).";
+	Write-Message -Error "Please install nuget.exe and add it to the PATH environment var.";
 	return $ReturnCodes.InvalidArgument;
 }
 
-Write-Message "Loading dependencies from: $DependencyPaths"
+nuget install -OutputDirectory .\packages $NugetDependenciesPackageConfig
+$packages = dir .\packages\ -Include *.dll -Recurse;
+$packages | %{[System.Reflection.Assembly]::LoadFrom( $_ )};
 
-$DependencyPaths = $DependencyPaths -SPLIT ";|###";
 
-foreach ($DependencyPath in $DependencyPaths)
+if ([String]::IsNullOrWhiteSpace($SerialPortBinPath) -OR (Test-Path $SerialPortBinPath) -EQ $false)
 {
-	$DependencyFiles = @();
-	
-	if (Test-Path $DependencyPath -Pathtype leaf) # It is file.
-	{
-		$DependencyFiles += $DependencyPath;
-	}
-	else
-	{
-		dir "$DependencyPath\*.dll" -Recurse | %{ $DependencyFiles += $_.FullName };
-	}
-
-	$DependenciesLoaded = @();
-	$DependencyFiles | %{ $DependenciesLoaded += [System.Reflection.Assembly]::LoadFrom($_); }
+	Write-Message -Error "Please provide a valid path to SerialPort binary.";
+	return $ReturnCodes.InvalidArgument;
 }
+
+
+Write-Message "Loading SerialPort library."
+
+$SerialPortBinPath = Resolve-Path $SerialPortBinPath;
+[System.Reflection.Assembly]::LoadFrom($SerialPortBinPath);
 
 
 # Copying test binary to device.
@@ -242,11 +208,21 @@ else
 					continue;
 				}
 				
-				if ($ScriptState -EQ $ScriptStates.ProvidingParameters -AND $IoTHubClientParams.Keys -IMATCH $Message)
+				if ($ScriptState -EQ $ScriptStates.ProvidingParameters)
 				{
-					Write-Message "Sending parameter [$($IoTHubClientParams[$Message])]";
-					$SerialPort.WriteLine($($IoTHubClientParams[$Message] -Replace " ", ""));
-					continue;
+					if (Test-Path "env:$Message")
+					{
+						Write-Message "Sending parameter [$Message]";
+						$SerialPort.WriteLine($((Get-ChildItem "env:$Message").Value -Replace " ", ""));
+					}
+					else
+					{
+						Write-Message -Error "The device requested the env var '$Message', but it is not set in the local host.";
+						$ReturnCode = $ReturnCodes.TestFailed;
+						$ScriptState = $ScriptStates.Terminating;
+					}
+
+					continue;					
 				}
 				
 				if ($Message -IMATCH "VerifyMessageReceived\[(.*)\] sent on \[(.*)\]")
