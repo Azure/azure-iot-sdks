@@ -110,16 +110,58 @@ void set_callbacks()
 }
 
 
+typedef struct time_out_thread_data_tag
+{
+    IOTHUB_CHANNEL_HANDLE hc;
+    int                   to;
+} time_out_thread_data;
+
+
+int timeout_thread(void *data)
+{
+    time_out_thread_data *td = (time_out_thread_data *) data;
+
+    ThreadAPI_Sleep(td->to * 1000);
+    IoTHubClient_DM_Close(td->hc);
+
+    return 0;
+}
+
+
 /**********************************************************************************
  * MAIN LOOP
  *
  **********************************************************************************/
 int main(int argc, char *argv[])
 {
-    const char *cs;
+    char *cs = connectionString;
+    int   to = -1;
 
-    if (argc == 2) cs = argv[1];
-    else cs = connectionString;
+    for (int ii = 1; ii < argc; ++ii)
+    {
+        if (0 == strncmp(argv[ii], "-cs", 3))
+        {
+            ++ii;
+            cs = argv[ii];
+        }
+
+        else if (0 == strncmp(argv[ii], "-to", 3))
+        {
+            ++ii;
+            to = atol(argv[ii]);
+        }
+    }
+
+    if (NULL == cs)
+    {
+        printf("usage: %s -cs <connection_string> [-to <time_out>\n", argv[0]);
+        printf("     connection_string is the device connection string\n");
+        printf("     time_out specifies the length of the run as follows:\n");
+        printf("         -1 means run indefinitly.\n");
+        printf("         a positive value means run for the specified number of seconds.\n");
+
+        return -1;
+    }
 
     IOTHUB_CHANNEL_HANDLE IoTHubChannel = IoTHubClient_DM_Open(cs, COAP_TCPIP);
     if (NULL == IoTHubChannel)
@@ -136,7 +178,8 @@ int main(int argc, char *argv[])
     {
         LogError("failure to create LWM2M objects for client: %p\r\n", IoTHubChannel);
 
-        return -1;
+        IoTHubClient_DM_Close(IoTHubChannel);
+        return -2;
     }
 
     set_initial_property_state();
@@ -149,19 +192,35 @@ int main(int argc, char *argv[])
     {
         LogError("failure to create the udpate thread\r\n");
 
-        return -1;
+        IoTHubClient_DM_Close(IoTHubChannel);
+        return -3;
+    }
+
+    if (to > 0)
+    {
+        THREAD_HANDLE        th = NULL;
+        time_out_thread_data data = { IoTHubChannel, to };
+
+        THREADAPI_RESULT tr = ThreadAPI_Create(&th, &timeout_thread, &data);
+        if (tr != THREADAPI_OK)
+        {
+            LogError("failed to create time out thread, error=%d", tr);
+        }
     }
 
     if (IOTHUB_CLIENT_OK != IoTHubClient_DM_Start(IoTHubChannel))
     {
         LogError("failure to start the client: %p\r\n", IoTHubChannel);
 
-        return -1;
+        IoTHubClient_DM_Close(IoTHubChannel);
+        return -4;
     }
 
     /* Disconnect and cleanup */
     IoTHubClient_DM_Close(IoTHubChannel);
+    return 0;
 }
+
 
 void update_battery_level(SimulatedDeviceState *sds)
 {
@@ -169,7 +228,7 @@ void update_battery_level(SimulatedDeviceState *sds)
     {
         sds->BatteryLevel = 100;
         sds->LastBatteryUpdateTime = time(NULL);
-        set_device_batterylevel(0,sds->BatteryLevel);
+        set_device_batterylevel(0, sds->BatteryLevel);
     }
 
     else if ((time(NULL) - sds->LastBatteryUpdateTime) >= BATTERY_DRAIN_INTERVAL_S)
@@ -181,7 +240,7 @@ void update_battery_level(SimulatedDeviceState *sds)
         }
 
         sds->LastBatteryUpdateTime = time(NULL);
-        set_device_batterylevel(0,sds->BatteryLevel);
+        set_device_batterylevel(0, sds->BatteryLevel);
     }
 }
 
@@ -309,7 +368,7 @@ int update_thread(void *v)
 
     while (true)
     {
-        ThreadAPI_Sleep(30000);
+        ThreadAPI_Sleep(30000 /* 30 serconds */);
 
         if (update_property_values(&sds) != IOTHUB_CLIENT_OK)
         {

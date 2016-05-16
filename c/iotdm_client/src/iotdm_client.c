@@ -241,14 +241,32 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_CreateDefaultObjects(IOTHUB_CHANNEL_HANDLE 
     return result;
 }
 
+
+static COND_RESULT tickle_event_condition(CLIENT_DATA *client)
+{
+    Lock(client->push_event_lock);
+    COND_RESULT retValue = Condition_Post(client->push_event_condition);
+    Unlock(client->push_event_lock);
+
+    return retValue;
+}
+
+
 void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
     if (NULL != iotDMClientHandle)
     {
         CLIENT_DATA *client = (CLIENT_DATA *)iotDMClientHandle;
 
+        tickle_event_condition(client);
+        client->state = SHUTTING_DOWN;
+
         lwm2m_close(client->session);
+        client->session = NULL;
+
         xio_destroy(client->ioHandle);
+        client->ioHandle = NULL;
+
         if (NULL != client->config.deviceId)
         {
             free((void *)(client->config.deviceId));
@@ -394,27 +412,26 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHa
     return iotdmc_register(client, on_register_complete, context);
 }
 
+
 IOTHUB_CLIENT_RESULT wake_main_dm_thread(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
 
     if (NULL != iotDMClientHandle)
     {
-        CLIENT_DATA *cd = (CLIENT_DATA*)iotDMClientHandle;
-        Lock(cd->push_event_lock);
-        if (Condition_Post(cd->push_event_condition) == COND_OK)
+        if (tickle_event_condition((CLIENT_DATA *)iotDMClientHandle) == COND_OK)
         {
             result = IOTHUB_CLIENT_OK;
         }
-        Unlock(cd->push_event_lock);
     }
 
     return result;
 }
 
+
 /**
- * This function will return FALSE if the server refuses to accept the client's request to connect.
- * All other states indicate happy.
+ * This function will return FALSE if the server refuses to accept the client's request to connect,
+ * or when the client is shutting down. All other states indicate happy.
  */
 bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
@@ -428,6 +445,13 @@ bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
     else
     {
         CLIENT_DATA *client = (CLIENT_DATA *)iotDMClientHandle;
+
+        if (client->state == SHUTTING_DOWN)
+        {
+            LogInfo("Client is shutting down.");
+
+            return false;
+        }
 
         /* check for pending requests. */
         xio_dowork(client->ioHandle);
@@ -451,11 +475,20 @@ bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 
             case STATE_REG_FAILED:
                 retValue = false;
+                LogError("Registration request failed.");
+
+                break;
+
+            case STATE_REG_PENDING:
+                retValue = true;
+                LogInfo("Registration request is pending...");
+
                 break;
 
             default:
                 retValue = true;
-                LogInfo("Registration request is pending...\n");
+                LogInfo("LWM2M Session Connection State is 'other'.");
+
                 break;
         }
     }
@@ -474,42 +507,10 @@ void on_dm_connect_complete(IOTHUB_CLIENT_RESULT result, void* context)
 }
 
 
-/**
-*  {BEGIN} Should be implemented by a platform adapter
-*/
-#if defined(WIN32)
-#include <thr/xtimec.h>
-#else
-#include <time.h>
-#endif
-unsigned long get_milliseconds()
-{
-#if defined(WIN32)
-
-    struct xtime tm;
-    int wait_result;
-    xtime_get(&tm, TIME_UTC);
-
-    return (tm.sec + (tm.nsec / 1000000L));
-
-#else
-
-    struct timespec tm;
-    clock_gettime(-1, &tm);
-
-    return (tm.tv_sec + (tm.tv_nsec / 1000000L));
-
-#endif
-}
-/**
-*  {END} Should be implemented by a platform adapter
-*/
-
-
 /***------------------------------------------------------------------- */
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
-    CLIENT_DATA *cd = (CLIENT_DATA*)iotDMClientHandle;
+    CLIENT_DATA *cd = (CLIENT_DATA *) iotDMClientHandle;
     int connectResult = IOTHUB_CLIENT_OK;
 
     IOTHUB_CLIENT_RESULT result = IoTHubClient_DM_Connect(iotDMClientHandle, on_dm_connect_complete, &connectResult);
@@ -525,31 +526,20 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
 
         if (IoTHubClient_DM_DoWork(iotDMClientHandle))
         {
-            unsigned long toWait = get_milliseconds() + 1000;
-        Lock(cd->push_event_lock);
-        if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
-        {
-            return IOTHUB_CLIENT_ERROR;
-        }
-        Unlock(cd->push_event_lock);
-            toWait -= get_milliseconds();
-
-            /**
-            *   If Condition_wait takes longer than a few milliseconds, we should proceed to Do_work as
-            *   this would signal that an update has taken place. 50 milliseconds is long enough to indicate
-            *   that work is available. It is also short enough to prevent false positives.
-            */
-            if (toWait > 950)
+            Lock(cd->push_event_lock);
+            if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
             {
-                ThreadAPI_Sleep(toWait);
+                return IOTHUB_CLIENT_ERROR;
             }
+            Unlock(cd->push_event_lock);
+            ThreadAPI_Sleep(1000);
         }
 
         else
         {
             result = IOTHUB_CLIENT_ERROR;
+        }
     }
-}
 
     return result;
 }
