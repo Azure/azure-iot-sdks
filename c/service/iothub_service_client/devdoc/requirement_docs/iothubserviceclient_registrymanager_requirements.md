@@ -129,7 +129,7 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_CreateDevice(IOTHUB_R
 
 **SRS_IOTHUBREGISTRYMANAGER_12_012: [** IoTHubRegistryManager_CreateDevice shall set the following key/value pairs to default value: etag:null,connectionState:Disconnected,status:enabled,statusReason:null,connectionStateUpdatedTime:0001-01-01T00:00:00,statusUpdatedTime:0001-01-01T00:00:00,lastActivityTime:0001-01-01T00:00:00,authentication:{symmetricKey:{primaryKey:null,secondaryKey:null}} **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_12_013: [** IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  **]**
+**SRS_IOTHUBREGISTRYMANAGER_12_013: [** IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR if the JSON creation failed  **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_014: [** IoTHubRegistryManager_CreateDevice shall create an HTTP PUT request using the created JSON **]**
 
