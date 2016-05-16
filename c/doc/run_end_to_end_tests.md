@@ -3,8 +3,8 @@
 This document describes how to run the end to end tests.
 
 - [Set up the test parameters](#testparams)
-- [Run end to end tests for a Windows development environment](#windows_client)
-- [Run end to end tests for for a Windows development environment](#linux_client)
+- [Run end to end tests on a Windows development environment](#windows_client)
+- [Run end to end tests for "iothub_client" on a Linux development environment](#linux_client)
 
 <a name="testparams"/>
 ## Setup the test parameters
