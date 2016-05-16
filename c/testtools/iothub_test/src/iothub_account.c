@@ -523,7 +523,22 @@ const char* IoTHubAccount_GetEventhubListenName(IOTHUB_ACCOUNT_INFO_HANDLE acctH
     (void)mbed_log("Received '%s'\r\n", value);
     return value;
 #else
+#if __linux__ 
+    static char  listenName[64];
+    char* envVarValue = getenv("IOTHUB_EVENTHUB_LISTEN_NAME");
+    if (envVarValue != NULL)
+    {
+        strcpy(listenName, envVarValue);
+        return listenName;
+    }
+    else
+    {
+        LogError("Failure retrieving Listen Name value.\n");
+        return NULL;
+    }
+#else   // not __linux__
     return IoTHubAccount_GetIoTHubName(acctHandle);
+#endif  // __linux__ 
 #endif
 }
 
