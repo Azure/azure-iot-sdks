@@ -140,6 +140,14 @@ int main(int argc, char *argv[])
     
     LogInfo("Connection string is \"%s\"\r\n",cs);
 
+    if (runAsService)
+    {
+        LogInfo("--service flag specified.  Running as service\r\n ");
+        
+        chdir("/");
+        daemon(0, 1);
+    }
+    
     IOTHUB_CHANNEL_HANDLE IoTHubChannel = IoTHubClient_DM_Open(cs, COAP_TCPIP);
     if (NULL == IoTHubChannel)
     {
@@ -168,13 +176,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    if (runAsService)
-    {
-        LogInfo("--service flag specified.  Running as service\r\n ");
-        
-        chdir("/");
-        daemon(0, 1);
-    }
 
     if (IOTHUB_CLIENT_OK != IoTHubClient_DM_Start(IoTHubChannel))
     {
