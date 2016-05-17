@@ -533,7 +533,25 @@ const char* IoTHubAccount_GetIoTHubSuffix(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 
 const char* IoTHubAccount_GetEventhubListenName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 {
-    return IoTHubAccount_GetIoTHubName(acctHandle);
+	static char listenName[64];  
+	char* value;
+	
+#ifndef MBED_BUILD_TIMESTAMP
+	if ((value = getenv("IOTHUB_EVENTHUB_LISTEN_NAME")) == NULL)
+#else
+	if ((value = getMbedParameter("IOTHUB_EVENTHUB_LISTEN_NAME")) == NULL)
+#endif
+	{
+		value = IoTHubAccount_GetIoTHubName(acctHandle); 
+	}
+
+	if (value != NULL &&
+		sprintf_s(listenName, 64, "%s", value) <= 0)
+	{
+		LogError("Failed reading IoT Hub Event Hub listen namespace (sprintf_s failed).");
+	}
+    
+	return listenName;
 }
 
 const char* IoTHubAccount_GetDeviceId(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
