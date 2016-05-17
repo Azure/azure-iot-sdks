@@ -496,14 +496,33 @@ bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
     return retValue;
 }
 
+
+typedef struct CN_RESULT_TAG
+{
+    int          connectionResult;
+    LOCK_HANDLE  my_lock;
+} CN_RESULT;
+
+
 void on_dm_connect_complete(IOTHUB_CLIENT_RESULT result, void* context)
 {
     if (result != IOTHUB_CLIENT_OK)
     {
-        LogError("failed to connect to the service, error=%d\n", result);
+        LogError("failed to connect to the service, error=%d", result);
     }
 
-    *((IOTHUB_CLIENT_RESULT *) context) = result;
+    if (NULL == context)
+    {
+        LogInfo("on_dm_connect_complete is given a NULL argument");
+    }
+
+    else
+    {
+        CN_RESULT *cnResultPtr = (CN_RESULT *) context;
+        Lock(cnResultPtr->my_lock);
+        cnResultPtr->connectionResult = result;
+        Unlock(cnResultPtr->my_lock);
+    }
 }
 
 
@@ -511,35 +530,41 @@ void on_dm_connect_complete(IOTHUB_CLIENT_RESULT result, void* context)
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
     CLIENT_DATA *cd = (CLIENT_DATA *) iotDMClientHandle;
-    int connectResult = IOTHUB_CLIENT_OK;
+    CN_RESULT    cnResult;
 
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_DM_Connect(iotDMClientHandle, on_dm_connect_complete, &connectResult);
+    cnResult.connectionResult = IOTHUB_CLIENT_OK;
+    cnResult.my_lock = Lock_Init();
+
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_DM_Connect(iotDMClientHandle, on_dm_connect_complete, &cnResult);
     while (result == IOTHUB_CLIENT_OK)
     {
         // If the asynchronous call to IoTHubClient_DM_Connect above eventually fails,
         // then exit this blocking function. If the connection is still pending, or if the
         // connection was successful, continue calling IoTHubClient_DM_DoWork in a loop.
-        if (connectResult != IOTHUB_CLIENT_OK)
-        {
-            return connectResult;
-        }
+        Lock(cnResult.my_lock);
+        result = cnResult.connectionResult;
+        Unlock(cnResult.my_lock);
 
-        if (IoTHubClient_DM_DoWork(iotDMClientHandle))
+        if (result == IOTHUB_CLIENT_OK)
         {
-            Lock(cd->push_event_lock);
-            if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
+            if (IoTHubClient_DM_DoWork(iotDMClientHandle))
             {
-                return IOTHUB_CLIENT_ERROR;
+                Lock(cd->push_event_lock);
+                if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
+                {
+                    return IOTHUB_CLIENT_ERROR;
+                }
+                Unlock(cd->push_event_lock);
+                ThreadAPI_Sleep(1000);
             }
-            Unlock(cd->push_event_lock);
-            ThreadAPI_Sleep(1000);
-        }
 
-        else
-        {
-            result = IOTHUB_CLIENT_ERROR;
+            else
+            {
+                result = IOTHUB_CLIENT_ERROR;
+            }
         }
     }
 
+    Lock_Deinit(cnResult.my_lock);
     return result;
 }
