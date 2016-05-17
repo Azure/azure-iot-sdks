@@ -22,7 +22,7 @@ namespace Microsoft.Azure.Devices.Client.Common
         /// </summary>
         public static Task<bool> BooleanFalse
         {
-            get { return TaskConstants<bool>.Default; }
+            get { return TaskConstantsGeneric<bool>.Default; }
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Devices.Client.Common
         /// </summary>
         public static Task<int> Int32Zero
         {
-            get { return TaskConstants<int>.Default; }
+            get { return TaskConstantsGeneric<int>.Default; }
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Microsoft.Azure.Devices.Client.Common
         /// </summary>
         public static Task Never
         {
-            get { return TaskConstants<bool>.Never; }
+            get { return TaskConstantsGeneric<bool>.Never; }
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Microsoft.Azure.Devices.Client.Common
         /// </summary>
         public static Task Canceled
         {
-            get { return TaskConstants<bool>.Canceled; }
+            get { return TaskConstantsGeneric<bool>.Canceled; }
         }
     }
 
@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Devices.Client.Common
     ///     Provides completed task constants.
     /// </summary>
     /// <typeparam name="T">The type of the task result.</typeparam>
-    static class TaskConstants<T>
+    static class TaskConstantsGeneric<T>
     {
         static readonly Task<T> defaultValue = Task.FromResult(default(T));
 
