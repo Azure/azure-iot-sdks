@@ -10,34 +10,23 @@ cd $build_root
 ./c/build_all/linux/build.sh --build-javawrapper --skip-unittests --skip-e2e-tests #-x
 [ $? -eq 0 ] || exit $?
 
-echo compile java samples
-
-cd javawrapper/device/samples/send-event-sample/
-mvn install
-cp ~/cmake/javawrapper/libiothub_client_java.so ./target
-cd $build_root 
-
-cd javawrapper/device/samples/send-receive-sample/
-mvn install
-cp ~/cmake/javawrapper/libiothub_client_java.so ./target
-cd $build_root 
-
-cd javawrapper/device/samples/direct_call_of_wrapped_functions/
-mvn install
-cp ~/cmake/javawrapper/libiothub_client_java.so ./target
-cd $build_root 
-
-cd javawrapper/device/samples/send-serialized-event/
-mvn install
-cp ~/cmake/javawrapper/libiothub_client_java.so ./target
-cd $build_root 
+echo compile javawrapper and samples
 
 source ./javawrapper/build_all/linux/exportLibPath.sh
 
-cd javawrapper/device/test/
-mvn test
-cp ~/cmake/javawrapper/libiothub_client_mock.so ./target
+cd javawrapper/device/
+mvn install
+cp ~/cmake/javawrapper/libiothub_client_java.so ./samples/send-event-sample/target
+cp ~/cmake/javawrapper/libiothub_client_java.so ./samples/send-receive-sample/target
+cp ~/cmake/javawrapper/libiothub_client_java.so ./samples/send-serialized-event/target
+cp ~/cmake/javawrapper/libiothub_client_java.so ./samples/direct_call_of_wrapped_functions/target
+cp ~/cmake/javawrapper/libiothub_client_mock.so ./test
 cd $build_root 
+
+
+
+
+
 
 
 
