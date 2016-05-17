@@ -68,7 +68,7 @@ typedef struct _tagSimulatedDeviceState
 SimulatedDeviceState *g_sds = NULL;
 
 // time interval (in seconds) for how frequently to drop the battery level
-#define BATTERY_DRAIN_INTERVAL_S 10
+#define BATTERY_DRAIN_INTERVAL_S 30
 
 // time (in seconds) that simulated download takes
 #define DOWNLOAD_TIME_S   20
@@ -134,7 +134,7 @@ int timeout_thread(void *data)
  **********************************************************************************/
 int main(int argc, char *argv[])
 {
-    char *cs = connectionString;
+    char *cs = (char *) connectionString;
     int   to = -1;
 
     for (int ii = 1; ii < argc; ++ii)
@@ -150,17 +150,17 @@ int main(int argc, char *argv[])
             ++ii;
             to = atol(argv[ii]);
         }
-    }
 
-    if (NULL == cs)
-    {
-        printf("usage: %s -cs <connection_string> [-to <time_out>\n", argv[0]);
-        printf("     connection_string is the device connection string\n");
-        printf("     time_out specifies the length of the run as follows:\n");
-        printf("         -1 means run indefinitly.\n");
-        printf("         a positive value means run for the specified number of seconds.\n");
+        else if (0 == strncmp(argv[ii], "-u", 2))
+        {
+            printf("usage: %s -cs <connection_string> [-to <time_out>\n", argv[0]);
+            printf("     connection_string is the device connection string\n");
+            printf("     time_out specifies the length of the run as follows:\n");
+            printf("         -1 means run indefinitly.\n");
+            printf("         a positive value means run for the specified number of seconds.\n");
 
-        return -1;
+            return 0;
+        }
     }
 
     IOTHUB_CHANNEL_HANDLE IoTHubChannel = IoTHubClient_DM_Open(cs, COAP_TCPIP);
@@ -238,6 +238,7 @@ void update_battery_level(SimulatedDeviceState *sds)
         {
             sds->BatteryLevel = 100;
         }
+        LogInfo("New Battery Level: %d", sds->BatteryLevel);
 
         sds->LastBatteryUpdateTime = time(NULL);
         set_device_batterylevel(0, sds->BatteryLevel);
@@ -368,8 +369,7 @@ int update_thread(void *v)
 
     while (true)
     {
-        ThreadAPI_Sleep(30000 /* 30 serconds */);
-
+        ThreadAPI_Sleep(1000);
         if (update_property_values(&sds) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed updating property values.  Exiting thread");

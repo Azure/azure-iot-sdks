@@ -133,6 +133,7 @@
                 else if (true == _registered)
                 {
                     if (eArgs.Data.Contains("** ")) Console.WriteLine(eArgs.Data);
+                    if (eArgs.Data.Contains("New Battery Level")) Console.WriteLine(eArgs.Data);
                     if (eArgs.Data.Contains("returning"))
                     {
                         // this is a 'read' operation
@@ -150,7 +151,7 @@
                                 }
 
                                 aCase.ExpectedValue = rawValue;
-                                Console.WriteLine("Property: {0} expected '{1}'", propertyName, rawValue);
+                                Console.WriteLine("Read_{0} should return '{1}'", propertyName, rawValue);
                             }
                         }
                     }
@@ -172,7 +173,6 @@
                                 }
 
                                 aCase.RecordedValue = rawValue;
-                                Console.WriteLine("Property: {0} recorded '{1}'", propertyName, rawValue);
                             }
                         }
                     }
@@ -370,7 +370,7 @@
                 {
                     one.Value.ExpectedValue = null;
                     one.Value.RecordedValue = ReadPropertyThroughService(one.Value.Name);
-                    Console.WriteLine("Property: {0} recorded '{1}'", one.Value.Name, one.Value.RecordedValue);
+                    Console.WriteLine("Read_{0} returned '{1}'", one.Value.Name, one.Value.RecordedValue);
                 }
 
                 foreach (var one in _WriteTestCases)
@@ -482,7 +482,7 @@
              *  Start a timer for the process. The interval should be large enough to validate all tests.
              *  Care must be taken to ensure PMIN and PMAX, for example, are honored.
              */
-            _closer = new SysTimer(15 * OneMinute);
+            _closer = new SysTimer(20 * OneMinute);
             _closer.Elapsed += (sender, e) =>
             {
                 _clientReady.Set();
