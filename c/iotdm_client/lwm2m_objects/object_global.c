@@ -20,13 +20,11 @@ lwm2m_context_t *g_contextP = NULL;
 
 static uint8_t prv_get_value(lwm2m_data_t *tlvP, uint16_t objectID, uint16_t instanceID)
 {
-    tlvP->type = LWM2M_TYPE_RESOURCE;
     return dispatch_read(objectID, instanceID, tlvP->id, tlvP);
 }
 
 static uint8_t prv_set_value(lwm2m_data_t *tlvP, uint16_t objectID, uint16_t instanceID)
 {
-    tlvP->type = LWM2M_TYPE_RESOURCE;
     return dispatch_write(objectID, instanceID, tlvP->id, tlvP);
 }
 

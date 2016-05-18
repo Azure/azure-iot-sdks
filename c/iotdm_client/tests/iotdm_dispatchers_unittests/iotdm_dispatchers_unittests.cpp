@@ -573,7 +573,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_STRING, &data);
 
-        ASSERT_ARE_EQUAL(int, data.dataType, LWM2M_TYPE_STRING);
+        ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_STRING);
         ASSERT_ARE_EQUAL(int, 0, data.flags);
         ASSERT_ARE_EQUAL(int, strlen(VALID_STRING), data.length);
         ASSERT_IS_TRUE(strcmp((char*)data.value, VALID_STRING) == 0);
@@ -589,7 +589,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_OPAQUE, &data);
 
-        ASSERT_ARE_EQUAL(int, data.dataType, LWM2M_TYPE_OPAQUE);
+        ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_OPAQUE);
         ASSERT_ARE_EQUAL(int, 0, data.flags);
         ASSERT_ARE_EQUAL(int, strlen(VALID_STRING)+1, data.length);
         ASSERT_IS_TRUE(strcmp((char*)data.value, VALID_STRING) == 0);
@@ -605,7 +605,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_INTEGER, &data);
 
-        ASSERT_ARE_EQUAL(int, data.dataType, LWM2M_TYPE_INTEGER);
+        ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_INTEGER);
         ASSERT_ARE_EQUAL(int, data.length, 4);
         ASSERT_ARE_EQUAL(int, data.value[0], BYTE1(VALID_INT));
         ASSERT_ARE_EQUAL(int, data.value[1], BYTE2(VALID_INT));
@@ -623,7 +623,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_FLOAT, &data);
 
-        ASSERT_ARE_EQUAL(int, data.dataType, LWM2M_TYPE_FLOAT);
+        ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_FLOAT);
         ASSERT_ARE_EQUAL(int, data.length, 4);
         float f = (float)VALID_FLOAT;
         uint32_t i = *((int*)(&f));
@@ -643,7 +643,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_TIME, &data);
 
-        ASSERT_ARE_EQUAL(int, data.dataType, LWM2M_TYPE_TIME);
+        ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_TIME);
         ASSERT_ARE_EQUAL(int, data.length, 4);
         ASSERT_ARE_EQUAL(int, data.value[0], BYTE1(VALID_TIME));
         ASSERT_ARE_EQUAL(int, data.value[1], BYTE2(VALID_TIME));
@@ -661,7 +661,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_BOOL, &data);
 
-        ASSERT_ARE_EQUAL(int, data.dataType, LWM2M_TYPE_BOOLEAN);
+        ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_BOOLEAN);
         ASSERT_ARE_EQUAL(int, data.length, 1);
         ASSERT_ARE_EQUAL(int, data.value[0], 1);
 
@@ -734,7 +734,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
 
     void populate_lwm2m_integer(lwm2m_data_t *data, uint32_t value)
     {
-        //data->dataType = LWM2M_TYPE_INTEGER;
+        //data->type = LWM2M_TYPE_INTEGER;
         data->length = 4;
         data->value = (uint8_t*)lwm2m_malloc(data->length);
         data->value[0] = BYTE1(value);
@@ -745,7 +745,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
 
     void populate_lwm2m_bool(lwm2m_data_t *data, bool value)
     {
-        //data->dataType = LWM2M_TYPE_BOOLEAN;
+        //data->type = LWM2M_TYPE_BOOLEAN;
         data->length = 1;
         data->value = (uint8_t*)lwm2m_malloc(data->length);
         data->value[0] = (uint8_t)value;
@@ -754,12 +754,12 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     void populate_lwm2m_time(lwm2m_data_t *data, int value)
     {
         populate_lwm2m_integer(data, value);
-        //data->dataType = LWM2M_TYPE_TIME;
+        //data->type = LWM2M_TYPE_TIME;
     }
 
     void populate_lwm2m_float(lwm2m_data_t *data, float value)
     {
-        //data->dataType = LWM2M_TYPE_FLOAT;
+        //data->type = LWM2M_TYPE_FLOAT;
         data->length = 4;
         data->value = (uint8_t*)lwm2m_malloc(data->length);
         int intvalue = *((int*)&value);

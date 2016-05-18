@@ -16,9 +16,9 @@ IOTHUB_CLIENT_RESULT dispatch_string_read_to_callback(void *obj, void *function,
     if (res == IOTHUB_CLIENT_OK)
     {
         // Codes_SRS_DMDISPATCHERS_18_043: [ dispatch_read will correctly return a string property in the correct LWM2M format ]
-        tlvP->length = data ? strlen(data) : 0;
-        tlvP->value = data;
-        tlvP->dataType = LWM2M_TYPE_STRING;
+        tlvP->value.asBuffer.length = data ? strlen(data) : 0;
+        tlvP->value.asBuffer.buffer = data;
+        tlvP->type = LWM2M_TYPE_STRING;
     }
     
     return res;
@@ -46,7 +46,7 @@ IOTHUB_CLIENT_RESULT dispatch_time_read_to_callback(void *obj, void *function, l
     {
         // Codes_SRS_DMDISPATCHERS_18_047: [ dispatch_read will correctly convert a time property into the correct LWM2M format ]
         lwm2m_data_encode_int(data, tlvP);
-        tlvP->dataType = LWM2M_TYPE_TIME;
+        tlvP->type = LWM2M_TYPE_TIME;
     }
     return res;
 }
@@ -59,9 +59,9 @@ IOTHUB_CLIENT_RESULT dispatch_opaque_read_to_callback(void *obj, void *function,
     res = ((IOTHUB_CLIENT_GET_OPAQUEPROP)function)(obj, &data, &length);
     if (res == IOTHUB_CLIENT_OK)
     {
-        tlvP->length = length;
-        tlvP->value = data;
-        tlvP->dataType = LWM2M_TYPE_OPAQUE;
+        tlvP->value.asBuffer.length = length;
+        tlvP->value.asBuffer.buffer = data;
+        tlvP->type = LWM2M_TYPE_OPAQUE;
     }
     return res;
 }
@@ -103,7 +103,7 @@ IOTHUB_CLIENT_RESULT dispatch_string_write_to_callback(void *obj, void *function
     IOTHUB_CLIENT_RESULT res = IOTHUB_CLIENT_OK;
 
     //Codes_SRS_DMDISPATCHERS_18_037: [ dispatch_write correctly passes a string argument into the callback ]
-    return ((IOTHUB_CLIENT_SET_STRINGPROP)function)(obj, (char*)tlvP->value);
+    return ((IOTHUB_CLIENT_SET_STRINGPROP)function)(obj, (char*)tlvP->value.asBuffer.buffer);
 }
 
 IOTHUB_CLIENT_RESULT dispatch_integer_write_to_callback(void *obj, void *function, lwm2m_data_t *tlvP)
@@ -147,7 +147,7 @@ IOTHUB_CLIENT_RESULT dispatch_time_write_to_callback(void *obj, void *function, 
 //Codes_SRS_DMDISPATCHERS_18_038: [ dispatch_write correctly passes a oppaque argument into the callback ]
 IOTHUB_CLIENT_RESULT dispatch_opaque_write_to_callback(void *obj, void *function, lwm2m_data_t *tlvP)
 {
-    return ((IOTHUB_CLIENT_SET_OPAQUEPROP)function)(obj, tlvP->value, tlvP->length);
+    return ((IOTHUB_CLIENT_SET_OPAQUEPROP)function)(obj, tlvP->value.asBuffer.buffer, tlvP->value.asBuffer.length);
 }
 
 IOTHUB_CLIENT_RESULT dispatch_float_write_to_callback(void *obj, void *function, lwm2m_data_t *tlvP)
