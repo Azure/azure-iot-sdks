@@ -184,4 +184,13 @@ SimulatedHttp.prototype.setServiceProperties = function (deviceId, serviceProper
   done(null, JSON.stringify(serviceProperties), testResponse);
 };
 
+SimulatedHttp.prototype.getRegistryStatistics = function (path, done) {
+  var stats = {
+    "totalDeviceCount": 42,
+    "enabledDeviceCount": 40,
+    "disabledDeviceCount": 2
+  };
+  
+  done(null, JSON.stringify(stats), { statusCode: 200 });
+};
 module.exports = SimulatedHttp;

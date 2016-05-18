@@ -142,3 +142,7 @@ The `setServiceProperties` method will replace the service properties of the dev
 **SRS_NODE_IOTHUB_REGISTRY_16_026: [** The `done` callback shall be called with an `Error` object if the request fails.  **]**
 **SRS_NODE_IOTHUB_REGISTRY_16_027: [** The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of service properties if the request succeeds. **]**
  
+#getRegistryStatistics(done)
+The `getRegistryStatistics` method retrieves devices statistics from the registry, such as the number of devices.
+**SRS_NODE_IOTHUB_REGISTRY_16_028: [** The `done` callback shall be called with an `Error` object if the request fails.  **]**
+**SRS_NODE_IOTHUB_REGISTRY_16_029: [** The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of registry statistics if the request succeeds. **]**

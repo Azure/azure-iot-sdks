@@ -470,12 +470,7 @@ Registry.prototype.queryDevices = function (query, done) {
  * @param {Function}    done               The function to call when the operation is
  *                                         complete. `done` will be called with three arguments:
  *                                         - an Error object (can be null)
- *                                         - a result object that can be:
- *                                           - an array of {@link module:azure-iothub.Device|Device}
- *                                             objects representing the matching device
- *                                             identities
- *                                           - an associative array with the aggregate results 
- *                                             if the query object requested an aggregation operation
+ *                                         - a result object
  *                                         - a transport-specific response object useful for logging or debugging.
  */
 Registry.prototype.setServiceProperties = function (deviceId, serviceProperties, done) {
@@ -493,6 +488,30 @@ Registry.prototype.setServiceProperties = function (deviceId, serviceProperties,
       /*SRS_NODE_IOTHUB_REGISTRY_16_027: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of service properties if the request succeeds.]*/
       var serviceProperties = JSON.parse(body);
       done(null, serviceProperties, response);
+    }
+  });
+};
+
+
+/**
+ * @method              module:azure-iothub.Registry#getRegistryStatistics
+ * @description         The getRegistryStatistics method will retrieve device-related statistics from Registry.
+ * @param {Function}    done               The function to call when the operation is
+ *                                         complete. `done` will be called with three arguments:
+ *                                         - an Error object (can be null)
+ *                                         - a result object that is an associative array containing the registry statistics.
+ *                                         - a transport-specific response object useful for logging or debugging.
+ */
+Registry.prototype.getRegistryStatistics = function (done) {
+  var path = '/statistics/devices' + endpoint.versionQueryString();
+  this._transport.getRegistryStatistics(path, function (err, body, response) {  
+    if (err) {
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_028: [The `done` callback shall be called with an `Error` object if the request fails.]*/
+      done(err);
+    } else {
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_029: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of registry statistics if the request succeeds.]*/
+      var stats = JSON.parse(body);
+      done(null, stats, response);
     }
   });
 };

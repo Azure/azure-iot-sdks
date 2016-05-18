@@ -440,6 +440,39 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
         });
       });
     });
+    
+    describe('#getRegistryStatistics', function(){
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_028: [The `done` callback shall be called with an `Error` object if the request fails.]*/
+      it('calls the done callback with an error if the request fails', function (done) {
+        var FailingTransport = function() {
+          this.getRegistryStatistics = function (path, callback) {
+            assert.equal(typeof path, 'string');
+            callback(new Error('fake failure'));
+          };
+        };
+        
+        var registry = Registry.fromConnectionString(dmConnectionString, FailingTransport);
+        registry.getRegistryStatistics(function (err) {
+          assert.instanceOf(err, Error);
+          done();
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_029: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of registry statistics if the request succeeds.]*/      
+      it('calls the done callback with a null error object and an object containing registry statistics if the request succeeds', function (done) {
+        var registry = Registry.fromConnectionString(dmConnectionString, Transport);
+        registry.getRegistryStatistics(function (err, result) {
+          if (err) {
+            done(err);
+          } else {
+            assert(result.hasOwnProperty('totalDeviceCount'));
+            assert(result.hasOwnProperty('enabledDeviceCount'));
+            assert(result.hasOwnProperty('disabledDeviceCount'));
+            done();
+          }
+        });
+      });
+    });
   });
 }
 
