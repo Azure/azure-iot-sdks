@@ -13,7 +13,7 @@ var XMLSerializer = require('xmldom').XMLSerializer;
 var versions = require('./versions.json');
 var inputs = require('./inputs');
 var colors = require('colors');
-var basePath = path.normalize(__dirname + '../../../..');
+var basePath = path.normalize(__dirname + '/../../..');
 
 function main() {
     // process all inputs
