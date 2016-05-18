@@ -379,4 +379,26 @@ Http.prototype.setServiceProperties = function (path, serviceProperties, done) {
   request.end();
 };
 
+Http.prototype.getRegistryStatistics = function (path, done) {
+  var config = this._config;
+  /*Tests_SRS_NODE_IOTHUB_HTTP_16_007: [The `getRegistryStatistics` method shall construct an HTTP request using information supplied by the caller as follows:
+  ```
+  GET [path]?api-version=[version] HTTP/1.1
+  Authorization: [config.sharedAccessSignature]
+  Accept: application/json,
+  Host: [host-name]
+  [serviceProperties]
+  ```]*/
+  
+  var httpHeaders = {
+    'Authorization': config.sharedAccessSignature,
+    'Accept': 'application/json',
+    'Host': config.host,
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
+  };
+
+  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, handleHttpResponse (done));
+  request.end();
+};
+
 module.exports = Http;

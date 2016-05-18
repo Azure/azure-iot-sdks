@@ -184,6 +184,15 @@ else if (command === 'delete') {
     }
   });
 }
+else if (command === 'registry-stats') {
+  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
+  registry.getRegistryStatistics(function (err, statistics) {
+    if (err) serviceError(err);
+    else {
+      printResult(statistics);
+    }
+  });
+}
 else if (command === 'monitor-events') {
   if (!connString) inputError('\'monitor-events\' requires <connection-string> (for now)');
   if (!arg1) inputError('No device ID given');
@@ -566,6 +575,8 @@ function usage() {
     '    Can optionally reduce output to selected properties and/or the connection string.{/grey}',
     '  {white}[<connection-string>] {green}delete{/green} <device-id>{/white}',
     '    {grey}Deletes the device twin from the IoT Hub.{/grey}',
+    '  {white}[<connection-string>] {green}registry-stats{/green}{/white}',
+    '    {grey}Displays statistics about all devices registered with the IoT Hub.{/grey}',
     '',
     '  {grey}Use the{/grey} {white}--display{/white} {grey}option to show only the given properties from the azure-iothub.Device object.{/grey}',
     '  {grey}Use the{/grey} {white}--connection-string{/white} {grey}option to generate a connection string for the device(s).{/grey}',
