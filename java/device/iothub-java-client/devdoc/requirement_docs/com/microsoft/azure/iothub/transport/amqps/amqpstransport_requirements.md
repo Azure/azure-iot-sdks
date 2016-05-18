@@ -105,6 +105,8 @@ public void sendMessages() throws IOException;
 
 **SRS_AMQPSTRANSPORT_15_037: [**The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.**]**
 
+**SRS_AMQPSTRANSPORT_15_039: [**If the message is expired, the function shall create a callback with the MESSAGE_EXPIRED status and add it to the callback list.**]**
+
 
 ### invokeCallbacks
 

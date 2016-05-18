@@ -18,6 +18,7 @@ public final class Message
     public Message setProperty(String name, String value);
     public String getProperty(String name);
     public MessageProperty[] getProperties();
+    public boolean isExpired();
 
     public byte[] getBytes();
 }
@@ -70,6 +71,17 @@ public MessageProperty[] getProperties();
 ```
 
 **SRS_MESSAGE_11_033: [**The function shall return a copy of the message properties.**]**
+
+
+### isExpired()
+
+```java
+public boolean isExpired();
+```
+
+**SRS_MESSAGE_15_035: [**The function shall return false if the expiry time is 0.**]**
+
+**SRS_MESSAGE_15_036: [**The function shall return true if the current time is greater than the expiry time and false otherwise.**]**
 
 
 ### getBytes

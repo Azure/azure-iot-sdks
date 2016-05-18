@@ -212,4 +212,50 @@ public class MessageTest
         assertThat(testProperties.length, is(expectedNumProperties));
         assertThat(testProperties[0], is(not(mockProperty)));
     }
+
+    // Tests_SRS_MESSAGE_15_035: [The function shall return true if the expiryTime is set to 0.]
+    @Test
+    public void isExpiredReturnsTrueIfExpiryIsNotSet()
+    {
+        final byte[] body = { 0x61, 0x62, 0x63 };
+
+        Message msg = new Message(body);
+
+        boolean actualResult = msg.isExpired();
+
+        boolean expectedResult = false;
+        assertThat(expectedResult, is(actualResult));
+    }
+
+    // Tests_SRS_MESSAGE_15_036: [The function shall return true if the current time is greater than the expiry time and false otherwise.]
+    @Test
+    public void isExpiredReturnsTrueIfCurrentTimeIsGreaterThanExpiryTime() throws InterruptedException
+    {
+        final byte[] body = { 0x61, 0x62, 0x63 };
+
+        Message msg = new Message(body);
+        msg.setExpiryTime(9);
+
+        Thread.sleep(10);
+
+        boolean actualResult = msg.isExpired();
+
+        boolean expectedResult = true;
+        assertThat(expectedResult, is(actualResult));
+    }
+
+    // Tests_SRS_MESSAGE_15_036: [The function shall return true if the current time is greater than the expiry time and false otherwise.]
+    @Test
+    public void isExpiredReturnsFalseIfCurrentTimeIsSmallerThanExpiryTime() throws InterruptedException
+    {
+        final byte[] body = { 0x61, 0x62, 0x63 };
+
+        Message msg = new Message(body);
+        msg.setExpiryTime(1000);
+
+        boolean actualResult = msg.isExpired();
+
+        boolean expectedResult = false;
+        assertThat(expectedResult, is(actualResult));
+    }
 }
