@@ -133,7 +133,6 @@
                 else if (true == _registered)
                 {
                     if (eArgs.Data.Contains("** ")) Console.WriteLine(eArgs.Data);
-                    if (eArgs.Data.Contains("New Battery Level")) Console.WriteLine(eArgs.Data);
                     if (eArgs.Data.Contains("returning"))
                     {
                         // this is a 'read' operation
@@ -151,7 +150,12 @@
                                 }
 
                                 aCase.ExpectedValue = rawValue;
-                                Console.WriteLine("Read_{0} should return '{1}'", propertyName, rawValue);
+                                Console.WriteLine("\t{0} is reported by the device as '{1}'", propertyName, rawValue);
+                            }
+
+                            else if (propertyName.Equals("Device_BatteryLevel"))
+                            {
+                                Console.WriteLine("\t** {0} is reported by the device as '{1}' **", propertyName, data[2]);
                             }
                         }
                     }
@@ -366,13 +370,16 @@
                     Thread.Sleep(OneSecond);
                 }
 
+                Console.WriteLine();
                 foreach (var one in _ReadTestCases)
                 {
+                    Console.WriteLine("TestCase: Read({0}", one.Key);
                     one.Value.ExpectedValue = null;
                     one.Value.RecordedValue = ReadPropertyThroughService(one.Value.Name);
-                    Console.WriteLine("Read_{0} returned '{1}'", one.Value.Name, one.Value.RecordedValue);
+                    Console.WriteLine("\t{0} is reported by the service as '{1}'", one.Value.Name, one.Value.RecordedValue);
                 }
 
+                Console.WriteLine();
                 foreach (var one in _WriteTestCases)
                 {
                     one.Value.RecordedValue = null;

@@ -238,7 +238,7 @@ void update_battery_level(SimulatedDeviceState *sds)
         {
             sds->BatteryLevel = 100;
         }
-        LogInfo("New Battery Level: %d", sds->BatteryLevel);
+        LogInfo("** New Battery Level: %d\r\n", sds->BatteryLevel);
 
         sds->LastBatteryUpdateTime = time(NULL);
         set_device_batterylevel(0, sds->BatteryLevel);
