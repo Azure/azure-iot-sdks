@@ -7,7 +7,7 @@ cd $build_root
 
 # instruct C builder to include javawrapper library and to skip tests
 
-./c/build_all/linux/build.sh --build-javawrapper --skip-unittests --skip-e2e-tests #-x
+./c/build_all/linux/build.sh --build-javawrapper --skip-unittests #-x
 [ $? -eq 0 ] || exit $?
 
 echo compile javawrapper and samples
