@@ -325,7 +325,7 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
 	int return_value;
 	PROPERTIES_HANDLE uamqp_message_properties;
 	AMQP_VALUE uamqp_message_property;
-	char* uamqp_message_property_value;
+	const char* uamqp_message_property_value;
 	int api_call_result;
 
 	/* Codes_SRS_IOTHUBTRANSPORTAMQP_09_155: [uAMQP message properties shall be retrieved using message_get_properties.] */
@@ -398,7 +398,7 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
 {
 	int result;
 	AMQP_VALUE uamqp_app_properties;
-	int property_count;
+	uint32_t property_count;
 	MAP_HANDLE iothub_message_properties_map;
 
 	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_170: [The IOTHUB_MESSAGE_HANDLE properties shall be retrieved using IoTHubMessage_Properties.]
@@ -442,8 +442,8 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
 		{
 			AMQP_VALUE map_key_name;
 			AMQP_VALUE map_key_value;
-			char *key_name;
-			char* key_value;
+			const char *key_name;
+			const char* key_value;
 
 			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_178: [The uAMQP application property name and value shall be obtained using amqpvalue_get_map_key_value_pair.]
 			if ((result = amqpvalue_get_map_key_value_pair(uamqp_app_properties, i, &map_key_name, &map_key_value)) != 0)

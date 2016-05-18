@@ -534,7 +534,7 @@ const char* IoTHubAccount_GetIoTHubSuffix(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 const char* IoTHubAccount_GetEventhubListenName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 {
 	static char listenName[64];  
-	char* value;
+	const char* value;
 	
 #ifndef MBED_BUILD_TIMESTAMP
 	if ((value = getenv("IOTHUB_EVENTHUB_LISTEN_NAME")) == NULL)
