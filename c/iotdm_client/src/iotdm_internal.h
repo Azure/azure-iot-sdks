@@ -30,6 +30,12 @@
 
 #include "iotdm_lwm2m_client_apis.h"
 
+#ifdef NDEBUG
+#define IOT_LogInfo LogInfo
+#undef LogInfo
+#define LogInfo(...) { /* NO_OP */}
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
