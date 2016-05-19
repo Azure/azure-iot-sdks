@@ -3,8 +3,12 @@
 
 namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 {
+    using System;
+
     interface ICancellable
     {
         void Cancel();
+
+        void Abort(Exception exception);
     }
 }

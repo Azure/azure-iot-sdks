@@ -20,6 +20,7 @@ var EventHubClient = require('./lib/eventhubclient.js');
 var ConnectionString = require('azure-iothub').ConnectionString;
 var SharedAccessSignature = require('azure-iothub').SharedAccessSignature;
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
+var DeviceSAS = require('azure-iot-device').SharedAccessSignature;
 
 function Count(val) {
   this.val = +val;
@@ -408,6 +409,22 @@ else if (command === 'reboot')
     handleJobScheduled(err, job, 'Reboot');
   });
 }
+else if (command === 'sas-token') {
+  if (!arg1) inputError('No device ID given');
+  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
+  registry.get(arg1, function (err, device) {
+    if (err)
+      serviceError(err);
+    else {
+      var key = device.authentication.SymmetricKey.primaryKey;
+      var expiry = endTime();
+      if (!parsed.raw)
+        console.log(colorsTmpl('{green}SAS Token for device ' + arg1 + ' with expiry ' + (parsed.duration ? parsed.duration : '3600') + ' seconds from now:{/green}'));
+      var sas = DeviceSAS.create(hostname, arg1, key, expiry);
+      console.log(sas.toString());
+    }
+  });
+}
 else {
   inputError('\'' + command + '\' is not a valid command');
   usage();
@@ -588,6 +605,9 @@ function usage() {
     '    {grey}Sends a cloud-to-device message to the given device, optionally with acknowledgment of receipt.{/grey}',
     '  {white}[<connection-string>] {green}receive{/green} [--messages=n]{/white}',
     '    {grey}Receives feedback about the delivery of cloud-to-device messages; optionally exits after receiving {white}n{/white} messages.{/grey}',
+    '  {white}[<connection-string>] {green}sas-token{/green} <device-id> [--duration=<num-seconds>]{/white}',
+    '    {grey}Generates a SAS Token for the given device with an expiry time <num-seconds> from now.',
+    '    Default duration is 3600 (one hour).{/grey}',
     '',
     '{yellow}Device management commands{/yellow}',
     '  {white}[<connection-string>] {green}get-job{/green} <job-id>{/white}',

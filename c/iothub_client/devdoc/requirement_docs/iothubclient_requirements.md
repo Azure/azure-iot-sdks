@@ -1,4 +1,4 @@
-#IoTHubClient Requirements
+﻿#IoTHubClient Requirements
  
 
  
@@ -248,6 +248,8 @@ IoTHubClient_SetOption allows run-time changing of settings of the IoTHubClient.
 
 **SRS_IOTHUBCLIENT_02_038: [** If optionName doesn't match one of the options handled by this module then IoTHubClient_SetOption shall call IoTHubClient_LL_SetOption passing the same parameters and return what IoTHubClient_LL_SetOption returns. **]**
 
+**SRS_IOTHUBCLIENT_01_041: [** IoTHubClient_SetOption shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
+**SRS_IOTHUBCLIENT_01_042: [** If acquiring the lock fails, IoTHubClient_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_ERROR. **]**
 
 
 Options handled by IoTHubClient_SetOption:

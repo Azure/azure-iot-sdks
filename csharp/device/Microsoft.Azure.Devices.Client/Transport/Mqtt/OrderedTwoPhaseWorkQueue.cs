@@ -6,6 +6,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
     using Microsoft.Azure.Devices.Client.Exceptions;
 
@@ -54,6 +55,33 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         {
             await base.DoWorkAsync(context, work);
             this.incompleteQueue.Enqueue(new IncompleteWorkItem(this.getWorkId(work), work));
+        }
+
+        public override void Abort()
+        {
+            this.Abort(null);
+        }
+
+        public override void Abort(Exception exception)
+        {
+            States stateBefore = this.State;
+            base.Abort(exception);
+            if (stateBefore != this.State && this.State == States.Aborted)
+            {
+                Queue<IncompleteWorkItem> queue = this.incompleteQueue;
+                while (queue.Count > 0)
+                {
+                    TWork workItem = queue.Dequeue().WorkItem;
+                    if (exception == null)
+                    {
+                        (workItem as ICancellable)?.Cancel();
+                    }
+                    else
+                    {
+                        (workItem as ICancellable)?.Abort(exception);
+                    }
+                }
+            }
         }
     }
 }

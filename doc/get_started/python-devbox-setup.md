@@ -36,6 +36,10 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
     * To build with python 3.4 or 3.5, run `./build.sh --build-python 3.4` or `./build.sh --build-python 3.5` respectively 
 5. After a successful build, the `iothub_client.so` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
+###Known build issues: 
+1. On some small footprint Linux devices, like a *Raspberry Pi* using Raspbian OS, the following build error may occur: `virtual memory exhausted: Cannot allocate memory`. In such a case please try to increase the swap file size on your platform and retry the build.
+2. CentOS7: Only Python 2.7 is supported due to a missing boost-python3 library package.
+
 <a name="windows"/>
 ## Build the Python iothub_client module on Windows using Nuget packages (recommended)
 
@@ -72,12 +76,15 @@ Important note: The boost libraries can only be used to build for a single Pytho
 3. Run the script `build_client.cmd` in the **python\\build_all\\windows** directory.
 4. After a successful build, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
+To use the iothub_client extension for native code debugging with [Python Tools for Visual Studio] run the script: `build_client.cmd -config Debug` to get the full debug symbol support.
+
 <a name="samplecode"/>
 ## Sample applications
 
 This repository contains various Python sample applications that illustrate how to use the Microsoft Azure IoT SDK for Python. To learn how to run a sample application that sends messages to an IoT hub, see [Getting started - running a Python sample application][getstarted].
 
 [python-2.7 or python-3.5]: https://www.python.org/downloads/
+[Python Tools for Visual Studio]: https://www.visualstudio.com/en-us/features/python-vs.aspx
 [setup-devbox]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
 [getstarted]: python-run-sample.md
 [boost-zip]: http://www.boost.org/users/history/version_1_60_0.html

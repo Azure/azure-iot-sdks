@@ -78,6 +78,21 @@ namespace Microsoft.Azure.Devices
         public abstract Task SendAsync(string deviceId, Message message);
 
         /// <summary>
+        /// Removes all messages from a device's queue.
+        /// </summary>
+        /// <param name="deviceId"></param>
+        /// <returns></returns>
+        public abstract Task<PurgeMessageQueueResult> PurgeMessageQueueAsync(string deviceId);
+
+        /// <summary>
+        /// Removes all messages from a device's queue.
+        /// </summary>
+        /// <param name="deviceId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public abstract Task<PurgeMessageQueueResult> PurgeMessageQueueAsync(string deviceId, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Get the FeedbackReceiver
         /// </summary>
         /// <returns>An instance of the FeedbackReceiver</returns>

@@ -293,6 +293,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
+        iotHubConfig.deviceSasToken = NULL;
         iotHubConfig.protocol = MQTT_Protocol;
 
         EXPECTED_SEND_DATA* sendData = EventData_Create();
@@ -372,6 +373,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 #if 0
     TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest)
     {
+#if 0
         // arrange
         IOTHUB_CLIENT_CONFIG iotHubConfig;
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
@@ -390,6 +392,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
         iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
         iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
+        iotHubConfig.deviceSasToken = NULL;
         iotHubConfig.protocol = MQTT_Protocol;
 
         iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
@@ -445,6 +448,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         IoTHubTest_Deinit(iotHubTestHandle);
         MessageData_Destroy(notifyData);
         IoTHubClient_Destroy(iotHubClientHandle);
+#endif
     }
 #endif
 

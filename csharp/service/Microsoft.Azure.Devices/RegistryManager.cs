@@ -3,6 +3,7 @@
 
 namespace Microsoft.Azure.Devices
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace Microsoft.Azure.Devices
         /// <returns> An RegistryManager instance. </returns>
         public static RegistryManager CreateFromConnectionString(string connectionString)
         {
-            var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
+            IotHubConnectionString iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
             return new HttpRegistryManager(iotHubConnectionString);
         }
 
@@ -61,6 +62,7 @@ namespace Microsoft.Azure.Devices
         /// The Device objects to be registered.
         /// </param>
         /// <returns>returns a string array of error messages</returns>
+        [Obsolete("Use AddDevices2Async")]
         public abstract Task<string[]> AddDevicesAsync(IEnumerable<Device> devices);
 
         /// <summary>
@@ -73,8 +75,30 @@ namespace Microsoft.Azure.Devices
         /// The token which allows the the operation to be cancelled.
         /// </param>
         /// <returns>returns a string array of error messages</returns>
+        [Obsolete("Use AddDevices2Async")]
         public abstract Task<string[]> AddDevicesAsync(IEnumerable<Device> devices, CancellationToken cancellationToken);
-        
+
+        /// <summary>
+        /// Register a list of new devices with the system
+        /// </summary>
+        /// <param name="devices">
+        /// The Device objects to be registered.
+        /// </param>
+        /// <returns>returns a BulkRegistryOperationResult object</returns>
+        public abstract Task<BulkRegistryOperationResult> AddDevices2Async(IEnumerable<Device> devices);
+
+        /// <summary>
+        /// Register a list of new devices with the system
+        /// </summary>
+        /// <param name="devices">
+        /// The Device objects to be registered.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The token which allows the the operation to be cancelled.
+        /// </param>
+        /// <returns>returns a BulkRegistryOperationResult object</returns>
+        public abstract Task<BulkRegistryOperationResult> AddDevices2Async(IEnumerable<Device> devices, CancellationToken cancellationToken);
+
         /// <summary>
         /// Update the mutable fields of the device registration
         /// </summary>
@@ -91,7 +115,7 @@ namespace Microsoft.Azure.Devices
         /// The Device object with updated fields.
         /// </param>
         /// <param name="forceUpdate">
-        /// Forces the device object to be replaced even if it was updated since it was retrieved last time.
+        /// Forces the device object to be replaced without regard for an ETag match.
         /// </param>
         /// <returns>echoes back the Device object with updated etags</returns>
         public abstract Task<Device> UpdateDeviceAsync(Device device, bool forceUpdate);
@@ -130,6 +154,7 @@ namespace Microsoft.Azure.Devices
         /// The Device objects to be updated.
         /// </param>
         /// <returns>returns a string array of error messages</returns>
+        [Obsolete("Use UpdateDevices2Async")]
         public abstract Task<string[]> UpdateDevicesAsync(IEnumerable<Device> devices);
 
         /// <summary>
@@ -145,7 +170,32 @@ namespace Microsoft.Azure.Devices
         /// The token which allows the the operation to be cancelled.
         /// </param>
         /// <returns>returns a string array of error messages</returns>
+        [Obsolete("Use UpdateDevices2Async")]
         public abstract Task<string[]> UpdateDevicesAsync(IEnumerable<Device> devices, bool forceUpdate, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Update a list of devices with the system
+        /// </summary>
+        /// <param name="devices">
+        /// The Device objects to be updated.
+        /// </param>
+        /// <returns>returns a BulkRegistryOperationResult object</returns>
+        public abstract Task<BulkRegistryOperationResult> UpdateDevices2Async(IEnumerable<Device> devices);
+
+        /// <summary>
+        /// Update a list of devices with the system
+        /// </summary>
+        /// <param name="devices">
+        /// The Device objects to be updated.
+        /// </param>
+        /// <param name="forceUpdate">
+        /// Forces the device object to be replaced even if it was updated since it was retrieved last time.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The token which allows the the operation to be cancelled.
+        /// </param>
+        /// <returns>returns a BulkRegistryOperationResult object</returns>
+        public abstract Task<BulkRegistryOperationResult> UpdateDevices2Async(IEnumerable<Device> devices, bool forceUpdate, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes a previously registered device from the system.
@@ -191,6 +241,7 @@ namespace Microsoft.Azure.Devices
         /// <param name="devices">
         /// The devices being deleted.
         /// </param>
+        [Obsolete("Use RemoveDevices2Async")]
         public abstract Task<string[]> RemoveDevicesAsync(IEnumerable<Device> devices);
 
         /// <summary>
@@ -199,13 +250,38 @@ namespace Microsoft.Azure.Devices
         /// <param name="devices">
         /// The devices being deleted.
         /// </param>
-        /// <param name="forceDelete">
-        /// Forces the device object to be deleted even if it was updated since it was retrieved last time.
+        /// <param name="forceRemove">
+        /// Forces the device object to be removed without regard for an ETag match.
         /// </param>
         /// <param name="cancellationToken">
         /// The token which allows the the operation to be cancelled.
         /// </param>
-        public abstract Task<string[]> RemoveDevicesAsync(IEnumerable<Device> devices, bool forceDelete, CancellationToken cancellationToken);
+        [Obsolete("Use RemoveDevices2Async")]
+        public abstract Task<string[]> RemoveDevicesAsync(IEnumerable<Device> devices, bool forceRemove, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Deletes a list of previously registered devices from the system.
+        /// </summary>
+        /// <param name="devices">
+        /// The devices being deleted.
+        /// </param>
+        /// <returns>returns a BulkRegistryOperationResult object</returns>
+        public abstract Task<BulkRegistryOperationResult> RemoveDevices2Async(IEnumerable<Device> devices);
+
+        /// <summary>
+        /// Deletes a list of previously registered devices from the system.
+        /// </summary>
+        /// <param name="devices">
+        /// The devices being deleted.
+        /// </param>
+        /// <param name="forceRemove">
+        /// Forces the device object to be removed even if it was updated since it was retrieved last time.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The token which allows the the operation to be cancelled.
+        /// </param>
+        /// <returns>returns a BulkRegistryOperationResult object</returns>
+        public abstract Task<BulkRegistryOperationResult> RemoveDevices2Async(IEnumerable<Device> devices, bool forceRemove, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets usage statistics for the Iot Hub.
@@ -301,6 +377,25 @@ namespace Microsoft.Azure.Devices
         public abstract Task<JobProperties> ExportDevicesAsync(string exportBlobContainerUri, bool excludeKeys, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Creates a new bulk job to export device registrations to the container specified by the provided URI.
+        /// </summary>
+        /// <param name="exportBlobContainerUri"></param>
+        /// <param name="outputBlobName"></param>
+        /// <param name="excludeKeys"></param>
+        /// <returns>JobProperties of the newly created job.</returns>
+        public abstract Task<JobProperties> ExportDevicesAsync(string exportBlobContainerUri, string outputBlobName, bool excludeKeys);
+
+        /// <summary>
+        /// Creates a new bulk job to export device registrations to the container specified by the provided URI.
+        /// </summary>
+        /// <param name="exportBlobContainerUri"></param>
+        /// <param name="outputBlobName"></param>
+        /// <param name="excludeKeys"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>JobProperties of the newly created job.</returns>
+        public abstract Task<JobProperties> ExportDevicesAsync(string exportBlobContainerUri, string outputBlobName, bool excludeKeys, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Creates a new bulk job to import device registrations into the IoT Hub.
         /// </summary>
         /// <param name="importBlobContainerUri"></param>
@@ -316,6 +411,25 @@ namespace Microsoft.Azure.Devices
         /// <param name="cancellationToken"></param>
         /// <returns>JobProperties of the newly created job.</returns>
         public abstract Task<JobProperties> ImportDevicesAsync(string importBlobContainerUri, string outputBlobContainerUri, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Creates a new bulk job to import device registrations into the IoT Hub.
+        /// </summary>
+        /// <param name="importBlobContainerUri"></param>
+        /// <param name="outputBlobContainerUri"></param>
+        /// <param name="inputBlobName"></param>
+        /// <returns>JobProperties of the newly created job.</returns>
+        public abstract Task<JobProperties> ImportDevicesAsync(string importBlobContainerUri, string outputBlobContainerUri, string inputBlobName);
+
+        /// <summary>
+        /// Creates a new bulk job to import device registrations into the IoT Hub.
+        /// </summary>
+        /// <param name="importBlobContainerUri"></param>
+        /// <param name="outputBlobContainerUri"></param>
+        /// <param name="inputBlobName"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>JobProperties of the newly created job.</returns>
+        public abstract Task<JobProperties> ImportDevicesAsync(string importBlobContainerUri, string outputBlobContainerUri, string inputBlobName, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets the job with the specified ID.

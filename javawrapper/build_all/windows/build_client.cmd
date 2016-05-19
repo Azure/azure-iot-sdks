@@ -49,30 +49,15 @@ cd %build-root%
 
 set PATH=%PATH%;%userprofile%\cmake_%build-platform%\javawrapper\Debug
 
-REM -- compile java samples --
-cd ..\..\device\samples\direct_call_of_wrapped_functions
+REM -- compile javawrapper --
+cd ..\..\device
 call mvn install
-copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\target
-cd %build-root%
 
-cd ..\..\device\samples\send-receive-sample
-call mvn install
-copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\target
-cd %build-root%
-
-cd ..\..\device\samples\send-event-sample
-call mvn install
-copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\target
-cd %build-root%
-
-cd ..\..\device\samples\send-serialized-event
-call mvn install
-copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\target
-cd %build-root%
-
-cd ..\..\device\test
-call mvn test
-copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_mock.dll %cd%\target
+copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\direct_call_of_wrapped_functions\target
+copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\send-receive-sample\target
+copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\send-event-sample\target
+copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\send-serialized-event\target
+copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_mock.dll %cd%\test
 cd %build-root%
 
 goto :eof

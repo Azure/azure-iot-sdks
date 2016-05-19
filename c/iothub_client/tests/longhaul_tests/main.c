@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "testrunnerswitcher.h"
+#include "longhaul_tests.h"
 
 int main(void)
 {
-    size_t failedTestCount = 0;
-    RUN_TEST_SUITE(longhaul_tests, failedTestCount);
-    return failedTestCount;
+    int failedTestCount = 0;
+	
+	if (IoTHubClient_LongHaul_12h_Run_1_Event_Per_Sec() != 0)
+	{
+		failedTestCount++;
+	}
+    
+	return failedTestCount;
 }

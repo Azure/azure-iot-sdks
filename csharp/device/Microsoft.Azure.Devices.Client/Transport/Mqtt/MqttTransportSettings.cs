@@ -14,6 +14,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         const bool DefaultHasWill = false;
         const bool DefaultMaxOutboundRetransmissionEnforced = false;
         const int DefaultKeepAliveInSeconds = 300;
+        const int DefaultReceiveTimeoutInSeconds = 60;
         const int DefaultMaxPendingInboundMessages = 50;
         const QualityOfService DefaultPublishToServerQoS = QualityOfService.AtLeastOnce;
         const QualityOfService DefaultReceivingQoS = QualityOfService.AtLeastOnce;
@@ -38,6 +39,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             this.QoSPropertyName = "mqtt-qos";
             this.RetainPropertyName = "mqtt-retain";
             this.WillMessage = null;
+            this.DefaultReceiveTimeout = TimeSpan.FromSeconds(DefaultReceiveTimeoutInSeconds);
         }
 
         public bool DeviceReceiveAckCanTimeout { get; set; }
@@ -72,5 +74,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         {
             return this.transportType;
         }
+
+        public TimeSpan DefaultReceiveTimeout { get; set; }
     }
 }

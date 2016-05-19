@@ -5,6 +5,7 @@ namespace Microsoft.Azure.Devices.Client.Extensions
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
@@ -19,11 +20,27 @@ namespace Microsoft.Azure.Devices.Client.Extensions
             return Fx.IsFatal(exception);
         }
 
-        public static IEnumerable<Exception> Unwind(this Exception exception)
+        public static IEnumerable<Exception> Unwind(this Exception exception, bool unwindAggregate = false)
         {
             while (exception != null)
             {
                 yield return exception;
+                if (!unwindAggregate)
+                {
+                    exception = exception.InnerException;
+                    continue;
+                }
+                ReadOnlyCollection<Exception> excepetions = (exception as AggregateException)?.InnerExceptions;
+                if (excepetions != null)
+                {
+                    foreach (Exception ex in excepetions)
+                    {
+                        foreach (Exception innerEx in ex.Unwind(true))
+                        {
+                            yield return innerEx;
+                        }
+                    }
+                }
                 exception = exception.InnerException;
             }
         }
@@ -68,7 +85,7 @@ namespace Microsoft.Azure.Devices.Client.Extensions
 
         public static Exception DisablePrepareForRethrow(this Exception exception)
         {
-            exception.Data[AsyncResult.DisablePrepareForRethrow] = string.Empty;
+            exception.Data[AsyncResult.DisablePrepareForRethrow] = String.Empty;
             return exception;
         }
 
@@ -77,7 +94,7 @@ namespace Microsoft.Azure.Devices.Client.Extensions
             // exception.Data is empty collection by default.
             if (exception.Data != null && exception.Data.Contains(ExceptionIdentifierName))
             {
-                return string.Format(CultureInfo.InvariantCulture,
+                return String.Format(CultureInfo.InvariantCulture,
                     "ExceptionId: {0}-{1}: {2}",
                     exception.Data[ExceptionIdentifierName],
                     exception.GetType(),
@@ -88,7 +105,7 @@ namespace Microsoft.Azure.Devices.Client.Extensions
                 string exceptionIdentifier = Guid.NewGuid().ToString();
                 exception.Data[ExceptionIdentifierName] = exceptionIdentifier;
 
-                return string.Format(CultureInfo.InvariantCulture,
+                return String.Format(CultureInfo.InvariantCulture,
                     "ExceptionId: {0}-{1}",
                     exceptionIdentifier,
                     exception.ToString());

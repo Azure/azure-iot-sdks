@@ -551,6 +551,11 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iothub",
                 "replaceString": "node.service"
             }

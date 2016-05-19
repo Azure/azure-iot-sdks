@@ -13,11 +13,11 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             if (exception is TimeoutException)
             {
-                return new IotHubCommunicationException(exception.Message);
+                return new IotHubCommunicationException(exception.Message, exception);
             }
             else if (exception is UnauthorizedAccessException)
             {
-                return new UnauthorizedException(exception.Message);
+                return new UnauthorizedException(exception.Message, exception);
             }
             else
             {

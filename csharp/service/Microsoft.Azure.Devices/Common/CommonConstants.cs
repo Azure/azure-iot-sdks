@@ -112,6 +112,9 @@ namespace Microsoft.Azure.Devices.Common
         public static readonly TimeSpan ProcessThreadCheckInterval = TimeSpan.FromMinutes(1);
         public const int MaxThreadsCountThreshold = 700;
 
+        // Custom HTTP headers
+        public const string IotHubErrorCode = "IotHubErrorCode";
+
         //Service Analytics related
         public static class ServiceAnalytics
         {

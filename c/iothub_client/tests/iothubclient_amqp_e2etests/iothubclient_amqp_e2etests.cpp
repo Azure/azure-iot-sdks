@@ -115,6 +115,21 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         {
         if (notifyData != NULL)
         {
+			const char* messageId;
+			const char* correlationId;
+
+			if ((messageId = IoTHubMessage_GetMessageId(msg)) == NULL)
+			{
+				messageId = "<null>";
+			}
+
+			if ((correlationId = IoTHubMessage_GetCorrelationId(msg)) == NULL)
+			{
+				correlationId = "<null>";
+			}
+
+			printf("Received new message from IoT Hub (message-id: %s, correlation-id: %s)", messageId, correlationId);
+
             const char* buffer;
             size_t size;
             IoTHubMessage_GetByteArray(msg, (const unsigned char**)&buffer, &size);

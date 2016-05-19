@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0-14) vivid; urgency=low
+azure-iot-sdk-c (0.1.0-15) vivid; urgency=low
 
   * Initial release
 
@@ -22,4 +22,6 @@ azure-iot-sdk-c (0.1.0-14) vivid; urgency=low
 
   * Added a backoff for mqtt to not overload the network and enable sas token reset before expiration
 
- -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 22 Apr 2016 17:24:51 +0000
+  * Initial implementation of SAS Token support as input in Device Connection String
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 6 May 2016 17:24:51 +0000

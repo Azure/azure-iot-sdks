@@ -4,15 +4,16 @@
 namespace Microsoft.Azure.Devices
 {
     using System;
-    using System.Collections.Generic;    
     using Newtonsoft.Json;
-    using Microsoft.Azure.Devices.Common;
 
     /// <summary>
     /// Contains properties of a Job.
     /// </summary>
     public class JobProperties
     {
+        /// <summary>
+        /// Default constructor that creates an empty JobProperties object.
+        /// </summary>
         public JobProperties()
         {
             this.JobId = string.Empty;
@@ -64,10 +65,23 @@ namespace Microsoft.Azure.Devices
         public string InputBlobContainerUri { get; set; }
 
         /// <summary>
+        /// The blob name to be used when importing from the provided input blob container.
+        /// </summary>
+        [JsonProperty(PropertyName = "inputBlobName", NullValueHandling = NullValueHandling.Ignore)]
+        public string InputBlobName { get; set; }
+
+        /// <summary>
         /// URI containing SAS token to a blob container.  This is used to output the status of the job and the results.
         /// </summary>
         [JsonProperty(PropertyName = "outputBlobContainerUri", Required = Required.Always)]
         public string OutputBlobContainerUri { get; set; }
+
+        /// <summary>
+        /// The name of the blob that will be created in the provided output blob container.  This blob will contain
+        /// the exported device registry information for the IoT Hub.
+        /// </summary>
+        [JsonProperty(PropertyName = "outputBlobName", NullValueHandling = NullValueHandling.Ignore)]
+        public string OutputBlobName { get; set; }
 
         /// <summary>
         /// Optional for export jobs; ignored for other jobs.  Default: false.  If false, authorization keys are included

@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.microsoft.azure.iothub-java-client</groupId>
         <artifactId>iothub-java-client-with-samples</artifactId>
-        <version>1.0.5</version>
+        <version>1.0.6</version>
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -52,8 +52,13 @@
         <dependency>
             <groupId>com.microsoft.azure.iothub-java-client</groupId>
             <artifactId>iothub-java-service-client</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.4</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.10</version>
         </dependency>
     </dependencies>
     <build>
