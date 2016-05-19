@@ -332,7 +332,7 @@
             }
 
             public String RecordedValue { get; set; }
-            public String ExpectedValue { get; set; }
+            public object ExpectedValue { get; set; }
 
             public TestCase(String name, TestType type)
             {
@@ -345,7 +345,7 @@
                 get
                 {
                     string message = this.Type.ToString() + "_" + this.Name;
-                    return AreEqual(ExpectedValue, RecordedValue, message);
+                    return AreEqual(ExpectedValue.ToString(), RecordedValue, message);
                 }
             }
 
@@ -373,7 +373,7 @@
                 Console.WriteLine();
                 foreach (var one in _ReadTestCases)
                 {
-                    Console.WriteLine("TestCase: Read({0}", one.Key);
+                    Console.WriteLine("TestCase: Read({0})", one.Key);
                     one.Value.ExpectedValue = null;
                     one.Value.RecordedValue = ReadPropertyThroughService(one.Value.Name);
                     Console.WriteLine("\t{0} is reported by the service as '{1}'", one.Value.Name, one.Value.RecordedValue);
@@ -461,6 +461,9 @@
             oneCase = new TestCase(DevicePropertyNames.BatteryLevel, TestCase.TestType.Write);
             oneCase.ExpectedValue = WritePropertyError;
             _WriteTestCases.Add("Device_BatteryLevel", oneCase);
+            oneCase = new TestCase(DevicePropertyNames.RegistrationLifetime, TestCase.TestType.Write);
+            oneCase.ExpectedValue = 10;
+            _WriteTestCases.Add("LWM2MServer_Lifetime", oneCase);
 
             // the 'execute' test cases
             oneCase = new TestCase("Device_FactoryReset", TestCase.TestType.Execute);
@@ -590,7 +593,7 @@
         }
 
 
-        static bool WritePropertyThroughService(string propertyName, string propertyValue)
+        static bool WritePropertyThroughService(string propertyName, object propertyValue)
         {
             try
             {
