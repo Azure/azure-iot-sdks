@@ -137,29 +137,37 @@ int main(int argc, char *argv[])
     char *cs = (char *) connectionString;
     int   to = -1;
 
-    for (int ii = 1; ii < argc; ++ii)
+    if (argc == 2) // use argv[1] as CS
     {
-        if (0 == strncmp(argv[ii], "-cs", 3))
-        {
-            ++ii;
-            cs = argv[ii];
-        }
+        cs = argv[1];
+    }
 
-        else if (0 == strncmp(argv[ii], "-to", 3))
+    else
+    {
+        for (int ii = 1; ii < argc; ++ii)
         {
-            ++ii;
-            to = atol(argv[ii]);
-        }
+            if (0 == strncmp(argv[ii], "-cs", 3))
+            {
+                ++ii;
+                cs = argv[ii];
+            }
 
-        else if (0 == strncmp(argv[ii], "-u", 2))
-        {
-            printf("usage: %s -cs <connection_string> [-to <time_out>\n", argv[0]);
-            printf("     connection_string is the device connection string\n");
-            printf("     time_out specifies the length of the run as follows:\n");
-            printf("         -1 means run indefinitly.\n");
-            printf("         a positive value means run for the specified number of seconds.\n");
+            else if (0 == strncmp(argv[ii], "-to", 3))
+            {
+                ++ii;
+                to = atol(argv[ii]);
+            }
 
-            return 0;
+            else if (0 == strncmp(argv[ii], "-u", 2))
+            {
+                printf("usage: %s -cs <connection_string> [-to <time_out>\n", argv[0]);
+                printf("     connection_string is the device connection string\n");
+                printf("     time_out specifies the length of the run as follows:\n");
+                printf("         -1 means run indefinitly.\n");
+                printf("         a positive value means run for the specified number of seconds.\n");
+
+                return 0;
+            }
         }
     }
 
