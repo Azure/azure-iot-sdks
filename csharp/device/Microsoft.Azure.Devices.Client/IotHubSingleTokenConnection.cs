@@ -41,7 +41,7 @@ namespace Microsoft.Azure.Devices.Client
             }
             else
             {
-                this.CloseAsync();
+                this.FaultTolerantSession.Close();
             }
         }
 

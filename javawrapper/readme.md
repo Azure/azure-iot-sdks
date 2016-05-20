@@ -24,9 +24,17 @@ Other useful documents include:
 
 All the java wrapper device specific resources are located in the **javawrapper** folder.
 
-### /build
+### /build_all
 
 This folder contains build scripts for the java wrapper client libraries on windows and linux.
+ * To build for Windows execute \javawrapper\build_all\windows\build_client.cmd 
+ * To build for Linux execute \javawrapper\build_all\windows\build.sh
+The javawrapper library can be found at:
+
+```
+  {IoT device SDK root}/javawrapper/device/target/iothub_client_javawrapper-{version}.jar
+
+  ```
 
 ### /device/iothub_client_javawrapper
 

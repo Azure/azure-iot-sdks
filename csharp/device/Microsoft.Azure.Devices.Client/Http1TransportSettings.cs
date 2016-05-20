@@ -3,6 +3,7 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
+    using System;
 #if !WINDOWS_UWP && !PCL
     using System.Security.Cryptography.X509Certificates;
 #endif
@@ -12,6 +13,8 @@ namespace Microsoft.Azure.Devices.Client
     /// </summary>
     public sealed class Http1TransportSettings : ITransportSettings
     {
+        static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(60);
+
         public TransportType GetTransportType()
         {
             return TransportType.Http1;
@@ -20,5 +23,6 @@ namespace Microsoft.Azure.Devices.Client
 #if !WINDOWS_UWP && !PCL
         public X509Certificate2 ClientCertificate { get; set; }
 #endif
+        public TimeSpan DefaultReceiveTimeout => DefaultOperationTimeout;
     }
 }

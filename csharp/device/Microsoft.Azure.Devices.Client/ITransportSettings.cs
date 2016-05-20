@@ -3,11 +3,15 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
+    using System;
+
     /// <summary>
     /// Interface used to define various transport-specific settings for DeviceClient
     /// </summary>
     public interface ITransportSettings
     {
         TransportType GetTransportType();
+
+        TimeSpan DefaultReceiveTimeout { get; }
     }
 }

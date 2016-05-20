@@ -92,7 +92,7 @@ and save the toolchain file. Your cross compilation environment is now complete.
 The final step in the process is to run the actual build. For this you will need to be in the Linux build directory as shown above. Enter the following commands
 ```
 cd ~/Source/azure-iot-sdks/c/build_all/linux
-./build.sh --toolchain-file toolchain-rpi.cmake --skip-e2e-tests \
+./build.sh --toolchain-file toolchain-rpi.cmake \
 --skip-unittests --no-amqp --no-mqtt -cl -D__STDC_NO_ATOMICS__ \
 -cl --sysroot=$RPI_ROOT
 ```

@@ -146,7 +146,7 @@ You can build the Windows samples to verify that your environment is set up corr
 3. Run the following command:
 
 ```
-build.cmd --skip-e2e-tests
+build.cmd
 ```
 
 This script uses cmake to make a folder called "cmake_ce8" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the solution and run tests.

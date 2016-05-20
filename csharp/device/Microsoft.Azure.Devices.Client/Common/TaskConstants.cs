@@ -4,7 +4,7 @@ namespace Microsoft.Azure.Devices.Client.Common
 {
     using System.Threading.Tasks;
 
-    public static class TaskConstants
+    static class TaskConstants
     {
         static readonly Task<bool> BooleanTrueTask = Task.FromResult(true);
         static readonly Task<int> IntNegativeOneTask = Task.FromResult(-1);
@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Devices.Client.Common
     ///     Provides completed task constants.
     /// </summary>
     /// <typeparam name="T">The type of the task result.</typeparam>
-    public static class TaskConstants<T>
+    static class TaskConstants<T>
     {
         static readonly Task<T> defaultValue = Task.FromResult(default(T));
 

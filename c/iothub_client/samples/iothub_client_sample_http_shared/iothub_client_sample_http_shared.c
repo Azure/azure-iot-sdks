@@ -178,6 +178,7 @@ void iothub_client_sample_http_run(void)
 			config1.protocol = HTTP_Protocol;
 			config1.iotHubName = NULL;
 			config1.iotHubSuffix = NULL;
+            config1.deviceSasToken = NULL;
 			if ((iothubClient1 = IoTHubClient_CreateWithTransport(httpTransport, &config1)) == NULL)
 			{
 				(void)printf("ERROR: 1st device handle is NULL\r\n");
@@ -190,6 +191,7 @@ void iothub_client_sample_http_run(void)
 				config2.protocol = HTTP_Protocol;
 				config2.iotHubName = NULL;
 				config2.iotHubSuffix = NULL;
+                config2.deviceSasToken = NULL;
 				if ((iothubClient2 = IoTHubClient_CreateWithTransport(httpTransport, &config2)) == NULL)
 				{
 					(void)printf("ERROR: 2nd device handle is NULL\r\n");

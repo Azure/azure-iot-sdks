@@ -117,6 +117,12 @@
     <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Exceptions\FatalException.cs">
       <Link>FatalException.cs</Link>
     </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Exceptions\IotHubClientException.cs">
+      <Link>IotHubClientException.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Exceptions\IotHubClientTransientException.cs">
+      <Link>IotHubClientTransientException.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Exceptions\IotHubCommunicationException.cs">
       <Link>IotHubCommunicationException.cs</Link>
     </Compile>
@@ -213,6 +219,9 @@
     <Compile Include="..\Microsoft.Azure.Devices.Client\Common\SynchronizedPool.cs">
       <Link>SynchronizedPool.cs</Link>
     </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Common\TaskConstants.cs">
+      <Link>TaskConstants.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\Common\TaskHelpers.cs">
       <Link>TaskHelpers.cs</Link>
     </Compile>
@@ -261,6 +270,9 @@
     <Compile Include="..\Microsoft.Azure.Devices.Client\IAuthorizationHeaderProvider.cs">
       <Link>IAuthorizationHeaderProvider.cs</Link>
     </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\IDelegatingHandler.cs">
+      <Link>IDelegatingHandler.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\IotHubConnectionCache.cs">
       <Link>IotHubConnectionCache.cs</Link>
     </Compile>
@@ -287,6 +299,15 @@
     </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\PutOperationType.cs">
       <Link>PutOperationType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Transport\DefaultDelegatingHandler.cs">
+      <Link>DefaultDelegatingHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Transport\ErrorDelegatingHandler.cs">
+      <Link>ErrorDelegatingHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Transport\GateKeeperDelegatingHandler.cs">
+      <Link>GateKeeperDelegatingHandler.cs</Link>
     </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\Transport\HttpClientHelper.cs">
       <Link>HttpClientHelper.cs</Link>

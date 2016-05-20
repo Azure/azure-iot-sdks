@@ -46,7 +46,7 @@ define Build/Configure
   STRIP="$(TOOLCHAIN_DIR)/bin/$(TARGET_CROSS)strip" \
   OBJCOPY="$(TOOLCHAIN_DIR)/bin/$(TARGET_CROSS)objcopy" \
   OBJDUMP="$(TOOLCHAIN_DIR)/bin/$(TARGET_CROSS)objdump" \
-  cmake -DCMAKE_FIND_ROOT_PATH="$(TOOLCHAIN_DIR)" $(PKG_BUILD_DIR)/CMakeLists.txt -DIN_OPENWRT=1 -Duse_amqp:bool=OFF -Duse_http:bool=ON -Duse_mqtt:bool=OFF -Dskip_unittests:bool=ON -Duse_floats:bool=OFF -Duse_condition:bool=OFF
+  cmake -DCMAKE_FIND_ROOT_PATH="$(TOOLCHAIN_DIR)" $(PKG_BUILD_DIR)/CMakeLists.txt -DIN_OPENWRT=1 -Duse_amqp:bool=ON -Duse_http:bool=ON -Duse_mqtt:bool=OFF -Dskip_unittests:bool=ON -Duse_floats:bool=OFF -Duse_condition:bool=OFF
 endef
 
 define Build/InstallDev
@@ -80,7 +80,9 @@ define Package/azure-iot-sdks/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/iothub_client/*.a $(1)/usr/lib/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/serializer/*.a $(1)/usr/lib/
 	$(INSTALL_DIR) $(1)/usr/share/azure-iot-sdk/samples
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/serializer/samples/remote_monitoring/remote_monitoring $(1)/usr/share/azure-iot-sdk/samples/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/serializer/samples/simplesample_http/simplesample_http $(1)/usr/share/azure-iot-sdk/samples/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/serializer/samples/simplesample_amqp/simplesample_amqp $(1)/usr/share/azure-iot-sdk/samples/
 endef
 
 $(eval $(call BuildPackage,azure-iot-sdks))

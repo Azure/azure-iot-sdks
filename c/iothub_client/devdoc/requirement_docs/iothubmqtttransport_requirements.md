@@ -10,7 +10,7 @@ IoTHubMQTTTransport is the library that enables communications with MQTT message
 extern TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config);
 extern void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle);
 
-extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend);
+extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, PDLIST_ENTRY waitingToSend);
 extern void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
     
 extern int IoTHubTransportMqtt_Subscribe(IOTHUB_DEVICE_HANDLE handle);
@@ -31,7 +31,8 @@ IoTHubTransportMqtt_Create shall create a TRANSPORT_LL_HANDLE that can be furthe
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_001: [**If parameter config is NULL then IoTHubTransportMqtt_Create shall return NULL.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_002: [**If the parameter config's variables upperConfig or waitingToSend are NULL then IoTHubTransportMqtt_Create shall return NULL.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_003: [**If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransportMqtt_Create shall return NULL.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_003: [**If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransportMqtt_Create shall return NULL.**]** 
+**SRS_IOTHUB_MQTT_TRANSPORT_03_003: [**If both deviceKey & deviceSasToken fields are NOT NULL then IoTHubTransportMqtt_Create shall return NULL.**]**
 **SRS_IOTHUB_MQTT_TRANSPORT_07_004: [**If the config's waitingToSend variable is NULL then IoTHubTransportMqtt_Create shall return NULL.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_005: [**If the upperConfig's variables deviceKey, iotHubName, or iotHubSuffix are empty strings then IoTHubTransportMqtt_Create shall return NULL.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_006: [**If the upperConfig's variables deviceId is an empty strings or length is greater then 128 then IoTHubTransportMqtt_Create shall return NULL.**]**  
@@ -51,13 +52,15 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle)
 
 ## IoTHubTransportMqtt_Register
 ```c
-extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const char* deviceId, const char* deviceKey, PDLIST_ENTRY waitingToSend);
+extern IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(RANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, PDLIST_ENTRY waitingToSend);
 ```
 
 This function registers a device with the transport.  The MQTT transport only supports a single device established on create, so this function will prevent multiple devices from being registered.
 
 **SRS_IOTHUB_MQTT_TRANSPORT_17_001: [** `IoTHubTransportMqtt_Register` shall return `NULL` if the `TRANSPORT_LL_HANDLE` is `NULL`.**]**   
-**SRS_IOTHUB_MQTT_TRANSPORT_17_002: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `deviceId`, `deviceKey` or `waitingToSend` are `NULL`.**]**     
+**SRS_IOTHUB_MQTT_TRANSPORT_17_002: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `device`, `waitingToSend` are `NULL`.**]**     
+**SRS_IOTHUB_MQTT_TRANSPORT_03_001: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `deviceId`, or both `deviceKey` and `deviceSasToken` are `NULL`.**]**     
+**SRS_IOTHUB_MQTT_TRANSPORT_03_002: [** `IoTHubTransportMqtt_Register` shall return `NULL` if both `deviceKey` and `deviceSasToken` are provided.**]**
 **SRS_IOTHUB_MQTT_TRANSPORT_17_003: [** `IoTHubTransportMqtt_Register` shall return `NULL` if `deviceId` or `deviceKey` do not match the `deviceId` and `deviceKey` passed in during `IoTHubTransportMqtt_Create`.**]**      
 **SRS_IOTHUB_MQTT_TRANSPORT_17_004: [** `IoTHubTransportMqtt_Register` shall return the `TRANSPORT_LL_HANDLE` as the `IOTHUB_DEVICE_HANDLE`. **]**    
 

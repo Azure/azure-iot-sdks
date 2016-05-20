@@ -10,7 +10,7 @@ namespace Microsoft.Azure.Devices.Client.Samples
     class Program
     {
 
-        
+
         // String containing Hostname, Device Id & Device Key in one of the following formats:
         //  "HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
         //  "HostName=<iothub_host_name>;CredentialType=SharedAccessSignature;DeviceId=<device_id>;SharedAccessSignature=SharedAccessSignature sr=<iot_host>/devices/<device_id>&sig=<token>&se=<expiry_time>";
@@ -65,19 +65,29 @@ namespace Microsoft.Azure.Devices.Client.Samples
         static async Task ReceiveCommands(DeviceClient deviceClient)
         {
             Console.WriteLine("\nDevice waiting for commands from IoTHub...\n");
-            Message receivedMessage;
+            Message receivedMessage = null;
             string messageData;
 
             while (true)
             {
-                receivedMessage = await deviceClient.ReceiveAsync(TimeSpan.FromSeconds(1));
-                
-                if (receivedMessage != null)
+                try
                 {
-                    messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
-                    Console.WriteLine("\t{0}> Received message: {1}", DateTime.Now.ToLocalTime(), messageData);
+                    receivedMessage = await deviceClient.ReceiveAsync(TimeSpan.FromSeconds(1));
 
-                    await deviceClient.CompleteAsync(receivedMessage);
+                    if (receivedMessage != null)
+                    {
+                        messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
+                        Console.WriteLine("\t{0}> Received message: {1}", DateTime.Now.ToLocalTime(), messageData);
+
+                        await deviceClient.CompleteAsync(receivedMessage);
+                    }
+                }
+                finally
+                {
+                    if (receivedMessage != null)
+                    {
+                        receivedMessage.Dispose();
+                    }
                 }
             }
         }

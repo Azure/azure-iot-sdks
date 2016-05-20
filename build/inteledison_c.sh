@@ -112,5 +112,5 @@ sed -i 's/\[device connection string\]/'$IOTHUB_DEVICE_CONN_STR'/g' c/iothub_cli
 # -----------------------------------------------------------------------------
 echo ---------- Building the SDK by executing build.sh script ---------- 
 cd $build_root/c/build_all/linux 
-./build.sh --toolchain-file toolchain-inteledison.cmake --skip-e2e-tests --skip-unittests --no-mqtt -cl --sysroot=$INTELEDISON_ROOT 
+./build.sh --toolchain-file toolchain-inteledison.cmake --skip-unittests --no-mqtt -cl --sysroot=$INTELEDISON_ROOT 
 [ $? -eq 0 ] || exit $?

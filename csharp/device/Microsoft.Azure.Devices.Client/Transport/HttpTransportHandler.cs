@@ -17,11 +17,11 @@ namespace Microsoft.Azure.Devices.Client.Transport
     using Microsoft.Azure.Devices.Client.Extensions;
     using Newtonsoft.Json;
 
-    sealed class HttpTransportHandler : TransportHandlerBase
+    sealed class HttpTransportHandler : DefaultDelegatingHandler
     {
+        readonly Http1TransportSettings transportSettings;
         static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(60);
-        static readonly TimeSpan DefaultReceiveTimeoutInSeconds = TimeSpan.FromSeconds(0);
-        static readonly IDictionary<string, string> MapMessageProperties2HttpHeaders = new Dictionary<string, string>()
+        static readonly IDictionary<string, string> MapMessageProperties2HttpHeaders = new Dictionary<string, string>
             {
                 { MessageSystemPropertyNames.Ack, CustomHeaderConstants.Ack },
                 { MessageSystemPropertyNames.CorrelationId, CustomHeaderConstants.CorrelationId },
@@ -35,8 +35,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         readonly IHttpClientHelper httpClientHelper;
         readonly string deviceId;
 
-        readonly Http1TransportSettings transportSettings;
-
+#if WINDOWS_UWP || PCL
         internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString)
         {
             this.deviceId = iotHubConnectionString.DeviceId;
@@ -45,19 +44,28 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 iotHubConnectionString,
                 ExceptionHandlingHelper.GetDefaultErrorMapping(),
                 DefaultOperationTimeout,
-                null
-#if !WINDOWS_UWP && !PCL
-                , null
-#endif
-                );
-            this.DefaultReceiveTimeout = DefaultReceiveTimeoutInSeconds;
+                null);
         }
+#else
+        internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString)
+            : this(iotHubConnectionString, new Http1TransportSettings())
+        {
+
+        }
+#endif
 
 #if WINDOWS_UWP || PCL
         internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString, Http1TransportSettings transportSettings)
             : this(iotHubConnectionString)
         {
             this.transportSettings = transportSettings;
+            this.deviceId = iotHubConnectionString.DeviceId;
+            this.httpClientHelper = new HttpClientHelper(
+                iotHubConnectionString.HttpsEndpoint,
+                iotHubConnectionString,
+                ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                DefaultOperationTimeout,
+                null);
         }
 #else
         internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString, Http1TransportSettings transportSettings)
@@ -71,10 +79,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 DefaultOperationTimeout,
                 null,
                 this.transportSettings.ClientCertificate);
-            this.DefaultReceiveTimeout = DefaultReceiveTimeoutInSeconds;
         }
 #endif
-
         /// <summary>
         /// Create a DeviceClient from individual parameters
         /// </summary>
@@ -85,15 +91,15 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             if (hostname == null)
             {
-                throw new ArgumentNullException("hostname");
+                throw new ArgumentNullException(nameof(hostname));
             }
 
             if (authMethod == null)
             {
-                throw new ArgumentNullException("authMethod");
+                throw new ArgumentNullException(nameof(authMethod));
             }
 
-            var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authMethod);
+            IotHubConnectionStringBuilder connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authMethod);
             return CreateFromConnectionString(connectionStringBuilder.ToString());
         }
 
@@ -106,26 +112,24 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             if (connectionString == null)
             {
-                throw new ArgumentNullException("connectionString");
+                throw new ArgumentNullException(nameof(connectionString));
             }
 
-            var iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
+            IotHubConnectionString iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
             return new HttpTransportHandler(iotHubConnectionString);
         }
 
-        protected override TimeSpan DefaultReceiveTimeout { get; set; }
-
-        protected override Task OnOpenAsync(bool explicitOpen)
+        public override Task OpenAsync(bool explicitOpen)
         {
             return TaskHelpers.CompletedTask;
         }
 
-        protected override Task OnCloseAsync()
+        public override Task CloseAsync()
         {
             return TaskHelpers.CompletedTask;
         }
 
-        protected override Task OnSendEventAsync(Message message)
+        public override Task SendEventAsync(Message message)
         {
             if (message == null)
             {
@@ -151,7 +155,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 CancellationToken.None);
         }
 
-        protected override Task OnSendEventAsync(IEnumerable<Message> messages)
+        public override Task SendEventAsync(IEnumerable<Message> messages)
         {
             if (messages == null)
             {
@@ -167,6 +171,15 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 ExceptionHandlingHelper.GetDefaultErrorMapping(),
                 customHeaders,
                 CancellationToken.None);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                this.httpClientHelper?.Dispose();
+            }
         }
 
         internal Task SendEventAsync(IEnumerable<string> messages)
@@ -194,7 +207,12 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 CancellationToken.None);
         }
 
-        protected async override Task<Message> OnReceiveAsync(TimeSpan timeout)
+        public override Task<Message> ReceiveAsync()
+        {
+            return this.ReceiveAsync(TimeSpan.Zero);
+        }
+
+        public override async Task<Message> ReceiveAsync(TimeSpan timeout)
         {
             // Long-polling is not supported
             if (!TimeSpan.Zero.Equals(timeout))
@@ -292,7 +310,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             return message;
         }
 
-        protected override Task OnCompleteAsync(string lockToken)
+        public override Task CompleteAsync(string lockToken)
         {
             var customHeaders = PrepareCustomHeaders(
                 CommonConstants.DeviceBoundPathCompleteTemplate.FormatInvariant(this.deviceId, lockToken),
@@ -309,7 +327,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 CancellationToken.None);
         }
 
-        protected override Task OnAbandonAsync(string lockToken)
+        public override Task AbandonAsync(string lockToken)
         {
             var customHeaders = PrepareCustomHeaders(
                 CommonConstants.DeviceBoundPathAbandonTemplate.FormatInvariant(this.deviceId, lockToken),
@@ -327,7 +345,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 CancellationToken.None);
         }
 
-        protected override Task OnRejectAsync(string lockToken)
+        public override Task RejectAsync(string lockToken)
         {
             var customHeaders = PrepareCustomHeaders(
                 CommonConstants.DeviceBoundPathRejectTemplate.FormatInvariant(this.deviceId, lockToken),

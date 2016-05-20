@@ -21,7 +21,7 @@ rem ----------------------------------------------------------------------------
 rem -- build iothub client samples
 rem -----------------------------------------------------------------------------
 
-call %repo-build-root%\iothub_client\build\mbed\build.cmd
+call %repo-build-root%\iothub_client\build\mbed\build.cmd %*
 if not %errorlevel%==0 exit /b %errorlevel%
 
 goto :eof
