@@ -83,7 +83,7 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
         [TestCategory("CIT")]
         public void DeviceClient_ConnectionString_SASAuthScheme_Test()
         {
-            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=Sas;DeviceId=device;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
+            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=SharedAccessKey;DeviceId=device;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
             var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
         }
 

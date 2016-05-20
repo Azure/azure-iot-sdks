@@ -157,7 +157,7 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
         [ExpectedException(typeof(ArgumentException))]
         public void DeviceClient_ConnectionString_SASAuthScheme_ExceptionTest()
         {
-            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=SAS;DeviceId=device";
+            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=SharedAccessKey;DeviceId=device";
             var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
         }
 
