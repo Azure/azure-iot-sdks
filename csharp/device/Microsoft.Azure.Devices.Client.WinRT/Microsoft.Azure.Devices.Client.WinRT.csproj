@@ -122,7 +122,6 @@
     <Compile Include="$(DeviceClientDir)\IAuthenticationMethod.cs" />
     <Compile Include="$(DeviceClientDir)\AmqpConnectionPoolSettings.cs" />
     <Compile Include="$(DeviceClientDir)\AuthenticationMethodFactory.cs" />
-    <Compile Include="$(DeviceClientDir)\AuthenticationScheme.cs" />
     <Compile Include="$(DeviceClientDir)\Common\ActionItem.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Api\ClientApiVersionHelper.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Api\IotHubApiResources.cs" />

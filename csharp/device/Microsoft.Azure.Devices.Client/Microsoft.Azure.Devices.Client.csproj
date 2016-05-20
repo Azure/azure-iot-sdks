@@ -140,7 +140,6 @@
     <Compile Include="Common\Exceptions\IotHubClientTransientException.cs" />
     <Compile Include="Common\TaskConstants.cs" />
     <Compile Include="Common\TaskUtils.cs" />
-    <Compile Include="AuthenticationScheme.cs" />
     <Compile Include="DeviceAuthenticationWithX509Certificate.cs" />
     <Compile Include="Transport\DefaultDelegatingHandler.cs" />
     <Compile Include="IDelegatingHandler.cs" />

@@ -137,36 +137,27 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
         [TestMethod]
         [TestCategory("CIT")]
         [ExpectedException(typeof(ArgumentException))]
-        public void DeviceClient_ConnectionString_BadAuthScheme_ExceptionTest()
+        public void DeviceClient_ConnectionString_SASKey_X509CertExceptionTest()
         {
-            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=Xyz;DeviceId=device;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
+            string connectionString = "HostName=acme.azure-devices.net;X509Cert=true;DeviceId=device;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
             var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
         }
 
         [TestMethod]
         [TestCategory("CIT")]
         [ExpectedException(typeof(ArgumentException))]
-        public void DeviceClient_ConnectionString_X509AuthScheme_ExceptionTest()
+        public void DeviceClient_ConnectionString_SASSignature_X509ExceptionTest()
         {
-            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=X509;DeviceId=device;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
+            string connectionString = "HostName=acme.azure-devices.net;DeviceId=device1;X509Cert=true;SharedAccessSignature=SharedAccessSignature sr=dh%3a%2f%2facme.azure-devices.net&sig=poifbMLdBGtCJknubF2FW6FLn5vND5k1IKoeQ%2bONgkE%3d&se=87824124985&skn=AllAccessKey";
             var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
         }
 
         [TestMethod]
         [TestCategory("CIT")]
         [ExpectedException(typeof(ArgumentException))]
-        public void DeviceClient_ConnectionString_SASAuthScheme_ExceptionTest()
+        public void DeviceClient_ConnectionString_X509Cert_False_Test()
         {
-            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=SharedAccessKey;DeviceId=device";
-            var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
-        }
-
-        [TestMethod]
-        [TestCategory("CIT")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void DeviceClient_ConnectionString_SASSignature_ExceptionTest()
-        {
-            string connectionString = "HostName=acme.azure-devices.net;DeviceId=device1;AuthScheme=x509;SharedAccessSignature=SharedAccessSignature sr=dh%3a%2f%2facme.azure-devices.net&sig=poifbMLdBGtCJknubF2FW6FLn5vND5k1IKoeQ%2bONgkE%3d&se=87824124985&skn=AllAccessKey";
+            string connectionString = "HostName=acme.azure-devices.net;X509Cert=false;DeviceId=device";
             var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
         }
     }

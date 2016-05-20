@@ -54,9 +54,6 @@
     <Compile Include="..\Microsoft.Azure.Devices.Client\AuthenticationMethodFactory.cs">
       <Link>AuthenticationMethodFactory.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.Azure.Devices.Client\AuthenticationScheme.cs">
-      <Link>AuthenticationScheme.cs</Link>
-    </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Api\ClientApiVersionHelper.cs">
       <Link>ClientApiVersionHelper.cs</Link>
     </Compile>

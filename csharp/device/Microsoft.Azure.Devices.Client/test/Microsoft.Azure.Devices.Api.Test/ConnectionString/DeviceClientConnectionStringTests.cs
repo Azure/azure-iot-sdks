@@ -81,22 +81,6 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
 
         [TestMethod]
         [TestCategory("CIT")]
-        public void DeviceClient_ConnectionString_SASAuthScheme_Test()
-        {
-            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=SharedAccessKey;DeviceId=device;SharedAccessKey=CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=";
-            var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
-        }
-
-        [TestMethod]
-        [TestCategory("CIT")]
-        public void DeviceClient_ConnectionString_X509AuthScheme_Test()
-        {
-            string connectionString = "HostName=acme.azure-devices.net;AuthScheme=X509;DeviceId=device";
-            var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
-        }
-
-        [TestMethod]
-        [TestCategory("CIT")]
         public void DeviceClient_ConnectionString_X509Certificate_DefaultTest()
         {
             string hostName = "acme.azure-devices.net";
@@ -104,6 +88,14 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
             var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
 
             var deviceClient = DeviceClient.Create(hostName, authMethod);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        public void DeviceClient_ConnectionString_X509Cert_Test()
+        {
+            string connectionString = "HostName=acme.azure-devices.net;X509Cert=true;DeviceId=device";
+            var deviceClient = DeviceClient.CreateFromConnectionString(connectionString);
         }
 
         [TestMethod]
