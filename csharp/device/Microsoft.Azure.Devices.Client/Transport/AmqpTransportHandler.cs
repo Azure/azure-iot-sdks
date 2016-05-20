@@ -6,6 +6,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
@@ -25,6 +26,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         readonly uint prefetchCount;
 
         int eventsDeliveryTag;
+        int closed;
 
         public AmqpTransportHandler(IotHubConnectionString connectionString, AmqpTransportSettings transportSettings)
             :base(transportSettings)
@@ -117,10 +119,13 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         public override Task CloseAsync()
         {
-            GC.SuppressFinalize(this);
-            this.faultTolerantEventSendingLink.CloseAsync().Fork();
-            this.faultTolerantDeviceBoundReceivingLink.CloseAsync().Fork();
-            this.IotHubConnection.Release(this.deviceId);
+            if (Interlocked.CompareExchange(ref this.closed, 1, 0) == 0)
+            {
+                GC.SuppressFinalize(this);
+                this.faultTolerantEventSendingLink.CloseAsync().Fork();
+                this.faultTolerantDeviceBoundReceivingLink.CloseAsync().Fork();
+                this.IotHubConnection.Release(this.deviceId);
+            }
             return TaskHelpers.CompletedTask;
         }
 
