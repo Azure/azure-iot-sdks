@@ -65,8 +65,8 @@ API reference documentation can be found online at https://msdn.microsoft.com/li
 
 [setup-iothub]: ../../doc/setup_iothub.md
 [devbox-setup]: doc/devbox_setup.md
-[run-sample-on-desktop-windows]: doc/run_sample_on_desktop_windows.md
-[run-sample-on-windows-iot-core]: doc/run_sample_on_windows_iot_core.md
+[run-sample-on-desktop-windows]: ../../doc/get_started/windows-desktop-csharp.md
+[run-sample-on-windows-iot-core]: ../../doc/get_started/windows10-iotcore-csharp.md
 [device-explorer]: ../../tools/DeviceExplorer/readme.md
 [faq-doc]: ../../doc/faq.md
 [dotnet-api-ref]: https://msdn.microsoft.com/library/microsoft.azure.devices.aspx

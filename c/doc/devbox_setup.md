@@ -115,7 +115,7 @@ This script uses **cmake** to make a folder called "cmake" in your home director
 
 > Note: Every time you run `build.sh`, it deletes and then recreates the "cmake" folder in your home directory.
 
-> Note: You will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](run_sample_on_desktop_linux.md).
+> Note: You will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](../../doc/get_started/linux-desktop-c.md).
 
 <a name="windowsce"/>
 ## Set up a Windows Embedded Compact 2013 development environment
@@ -151,7 +151,7 @@ build.cmd
 
 This script uses cmake to make a folder called "cmake_ce8" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the solution and run tests.
 
-> Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [running a C sample application on Windows Embedded Compact 2013 on a Toradex module](run_sample_on_toradex_wec2013.md).
+> Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [running a C sample application on Windows Embedded Compact 2013 on a Toradex module](../../doc/get_started/wince2013-toradex-module-c.md).
 
 To view the projects and examine the source code, open the **azure_iot_sdks.sln** solution files in Visual Studio.
 
@@ -166,4 +166,4 @@ This repository contains various C sample applications that illustrate how to us
 [readme]: ../readme.md
 [device-explorer]: ../../tools/DeviceExplorer/readme.md
 [toradex-CE8-sdk]:http://docs.toradex.com/102578
-[application-builder]:http://www.microsoft.com/en-us/download/details.aspx?id=38819
+[application-builder]:http://www.microsoft.com/download/details.aspx?id=38819

@@ -46,7 +46,7 @@ Unfortunately, this does not give us all the files that are required to build th
 ```
 cd ~/RPiTools/tools/arm-bcm2708/\
 gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf
-rsync -rl --safe-links pi@&lt;*your Pi identifier*&gt;:/{lib,usr} .
+rsync -rl --safe-links pi@<your Pi identifier>:/{lib,usr} .
 ```
 In the above command replace &lt;*your Pi identifier*&gt; with the IP address of your Raspberry Pi. If you no longer have a user identity on your Raspberry Pi called pi, then you will need to substitute an existing user identity.
 
@@ -98,7 +98,15 @@ cd ~/Source/azure-iot-sdks/c/build_all/linux
 ```
 This will tell cmake to build the SDK using the toolchain file toolchain-rpi.cmake, skip running all tests which is important since the executables will (probably) not run successfully on the host anyway, and exclude building the amqp and mqtt transports. The define *\_\_STDC\_NO\_ATOMICS\_\_* is required because this version of the Raspberry Pi compiler does not support *atomic\_fetch\_add* and *atomic\_fetch\_sub* so we need to tell it to use the GNU equivalents. Finally, and absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries.
 
-Note that if you need to add additional compiler flags to the build you can do so by specifying the -cl option on the build line. For example, one can use *-cl -v* or -*cl Wl,-v*.
+### Specifying Additional Build Flags
+
+If you need to provide additional build flags for your cross compile to function you can add further _-cl_ parameters to the build script's command line. For example, adding _-cl -v_ will turn on the verbose output from the compile and link process or to pass options only to the linker for example to pass -v to the linker you can use _-cl Wl,-v_.
+
+See this page for a summary of available gcc flags: https://gcc.gnu.org/onlinedocs/gcc/Option-Summary.html.
+
+### Known Issues and Circumventions
+
+If you encounter the error _error adding symbols: DSO missing from command line_ try adding a reference to libdl with  _-cl -ldl_ added to your build script command line.
 
 ## Summary
 
