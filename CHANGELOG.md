@@ -1,27 +1,21 @@
-# C Device SDK
-- 
-
-# Java SDK
-- 
-
-# C# Service SDK
-- 
-
-# Node Device Client
-- 
-
-# Python SDK
-- 
+# C# Device SDK
+- Device Client code cleanup & refactoring (changed to pipeline model)
+- Thread pool for MQTT threads\
+- More sophisticated error handling
+- Retry operation if transient error occured
 
 # General
-- 
+- Iothub-explorer - Pull request #551, tomconte – Add an option to generate a SAS Token for a device
 
 # Bug fixes
-
-- 
+- Fix tlsio_schannel bug (not all input bytes were being read)
+- Fix for the linux socket io layer
+- C# MQTT Fixed exception handling to properly propagate to a user
+- C# MQTT Fixed race in the message complete operation
+- Linux defaults to not run the e2e tests
 
 # Internal Changes
-- Fixed C longhaul tests for Windows, Linux and MBED platforms.
+- Fixed C longhaul tests for Windows, Linux and MBED platforms
 
 
 Release for May 6, 2016

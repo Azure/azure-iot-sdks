@@ -1,14 +1,14 @@
 {
     "c": {
-        "device": "1.0.6"
-    },
-    "c_nuget": {
         "device": "1.0.7"
     },
+    "c_nuget": {
+        "device": "1.0.8"
+    },
     "csharp": {
-        "device": "1.0.7",
+        "device": "1.0.8",
 		"devicepcl": "1.0.7",
-        "service": "1.0.6"
+        "service": "1.0.8"
     },
     "java": {
         "device": "1.0.6",
@@ -27,6 +27,6 @@
         "service": "1.0.8"
     },
     "iothub-explorer": "1.0.6",
-    "device-explorer": "1.0.5",
+    "device-explorer": "1.0.6",
     "github-release": "v1.0.5"
 }
