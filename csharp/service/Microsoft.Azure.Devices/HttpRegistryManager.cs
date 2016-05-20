@@ -685,7 +685,7 @@ namespace Microsoft.Azure.Devices
             }
         }
 
-        public static void ValidateDeviceAuthentication(AuthenticationMechanism authentication, string deviceId)
+        static void ValidateDeviceAuthentication(AuthenticationMechanism authentication, string deviceId)
         {
             if (authentication != null)
             {
