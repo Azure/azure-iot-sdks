@@ -50,7 +50,6 @@ namespace Microsoft.Azure.Devices.Client.Transport
         internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString)
             : this(iotHubConnectionString, new Http1TransportSettings())
         {
-
         }
 #endif
 
