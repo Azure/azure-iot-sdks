@@ -685,7 +685,7 @@ namespace Microsoft.Azure.Devices
             }
         }
 
-        public static bool ValidateDeviceAuthentication(AuthenticationMechanism authentication, string deviceId)
+        public static void ValidateDeviceAuthentication(AuthenticationMechanism authentication, string deviceId)
         {
             if (authentication != null)
             {
@@ -701,16 +701,13 @@ namespace Microsoft.Azure.Devices
                 // Validate X.509 thumbprints or SymmetricKeys since we should not have both at the same time
                 if (x509ThumbprintIsSet)
                 {
-                    return authentication.X509Thumbprint.IsValid(true);
+                    authentication.X509Thumbprint.IsValid(true);
                 }
                 else if (symmetricKeyIsSet)
                 {
-                    return authentication.SymmetricKey.IsValid(true);
+                    authentication.SymmetricKey.IsValid(true);
                 }
             }
-
-            // return true even if authentication is null
-            return true;
         }
 
         void EnsureInstanceNotClosed()
