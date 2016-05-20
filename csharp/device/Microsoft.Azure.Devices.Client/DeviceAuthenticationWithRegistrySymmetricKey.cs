@@ -65,7 +65,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             iotHubConnectionStringBuilder.DeviceId = this.DeviceId;
-            iotHubConnectionStringBuilder.AuthScheme = AuthenticationScheme.SAS;
+            iotHubConnectionStringBuilder.AuthScheme = AuthenticationScheme.SharedAccessKey;
             iotHubConnectionStringBuilder.SharedAccessKey = this.KeyAsBase64String;
             iotHubConnectionStringBuilder.SharedAccessKeyName = null;
             iotHubConnectionStringBuilder.SharedAccessSignature = null;

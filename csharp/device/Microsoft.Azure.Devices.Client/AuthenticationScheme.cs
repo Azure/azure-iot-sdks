@@ -8,9 +8,11 @@ namespace Microsoft.Azure.Devices.Client
     /// </summary>
     public enum AuthenticationScheme
     {
+        // Shared Access Key
+        SharedAccessKey = 0,
         // Shared Access Signature
-        SAS = 0,
+        SharedAccessSignature = 1,
         // X509 Certificate
-        X509 = 1
+        X509 = 2
     }
 }

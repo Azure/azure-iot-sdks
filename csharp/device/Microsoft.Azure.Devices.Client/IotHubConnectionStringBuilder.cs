@@ -46,7 +46,7 @@ namespace Microsoft.Azure.Devices.Client
         static readonly Regex SharedAccessKeyNameRegex = new Regex(@"^[a-zA-Z0-9_\-@\.]+$", regexOptions);
         static readonly Regex SharedAccessKeyRegex = new Regex(@"^.+$", regexOptions);
         static readonly Regex SharedAccessSignatureRegex = new Regex(@"^.+$", regexOptions);
-        static readonly Regex AuthSchemeRegex = new Regex(@"^[SAS|X509]+$", regexOptions);
+        static readonly Regex AuthSchemeRegex = new Regex(@"^[SharedAccessKey|SharedAccessSignature|X509]+$", regexOptions);
 #endif
 
         string hostName;
@@ -392,10 +392,14 @@ namespace Microsoft.Azure.Devices.Client
 
         static bool GetAuthScheme(string input, bool ignoreCase, out AuthenticationScheme authScheme)
         {
-            authScheme = AuthenticationScheme.SAS;
-            if (string.Equals(input, AuthenticationScheme.SAS.ToString(), ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+            authScheme = AuthenticationScheme.SharedAccessKey;
+            if (string.Equals(input, AuthenticationScheme.SharedAccessKey.ToString(), ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
             {
-                authScheme = AuthenticationScheme.SAS;
+                authScheme = AuthenticationScheme.SharedAccessKey;
+            }
+            else if (string.Equals(input, AuthenticationScheme.SharedAccessSignature.ToString(), ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+            {
+                authScheme = AuthenticationScheme.SharedAccessSignature;
             }
             else if (string.Equals(input, AuthenticationScheme.X509.ToString(), ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
             {
