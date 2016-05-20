@@ -253,7 +253,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
 #if !WINDOWS_UWP && !PCL && !NETMF
-            if ((this.UsingX509Cert) &&
+            if ((this.UsingX509Cert || this.Certificate != null) &&
                 (!this.SharedAccessKey.IsNullOrWhiteSpace() || !this.SharedAccessSignature.IsNullOrWhiteSpace()))
             {
                 throw new ArgumentException("Should not specify either SharedAccessKey or SharedAccessSignature if X.509 certificate is used");
