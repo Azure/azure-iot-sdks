@@ -149,6 +149,7 @@ void remote_monitoring_run(void)
             IOTHUB_CLIENT_CONFIG config;
             IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
+            config.deviceSasToken = NULL;
             config.deviceId = deviceId;
             config.deviceKey = deviceKey;
             config.iotHubName = hubName;
