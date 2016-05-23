@@ -1,8 +1,21 @@
 # C# Device SDK
+- 
+# General
+- 
+
+# Bug fixes
+- 
+
+# Internal Changes
+- 
+
+Release for May 20, 2016
+
+# C# Device SDK
 - Device Client code cleanup & refactoring (changed to pipeline model)
-- Thread pool for MQTT threads\
+- Thread pool for MQTT threads
 - More sophisticated error handling
-- Retry operation if transient error occured
+- Retry operation if transient error occurred
 - Support for X.509 client certificates as an authentication mechanism for devices
 
 # General
