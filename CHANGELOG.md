@@ -3,6 +3,7 @@
 - Thread pool for MQTT threads\
 - More sophisticated error handling
 - Retry operation if transient error occured
+- Support for X.509 client certificates as an authentication mechanism for devices
 
 # General
 - Iothub-explorer - Pull request #551, tomconte – Add an option to generate a SAS Token for a device
