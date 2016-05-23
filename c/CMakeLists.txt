@@ -13,8 +13,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full --error-exitcode=1")
 endif()
 
-include (CTest)
-
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
@@ -28,6 +26,11 @@ option(compileOption_CXX "passes a string to the command line of the C++ compile
 option(build_python "builds the Python native iothub_client module" OFF)
 option(build_javawrapper "builds the native iothub_client library for java C wrapper" OFF)
 
+if (${run_longhaul_tests})
+	set(CTEST_TEST_TIMEOUT 86400) # this must be defined before including CTest.
+endif()
+
+include (CTest)
 
 #Use solution folders. 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
