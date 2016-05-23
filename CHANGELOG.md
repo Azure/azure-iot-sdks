@@ -8,6 +8,8 @@
 
 # Internal Changes
 - 
+# Node.js Device SDK
+- Upload to blob
 
 Release for May 20, 2016
 
