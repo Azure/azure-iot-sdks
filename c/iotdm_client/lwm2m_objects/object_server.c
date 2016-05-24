@@ -40,29 +40,26 @@ static uint8_t prv_read(uint16_t instanceId, int *numDataP, lwm2m_data_t **dataA
     do
     {
         lwm2m_data_t      *tlvP = (*dataArrayP) + index;
-        tlvP->type = LWM2M_TYPE_RESOURCE;
         server_instance_t *targetP = (server_instance_t *)lwm2m_list_find(objectP->instanceList, instanceId);
         switch (tlvP->id)
         {
             case LWM2M_SERVER_SHORT_ID_ID:
                 lwm2m_data_encode_int(targetP->shortServerId, tlvP);
-                if (0 != tlvP->length) result = COAP_205_CONTENT;
-                else result = COAP_500_INTERNAL_SERVER_ERROR;
+                result = COAP_205_CONTENT;
 
                 break;
 
             case LWM2M_SERVER_LIFETIME_ID:
                 lwm2m_data_encode_int(targetP->lifetime, tlvP);
-                if (0 != tlvP->length) result = COAP_205_CONTENT;
-                else result = COAP_500_INTERNAL_SERVER_ERROR;
+                result = COAP_205_CONTENT;
 
                 break;
 
             case LWM2M_SERVER_BINDING_ID:
-                tlvP->value = (uint8_t *)targetP->binding;
-                tlvP->length = strlen(targetP->binding);
-                tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
-                tlvP->dataType = LWM2M_TYPE_STRING;
+                tlvP->value.asBuffer.buffer = (uint8_t *)targetP->binding;
+                tlvP->value.asBuffer.length = strlen(targetP->binding);
+                // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+                tlvP->type = LWM2M_TYPE_STRING;
                 result = COAP_205_CONTENT;
 
                 break;

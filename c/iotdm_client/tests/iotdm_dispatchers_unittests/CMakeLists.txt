@@ -17,6 +17,9 @@ set(${theseTestsName}_c_files
     ${LOCK_C_FILE}    
     ../../../wakaama/core/utils.c
     ../../../wakaama/core/tlv.c
+    ../../../wakaama/core/data.c
+    ../../../wakaama/core/discover.c
+    ../../../wakaama/core/uri.c
     ../../lwm2m_objects/lwm2m_object_list.c
     ../../lwm2m_objects/iotdm_dispatchers.c
     ../../lwm2m_objects/iotdm_dispatcher_list.c

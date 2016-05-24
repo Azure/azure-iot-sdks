@@ -10,18 +10,25 @@
 
 extern "C" 
 {
-#include "iotdm_internal.h"
-#include "iotdm_dispatchers.h"
+    #include "iotdm_internal.h"
+    #include "iotdm_dispatchers.h"
 
 
-#define bool	_Bool
-#define false	0
-#define true	1
+    #define bool	_Bool
+    #define false	0
+    #define true	1
 
-bool lwm2m_session_is_equal(void *lhs, void *rhs, void *userData)
-{
-    return (lhs == rhs);
-}
+    bool lwm2m_session_is_equal(void *lhs, void *rhs, void *userData)
+    {
+        return (lhs == rhs);
+    }
+    
+    // We don't use this, but we need to keep the linker happy and including observe.c 
+    // opens up a world of pain.
+    lwm2m_observed_t * observe_findByUri(lwm2m_context_t * contextP, lwm2m_uri_t * uriP)
+    {
+        return NULL;
+    }
 
 }
 
@@ -151,7 +158,7 @@ BEGIN_OPERATION_LIST(object_fake_readonly)
     OPERATION(PID_READ_VALID_STRING, OP_R, LWM2M_TYPE_STRING)
     OPERATION(PID_READ_VALID_INTEGER, OP_R, LWM2M_TYPE_INTEGER)
     OPERATION(PID_READ_VALID_FLOAT, OP_R, LWM2M_TYPE_FLOAT)
-    OPERATION(PID_READ_VALID_TIME, OP_R, LWM2M_TYPE_TIME)
+    OPERATION(PID_READ_VALID_TIME, OP_R, LWM2M_TYPE_INTEGER)
     OPERATION(PID_READ_VALID_OPAQUE, OP_R, LWM2M_TYPE_OPAQUE)
     OPERATION(PID_READ_VALID_BOOL, OP_R, LWM2M_TYPE_BOOLEAN)
     OPERATION(PID_READ_INT_NOTIMPL, OP_R, LWM2M_TYPE_INTEGER)
@@ -312,7 +319,7 @@ BEGIN_OPERATION_LIST(object_fake_writeexec)
     OPERATION(PID_WRITE_STRING, OP_W, LWM2M_TYPE_STRING)
     OPERATION(PID_WRITE_INTEGER, OP_W, LWM2M_TYPE_INTEGER)
     OPERATION(PID_WRITE_FLOAT, OP_W, LWM2M_TYPE_FLOAT)
-    OPERATION(PID_WRITE_TIME, OP_W, LWM2M_TYPE_TIME)
+    OPERATION(PID_WRITE_TIME, OP_W, LWM2M_TYPE_INTEGER)
     OPERATION(PID_WRITE_OPAQUE, OP_W, LWM2M_TYPE_OPAQUE)
     OPERATION(PID_WRITE_BOOL, OP_W, LWM2M_TYPE_BOOLEAN )
     OPERATION(PID_WRITE_NOTIMPL, OP_W, LWM2M_TYPE_INTEGER)
@@ -365,14 +372,9 @@ object_fake_writeexec *create_and_register_fake_writeexec_object()
 
 void free_lwm2m_data_t(lwm2m_data_t t)
 {
-    if (t.value != NULL)
-    {
-        if ((t.flags & LWM2M_TLV_FLAG_STATIC_DATA) != LWM2M_TLV_FLAG_STATIC_DATA)
-        {
-            lwm2m_free(t.value);
-        }
-    }
+    lwm2m_data_free(1, &t);
 }
+
 
 #define BYTE1(x) ((uint8_t)(((uint32_t)x) >> 24))
 #define BYTE2(x) ((uint8_t)(((uint32_t)x) >> 16))
@@ -485,7 +487,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_calls_correct_callback)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         (void)dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_INTEGER, &data);
 
@@ -497,7 +500,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_correct_result_on_callback_success)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_INTEGER, &data);
 
@@ -509,7 +513,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_correct_error_for_unregistered_object)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_UNREGISTERED, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_INTEGER, &data);
 
@@ -521,7 +526,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_correct_error_for_nonexistant_propertyId)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_NOT_IN_FAKE_READONLY_OBJECT, &data);
 
@@ -533,7 +539,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_correct_error_for_unimplemented_callback)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_INT_NOTIMPL, &data);
 
@@ -545,7 +552,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_correct_error_for_invalid_argument)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_INT_INVALIDARG, &data);
 
@@ -557,7 +565,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_correct_error_for_invalid_operation)
     {
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_WRITEEXEC, INSTANCE_ID_FAKE_WRITEEXEC_OBJECT, PID_WRITE_INTEGER, &data);
 
@@ -569,14 +578,14 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_string_property_correctly)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_STRING, &data);
 
         ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_STRING);
-        ASSERT_ARE_EQUAL(int, 0, data.flags);
-        ASSERT_ARE_EQUAL(int, strlen(VALID_STRING), data.length);
-        ASSERT_IS_TRUE(strcmp((char*)data.value, VALID_STRING) == 0);
+        ASSERT_ARE_EQUAL(int, strlen(VALID_STRING), data.value.asBuffer.length);
+        ASSERT_IS_TRUE(strcmp((char*)data.value.asBuffer.buffer, VALID_STRING) == 0);
 
         free_lwm2m_data_t(data);
     }
@@ -585,14 +594,14 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_opaque_property_correctly)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_OPAQUE, &data);
 
         ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_OPAQUE);
-        ASSERT_ARE_EQUAL(int, 0, data.flags);
-        ASSERT_ARE_EQUAL(int, strlen(VALID_STRING)+1, data.length);
-        ASSERT_IS_TRUE(strcmp((char*)data.value, VALID_STRING) == 0);
+        ASSERT_ARE_EQUAL(int, strlen(VALID_STRING)+1, data.value.asBuffer.length);
+        ASSERT_IS_TRUE(strcmp((char*)data.value.asBuffer.buffer, VALID_STRING) == 0);
 
         free_lwm2m_data_t(data);
     }
@@ -601,16 +610,13 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_integer_property_correctly)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_INTEGER, &data);
 
         ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_INTEGER);
-        ASSERT_ARE_EQUAL(int, data.length, 4);
-        ASSERT_ARE_EQUAL(int, data.value[0], BYTE1(VALID_INT));
-        ASSERT_ARE_EQUAL(int, data.value[1], BYTE2(VALID_INT));
-        ASSERT_ARE_EQUAL(int, data.value[2], BYTE3(VALID_INT));
-        ASSERT_ARE_EQUAL(int, data.value[3], BYTE4(VALID_INT));
+        ASSERT_ARE_EQUAL(int, data.value.asInteger, VALID_INT);
 
         free_lwm2m_data_t(data);
     }
@@ -619,18 +625,13 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_float_property_correctly)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_FLOAT, &data);
 
         ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_FLOAT);
-        ASSERT_ARE_EQUAL(int, data.length, 4);
-        float f = (float)VALID_FLOAT;
-        uint32_t i = *((int*)(&f));
-        ASSERT_ARE_EQUAL(int, data.value[0], BYTE1(i));
-        ASSERT_ARE_EQUAL(int, data.value[1], BYTE2(i));
-        ASSERT_ARE_EQUAL(int, data.value[2], BYTE3(i));
-        ASSERT_ARE_EQUAL(int, data.value[3], BYTE4(i));
+        ASSERT_ARE_EQUAL(int, data.value.asFloat, VALID_FLOAT);
 
         free_lwm2m_data_t(data);
     }
@@ -639,16 +640,13 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_time_property_correctly)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_TIME, &data);
 
-        ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_TIME);
-        ASSERT_ARE_EQUAL(int, data.length, 4);
-        ASSERT_ARE_EQUAL(int, data.value[0], BYTE1(VALID_TIME));
-        ASSERT_ARE_EQUAL(int, data.value[1], BYTE2(VALID_TIME));
-        ASSERT_ARE_EQUAL(int, data.value[2], BYTE3(VALID_TIME));
-        ASSERT_ARE_EQUAL(int, data.value[3], BYTE4(VALID_TIME));
+        ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_INTEGER);
+        ASSERT_ARE_EQUAL(int, data.value.asInteger, VALID_TIME);
 
         free_lwm2m_data_t(data);
     }
@@ -657,13 +655,13 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     TEST_FUNCTION(dispatch_read_returns_bool_property_correctly)
     {
         object_fake_readonly *obj = create_and_register_fake_readonly_object();
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
 
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_BOOL, &data);
 
         ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_BOOLEAN);
-        ASSERT_ARE_EQUAL(int, data.length, 1);
-        ASSERT_ARE_EQUAL(int, data.value[0], 1);
+        ASSERT_ARE_EQUAL(int, data.value.asBoolean, 1);
 
         free_lwm2m_data_t(data);
     }
@@ -735,52 +733,39 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     void populate_lwm2m_integer(lwm2m_data_t *data, uint32_t value)
     {
         //data->type = LWM2M_TYPE_INTEGER;
-        data->length = 4;
-        data->value = (uint8_t*)lwm2m_malloc(data->length);
-        data->value[0] = BYTE1(value);
-        data->value[1] = BYTE2(value);
-        data->value[2] = BYTE3(value);
-        data->value[3] = BYTE4(value);
+        data->value.asInteger = value;
     }
 
     void populate_lwm2m_bool(lwm2m_data_t *data, bool value)
     {
         //data->type = LWM2M_TYPE_BOOLEAN;
-        data->length = 1;
-        data->value = (uint8_t*)lwm2m_malloc(data->length);
-        data->value[0] = (uint8_t)value;
+        data->value.asBoolean = value;
     }
 
     void populate_lwm2m_time(lwm2m_data_t *data, int value)
     {
         populate_lwm2m_integer(data, value);
-        //data->type = LWM2M_TYPE_TIME;
+        //data->type = LWM2M_TYPE_INTEGER;
     }
 
     void populate_lwm2m_float(lwm2m_data_t *data, float value)
     {
         //data->type = LWM2M_TYPE_FLOAT;
-        data->length = 4;
-        data->value = (uint8_t*)lwm2m_malloc(data->length);
-        int intvalue = *((int*)&value);
-        data->value[0] = BYTE1(intvalue);
-        data->value[1] = BYTE2(intvalue);
-        data->value[2] = BYTE3(intvalue);
-        data->value[3] = BYTE4(intvalue);
+        data->value.asFloat = value;
     }
 
     void populate_lwm2m_string(lwm2m_data_t *data, const char *value)
     {
-        data->length = strlen(value);
-        data->value = (uint8_t*)lwm2m_malloc(data->length + 1);
-        strcpy((char*)data->value, value);
-        data->flags = LWM2M_TLV_FLAG_TEXT_FORMAT;
+        data->value.asBuffer.length = strlen(value);
+        data->value.asBuffer.buffer = (uint8_t*)lwm2m_malloc(data->value.asBuffer.length + 1);
+        strcpy((char*)data->value.asBuffer.buffer, value);
     }
 
     // Tests_SRS_DMDISPATCHERS_18_026: [ dispatch_write calls the correct callback for the given objectId and propertyId ]
     TEST_FUNCTION(dispatch_write_calls_correct_callback)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_integer(&data, VALID_INT);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -794,7 +779,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_029: [ dispatch_write returns COAP_204_CHANGED if the callback returns IOTHUB_CLIENT_OK ]
     TEST_FUNCTION(dispatch_write_returns_correct_result_on_callback_success)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_integer(&data, VALID_INT);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -808,7 +794,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_027: [ dispatch_write returns COAP_404_NOT_FOUND if the given objectId is not registered ]
     TEST_FUNCTION(dispatch_write_returns_correct_error_for_unregistered_object)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_integer(&data, VALID_INT);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -822,7 +809,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_028: [ dispatch_write returns COAP_404_NOT_FOUND if the given objectId does not contain the given propertyId ]
     TEST_FUNCTION(dispatch_write_returns_correct_error_for_nonexistant_property)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_integer(&data, VALID_INT);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -836,7 +824,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_030: [ dispatch_write returns COAP_501_NOT_IMPLEMENTED if the callback returns IOTHUB_CLIENT_NOT_IMPLEMENTED ]
     TEST_FUNCTION(dispatch_write_returns_correct_error_for_unimplemented_callback)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_integer(&data, VALID_INT);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -850,7 +839,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_031: [ dispatch_write returns COAP_400_BAD_REQUEST if the callback returns IOTHUB_CLIENT_INVLAID_ARG ]
     TEST_FUNCTION(dispatch_write_returns_correct_error_for_invalid_argument)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_integer(&data, VALID_INT);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -864,7 +854,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_032: [ dispatch_write returns COAP_405_METHOD_NOT_ALLOWED if the propertyId doesn't support the write operation ]
     TEST_FUNCTION(dispatch_write_returns_correct_error_for_invalid_operation)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_integer(&data, VALID_INT);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -878,7 +869,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_033: [ dispatch_write returns COAP_400_BAD_REQUEST for an integer property that fails to parse ]
     TEST_FUNCTION(dispatch_write_returns_correct_error_for_unparsable_integer)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_string(&data, UNPARSABLE_STRING);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -892,7 +884,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_034: [ dispatch_write returns COAP_400_BAD_REQUEST for a time property that fails to parse ]
     TEST_FUNCTION(dispatch_write_returns_correct_error_for_unparsable_time)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_string(&data, UNPARSABLE_STRING);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -906,7 +899,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_035: [ dispatch_write returns COAP_400_BAD_REQUEST for a float property that fails to parse ]
     TEST_FUNCTION(dispatch_write_returns_correct_error_for_unparsable_float)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_string(&data, UNPARSABLE_STRING);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -920,7 +914,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_036: [ dispatch_write returns COAP_400_BAD_REQUEST for a bool property that fails to parse ]
     TEST_FUNCTION(dispatch_write_returns_correct_error_for_unparsable_bool)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_string(&data, UNPARSABLE_STRING);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -934,7 +929,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_037: [ dispatch_write correctly passes a string argument into the callback ]
     TEST_FUNCTION(dispatch_write_passes_string_property_into_callback)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_string(&data, UNPARSABLE_STRING);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -948,16 +944,17 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_038: [ dispatch_write correctly passes a oppaque argument into the callback ]
     TEST_FUNCTION(dispatch_write_passes_opaque_property_into_callback)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_integer(&data, VALID_INT);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
         (void)dispatch_write(OID_FAKE_WRITEEXEC, INSTANCE_ID_FAKE_WRITEEXEC_OBJECT, PID_WRITE_OPAQUE, &data);
 
-        ASSERT_ARE_EQUAL(int, obj->opaque_length, data.length);
-        for (size_t i = 0; i < data.length; i++)
+        ASSERT_ARE_EQUAL(int, obj->opaque_length, data.value.asBuffer.length);
+        for (size_t i = 0; i < data.value.asBuffer.length; i++)
         {
-            ASSERT_ARE_EQUAL(int, obj->opaque_property[i], data.value[i]);
+            ASSERT_ARE_EQUAL(int, obj->opaque_property[i], data.value.asBuffer.buffer[i]);
         }
 
         free_lwm2m_data_t(data);
@@ -966,7 +963,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_039: [ dispatch_write correctly parses an well-formed integer argument and passes it into the callback ]
     TEST_FUNCTION(dispatch_write_passes_integer_property_into_callback)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_integer(&data, VALID_INT);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -980,7 +978,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_040: [ dispatch_write correctly parses an well-formed time argument and passes it into the callback ]
     TEST_FUNCTION(dispatch_write_passes_time_property_into_callback)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_time(&data, VALID_TIME);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -994,7 +993,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_041: [ dispatch_write correctly parses an well-formed float argument and passes it into the callback ]
     TEST_FUNCTION(dispatch_write_passes_float_property_into_callback)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_float(&data, (float)VALID_FLOAT);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
@@ -1008,7 +1008,8 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
     // Tests_SRS_DMDISPATCHERS_18_042: [ dispatch_write correctly parses an well-formed bool argument and passes it into the callback ]
     TEST_FUNCTION(dispatch_write_passes_bool_property_into_callback)
     {
-        lwm2m_data_t data = { 0 };
+        lwm2m_data_t data;
+        memset(&data, 0, sizeof(data));
         populate_lwm2m_bool(&data, true);
 
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();

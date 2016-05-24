@@ -160,7 +160,14 @@ namespace api_generator
         {
             get
             {
-                return "LWM2M_TYPE_" + PropertyTypeName.ToUpper();
+                if (PropertyTypeName.ToUpper().Equals("TIME"))
+                {
+                    return "LWM2M_TYPE_INTEGER";
+                }
+                else
+                {
+                    return "LWM2M_TYPE_" + PropertyTypeName.ToUpper();
+                }
             }
         }
 

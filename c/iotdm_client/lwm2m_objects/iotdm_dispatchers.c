@@ -46,7 +46,7 @@ IOTHUB_CLIENT_RESULT dispatch_time_read_to_callback(void *obj, void *function, l
     {
         // Codes_SRS_DMDISPATCHERS_18_047: [ dispatch_read will correctly convert a time property into the correct LWM2M format ]
         lwm2m_data_encode_int(data, tlvP);
-        tlvP->type = LWM2M_TYPE_TIME;
+        tlvP->type = LWM2M_TYPE_INTEGER;
     }
     return res;
 }

@@ -75,86 +75,79 @@ typedef struct _security_instance_
 static uint8_t prv_get_value(lwm2m_data_t *tlvP, security_instance_t * targetP)
 {
     // There are no multiple instance ressources
-    tlvP->type = LWM2M_TYPE_RESOURCE;
     switch (tlvP->id)
     {
     case LWM2M_SECURITY_URI_ID:
-        tlvP->value = (uint8_t*)targetP->uri;
-        tlvP->length = strlen(targetP->uri);
-        tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
-        tlvP->dataType = LWM2M_TYPE_STRING;
+        tlvP->value.asBuffer.buffer= (uint8_t*)targetP->uri;
+        tlvP->value.asBuffer.length = strlen(targetP->uri);
+        // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        tlvP->type = LWM2M_TYPE_STRING;
         return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_BOOTSTRAP_ID:
         lwm2m_data_encode_bool(targetP->isBootstrap, tlvP);
-        if (0 != tlvP->length) return COAP_205_CONTENT;
-        else return COAP_500_INTERNAL_SERVER_ERROR;
+        return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SECURITY_ID:
         lwm2m_data_encode_int(LWM2M_SECURITY_MODE_NONE, tlvP);
-        if (0 != tlvP->length) return COAP_205_CONTENT;
-        else return COAP_500_INTERNAL_SERVER_ERROR;
+        return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_PUBLIC_KEY_ID:
         // Here we return an opaque of 1 byte containing 0
-        tlvP->value = (uint8_t*)"";
-        tlvP->length = 1;
-        tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
-        tlvP->dataType = LWM2M_TYPE_OPAQUE;
+        tlvP->value.asBuffer.buffer = (uint8_t*)"";
+        tlvP->value.asBuffer.length = 1;
+        // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        tlvP->type = LWM2M_TYPE_OPAQUE;
         return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SERVER_PUBLIC_KEY_ID:
         // Here we return an opaque of 1 byte containing 0
-        tlvP->value = (uint8_t*)"";
-        tlvP->length = 1;
-        tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
-        tlvP->dataType = LWM2M_TYPE_OPAQUE;
+        tlvP->value.asBuffer.buffer = (uint8_t*)"";
+        tlvP->value.asBuffer.length = 1;
+        // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        tlvP->type = LWM2M_TYPE_OPAQUE;
         return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SECRET_KEY_ID:
         // Here we return an opaque of 1 byte containing 0
-        tlvP->value = (uint8_t*)"";
-        tlvP->length = 1;
-        tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
-        tlvP->dataType = LWM2M_TYPE_OPAQUE;
+        tlvP->value.asBuffer.buffer = (uint8_t*)"";
+        tlvP->value.asBuffer.length = 1;
+        // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        tlvP->type = LWM2M_TYPE_OPAQUE;
         return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SMS_SECURITY_ID:
         lwm2m_data_encode_int(LWM2M_SECURITY_MODE_NONE, tlvP);
-        if (0 != tlvP->length) return COAP_205_CONTENT;
-        else return COAP_500_INTERNAL_SERVER_ERROR;
+        return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SMS_KEY_PARAM_ID:
         // Here we return an opaque of 6 bytes containing a buggy value
-        tlvP->value = (uint8_t*)"12345";
-        tlvP->length = 6;
-        tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
-        tlvP->dataType = LWM2M_TYPE_OPAQUE;
+        tlvP->value.asBuffer.buffer = (uint8_t*)"12345";
+        tlvP->value.asBuffer.length = 6;
+        // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        tlvP->type = LWM2M_TYPE_OPAQUE;
         return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SMS_SECRET_KEY_ID:
         // Here we return an opaque of 32 bytes containing a buggy value
-        tlvP->value = (uint8_t*)"1234567890abcdefghijklmnopqrstu";
-        tlvP->length = 32;
-        tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
-        tlvP->dataType = LWM2M_TYPE_OPAQUE;
+        tlvP->value.asBuffer.buffer = (uint8_t*)"1234567890abcdefghijklmnopqrstu";
+        tlvP->value.asBuffer.length = 32;
+        // BKTOD tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        tlvP->type = LWM2M_TYPE_OPAQUE;
         return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SMS_SERVER_NUMBER_ID:
         lwm2m_data_encode_int(0, tlvP);
-        if (0 != tlvP->length) return COAP_205_CONTENT;
-        else return COAP_500_INTERNAL_SERVER_ERROR;
+        return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SHORT_SERVER_ID:
         lwm2m_data_encode_int(targetP->shortID, tlvP);
-        if (0 != tlvP->length) return COAP_205_CONTENT;
-        else return COAP_500_INTERNAL_SERVER_ERROR;
+        COAP_205_CONTENT;
 
     case LWM2M_SECURITY_HOLD_OFF_ID:
         lwm2m_data_encode_int(targetP->clientHoldOffTime, tlvP);
-        if (0 != tlvP->length) return COAP_205_CONTENT;
-        else return COAP_500_INTERNAL_SERVER_ERROR;
-
+        return COAP_205_CONTENT;
+        
     default:
         return COAP_404_NOT_FOUND;
     }

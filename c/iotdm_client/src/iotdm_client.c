@@ -467,8 +467,8 @@ bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 
                 time_t now = lwm2m_gettime();
                 time_t timeout = 60;
-                observation_step(client->session, now, &timeout);
-                transaction_step(client->session, now, &timeout);
+                observe_step(client->session, now, &timeout);
+                observe_step(client->session, now, &timeout);
 
                 retValue = true;
                 break;

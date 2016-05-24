@@ -4,33 +4,6 @@
 cmake_minimum_required(VERSION 2.8)
 #this is CMakeLists for iotdm_client
 
-macro(compileAsC99)
-  if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
-    if (NOT IN_OPENWRT)
-      set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
-    endif()
-    endif()
-  else()
-    set (CMAKE_C_STANDARD 99)
-    set (CMAKE_CXX_STANDARD 11)
-  endif()
-endmacro(compileAsC99)
-
-macro(compileAsC11)
-  if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      set (CMAKE_C_FLAGS "--std=c11 ${CMAKE_C_FLAGS}")
-      set (CMAKE_C_FLAGS "-D_POSIX_C_SOURCE=200112L ${CMAKE_C_FLAGS}")
-      set (CMAKE_CXX_FLAGS "--std=c++11 ${CMAKE_CXX_FLAGS}")
-    endif()
-  else()
-    set (CMAKE_C_STANDARD 11)
-    set (CMAKE_CXX_STANDARD 11)
-  endif()
-endmacro(compileAsC11)
-
 compileAsC99()
 
 option(no_tls "set no_tls:BOOL=ON to disable TLS in the DM client (OFF by default)" OFF)
@@ -42,6 +15,8 @@ set(LWM2M_OBJECTS_DIR ${CMAKE_CURRENT_LIST_DIR}/lwm2m_objects)
 set(IOTHUB_CLIENT_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 
 set(wakaama_c_files
+    ${LIBLWM2M_DIR}/core/data.c
+    ${LIBLWM2M_DIR}/core/discover.c
     ${LIBLWM2M_DIR}/core/bootstrap.c
     ${LIBLWM2M_DIR}/core/json.c
     ${LIBLWM2M_DIR}/core/liblwm2m.c
