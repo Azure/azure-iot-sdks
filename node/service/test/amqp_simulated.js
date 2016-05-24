@@ -43,7 +43,16 @@ SimulatedAmqp.prototype.send = function send(deviceId, message, done) {
   }
 };
 
-SimulatedAmqp.prototype.getReceiver = function (done) {
+SimulatedAmqp.prototype.getFeedbackReceiver = function (done) {
+  if (this._config.sharedAccessSignature === 'fail') {
+    done(new Error('error'));
+  }
+  else {
+    done(null, this._receiver);
+  }
+};
+
+SimulatedAmqp.prototype.getFileNotificationReceiver = function (done) {
   if (this._config.sharedAccessSignature === 'fail') {
     done(new Error('error'));
   }

@@ -64,7 +64,7 @@ The open method opens a connection to the IoT Hub service.
 
 **SRS_NODE_IOTHUB_CLIENT_05_010: [**The argument `err` passed to the callback `done` shall be null if the protocol operation was successful.**]**  
 
-**SRS_NODE_IOTHUB_CLIENT_05_011: [**Otherwise the argument `err` shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.**]**  
+**SRS_NODE_IOTHUB_CLIENT_05_011: [**Otherwise the argument `err` shall have an `amqpError` property containing implementation-specific response information for use in logging and troubleshooting.**]**  
 
 **SRS_NODE_IOTHUB_CLIENT_05_012: [**If the connection is already open when `open` is called, it shall have no effect—that is, the `done` callback shall be invoked immediately with a null argument.**]** 
 
@@ -75,43 +75,31 @@ The `send` method sends a cloud-to-device message to the service, intended for d
 
 **SRS_NODE_IOTHUB_CLIENT_05_014: [**The `send` method shall convert the message object to type azure-iot-common.Message if necessary.**]**
 
-**SRS_NODE_IOTHUB_CLIENT_05_015: [**If the connection has not already been opened (e.g., by a call to `open`), the send method shall open the connection before attempting to send the message.**]**  
-
 **SRS_NODE_IOTHUB_CLIENT_05_016: [**When the `send` method completes, the callback function (indicated by the done - argument) shall be invoked with the following arguments:
 - `err` - standard JavaScript Error object (or subclass)
 - `response` - an implementation-specific response object returned by the underlying protocol, useful for logging and troubleshooting**]** 
 
 **SRS_NODE_IOTHUB_CLIENT_05_017: [**The argument `err` passed to the callback `done` shall be null if the protocol operation was successful.**]**  
 
-**SRS_NODE_IOTHUB_CLIENT_05_018: [**Otherwise the argument `err` shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.**]**  
+**SRS_NODE_IOTHUB_CLIENT_05_018: [**Otherwise the argument `err` shall have an `amqpError` property containing implementation-specific response information for use in logging and troubleshooting.**]**  
 
 **SRS_NODE_IOTHUB_CLIENT_05_019: [**If the `deviceId` has not been registered with the IoT Hub, `send` shall call the `done` callback with a `DeviceNotFoundError`.**]**  
 
 **SRS_NODE_IOTHUB_CLIENT_05_020: [**If the queue which receives messages on behalf of the device is full, `send` shall call the `done` callback with a `DeviceMaximumQueueDepthExceededError`.**]** 
 
 ###getFeedbackReceiver(done)
-The `getFeedbackReceiver` method returns a FeedbackReceiver object which emits events when new feedback messages are received by the client.
+The `getFeedbackReceiver` method is used to obtain an `AmqpReceiver` object which emits events when new feedback messages are received by the client.
 
-**SRS_NODE_IOTHUB_CLIENT_05_026: [**If the connection has not already been opened (e.g., by a call to open), the `getFeedbackReceiver` method shall open the connection.**]**  
+**SRS_NODE_IOTHUB_CLIENT_05_027: [**When the `getFeedbackReceiver` method completes, the callback function (indicated by the `done` argument) shall be invoked with the following arguments:
+- `err` - standard JavaScript `Error` object (or subclass): `null` if the operation was successful
+- `receiver` - an `AmqpReceiver` instance: `undefined` if the operation failed **]**
 
-**SRS_NODE_IOTHUB_CLIENT_05_027: [**When the getFeedbackRec``eiver method completes, the callback function (indicated by the `done` argument) shall be invoked with the following arguments:
-- `err` - standard JavaScript Error object (or subclass)
-- `receiver` - an instance of Client.FeedbackReceiver**]**
+###getFileNotificationReceiver(done)
+The `getFileNotificationReceiver` method is used to obtain an `AmqpReceiver` object which emits events when new file notifications are received by the client.
 
-**SRS_NODE_IOTHUB_CLIENT_05_028: [**The argument err passed to the callback `done` shall be null if the protocol operation was successful.**]**
-
-**SRS_NODE_IOTHUB_CLIENT_05_029: [**Otherwise the argument `err` shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.**]**
-
-**SRS_NODE_IOTHUB_CLIENT_05_033: [**`getFeedbackReceiver` shall return the same instance of `Client.FeedbackReceiver` every time it is called with a given instance of `Client`.**]**
-`FeedbackReceiver` class
-
-**SRS_NODE_IOTHUB_CLIENT_05_030: [**The `FeedbackReceiver` class shall inherit `EventEmitter` to provide consumers the ability to listen for (and stop listening for) events.**]**  
-
-**SRS_NODE_IOTHUB_CLIENT_05_031: [**`FeedbackReceiver` shall expose the `errorReceived` event, whose handler shall be called with the following arguments:
-- `err` – standard JavaScript Error object (or subclass)**]** 
-
-**SRS_NODE_IOTHUB_CLIENT_05_032: [**`FeedbackReceiver` shall expose the `message` event, whose handler shall be called with the following arguments when a new feedback message is received from the IoT Hub:
-- `message` – a JavaScript object containing a batch of one or more feedback records**]**	 
+**SRS_NODE_IOTHUB_CLIENT_16_001: [** When the `getFileNotificationReceiver` method completes, the callback function (indicated by the `done` argument) shall be invoked with the following arguments:
+- `err` - standard JavaScript `Error` object (or subclass): `null` if the operation was successful
+- `receiver` - an `AmqpReceiver` instance: `undefined` if the operation failed **]**
 
 ###close(done)
 The `close` method closes the connection opened by open.

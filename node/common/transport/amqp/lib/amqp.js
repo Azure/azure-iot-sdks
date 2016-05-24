@@ -77,8 +77,7 @@ function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
     debug('Error received from node-amqp10: ' + err.message);
   }.bind(this));
 
-  this._receiverPromise = null;
-  this._receiver = null;
+  this._receivers = {};
   this._sender = null;
   this._connected = false;
 
@@ -207,23 +206,21 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
  */
 Amqp.prototype.getReceiver = function getReceiver(endpoint, done) {
   /*Codes_SRS_NODE_COMMON_AMQP_16_010: [If a receiver for this endpoint doesn’t exist, the getReceiver method should create a new AmqpReceiver object and then call the done() method with the object that was just created as an argument.] */
-  if (!this._receiver) {
+  if (!this._receivers[endpoint]) {
     this._setupReceiverLink(endpoint, done);
   }
   else {
     /*Codes_SRS_NODE_COMMON_AMQP_16_009: [If a receiver for this endpoint has already been created, the getReceiver method should call the done() method with the existing instance as an argument.] */
-    done(null, this._receiver);
+    done(null, this._receiver[endpoint]);
   }
 };
 
 Amqp.prototype._setupReceiverLink = function setupReceiverLink(endpoint, done) {
-  if (!this._receiverPromise) this._receiverPromise = this._amqp.createReceiver(endpoint);
-
-  this._receiverPromise
+  this._amqp.createReceiver(endpoint)
     .then(function (receiver) {
-      this._receiver = new AmqpReceiver(receiver);
-      debug('AmqpReceiver object created');
-      done(null, this._receiver);
+      this._receivers[endpoint] = new AmqpReceiver(receiver);
+      debug('AmqpReceiver object created for endpoint: ' + endpoint);
+      done(null, this._receivers[endpoint]);
     }.bind(this))
     .catch(function (err) {
       if (done) done(err);

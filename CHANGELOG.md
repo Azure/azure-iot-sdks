@@ -11,6 +11,10 @@
 # Node.js Device SDK
 - Upload to blob
 
+# Node.js Service SDK
+- Upload notifications
+- Deprecating `Amqp.getReceiver` in favor of `Amqp.getFeedbackReceiver`. `Amqp.getReceiver` will be removed for the next major release.
+
 Release for May 20, 2016
 
 # C# Device SDK
