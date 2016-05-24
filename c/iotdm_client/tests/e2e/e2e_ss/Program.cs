@@ -150,12 +150,6 @@
                                 }
 
                                 aCase.ExpectedValue = rawValue;
-                                Console.WriteLine("\t{0} is reported by the device as '{1}'", propertyName, rawValue);
-                            }
-
-                            else if (propertyName.Equals("Device_BatteryLevel"))
-                            {
-                                Console.WriteLine("\t** {0} is reported by the device as '{1}' **", propertyName, data[2]);
                             }
                         }
                     }
@@ -248,8 +242,6 @@
                     {
                         TestCase aCase = _ObserveTestCases[uRI];
                         aCase.ExpectedValue = data[2];
-
-                        Thread.Sleep(500);
                         aCase.RecordedValue = ReadPropertyThroughService(aCase.Name);
                         Console.WriteLine("Property: {0} Observed '{1}'", aCase.Name, aCase.RecordedValue);
                     }
@@ -363,7 +355,7 @@
                 _dj = JobClient.CreateFromConnectionString(_cs);
 
                 /** wait for the service/client handshake to finish */
-                Thread.Sleep(2 * OneMinute);
+                Thread.Sleep(100 * OneSecond);
 
                 while (_registered == false)
                 {
@@ -435,8 +427,8 @@
             _ReadTestCases.Add("Device_FirmwareVersion", oneCase);
             oneCase = new TestCase(DevicePropertyNames.BatteryStatus, TestCase.TestType.Read);
             _ReadTestCases.Add("Device_BatteryStatus", oneCase);
-            oneCase = new TestCase(DevicePropertyNames.BatteryLevel, TestCase.TestType.Read);
-            _ReadTestCases.Add("Device_BatteryLevel", oneCase);
+            //oneCase = new TestCase(DevicePropertyNames.BatteryLevel, TestCase.TestType.Read);
+            //_ReadTestCases.Add("Device_BatteryLevel", oneCase);
             oneCase = new TestCase(DevicePropertyNames.HardwareVersion, TestCase.TestType.Read);
             _ReadTestCases.Add("Device_HardwareVersion", oneCase);
             oneCase = new TestCase(DevicePropertyNames.SerialNumber, TestCase.TestType.Read);
@@ -492,7 +484,7 @@
              *  Start a timer for the process. The interval should be large enough to validate all tests.
              *  Care must be taken to ensure PMIN and PMAX, for example, are honored.
              */
-            _closer = new SysTimer(20 * OneMinute);
+            _closer = new SysTimer(35 * OneMinute);
             _closer.Elapsed += (sender, e) =>
             {
                 _clientReady.Set();
@@ -569,6 +561,7 @@
             {
                 var jobID = "Read" + propertyName + Guid.NewGuid().ToString();
 
+                DateTime start = DateTime.Now;
                 Task<JobResponse> job = _dj.ScheduleDevicePropertyReadAsync(jobID, _deviceId, propertyName);
                 job.Wait();
                 JobResponse rs = job.Result;
@@ -578,6 +571,9 @@
                     job.Wait();
                     rs = job.Result;
                 }
+
+                TimeSpan ts = DateTime.Now.Subtract(start);
+                Console.WriteLine("Read Property('{0}') took {1} seconds.", propertyName, ts.TotalSeconds);
 
                 string rv = getProperty(propertyName);
 
@@ -649,7 +645,6 @@
                     JobResponse rs = job.Result;
                     while (rs.Status < JobStatus.Completed)
                     {
-                        Thread.Sleep(1000);
                         job = _dj.GetJobAsync(jobID);
                         job.Wait();
                         rs = job.Result;
