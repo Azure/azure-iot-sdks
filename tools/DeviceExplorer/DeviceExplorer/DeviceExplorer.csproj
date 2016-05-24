@@ -157,6 +157,12 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\csharp\service\Microsoft.Azure.Devices\Microsoft.Azure.Devices.csproj">
+      <Project>{7fc2a03f-36fe-44c5-a1ef-5b1f11458350}</Project>
+      <Name>Microsoft.Azure.Devices</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

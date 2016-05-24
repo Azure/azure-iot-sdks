@@ -106,11 +106,38 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to null or empty deviceIds.
+        /// </summary>
+        internal static string DeviceJobParametersNullOrEmptyDeviceList {
+            get {
+                return ResourceManager.GetString("DeviceJobParametersNullOrEmptyDeviceList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to null or empty deviceId entries specified.
+        /// </summary>
+        internal static string DeviceJobParametersNullOrEmptyDeviceListEntries {
+            get {
+                return ResourceManager.GetString("DeviceJobParametersNullOrEmptyDeviceListEntries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Either both primary and secondary keys must be specified or neither one to auto generate on service side..
         /// </summary>
         internal static string DeviceKeysInvalid {
             get {
                 return ResourceManager.GetString("DeviceKeysInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to no properties specified.
+        /// </summary>
+        internal static string DevicePropertiesJob_NoPropertiesSpecified {
+            get {
+                return ResourceManager.GetString("DevicePropertiesJob_NoPropertiesSpecified", resourceCulture);
             }
         }
         
@@ -147,6 +174,33 @@ namespace Microsoft.Azure.Devices {
         internal static string FailedToSerializeUnsupportedType {
             get {
                 return ResourceManager.GetString("FailedToSerializeUnsupportedType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to packageUri is not a valid Uri..
+        /// </summary>
+        internal static string FirmwareUpdateJob_InvalidPackageUri {
+            get {
+                return ResourceManager.GetString("FirmwareUpdateJob_InvalidPackageUri", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid timeout value. timeout has a lower bound of 1 minute and an upper bound of 1 day..
+        /// </summary>
+        internal static string FirmwareUpdateJob_InvalidTimeout {
+            get {
+                return ResourceManager.GetString("FirmwareUpdateJob_InvalidTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to null or empty package uri.
+        /// </summary>
+        internal static string FirmwareUpdateJob_NullOrEmptyPackageUri {
+            get {
+                return ResourceManager.GetString("FirmwareUpdateJob_NullOrEmptyPackageUri", resourceCulture);
             }
         }
         
@@ -196,6 +250,15 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The JobClient instance was already closed..
+        /// </summary>
+        internal static string JobClientInstanceAlreadyClosed {
+            get {
+                return ResourceManager.GetString("JobClientInstanceAlreadyClosed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The message body cannot be read multiple times. To reuse it store the value after reading..
         /// </summary>
         internal static string MessageBodyConsumed {
@@ -232,6 +295,15 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The parameter {0} cannot be null or empty..
+        /// </summary>
+        internal static string ParameterCannotBeNullOrEmpty {
+            get {
+                return ResourceManager.GetString("ParameterCannotBeNullOrEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The parameter {0} cannot be null, empty or whitespace..
         /// </summary>
         internal static string ParameterCannotBeNullOrWhitespace {
@@ -246,6 +318,87 @@ namespace Microsoft.Azure.Devices {
         internal static string PropertyIsNotValidUri {
             get {
                 return ResourceManager.GetString("PropertyIsNotValidUri", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There must be AT LEAST 1 Key AND 1 AggregatedProperty..
+        /// </summary>
+        internal static string QueryExpressions_InvalidAggregationExpr {
+            get {
+                return ResourceManager.GetString("QueryExpressions_InvalidAggregationExpr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A LogicalExpression must have AT LEAST 1 FilterExpression..
+        /// </summary>
+        internal static string QueryExpressions_InvalidLogicalExpr {
+            get {
+                return ResourceManager.GetString("QueryExpressions_InvalidLogicalExpr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A LogicalExpression with operator &apos;Not&apos; should have EXACTLY 1 FilterExpression..
+        /// </summary>
+        internal static string QueryExpressions_InvalidLogicalNotExpr {
+            get {
+                return ResourceManager.GetString("QueryExpressions_InvalidLogicalNotExpr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There must be AT LEAST 1 QueryProperty in ProjectedProperties list if AllProperties is false..
+        /// </summary>
+        internal static string QueryExpressions_InvalidProjectionExpr {
+            get {
+                return ResourceManager.GetString("QueryExpressions_InvalidProjectionExpr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A QueryExpression cannot have both Projection and Aggregate expressions..
+        /// </summary>
+        internal static string QueryExpressions_InvalidQueryExpr {
+            get {
+                return ResourceManager.GetString("QueryExpressions_InvalidQueryExpr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} list cannot have null values..
+        /// </summary>
+        internal static string QueryExpressions_NullListValues {
+            get {
+                return ResourceManager.GetString("QueryExpressions_NullListValues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Value must be a type that implements IEnumerable if ComparisonOpertor is &apos;In&apos;, &apos;NotIn&apos; or &apos;All&apos;..
+        /// </summary>
+        internal static string QueryExpressions_RequiresEnumerableType {
+            get {
+                return ResourceManager.GetString("QueryExpressions_RequiresEnumerableType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to $ is a reserved character..
+        /// </summary>
+        internal static string QueryExpressions_ReservedCharError {
+            get {
+                return ResourceManager.GetString("QueryExpressions_ReservedCharError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tags property only supports ComparisonOperator &apos;All&apos;..
+        /// </summary>
+        internal static string QueryExpressions_TagsOperatorError {
+            get {
+                return ResourceManager.GetString("QueryExpressions_TagsOperatorError", resourceCulture);
             }
         }
         

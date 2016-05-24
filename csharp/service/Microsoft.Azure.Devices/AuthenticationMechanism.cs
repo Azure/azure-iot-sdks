@@ -15,6 +15,9 @@ namespace Microsoft.Azure.Devices
             this.SymmetricKey = new SymmetricKey();
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="SymmetricKey"/> used for Authentication
+        /// </summary>
         [JsonProperty(PropertyName = "symmetricKey")]
         public SymmetricKey SymmetricKey { get; set; }
     }

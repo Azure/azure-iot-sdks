@@ -14,18 +14,24 @@ namespace Microsoft.Azure.Devices
 
     using Microsoft.Azure.Devices.Common;
     using Microsoft.Azure.Devices.Common.Exceptions;
+    using Newtonsoft.Json;
+    using QueryExpressions;
 
     class HttpRegistryManager : RegistryManager, IDisposable
     {
         const string AdminUriFormat = "/$admin/{0}?{1}";
         const string RequestUriFormat = "/devices/{0}?{1}";
+        const string ManagedDeviceServicePropertyUriFormat = "/devices/{0}/serviceProperties?{1}";
         const string JobsUriFormat = "/jobs{0}?{1}";
         const string StatisticsUriFormat = "/statistics/devices?" + ClientApiVersionHelper.ApiVersionQueryString;
         const string DevicesRequestUriFormat = "/devices/?top={0}&{1}";
+        const string DevicesQueryUriFormat = "/devices/query?tags={0}&top={1}&{2}";
+        const string DevicesQueryExpressionUriFormat = "/devices/query?" + ClientApiVersionHelper.ApiVersionQueryString;
 
         static readonly Regex DeviceIdRegex = new Regex(@"^[A-Za-z0-9\-:.+%_#*?!(),=@;$']{1,128}$", RegexOptions.Compiled | RegexOptions.ECMAScript | RegexOptions.IgnoreCase);
+
         static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(100);
-        
+
         IHttpClientHelper httpClientHelper;
         readonly string iotHubName;
 
@@ -202,7 +208,7 @@ namespace Microsoft.Azure.Devices
         {
             return this.RemoveDeviceAsync(deviceId, CancellationToken.None);
         }
-        
+
         public override Task RemoveDeviceAsync(string deviceId, CancellationToken cancellationToken)
         {
             this.EnsureInstanceNotClosed();
@@ -314,7 +320,53 @@ namespace Microsoft.Azure.Devices
                 null,
                 cancellationToken);
         }
-        
+
+        /// <inheritdoc/>
+        public override Task<IEnumerable<Device>> QueryDevicesAsync(IEnumerable<string> tags, int maxCount)
+        {
+            return this.QueryDevicesAsync(tags, maxCount, CancellationToken.None);
+        }
+
+        /// <inheritdoc/>
+        public override Task<IEnumerable<Device>> QueryDevicesAsync(IEnumerable<string> tags, int maxCount, CancellationToken cancellationToken)
+        {
+            this.EnsureInstanceNotClosed();
+
+            IList<string> tagList = tags.ToListSlim();
+
+            if (tags == null || tagList.Count == 0)
+            {
+                throw new ArgumentException(IotHubApiResources.GetString(ApiResources.ParameterCannotBeNullOrEmpty, "tags"));
+            }
+
+            return this.httpClientHelper.PostAsync<Object, IEnumerable<Device>>(
+                QueryDevicesRequestUri(tagList, maxCount),
+                null,
+                null,
+                null,
+                cancellationToken);
+        }
+
+        public override Task<DeviceQueryResult> QueryDevicesJsonAsync(string queryJson)
+        {
+            return this.QueryDevicesJsonAsync(queryJson, CancellationToken.None);
+        }
+
+        public override Task<DeviceQueryResult> QueryDevicesJsonAsync(string queryJson, CancellationToken cancellationToken)
+        {
+            this.EnsureInstanceNotClosed();
+
+            var deviceQueryExpression = string.IsNullOrWhiteSpace(queryJson) ? new QueryExpression() : JsonConvert.DeserializeObject<QueryExpression>(queryJson);
+            deviceQueryExpression.Validate();
+
+            return this.httpClientHelper.PostAsync<QueryExpression, DeviceQueryResult>(
+                new Uri(DevicesQueryExpressionUriFormat, UriKind.Relative),
+                deviceQueryExpression,
+                null,
+                null,
+                cancellationToken);
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -574,7 +626,7 @@ namespace Microsoft.Azure.Devices
         public override Task<JobProperties> GetJobAsync(string jobId, CancellationToken cancellationToken)
         {
             this.EnsureInstanceNotClosed();
-            
+
             var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
             {
                 { HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new JobNotFoundException(jobId)) }
@@ -619,7 +671,7 @@ namespace Microsoft.Azure.Devices
                 null,
                 cancellationToken);
         }
-        
+
         Task RemoveDeviceAsync(string deviceId, IETagHolder eTagHolder, CancellationToken cancellationToken)
         {
             var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
@@ -647,6 +699,12 @@ namespace Microsoft.Azure.Devices
             return new Uri(RequestUriFormat.FormatInvariant(string.Empty, apiVersionQueryString), UriKind.Relative);
         }
 
+        static Uri GetDeviceServicePropertyRequestUri(string deviceId)
+        {
+            deviceId = WebUtility.UrlEncode(deviceId);
+            return new Uri(ManagedDeviceServicePropertyUriFormat.FormatInvariant(deviceId, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
+        }
+        
         static Uri GetJobUri(string jobId)
         {
             return new Uri(JobsUriFormat.FormatInvariant(jobId, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
@@ -655,6 +713,12 @@ namespace Microsoft.Azure.Devices
         static Uri GetDevicesRequestUri(int maxCount)
         {
             return new Uri(DevicesRequestUriFormat.FormatInvariant(maxCount, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
+        }
+
+        static Uri QueryDevicesRequestUri(IEnumerable<string> tags, int maxCount)
+        {
+            string encodedTags = WebUtility.UrlEncode(String.Join(",", tags));
+            return new Uri(DevicesQueryUriFormat.FormatInvariant(encodedTags, maxCount, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
         }
 
         static Uri GetAdminUri(string operation)
@@ -704,6 +768,36 @@ namespace Microsoft.Azure.Devices
             {
                 throw new ObjectDisposedException("RegistryManager", ApiResources.RegistryManagerInstanceAlreadyClosed);
             }
+        }
+
+        public override Task<ServiceProperties> SetServicePropertiesAsync(string deviceId, ServiceProperties serviceProperties)
+        {
+            return this.SetServicePropertiesAsync(deviceId, serviceProperties, CancellationToken.None);
+        }
+
+        public override Task<ServiceProperties> SetServicePropertiesAsync(string deviceId,  ServiceProperties serviceProperties, CancellationToken cancellationToken)
+        {
+            this.EnsureInstanceNotClosed();
+
+            if (string.IsNullOrEmpty(deviceId))
+            {
+                throw new ArgumentNullException("deviceId");
+            }
+
+            if (serviceProperties == null)
+            {
+                throw new ArgumentNullException("serviceProperties");
+            }
+
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>();
+            errorMappingOverrides.Add(HttpStatusCode.PreconditionFailed, async (responseMessage) => new PreconditionFailedException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)));
+            errorMappingOverrides.Add(HttpStatusCode.NotFound, async responseMessage =>
+            {
+                var responseContent = await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage);
+                return (Exception)new DeviceNotFoundException(responseContent, (Exception)null);
+            });
+
+            return this.httpClientHelper.PutAsync<ServiceProperties>(GetDeviceServicePropertyRequestUri(deviceId), serviceProperties, PutOperationType.UpdateEntity, errorMappingOverrides, cancellationToken);
         }
     }
 }

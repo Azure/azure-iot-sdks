@@ -5,6 +5,7 @@ namespace Microsoft.Azure.Devices.Api.Test
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Threading;
@@ -12,6 +13,8 @@ namespace Microsoft.Azure.Devices.Api.Test
     using Microsoft.Azure.Devices;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
+    using Newtonsoft.Json;
+    using QueryExpressions;
 
     [TestClass]
     public class RegistryManagerTests
@@ -64,6 +67,100 @@ namespace Microsoft.Azure.Devices.Api.Test
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
             await registryManager.GetDeviceAsync(null);
             Assert.Fail("Calling GetDeviceAsync with null device id did not throw an exception.");
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("API")]
+        public async Task QueryDevicesAsyncTestWithNullTags()
+        {
+            var restOpMock = new Mock<IHttpClientHelper>();
+            var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
+
+            await TestAssert.ThrowsAsync<ArgumentException>(() => registryManager.QueryDevicesAsync(null, 1));
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("API")]
+        public async Task QueryDevicesAsyncTestWithEmptyTags()
+        {
+            var restOpMock = new Mock<IHttpClientHelper>();
+            var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
+
+            await TestAssert.ThrowsAsync<ArgumentException>(() => registryManager.QueryDevicesAsync(new List<string>(), 1));
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("API")]
+        public async Task QueryDevicesAsyncTest()
+        {
+            List<Device> devicesToReturn = new List<Device>();
+            devicesToReturn.Add(new Device("a") { ConnectionState = DeviceConnectionState.Connected });
+
+            var restOpMock = new Mock<IHttpClientHelper>();
+            restOpMock.Setup(restOp => restOp.PostAsync<object, IEnumerable<Device>>(It.IsAny<Uri>(), null, It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), null, It.IsAny<CancellationToken>())).ReturnsAsync(devicesToReturn);
+
+            var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
+
+            var returnedDevices = await registryManager.QueryDevicesAsync(new List<string>() { "a", "b" }, 1);
+
+            Assert.AreSame(devicesToReturn, returnedDevices);
+            Assert.AreSame(devicesToReturn[0], returnedDevices.First());
+            restOpMock.VerifyAll();
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("API")]
+        public async Task QueryDeviceExpressionAsyncTest()
+        {
+            List<Device> devicesToReturn = new List<Device>();
+            devicesToReturn.Add(new Device("a") { ConnectionState = DeviceConnectionState.Connected });
+
+            var queryResultToReturn = new DeviceQueryResult
+            {
+                Result = devicesToReturn
+            };
+
+            var restOpMock = new Mock<IHttpClientHelper>();
+            restOpMock.Setup(restOp => restOp.PostAsync<QueryExpression, DeviceQueryResult>(It.IsAny<Uri>(), It.IsAny<QueryExpression>(), It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), null, It.IsAny<CancellationToken>())).ReturnsAsync(queryResultToReturn);
+
+            var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
+
+            // Valid JSON
+            var queryJson = JsonConvert.SerializeObject(this.GetQueryExpression());
+
+            var returnedDevices = (await registryManager.QueryDevicesJsonAsync(queryJson)).Result;
+
+            Assert.AreSame(devicesToReturn, returnedDevices);
+            Assert.AreSame(devicesToReturn[0], returnedDevices.First());
+            restOpMock.VerifyAll();
+
+            // Invalid JSON
+            queryJson = "{ filter: { { } }";
+            await TestAssert.ThrowsAsync<Exception>(() => registryManager.QueryDevicesJsonAsync(queryJson));
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("API")]
+        public async Task GetDevicesAsyncTest()
+        {
+            List<Device> devicesToReturn = new List<Device>();
+            devicesToReturn.Add(new Device("a") { ConnectionState = DeviceConnectionState.Connected });
+
+            var restOpMock = new Mock<IHttpClientHelper>();
+            restOpMock.Setup(restOp => restOp.GetAsync<IEnumerable<Device>>(It.IsAny<Uri>(), It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), null, It.IsAny<CancellationToken>())).ReturnsAsync(devicesToReturn);
+
+            var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
+
+            var returnedDevices = await registryManager.GetDevicesAsync(1);
+
+            Assert.AreSame(devicesToReturn, returnedDevices);
+            Assert.AreSame(devicesToReturn[0], returnedDevices.First());
+            restOpMock.VerifyAll();
         }
 
         [TestMethod]
@@ -282,6 +379,130 @@ namespace Microsoft.Azure.Devices.Api.Test
             var returnedDevice = await registryManager.UpdateDeviceAsync(deviceToReturn);
             Assert.AreSame(deviceToReturn, returnedDevice);
             restOpMock.VerifyAll();
+        }
+
+        private Device PrepareTestDevice(int batteryLevel, string firmwareVersion)
+        {
+            Device deviceToReturn = new Device("Device123");
+
+            deviceToReturn.DeviceProperties = new Dictionary<string, DevicePropertyValue>() {
+                { DevicePropertyNames.BatteryLevel,
+                    new DevicePropertyValue() { LastUpdatedTime= DateTime.Today, Value = batteryLevel } },
+                { DevicePropertyNames.FirmwareVersion,
+                    new DevicePropertyValue() { LastUpdatedTime= DateTime.Today, Value = firmwareVersion }
+                }
+            };
+
+
+            return deviceToReturn;
+        }
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("API")]
+        public async Task UpdateManagedDevicePropertiesAsyncTest()
+        {
+            // Setup for Test
+
+            Device deviceToReturn = PrepareTestDevice(batteryLevel: 10, firmwareVersion: "1.0");
+            deviceToReturn.ServiceProperties = new ServiceProperties() { Tags = new List<string>() { "Building109" } };
+
+            
+            JobResponse jobCurrentTimeToReturn = new JobResponse() { Status = JobStatus.Running };
+
+            var restOpMock = new Mock<IHttpClientHelper>();
+            restOpMock.Setup(restOp => restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(), It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), It.IsAny<CancellationToken>())).ReturnsAsync(deviceToReturn);
+            restOpMock.Setup(restOp => restOp.PutAsync<JobRequest,JobResponse>(It.IsAny<Uri>(), It.IsAny<JobRequest>(), It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), It.IsAny<CancellationToken>())).ReturnsAsync(jobCurrentTimeToReturn);
+
+            // Create a new Device with the Tags
+            Device myDevice = new Device("Device123");
+
+            var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
+            Device createdDevice = await registryManager.AddDeviceAsync(myDevice);
+
+            // Get the Device and check for the Managed Device Properties
+
+            string manufacturer = null;
+            try
+            {
+                manufacturer = createdDevice.DeviceProperties[DevicePropertyNames.Manufacturer].ToString();
+            }
+            catch (KeyNotFoundException)
+            { }
+
+            Assert.AreEqual(manufacturer, null);
+
+            // Update the Device Property for Manufacturer . Schedules the Job and Returns the Job Id to poll
+            var jobClient = new HttpJobClient(restOpMock.Object, IotHubName);
+            JobResponse jobCurrentTime = await jobClient.ScheduleDevicePropertyWriteAsync(Guid.NewGuid().ToString(), myDevice.Id, DevicePropertyNames.CurrentTime, DateTime.UtcNow);
+
+            Assert.AreEqual(jobCurrentTime.Status, jobCurrentTimeToReturn.Status);
+
+            // Poll for the Job Status ...
+            jobCurrentTime = await jobClient.GetJobAsync(jobCurrentTime.JobId);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("API")]
+        public async Task UpdateManagedDeviceConfigurationAsyncTest()
+        {
+            // Setup for Test
+            Device deviceToReturn = PrepareTestDevice(batteryLevel: 10, firmwareVersion: "1.0");
+            deviceToReturn.ServiceProperties = new ServiceProperties() { Tags = new List<string>() { "Building109" } };
+
+            JobResponse configurationJobPropertyToReturn = new JobResponse() { Status = JobStatus.Running };
+
+            var restOpMock = new Mock<IHttpClientHelper>();
+            restOpMock.Setup(restOp => restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(), It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), It.IsAny<CancellationToken>())).ReturnsAsync(deviceToReturn);
+            restOpMock.Setup(restOp => restOp.PutAsync<JobRequest, JobResponse>(It.IsAny<Uri>(), It.IsAny<JobRequest>(), It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), It.IsAny<CancellationToken>())).ReturnsAsync(configurationJobPropertyToReturn);
+
+            // Create a new Device with the Tags
+            Device myDevice = new Device("Device123");
+
+            var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
+            Device createdDevice = await registryManager.AddDeviceAsync(myDevice);
+
+
+            // Update the Device Property for Manufacturer . Schedules the Job and Returns the Job Id to poll
+            var jobClient = new HttpJobClient(restOpMock.Object, IotHubName);
+            JobResponse configJobProperties = await jobClient.ScheduleUpdateDeviceConfigurationAsync(Guid.NewGuid().ToString(), myDevice.Id, "New Configuration Value");
+
+            Assert.AreEqual(configJobProperties.Status, configurationJobPropertyToReturn.Status);
+
+            // Poll for the Job Status ...
+            configJobProperties = await jobClient.GetJobAsync(configJobProperties.JobId);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("API")]
+        public async Task UpdateManagedDeviceTagsAsyncTest()
+        {
+            // Setup for Test
+            Device createdDeviceToReturn = PrepareTestDevice(batteryLevel: 10, firmwareVersion: "1.0");
+            createdDeviceToReturn.ServiceProperties = new ServiceProperties() { Tags = new List<string>() { "Building109" } };
+
+            Device updatedDeviceToReturn = new Device("Device123");
+            updatedDeviceToReturn.ServiceProperties = new ServiceProperties() { Tags = new List<string>() { "My New Tag" } };
+
+            var restOpMock = new Mock<IHttpClientHelper>();
+            restOpMock.Setup(restOp => restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<Device>(), It.IsAny<PutOperationType>(), It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), It.IsAny<CancellationToken>())).ReturnsAsync(createdDeviceToReturn);
+            restOpMock.Setup(restOp => restOp.PostAsync<ServiceProperties, Device>(It.IsAny<Uri>(), It.IsAny<ServiceProperties>(), It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), null, It.IsAny<CancellationToken>())).ReturnsAsync(updatedDeviceToReturn);
+
+            // Create a new Device with the Tags
+            Device myDevice = new Device("Device123");
+
+            var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
+            Device createdDevice = await registryManager.AddDeviceAsync(myDevice);
+
+            // Updates the Tags
+            createdDevice.ServiceProperties.Tags.Add("My New Tag");
+
+            restOpMock.Setup(restOp => restOp.PutAsync(It.IsAny<Uri>(), It.IsAny<ServiceProperties>(), It.IsAny<PutOperationType>(), It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), It.IsAny<CancellationToken>())).ReturnsAsync(createdDevice.ServiceProperties);
+
+            ServiceProperties serviceProperties = await registryManager.SetServicePropertiesAsync(createdDevice.Id, createdDevice.ServiceProperties);
+
+            Assert.AreEqual(true, serviceProperties.Tags.Contains("My New Tag"));
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
@@ -790,6 +1011,94 @@ namespace Microsoft.Azure.Devices.Api.Test
 
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
             await registryManager.RemoveDevices2Async(new List<Device>() { goodDevice1, goodDevice2 }, false, CancellationToken.None);
+        }
+        
+        private QueryExpression GetQueryExpression()
+        {
+            return new QueryExpression
+            {
+                Filter = new LogicalExpression
+                {
+                    LogicalOperator = LogicalOperatorType.And,
+                    FilterExpressions = new List<FilterExpression>
+                    {
+                        new ComparisonExpression
+                        {
+                            ComparisonOperator = ComparisonOperatorType.GreaterThan,
+                            Property = new QueryProperty
+                            {
+                                PropertyName = "Temperature",
+                                PropertyType = PropertyType.DeviceProperty
+                            },
+                            Value = 70
+                        },
+                        new LogicalExpression
+                        {
+                            LogicalOperator = LogicalOperatorType.Or,
+                            FilterExpressions = new List<FilterExpression>
+                            {
+                                new ComparisonExpression
+                                {
+                                    ComparisonOperator = ComparisonOperatorType.LessThan,
+                                    Property = new QueryProperty
+                                    {
+                                        PropertyName = "Humidity",
+                                        PropertyType = PropertyType.DeviceProperty
+                                    },
+                                    Value = 40
+                                },
+                                new ComparisonExpression
+                                {
+                                    ComparisonOperator = ComparisonOperatorType.GreaterThan,
+                                    Property = new QueryProperty
+                                    {
+                                        PropertyName = "Humidity",
+                                        PropertyType = PropertyType.DeviceProperty
+                                    },
+                                    Value = 60
+                                }
+                            }
+                        }
+                    }
+                },
+                Projection = new ProjectionExpression
+                {
+                    AllProperties = false,
+                    ProjectedProperties = new List<QueryProperty>
+                    {
+                        new QueryProperty
+                        {
+                            PropertyName = "Temperature",
+                            PropertyType = PropertyType.DeviceProperty
+                        },
+                        new QueryProperty
+                        {
+                            PropertyName = "Humidity",
+                            PropertyType = PropertyType.DeviceProperty
+                        }
+                    }
+                },
+                Sort = new List<SortExpression>
+                {
+                    new SortExpression
+                    {
+                        Order = SortOrder.Ascending,
+                        Property = new QueryProperty
+                        {
+                            PropertyName = "AvgHumidity",
+                            PropertyType = PropertyType.AggregatedProperty
+                        }
+                    },
+                    new SortExpression
+                    {
+                        Order = SortOrder.Ascending,
+                        Property = new QueryProperty
+                        {
+                            PropertyName = "DeviceId"
+                        }
+                    }
+                }
+            };
         }
     }
 }

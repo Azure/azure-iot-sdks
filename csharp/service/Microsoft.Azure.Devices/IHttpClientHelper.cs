@@ -34,6 +34,12 @@ namespace Microsoft.Azure.Devices
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
             CancellationToken cancellationToken) where T: IETagHolder;
 
+        Task<T2> PutAsync<T, T2>(
+            Uri requestUri,
+            T entity,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            CancellationToken cancellationToken);
+
         Task PostAsync<T>(
             Uri requestUri, 
             T entity, 

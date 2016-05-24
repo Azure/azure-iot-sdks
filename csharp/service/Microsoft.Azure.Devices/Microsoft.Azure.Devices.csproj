@@ -200,7 +200,22 @@
     <Compile Include="DeliveryFailureReason.cs" />
     <Compile Include="Device.cs" />
     <Compile Include="DeviceConnectionState.cs" />
+    <Compile Include="DevicePropertyValue.cs" />
     <Compile Include="BulkRegistryOperationResult.cs" />
+    <Compile Include="JobClient\DeviceJobParameters.cs" />
+    <Compile Include="JobClient\UpdateDeviceConfigurationJobParameters.cs" />
+    <Compile Include="JobClient\ReadDevicePropertiesJobParameters.cs" />
+    <Compile Include="JobClient\FirmwareUpdateJobParameters.cs" />
+    <Compile Include="JobClient\HttpJobClient.cs" />
+    <Compile Include="JobClient\JobClient.cs" />
+    <Compile Include="JobClient\JobParameters.cs" />
+    <Compile Include="JobClient\JobRequest.cs" />
+    <Compile Include="JobClient\JobResponse.cs" />
+    <Compile Include="JobClient\WriteDevicePropertiesJobParameters.cs" />
+    <Compile Include="DeviceQueryResult.cs" />
+    <Compile Include="QueryExpressions\FilterExpressionConverter.cs" />
+    <Compile Include="JobQueryResult.cs" />
+    <Compile Include="ServiceProperties.cs" />
     <Compile Include="DeviceStatus.cs" />
     <Compile Include="EndpointKind.cs" />
     <Compile Include="ETagHolder.cs" />
@@ -234,6 +249,21 @@
     <Compile Include="MessageSystemPropertyNames.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PutOperationType.cs" />
+    <Compile Include="QueryExpressions\AggregationExpression.cs" />
+    <Compile Include="QueryExpressions\AggregationOperatorType.cs" />
+    <Compile Include="QueryExpressions\AggregationProperty.cs" />
+    <Compile Include="QueryExpressions\ComparisonExpression.cs" />
+    <Compile Include="QueryExpressions\ComparisonOperatorType.cs" />
+    <Compile Include="QueryExpressions\QueryExpression.cs" />
+    <Compile Include="QueryExpressions\FilterExpression.cs" />
+    <Compile Include="QueryExpressions\FilterExpressionType.cs" />
+    <Compile Include="QueryExpressions\LogicalExpression.cs" />
+    <Compile Include="QueryExpressions\LogicalOperatorType.cs" />
+    <Compile Include="QueryExpressions\ProjectionExpression.cs" />
+    <Compile Include="QueryExpressions\PropertyType.cs" />
+    <Compile Include="QueryExpressions\QueryProperty.cs" />
+    <Compile Include="QueryExpressions\SortExpression.cs" />
+    <Compile Include="QueryExpressions\SortOrder.cs" />
     <Compile Include="Receiver.cs" />
     <Compile Include="RegistryManager.cs" />
     <Compile Include="RegistryStatistics.cs" />
@@ -242,6 +272,7 @@
     <Compile Include="ServiceClient.cs" />
     <Compile Include="ServiceStatistics.cs" />
     <Compile Include="SymmetricKey.cs" />
+    <Compile Include="DevicePropertyNames.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

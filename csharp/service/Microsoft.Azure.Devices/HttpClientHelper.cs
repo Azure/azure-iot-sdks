@@ -15,7 +15,7 @@ namespace Microsoft.Azure.Devices
     using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
-    
+
     using Microsoft.Azure.Devices.Common;
     using Microsoft.Azure.Devices.Common.Exceptions;
     using Microsoft.Azure.Devices.Common.Extensions;
@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Devices
             this.httpClientObj.BaseAddress = this.baseAddress;
             this.httpClientObj.Timeout = timeout;
             this.httpClientObj.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(CommonConstants.MediaTypeForDeviceManagementApis));
-            this.httpClientObj.DefaultRequestHeaders.ExpectContinue = false; 
+            this.httpClientObj.DefaultRequestHeaders.ExpectContinue = false;
             if (preRequestActionForAllRequests != null)
             {
                 preRequestActionForAllRequests(this.httpClientObj);
@@ -99,7 +99,7 @@ namespace Microsoft.Azure.Devices
             T entity,
             PutOperationType operationType,
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
-            CancellationToken cancellationToken) where T: IETagHolder
+            CancellationToken cancellationToken) where T : IETagHolder
         {
             T result = default(T);
 
@@ -119,11 +119,34 @@ namespace Microsoft.Azure.Devices
             return result;
         }
 
+        public async Task<T2> PutAsync<T, T2>(
+            Uri requestUri,
+            T entity,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            CancellationToken cancellationToken)
+        {
+            T2 result = default(T2);
+
+            await this.ExecuteAsync(
+                    HttpMethod.Put,
+                    new Uri(this.baseAddress, requestUri),
+                    (requestMsg, token) =>
+                    {
+                        requestMsg.Content = new ObjectContent<T>(entity, new JsonMediaTypeFormatter());
+                        return Task.FromResult(0);
+                    },
+                    async (httpClient, token) => result = await ReadResponseMessageAsync<T2>(httpClient, token),
+                    errorMappingOverrides,
+                    cancellationToken);
+
+            return result;
+        }
+
         static async Task<T> ReadResponseMessageAsync<T>(HttpResponseMessage message, CancellationToken token)
         {
-            if (typeof(T) == typeof (HttpResponseMessage))
+            if (typeof(T) == typeof(HttpResponseMessage))
             {
-                return (T) (object)message;
+                return (T)(object)message;
             }
 
             T entity = await message.Content.ReadAsAsync<T>(token);
@@ -169,7 +192,7 @@ namespace Microsoft.Azure.Devices
             }
             else
             {
-                InsertEtag(requestMessage, entity); 
+                InsertEtag(requestMessage, entity);
             }
         }
 
@@ -212,10 +235,10 @@ namespace Microsoft.Azure.Devices
         }
 
         public Task PostAsync<T>(
-            Uri requestUri, 
-            T entity, 
-            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides, 
-            IDictionary<string, string> customHeaders, 
+            Uri requestUri,
+            T entity,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            IDictionary<string, string> customHeaders,
             CancellationToken cancellationToken)
         {
             return this.PostAsyncHelper(
@@ -289,8 +312,8 @@ namespace Microsoft.Azure.Devices
             Uri requestUri,
             T entity,
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
-            IDictionary<string, string> customHeaders, 
-            CancellationToken cancellationToken) where T: IETagHolder
+            IDictionary<string, string> customHeaders,
+            CancellationToken cancellationToken) where T : IETagHolder
         {
             return this.ExecuteAsync(
                     HttpMethod.Delete,
@@ -403,7 +426,7 @@ namespace Microsoft.Azure.Devices
                         {
                             await processResponseMessageAsync(responseMsg, cancellationToken);
                         }
-                    }                        
+                    }
                 }
                 catch (AggregateException ex)
                 {
