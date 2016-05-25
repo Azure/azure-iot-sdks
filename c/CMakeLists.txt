@@ -164,6 +164,8 @@ if(${run_e2e_tests} OR ${run_longhaul_tests})
 endif()
 
 add_subdirectory(blob)
+include_directories(${BLOB_INC_FOLDER})
+
 add_subdirectory(iothub_client)
 add_subdirectory(service)
 add_subdirectory(serializer)

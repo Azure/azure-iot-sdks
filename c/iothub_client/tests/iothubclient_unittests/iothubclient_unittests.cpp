@@ -17,6 +17,7 @@
 #include "iothub_client_ll.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/list.h"
 #include "iothubtransport.h"
 
 extern "C" int gballoc_init(void);
@@ -79,7 +80,14 @@ static IOTHUB_CLIENT_HANDLE current_iothub_client;
 #define TEST_IOTHUBTRANSPORT_HANDLE (TRANSPORT_HANDLE)0xDEAD
 #define TEST_IOTHUBTRANSPORT_LOCK (TRANSPORT_HANDLE)0xDEAF
 #define TEST_IOTHUBTRANSPORT_LL (TRANSPORT_HANDLE)0xDEDE
+#define TEST_LIST_HANDLE				(LIST_HANDLE)0x4246
+typedef struct TEST_LIST_ITEM_TAG
+{
+    const void* item_value;
+} TEST_LIST_ITEM;
 
+static TEST_LIST_ITEM** list_items = NULL;
+static size_t list_item_count = 0;
 TYPED_MOCK_CLASS(CIoTHubClientMocks, CGlobalMock)
 {
 public:
@@ -171,20 +179,122 @@ public:
 
 	/* TRANSPORT mocks*/
 
-	MOCK_STATIC_METHOD_1(, LOCK_HANDLE, IoTHubTransport_GetLock, TRANSPORT_HANDLE, transportHlHandle)
-	MOCK_METHOD_END(LOCK_HANDLE, TEST_IOTHUBTRANSPORT_LOCK)
+    MOCK_STATIC_METHOD_1(, LOCK_HANDLE, IoTHubTransport_GetLock, TRANSPORT_HANDLE, transportHlHandle)
+    MOCK_METHOD_END(LOCK_HANDLE, TEST_IOTHUBTRANSPORT_LOCK)
 
-	MOCK_STATIC_METHOD_1(, TRANSPORT_LL_HANDLE, IoTHubTransport_GetLLTransport, TRANSPORT_HANDLE, transportHlHandle)
-	MOCK_METHOD_END(TRANSPORT_LL_HANDLE, TEST_IOTHUBTRANSPORT_LL)
+    MOCK_STATIC_METHOD_1(, TRANSPORT_LL_HANDLE, IoTHubTransport_GetLLTransport, TRANSPORT_HANDLE, transportHlHandle)
+    MOCK_METHOD_END(TRANSPORT_LL_HANDLE, TEST_IOTHUBTRANSPORT_LL)
 
-	MOCK_STATIC_METHOD_2(, IOTHUB_CLIENT_RESULT, IoTHubTransport_StartWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle)
-	MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK)
+    MOCK_STATIC_METHOD_2(, IOTHUB_CLIENT_RESULT, IoTHubTransport_StartWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle)
+    MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK)
 
-	MOCK_STATIC_METHOD_2(, bool, IoTHubTransport_SignalEndWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle)
-	MOCK_METHOD_END(bool, true)
+    MOCK_STATIC_METHOD_2(, bool, IoTHubTransport_SignalEndWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle)
+    MOCK_METHOD_END(bool, true)
 
-	MOCK_STATIC_METHOD_2(, void, IoTHubTransport_JoinWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle)
-	MOCK_VOID_METHOD_END()
+    MOCK_STATIC_METHOD_2(, void, IoTHubTransport_JoinWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle)
+    MOCK_VOID_METHOD_END()
+
+    MOCK_STATIC_METHOD_2(, int, mallocAndStrcpy_s, char**, destination, const char*, source)
+        int result2;
+        if ((destination == NULL) || (source == NULL))
+        {
+            result2 = __LINE__;
+        }
+        else
+        {
+            size_t l = strlen(source);
+            *destination = (char*)malloc(l + 1);
+            if (*destination == NULL)
+            {
+                result2 = __LINE__;
+            }
+            else
+            {
+                memcpy(*destination, source, l+1);
+                result2 = 0;
+            }
+        }
+    MOCK_METHOD_END(int, result2);
+
+    MOCK_STATIC_METHOD_4(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
+    MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
+
+    /* list mocks */
+    MOCK_STATIC_METHOD_0(, LIST_HANDLE, list_create)
+    MOCK_METHOD_END(LIST_HANDLE, TEST_LIST_HANDLE);
+    MOCK_STATIC_METHOD_1(, void, list_destroy, LIST_HANDLE, list)
+    MOCK_VOID_METHOD_END();
+    MOCK_STATIC_METHOD_2(, LIST_ITEM_HANDLE, list_add, LIST_HANDLE, list, const void*, item)
+        TEST_LIST_ITEM** items = (TEST_LIST_ITEM**)realloc(list_items, (list_item_count + 1) * sizeof(TEST_LIST_ITEM*));
+        LIST_ITEM_HANDLE to_return = NULL;
+        if (items != NULL)
+        {
+            list_items = items;
+            list_items[list_item_count] = (TEST_LIST_ITEM*)malloc(sizeof(TEST_LIST_ITEM));
+            if (list_items[list_item_count] != NULL)
+            {
+                list_items[list_item_count]->item_value = item;
+                to_return = (LIST_ITEM_HANDLE)list_items[list_item_count];
+                list_item_count++;
+            }
+        }
+    MOCK_METHOD_END(LIST_ITEM_HANDLE, to_return);
+
+    MOCK_STATIC_METHOD_1(, const void*, list_item_get_value, LIST_ITEM_HANDLE, item_handle)
+    MOCK_METHOD_END(const void*, ((TEST_LIST_ITEM*)item_handle)->item_value);
+
+    MOCK_STATIC_METHOD_3(, LIST_ITEM_HANDLE, list_find, LIST_HANDLE, handle, LIST_MATCH_FUNCTION, match_function, const void*, match_context)
+        size_t i;
+    LIST_ITEM_HANDLE found_item = NULL;
+    for (i = 0; i < list_item_count; i++)
+    {
+        if (match_function((LIST_ITEM_HANDLE)list_items[i], match_context))
+        {
+            found_item = (LIST_ITEM_HANDLE)list_items[i];
+            break;
+        }
+    }
+    MOCK_METHOD_END(LIST_ITEM_HANDLE, found_item);
+    MOCK_STATIC_METHOD_2(, int, list_remove, LIST_HANDLE, list, LIST_ITEM_HANDLE, list_item)
+        size_t i;
+    LIST_ITEM_HANDLE found_item = NULL;
+    for (i = 0; i < list_item_count; i++)
+    {
+        if (((LIST_ITEM_HANDLE)list_items[i]) == list_item)
+        {
+            break;
+        }
+    }
+    if (i < list_item_count)
+    {
+        free(list_items[i]);
+        memmove(&list_items[i], &list_items[i + 1], (list_item_count - i - 1) * sizeof(TEST_LIST_ITEM*));
+        list_item_count--;
+        if (list_item_count == 0)
+        {
+            free(list_items);
+            list_items = NULL;
+        }
+    }
+    MOCK_METHOD_END(int, 0);
+
+    MOCK_STATIC_METHOD_1(, LIST_ITEM_HANDLE, list_get_head_item, LIST_HANDLE, list)
+        LIST_ITEM_HANDLE result2;
+        if (list_items == NULL)
+        {
+            result2 = NULL;
+        }
+        else
+        {
+            result2 = (LIST_ITEM_HANDLE)list_items[0];
+        }
+    MOCK_METHOD_END(LIST_ITEM_HANDLE, result2);
+
+    MOCK_STATIC_METHOD_1(, LIST_ITEM_HANDLE, list_get_next_item, LIST_ITEM_HANDLE, item)
+    MOCK_METHOD_END(LIST_ITEM_HANDLE, (LIST_ITEM_HANDLE)NULL);
+
+    MOCK_STATIC_METHOD_2(, void, uploadToBlobAsyncCallback, IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result3, void*, userContextCallback)
+    MOCK_VOID_METHOD_END()
 
 };
 
@@ -223,6 +333,19 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubT
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , bool, IoTHubTransport_SignalEndWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, IoTHubTransport_JoinWorkerThread, TRANSPORT_HANDLE, transportHlHandle, IOTHUB_CLIENT_HANDLE, clientHandle);
 
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , int, mallocAndStrcpy_s, char**, destination, const char*, source);
+DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
+
+DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubClientMocks, , LIST_HANDLE, list_create);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , void, list_destroy, LIST_HANDLE, list);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , LIST_ITEM_HANDLE, list_add, LIST_HANDLE, list, const void*, item);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , const void*, list_item_get_value, LIST_ITEM_HANDLE, item_handle);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , LIST_ITEM_HANDLE, list_find, LIST_HANDLE, handle, LIST_MATCH_FUNCTION, match_function, const void*, match_context);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , int, list_remove, LIST_HANDLE, list, LIST_ITEM_HANDLE, list_item);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , LIST_ITEM_HANDLE, list_get_head_item, LIST_HANDLE, list);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , LIST_ITEM_HANDLE, list_get_next_item, LIST_ITEM_HANDLE, item);
+
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, ,void, uploadToBlobAsyncCallback, IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result, void*, userContextCallback);
 
 static const void* provideFAKE(void)
 {
@@ -269,12 +392,14 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
     /* Tests_SRS_IOTHUBCLIENT_12_004: [IoTHubClient_CreateFromConnectionString shall allocate a new IoTHubClient instance.] */
     /* Tests_SRS_IOTHUBCLIENT_12_005: [IoTHubClient_CreateFromConnectionString shall create a lock object to be used later for serializing IoTHubClient calls] */
     /* Tests_SRS_IOTHUBCLIENT_12_006: [IoTHubClient_CreateFromConnectionString shall instantiate a new IoTHubClient_LL instance by calling IoTHubClient_LL_CreateFromConnectionString and passing the connectionString and protocol] */
+    /*Tests_SRS_IOTHUBCLIENT_02_059: [ IoTHubClient_CreateFromConnectionString shall create a LIST_HANDLE containing informations saved by IoTHubClient_UploadToBlobAsync. ]*/
     TEST_FUNCTION(IoTHubClient_CreateFromConnectionString_succeeds)
     {
         // arrange
         CIoTHubClientMocks mocks;
         EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mocks, Lock_Init());
+        STRICT_EXPECTED_CALL(mocks, list_create());
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE));
 
         // act
@@ -352,6 +477,27 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         mocks.AssertActualAndExpectedCalls();
     }
 
+    /*Tests_SRS_IOTHUBCLIENT_02_070: [ If creating the LIST_HANDLE fails then IoTHubClient_CreateFromConnectionString shall fail and return NULL]*/
+    TEST_FUNCTION(IoTHubClient_CreateFromConnectionString_if_list_create_fails_then_it_fails)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+        EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+        EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mocks, Lock_Init());
+        STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
+
+        STRICT_EXPECTED_CALL(mocks, list_create())
+            .SetReturn((LIST_HANDLE)NULL);
+        
+        // act
+        IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_CreateFromConnectionString(TEST_CHAR, provideFAKE);
+
+        // assert
+        ASSERT_IS_NULL(iotHubClient);
+        mocks.AssertActualAndExpectedCalls();
+    }
     /* Tests_SRS_IOTHUBCLIENT_12_010: [If IoTHubClient_LL_CreateFromConnectionString fails then IoTHubClient_CreateFromConnectionString shall do clean - up and return NULL] */
     TEST_FUNCTION(IoTHubClient_CreateFromConnectionString_if_IoTHubClient_LL_CreateFromConnectionString_fails_then_IoTHubClient_CreateFromConnectionString_do_clean_up_and_fails)
     {
@@ -360,6 +506,9 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
         STRICT_EXPECTED_CALL(mocks, Lock_Init());
+        STRICT_EXPECTED_CALL(mocks, list_create());
+        STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE))
             .SetReturn((IOTHUB_CLIENT_LL_HANDLE)NULL);
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
@@ -378,12 +527,14 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
     /* Tests_SRS_IOTHUBCLIENT_01_001: [IoTHubClient_Create shall allocate a new IoTHubClient instance and return a non-NULL handle to it.] */
     /* Tests_SRS_IOTHUBCLIENT_01_002: [IoTHubClient_Create shall instantiate a new IoTHubClient_LL instance by calling IoTHubClient_LL_Create and passing the config argument.] */
     /* Tests_SRS_IOTHUBCLIENT_01_029: [IoTHubClient_Create shall create a lock object to be used later for serializing IoTHubClient calls.] */
+    /*Tests_SRS_IOTHUBCLIENT_02_060: [ IoTHubClient_Create shall create a LIST_HANDLE that shall be used beIoTHubClient_UploadToBlobAsync. ]*/
     TEST_FUNCTION(IoTHubClient_Create_with_valid_arguments_when_all_underlying_calls_are_OK_succeeds)
     {
         // arrange
         CIoTHubClientMocks mocks;
         EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mocks, Lock_Init());
+        STRICT_EXPECTED_CALL(mocks, list_create());
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Create(&TEST_CONFIG));
 
         // act
@@ -405,11 +556,34 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         CIoTHubClientMocks mocks;
         EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mocks, Lock_Init());
+        STRICT_EXPECTED_CALL(mocks, list_create());
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Create(&TEST_CONFIG))
             .SetReturn((IOTHUB_CLIENT_LL_HANDLE)NULL);
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+
+        // act
+        IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_Create(&TEST_CONFIG);
+
+        // assert
+        ASSERT_IS_NULL(iotHubClient);
+        mocks.AssertActualAndExpectedCalls();
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_061: [ If creating the LIST_HANDLE fails then IoTHubClient_Create shall fail and return NULL. ]*/
+    TEST_FUNCTION(IoTHubClient_LL_Create_fails_when_list_create_fails)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+        EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+        EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mocks, Lock_Init());
+        STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
+
+        STRICT_EXPECTED_CALL(mocks, list_create())
+            .SetFailReturn((LIST_HANDLE)NULL);
 
         // act
         IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_Create(&TEST_CONFIG);
@@ -711,6 +885,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
     /* Tests_SRS_IOTHUBCLIENT_01_005: [IoTHubClient_Destroy shall free all resources associated with the iotHubClientHandle instance.] */
     /* Tests_SRS_IOTHUBCLIENT_01_006: [That includes destroying the IoTHubClient_LL instance by calling IoTHubClient_LL_Destroy.] */
     /* Tests_SRS_IOTHUBCLIENT_01_032: [The lock allocated in IoTHubClient_Create shall be also freed.] */
+    /*Tests_SRS_IOTHUBCLIENT_02_069: [ IoTHubClient_Destroy shall free all data created by IoTHubClient_UploadToBlobAsync ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_072: [ All threads marked as disposable (upon completion of a file upload) shall be joined and the data structures build for them shall be freed. ]*/
     TEST_FUNCTION(IoTHubClient_Destroy_frees_underlying_LL_client)
     {
         // arrange
@@ -719,6 +895,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         mocks.ResetAllCalls();
 
 		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
@@ -741,6 +919,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
 		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
 			.SetFailReturn((LOCK_RESULT)LOCK_ERROR);
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE))
 			.SetFailReturn((LOCK_RESULT)LOCK_ERROR);
 
@@ -763,6 +943,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		mocks.ResetAllCalls();
 
 		STRICT_EXPECTED_CALL(mocks, Lock(TEST_IOTHUBTRANSPORT_LOCK));
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_IOTHUBTRANSPORT_LOCK));
 
 		STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
@@ -802,6 +984,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         /*here StopThread=1 is set*/
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -830,6 +1014,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         /*here StopThread=1 is set*/
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -849,7 +1035,6 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
     /* Tests_SRS_IOTHUBCLIENT_01_007: [The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetMessageCallback shall be joined.] */
     /*Tests_SRS_IOTHUBCLIENT_02_043: [IoTHubClient_Destroy shall lock the serializing lock.]*/
-    /*Tests_SRS_IOTHUBCLIENT_02_044: [ If locking the serializing lock succeeds then the condition variable that signals the working thread termination shall be signaled. ]*/
     /*Tests_SRS_IOTHUBCLIENT_02_045: [ IoTHubClient_Destroy shall unlock the serializing lock. ]*/
     TEST_FUNCTION(When_Thread_Join_Fails_The_Rest_Of_Resources_Are_Still_Freed)
     {
@@ -862,6 +1047,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         /*here StopThread=1 is set*/
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
@@ -892,6 +1079,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         mocks.ResetAllCalls();
 
         STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -1503,6 +1692,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
     /* Tests_SRS_IOTHUBCLIENT_01_037: [The thread created by IoTHubClient_Create shall call IoTHubClient_LL_DoWork every 1 ms.] */
     /* Tests_SRS_IOTHUBCLIENT_01_038: [The thread shall exit when IoTHubClient_Destroy is called.] */
     /* Tests_SRS_IOTHUBCLIENT_01_039: [All calls to IoTHubClient_LL_DoWork shall be protected by the lock created in IotHubClient_Create.] */
+    /*Tests_SRS_IOTHUBCLIENT_02_072: [ All threads marked as disposable (upon completion of a file upload) shall be joined and the data structures build for them shall be freed. ]*/
     TEST_FUNCTION(Worker_Thread_calls_DoWork_Every_1_ms)
     {
         // arrange
@@ -1515,6 +1705,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         current_iothub_client = iotHubClient;
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_DoWork(TEST_IOTHUB_CLIENT_LL_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
         
         STRICT_EXPECTED_CALL(mocks, ThreadAPI_Sleep(1));
@@ -1546,11 +1738,15 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         current_iothub_client = iotHubClient;
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_DoWork(TEST_IOTHUB_CLIENT_LL_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
         STRICT_EXPECTED_CALL(mocks, ThreadAPI_Sleep(1));
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_DoWork(TEST_IOTHUB_CLIENT_LL_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
         STRICT_EXPECTED_CALL(mocks, ThreadAPI_Sleep(1));
@@ -1587,6 +1783,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         /* second round, when lock does not fail and DoWork gets called */
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_DoWork(TEST_IOTHUB_CLIENT_LL_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
         STRICT_EXPECTED_CALL(mocks, ThreadAPI_Sleep(1));
@@ -1734,5 +1932,594 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         IoTHubClient_Destroy(handle);
     }
 
+    /*Tests_SRS_IOTHUBCLIENT_02_047: [ If iotHubClientHandle is NULL then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_with_NULL_iotHubClientHandle_fails)
+    {
+        ///arrange
+        IOTHUB_CLIENT_RESULT result;
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(NULL, "a", (const unsigned char*)"b", 1, NULL, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_048: [ If destinationFileName is NULL then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_with_NULL_destinationFileName_fails)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, NULL, (const unsigned char*)"b", 1, NULL, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_049: [ If source is NULL and size is greated than 0 then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_with_NULL_source_and_size_1_fails)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", NULL, 1, NULL, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_051: [ IoTHubClient_UploadToBlobAsync shall copy the souce, size, iotHubClientFileUploadCallback, context and a non-initialized(1) THREAD_HANDLE parameters into a structure. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_058: [ IoTHubClient_UploadToBlobAsync shall add the structure to the list of structures that need to be cleaned once file upload finishes. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_052: [ IoTHubClient_UploadToBlobAsync shall spawn a thread passing the structure build in SRS IOTHUBCLIENT 02 051 as thread data.]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_054: [ The thread shall call IoTHubClient_LL_UploadToBlob passing the information packed in the structure. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_056: [ Otherwise the thread iotHubClientFileUploadCallbackInternal passing as result FILE_UPLOAD_OK and the structure from SRS IOTHUBCLIENT 02 051. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_071: [ The thread shall mark itself as disposable. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_succeeds)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(1)); /*this is making a copy of the content*/
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is locking the IOTHUB_CLIENT_HANDLE because it's savedDataToBeCleaned member is about to be modified*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is starting the worker thread*/
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG)) /*what has been locked shall be unlocked*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is adding UPLOADTOBLOB_SAVED_DATA to the list of UPLOADTOBLOB_SAVED_DATAs to be cleaned*/
+            .IgnoreArgument(1)
+            .IgnoreArgument(2);
+
+        STRICT_EXPECTED_CALL(mocks, Lock_Init()); /*this is creating a lock for the canBeGarbageCollected */
+
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is spawning the thread*/
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob(IGNORED_PTR_ARG, "someFileName.txt", IGNORED_PTR_ARG, 1)) /*this is the thread calling into _LL layer*/
+            .IgnoreArgument(1)
+            .IgnoreArgument(3);
+
+        STRICT_EXPECTED_CALL(mocks, uploadToBlobAsyncCallback(FILE_UPLOAD_OK, (void*)1)); /*the thread completes successfully*/
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is the thread marking UPLOADTOBLOB_SAVED_DATA as disposeable*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG)) /*what has been locked, shall be unlocked*/
+            .IgnoreArgument(1);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", (const unsigned char*)"a", 1, uploadToBlobAsyncCallback, (void*)1);
+
+        threadFunc(threadFuncArg); /*this is the thread uploading function*/
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_051: [ IoTHubClient_UploadToBlobAsync shall copy the souce, size, iotHubClientFileUploadCallback, context and a non-initialized(1) THREAD_HANDLE parameters into a structure. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_058: [ IoTHubClient_UploadToBlobAsync shall add the structure to the list of structures that need to be cleaned once file upload finishes. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_052: [ IoTHubClient_UploadToBlobAsync shall spawn a thread passing the structure build in SRS IOTHUBCLIENT 02 051 as thread data.]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_054: [ The thread shall call IoTHubClient_LL_UploadToBlob passing the information packed in the structure. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_056: [ Otherwise the thread iotHubClientFileUploadCallbackInternal passing as result FILE_UPLOAD_OK and the structure from SRS IOTHUBCLIENT 02 051. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_071: [ The thread shall mark itself as disposable. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_with_0_size_succeeds)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is locking the IOTHUB_CLIENT_HANDLE because it's savedDataToBeCleaned member is about to be modified*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is starting the worker thread*/
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG)) /*what has been locked shall be unlocked*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is adding UPLOADTOBLOB_SAVED_DATA to the list of UPLOADTOBLOB_SAVED_DATAs to be cleaned*/
+            .IgnoreArgument(1)
+            .IgnoreArgument(2);
+
+        STRICT_EXPECTED_CALL(mocks, Lock_Init()); /*this is creating a lock for the canBeGarbageCollected */
+
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is spawning the thread*/
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob(IGNORED_PTR_ARG, "someFileName.txt", IGNORED_PTR_ARG, 0)) /*this is the thread calling into _LL layer*/
+            .IgnoreArgument(1)
+            .IgnoreArgument(3);
+
+        STRICT_EXPECTED_CALL(mocks, uploadToBlobAsyncCallback(FILE_UPLOAD_OK, (void*)1)); /*the thread completes successfully*/
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is the thread marking UPLOADTOBLOB_SAVED_DATA as disposeable*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG)) /*what has been locked, shall be unlocked*/
+            .IgnoreArgument(1);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", NULL, 0, uploadToBlobAsyncCallback, (void*)1);
+
+        threadFunc(threadFuncArg); /*this is the thread uploading function*/
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_051: [ IoTHubClient_UploadToBlobAsync shall copy the souce, size, iotHubClientFileUploadCallback, context and a non-initialized(1) THREAD_HANDLE parameters into a structure. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_058: [ IoTHubClient_UploadToBlobAsync shall add the structure to the list of structures that need to be cleaned once file upload finishes. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_052: [ IoTHubClient_UploadToBlobAsync shall spawn a thread passing the structure build in SRS IOTHUBCLIENT 02 051 as thread data.]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_054: [ The thread shall call IoTHubClient_LL_UploadToBlob passing the information packed in the structure. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_055: [ If IoTHubClient_LL_UploadToBlob fails then the thread shall call the callback passing as result FILE_UPLOAD_ERROR and as context the structure from SRS IOTHUBCLIENT 02 051. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_02_071: [ The thread shall mark itself as disposable. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_indicates_error)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(1)); /*this is making a copy of the content*/
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is locking the IOTHUB_CLIENT_HANDLE because it's savedDataToBeCleaned member is about to be modified*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is starting the worker thread*/
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG)) /*what has been locked shall be unlocked*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is adding UPLOADTOBLOB_SAVED_DATA to the list of UPLOADTOBLOB_SAVED_DATAs to be cleaned*/
+            .IgnoreArgument(1)
+            .IgnoreArgument(2);
+
+        STRICT_EXPECTED_CALL(mocks, Lock_Init()); /*this is creating a lock for the canBeGarbageCollected */
+
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is spawning the thread*/
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob(IGNORED_PTR_ARG, "someFileName.txt", IGNORED_PTR_ARG, 1)) /*this is the thread calling into _LL layer*/
+            .IgnoreArgument(1)
+            .IgnoreArgument(3)
+            .SetReturn(IOTHUB_CLIENT_ERROR);
+
+        STRICT_EXPECTED_CALL(mocks, uploadToBlobAsyncCallback(FILE_UPLOAD_ERROR, (void*)1)); /*the thread completes the upload, but fails*/
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is the thread marking UPLOADTOBLOB_SAVED_DATA as disposeable*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG)) /*what has been locked, shall be unlocked*/
+            .IgnoreArgument(1);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", (const unsigned char*)"a", 1, uploadToBlobAsyncCallback, (void*)1);
+
+        threadFunc(threadFuncArg); /*this is the thread uploading function*/
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_fails_when_ThreadAPI_Create_fails)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(1)); /*this is making a copy of the content*/
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is locking the IOTHUB_CLIENT_HANDLE because it's savedDataToBeCleaned member is about to be modified*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is starting the worker thread*/
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG)) /*what has been locked shall be unlocked*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is adding UPLOADTOBLOB_SAVED_DATA to the list of UPLOADTOBLOB_SAVED_DATAs to be cleaned*/
+            .IgnoreArgument(1)
+            .IgnoreArgument(2);
+
+        STRICT_EXPECTED_CALL(mocks, Lock_Init()); /*this is creating a lock for the canBeGarbageCollected */
+
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is spawning the thread*/
+            .IgnoreAllArguments()
+            .SetFailReturn(THREADAPI_ERROR);
+
+        STRICT_EXPECTED_CALL(mocks, Lock_Deinit(IGNORED_PTR_ARG)) /*this is uncreating a lock for the canBeGarbageCollected */
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, list_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", (const unsigned char*)"a", 1, uploadToBlobAsyncCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_fails_when_Lock_Init_fails)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(1)); /*this is making a copy of the content*/
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is locking the IOTHUB_CLIENT_HANDLE because it's savedDataToBeCleaned member is about to be modified*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is starting the worker thread*/
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG)) /*what has been locked shall be unlocked*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is adding UPLOADTOBLOB_SAVED_DATA to the list of UPLOADTOBLOB_SAVED_DATAs to be cleaned*/
+            .IgnoreArgument(1)
+            .IgnoreArgument(2);
+
+        STRICT_EXPECTED_CALL(mocks, Lock_Init()) /*this is creating a lock for the canBeGarbageCollected */
+            .SetFailReturn((LOCK_HANDLE)NULL);
+
+        STRICT_EXPECTED_CALL(mocks, list_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", (const unsigned char*)"a", 1, uploadToBlobAsyncCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_fails_when_list_add_fails)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(1)); /*this is making a copy of the content*/
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is locking the IOTHUB_CLIENT_HANDLE because it's savedDataToBeCleaned member is about to be modified*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is starting the worker thread*/
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG)) /*what has been locked shall be unlocked*/
+            .IgnoreArgument(1);
+    
+        STRICT_EXPECTED_CALL(mocks, list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is adding UPLOADTOBLOB_SAVED_DATA to the list of UPLOADTOBLOB_SAVED_DATAs to be cleaned*/
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .SetFailReturn((LIST_ITEM_HANDLE)NULL);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", (const unsigned char*)"a", 1, uploadToBlobAsyncCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_fails_when_StartWorkerThreadIfNeeded_fails)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(1)); /*this is making a copy of the content*/
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is locking the IOTHUB_CLIENT_HANDLE because it's savedDataToBeCleaned member is about to be modified*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is starting the worker thread*/
+            .IgnoreAllArguments()
+            .SetReturn(THREADAPI_ERROR);
+
+        STRICT_EXPECTED_CALL(mocks, Unlock(IGNORED_PTR_ARG)) /*what has been locked shall be unlocked*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", (const unsigned char*)"a", 1, uploadToBlobAsyncCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_fails_when_Lock_fails)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(1)); /*this is making a copy of the content*/
+
+        STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG)) /*this is locking the IOTHUB_CLIENT_HANDLE because it's savedDataToBeCleaned member is about to be modified*/
+            .IgnoreArgument(1)
+            .SetReturn(LOCK_ERROR);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", (const unsigned char*)"a", 1, uploadToBlobAsyncCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_fails_when_malloc_fails_1)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(1)) /*this is making a copy of the content*/
+            .SetFailReturn((void*)NULL);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", (const unsigned char*)"a", 1, uploadToBlobAsyncCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_fails_when_malloc_fails_2)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, "someFileName.txt")) /*this is making a copy of the filename*/
+            .IgnoreArgument(1)
+            .SetFailReturn(__LINE__);
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", (const unsigned char*)"a", 1, uploadToBlobAsyncCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_fails_when_malloc_fails_3)
+    {
+        ///arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE h = IoTHubClient_Create(&TEST_CONFIG);
+        IOTHUB_CLIENT_RESULT result;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+            .IgnoreArgument(1)
+            .SetFailReturn((void*)NULL);
+
+        ///act
+        result = IoTHubClient_UploadToBlobAsync(h, "someFileName.txt", (const unsigned char*)"a", 1, uploadToBlobAsyncCallback, (void*)1);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(h);
+    }
 END_TEST_SUITE(iothubclient_unittests)
 
