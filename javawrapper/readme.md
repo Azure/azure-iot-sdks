@@ -12,13 +12,14 @@ The javamodule is built as a wrapper around the native C SDK.
 
 ## Application development guidelines
 For more information on how to use this library refer to the documents below:
-- [Preparing your development environment][devbox-setup]
-- [Running the java samples on Windows][run-sample-on-windows]
-- [Running the java samples on Linux][run-sample-on-linux]
+- [Preparing your development environment](../doc/get_started/javawrapper-devbox-setup.md)
+- [Running the java samples on Windows](../doc/get_started/javawrapper-run-sample-on-windows.md)
+- [Running the java samples on Linux](../doc/get_started/javawrapper-run-sample-on-linux.md)
+
 
 Other useful documents include:
-- [Setup IoT Hub][setup-iothub]
-- [How to use Device Explorer][device-explorer]
+- [Setup IoT Hub](../doc/setup_iothub.md)
+- [Provision devices](../doc/manage_iot_hub.md)
 
 ## Folder structure of repository
 
