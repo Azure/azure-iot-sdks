@@ -9,4 +9,4 @@
 	url = https://github.com/Azure/azure-uamqp-c.git
 [submodule "c/wakaama"]
 	path = c/wakaama
-	url = file://h:/repos/wakaama-haitham
+	url = https://github.com/mhshami01/wakaama.git
