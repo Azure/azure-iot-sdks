@@ -26,10 +26,6 @@ option(compileOption_CXX "passes a string to the command line of the C++ compile
 option(build_python "builds the Python native iothub_client module" OFF)
 option(build_javawrapper "builds the native iothub_client library for java C wrapper" OFF)
 
-if (${run_longhaul_tests})
-	set(CTEST_TEST_TIMEOUT 86400) # this must be defined before including CTest.
-endif()
-
 include (CTest)
 
 #Use solution folders. 

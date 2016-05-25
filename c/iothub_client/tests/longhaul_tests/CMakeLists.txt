@@ -29,7 +29,6 @@ IF(WIN32)
 	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-#include_directories(.)
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 
 set(sharedutil_include_directories ${SAL_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER} ${SHARED_UTIL_SRC_FOLDER})
@@ -64,3 +63,4 @@ linkSharedUtil(longhaul_tests)
 linkUAMQP(longhaul_tests)
 
 add_test(NAME longhaul_tests COMMAND $<TARGET_FILE:longhaul_tests>)
+set_tests_properties(longhaul_tests PROPERTIES TIMEOUT 86400)
