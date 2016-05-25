@@ -11,6 +11,7 @@ var SharedAccessSignature = require('./shared_access_signature.js');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var debug = require('debug')('azure-iot-device.Client');
+var BlobUploadClient = require('./blob_upload').BlobUploadClient;
 
 /**
  * @class           module:azure-iot-device.Client
@@ -18,12 +19,13 @@ var debug = require('debug')('azure-iot-device.Client');
  *                  call the factory method,
  *                  {@link module:azure-iot-device.Client.fromConnectionString|fromConnectionString},
  *                  to create an IoT Hub device client.
- * @param {Object}  transport   An object that implements the interface
- *                              expected of a transport object, e.g.,
- *                              {@link module:azure-iot-device~Http|Http}.
- * @param {String}  connStr     A connection string (optional: when not provided, updateSharedAccessSignature must be called to set the SharedAccessSignature token directly).
+ * @param {Object}  transport         An object that implements the interface
+ *                                    expected of a transport object, e.g.,
+ *                                    {@link module:azure-iot-device~Http|Http}.
+ * @param {String}  connStr           A connection string (optional: when not provided, updateSharedAccessSignature must be called to set the SharedAccessSignature token directly).
+ * @param {Object}  blobUploadClient  An object that is capable of uploading a stream to a blob.
  */
-var Client = function (transport, connStr) {
+var Client = function (transport, connStr, blobUploadClient) {
   EventEmitter.call(this);
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_001: [The Client constructor shall throw ReferenceError if the transport argument is falsy.]*/
   if (!transport) throw new ReferenceError('transport is \'' + transport + '\'');
@@ -36,6 +38,8 @@ var Client = function (transport, connStr) {
   } else {
     this._connectionString = null;
   }
+
+  this.blobUploadClient = blobUploadClient;
 
   this._transport = transport;
   this._receiver = null;
@@ -122,7 +126,7 @@ Client.fromConnectionString = function fromConnectionString(connStr, Transport) 
   };
 
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_006: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(new Transport(...)).]*/
-  return new Client(new Transport(config), connStr);
+  return new Client(new Transport(config), connStr, new BlobUploadClient(config));
 };
 
 /**
@@ -153,7 +157,7 @@ Client.fromSharedAccessSignature = function (sharedAccessSignature, Transport) {
   };
 
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_030: [The fromSharedAccessSignature method shall return a new instance of the Client object] */
-  return new Client(new Transport(config));
+  return new Client(new Transport(config), null, new BlobUploadClient(config));
 };
 
 /**
@@ -169,6 +173,8 @@ Client.fromSharedAccessSignature = function (sharedAccessSignature, Transport) {
 Client.prototype.updateSharedAccessSignature = function (sharedAccessSignature, done) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_031: [The updateSharedAccessSignature method shall throw a ReferenceError if the sharedAccessSignature parameter is falsy.]*/
   if (!sharedAccessSignature) throw new ReferenceError('sharedAccessSignature is falsy');
+
+  this.blobUploadClient.updateSharedAccessSignature(sharedAccessSignature);
 
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_032: [The updateSharedAccessSignature method shall call the updateSharedAccessSignature method of the transport currently inuse with the sharedAccessSignature parameter.]*/
   this._transport.updateSharedAccessSignature(sharedAccessSignature, function (err, result) {
@@ -395,4 +401,29 @@ Client.prototype.abandon = function (message, done) {
     }
   });
 };
+
+/**
+ * @method           module:azure-iot-device.Client#uploadToBlob
+ * @description      The `uploadToBlob` method uploads a stream to a blob.
+ *
+ * @param {String}   blobName         The name to use for the blob that will be created with the content of the stream.
+ * @param {Stream}   stream           The data to that should be uploaded to the blob.
+ * @param {Number}   streamLength     The size of the data to that should be uploaded to the blob.
+ * @param {Function} done             The callback to call when the upload is complete.
+ *
+ * @throws {ReferenceException} If blobName or stream or streamLength is falsy.
+ */
+Client.prototype.uploadToBlob = function (blobName, stream, streamLength, done) {
+  /*Codes_SRS_NODE_DEVICE_CLIENT_16_037: [The `uploadToBlob` method shall throw a `ReferenceError` if `blobName` is falsy.]*/
+  if (!blobName) throw new ReferenceError('blobName cannot be \'' + blobName + '\'');
+  /*Codes_SRS_NODE_DEVICE_CLIENT_16_038: [The `uploadToBlob` method shall throw a `ReferenceError` if `stream` is falsy.]*/
+  if (!stream) throw new ReferenceError('stream cannot be \'' + stream + '\'');
+  /*Codes_SRS_NODE_DEVICE_CLIENT_16_039: [The `uploadToBlob` method shall throw a `ReferenceError` if `streamLength` is falsy.]*/
+  if (!streamLength) throw new ReferenceError('streamLength cannot be \'' + streamLength + '\'');
+
+  /*Codes_SRS_NODE_DEVICE_CLIENT_16_040: [The `uploadToBlob` method shall call the `done` callback with an `Error` object if the upload fails.]*/
+  /*Codes_SRS_NODE_DEVICE_CLIENT_16_041: [The `uploadToBlob` method shall call the `done` callback no parameters if the upload succeeds.]*/
+  this.blobUploadClient.uploadToBlob(blobName, stream, streamLength, done);
+};
+
 module.exports = Client;
