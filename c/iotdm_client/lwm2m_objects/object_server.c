@@ -56,10 +56,7 @@ static uint8_t prv_read(uint16_t instanceId, int *numDataP, lwm2m_data_t **dataA
                 break;
 
             case LWM2M_SERVER_BINDING_ID:
-                tlvP->value.asBuffer.buffer = (uint8_t *)targetP->binding;
-                tlvP->value.asBuffer.length = strlen(targetP->binding);
-                // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
-                tlvP->type = LWM2M_TYPE_STRING;
+                lwm2m_data_encode_string(targetP->binding, tlvP);
                 result = COAP_205_CONTENT;
 
                 break;

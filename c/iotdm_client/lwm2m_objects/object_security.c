@@ -78,10 +78,7 @@ static uint8_t prv_get_value(lwm2m_data_t *tlvP, security_instance_t * targetP)
     switch (tlvP->id)
     {
     case LWM2M_SECURITY_URI_ID:
-        tlvP->value.asBuffer.buffer= (uint8_t*)targetP->uri;
-        tlvP->value.asBuffer.length = strlen(targetP->uri);
-        // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
-        tlvP->type = LWM2M_TYPE_STRING;
+        lwm2m_data_encode_string(targetP->uri, tlvP);
         return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_BOOTSTRAP_ID:
@@ -94,25 +91,19 @@ static uint8_t prv_get_value(lwm2m_data_t *tlvP, security_instance_t * targetP)
 
     case LWM2M_SECURITY_PUBLIC_KEY_ID:
         // Here we return an opaque of 1 byte containing 0
-        tlvP->value.asBuffer.buffer = (uint8_t*)"";
-        tlvP->value.asBuffer.length = 1;
-        // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        lwm2m_data_encode_string("", tlvP);
         tlvP->type = LWM2M_TYPE_OPAQUE;
         return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SERVER_PUBLIC_KEY_ID:
         // Here we return an opaque of 1 byte containing 0
-        tlvP->value.asBuffer.buffer = (uint8_t*)"";
-        tlvP->value.asBuffer.length = 1;
-        // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        lwm2m_data_encode_string("", tlvP);
         tlvP->type = LWM2M_TYPE_OPAQUE;
         return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SECRET_KEY_ID:
         // Here we return an opaque of 1 byte containing 0
-        tlvP->value.asBuffer.buffer = (uint8_t*)"";
-        tlvP->value.asBuffer.length = 1;
-        // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        lwm2m_data_encode_string("", tlvP);
         tlvP->type = LWM2M_TYPE_OPAQUE;
         return COAP_205_CONTENT;
 
@@ -122,17 +113,13 @@ static uint8_t prv_get_value(lwm2m_data_t *tlvP, security_instance_t * targetP)
 
     case LWM2M_SECURITY_SMS_KEY_PARAM_ID:
         // Here we return an opaque of 6 bytes containing a buggy value
-        tlvP->value.asBuffer.buffer = (uint8_t*)"12345";
-        tlvP->value.asBuffer.length = 6;
-        // BKTODO tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        lwm2m_data_encode_string("12345", tlvP);
         tlvP->type = LWM2M_TYPE_OPAQUE;
         return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_SMS_SECRET_KEY_ID:
         // Here we return an opaque of 32 bytes containing a buggy value
-        tlvP->value.asBuffer.buffer = (uint8_t*)"1234567890abcdefghijklmnopqrstu";
-        tlvP->value.asBuffer.length = 32;
-        // BKTOD tlvP->flags = LWM2M_TLV_FLAG_STATIC_DATA;
+        lwm2m_data_encode_string("1234567890abcdefghijklmnopqrstu", tlvP);
         tlvP->type = LWM2M_TYPE_OPAQUE;
         return COAP_205_CONTENT;
 
@@ -142,7 +129,7 @@ static uint8_t prv_get_value(lwm2m_data_t *tlvP, security_instance_t * targetP)
 
     case LWM2M_SECURITY_SHORT_SERVER_ID:
         lwm2m_data_encode_int(targetP->shortID, tlvP);
-        COAP_205_CONTENT;
+        return COAP_205_CONTENT;
 
     case LWM2M_SECURITY_HOLD_OFF_ID:
         lwm2m_data_encode_int(targetP->clientHoldOffTime, tlvP);
