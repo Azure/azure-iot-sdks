@@ -42,12 +42,12 @@ IOTHUB_CLIENT_RESULT on_write_firmwareupdate_package(object_firmwareupdate *obj,
     return IOTHUB_CLIENT_NOT_IMPLEMENTED;
 }
 
-IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *obj, const char *value)
+IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *obj, const char *value, size_t length)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("FirmwareUpdate_PackageUri being set to [%s]", value);
     lwm2m_free(obj->propval_firmwareupdate_packageuri);
-    obj->propval_firmwareupdate_packageuri = lwm2m_strdup(value);
+    obj->propval_firmwareupdate_packageuri = iotdm_strndup(value, length);
+    LogInfo("FirmwareUpdate_PackageUri being set to [%s]", obj->propval_firmwareupdate_packageuri);
 
     if (obj->firmwareupdate_packageuri_write_callback != NULL)
     {

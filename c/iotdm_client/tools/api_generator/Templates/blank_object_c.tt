@@ -117,9 +117,9 @@ void set_default_<#= ObjectCodeName #>_property_values(<#= ObjectStructName #> *
                     case LWM2MObjectItemType.String:
 #>
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("<#= prop.PropertyName #> being set to [%s]", value);
     lwm2m_free(obj-><#= prop.SampleVariableName #>);
-    obj-><#= prop.SampleVariableName #> = lwm2m_strdup(value);
+    obj-><#= prop.SampleVariableName #> = iotdm_strndup(value, length);
+    LogInfo("<#= prop.PropertyName #> being set to [%s]", obj-><#= prop.SampleVariableName #>);
 
     if (obj-><#= prop.PropertyName.ToLower() #>_write_callback != NULL)
     {
@@ -228,7 +228,7 @@ private string GetWritePrototype(PropertyToGenerate prop)
     }
     else if (prop.Type == LWM2MObjectItemType.String)
     {
-        return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, const char *value)";
+        return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, const char *value, size_t length)";
     }
     else
     {

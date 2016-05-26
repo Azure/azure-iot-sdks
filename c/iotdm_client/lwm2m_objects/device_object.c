@@ -198,12 +198,12 @@ IOTHUB_CLIENT_RESULT on_read_device_utcoffset(object_device *obj, char **value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_device_utcoffset(object_device *obj, const char *value)
+IOTHUB_CLIENT_RESULT on_write_device_utcoffset(object_device *obj, const char *value, size_t length)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Device_UtcOffset being set to [%s]", value);
     lwm2m_free(obj->propval_device_utcoffset);
-    obj->propval_device_utcoffset = lwm2m_strdup(value);
+    obj->propval_device_utcoffset = iotdm_strndup(value, length);
+    LogInfo("Device_UtcOffset being set to [%s]", obj->propval_device_utcoffset);
 
     if (obj->device_utcoffset_write_callback != NULL)
     {
@@ -227,12 +227,12 @@ IOTHUB_CLIENT_RESULT on_read_device_timezone(object_device *obj, char **value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_device_timezone(object_device *obj, const char *value)
+IOTHUB_CLIENT_RESULT on_write_device_timezone(object_device *obj, const char *value, size_t length)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Device_Timezone being set to [%s]", value);
     lwm2m_free(obj->propval_device_timezone);
-    obj->propval_device_timezone = lwm2m_strdup(value);
+    obj->propval_device_timezone = iotdm_strndup(value, length);
+    LogInfo("Device_Timezone being set to [%s]", obj->propval_device_timezone);
 
     if (obj->device_timezone_write_callback != NULL)
     {

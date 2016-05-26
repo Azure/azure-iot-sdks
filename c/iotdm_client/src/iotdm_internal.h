@@ -102,6 +102,7 @@ IOTHUB_CLIENT_RESULT add_dm_object(LIST_HANDLE *list, void *object);
 
 // iotdm_client.c
 IOTHUB_CLIENT_RESULT wake_main_dm_thread(IOTHUB_CHANNEL_HANDLE h);
+char *iotdm_strndup(const char *buffer, size_t length);
 
 // iotdm_dispatcher_list.c
 void signal_all_resource_changes();

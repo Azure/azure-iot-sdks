@@ -29,7 +29,7 @@ DISPATCHER_FORWARD_DECLARATIONS(object_firmwareupdate);
 
 void set_default_firmwareupdate_property_values(object_firmwareupdate *obj);
 IOTHUB_CLIENT_RESULT on_write_firmwareupdate_package(object_firmwareupdate *obj, void* value, size_t length);
-IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *obj, const char *value);
+IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *obj, const char *value, size_t length);
 IOTHUB_CLIENT_RESULT on_exec_firmwareupdate_update(object_firmwareupdate *obj);
 IOTHUB_CLIENT_RESULT on_read_firmwareupdate_state(object_firmwareupdate *obj, int *value);
 IOTHUB_CLIENT_RESULT on_read_firmwareupdate_updateresult(object_firmwareupdate *obj, int *value);

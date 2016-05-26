@@ -103,7 +103,7 @@ IOTHUB_CLIENT_RESULT dispatch_string_write_to_callback(void *obj, void *function
     IOTHUB_CLIENT_RESULT res = IOTHUB_CLIENT_OK;
 
     //Codes_SRS_DMDISPATCHERS_18_037: [ dispatch_write correctly passes a string argument into the callback ]
-    return ((IOTHUB_CLIENT_SET_STRINGPROP)function)(obj, (char*)tlvP->value.asBuffer.buffer);
+    return ((IOTHUB_CLIENT_SET_STRINGPROP)function)(obj, (char*)tlvP->value.asBuffer.buffer, tlvP->value.asBuffer.length);
 }
 
 IOTHUB_CLIENT_RESULT dispatch_integer_write_to_callback(void *obj, void *function, lwm2m_data_t *tlvP)

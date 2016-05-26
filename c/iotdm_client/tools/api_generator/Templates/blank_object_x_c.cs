@@ -878,7 +878,7 @@ private string GetWritePrototype(PropertyToGenerate prop)
     }
     else if (prop.Type == LWM2MObjectItemType.String)
     {
-        return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, const char *value)";
+        return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, const char *value, size_t length)";
     }
     else
     {

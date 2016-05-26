@@ -568,3 +568,15 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
     Lock_Deinit(cnResult.my_lock);
     return result;
 }
+
+char * iotdm_strndup(const char *buffer, size_t length)
+{
+    char *out = lwm2m_malloc(length + 1);
+    if (out)
+    {
+        memcpy(out, buffer, length);
+        out[length] = 0;
+    }
+    return out;
+}
+

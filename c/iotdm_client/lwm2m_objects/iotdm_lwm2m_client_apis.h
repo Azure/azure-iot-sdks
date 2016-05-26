@@ -28,7 +28,7 @@ typedef  IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_GET_BOOLPROP)(void *obj, bool *val
 
 /** @brief Callback used when DM client needs to set an String Property to the application.
  */
-typedef IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_SET_STRINGPROP)(void *obj, char *value);
+typedef IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_SET_STRINGPROP)(void *obj, char *value, size_t length);
 /** @brief Callback used when DM client needs to get an String Property from the application.
  */
 typedef  IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_GET_STRINGPROP)(void *obj, char **value);

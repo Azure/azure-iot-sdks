@@ -47,12 +47,12 @@ IOTHUB_CLIENT_RESULT on_read_config_name(object_config *obj, char **value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_config_name(object_config *obj, const char *value)
+IOTHUB_CLIENT_RESULT on_write_config_name(object_config *obj, const char *value, size_t length)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Config_Name being set to [%s]", value);
     lwm2m_free(obj->propval_config_name);
-    obj->propval_config_name = lwm2m_strdup(value);
+    obj->propval_config_name = iotdm_strndup(value, length);
+    LogInfo("Config_Name being set to [%s]", obj->propval_config_name);
 
     if (obj->config_name_write_callback != NULL)
     {
@@ -76,12 +76,12 @@ IOTHUB_CLIENT_RESULT on_read_config_value(object_config *obj, char **value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_config_value(object_config *obj, const char *value)
+IOTHUB_CLIENT_RESULT on_write_config_value(object_config *obj, const char *value, size_t length)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Config_Value being set to [%s]", value);
     lwm2m_free(obj->propval_config_value);
-    obj->propval_config_value = lwm2m_strdup(value);
+    obj->propval_config_value = iotdm_strndup(value, length);
+    LogInfo("Config_Value being set to [%s]", obj->propval_config_value);
 
     if (obj->config_value_write_callback != NULL)
     {

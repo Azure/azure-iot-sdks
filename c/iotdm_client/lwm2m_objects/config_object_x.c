@@ -25,9 +25,9 @@ DISPATCHER_FORWARD_DECLARATIONS(object_config);
 
 void set_default_config_property_values(object_config *obj);
 IOTHUB_CLIENT_RESULT on_read_config_name(object_config *obj, char **value);
-IOTHUB_CLIENT_RESULT on_write_config_name(object_config *obj, const char *value);
+IOTHUB_CLIENT_RESULT on_write_config_name(object_config *obj, const char *value, size_t length);
 IOTHUB_CLIENT_RESULT on_read_config_value(object_config *obj, char **value);
-IOTHUB_CLIENT_RESULT on_write_config_value(object_config *obj, const char *value);
+IOTHUB_CLIENT_RESULT on_write_config_value(object_config *obj, const char *value, size_t length);
 IOTHUB_CLIENT_RESULT on_exec_config_apply(object_config *obj);
 
 
