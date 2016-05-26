@@ -6,6 +6,9 @@
 # Bug fixes
 - 
 
+#Java SDK
+- Implemented message timeout for AMQP protocol.
+
 # Internal Changes
 - 
 # Node.js Device SDK
