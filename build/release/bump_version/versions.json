@@ -6,7 +6,7 @@
         "device": "1.0.8"
     },
     "csharp": {
-        "device": "1.0.8",
+        "device": "1.0.10",
 		"devicepcl": "1.0.7",
         "service": "1.0.8"
     },

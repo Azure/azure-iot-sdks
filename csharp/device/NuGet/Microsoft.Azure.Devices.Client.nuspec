@@ -21,6 +21,7 @@
                 <dependency id="DotNetty.Codecs.Mqtt-signed" version="0.3.0" />
                 <dependency id="DotNetty.Handlers-signed" version="0.3.0" />
 				<dependency id="EnterpriseLibrary.TransientFaultHandling" version="6.0.1304" />
+				<dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
             </group>
 	    <group targetFramework="uap">
 		<dependency id="PCLCrypto" version="1.0.86" />
