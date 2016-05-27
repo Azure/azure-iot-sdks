@@ -31,7 +31,12 @@ namespace Microsoft.Azure.Devices
         /// <summary>
         /// correlated responses from device -> cloud
         /// </summary>
-        Response,           
+        Response,
+        
+        /// <summary>
+        /// Notification messages for file uploads from devices
+        /// </summary>
+        FileNotification           
 
     }
 }

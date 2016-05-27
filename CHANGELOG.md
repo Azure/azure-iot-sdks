@@ -6,6 +6,9 @@
 # Bug fixes
 - 
 
+#Java SDK
+- Implemented message timeout for AMQP protocol.
+
 # Internal Changes
 - 
 # Node.js Device SDK
@@ -58,6 +61,11 @@ Release for May 6, 2016
 # Python SDK
 - Bug fixes for messageTimeout option and message properties in the Python binding
 - Build improvements
+
+# C# Service SDK
+- Adding support for receiving file upload notifications from service client. 
+	- Implemented 'AmqpFileNotificationReceiver'
+	- Moved common code for 'AmqpFileNotificationReceiver' and 'AmqpFeedbackReceiver' to common helpers
 
 # General
 - Documentation fixes

@@ -32,9 +32,9 @@ public class Message
     private String to;
 
     /// <summary>
-    /// Expiry time in UTC Interpreted by hub on C2D messages. Ignored in other cases.
+    /// [Optional] Expiry time in milliseconds.
     /// </summary>
-    private Date expiryTimeUtc;
+    private long expiryTime;
 
     /// <summary>
     /// Used by receiver to Abandon, Reject or Complete the message
@@ -297,6 +297,36 @@ public class Message
     }
 
     /**
+     * Verifies whether the message is expired or not
+     * @return true if the message is expired, false otherwise
+     */
+    public boolean isExpired()
+    {
+        boolean messageExpired;
+
+        // Codes_SRS_MESSAGE_15_035: [The function shall return false if the expiryTime is set to 0.]
+        if (this.expiryTime == 0)
+        {
+            messageExpired = false;
+        }
+        else
+        {
+            // Codes_SRS_MESSAGE_15_036: [The function shall return true if the current time is greater than the expiry time and false otherwise.]
+            long currentTime = System.currentTimeMillis();
+            if (currentTime > expiryTime)
+            {
+                messageExpired = true;
+            }
+            else
+            {
+                messageExpired = false;
+            }
+        }
+
+        return messageExpired;
+    }
+
+    /**
      * Getter for the messageId property
      * @return The property value
      */
@@ -324,11 +354,21 @@ public class Message
     }
 
     /**
-     * Setter for the expiryTimeUtc property
+     * Setter for the correlationId property
      * @param correlationId The string containing the property value
      */
     public void setCorrelationId(String correlationId)
     {
         this.correlationId = correlationId;
+    }
+
+    /**
+     * Setter for the expiryTime property
+     * @param timeOut The time out for the message, in milliseconds.
+     */
+    public void setExpiryTime(long timeOut)
+    {
+        long currentTime = System.currentTimeMillis();
+        this.expiryTime = currentTime + timeOut;
     }
 }
