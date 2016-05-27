@@ -43,7 +43,7 @@ import java.util.concurrent.Future;
  */
 public final class AmqpsIotHubConnection extends BaseHandler
 {
-    private int maxWaitTimeForOpeningConnection = 5000;
+    private int maxWaitTimeForOpeningConnection = 30000;
     protected State state;
     private Future reactorFuture;
 
