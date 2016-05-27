@@ -13,7 +13,8 @@ $maven_compiler_plugin_version = "3.3"
 $maven_source_plugin_artifactId = "maven-source-plugin"
 $maven_javadoc_plugin_artifactId = "maven-javadoc-plugin"
 $maven_javadoc_plugin_version = "2.10.3"
-$java_version = "1.8"
+$java_version_service = "1.8"
+$java_version_client = "1.7"
 
 $sourcesPath = "src\main\java\com\microsoft\azure\iothub"
 $testsPath = "src\test\java\tests\unit\com\microsoft\azure\iothub"
@@ -39,7 +40,7 @@ function Is-Null
 
 function Release-Client
 {
-	param([string]$clientLocation, [string]$groupId, [string]$artifactId)
+	param([string]$clientLocation, [string]$groupId, [string]$artifactId, [string]$java_version)
 	$clientDirectoryName = (split-path $clientLocation -leaf)
 	$jarsCopyLocation = (join-path (join-path $mavenArtifactsDir "$clientDirectoryName") "UnsignedJars")
 
@@ -247,8 +248,8 @@ if(!(Test-Path -Path $copyLocation)){
 	New-Item -ItemType directory -Path $copyLocation
 }
 
-Release-Client $javaDeviceClientLocation "com.microsoft.azure.iothub-java-client" "iothub-java-device-client"
-Release-Client $javaServiceClientLocation "com.microsoft.azure.iothub-java-client" "iothub-java-service-client"
+Release-Client $javaDeviceClientLocation "com.microsoft.azure.iothub-java-client" "iothub-java-device-client" $java_version_client
+Release-Client $javaServiceClientLocation "com.microsoft.azure.iothub-java-client" "iothub-java-service-client" $java_version_service
 
 Set-Location $currentLocation
 
