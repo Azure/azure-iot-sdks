@@ -134,6 +134,7 @@ public class SendSerializedEvent {
             String msgStr = data.serialize();
 
             Message msg = new Message(msgStr);
+            msg.setExpiryTime(5000);
 
             Object lockobj = new Object();
             EventCallback callback = new EventCallback();

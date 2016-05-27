@@ -185,24 +185,35 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             IotHubOutboundPacket packet = this.waitingMessages.remove();
 
             Message message = packet.getMessage();
+
             // Codes_SRS_AMQPSTRANSPORT_15_015: [The function shall skip messages with null or empty body.]
             if (message != null && message.getBytes().length > 0)
             {
-                // Codes_SRS_AMQPSTRANSPORT_15_036: [The function shall create a new Proton message from the IoTHub message.]
-                MessageImpl protonMessage = iotHubMessageToProtonMessage(message);
-
-                // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
-                Integer sendHash = connection.sendMessage(protonMessage);
-
-                // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
-                if (sendHash != -1)
+                // Codes_SRS_AMQPSTRANSPORT_15_039: [If the message is expired, the function shall create a callback
+                // with the MESSAGE_EXPIRED status and add it to the callback list.]
+                if (message.isExpired())
                 {
-                    this.inProgressMessages.put(sendHash, packet);
+                    IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, packet.getCallback(), packet.getContext());
+                    this.callbackList.add(callbackPacket);
                 }
-                // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
                 else
                 {
-                    failedMessages.add(packet);
+                    // Codes_SRS_AMQPSTRANSPORT_15_036: [The function shall create a new Proton message from the IoTHub message.]
+                    MessageImpl protonMessage = iotHubMessageToProtonMessage(message);
+
+                    // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
+                    Integer sendHash = connection.sendMessage(protonMessage);
+
+                    // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
+                    if (sendHash != -1)
+                    {
+                        this.inProgressMessages.put(sendHash, packet);
+                    }
+                    // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
+                    else
+                    {
+                        failedMessages.add(packet);
+                    }
                 }
             }
         }
