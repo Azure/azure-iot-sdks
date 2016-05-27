@@ -17,7 +17,8 @@ var SRCS = [
     "iothub_message.c",
     "iothubtransporthttp.c",
     "version.c",
-    "blob.c"
+    "blob.c",
+    "iothub_client_ll_uploadtoblob.c"
 ];
 
 /* Paths to external source libraries */
