@@ -27,7 +27,7 @@ and removing calls to _DoWork will yield the same results. */
 
 /*String containing Hostname, Device Id & Device Key in the format:             */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
-static const char* connectionString = "";
+static const char* connectionString = "[device connection string]";
 
 // Define the Model
 BEGIN_NAMESPACE(WeatherStation);
