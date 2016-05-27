@@ -10,6 +10,7 @@ add_subdirectory(iothubclient_ll_uploadtoblob_unittests)
 add_subdirectory(iothubclient_unittests)
 add_subdirectory(iothubmessage_unittests)
 add_subdirectory(iothubtransport_unittests)
+add_subdirectory(blob_unittests)
 
 if(${use_http})
 	add_subdirectory(iothubtransporthttp_unittests)

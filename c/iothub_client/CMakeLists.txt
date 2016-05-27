@@ -11,6 +11,7 @@ set(iothub_client_ll_transport_c_files
 ./src/iothub_message.c
 ./src/iothub_client_ll.c
 ./src/iothub_client_ll_uploadtoblob.c
+./src/blob.c
 ../parson/parson.c
 )
 
@@ -20,6 +21,7 @@ set(iothub_client_ll_transport_h_files
 ./inc/iothub_client_ll_uploadtoblob.h
 ./inc/iothub_client_version.h
 ./inc/iothub_transport_ll.h
+./inc/blob.h
 ../parson/parson.h
 )
 
@@ -120,7 +122,7 @@ if(${use_http})
 		${iothub_client_http_transport_h_files}
 	)
 	linkSharedUtil(iothub_client_http_transport)
-    target_link_libraries(iothub_client_http_transport blob)
+    target_link_libraries(iothub_client_http_transport)
 endif()
 
 if(${use_amqp})
@@ -130,7 +132,7 @@ if(${use_amqp})
 		${iothub_client_amqp_transport_h_files}
 	)
 	linkSharedUtil(iothub_client_amqp_transport)
-    target_link_libraries(iothub_client_amqp_transport blob)
+    target_link_libraries(iothub_client_amqp_transport)
 endif()
 
 if(${use_mqtt})
@@ -141,7 +143,7 @@ if(${use_mqtt})
 	)
 	linkSharedUtil(iothub_client_mqtt_transport)
 	linkMqttLibrary(iothub_client_mqtt_transport)
-    target_link_libraries(iothub_client_mqtt_transport blob)
+    target_link_libraries(iothub_client_mqtt_transport)
 endif()
 
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
@@ -157,7 +159,6 @@ add_library(iothub_client
 	${iothub_client_h_files}
 )
 linkSharedUtil(iothub_client)
-target_link_libraries(iothub_client blob)
 
 add_subdirectory(samples)
 
