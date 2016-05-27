@@ -47,8 +47,8 @@ static MICROMOCK_MUTEX_HANDLE g_testByTest;
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 
 static const char TEST_CONST_CHAR[] = "a";
-static const char* TEST_CHAR_PTR = "TestConstChar";
-static const char* TEST_CHAR_PTR_NULL = (const char*)NULL;
+static const char* TEST_CONST_CHAR_PTR = "TestConstChar";
+static const char* TEST_CONST_CHAR_PTR_NULL = (const char*)NULL;
 
 static STRING_HANDLE TEST_STRING_HANDLE = (STRING_HANDLE)0x4242;
 static STRING_HANDLE TEST_STRING_HANDLE_NULL = (STRING_HANDLE)NULL;
@@ -62,7 +62,7 @@ static STRING_TOKENIZER_HANDLE TEST_STRING_TOKENIZER_HANDLE_NULL = (STRING_TOKEN
 static STRING_HANDLE TEST_KEY_STRING_HANDLE = (STRING_HANDLE)0x4545;
 static STRING_HANDLE TEST_VALUE_STRING_HANDLE = (STRING_HANDLE)0x4646;
 
-static const char* TEST_STRING = "TestString";
+static const char* TEST_CHAR_PTR = "TestString";
 static size_t currentmalloc_call;
 static size_t whenShallmalloc_fail;
 
@@ -121,7 +121,7 @@ public:
     MOCK_STATIC_METHOD_3(, MAP_RESULT, Map_Add, MAP_HANDLE, handle, const char*, key, const char*, value)
         MOCK_METHOD_END(MAP_RESULT, MAP_OK);
     MOCK_STATIC_METHOD_2(, const char*, Map_GetValueFromKey, MAP_HANDLE, handle, const char*, key)
-        MOCK_METHOD_END(const char*, TEST_CHAR_PTR);
+        MOCK_METHOD_END(const char*, TEST_CONST_CHAR_PTR);
 
     /* STRING mocks */
     MOCK_STATIC_METHOD_0(, STRING_HANDLE, STRING_new)
@@ -225,7 +225,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_return_null_if_
         .IgnoreArgument(1);
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -244,14 +244,14 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_and
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING))
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR))
         .SetReturn((STRING_HANDLE)NULL);
 
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -269,7 +269,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_and
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE_NULL);
@@ -280,7 +280,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_and
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -298,13 +298,13 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR_NULL);
+        .SetReturn(TEST_CONST_CHAR_PTR_NULL);
 
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -317,7 +317,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -335,16 +335,16 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR_NULL);
+        .SetReturn(TEST_CONST_CHAR_PTR_NULL);
 
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
     .IgnoreArgument(1);
@@ -357,7 +357,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -375,19 +375,19 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR_NULL);
+        .SetReturn(TEST_CONST_CHAR_PTR_NULL);
 
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -400,7 +400,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -418,21 +418,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR))
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR))
         .SetReturn(TEST_STRING_HANDLE_NULL);
 
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
@@ -446,7 +446,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -464,21 +464,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE_NULL);
@@ -494,7 +494,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -512,21 +512,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -545,7 +545,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -563,21 +563,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
     
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -599,7 +599,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -617,21 +617,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -656,7 +656,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -674,21 +674,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -716,7 +716,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -734,21 +734,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -779,7 +779,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -797,21 +797,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -848,7 +848,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -866,21 +866,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -923,7 +923,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -941,21 +941,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -982,10 +982,10 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
         .SetReturn(0);
 
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
-        .SetReturn(TEST_STRING);
+        .SetReturn(TEST_CHAR_PTR);
 
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
-        .SetReturn(TEST_STRING);
+        .SetReturn(TEST_CHAR_PTR);
 
     EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .SetReturn(1);
@@ -1010,7 +1010,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -1028,21 +1028,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -1069,10 +1069,10 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
         .SetReturn(0);
 
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
-        .SetReturn(TEST_STRING);
+        .SetReturn(TEST_CHAR_PTR);
 
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
-        .SetReturn(TEST_STRING);
+        .SetReturn(TEST_CHAR_PTR);
 
     EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .SetReturn(0);
@@ -1103,7 +1103,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -1121,21 +1121,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -1162,7 +1162,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
         .SetReturn(0);
 
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
-        .SetReturn(TEST_CHAR_PTR_NULL);
+        .SetReturn(TEST_CONST_CHAR_PTR_NULL);
 
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -1184,7 +1184,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -1202,21 +1202,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -1243,10 +1243,10 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
         .SetReturn(0);
 
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
 
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
-        .SetReturn(TEST_CHAR_PTR_NULL);
+        .SetReturn(TEST_CONST_CHAR_PTR_NULL);
 
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -1268,7 +1268,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
@@ -1286,21 +1286,21 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_succeed)
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
     
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_STRING));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
     
     STRICT_EXPECTED_CALL(mocks, connectionstringparser_parse(TEST_STRING_HANDLE))
         .SetReturn(TEST_MAP_HANDLE);
     
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"HostName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
     
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKeyName"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
     
     STRICT_EXPECTED_CALL(mocks, Map_GetValueFromKey(TEST_MAP_HANDLE, (const char*)"SharedAccessKey"))
-        .SetReturn(TEST_CHAR_PTR);
+        .SetReturn(TEST_CONST_CHAR_PTR);
     
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CONST_CHAR_PTR));
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE))
         .SetReturn(TEST_STRING_TOKENIZER_HANDLE);
@@ -1327,10 +1327,10 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_succeed)
         .SetReturn(0);
     
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
-        .SetReturn(TEST_STRING);
+        .SetReturn(TEST_CHAR_PTR);
     
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
-        .SetReturn(TEST_STRING);
+        .SetReturn(TEST_CHAR_PTR);
     
     EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .SetReturn(0);
@@ -1346,7 +1346,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_succeed)
     STRICT_EXPECTED_CALL(mocks, STRING_delete(TEST_STRING_HANDLE));
 
     // act
-    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_STRING);
+    auto result = IoTHubServiceClientAuth_CreateFromConnectionString(TEST_CHAR_PTR);
 
     // assert
     ASSERT_IS_NOT_NULL(result);

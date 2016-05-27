@@ -22,12 +22,13 @@
 
 IOTHUB_SERVICE_CLIENT_AUTH_HANDLE IoTHubServiceClientAuth_CreateFromConnectionString(const char* connectionString)
 {
-    IOTHUB_SERVICE_CLIENT_AUTH_HANDLE result = NULL;
+    IOTHUB_SERVICE_CLIENT_AUTH_HANDLE result;
 
     /* Codes_SRS_IOTHUBSERVICECLIENT_12_001: [** IoTHubServiceClientAuth_CreateFromConnectionString shall verify the input parameter and if it is NULL then return NULL **]*/
     if (connectionString == NULL)
     {
         LogError("Input parameter is NULL: connectionString");
+        result = NULL;
     }
     else
     {
