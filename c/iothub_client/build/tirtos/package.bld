@@ -16,7 +16,7 @@ var SRCS = [
     "iothub_client_ll.c",
     "iothub_message.c",
     "iothubtransporthttp.c",
-    "version.c"
+    "version.c",
     "blob.c"
 ];
 
