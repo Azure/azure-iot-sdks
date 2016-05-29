@@ -17,6 +17,10 @@ namespace Microsoft.Azure.Devices.Client.Transport
     using Microsoft.Azure.Devices.Client.Extensions;
     using Newtonsoft.Json;
 
+#if !WINDOWS_UWP && !PCL
+    using WindowsAzure.Storage.Blob;
+#endif
+
     sealed class HttpTransportHandler : DefaultDelegatingHandler
     {
         readonly Http1TransportSettings transportSettings;
@@ -205,6 +209,54 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 customHeaders,
                 CancellationToken.None);
         }
+
+#if !WINDOWS_UWP && !PCL
+        internal async Task UploadBlobAsync(String blobName, System.IO.Stream source)
+        {
+            // 1. Construct GET request to get SAS URI for storage account
+            HttpResponseMessage responseMessage = await this.httpClientHelper.GetAsync<HttpResponseMessage>(
+                GetRequestUri(this.deviceId, CommonConstants.CloudBoundPathTemplate + blobName, null),
+                ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                null,
+                true,
+                CancellationToken.None);
+
+            if (responseMessage.StatusCode != HttpStatusCode.OK)
+            {
+                throw new HttpRequestException(responseMessage.StatusCode.ToString());
+            }
+
+            var stringContent = await responseMessage.Content.ReadAsStringAsync();
+
+            FileUploadGetResponse getResponseData = JsonConvert.DeserializeObject<FileUploadGetResponse>(stringContent);
+
+            string putString = String.Format("https://{0}/{1}/{2}{3}",
+                getResponseData.hostName,
+                getResponseData.containerName,
+                getResponseData.blobName,
+                getResponseData.sasToken);
+
+            // 2. Use SAS URI to send data to Azure Storage Blob (PUT)
+            CloudBlockBlob blob = new CloudBlockBlob(new Uri(putString));
+            var uploadTask = blob.UploadFromStreamAsync(source);
+
+            // 3. POST to IoTHub with upload status
+            FileUploadNotificationResponse notification = new FileUploadNotificationResponse();
+
+            await uploadTask;
+
+            notification.isSuccess = uploadTask.IsCompleted ? true : false;
+            notification.statusCode = uploadTask.IsCompleted ? 0 : -1;
+            notification.statusDescription = uploadTask.IsCompleted? "Upload to storage completed." : "Failed to upload to storage.";
+
+            await this.httpClientHelper.PostAsync<FileUploadNotificationResponse>(
+                GetRequestUri(this.deviceId, CommonConstants.CloudBoundPathTemplate + "notifications/" + getResponseData.correlationId, null),
+                notification,
+                ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                null,
+                CancellationToken.None);
+        }
+#endif
 
         public override Task<Message> ReceiveAsync()
         {

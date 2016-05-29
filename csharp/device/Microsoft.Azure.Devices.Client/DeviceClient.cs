@@ -71,6 +71,8 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, RegexOptions);
 
+        static IotHubConnectionString iotHubConnectionString = null;
+
         internal IDelegatingHandler InnerHandler { get; set; }
 
 #if !PCL
@@ -345,7 +347,7 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentOutOfRangeException(nameof(connectionString), "Must specify at least one TransportSettings instance");
             }
 
-            IotHubConnectionString iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
+            iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
 
             foreach (ITransportSettings transportSetting in transportSettings)
             {
@@ -570,6 +572,30 @@ namespace Microsoft.Azure.Devices.Client
 
             return this.InnerHandler.SendEventAsync(messages).AsTaskOrAsyncOp();
         }
+
+#if !WINDOWS_UWP && !PCL
+        /// <summary>
+        /// Uploads a stream to a block blob in a storage account associated with the IoTHub for that device.
+        /// If the blob already exists, it will be overwritten.
+        /// </summary>
+        /// <param name="blobName"></param>
+        /// <param name="source"></param>
+        /// <returns>AsncTask</returns>
+        public AsyncTask UploadToBlobAsync(String blobName, System.IO.Stream source)
+        {
+            if (String.IsNullOrEmpty(blobName))
+            {
+                throw Fx.Exception.ArgumentNull("blobName");
+            }
+            if (source == null)
+            {
+                throw Fx.Exception.ArgumentNull("source");
+            }
+
+            HttpTransportHandler httpTransport = new HttpTransportHandler(iotHubConnectionString);
+            return httpTransport.UploadBlobAsync(blobName, source);
+        }
+#endif
 
         public void Dispose()
         {
