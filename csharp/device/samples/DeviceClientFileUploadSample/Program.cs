@@ -32,7 +32,7 @@ namespace Microsoft.Azure.Devices.Client.Samples
         {
             DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Http1);
             FileStream fileStreamSource = new FileStream(@"c:\temp\ForFileUpload.txt", FileMode.Open);
-            string fileName = String.Format("{0}_{1}", "TestFile_07", Path.GetFileName(fileStreamSource.Name));
+            string fileName = Path.GetFileName(fileStreamSource.Name);
 
             Console.WriteLine("Uploading File: {0}\n", fileName);
             await deviceClient.UploadToBlobAsync(fileName, fileStreamSource);
