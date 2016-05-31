@@ -97,6 +97,7 @@
   <ItemGroup>
     <Compile Include="AmqpClientHelper.cs" />
     <Compile Include="AmqpFeedbackReceiver.cs" />
+    <Compile Include="AmqpFileNotificationReceiver.cs" />
     <Compile Include="AmqpServiceClient.cs" />
     <Compile Include="ApiResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -107,6 +108,7 @@
     <Compile Include="Common\Amqp\WebSocketConstants.cs" />
     <Compile Include="Common\Exceptions\ErrorCode.cs" />
     <Compile Include="Common\Exceptions\TooManyDevicesException.cs" />
+    <Compile Include="Common\Extensions\AmqpExtensions.cs" />
     <Compile Include="Common\PerfectHash.cs" />
     <Compile Include="AuthenticationMechanism.cs" />
     <Compile Include="AuthenticationMethodFactory.cs" />
@@ -212,6 +214,8 @@
     <Compile Include="FeedbackReceiver.cs" />
     <Compile Include="FeedbackRecord.cs" />
     <Compile Include="FeedbackStatusCode.cs" />
+    <Compile Include="FileNotification.cs" />
+    <Compile Include="FileNotificationReceiver.cs" />
     <Compile Include="HttpClientHelper.cs" />
     <Compile Include="HttpRegistryManager.cs" />
     <Compile Include="IAuthenticationMethod.cs" />

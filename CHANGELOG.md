@@ -1,8 +1,30 @@
 # C# Device SDK
+- 
+# General
+- 
+
+# Bug fixes
+- 
+
+#Java SDK
+- Implemented message timeout for AMQP protocol.
+
+# Internal Changes
+- 
+# Node.js Device SDK
+- Upload to blob
+
+# Node.js Service SDK
+- Upload notifications
+- Deprecating `Amqp.getReceiver` in favor of `Amqp.getFeedbackReceiver`. `Amqp.getReceiver` will be removed for the next major release.
+
+Release for May 20, 2016
+
+# C# Device SDK
 - Device Client code cleanup & refactoring (changed to pipeline model)
-- Thread pool for MQTT threads\
+- Thread pool for MQTT threads
 - More sophisticated error handling
-- Retry operation if transient error occured
+- Retry operation if transient error occurred
 - Support for X.509 client certificates as an authentication mechanism for devices
 
 # General
@@ -39,6 +61,11 @@ Release for May 6, 2016
 # Python SDK
 - Bug fixes for messageTimeout option and message properties in the Python binding
 - Build improvements
+
+# C# Service SDK
+- Adding support for receiving file upload notifications from service client. 
+	- Implemented 'AmqpFileNotificationReceiver'
+	- Moved common code for 'AmqpFileNotificationReceiver' and 'AmqpFeedbackReceiver' to common helpers
 
 # General
 - Documentation fixes

@@ -597,6 +597,65 @@ public class AmqpsTransportTest
         };
     }
 
+    // Tests_SRS_AMQPSTRANSPORT_15_039: [If the message is expired, the function shall create a callback
+    // with the MESSAGE_EXPIRED status and add it to the callback list.]
+    @Test
+    public void sendMessagesAddsExpiredMessagesToCallbackListWithCorrectCode(
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubEventCallback mockCallback,
+            @Mocked final IotHubOutboundPacket mockPacket)
+            throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[] {1, 2};
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.isExpired();
+                returns (true, false);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
+                result = 1;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+        Map<Integer, IotHubOutboundPacket> inProgressMessages = Deencapsulation.getField(transport, "inProgressMessages");
+        Assert.assertEquals(1, inProgressMessages.size());
+
+        Queue<IotHubOutboundPacket> waitingMessages = Deencapsulation.getField(transport, "waitingMessages");
+        Assert.assertEquals(0, waitingMessages.size());
+
+        Queue<IotHubCallbackPacket> callbackList = Deencapsulation.getField(transport, "callbackList");
+        Assert.assertEquals(1, callbackList.size());
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 2;
+                mockPacket.getMessage();
+                times = 2;
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
+                times = 1;
+                new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, (IotHubEventCallback) any, any);
+                times = 1;
+            }
+        };
+    }
+
     // Tests_SRS_AMQPSTRANSPORT_15_019: [If the transport closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void invokeCallbacksFailsIfTransportNotOpen()

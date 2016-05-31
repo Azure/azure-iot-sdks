@@ -10,13 +10,19 @@ set(iothub_client_ll_transport_c_files
 ./src/version.c
 ./src/iothub_message.c
 ./src/iothub_client_ll.c
+./src/iothub_client_ll_uploadtoblob.c
+./src/blob.c
+../parson/parson.c
 )
 
 set(iothub_client_ll_transport_h_files
 ./inc/iothub_message.h
 ./inc/iothub_client_ll.h
+./inc/iothub_client_ll_uploadtoblob.h
 ./inc/iothub_client_version.h
 ./inc/iothub_transport_ll.h
+./inc/blob.h
+../parson/parson.h
 )
 
 set(iothub_client_c_files
@@ -98,6 +104,7 @@ endif()
 
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
+include_directories(../parson)
 include_directories(${SHARED_UTIL_INC_FOLDER})
 
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
@@ -115,6 +122,7 @@ if(${use_http})
 		${iothub_client_http_transport_h_files}
 	)
 	linkSharedUtil(iothub_client_http_transport)
+    target_link_libraries(iothub_client_http_transport)
 endif()
 
 if(${use_amqp})
@@ -124,6 +132,7 @@ if(${use_amqp})
 		${iothub_client_amqp_transport_h_files}
 	)
 	linkSharedUtil(iothub_client_amqp_transport)
+    target_link_libraries(iothub_client_amqp_transport)
 endif()
 
 if(${use_mqtt})
@@ -134,6 +143,7 @@ if(${use_mqtt})
 	)
 	linkSharedUtil(iothub_client_mqtt_transport)
 	linkMqttLibrary(iothub_client_mqtt_transport)
+    target_link_libraries(iothub_client_mqtt_transport)
 endif()
 
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})

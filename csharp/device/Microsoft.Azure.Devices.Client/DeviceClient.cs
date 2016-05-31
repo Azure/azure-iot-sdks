@@ -73,14 +73,21 @@ namespace Microsoft.Azure.Devices.Client
 
         internal IDelegatingHandler InnerHandler { get; set; }
 
-#if !WINDOWS_UWP && !PCL
+#if !PCL
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
         {
-            this.InnerHandler = new GateKeeperDelegatingHandler(
-                new RetryDelegatingHandler(
-                    new ErrorDelegatingHandler(
-                        () => new RoutingDelegatingHandler(this.CreateTransportHandler, iotHubConnectionString, transportSettings)))
-                );
+
+#if !WINDOWS_UWP
+            var innerHandler = new RetryDelegatingHandler(
+                new ErrorDelegatingHandler(
+                    () => new RoutingDelegatingHandler(this.CreateTransportHandler, iotHubConnectionString, transportSettings)));
+#else
+            // UWP does not support retry yet. We need to make the underlying Message stream accessible internally on UWP
+            // to be sure that either the stream has not been read or it is seekable to safely retry operation
+            var innerHandler = new ErrorDelegatingHandler(
+                () => new RoutingDelegatingHandler(this.CreateTransportHandler, iotHubConnectionString, transportSettings));
+#endif
+            this.InnerHandler = new GateKeeperDelegatingHandler(innerHandler);
         }
 
         DefaultDelegatingHandler CreateTransportHandler(IotHubConnectionString iotHubConnectionString, ITransportSettings transportSetting)
@@ -92,8 +99,10 @@ namespace Microsoft.Azure.Devices.Client
                     return new AmqpTransportHandler(iotHubConnectionString, transportSetting as AmqpTransportSettings);
                 case TransportType.Http1:
                     return new HttpTransportHandler(iotHubConnectionString, transportSetting as Http1TransportSettings);
+#if !WINDOWS_UWP && !NETMF
                 case TransportType.Mqtt:
                     return new MqttTransportHandler(iotHubConnectionString, transportSetting as MqttTransportSettings);
+#endif
                 default:
                     throw new InvalidOperationException("Unsupported Transport Setting {0}".FormatInvariant(transportSetting));
             }
@@ -368,12 +377,8 @@ namespace Microsoft.Azure.Devices.Client
                 }
             }
 
-#if !WINDOWS_UWP
             // Defer concrete DeviceClient creation to OpenAsync
             return new DeviceClient(iotHubConnectionString, transportSettings);
-#else
-            return new DeviceClient(iotHubConnectionString);
-#endif
         }
 
         /// <summary>

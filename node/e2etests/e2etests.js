@@ -9,6 +9,7 @@ var ConnectionString = require('azure-iothub').ConnectionString;
 
 var device_service_tests = require('./test/device_service.js');
 var registry_tests = require('./test/registry.js');
+var file_upload_tests = require('./test/file_upload.js');
 
 var deviceName = process.env.IOTHUB_DEVICE_ID;
 var deviceKey = process.env.IOTHUB_DEVICE_KEY;
@@ -21,3 +22,5 @@ device_service_tests(deviceAmqp.Amqp, hubConnectionString, deviceConnectionStrin
 device_service_tests(deviceHttp.Http, hubConnectionString, deviceConnectionString, deviceName, deviceKey);
 
 registry_tests(hubConnectionString, storageConnectionString);
+
+file_upload_tests(hubConnectionString, deviceConnectionString, deviceName);

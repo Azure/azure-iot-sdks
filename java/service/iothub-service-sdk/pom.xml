@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
     <artifactId>iothub-service-sdk</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <name>IotHub Java Service SDK</name>
     <description>The Microsoft Azure IoT Service SDK for Java</description>
     <developers>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>com.microsoft.azure.iot</groupId>
             <artifactId>proton-j-azure-iot</artifactId>
-            <version>0.12.1</version>
+            <version>0.12.2</version>
             <type>jar</type>
         </dependency>
         <dependency>

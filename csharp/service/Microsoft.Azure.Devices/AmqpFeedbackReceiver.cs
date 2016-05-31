@@ -5,16 +5,11 @@ namespace Microsoft.Azure.Devices
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Text;
     using System.Threading.Tasks;
-    using System.Web;
     using Microsoft.Azure.Amqp;
-    using Microsoft.Azure.Amqp.Framing;
-    using Newtonsoft.Json;
-
     using Microsoft.Azure.Devices.Common;
-    using Microsoft.Azure.Devices.Common.Exceptions;
+    using Microsoft.Azure.Devices.Common.Extensions;
 
     sealed class AmqpFeedbackReceiver : FeedbackReceiver<FeedbackBatch>, IDisposable
     {
@@ -29,7 +24,7 @@ namespace Microsoft.Azure.Devices
             this.iotHubConnection = iotHubConnection;
             this.openTimeout = IotHubConnection.DefaultOpenTimeout;
             this.operationTimeout = IotHubConnection.DefaultOperationTimeout;
-            this.receivingPath = GetReceivingPath(EndpointKind.Feedback);
+            this.receivingPath = AmqpClientHelper.GetReceivingPath(EndpointKind.Feedback);
             this.faultTolerantReceivingLink = new FaultTolerantAmqpObject<ReceivingAmqpLink>(this.CreateReceivingLinkAsync, this.iotHubConnection.CloseLink);
         }
 
@@ -59,7 +54,7 @@ namespace Microsoft.Azure.Devices
 
         public Task OpenAsync()
         {
-            return this.GetReceivingLinkAsync();
+            return this.faultTolerantReceivingLink.GetReceivingLinkAsync();
         }
 
         public Task CloseAsync()
@@ -76,32 +71,23 @@ namespace Microsoft.Azure.Devices
         {
             try
             {
-                ReceivingAmqpLink receivingLink = await this.GetReceivingLinkAsync();
+                ReceivingAmqpLink receivingLink = await this.faultTolerantReceivingLink.GetReceivingLinkAsync();
                 AmqpMessage amqpMessage = await receivingLink.ReceiveMessageAsync(timeout);
 
                 if (amqpMessage != null)
                 {
                     using (amqpMessage)
                     {
-                        string contentType = amqpMessage.Properties.ContentType.ToString();
-                        if (!string.Equals(contentType, CommonConstants.BatchedFeedbackContentType, StringComparison.OrdinalIgnoreCase))
-                        {
-                            throw new InvalidOperationException("Unsupported content type: {0}".FormatInvariant(contentType));
-                        }
+                        AmqpClientHelper.ValidateContentType(amqpMessage, CommonConstants.BatchedFeedbackContentType);
+                        var records = await AmqpClientHelper.GetObjectFromAmqpMessageAsync<IEnumerable<FeedbackRecord>>(amqpMessage);
 
-                        using (var reader = new StreamReader(amqpMessage.BodyStream, Encoding.UTF8))
+                        return new FeedbackBatch
                         {
-                            string jsonString = await reader.ReadToEndAsync();
-                            var records = JsonConvert.DeserializeObject<IEnumerable<FeedbackRecord>>(jsonString);
-
-                            return new FeedbackBatch
-                            {
-                                EnqueuedTime = (DateTime)amqpMessage.MessageAnnotations.Map[MessageSystemPropertyNames.EnqueuedTime],
-                                LockToken = new Guid(amqpMessage.DeliveryTag.Array).ToString(),
-                                Records = records,
-                                UserId = Encoding.UTF8.GetString(amqpMessage.Properties.UserId.Array, amqpMessage.Properties.UserId.Offset, amqpMessage.Properties.UserId.Count)
-                            };
-                        }
+                            EnqueuedTime = (DateTime)amqpMessage.MessageAnnotations.Map[MessageSystemPropertyNames.EnqueuedTime],
+                            LockToken = new Guid(amqpMessage.DeliveryTag.Array).ToString(),
+                            Records = records,
+                            UserId = Encoding.UTF8.GetString(amqpMessage.Properties.UserId.Array, amqpMessage.Properties.UserId.Offset, amqpMessage.Properties.UserId.Count)
+                        };
                     }
                 }
 
@@ -118,72 +104,27 @@ namespace Microsoft.Azure.Devices
             }
         }
 
-        async Task<ReceivingAmqpLink> GetReceivingLinkAsync()
-        {
-            ReceivingAmqpLink receivingLink;
-            if (!this.faultTolerantReceivingLink.TryGetOpenedObject(out receivingLink))
-            {
-                receivingLink = await this.faultTolerantReceivingLink.GetOrCreateAsync(this.OpenTimeout);
-            }
-
-            return receivingLink;
-        }
-
         Task<ReceivingAmqpLink> CreateReceivingLinkAsync(TimeSpan timeout)
         {
             return this.iotHubConnection.CreateReceivingLink(this.receivingPath, timeout, 0);
         }
 
-        static string GetReceivingPath(EndpointKind endpointKind)
-        {
-            string path;
-            switch (endpointKind)
-            {
-                case EndpointKind.Feedback:
-                    path = "/messages/serviceBound/feedback";
-                    break;
-                
-                default:
-                    throw new ArgumentException("Invalid endpoint kind to receive messages from Service endpoints", "endpointKind");
-            }
-
-            return path;
-        }
-
         public override Task CompleteAsync(FeedbackBatch feedback)
         {
-            return this.DisposeMessageAsync(feedback.LockToken, AmqpConstants.AcceptedOutcome);
+            return AmqpClientHelper.DisposeMessageAsync(
+                this.faultTolerantReceivingLink,
+                feedback.LockToken,
+                AmqpConstants.AcceptedOutcome,
+                true);
         }
 
         public override Task AbandonAsync(FeedbackBatch feedback)
         {
-             return this.DisposeMessageAsync(feedback.LockToken, AmqpConstants.ReleasedOutcome);
-        }
-
-        async Task DisposeMessageAsync(string lockToken, Outcome outcome)
-        {
-            var deliveryTag = IotHubConnection.ConvertToDeliveryTag(lockToken);
-
-            Outcome disposeOutcome;
-            try
-            {
-                ReceivingAmqpLink deviceBoundReceivingLink = await this.GetReceivingLinkAsync();
-                disposeOutcome = await deviceBoundReceivingLink.DisposeMessageAsync(deliveryTag, outcome, batchable: true, timeout: this.OperationTimeout);
-            }
-            catch (Exception exception)
-            {
-                if (exception.IsFatal())
-                {
-                    throw;
-                }
-
-                throw AmqpClientHelper.ToIotHubClientContract(exception);
-            }
-
-            if (disposeOutcome.DescriptorCode != Accepted.Code)
-            {
-                throw AmqpErrorMapper.GetExceptionFromOutcome(disposeOutcome);
-            }
+            return AmqpClientHelper.DisposeMessageAsync(
+                this.faultTolerantReceivingLink,
+                feedback.LockToken,
+                AmqpConstants.ReleasedOutcome,
+                true);
         }
         
         /// <inheritdoc/>

@@ -29,6 +29,7 @@ namespace Microsoft.Azure.Devices
         readonly string sendingPath;
         readonly string receivingPath;
         readonly AmqpFeedbackReceiver feedbackReceiver;
+        readonly AmqpFileNotificationReceiver fileNotificationReceiver;
         readonly IHttpClientHelper httpClientHelper;
         readonly string iotHubName;
 
@@ -43,6 +44,7 @@ namespace Microsoft.Azure.Devices
             this.sendingPath = "/messages/deviceBound";
             this.faultTolerantSendingLink = new FaultTolerantAmqpObject<SendingAmqpLink>(this.CreateSendingLinkAsync, this.iotHubConnection.CloseLink);
             this.feedbackReceiver = new AmqpFeedbackReceiver(this.iotHubConnection);
+            this.fileNotificationReceiver = new AmqpFileNotificationReceiver(this.iotHubConnection);
             this.iotHubName = iotHubConnectionString.IotHubName;
             this.httpClientHelper = new HttpClientHelper(
                 iotHubConnectionString.HttpsEndpoint,
@@ -156,6 +158,11 @@ namespace Microsoft.Azure.Devices
         public override FeedbackReceiver<FeedbackBatch> GetFeedbackReceiver()
         {
             return this.feedbackReceiver;
+        }
+
+        public override FileNotificationReceiver<FileNotification> GetFileNotificationReceiver()
+        {
+            return this.fileNotificationReceiver;
         }
 
         public override Task<ServiceStatistics> GetServiceStatisticsAsync()

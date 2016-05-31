@@ -6,12 +6,17 @@
 compileAsC99()
 
 set(iothub_service_client_c_files
+./parson/parson.c
 ./src/connection_string_parser.c
 ./src/iothub_service_client_auth.c
+./src/iothub_registrymanager.c
 )
 
 set(iothub_service_client_h_files
+./parson/parson.h
 ./inc/connection_string_parser.h
+./inc/iothub_registrymanager.h
+./inc/iothub_messaging_ll.h
 ./inc/iothub_service_client_auth.h
 )
 
@@ -24,6 +29,8 @@ include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
 include_directories(${UAMQP_INC_FOLDER})
+
+include_directories(${PARSON_INC_FOLDER})
 
 IF(WIN32)
 	#windows needs this define
