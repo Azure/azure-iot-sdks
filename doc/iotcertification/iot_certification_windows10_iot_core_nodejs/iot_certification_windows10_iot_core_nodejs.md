@@ -83,47 +83,63 @@ This section walks you through the steps to create a UWP Node.js wrapper over ex
 
 
 1.  Start a new instance of Visual Studio 2015.
+
 2. Create a new project (**File | New Project…**). In the New Project dialog, navigate to Node.js as shown below (in the left pane in the dialog: Templates | JavaScript | Node.js). Select the **Basic Node.js Johnny-Five Application (Universal Windows) template** (shown below). Enter a name for your project, for example **NodeJsUWPSample**. 
+
 ![VisualStudio\_project\_Template](images/vs_project_template_for_nodejs_uwp.png)
-4. Select app.js and package.json file in Solution Explorer, Right click and select **Delete**.
+
+3. Select app.js and package.json file in Solution Explorer, Right click and select **Delete**.
           ![VisualStudio\_delete\_oldfiles](images/Delete_old_files.png)
-5. Clone [Azure IoT SDK](https://github.com/Azure/azure-iot-sdks.git) repository to your Windows 10 machine.         
-6. In File explorer, Copy **package.json** and **simple_sample_device.js** files available under Node.js sample of the repository on your machine. For example if you cloned the **azure-iot-sdks** repository under C:\IOT directory, Go to **(C:\azure-iot-sdks\node\device\samples\)**
-          ![FileExplorere\_copy\_files](images/copy_files.png)
           
-7. Go back to Visual Studio, Right click your project in Solution Explorer and click **Open Folder in File Explorer** .
+4. Clone [Azure IoT SDK](https://github.com/Azure/azure-iot-sdks.git) repository to your Windows 10 machine. 
+
+5. In File explorer, Copy **package.json** and **simple_sample_device.js** files available under Node.js sample of the repository on your machine. For example if you cloned the **azure-iot-sdks** repository under C:\IOT directory, Go to **(C:\azure-iot-sdks\node\device\samples\)**
+
+      ![FileExplorere\_copy\_files](images/copy_files.png)
+          
+6. Go back to Visual Studio, Right click your project in Solution Explorer and click **Open Folder in File Explorer**.
+
     ![VisualStudio\_project\_Template](images/open_project_in_file_explorer.png)
-8. Paste the files you copied earlier in this folder.
+    
+7. Paste the files you copied earlier in this folder.
+
     ![FileExplorer\_paste\Files](images/project_file_explorer.png)
-10. Go back to Visual Studio, in Solution Explorer on the top context menu, click **Show All Files**.
+    
+8. Go back to Visual Studio, in Solution Explorer on the top context menu, click **Show All Files**.
 
     ![VisualStudio\show\AllFiles](images/show_all_files.PNG)
-10. Right click both **package.json** and **simple_sample_device.js** files and choose **Include in project** option.
-        ![VisualStudio\IncudeIn\Project](images/Include_In_Project.PNG)
-11. Right click the **npm** node and click **Install Missing npm Packages** to install the required packages for the solution.
+    
+9. Right click both **package.json** and **simple_sample_device.js** files and choose **Include in project** option.
+
+      ![VisualStudio\IncudeIn\Project](images/Include_In_Project.PNG)
+        
+10. Right click the **npm** node and click **Install Missing npm Packages** to install the required packages for the solution.
 
     ![VisualStudio\Install\MissingNpmPackages](images/install-missing-npm-packages.PNG)
-12. Expand the npm node in Solution Explorer and right click all package(s) that shows not listed in package and click **Uninstall npm Package(s)**.
+    
+11. Expand the npm node in Solution Explorer and right click all package(s) that shows not listed in package and click **Uninstall npm Package(s)**.
+
 ![VisualStudio\_Properties\_Debug](images/Remove_extra_package.PNG)
-14.  Select **simple_sample_device.js** file and locate the following code in the **simple_sample_device.js** file:
+
+12.  Select **simple_sample_device.js** file and locate the following code in the **simple_sample_device.js** file:
 
         var connectionString = '[IoT device connection string]';
 
-15.  Replace `[IoT device connection string]` with the connection string for your device and **Save** the changes. You can get the connection string from DeviceExplorer as explained in [Step 2](#Step_2:_Register).
+13.  Replace `[IoT device connection string]` with the connection string for your device and **Save** the changes. You can get the connection string from DeviceExplorer as explained in [Step 2](#Step_2:_Register).
 
-16. Right click the **simple_sample_device.js** file and from context menu choose "Set as Node.JS Startup File".
+14. Right click the **simple_sample_device.js** file and from context menu choose "Set as Node.JS Startup File".
 
-17.  Choose the right architecture (x86 or ARM, depending on your device) and set the debugging method to "Remote Machine":
+15.  Choose the right architecture (x86 or ARM, depending on your device) and set the debugging method to "Remote Machine":
 
       ![VisualStudio\_Select\_Architecture](images/vs_select_arch.png)
     
-18.  To deploy the binaries on your device, right-click on the NodeJsUWPSample project in the **Solution Explorer**, select **Properties** and navigate to the **General** tab:
+16.  To deploy the binaries on your device, right-click on the NodeJsUWPSample project in the **Solution Explorer**, select **Properties** and navigate to the **General** tab:
 
       ![VisualStudio\_Properties\_Debug](images/vs_properties_debug.png)
 
    Type in the name or IP of your device.
 
-19.  Build the solution.
+17.  Build the solution.
 
 
 <a name="Step_3_3:_Run"/>
@@ -149,7 +165,7 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
        
 4. You should be able to see the events received in the DeviceExplorer's data tab.
 
-    ![DeviceExplorer\_Events\_Received](images/device_explorer_message_received.png)
+      ![DeviceExplorer\_Events\_Received](images/device_explorer_message_received.png)
 
 ### 3.3.2 Receive messages from IoT Hub
 
