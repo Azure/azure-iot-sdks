@@ -1,7 +1,9 @@
 ﻿#IoTHubClient Requirements
- 
 
- 
+##References
+[Azure Storage Services REST API Reference](https://msdn.microsoft.com/en-us/library/azure/dd179355.aspx)
+
+
 ##Overview
 
 IoTHubClient is a module that extends the IoTHubCLient_LL module with 2 features:
@@ -20,10 +22,11 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE tr
 extern void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void* userContextCallback);
 
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context);
 ```
 
 ## IoTHubClient_GetVersionString
@@ -44,11 +47,11 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* 
 
 **SRS_IOTHUBCLIENT_12_004: [** IoTHubClient_CreateFromConnectionString shall allocate a new IoTHubClient instance.  **]**
 
+**SRS_IOTHUBCLIENT_02_059: [** `IoTHubClient_CreateFromConnectionString` shall create a `LIST_HANDLE` containing informations saved by `IoTHubClient_UploadToBlobAsync`. **]** 
+
+**SRS_IOTHUBCLIENT_02_070: [** If creating the `LIST_HANDLE` fails then `IoTHubClient_CreateFromConnectionString` shall fail and return NULL**]**
+
 **SRS_IOTHUBCLIENT_12_011: [** If the allocation failed, IoTHubClient_CreateFromConnectionString returns NULL  **]**
-
-**SRS_IOTHUBCLIENT_02_039: [** IoTHubClient_CreateFromConnectionString shall create a condition variable object to be used later for stopping the worker thread. **]**
-
-**SRS_IOTHUBCLIENT_02_040: [** If condition variable creation fails, then IoTHubClient_CreateFromConnectionString shall fail and return NULL. **]**
 
 **SRS_IOTHUBCLIENT_12_005: [** IoTHubClient_CreateFromConnectionString shall create a lock object to be used later for serializing IoTHubClient calls **]**
 
@@ -67,15 +70,15 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* conf
 
 **SRS_IOTHUBCLIENT_01_001: [** IoTHubClient_Create shall allocate a new IoTHubClient instance and return a non-NULL handle to it. **]**
 
+**SRS_IOTHUBCLIENT_02_060: [** `IoTHubClient_Create` shall create a `LIST_HANDLE` that shall be used by `IoTHubClient_UploadToBlobAsync`. **]**  
+
+**SRS_IOTHUBCLIENT_02_061: [** If creating the `LIST_HANDLE` fails then `IoTHubClient_Create` shall fail and return NULL. **]**
+
 **SRS_IOTHUBCLIENT_01_002: [** IoTHubClient_Create shall instantiate a new IoTHubClient_LL instance by calling IoTHubClient_LL_Create and passing the config argument. **]**
 
 **SRS_IOTHUBCLIENT_01_003: [** If IoTHubClient_LL_Create fails, then IoTHubClient_Create shall return NULL. **]**
 
 **SRS_IOTHUBCLIENT_01_004: [** If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_Create shall return NULL. **]**
-
-**SRS_IOTHUBCLIENT_02_041: [** IoTHubClient_Create shall create a condition variable object to be used later for stopping the worker thread. **]**
-
-**SRS_IOTHUBCLIENT_02_042: [** If condition variable creation fails, then IoTHubClient_Create shall fail and return NULL. **]**
 
 **SRS_IOTHUBCLIENT_01_029: [** IoTHubClient_Create shall create a lock object to be used later for serializing IoTHubClient calls. **]**
 
@@ -94,10 +97,9 @@ Create an IoTHubClient using an existing connection.
 
 **SRS_IOTHUBCLIENT_17_014: [** IoTHubClient_CreateWithTransport shall return NULL if config is NULL. **]**
 
-**SRS_IOTHUBCLIENT_17_001: [** IoTHubClient_CreateWithTransport shall allocate a new IoTHubClient instance and return a non-NULL handle to it.
- **]**
+**SRS_IOTHUBCLIENT_17_001: [** IoTHubClient_CreateWithTransport shall allocate a new IoTHubClient instance and return a non-NULL handle to it.**]**
  
- **SRS_IOTHUBCLIENT_17_002: [** If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_CreateWithTransport shall return NULL. **]**
+**SRS_IOTHUBCLIENT_17_002: [** If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_CreateWithTransport shall return NULL. **]**
  
 **SRS_IOTHUBCLIENT_17_003: [** IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLLTransport on transportHandle to get lower layer transport. **]**
 
@@ -121,6 +123,8 @@ extern void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 ```
 **SRS_IOTHUBCLIENT_01_005: [** IoTHubClient_Destroy shall free all resources associated with the iotHubClientHandle instance. **]**
 
+**SRS_IOTHUBCLIENT_02_069: [** `IoTHubClient_Destroy` shall free all data created by `IoTHubClient_UploadToBlobAsync` **]**
+
 **SRS_IOTHUBCLIENT_01_006: [** That includes destroying the IoTHubClient_LL instance by calling IoTHubClient_LL_Destroy. **]**
 
 **SRS_IOTHUBCLIENT_02_043: [** IoTHubClient_Destroy shall lock the serializing lock and signal the worker thread (if any) to end **]**
@@ -128,8 +132,6 @@ extern void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 **SRS_IOTHUBCLIENT_02_045: [** IoTHubClient_Destroy shall unlock the serializing lock. **]**
 
 **SRS_IOTHUBCLIENT_01_007: [** The thread created as part of executing IoTHubClient_SendEventAsync or IoTHubClient_SetNotificationMessageCallback shall be joined. **]**
-
-**SRS_IOTHUBCLIENT_02_046: [** the condition variable shall be detroyed. **]**
 
 **SRS_IOTHUBCLIENT_01_032: [** If the lock was allocated in IoTHubClient_Create, it shall be also freed. **]**
 
@@ -229,6 +231,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotH
 
 **SRS_IOTHUBCLIENT_01_040: [** If acquiring the lock fails, IoTHubClient_LL_DoWork shall not be called. **]**
 
+**SRS_IOTHUBCLIENT_02_072: [** All threads marked as disposable (upon completion of a file upload) shall be joined and the data structures build for them shall be freed. **]**
 
 
 ## IoTHubClient_SetOption
@@ -244,8 +247,6 @@ IoTHubClient_SetOption allows run-time changing of settings of the IoTHubClient.
 
 **SRS_IOTHUBCLIENT_02_036: [** If parameter value is NULL then IoTHubClient_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. **]**
 
-**SRS_IOTHUBCLIENT_02_037: [** If optionName matches one of the option handled by IoTHubClient, then the pointer value shall be dereferenced (by convention) to the data type for that option and option specific code shall be executed. **]**
-
 **SRS_IOTHUBCLIENT_02_038: [** If optionName doesn't match one of the options handled by this module then IoTHubClient_SetOption shall call IoTHubClient_LL_SetOption passing the same parameters and return what IoTHubClient_LL_SetOption returns. **]**
 
 **SRS_IOTHUBCLIENT_01_041: [** IoTHubClient_SetOption shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
@@ -254,3 +255,24 @@ IoTHubClient_SetOption allows run-time changing of settings of the IoTHubClient.
 
 Options handled by IoTHubClient_SetOption:
 -none.
+
+##IoTHubClient_UploadToBlobAsync
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context);
+```
+
+`IoTHubClient_UploadToBlobAsync` asynchronously uploads the data pointed to by `source` having the size `size` to a file 
+called `destinationFileName` in Azure Blob Storage and calls `iotHubClientFileUploadCallback` once the operation has completed
+
+**SRS_IOTHUBCLIENT_02_047: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_UploadToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+**SRS_IOTHUBCLIENT_02_048: [** If `destinationFileName` is `NULL` then `IoTHubClient_UploadToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+**SRS_IOTHUBCLIENT_02_049: [** If `source` is NULL and size is greated than 0 then `IoTHubClient_UploadToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+**SRS_IOTHUBCLIENT_02_051: [** `IoTHubClient_UploadToBlobAsync` shall copy the `souce`, `size`, `iotHubClientFileUploadCallback`, `context` into a structure. **]**
+**SRS_IOTHUBCLIENT_02_058: [** `IoTHubClient_UploadToBlobAsync` shall add the structure to the list of structures that need to be cleaned once file upload finishes. **]**
+**SRS_IOTHUBCLIENT_02_052: [** `IoTHubClient_UploadToBlobAsync` shall spawn a thread passing the structure build in SRS IOTHUBCLIENT 02 051 as thread data.**]**
+**SRS_IOTHUBCLIENT_02_053: [** If copying to the structure or spawning the thread fails, then `IoTHubClient_UploadToBlobAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_02_054: [** The thread shall call `IoTHubClient_LL_UploadToBlob` passing the information packed in the structure.  **]**
+**SRS_IOTHUBCLIENT_02_055: [** If `IoTHubClient_LL_UploadToBlob` fails then the thread shall call the callback passing as result `FILE_UPLOAD_ERROR` and as context the structure from SRS IOTHUBCLIENT 02 051. **]**
+**SRS_IOTHUBCLIENT_02_056: [** Otherwise the thread `iotHubClientFileUploadCallbackInternal` passing as result `FILE_UPLOAD_OK` and the structure from SRS IOTHUBCLIENT 02 051. **]**
+**SRS_IOTHUBCLIENT_02_071: [** The thread shall mark itself as disposable. **]**
+

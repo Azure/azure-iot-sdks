@@ -9,3 +9,9 @@
 	path = c/azure-uamqp-c
 	url = https://github.com/Azure/azure-uamqp-c.git
 	branch = master
+[submodule "c/parson"]
+	path = c/parson
+	url = https://github.com/kgabis/parson
+[submodule "c/service/iothub_service_client/parson"]
+  path = c/service/iothub_service_client/parson
+  url = https://github.com/kgabis/parson

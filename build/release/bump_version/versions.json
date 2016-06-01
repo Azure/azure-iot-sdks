@@ -7,7 +7,7 @@
     },
     "csharp": {
         "device": "1.0.11",
-		"devicepcl": "1.0.7",
+        "devicepcl": "1.0.7",
         "service": "1.0.8"
     },
     "java": {
@@ -26,6 +26,9 @@
         "device-mqtt": "1.0.6",
         "service": "1.0.8"
     },
+    "c_shared_utility_nuget": "1.0.8",
+    "uamqp_c_nuget": "1.0.8",
+    "umqtt_c_nuget": "1.0.7",
     "iothub-explorer": "1.0.6",
     "device-explorer": "1.0.6",
     "github-release": "v1.0.5"

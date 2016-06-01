@@ -14,6 +14,7 @@
 #define BLOB_H
 
 #include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/buffer_.h"
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -37,13 +38,15 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 /**
 * @brief	Synchronously uploads a byte array to blob storage
 *
-* @param	SASURI	    The URI to use to upload data
-* @param	size		The size of the data to be uploaded (can be 0)
-* @param	source		A pointer to the byte array to be uploaded (can be NULL, but then size needs to be zero)
+* @param	SASURI	        The URI to use to upload data
+* @param	size		    The size of the data to be uploaded (can be 0)
+* @param	source		    A pointer to the byte array to be uploaded (can be NULL, but then size needs to be zero)
+* @param    httpStatus      A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
+* @param    httpResponse    A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
 *
 * @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSasUri, const char*, SASURI, const unsigned char*, source, size_t, size);
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadFromSasUri,const char*, SASURI, const unsigned char*, source, size_t, size, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
 
 #ifdef __cplusplus
 }
