@@ -86,20 +86,21 @@ This section walks you through the steps to create a UWP Node.js wrapper over ex
 
 2. Create a new project (**File | New Project…**). In the New Project dialog, navigate to Node.js as shown below (in the left pane in the dialog: Templates | JavaScript | Node.js). Select the **Basic Node.js Johnny-Five Application (Universal Windows) template** (shown below). Enter a name for your project, for example **NodeJsUWPSample**. 
 
-![VisualStudio\_project\_Template](images/vs_project_template_for_nodejs_uwp.png)
+    ![VisualStudio\_project\_Template](images/vs_project_template_for_nodejs_uwp.png)
 
 3. Select app.js and package.json file in Solution Explorer, Right click and select **Delete**.
-          ![VisualStudio\_delete\_oldfiles](images/Delete_old_files.png)
+
+      ![VisualStudio\_delete\_oldfiles](images/Delete_old_files.png)
           
 4. Clone [Azure IoT SDK](https://github.com/Azure/azure-iot-sdks.git) repository to your Windows 10 machine. 
 
 5. In File explorer, Copy **package.json** and **simple_sample_device.js** files available under Node.js sample of the repository on your machine. For example if you cloned the **azure-iot-sdks** repository under C:\IOT directory, Go to **(C:\azure-iot-sdks\node\device\samples\)**
 
-      ![FileExplorere\_copy\_files](images/copy_files.png)
+    ![FileExplorere\_copy\_files](images/copy_files.png)
           
 6. Go back to Visual Studio, Right click your project in Solution Explorer and click **Open Folder in File Explorer**.
 
-    ![VisualStudio\_project\_Template](images/open_project_in_file_explorer.png)
+   ![VisualStudio\_project\_Template](images/open_project_in_file_explorer.png)
     
 7. Paste the files you copied earlier in this folder.
 
@@ -119,7 +120,7 @@ This section walks you through the steps to create a UWP Node.js wrapper over ex
     
 11. Expand the npm node in Solution Explorer and right click all package(s) that shows not listed in package and click **Uninstall npm Package(s)**.
 
-![VisualStudio\_Properties\_Debug](images/Remove_extra_package.PNG)
+    ![VisualStudio\_Properties\_Debug](images/Remove_extra_package.PNG)
 
 12.  Select **simple_sample_device.js** file and locate the following code in the **simple_sample_device.js** file:
 
@@ -131,11 +132,11 @@ This section walks you through the steps to create a UWP Node.js wrapper over ex
 
 15.  Choose the right architecture (x86 or ARM, depending on your device) and set the debugging method to "Remote Machine":
 
-      ![VisualStudio\_Select\_Architecture](images/vs_select_arch.png)
+     ![VisualStudio\_Select\_Architecture](images/vs_select_arch.png)
     
 16.  To deploy the binaries on your device, right-click on the NodeJsUWPSample project in the **Solution Explorer**, select **Properties** and navigate to the **General** tab:
 
-      ![VisualStudio\_Properties\_Debug](images/vs_properties_debug.png)
+     ![VisualStudio\_Properties\_Debug](images/vs_properties_debug.png)
 
    Type in the name or IP of your device.
 
