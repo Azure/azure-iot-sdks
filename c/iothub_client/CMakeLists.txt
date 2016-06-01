@@ -150,7 +150,9 @@ add_library(iothub_client
 )
 linkSharedUtil(iothub_client)
 
-add_subdirectory(samples)
+if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+	add_subdirectory(samples)
+endif()
 
 if(NOT IN_OPENWRT)
 # Disable tests for OpenWRT

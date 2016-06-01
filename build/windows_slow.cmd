@@ -20,6 +20,6 @@ if errorlevel 1 goto :eof
 cd %build-root%
 
 REM -- C --
-echo Y | call %build-root%\c\build_all\windows\build.cmd --skip-unittests
+echo Y | call %build-root%\c\build_all\windows\build.cmd --make_nuget yes
 if errorlevel 1 goto :eof
 cd %build-root%

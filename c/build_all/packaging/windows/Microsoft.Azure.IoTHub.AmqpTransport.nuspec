@@ -13,7 +13,7 @@
     <summary>This nuget package can be used to connect to IoTHub over AMQP.</summary>
     <releaseNotes/>
     <copyright>Copyright 2015</copyright>
-    <tags>AMQP Microsoft Azure IoT Native x86 x64 native package</tags>
+    <tags>AMQP Microsoft Azure IoT Native x86 x64 arm native package</tags>
     <dependencies>
       <dependency id="Microsoft.Azure.Uamqp" version="1.0.8"/>
       <dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.8"/>
@@ -24,14 +24,19 @@
     <file src="Microsoft.Azure.IoTHub.AmqpTransport_thirdpartynotice.txt" target="thirdpartynotice.txt"/>
 
     <!-- these are files for x86 plaform -->
-    <file src="..\..\..\..\build_output\c\win32\debug\iothub_client_amqp_transport.lib" target="build\native\Win32\Debug"/>
-    <file src="..\..\..\..\build_output\c\win32\debug\iothub_client_amqp_transport.pdb" target="build\native\Win32\Debug"/>
-    <file src="..\..\..\..\build_output\c\win32\release\iothub_client_amqp_transport.lib" target="build\native\Win32\Release"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\win32\debug\iothub_client_amqp_transport.lib" target="build\native\Win32\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\win32\debug\iothub_client_amqp_transport.pdb" target="build\native\Win32\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\win32\release\iothub_client_amqp_transport.lib" target="build\native\Win32\Release"/>
 
     <!-- these are files for x64 plaform -->
-    <file src="..\..\..\..\build_output\c\x64\debug\iothub_client_amqp_transport.lib" target="build\native\x64\Debug"/>
-    <file src="..\..\..\..\build_output\c\x64\debug\iothub_client_amqp_transport.pdb" target="build\native\x64\Debug"/>
-    <file src="..\..\..\..\build_output\c\x64\release\iothub_client_amqp_transport.lib" target="build\native\x64\Release"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\x64\debug\iothub_client_amqp_transport.lib" target="build\native\x64\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\x64\debug\iothub_client_amqp_transport.pdb" target="build\native\x64\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\x64\release\iothub_client_amqp_transport.lib" target="build\native\x64\Release"/>
+
+    <!-- these are files for arm plaform -->
+    <file src="..\..\..\cmake\iot_sdk_output\c\arm\debug\iothub_client_amqp_transport.lib" target="build\native\arm\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\arm\debug\iothub_client_amqp_transport.pdb" target="build\native\arm\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\arm\release\iothub_client_amqp_transport.lib" target="build\native\arm\Release"/>
 
     <file src="Microsoft.Azure.IoTHub.AmqpTransport.targets" target="build\native"/>
     <file src="..\..\..\iothub_client\inc\iothubtransportamqp.h" target="build\native\include"/>
