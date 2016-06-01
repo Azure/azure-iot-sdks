@@ -80,9 +80,9 @@ TEST_DEFINE_ENUM_TYPE(BLOB_RESULT, BLOB_RESULT_VALUES);
 
 static TEST_MUTEX_HANDLE g_dllByDll;
 
-#define TEST_HTTPCOLONBACKSLASHBACKSLACH "http:\\\\"
+#define TEST_HTTPCOLONBACKSLASHBACKSLACH "http://"
 #define TEST_HOSTNAME_1 "host.name"
-#define TEST_RELATIVE_PATH_1 "\\here\\follows\\something?param1=value1&param2=value2"
+#define TEST_RELATIVE_PATH_1 "/here/follows/something?param1=value1&param2=value2"
 #define TEST_VALID_SASURI_1 TEST_HTTPCOLONBACKSLASHBACKSLACH TEST_HOSTNAME_1 TEST_RELATIVE_PATH_1
 
 #define X_MS_BLOB_TYPE "x-ms-blob-type"
