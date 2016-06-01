@@ -93,7 +93,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL("umock_c reported error");
 }
 
-
+static BUFFER_HANDLE testValidBufferHandle; /*assigned in TEST_SUITE_INITIALIZE*/
+static unsigned int httpResponse; /*used as out parameter in every call to Blob_....*/
 
 BEGIN_TEST_SUITE(blob_unittests)
 
@@ -124,10 +125,16 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
     REGISTER_TYPE(HTTPAPIEX_RESULT, HTTPAPIEX_RESULT);
     REGISTER_TYPE(HTTP_HEADERS_RESULT, HTTP_HEADERS_RESULT);
 
+    testValidBufferHandle = BUFFER_create((const unsigned char*)"a", 1);
+    ASSERT_IS_NOT_NULL(testValidBufferHandle);
+    umock_c_reset_all_calls();
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
+
+    BUFFER_delete(testValidBufferHandle);
+
     umock_c_deinit();
 
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
@@ -140,7 +147,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_with_NULL_SasUri_fails)
     unsigned char c = '3';
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri(NULL, &c, sizeof(c));
+    BLOB_RESULT result = Blob_UploadFromSasUri(NULL, &c, sizeof(c), &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -156,7 +163,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_with_NULL_source_and_non_zero_size_fails)
 
     ///act
 
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, NULL, 1);
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, NULL, 1, &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -172,7 +179,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_with_source_greater_than_or_equal_to_64M_fai
     unsigned char c = '3';
     ///act
 
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, 64*1024*1024);
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, 64*1024*1024, &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_NOT_IMPLEMENTED, result);
@@ -188,7 +195,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_with_source_greater_than_or_equal_to_64M_fai
     unsigned char c = '3';
     ///act
 
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, 64 * 1024 * 1024 + 1);
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, 64 * 1024 * 1024 + 1, &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_NOT_IMPLEMENTED, result);
@@ -203,7 +210,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_with_source_greater_than_or_equal_to_64M_fai
 /*Tests_SRS_BLOB_02_008: [ Blob_UploadFromSasUri shall compute the relative path of the request from the SASURI parameter. ]*/
 /*Tests_SRS_BLOB_02_009: [ Blob_UploadFromSasUri shall create an HTTP_HEADERS_HANDLE for the request HTTP headers carrying the following headers: ]*/
 /*Tests_SRS_BLOB_02_010: [ Blob_UploadFromSasUri shall create a BUFFER_HANDLE from source and size parameters. ]*/
-/*Tests_SRS_BLOB_02_012: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest passing the parameters previously build. ]*/
+/*Tests_SRS_BLOB_02_012: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest passing the parameters previously build, httpStatus and httpResponse ]*/
 /*Tests_SRS_BLOB_02_015: [ Otherwise, HTTPAPIEX_ExecuteRequest shall succeed and return BLOB_OK. ]*/
 TEST_FUNCTION(Blob_UploadFromSasUri_happy_path)
 {
@@ -222,11 +229,10 @@ TEST_FUNCTION(Blob_UploadFromSasUri_happy_path)
                     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, X_MS_BLOB_TYPE, BLOCK_BLOB))
                         .IgnoreArgument_httpHeadersHandle();
 
-                    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, TEST_RELATIVE_PATH_1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, NULL))
+                    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, TEST_RELATIVE_PATH_1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
                         .IgnoreArgument_handle()
                         .IgnoreArgument_requestHttpHeadersHandle()
                         .IgnoreArgument_requestContent()
-                        .IgnoreArgument_statusCode()
                         .CopyOutArgumentBuffer_statusCode(&responseCode, sizeof(responseCode))
                         .SetReturn(HTTPAPIEX_OK)
                         ;
@@ -245,7 +251,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_happy_path)
     }
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c));
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c), &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
@@ -254,8 +260,8 @@ TEST_FUNCTION(Blob_UploadFromSasUri_happy_path)
     ///cleanup
 }
 
-/*Tests_SRS_BLOB_02_014: [ If the statusCode returned by HTTPAPIEX_ExecuteRequest is greater or equal to 300, then Blob_UploadFromSasUri shall fail and return BLOB_HTTP_ERROR. ]*/
-TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_HTTP_status_code_is_404)
+/*Tests_SRS_BLOB_02_015: [ Otherwise, HTTPAPIEX_ExecuteRequest shall succeed and return BLOB_OK. ]*/
+TEST_FUNCTION(Blob_UploadFromSasUri_succeeds_when_HTTP_status_code_is_404)
 {
     ///arrange
     unsigned char c = '3';
@@ -272,11 +278,10 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_HTTP_status_code_is_404)
                     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, X_MS_BLOB_TYPE, BLOCK_BLOB))
                         .IgnoreArgument_httpHeadersHandle();
 
-                    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, TEST_RELATIVE_PATH_1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, NULL))
+                    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, TEST_RELATIVE_PATH_1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
                         .IgnoreArgument_handle()
                         .IgnoreArgument_requestHttpHeadersHandle()
                         .IgnoreArgument_requestContent()
-                        .IgnoreArgument_statusCode()
                         .CopyOutArgumentBuffer_statusCode(&responseCode, sizeof(responseCode))
                         .SetReturn(HTTPAPIEX_OK)
                         ;
@@ -295,10 +300,10 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_HTTP_status_code_is_404)
     }
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c));
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c), &httpResponse, testValidBufferHandle);
 
     ///assert
-    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_HTTP_ERROR, result);
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     ///cleanup
@@ -322,11 +327,10 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_HTTPAPIEX_ExecuteRequest_fails)
                     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, X_MS_BLOB_TYPE, BLOCK_BLOB))
                         .IgnoreArgument_httpHeadersHandle();
 
-                    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, TEST_RELATIVE_PATH_1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, NULL))
+                    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, TEST_RELATIVE_PATH_1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
                         .IgnoreArgument_handle()
                         .IgnoreArgument_requestHttpHeadersHandle()
                         .IgnoreArgument_requestContent()
-                        .IgnoreArgument_statusCode()
                         .CopyOutArgumentBuffer_statusCode(&responseCode, sizeof(responseCode))
                         .SetReturn(HTTPAPIEX_ERROR)
                         ;
@@ -345,7 +349,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_HTTPAPIEX_ExecuteRequest_fails)
     }
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c));
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c), &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_HTTP_ERROR, result);
@@ -387,7 +391,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_HTTPHeaders_AddHeaderNameValuePai
     }
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c));
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c), &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ERROR, result);
@@ -423,7 +427,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_HTTPHeaders_Alloc_fails)
     }
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c));
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c), &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ERROR, result);
@@ -454,7 +458,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_BUFFER_create_fails)
     }
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c));
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c), &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ERROR, result);
@@ -479,7 +483,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_HTTPAPIEX_Create_fails)
     }
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c));
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c), &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ERROR, result);
@@ -499,7 +503,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_malloc_fails)
         ;
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c));
+    BLOB_RESULT result = Blob_UploadFromSasUri(TEST_VALID_SASURI_1, &c, sizeof(c), &httpResponse, testValidBufferHandle);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ERROR, result);
@@ -515,7 +519,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_1)
     unsigned char c = '3';
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri("https:\\h.h\\doms", &c, sizeof(c)); /*wrong format for protocol, notice it is actually http:\h.h\doms (missing a \ from http)*/
+    BLOB_RESULT result = Blob_UploadFromSasUri("https:\\h.h\\doms", &c, sizeof(c), &httpResponse, testValidBufferHandle); /*wrong format for protocol, notice it is actually http:\h.h\doms (missing a \ from http)*/
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -531,7 +535,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_2)
     unsigned char c = '3';
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri("https:\\\\h.h", &c, sizeof(c)); /*there's no relative path here*/
+    BLOB_RESULT result = Blob_UploadFromSasUri("https:\\\\h.h", &c, sizeof(c), &httpResponse, testValidBufferHandle); /*there's no relative path here*/
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);

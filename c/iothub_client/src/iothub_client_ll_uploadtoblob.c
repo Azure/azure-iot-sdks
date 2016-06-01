@@ -22,8 +22,7 @@
 #include "blob.h"
 
 /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
-#define FILE_UPLOAD_SUCCESS_BODY "{ \"statusCode\":201,\"statusDescription\" : \"created\" }"
-#define FILE_UPLOAD_FAILED_BODY "{ \"statusCode\":503,\"statusDescription\" : \"client not able to connect with the server\" }"
+#define FILE_UPLOAD_FAILED_BODY "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"client not able to connect with the server\" }"
 
 #define AUTHORIZATION_SCHEME_VALUES \
     DEVICE_KEY, \
@@ -117,9 +116,8 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
     
 }
 
-
 /*returns 0 when correlationId, sasUri contain data*/
-static int IoTHubClient_LL_UploadToBlob_step1(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* handleData, HTTPAPIEX_HANDLE iotHubHttpApiExHandle, HTTP_HEADERS_HANDLE requestHttpHeaders, const char* destinationFileName,
+static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* handleData, HTTPAPIEX_HANDLE iotHubHttpApiExHandle, HTTP_HEADERS_HANDLE requestHttpHeaders, const char* destinationFileName,
     STRING_HANDLE correlationId, STRING_HANDLE sasUri)
 {
     int result;
@@ -657,7 +655,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
                     else
                     {
                         /*do step 1*/
-                        if (IoTHubClient_LL_UploadToBlob_step1(handleData, iotHubHttpApiExHandle, requestHttpHeaders, destinationFileName, correlationId, sasUri) != 0)
+                        if (IoTHubClient_LL_UploadToBlob_step1and2(handleData, iotHubHttpApiExHandle, requestHttpHeaders, destinationFileName, correlationId, sasUri) != 0)
                         {
                             LogError("error in IoTHubClient_LL_UploadToBlob_step1");
                             result = IOTHUB_CLIENT_ERROR;
@@ -665,39 +663,72 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
                         else
                         {
                             /*do step 2.*/
-                            int step2success; /*0 means it failed*/
-                            if (Blob_UploadFromSasUri(STRING_c_str(sasUri), source, size) != BLOB_OK)
-                            {
-                                /*Codes_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                                step2success = 0;
-                                LogError("unable to Blob_UploadFromSasUri");
-                            }
-                            else
-                            {
-                                step2success = 1; /*the result of step 2 is failed*/
-                            }
 
-                            /*do step 3*/
-                            BUFFER_HANDLE responseToIoTHub = (step2success == 0)
-                                ? BUFFER_create(FILE_UPLOAD_FAILED_BODY, sizeof(FILE_UPLOAD_FAILED_BODY) - 1)
-                                : BUFFER_create(FILE_UPLOAD_SUCCESS_BODY, sizeof(FILE_UPLOAD_SUCCESS_BODY) - 1);
+                            unsigned int httpResponse;
+                            BUFFER_HANDLE responseToIoTHub = BUFFER_new();
                             if (responseToIoTHub == NULL)
                             {
-                                LogError("unable to BUFFER_create");
                                 result = IOTHUB_CLIENT_ERROR;
+                                LogError("unable to BUFFER_new");
                             }
                             else
                             {
-                                if (IoTHubClient_LL_UploadToBlob_step3(handleData, correlationId, iotHubHttpApiExHandle, requestHttpHeaders, responseToIoTHub) != 0)
+                                int step2success;
+                                /*Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadToBlob shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
+                                step2success = (Blob_UploadFromSasUri(STRING_c_str(sasUri), source, size, &httpResponse, responseToIoTHub) == BLOB_OK);
+                                if (!step2success)
                                 {
+                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                                    LogError("unable to Blob_UploadFromSasUri");
 
-                                    LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
+                                    /*do step 3*/ /*try*/
+                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_091: [ If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: ]*/
+                                    if (BUFFER_build(responseToIoTHub, (const unsigned char*)FILE_UPLOAD_FAILED_BODY, sizeof(FILE_UPLOAD_FAILED_BODY) / sizeof(FILE_UPLOAD_FAILED_BODY[0])) == 0)
+                                    {
+                                        if (IoTHubClient_LL_UploadToBlob_step3(handleData, correlationId, iotHubHttpApiExHandle, requestHttpHeaders, responseToIoTHub) != 0)
+                                        {
+                                            LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
+                                        }
+                                    }
                                     result = IOTHUB_CLIENT_ERROR;
                                 }
                                 else
                                 {
-                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_088: [ Otherwise, IoTHubClient_LL_UploadToBlob shall succeed and return IOTHUB_CLIENT_OK. ]*/
-                                    result = (step2success == 1) ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR;
+                                    /*must make a json*/
+
+                                    int requiredStringLength = snprintf(NULL, 0, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
+
+                                    char* requiredString = malloc(requiredStringLength + 1);
+                                    if (requiredString == 0)
+                                    {
+                                        LogError("unable to malloc");
+                                        result = IOTHUB_CLIENT_ERROR;
+                                    }
+                                    else
+                                    {
+                                        /*do again snprintf*/
+                                        (void)snprintf(requiredString, requiredStringLength + 1, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
+                                        BUFFER_HANDLE toBeTransmitted = BUFFER_create(requiredString, requiredStringLength);
+                                        if (toBeTransmitted == NULL)
+                                        {
+                                            LogError("unable to BUFFER_create");
+                                            result = IOTHUB_CLIENT_ERROR;
+                                        }
+                                        else
+                                        {
+                                            if (IoTHubClient_LL_UploadToBlob_step3(handleData, correlationId, iotHubHttpApiExHandle, requestHttpHeaders, toBeTransmitted) != 0)
+                                            {
+                                                LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
+                                                result = IOTHUB_CLIENT_ERROR;
+                                            }
+                                            else
+                                            {
+                                                result = (httpResponse < 300) ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR;
+                                            }
+                                            BUFFER_delete(toBeTransmitted);
+                                        }
+                                        free(requiredString);
+                                    }
                                 }
                                 BUFFER_delete(responseToIoTHub);
                             }

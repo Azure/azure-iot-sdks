@@ -12,7 +12,7 @@
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/iot_logging.h"
 
-BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size)
+BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size, unsigned int* httpStatus, BUFFER_HANDLE httpResponse)
 {
     BLOB_RESULT result;
     /*Codes_SRS_BLOB_02_001: [ If SASURI is NULL then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
@@ -118,9 +118,8 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                     }
                                     else
                                     {
-                                        int statusCode;
-                                        /*Codes_SRS_BLOB_02_012: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest passing the parameters previously build. ]*/
-                                        if (HTTPAPIEX_ExecuteRequest(httpApiExHandle, HTTPAPI_REQUEST_PUT, relativePath, requestHttpHeaders, requestBuffer, &statusCode, NULL, NULL) != HTTPAPIEX_OK)
+                                        /*Codes_SRS_BLOB_02_012: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest passing the parameters previously build, httpStatus and httpResponse ]*/
+                                        if (HTTPAPIEX_ExecuteRequest(httpApiExHandle, HTTPAPI_REQUEST_PUT, relativePath, requestHttpHeaders, requestBuffer, httpStatus, NULL, httpResponse) != HTTPAPIEX_OK)
                                         {
                                             /*Codes_SRS_BLOB_02_013: [ If HTTPAPIEX_ExecuteRequest fails, then Blob_UploadFromSasUri shall fail and return BLOB_HTTP_ERROR. ]*/
                                             LogError("failed to HTTPAPIEX_ExecuteRequest");
@@ -128,17 +127,8 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                         }
                                         else
                                         {
-                                            if (statusCode >= 300)
-                                            {
-                                                /*Codes_SRS_BLOB_02_014: [ If the statusCode returned by HTTPAPIEX_ExecuteRequest is greater or equal to 300, then Blob_UploadFromSasUri shall fail and return BLOB_HTTP_ERROR. ]*/
-                                                LogError("server returns %d HTTP code", statusCode);
-                                                result = BLOB_HTTP_ERROR;
-                                            }
-                                            else
-                                            {
-                                                /*Codes_SRS_BLOB_02_015: [ Otherwise, HTTPAPIEX_ExecuteRequest shall succeed and return BLOB_OK. ]*/
-                                                result = BLOB_OK;
-                                            }
+                                            /*Codes_SRS_BLOB_02_015: [ Otherwise, HTTPAPIEX_ExecuteRequest shall succeed and return BLOB_OK. ]*/
+                                            result = BLOB_OK;
                                         }
                                     }
                                     HTTPHeaders_Free(requestHttpHeaders);

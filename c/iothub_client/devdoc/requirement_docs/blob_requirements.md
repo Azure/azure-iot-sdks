@@ -24,12 +24,12 @@ DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
     *
     * @return	A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
     */
-    extern BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size);
+    extern BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size, const unsigned int* httpStatus, BUFFER_HANDLE httpResponse);
 ```
 
 ##Blob_UploadFromSasUri 
 ```c
-BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size)
+BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* source, size_t size, const unsigned int* httpStatus, BUFFER_HANDLE httpResponse)
 ```
 `Blob_UploadFromSasUri` uploads as a Blob the array of bytes pointed to by `source` having size `size` by using HTTPAPI_EX module.
 
@@ -50,7 +50,6 @@ In order for `Blob_UploadFromSasUri` to call `HTTPAPIEX_ExecuteRequest` it will 
 
 **SRS_BLOB_02_010: [** `Blob_UploadFromSasUri` shall create a BUFFER_HANDLE from `source` and `size` parameters. **]**
 **SRS_BLOB_02_011: [** If any of the previous steps related to building the `HTTPAPI_EX_ExecuteRequest` parameters fails, then `Blob_UploadFromSasUri` shall fail and return `BLOB_ERROR`. **]**
-**SRS_BLOB_02_012: [** `Blob_UploadFromSasUri` shall call `HTTPAPIEX_ExecuteRequest` passing the parameters previously build. **]**
+**SRS_BLOB_02_012: [** `Blob_UploadFromSasUri` shall call `HTTPAPIEX_ExecuteRequest` passing the parameters previously build, `httpStatus` and `httpResponse` **]**
 **SRS_BLOB_02_013: [** If `HTTPAPIEX_ExecuteRequest` fails, then `Blob_UploadFromSasUri` shall fail and return `BLOB_HTTP_ERROR`. **]**
-**SRS_BLOB_02_014: [** If the `statusCode` returned by `HTTPAPIEX_ExecuteRequest` is greater or equal to 300, then `Blob_UploadFromSasUri` shall fail and return `BLOB_HTTP_ERROR`. **]**
 **SRS_BLOB_02_015: [** Otherwise, `HTTPAPIEX_ExecuteRequest` shall succeed and return `BLOB_OK`. **]**

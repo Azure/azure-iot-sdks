@@ -296,7 +296,7 @@ the following HTTP request headers: **]**
 **SRS_IOTHUBCLIENT_LL_02_082: [** If extracting and saving the correlationId or SasUri fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
 
 ###step 2: upload using the SasUri.
-**ZRZ_IOTHUBCLIENT_LL_02_083: [** `IoTHubClient_LL_UploadToBlob` shall call `Blob_UploadFromSasUri` and capture the HTTP return code and HTTP body. **]**
+**SRS_IOTHUBCLIENT_LL_02_083: [** `IoTHubClient_LL_UploadToBlob` shall call `Blob_UploadFromSasUri` and capture the HTTP return code and HTTP body. **]**
 **SRS_IOTHUBCLIENT_LL_02_084: [** If `Blob_UploadFromSasUri` fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
 
 ###step 3: inform IoTHub that the upload has finished.
@@ -312,11 +312,11 @@ the following HTTP request headers: **]**
 }
 ```
  
-**ZRZ_IOTHUBCLIENT_LL_02_091: [** If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: **]**
+**SRS_IOTHUBCLIENT_LL_02_091: [** If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: **]**
 
 ```json
 {
-    "statusCode": 503
+    "statusCode": -1
     "statusDescription": "client not able to connect with the server"
 }
 ```
