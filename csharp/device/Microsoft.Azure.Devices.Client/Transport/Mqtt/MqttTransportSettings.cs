@@ -4,9 +4,10 @@
 namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 {
     using System;
+    using System.Net.Security;
     using DotNetty.Codecs.Mqtt.Packets;
 
-    class MqttTransportSettings : ITransportSettings
+    public class MqttTransportSettings : ITransportSettings
     {
         readonly TransportType transportType;
         const bool DefaultCleanSession = false;
@@ -76,5 +77,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         }
 
         public TimeSpan DefaultReceiveTimeout { get; set; }
+
+        public RemoteCertificateValidationCallback RemoteCertificateValidationCallback { get; set; }
     }
 }
