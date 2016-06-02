@@ -14,6 +14,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
     class RetryDelegatingHandler : DefaultDelegatingHandler
     {
         const int DefaultRetryCount = 15;
+        const int UndeterminedPosition = -1;
         const string StopRetrying = "StopRetrying";
 
         internal static int RetryCount = DefaultRetryCount;
@@ -158,8 +159,16 @@ namespace Microsoft.Azure.Devices.Client.Transport
             {
                 foreach (Message message in messages)
                 {
-                    sendState.InitialStreamPosition = message.BodyStream.Position > sendState.InitialStreamPosition ? message.BodyStream.Position : sendState.InitialStreamPosition;
-                    message.ResetGetBodyCalled();
+                    long messageStreamPosition = message.BodyStream.CanSeek ? message.BodyStream.Position : UndeterminedPosition;
+                    if (messageStreamPosition == UndeterminedPosition || sendState.InitialStreamPosition == UndeterminedPosition)
+                    {
+                        sendState.InitialStreamPosition = UndeterminedPosition;
+                    }
+                    else
+                    {
+                        sendState.InitialStreamPosition = messageStreamPosition > sendState.InitialStreamPosition ? messageStreamPosition : sendState.InitialStreamPosition;
+                    }
+                    message.TryResetBody(messageStreamPosition);
                 }
 
                 await TryExecuteActionAsync(sendState, action);
@@ -175,8 +184,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             if (sendState.Iteration == 0)
             {
-                sendState.InitialStreamPosition = message.BodyStream.Position;
-                message.ResetGetBodyCalled();
+                sendState.InitialStreamPosition = message.BodyStream.CanSeek ? message.BodyStream.Position : UndeterminedPosition;
+                message.TryResetBody(sendState.InitialStreamPosition);
 
                 await TryExecuteActionAsync(sendState, action);
                 return;
@@ -189,62 +198,40 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         static void EnsureStreamsAreInOriginalState(SendMessageState sendState, IEnumerable<Message> messages)
         {
+            IEnumerable<Message> messageList = messages as IList<Message> ?? messages.ToList();
+
+            //We do not retry if:
+            //1. any message was attempted to read the body stream and the stream is not seekable; 
+            //2. any message has initial stream position different from zero.
+
             if (sendState.InitialStreamPosition != 0)
             {
                 sendState.OriginalError.SourceException.Data[StopRetrying] = true;
                 sendState.OriginalError.Throw();
             }
 
-            foreach (Message message in messages)
-            {
-                if (!message.BodyStream.CanRead)
+            foreach (Message message in messageList)
+            {               
+                if (!message.IsBodyCalled || message.TryResetBody(0))
                 {
-                    sendState.OriginalError.SourceException.Data[StopRetrying] = true;
-                    sendState.OriginalError.Throw();
+                    continue;
                 }
 
-                if (message.BodyStream.Position == 0)
-                {
-                    message.ResetGetBodyCalled();
-                }
-
-                //Initial stream position can be not 0 intentionally, i.e. users may want to send the message starting from offset.
-                //However, we don't want to store initial positions of each message, so we just leave this rare scenario to the user.
-                else if (message.BodyStream.CanSeek)
-                {
-                    message.BodyStream.Position = 0;
-                    message.ResetGetBodyCalled();
-                }
-                else
-                {
-                    sendState.OriginalError.SourceException.Data[StopRetrying] = true;
-                    sendState.OriginalError.Throw();
-                }
+                sendState.OriginalError.SourceException.Data[StopRetrying] = true;
+                sendState.OriginalError.Throw();
             }
         }
 
         static void EnsureStreamIsInOriginalState(SendMessageState sendState, Message message)
         {
-            if (!message.BodyStream.CanRead)
+            //We do not retry if a message was attempted to read the body stream and the stream is not seekable;             
+            if (!message.IsBodyCalled || message.TryResetBody(sendState.InitialStreamPosition))
             {
-                sendState.OriginalError.SourceException.Data[StopRetrying] = true;
-                sendState.OriginalError.Throw();
+                return;
             }
 
-            if (message.BodyStream.Position == sendState.InitialStreamPosition)
-            {
-                message.ResetGetBodyCalled();
-            }
-            else if (message.BodyStream.CanSeek)
-            {
-                message.BodyStream.Position = sendState.InitialStreamPosition;
-                message.ResetGetBodyCalled();
-            }
-            else
-            {
-                sendState.OriginalError.SourceException.Data[StopRetrying] = true;
-                sendState.OriginalError.Throw();
-            }
+            sendState.OriginalError.SourceException.Data[StopRetrying] = true;
+            sendState.OriginalError.Throw();
         }
 
         static async Task TryExecuteActionAsync(SendMessageState sendState, Func<Task> action)
