@@ -32,6 +32,16 @@
       <AdditionalDependencies>$(MSBuildThisFileDirectory)../../build/native/x64/Release/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="ArmDebug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'arm' ) )">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../../build/native/arm/Debug/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="ArmRelease" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'arm' ) )">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../../build/native/arm/Release/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <UsingTask TaskName="Microsoft_Azure_IoTHubClient_Contains" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">
     <ParameterGroup>
       <Text Output="false" ParameterType="System.String" />
@@ -81,6 +91,11 @@
   <Target Name="Microsoft_Azure_IoTHubClient_redist_AfterBuild_Win64_and_Debug" Label="Win64 and Debug" Condition="'$(Platform.ToLower())' == 'x64' And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="Microsoft_Azure_IoTHubClient_redist_AfterBuild">
   </Target>
   <Target Name="Microsoft_Azure_IoTHubClient_redist_AfterBuild_Win64_and_Release" Label="Win64 and Release" Condition="'$(Platform.ToLower())' == 'x64' And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" AfterTargets="Microsoft_Azure_IoTHubClient_redist_AfterBuild">
+  </Target>
+
+  <Target Name="Microsoft_Azure_IoTHubClient_redist_AfterBuild_Arm_and_Debug" Label="Arm and Debug" Condition="'$(Platform.ToLower())' == 'arm' And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="Microsoft_Azure_IoTHubClient_redist_AfterBuild">
+  </Target>
+  <Target Name="Microsoft_Azure_IoTHubClient_redist_AfterBuild_Arm_and_Release" Label="Arm and Release" Condition="'$(Platform.ToLower())' == 'arm' And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" AfterTargets="Microsoft_Azure_IoTHubClient_redist_AfterBuild">
   </Target>
   
 </Project>

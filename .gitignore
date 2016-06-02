@@ -220,3 +220,4 @@ csharp/device/build/nuget.exe
 OnBoardFlash.dat
 OnBoardFlash.dat.smd
 DOTNETMF_FS_EMULATION*/
+/c/cmake
