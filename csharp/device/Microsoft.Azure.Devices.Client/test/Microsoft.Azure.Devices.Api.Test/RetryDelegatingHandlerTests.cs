@@ -16,6 +16,13 @@ namespace Microsoft.Azure.Devices.Client.Test
     [TestClass]
     public class RetryDelegatingHandlerTests
     {
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext testcontext)
+        {
+            //To avoid too long test executiuon due to multiple retries if something fails
+            RetryDelegatingHandler.RetryCount = 3;
+        }
+
         [TestMethod]
         [TestCategory("CIT")]
         [TestCategory("DelegatingHandlers")]
@@ -57,7 +64,7 @@ namespace Microsoft.Azure.Devices.Client.Test
                 callCounter++;
 
                 var m = t.Arg<Message>();
-                Stream stream = m.BodyStream;
+                Stream stream = m.GetBodyStream();
                 if (callCounter == 1)
                 {
                     throw new IotHubClientTransientException("");
@@ -88,7 +95,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             {
                 callCounter++;
                 var m = t.Arg<Message>();
-                Stream stream = m.BodyStream;
+                Stream stream = m.GetBodyStream();
                 var buffer = new byte[3];
                 stream.Read(buffer, 0, 3);
                 throw new IotHubClientTransientException("");
@@ -116,7 +123,7 @@ namespace Microsoft.Azure.Devices.Client.Test
                 callCounter++;
 
                 Message m = t.Arg<IEnumerable<Message>>().First();
-                Stream stream = m.BodyStream;
+                Stream stream = m.GetBodyStream();
                 if (callCounter == 1)
                 {
                     throw new IotHubClientTransientException("");
@@ -148,7 +155,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             {
                 callCounter++;
                 Message m = t.Arg<IEnumerable<Message>>().First();
-                Stream stream = m.BodyStream;
+                Stream stream = m.GetBodyStream();
                 var buffer = new byte[3];
                 stream.Read(buffer, 0, 3);
                 throw new IotHubClientTransientException("");
@@ -174,7 +181,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             {
                 callCounter++;
                 var m = t.Arg<Message>();
-                Stream stream = m.BodyStream;
+                Stream stream = m.GetBodyStream();
                 var buffer = new byte[3];
                 stream.Read(buffer, 0, 3);
                 if (callCounter == 1)
@@ -218,13 +225,10 @@ namespace Microsoft.Azure.Devices.Client.Test
         }
 
         [TestMethod]
-        [TestCategory("LongRunning")]
         [TestCategory("DelegatingHandlers")]
         [TestCategory("Owner [mtuchkov]")]
         public async Task Retry_TransientErrorThrownAfterNumberOfRetries_Throws()
         {
-            RetryDelegatingHandler.RetryCount = 2;
-
             var innerHandlerMock = Substitute.For<IDelegatingHandler>();
             innerHandlerMock.OpenAsync(Arg.Is(true)).Returns(t =>
             {
@@ -243,6 +247,33 @@ namespace Microsoft.Azure.Devices.Client.Test
             public NotSeekableStream(byte[] buffer):base(buffer)
             {
                 
+            }
+
+            public override long Length
+            {
+                get { throw new NotSupportedException(); }
+            }
+
+            public override void SetLength(long value)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override long Position
+            {
+                get
+                {
+                    throw new NotSupportedException();
+                }
+                set
+                {
+                    throw new NotSupportedException();
+                }
+            }
+
+            public override long Seek(long offset, SeekOrigin loc)
+            {
+                throw new NotSupportedException();
             }
         }
     }

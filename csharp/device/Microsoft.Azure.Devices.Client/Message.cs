@@ -535,9 +535,15 @@ namespace Microsoft.Azure.Devices.Client
                         }
 
                         this.SetSizeInBytesCalled();
-                        this.serializedAmqpMessage = this.bodyStream == null
-                            ? AmqpMessage.Create()
-                            : AmqpMessage.Create(this.bodyStream, false);
+                        if (this.bodyStream == null)
+                        {
+                            this.serializedAmqpMessage = AmqpMessage.Create();
+                        }
+                        else
+                        {
+                            this.serializedAmqpMessage = AmqpMessage.Create(this.bodyStream, false);
+                            this.SetGetBodyCalled();
+                        }
                         this.serializedAmqpMessage = this.PopulateAmqpMessageForSend(this.serializedAmqpMessage);
                     }
                 }
@@ -555,6 +561,19 @@ namespace Microsoft.Azure.Devices.Client
                 this.bodyStream.Seek(0, SeekOrigin.Begin);
             }
         }
+
+        internal bool TryResetBody(long position)
+        {
+            if (this.bodyStream != null && this.bodyStream.CanSeek)
+            {
+                this.bodyStream.Seek(position, SeekOrigin.Begin);
+                Interlocked.Exchange(ref this.getBodyCalled, 0);
+                return true;
+            }
+            return false;
+        }
+
+        internal bool IsBodyCalled => Volatile.Read(ref this.getBodyCalled) == 1;
 
         void SetGetBodyCalled()
         {
