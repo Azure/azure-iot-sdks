@@ -21,7 +21,7 @@ namespace Microsoft.Azure.Devices.Client
     using AsyncTask = System.Threading.Tasks.Task;
     using AsyncTaskOfMessage = System.Threading.Tasks.Task<Message>;
 #endif
-    
+
     /// <summary>
     /// Transport types supported by DeviceClient - Amqp and HTTP 1.1
     /// </summary>
@@ -71,13 +71,14 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, RegexOptions);
 
-        static IotHubConnectionString iotHubConnectionString = null;
+        IotHubConnectionString iotHubConnectionString = null;
 
         internal IDelegatingHandler InnerHandler { get; set; }
 
 #if !PCL
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
         {
+            this.iotHubConnectionString = iotHubConnectionString;
 
 #if !WINDOWS_UWP
             var innerHandler = new RetryDelegatingHandler(
@@ -347,7 +348,7 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentOutOfRangeException(nameof(connectionString), "Must specify at least one TransportSettings instance");
             }
 
-            iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
+            IotHubConnectionString iotHubConnectionString = IotHubConnectionString.Parse(connectionString);
 
             foreach (ITransportSettings transportSetting in transportSettings)
             {
@@ -592,8 +593,8 @@ namespace Microsoft.Azure.Devices.Client
                 throw Fx.Exception.ArgumentNull("source");
             }
 
-            HttpTransportHandler httpTransport = new HttpTransportHandler(iotHubConnectionString);
-            return httpTransport.UploadBlobAsync(blobName, source);
+            var httpTransport = new HttpTransportHandler(iotHubConnectionString);
+            return httpTransport.UploadToBlobAsync(blobName, source);
         }
 #endif
 

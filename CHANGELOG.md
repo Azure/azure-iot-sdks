@@ -54,6 +54,10 @@ Release for May 6, 2016
 # C# Service SDK
 - Support for PurgeMessageQueueAsync
 - Revised service API version with added support for custom blob names for Import/ExportDevicesAsync + quality of life changes for bulk operations
+- Adding support for receiving file upload notifications from service client. 
+	- Implemented 'AmqpFileNotificationReceiver'
+	- Moved common code for 'AmqpFileNotificationReceiver' and 'AmqpFeedbackReceiver' to common helpers
+
 
 # Node Device Client
 - Added a node-RED module for Azure IoT Hub
@@ -61,11 +65,6 @@ Release for May 6, 2016
 # Python SDK
 - Bug fixes for messageTimeout option and message properties in the Python binding
 - Build improvements
-
-# C# Service SDK
-- Adding support for receiving file upload notifications from service client. 
-	- Implemented 'AmqpFileNotificationReceiver'
-	- Moved common code for 'AmqpFileNotificationReceiver' and 'AmqpFeedbackReceiver' to common helpers
 
 # General
 - Documentation fixes

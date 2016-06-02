@@ -15,6 +15,7 @@ namespace Microsoft.Azure.Devices.Client.Samples
         //  "HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
         //  "HostName=<iothub_host_name>;CredentialType=SharedAccessSignature;DeviceId=<device_id>;SharedAccessSignature=SharedAccessSignature sr=<iot_host>/devices/<device_id>&sig=<token>&se=<expiry_time>";
         private const string DeviceConnectionString = "<replace>";
+        private const string FilePath = "<replace>";
 
         static void Main(string[] args)
         {
@@ -24,19 +25,27 @@ namespace Microsoft.Azure.Devices.Client.Samples
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in sample: {0}", ex.Message);
+                Console.WriteLine("{0}\n", ex.Message);
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine(ex.InnerException.Message + "\n");
+                }
             }
         }
 
         static async Task SendToBlobSample()
         {
-            DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Http1);
-            FileStream fileStreamSource = new FileStream(@"c:\temp\ForFileUpload.txt", FileMode.Open);
-            string fileName = Path.GetFileName(fileStreamSource.Name);
+            var deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Http1);
+            var fileStreamSource = new FileStream(FilePath, FileMode.Open);
+            var fileName = Path.GetFileName(fileStreamSource.Name);
 
-            Console.WriteLine("Uploading File: {0}\n", fileName);
+            Console.WriteLine("Uploading File: {0}", fileName);
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
             await deviceClient.UploadToBlobAsync(fileName, fileStreamSource);
-            Console.WriteLine("Done!\n");
+            watch.Stop();
+
+            Console.WriteLine("Time to upload file: {0}ms\n", watch.ElapsedMilliseconds);
         }
     }
 }
