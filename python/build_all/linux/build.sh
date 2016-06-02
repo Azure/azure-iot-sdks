@@ -3,6 +3,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 build_root=$(cd "$(dirname "$0")/../../.." && pwd)
+build_folder=$build_root"/c/cmake/iotsdk_linux"
+
 cd $build_root
 
 PYTHON_VERSION=2.7
@@ -35,9 +37,9 @@ process_args $*
 cd $build_root
 
 echo copy iothub_client library to samples folder
-cp ~/cmake/python/src/iothub_client.so ./python/device/samples/iothub_client.so
+cp $build_folder/python/src/iothub_client.so ./python/device/samples/iothub_client.so
 echo copy iothub_client_mock library to tests folder
-cp ~/cmake/python/test/iothub_client_mock.so ./python/device/tests/iothub_client_mock.so
+cp $build_folder/python/test/iothub_client_mock.so ./python/device/tests/iothub_client_mock.so
 
 cd $build_root/python/device/tests/
 echo "python${PYTHON_VERSION}" iothub_client_ut.py
