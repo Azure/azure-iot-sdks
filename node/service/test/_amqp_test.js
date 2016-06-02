@@ -13,29 +13,44 @@ var fakeConfig = {
 };
 
 describe('Amqp', function() {
+  var fakeAmqpBase = {
+    connect: function (callback) {
+      callback();
+    },
+    disconnect: function (callback) {
+      callback();
+    }
+  };
+
   describe('#connect', function() {
-    /*Codes_SRS_NODE_IOTHUB_SERVICE_AMQP_16_019: [The `connect` method shall call the `connect` method of the base AMQP transport and translate its result to the caller into a transport-agnostic object.]*/
+    /*Tests_SRS_NODE_IOTHUB_SERVICE_AMQP_16_019: [The `connect` method shall call the `connect` method of the base AMQP transport and translate its result to the caller into a transport-agnostic object.]*/
     it('calls the base transport connect method', function(done) {
-      var fakeAmqpBase = {
-        connect: function (callback) {
-          callback();
-        }
-      };
       var amqp = new Amqp(fakeConfig, fakeAmqpBase);
       amqp.connect(done);
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_SERVICE_AMQP_16_021: [** All asynchronous instance methods shall not throw if `done` is not specified or falsy]*/
+    it('does not fail if `done` is not specified or falsy', function() {
+      var amqp = new Amqp(fakeConfig, fakeAmqpBase);
+      assert.doesNotThrow(function() {
+        amqp.connect();
+      });
     });
   });
 
   describe('#disconnect', function() {
-    /*Codes_SRS_NODE_IOTHUB_SERVICE_AMQP_16_020: [** The `disconnect` method shall call the `disconnect` method of the base AMQP transport and translate its result to the caller into a transport-agnostic object.]*/
+    /*Tests_SRS_NODE_IOTHUB_SERVICE_AMQP_16_020: [** The `disconnect` method shall call the `disconnect` method of the base AMQP transport and translate its result to the caller into a transport-agnostic object.]*/
     it('calls the base transport disconnect method', function(done) {
-      var fakeAmqpBase = {
-        disconnect: function (callback) {
-          callback();
-        }
-      };
       var amqp = new Amqp(fakeConfig, fakeAmqpBase);
       amqp.disconnect(done);
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_SERVICE_AMQP_16_021: [** All asynchronous instance methods shall not throw if `done` is not specified or falsy]*/
+    it('does not fail if `done` is not specified or falsy', function() {
+      var amqp = new Amqp(fakeConfig, fakeAmqpBase);
+      assert.doesNotThrow(function() {
+        amqp.connect();
+      });
     });
   });
 
