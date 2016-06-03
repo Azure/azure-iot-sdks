@@ -3,26 +3,36 @@
 
 # C# Device SDK
 - Add new UploadToBlobAsync API implementing upload of a stream to Azure Storage.
+- Now utilizes amqp 1.1.5
+
+# C# Service SDK
+- Now utilizes amqp 1.1.5
+- Adding API support for receiving file upload notifications
 
 #Java SDK
-- Implemented message timeout for AMQP protocol.
+- Implemented message timeout for AMQP protocol
+- Java client is Java 7 compatible
+- Java sample for Android added
 
 # Internal Changes
-- Updated the shared utility to use the ctest repo.
-- Shared utility updated with a new string function.
+- Updated the shared utility to use the ctest repo
+- Shared utility updated with a new string function
 
 # Node.js Device SDK
 - Upload to blob
 
 # Node.js Service SDK
 - Upload notifications
-- Deprecating `Amqp.getReceiver` in favor of `Amqp.getFeedbackReceiver`. `Amqp.getReceiver` will be removed for the next major release.
+- Deprecating `Amqp.getReceiver` in favor of `Amqp.getFeedbackReceiver`. `Amqp.getReceiver` will be removed for the next major release
 
 # General
-- 
+- Change the location of the binaries produced with the build script to be contained within the repository directory
+- Added arm support for the Nuget and apt-get packages
 
 # Bug fixes
-- Adjusted the tls not provide credentials by default.
+- Adjusted the tls not to provide credentials by default.
+- Fixed regressions with AMQP on UWP
+- Python vcproj file contained a false ref to azure_shared_utility 1.0.7
 
 
 Release for May 20, 2016
