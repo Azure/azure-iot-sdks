@@ -211,7 +211,7 @@ Amqp.prototype.getReceiver = function getReceiver(endpoint, done) {
   }
   else {
     /*Codes_SRS_NODE_COMMON_AMQP_16_009: [If a receiver for this endpoint has already been created, the getReceiver method should call the done() method with the existing instance as an argument.] */
-    done(null, this._receiver[endpoint]);
+    done(null, this._receivers[endpoint]);
   }
 };
 

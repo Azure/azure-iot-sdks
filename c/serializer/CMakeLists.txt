@@ -62,7 +62,9 @@ add_library(
 serializer ${serializer_c_files} ${serializer_h_files}
 )
 
-add_subdirectory(samples)
+if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+	add_subdirectory(samples)
+endif()
 
 if(NOT IN_OPENWRT)
 # Disable tests and samples for OpenWRT

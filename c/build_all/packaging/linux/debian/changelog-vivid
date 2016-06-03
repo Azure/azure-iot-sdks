@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0-15) vivid; urgency=low
+azure-iot-sdk-c (0.1.0-16) vivid; urgency=low
 
   * Initial release
 
@@ -24,4 +24,6 @@ azure-iot-sdk-c (0.1.0-15) vivid; urgency=low
 
   * Initial implementation of SAS Token support as input in Device Connection String
 
- -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 6 May 2016 17:24:51 +0000
+  * Fix tlsio_schannel bug (not all input bytes were being read) (#451ab97)
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 20 May 2016 17:24:51 +0000

@@ -17,6 +17,7 @@ skip_unittests=OFF
 build_python=OFF
 build_javawrapper=OFF
 run_valgrind=0
+build_folder=$build_root"/cmake/iotsdk_linux"
 
 usage ()
 {
@@ -86,7 +87,7 @@ process_args ()
       fi
     done
 
-    if [ $toolchainfile <> " " ]
+    if [ $toolchainfile != " " ]
     then
       toolchainfile=$(readlink -f $toolchainfile)
       toolchainfile="-DCMAKE_TOOLCHAIN_FILE=$toolchainfile"
@@ -95,9 +96,9 @@ process_args ()
 
 process_args $*
 
-rm -r -f ~/cmake
-mkdir ~/cmake
-pushd ~/cmake
+rm -r -f $build_folder
+mkdir -p $build_folder
+pushd $build_folder
 cmake $toolchainfile -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Duse_wsio:BOOL=$use_wsio -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper $build_root
 
 CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)

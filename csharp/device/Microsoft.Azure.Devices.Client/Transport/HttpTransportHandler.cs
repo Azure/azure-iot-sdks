@@ -18,7 +18,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
     using Newtonsoft.Json;
 
 #if !WINDOWS_UWP && !PCL
-    using WindowsAzure.Storage.Blob;
+    using Microsoft.WindowsAzure.Storage.Blob;
 #endif
 
     sealed class HttpTransportHandler : DefaultDelegatingHandler

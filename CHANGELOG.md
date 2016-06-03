@@ -1,3 +1,6 @@
+# C Device SDK
+- uploadToBlob functionality
+
 # C# Device SDK
 - Add new UploadToBlobAsync API implementing upload of a stream to Azure Storage.
 # General
