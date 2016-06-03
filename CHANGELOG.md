@@ -11,7 +11,7 @@
 
 #Java SDK
 - Implemented message timeout for AMQP protocol
-- Java client is Java 7 compatible
+- Java device client maven package is now Java 7/Android compatible
 - Java sample for Android added
 
 # Internal Changes
