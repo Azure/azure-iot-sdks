@@ -3,23 +3,27 @@
 
 # C# Device SDK
 - Add new UploadToBlobAsync API implementing upload of a stream to Azure Storage.
-# General
-- 
-
-# Bug fixes
-- 
 
 #Java SDK
 - Implemented message timeout for AMQP protocol.
 
 # Internal Changes
-- 
+- Updated the shared utility to use the ctest repo.
+- Shared utility updated with a new string function.
+
 # Node.js Device SDK
 - Upload to blob
 
 # Node.js Service SDK
 - Upload notifications
 - Deprecating `Amqp.getReceiver` in favor of `Amqp.getFeedbackReceiver`. `Amqp.getReceiver` will be removed for the next major release.
+
+# General
+- 
+
+# Bug fixes
+- Adjusted the tls not provide credentials by default.
+
 
 Release for May 20, 2016
 
