@@ -198,7 +198,7 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\boost.1.60.0.0\build\native\boost.targets" Condition="Exists('..\packages\boost.1.60.0.0\build\native\boost.targets')" />
     <Import Project="..\packages\boost_python.1.60.0.0\build\native\boost_python.targets" Condition="Exists('..\packages\boost_python.1.60.0.0\build\native\boost_python.targets')" />
-    <Import Project="..\packages\Microsoft.Azure.C.SharedUtility.1.0.7\build\native\Microsoft.Azure.C.SharedUtility.targets" Condition="Exists('..\packages\Microsoft.Azure.C.SharedUtility.1.0.7\build\native\Microsoft.Azure.C.SharedUtility.targets')" />
+    <Import Project="..\packages\Microsoft.Azure.C.SharedUtility.1.0.8\build\native\Microsoft.Azure.C.SharedUtility.targets" Condition="Exists('..\packages\Microsoft.Azure.C.SharedUtility.1.0.8\build\native\Microsoft.Azure.C.SharedUtility.targets')" />
     <Import Project="..\packages\Microsoft.Azure.uamqp.1.0.8\build\native\Microsoft.Azure.uamqp.targets" Condition="Exists('..\packages\Microsoft.Azure.uamqp.1.0.8\build\native\Microsoft.Azure.uamqp.targets')" />
     <Import Project="..\packages\Microsoft.Azure.umqtt.1.0.7\build\native\Microsoft.Azure.umqtt.targets" Condition="Exists('..\packages\Microsoft.Azure.umqtt.1.0.7\build\native\Microsoft.Azure.umqtt.targets')" />
     <Import Project="..\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.8\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('..\packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.8\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
