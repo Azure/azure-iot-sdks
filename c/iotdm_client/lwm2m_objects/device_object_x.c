@@ -73,12 +73,11 @@ IOTHUB_CLIENT_RESULT set_device_manufacturer(uint16_t instanceId, const char *va
             obj->propval_device_manufacturer = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_DEVICE_MANUFACTURER] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -95,12 +94,11 @@ IOTHUB_CLIENT_RESULT set_device_modelnumber(uint16_t instanceId, const char *val
             obj->propval_device_modelnumber = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_DEVICE_MODELNUMBER] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -117,12 +115,11 @@ IOTHUB_CLIENT_RESULT set_device_serialnumber(uint16_t instanceId, const char *va
             obj->propval_device_serialnumber = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_DEVICE_SERIALNUMBER] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -139,12 +136,11 @@ IOTHUB_CLIENT_RESULT set_device_firmwareversion(uint16_t instanceId, const char 
             obj->propval_device_firmwareversion = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_DEVICE_FIRMWAREVERSION] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -160,12 +156,11 @@ IOTHUB_CLIENT_RESULT set_device_batterylevel(uint16_t instanceId, int value)
             obj->propval_device_batterylevel = value;
 
             obj->resourceUpdated[INDEX_DEVICE_BATTERYLEVEL] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -181,12 +176,11 @@ IOTHUB_CLIENT_RESULT set_device_memoryfree(uint16_t instanceId, int value)
             obj->propval_device_memoryfree = value;
 
             obj->resourceUpdated[INDEX_DEVICE_MEMORYFREE] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -202,12 +196,11 @@ IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, int value)
             obj->propval_device_currenttime = value;
 
             obj->resourceUpdated[INDEX_DEVICE_CURRENTTIME] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -224,12 +217,11 @@ IOTHUB_CLIENT_RESULT set_device_utcoffset(uint16_t instanceId, const char *value
             obj->propval_device_utcoffset = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_DEVICE_UTCOFFSET] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -246,12 +238,11 @@ IOTHUB_CLIENT_RESULT set_device_timezone(uint16_t instanceId, const char *value)
             obj->propval_device_timezone = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_DEVICE_TIMEZONE] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -268,12 +259,11 @@ IOTHUB_CLIENT_RESULT set_device_devicetype(uint16_t instanceId, const char *valu
             obj->propval_device_devicetype = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_DEVICE_DEVICETYPE] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -290,12 +280,11 @@ IOTHUB_CLIENT_RESULT set_device_hardwareversion(uint16_t instanceId, const char 
             obj->propval_device_hardwareversion = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_DEVICE_HARDWAREVERSION] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -311,12 +300,11 @@ IOTHUB_CLIENT_RESULT set_device_batterystatus(uint16_t instanceId, int value)
             obj->propval_device_batterystatus = value;
 
             obj->resourceUpdated[INDEX_DEVICE_BATTERYSTATUS] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -332,12 +320,11 @@ IOTHUB_CLIENT_RESULT set_device_memorytotal(uint16_t instanceId, int value)
             obj->propval_device_memorytotal = value;
 
             obj->resourceUpdated[INDEX_DEVICE_MEMORYTOTAL] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -427,7 +414,7 @@ object_device *get_device_object(uint16_t instanceId)
 #define DO_SIGNAL_RESOURCE_CHANGE(index, property) \
     if (obj->resourceUpdated[index]) \
     { \
-        on_resource_value_changed(OID_DEVICE, obj->instanceId, property); \
+        on_resource_value_changed(obj->channelHandle, OID_DEVICE, obj->instanceId, property); \
         obj->resourceUpdated[index] = (char)false; \
     }
 

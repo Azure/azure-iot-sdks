@@ -573,7 +573,7 @@
                 }
 
                 TimeSpan ts = DateTime.Now.Subtract(start);
-                Console.WriteLine("Read Property('{0}') took {1} seconds.", propertyName, ts.TotalSeconds);
+                Console.WriteLine("\tRead Property('{0}') took {1} seconds.", propertyName, ts.TotalSeconds);
 
                 string rv = getProperty(propertyName);
 

@@ -18,7 +18,7 @@ namespace api_generator.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+    #line 1 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "14.0.0.0")]
     public partial class blank_object_x_c : blank_object_x_cBase
     {
@@ -30,7 +30,7 @@ namespace api_generator.Templates
         {
             this.Write("\r\n");
             
-            #line 7 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 7 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
  
 var allProps = Program.GetListOfPropertiesToGenerate(ObjectName); 
 
@@ -41,7 +41,7 @@ var allProps = Program.GetListOfPropertiesToGenerate(ObjectName);
                     "ense. See LICENSE file in the project root for full license information.\r\n\r\n//\r\n" +
                     "// Simple implementation of IoTHub LWM2M ");
             
-            #line 15 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 15 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectName));
             
             #line default
@@ -51,28 +51,28 @@ var allProps = Program.GetListOfPropertiesToGenerate(ObjectName);
                     "generated.\r\n\r\n#include \"iotdm_internal.h\"\r\n#include \"iotdm_dispatchers.h\"\r\n#incl" +
                     "ude \"");
             
-            #line 25 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 25 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName.ToLower()));
             
             #line default
             #line hidden
             this.Write("_object.h\"\r\n\r\nDISPATCHER_FORWARD_DECLARATIONS(");
             
-            #line 27 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 27 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(");\r\n\r\n// Property Indices for for ");
             
-            #line 29 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 29 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
             #line hidden
             this.Write(" object\r\n");
             
-            #line 30 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 30 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
 foreach (var prop in allProps)
 {
@@ -82,21 +82,21 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("#define INDEX_");
             
-            #line 34 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 34 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 34 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 34 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyIndex));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 35 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 35 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
 }
 
@@ -105,21 +105,21 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("\r\nvoid set_default_");
             
-            #line 39 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 39 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
             #line hidden
             this.Write("_property_values(");
             
-            #line 39 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 39 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(" *obj);\r\n");
             
-            #line 40 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 40 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
 foreach (var prop in allProps)
 {
@@ -130,14 +130,14 @@ foreach (var prop in allProps)
             #line default
             #line hidden
             
-            #line 46 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 46 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetReadPrototype(prop)));
             
             #line default
             #line hidden
             this.Write(";\r\n");
             
-            #line 47 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 47 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
     }
     if (prop.CanWrite)
@@ -147,14 +147,14 @@ foreach (var prop in allProps)
             #line default
             #line hidden
             
-            #line 52 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 52 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetWritePrototype(prop)));
             
             #line default
             #line hidden
             this.Write(";\r\n");
             
-            #line 53 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 53 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
     }
     if (prop.CanExecute)
@@ -164,14 +164,14 @@ foreach (var prop in allProps)
             #line default
             #line hidden
             
-            #line 58 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 58 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetExecutePrototype(prop)));
             
             #line default
             #line hidden
             this.Write(";\r\n");
             
-            #line 59 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 59 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
     }
 }
@@ -182,7 +182,7 @@ foreach (var prop in allProps)
             this.Write("\r\n\r\n/****************************************************************************" +
                     "******\r\n * ");
             
-            #line 66 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 66 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectName));
             
             #line default
@@ -190,7 +190,7 @@ foreach (var prop in allProps)
             this.Write(" setters\r\n *\r\n ******************************************************************" +
                     "****************/\r\n");
             
-            #line 69 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 69 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
     foreach (var prop in allProps)
     {
@@ -201,28 +201,28 @@ foreach (var prop in allProps)
             #line default
             #line hidden
             
-            #line 75 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 75 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetSetterPrototype(prop)));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;\r\n    ");
             
-            #line 78 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 78 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(" *obj = get_object_instance(OID_");
             
-            #line 78 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 78 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName.ToUpper()));
             
             #line default
             #line hidden
             this.Write(", instanceId);\r\n    if (obj != NULL)\r\n    {\r\n");
             
-            #line 81 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 81 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
             switch (prop.ResourceFromXml.Type)
             {
@@ -233,7 +233,7 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("        // BKTODO\r\n        result = IOTHUB_CLIENT_NOT_IMPLEMENTED;\r\n");
             
-            #line 88 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 88 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
                     break;
                 case LWM2MObjectItemType.String:
@@ -243,50 +243,49 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("        if ((obj->");
             
-            #line 92 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 92 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
             
             #line default
             #line hidden
             this.Write(" == NULL) || strcmp(obj->");
             
-            #line 92 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 92 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
             
             #line default
             #line hidden
             this.Write(", value))\r\n        {\r\n            LogInfo(\"");
             
-            #line 94 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 94 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName));
             
             #line default
             #line hidden
             this.Write(" being set to [%s]\", value);\r\n            lwm2m_free(obj->");
             
-            #line 95 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 95 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
             
             #line default
             #line hidden
             this.Write(");\r\n            obj->");
             
-            #line 96 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 96 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
             
             #line default
             #line hidden
             this.Write(" = lwm2m_strdup(value);\r\n\r\n            obj->resourceUpdated[INDEX_");
             
-            #line 98 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 98 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
             
             #line default
             #line hidden
-            this.Write("] = (char)true;\r\n            wake_main_dm_thread(obj->channelHandle);\r\n        }\r" +
-                    "\n\r\n        result = IOTHUB_CLIENT_OK;\r\n");
+            this.Write("] = (char)true;\r\n        }\r\n\r\n        result = IOTHUB_CLIENT_OK;\r\n");
             
-            #line 103 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 102 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
                     break;
                 case LWM2MObjectItemType.Float:
@@ -296,36 +295,35 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("        if (obj->");
             
-            #line 107 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 106 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
             
             #line default
             #line hidden
             this.Write(" != value)\r\n        {\r\n            LogInfo(\"");
             
-            #line 109 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 108 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName));
             
             #line default
             #line hidden
             this.Write(" being set to %f\", value);\r\n            (obj->");
             
-            #line 110 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 109 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
             
             #line default
             #line hidden
             this.Write(" = value;\r\n\r\n            obj->resourceUpdated[INDEX_");
             
-            #line 112 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 111 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
             
             #line default
             #line hidden
-            this.Write("] = (char)true;\r\n            wake_main_dm_thread(obj->channelHandle);\r\n        }\r" +
-                    "\n\r\n        result = IOTHUB_CLIENT_OK;\r\n");
+            this.Write("] = (char)true;\r\n        }\r\n\r\n        result = IOTHUB_CLIENT_OK;\r\n");
             
-            #line 117 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 115 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
                     break;
                 case LWM2MObjectItemType.Integer:
@@ -336,36 +334,35 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("        if (obj->");
             
-            #line 122 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 120 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
             
             #line default
             #line hidden
             this.Write(" != value)\r\n        {\r\n            LogInfo(\"");
             
-            #line 124 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 122 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName));
             
             #line default
             #line hidden
             this.Write(" being set to %d\", value);\r\n            obj->");
             
-            #line 125 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 123 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
             
             #line default
             #line hidden
             this.Write(" = value;\r\n\r\n            obj->resourceUpdated[INDEX_");
             
-            #line 127 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 125 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
             
             #line default
             #line hidden
-            this.Write("] = (char)true;\r\n            wake_main_dm_thread(obj->channelHandle);\r\n        }\r" +
-                    "\n\r\n        result = IOTHUB_CLIENT_OK;\r\n");
+            this.Write("] = (char)true;\r\n        }\r\n\r\n        result = IOTHUB_CLIENT_OK;\r\n");
             
-            #line 132 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 129 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
                     break;
             }
@@ -373,9 +370,9 @@ foreach (var prop in allProps)
             
             #line default
             #line hidden
-            this.Write("\r\n    }\r\n    return result;\r\n}\r\n\r\n");
+            this.Write("    }\r\n\r\n    return result;\r\n}\r\n\r\n");
             
-            #line 141 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 138 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
         }
     }
@@ -386,7 +383,7 @@ foreach (var prop in allProps)
             this.Write("\r\n/******************************************************************************" +
                     "****\r\n * ");
             
-            #line 147 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 144 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectName));
             
             #line default
@@ -394,21 +391,21 @@ foreach (var prop in allProps)
             this.Write(" creation and destruction\r\n *\r\n *************************************************" +
                     "*********************************/\r\nstatic void destroy_");
             
-            #line 150 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 147 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
             #line hidden
             this.Write("_object(");
             
-            #line 150 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 147 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(" *obj)\r\n{\r\n    if (obj != NULL)\r\n    {\r\n");
             
-            #line 154 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 151 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
     foreach (var prop in allProps)
     {
@@ -420,14 +417,14 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("        lwm2m_free(obj->");
             
-            #line 160 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 157 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
             
             #line default
             #line hidden
             this.Write(");\r\n");
             
-            #line 161 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 158 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
         }
     }
@@ -437,28 +434,28 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("        lwm2m_free(obj);\r\n    }\r\n}\r\n\r\nstatic uint16_t g_next_");
             
-            #line 169 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 166 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
             #line hidden
             this.Write("_instance_id = 0;\r\nstatic uint16_t get_next_");
             
-            #line 170 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 167 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
             #line hidden
             this.Write("_instance_id()\r\n{\r\n    return g_next_");
             
-            #line 172 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 169 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
             #line hidden
             this.Write("_instance_id++;\r\n}\r\n\r\nIOTHUB_CLIENT_RESULT create_");
             
-            #line 175 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 172 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
@@ -466,46 +463,47 @@ foreach (var prop in allProps)
             this.Write("_object(IOTHUB_CLIENT_HANDLE h, uint16_t *instanceId)\r\n{\r\n    IOTHUB_CLIENT_RESUL" +
                     "T res = IOTHUB_CLIENT_OK;\r\n\r\n    res = REGISTER_DISPATCHERS(OID_");
             
-            #line 179 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 176 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName.ToUpper()));
             
             #line default
             #line hidden
             this.Write(", ");
             
-            #line 179 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 176 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(");\r\n    if (res != IOTHUB_CLIENT_OK)\r\n    {\r\n        LogError(\"Failed registering" +
-                    " dispatchers\");\r\n        res = IOTHUB_CLIENT_ERROR;\r\n    }\r\n    else\r\n    {\r\n   " +
-                    "     ");
+                    " dispatchers\");\r\n        res = IOTHUB_CLIENT_ERROR;\r\n    }\r\n\r\n    else\r\n    {\r\n " +
+                    "       ");
             
-            #line 187 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 185 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(" *obj = (");
             
-            #line 187 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 185 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(" *)lwm2m_malloc(sizeof(");
             
-            #line 187 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 185 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write("));\r\n        if (obj == NULL)\r\n        {\r\n            LogError(\"malloc failure\");" +
-                    "\r\n            res = IOTHUB_CLIENT_ERROR;\r\n        }\r\n        else\r\n        {\r\n  " +
-                    "          memset(obj,0,sizeof(*obj));\r\n            obj->instanceId = get_next_");
+                    "\r\n            res = IOTHUB_CLIENT_ERROR;\r\n        }\r\n\r\n        else\r\n        {\r\n" +
+                    "            memset(obj,0,sizeof(*obj));\r\n            obj->instanceId = get_next_" +
+                    "");
             
-            #line 196 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 195 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
@@ -513,7 +511,7 @@ foreach (var prop in allProps)
             this.Write("_instance_id();\r\n            obj->channelHandle = h;\r\n                \r\n         " +
                     "   res = add_dm_object(&");
             
-            #line 199 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 198 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
@@ -521,22 +519,22 @@ foreach (var prop in allProps)
             this.Write("_instance_list, obj);\r\n            if (res != IOTHUB_CLIENT_OK)\r\n            {\r\n " +
                     "               LogError(\"adding ");
             
-            #line 202 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 201 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectName));
             
             #line default
             #line hidden
             this.Write(" object to object list\");\r\n\r\n                destroy_");
             
-            #line 204 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 203 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
             #line hidden
-            this.Write("_object(obj);\r\n                obj = NULL;\r\n            }\r\n            else\r\n    " +
-                    "        {\r\n                set_default_");
+            this.Write("_object(obj);\r\n                obj = NULL;\r\n            }\r\n\r\n            else\r\n  " +
+                    "          {\r\n                set_default_");
             
-            #line 209 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 209 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
@@ -545,37 +543,37 @@ foreach (var prop in allProps)
                     "L)\r\n        {\r\n            *instanceId = (obj == NULL) ? 0 : obj->instanceId;\r\n " +
                     "       }\r\n    }\r\n\r\n    return res;\r\n}\r\n\r\n");
             
-            #line 222 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 222 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(" *get_");
             
-            #line 222 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 222 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
             #line hidden
             this.Write("_object(uint16_t instanceId)\r\n{\r\n    ");
             
-            #line 224 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 224 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(" *obj = NULL;\r\n\r\n    (void)get_dm_object(");
             
-            #line 226 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 226 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write("_instance_list, instanceId, (void*)&obj);\r\n\r\n    return obj;\r\n}\r\n\r\n#define DO_SIG" +
                     "NAL_RESOURCE_CHANGE(index, property) \\\r\n    if (obj->resourceUpdated[index]) \\\r\n" +
-                    "    { \\\r\n        on_resource_value_changed(OID_");
+                    "    { \\\r\n        on_resource_value_changed(obj->channelHandle, OID_");
             
-            #line 234 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 234 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName.ToUpper()));
             
             #line default
@@ -583,28 +581,28 @@ foreach (var prop in allProps)
             this.Write(", obj->instanceId, property); \\\r\n        obj->resourceUpdated[index] = (char)fals" +
                     "e; \\\r\n    }\r\n\r\n   \r\nvoid signal_object_");
             
-            #line 239 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 239 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectCodeName));
             
             #line default
             #line hidden
             this.Write("_resource_changed(void *p)\r\n{\r\n    ");
             
-            #line 241 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 241 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(" *obj = (");
             
-            #line 241 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 241 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write("*)p;\r\n");
             
-            #line 242 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 242 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
     foreach (var prop in allProps)
     {
@@ -614,21 +612,21 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("    DO_SIGNAL_RESOURCE_CHANGE(INDEX_");
             
-            #line 246 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 246 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
             
             #line default
             #line hidden
             this.Write(", PID_");
             
-            #line 246 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 246 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
             
             #line default
             #line hidden
             this.Write(")\r\n");
             
-            #line 247 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 247 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
     }
 
@@ -637,14 +635,14 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("}\r\n\r\nBEGIN_READ_DISPATCHER(");
             
-            #line 252 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 252 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(")\r\n");
             
-            #line 253 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 253 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
 foreach (var prop in allProps)
 {
@@ -656,28 +654,28 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("    ");
             
-            #line 259 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 259 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyTypeName.ToUpper()));
             
             #line default
             #line hidden
             this.Write("_READ(PID_");
             
-            #line 259 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 259 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
             
             #line default
             #line hidden
             this.Write(", on_read_");
             
-            #line 259 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 259 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToLower()));
             
             #line default
             #line hidden
             this.Write(")\r\n");
             
-            #line 260 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 260 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
     }
 }
@@ -687,14 +685,14 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("END_READ_DISPATCHER()\r\n\r\nBEGIN_EXEC_DISPATCHER(");
             
-            #line 266 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 266 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(")\r\n");
             
-            #line 267 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 267 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
 foreach (var prop in allProps)
 {
@@ -706,21 +704,21 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("    EXEC(PID_");
             
-            #line 273 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 273 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
             
             #line default
             #line hidden
             this.Write(", on_exec_");
             
-            #line 273 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 273 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToLower()));
             
             #line default
             #line hidden
             this.Write(")\r\n");
             
-            #line 274 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 274 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
     }
 }
@@ -730,14 +728,14 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("END_EXEC_DISPATCHER()\r\n\r\nBEGIN_WRITE_DISPATCHER(");
             
-            #line 280 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 280 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(")\r\n");
             
-            #line 281 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 281 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
 foreach (var prop in allProps)
 {
@@ -749,28 +747,28 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("    ");
             
-            #line 287 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 287 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyTypeName.ToUpper()));
             
             #line default
             #line hidden
             this.Write("_WRITE(PID_");
             
-            #line 287 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 287 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
             
             #line default
             #line hidden
             this.Write(", on_write_");
             
-            #line 287 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 287 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToLower()));
             
             #line default
             #line hidden
             this.Write(")\r\n");
             
-            #line 288 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 288 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
     }
 }
@@ -780,14 +778,14 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("END_WRITE_DISPATCHER();\r\n\r\nBEGIN_OPERATION_LIST(");
             
-            #line 294 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 294 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ObjectStructName));
             
             #line default
             #line hidden
             this.Write(")\r\n");
             
-            #line 295 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 295 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
 foreach (var prop in allProps)
 {
@@ -797,28 +795,28 @@ foreach (var prop in allProps)
             #line hidden
             this.Write("    OPERATION(PID_");
             
-            #line 299 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 299 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
             
             #line default
             #line hidden
             this.Write(", OP_");
             
-            #line 299 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 299 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.ResourceFromXml.Operations.ToString()));
             
             #line default
             #line hidden
             this.Write(", ");
             
-            #line 299 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 299 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.LWM2MTypeText));
             
             #line default
             #line hidden
             this.Write(")\r\n");
             
-            #line 300 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            #line 300 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
 
 }
 
@@ -829,7 +827,7 @@ foreach (var prop in allProps)
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 306 "H:\repos\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+        #line 306 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
  
 
 public string ObjectName;
@@ -876,10 +874,12 @@ private string GetWritePrototype(PropertyToGenerate prop)
     {
         return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, " + prop.PropertyTypeCodeName + " value, size_t length)";
     }
+
     else if (prop.Type == LWM2MObjectItemType.String)
     {
         return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, const char *value, size_t length)";
     }
+
     else
     {
         return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, " + prop.PropertyTypeCodeName + " value)";
@@ -892,10 +892,12 @@ private string GetSetterPrototype(PropertyToGenerate prop)
     {
         return "IOTHUB_CLIENT_RESULT set_" + prop.PropertyName.ToLower() + "(uint16_t instanceId, " + prop.PropertyTypeCodeName + " value, size_t length)";
     }
+
     else if (prop.Type == LWM2MObjectItemType.String)
     {
         return "IOTHUB_CLIENT_RESULT set_" + prop.PropertyName.ToLower() + "(uint16_t instanceId, const char *value)";
     }
+
     else
     {
         return "IOTHUB_CLIENT_RESULT set_" + prop.PropertyName.ToLower() + "(uint16_t instanceId, " + prop.PropertyTypeCodeName + " value)";

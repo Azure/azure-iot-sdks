@@ -48,7 +48,6 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_lifetime(uint16_t instanceId, int value)
             obj->propval_lwm2mserver_lifetime = value;
 
             obj->resourceUpdated[INDEX_LWM2MSERVER_LIFETIME] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
@@ -69,7 +68,6 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultminimumperiod(uint16_t instanceId, i
             obj->propval_lwm2mserver_defaultminimumperiod = value;
 
             obj->resourceUpdated[INDEX_LWM2MSERVER_DEFAULTMINIMUMPERIOD] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
@@ -90,7 +88,6 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultmaximumperiod(uint16_t instanceId, i
             obj->propval_lwm2mserver_defaultmaximumperiod = value;
 
             obj->resourceUpdated[INDEX_LWM2MSERVER_DEFAULTMAXIMUMPERIOD] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
@@ -177,7 +174,7 @@ object_lwm2mserver *get_lwm2mserver_object(uint16_t instanceId)
 #define DO_SIGNAL_RESOURCE_CHANGE(index, property) \
     if (obj->resourceUpdated[index]) \
     { \
-        on_resource_value_changed(OID_LWM2MSERVER, obj->instanceId, property); \
+        on_resource_value_changed(obj->channelHandle, OID_LWM2MSERVER, obj->instanceId, property); \
         obj->resourceUpdated[index] = (char)false; \
     }
 

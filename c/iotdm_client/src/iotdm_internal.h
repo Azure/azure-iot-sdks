@@ -68,16 +68,10 @@ typedef struct CLIENT_DATA_TAG
     IO_BUFFER             input;
     IOTHUB_CLIENT_CONFIG  config;
     STRING_HANDLE         SAS;
-    time_t                lastnotify_time;
-
-    LOCK_HANDLE push_event_lock;
-    COND_HANDLE push_event_condition;
 } CLIENT_DATA;
 
 typedef void(*ON_REGISTER_COMPLETE)(IOTHUB_CLIENT_RESULT result, void* context);
 
-void*   iotdmc_connect(CLIENT_DATA *cd);
-uint8_t iotdmc_send(void *context, uint8_t *buffer, size_t length, void *userData);
 IOTHUB_CLIENT_RESULT iotdmc_register(CLIENT_DATA *cd, ON_REGISTER_COMPLETE onComplete, void* callbackContext);
 
 // object_security.c
@@ -87,11 +81,11 @@ lwm2m_object_t *make_security_object(int serverId, const char* serverUri, bool i
 lwm2m_object_t *make_server_object(int serverId, int lifetime, bool storing);
 
 // object_global.c
-lwm2m_object_t *make_global_object(lwm2m_context_t *contextP);
+lwm2m_object_t *make_global_object(IOTHUB_CHANNEL_HANDLE iotHubChannel);
 uint8_t global_object_read(uint16_t instanceId, int *numDataP, lwm2m_data_t **dataArrayP, lwm2m_object_t *objectP);
 uint8_t global_object_write(uint16_t instanceId, int numData, lwm2m_data_t *dataArray, lwm2m_object_t *objectP);
 uint8_t global_object_execute(uint16_t instanceId, uint16_t resourceId, uint8_t *buffer, int length, lwm2m_object_t *objectP);
-void on_resource_value_changed(uint16_t objectId, uint16_t instanceId, uint16_t resourceId);
+void on_resource_value_changed(IOTHUB_CHANNEL_HANDLE iotHubChannel, uint16_t objectId, uint16_t instanceId, uint16_t resourceId);
 
 // Lwm2m_object_list.c
 typedef void(*FREE_SUBITEM_MEMORY)(void *object);
@@ -101,7 +95,6 @@ IOTHUB_CLIENT_RESULT get_dm_object(LIST_HANDLE list, uint16_t id, void **object)
 IOTHUB_CLIENT_RESULT add_dm_object(LIST_HANDLE *list, void *object);
 
 // iotdm_client.c
-IOTHUB_CLIENT_RESULT wake_main_dm_thread(IOTHUB_CHANNEL_HANDLE h);
 char *iotdm_strndup(const char *buffer, size_t length);
 
 // iotdm_dispatcher_list.c

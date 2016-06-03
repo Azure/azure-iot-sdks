@@ -48,7 +48,6 @@ IOTHUB_CLIENT_RESULT set_config_name(uint16_t instanceId, const char *value)
             obj->propval_config_name = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_CONFIG_NAME] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
@@ -70,12 +69,11 @@ IOTHUB_CLIENT_RESULT set_config_value(uint16_t instanceId, const char *value)
             obj->propval_config_value = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_CONFIG_VALUE] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -159,7 +157,7 @@ object_config *get_config_object(uint16_t instanceId)
 #define DO_SIGNAL_RESOURCE_CHANGE(index, property) \
     if (obj->resourceUpdated[index]) \
     { \
-        on_resource_value_changed(OID_CONFIG, obj->instanceId, property); \
+        on_resource_value_changed(obj->channelHandle, OID_CONFIG, obj->instanceId, property); \
         obj->resourceUpdated[index] = (char)false; \
     }
 

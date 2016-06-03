@@ -107,18 +107,12 @@ int IoTHubClient_InitializeFromConnectionString(IOTHUB_CHANNEL_HANDLE iotDMClien
         }
     }
 
-    if (deviceKeyString != NULL)
-        STRING_delete(deviceKeyString);
-    if (deviceIdString != NULL)
-        STRING_delete(deviceIdString);
-    if (hostNameString != NULL)
-        STRING_delete(hostNameString);
-    if (hostSuffix != NULL)
-        STRING_delete(hostSuffix);
-    if (valueString != NULL)
-        STRING_delete(valueString);
-    if (tokenString != NULL)
-        STRING_delete(tokenString);
+    STRING_delete(deviceKeyString);
+    STRING_delete(deviceIdString);
+    STRING_delete(hostNameString);
+    STRING_delete(hostSuffix);
+    STRING_delete(valueString);
+    STRING_delete(tokenString);
 
     STRING_delete(connString);
     STRING_TOKENIZER_destroy(tokenizer);
@@ -137,38 +131,24 @@ static IOTHUB_CHANNEL_HANDLE create_iothub_handle()
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
 
     CLIENT_DATA *returnValue = (CLIENT_DATA *)lwm2m_malloc(sizeof(CLIENT_DATA));
-    if (NULL != returnValue)
+    if (NULL == returnValue)
+    {
+        LogError("malloc failed");
+    }
+
+    else
     {
         memset(returnValue, 0, sizeof(CLIENT_DATA));
-
-        returnValue->push_event_lock = Lock_Init();
-        if (returnValue->push_event_lock == NULL)
-        {
-            lwm2m_free(returnValue);
-            returnValue = NULL;
-        }
-        else
-        {
-            returnValue->push_event_condition = Condition_Init();
-            if (returnValue->push_event_condition == NULL)
-            {
-                Lock_Deinit(returnValue->push_event_lock);
-                lwm2m_free(returnValue);
-                returnValue = NULL;
-            }
-        }
     }
 
     return (IOTHUB_CHANNEL_HANDLE)returnValue;
 }
 
+
 static void destroy_iothub_handle(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
     if (iotDMClientHandle != NULL)
     {
-        CLIENT_DATA *cd = (CLIENT_DATA *) iotDMClientHandle;
-        Condition_Deinit(cd->push_event_condition);
-        Lock_Deinit(cd->push_event_lock);
         lwm2m_free(iotDMClientHandle);
     }
 }
@@ -188,6 +168,7 @@ IOTHUB_CHANNEL_HANDLE IoTHubClient_DM_Open(const char *connectionString, IOTHUB_
         destroy_iothub_handle(returnValue);
         returnValue = NULL;
     }
+
     else
     {
         CLIENT_DATA *cd = (CLIENT_DATA *)returnValue;
@@ -242,23 +223,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_CreateDefaultObjects(IOTHUB_CHANNEL_HANDLE 
 }
 
 
-static COND_RESULT tickle_event_condition(CLIENT_DATA *client)
-{
-    Lock(client->push_event_lock);
-    COND_RESULT retValue = Condition_Post(client->push_event_condition);
-    Unlock(client->push_event_lock);
-
-    return retValue;
-}
-
-
 void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
     if (NULL != iotDMClientHandle)
     {
         CLIENT_DATA *client = (CLIENT_DATA *)iotDMClientHandle;
 
-        tickle_event_condition(client);
         client->state = SHUTTING_DOWN;
 
         lwm2m_close(client->session);
@@ -297,6 +267,7 @@ void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
     platform_deinit();
 }
 
+
 typedef struct
 {
     CLIENT_DATA* client;
@@ -307,12 +278,6 @@ typedef struct
 void on_register_complete(IOTHUB_CLIENT_RESULT result, void* context)
 {
     ON_REGISTER_COMPLETE_CONTEXT* registerContext = (ON_REGISTER_COMPLETE_CONTEXT*)context;
-
-    if (result == IOTHUB_CLIENT_OK)
-    {
-        registerContext->client->lastnotify_time = get_time(NULL);
-    }
-
     registerContext->onComplete(result, registerContext->context);
     free(context);
 }
@@ -333,6 +298,7 @@ static bool find_mandatory_objects(uint16_t oid, void *ctx)
     return true;
 }
 
+
 static bool mandatory_objects_exist()
 {
     oids_found found = { false, false };
@@ -344,6 +310,7 @@ static bool mandatory_objects_exist()
 
     return false;
 }
+
 
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHandle, ON_DM_CONNECT_COMPLETE onComplete, void* callbackContext)
 {
@@ -382,7 +349,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHa
     lwm2m_object_t *three[3] = {
         make_security_object(msft_server_ID, client->config.iotHubName, false),
         make_server_object(msft_server_ID, 300, false),
-        make_global_object(client->session)
+        make_global_object(client)
     };
     int result = lwm2m_configure(client->session, client->config.deviceId, NULL, NULL, 3, &three[0]);
     if (0 != result)
@@ -410,22 +377,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHa
     context->context = callbackContext;
 
     return iotdmc_register(client, on_register_complete, context);
-}
-
-
-IOTHUB_CLIENT_RESULT wake_main_dm_thread(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
-{
-    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
-
-    if (NULL != iotDMClientHandle)
-    {
-        if (tickle_event_condition((CLIENT_DATA *)iotDMClientHandle) == COND_OK)
-        {
-            result = IOTHUB_CLIENT_OK;
-        }
-    }
-
-    return result;
 }
 
 
@@ -549,12 +500,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
         {
             if (IoTHubClient_DM_DoWork(iotDMClientHandle))
             {
-                Lock(cd->push_event_lock);
-                if (Condition_Wait(cd->push_event_condition, cd->push_event_lock, 1000) == COND_ERROR)
-                {
-                    return IOTHUB_CLIENT_ERROR;
-                }
-                Unlock(cd->push_event_lock);
                 ThreadAPI_Sleep(1000);
             }
 
@@ -569,6 +514,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
     return result;
 }
 
+
 char * iotdm_strndup(const char *buffer, size_t length)
 {
     char *out = lwm2m_malloc(length + 1);
@@ -577,6 +523,7 @@ char * iotdm_strndup(const char *buffer, size_t length)
         memcpy(out, buffer, length);
         out[length] = 0;
     }
+
     return out;
 }
 

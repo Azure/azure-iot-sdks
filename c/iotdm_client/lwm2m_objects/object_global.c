@@ -16,7 +16,6 @@ typedef struct _OBJECT_instance_
     uint16_t                  instanceId;   // matches lwm2m_list_t::id
 } OBJECT_instance_t;
 
-lwm2m_context_t *g_contextP = NULL;
 
 static uint8_t prv_get_value(lwm2m_data_t *tlvP, uint16_t objectID, uint16_t instanceID)
 {
@@ -81,10 +80,16 @@ uint8_t global_object_read(uint16_t instanceId, int *numDataP, lwm2m_data_t **da
 
 /*
  */
-void on_resource_value_changed(uint16_t objectID, uint16_t instanceID, uint16_t resourceID)
+void on_resource_value_changed(IOTHUB_CHANNEL_HANDLE iotHubChannel, uint16_t objectID, uint16_t instanceID, uint16_t resourceID)
 {
-    if (NULL != g_contextP)
+    if (NULL == iotHubChannel)
     {
+        LogError("NULL Channel Handle.");
+    }
+
+    else
+    {
+        lwm2m_context_t *contextP = ((CLIENT_DATA *) iotHubChannel)->session;
         lwm2m_uri_t uri = {
             LWM2M_URI_FLAG_OBJECT_ID | LWM2M_URI_FLAG_INSTANCE_ID | LWM2M_URI_FLAG_RESOURCE_ID,
             objectID,
@@ -92,17 +97,14 @@ void on_resource_value_changed(uint16_t objectID, uint16_t instanceID, uint16_t 
             resourceID
         };
 
-        lwm2m_resource_value_changed(g_contextP, &uri);
+        lwm2m_resource_value_changed(contextP, &uri);
     }
 }
 
 
-
 uint8_t global_object_write(uint16_t instanceID, int numData, lwm2m_data_t *dataArray, lwm2m_object_t *objectP)
 {
-    uint8_t result = COAP_404_NOT_FOUND;
-    void *obj = NULL;
-
+    uint8_t  result = COAP_404_NOT_FOUND;
     int index = 0;
     do
     {
@@ -111,7 +113,7 @@ uint8_t global_object_write(uint16_t instanceID, int numData, lwm2m_data_t *data
         result = prv_set_value(&dataArray[index], objectP->objID, instanceID);
         if (result == COAP_204_CHANGED)
         {
-            on_resource_value_changed(objectP->objID, instanceID, resourceID);
+            on_resource_value_changed((IOTHUB_CHANNEL_HANDLE) (objectP->userData), objectP->objID, instanceID, resourceID);
         }
 
         index++;
@@ -124,6 +126,7 @@ uint8_t global_object_write(uint16_t instanceID, int numData, lwm2m_data_t *data
     return result;
 }
 
+
 uint8_t global_object_execute(uint16_t instanceID, uint16_t resourceID, uint8_t *buffer, int length, lwm2m_object_t *objectP)
 {
     uint8_t rv = dispatch_exec(objectP->objID, instanceID, resourceID);
@@ -134,15 +137,18 @@ uint8_t global_object_execute(uint16_t instanceID, uint16_t resourceID, uint8_t 
     return rv;
 }
 
+
 static uint8_t prv_OBJECT_delete(uint16_t id, lwm2m_object_t *objectP)
 {
     return COAP_405_METHOD_NOT_ALLOWED;
 }
 
+
 static uint8_t prv_OBJECT_create(uint16_t instanceID, int numData, lwm2m_data_t *dataArray, lwm2m_object_t *objectP)
 {
     return COAP_405_METHOD_NOT_ALLOWED;
 }
+
 
 static void prv_OBJECT_close(lwm2m_object_t *object)
 {
@@ -154,34 +160,42 @@ static void prv_OBJECT_close(lwm2m_object_t *object)
     }
 }
 
-lwm2m_object_t *make_global_object(lwm2m_context_t *contextP)
-{
-    lwm2m_object_t *oneObj;
 
-    oneObj = (lwm2m_object_t *) lwm2m_malloc(sizeof(lwm2m_object_t));
-    if (NULL != oneObj)
+lwm2m_object_t *make_global_object(IOTHUB_CHANNEL_HANDLE iotHubChannel)
+{
+    lwm2m_object_t *oneObj = (lwm2m_object_t *) lwm2m_malloc(sizeof(lwm2m_object_t));
+    if (NULL == oneObj)
     {
-        OBJECT_instance_t *oneInstance;
+        LogError("Malloc failed");
+    }
+
+    else
+    {
         memset(oneObj, 0, sizeof(lwm2m_object_t));
 
-        oneInstance = (OBJECT_instance_t *) lwm2m_malloc(sizeof(OBJECT_instance_t));
+        OBJECT_instance_t *oneInstance = (OBJECT_instance_t *) lwm2m_malloc(sizeof(OBJECT_instance_t));
         if (NULL == oneInstance)
         {
+            LogError("Malloc failed");
+
             lwm2m_free(oneObj);
-            return NULL;
+            oneObj = NULL;
         }
 
-        memset(oneInstance, 0, sizeof(OBJECT_instance_t));
-        oneObj->instanceList = LWM2M_LIST_ADD(oneObj->instanceList, oneInstance);
+        else
+        {
+            memset(oneInstance, 0, sizeof(OBJECT_instance_t));
+            oneObj->instanceList = LWM2M_LIST_ADD(oneObj->instanceList, oneInstance);
 
-        oneObj->objID = LWM2M_DEVICE_OBJECT_ID; /* fake out wakaama :-) */
-        oneObj->readFunc = global_object_read;
-        oneObj->writeFunc = global_object_write;
-        oneObj->createFunc = prv_OBJECT_create;
-        oneObj->deleteFunc = prv_OBJECT_delete;
-        oneObj->executeFunc = global_object_execute;
+            oneObj->objID = LWM2M_DEVICE_OBJECT_ID; /* fake out wakaama :-) */
+            oneObj->readFunc = global_object_read;
+            oneObj->writeFunc = global_object_write;
+            oneObj->createFunc = prv_OBJECT_create;
+            oneObj->deleteFunc = prv_OBJECT_delete;
+            oneObj->executeFunc = global_object_execute;
 
-        g_contextP = contextP;
+            oneObj->userData = (void *) iotHubChannel;
+        }
     }
 
     return oneObj;

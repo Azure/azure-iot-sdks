@@ -96,7 +96,6 @@ foreach (var prop in allProps)
             obj-><#= prop.SampleVariableName #> = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_<#= prop.PropertyName.ToUpper() #>] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
@@ -110,7 +109,6 @@ foreach (var prop in allProps)
             (obj-><#= prop.SampleVariableName #> = value;
 
             obj->resourceUpdated[INDEX_<#= prop.PropertyName.ToUpper() #>] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
@@ -125,7 +123,6 @@ foreach (var prop in allProps)
             obj-><#= prop.SampleVariableName #> = value;
 
             obj->resourceUpdated[INDEX_<#= prop.PropertyName.ToUpper() #>] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
@@ -133,8 +130,8 @@ foreach (var prop in allProps)
                     break;
             }
 #>
-
     }
+
     return result;
 }
 
@@ -182,6 +179,7 @@ IOTHUB_CLIENT_RESULT create_<#= ObjectCodeName #>_object(IOTHUB_CLIENT_HANDLE h,
         LogError("Failed registering dispatchers");
         res = IOTHUB_CLIENT_ERROR;
     }
+
     else
     {
         <#= ObjectStructName #> *obj = (<#= ObjectStructName #> *)lwm2m_malloc(sizeof(<#= ObjectStructName #>));
@@ -190,6 +188,7 @@ IOTHUB_CLIENT_RESULT create_<#= ObjectCodeName #>_object(IOTHUB_CLIENT_HANDLE h,
             LogError("malloc failure");
             res = IOTHUB_CLIENT_ERROR;
         }
+
         else
         {
             memset(obj,0,sizeof(*obj));
@@ -204,6 +203,7 @@ IOTHUB_CLIENT_RESULT create_<#= ObjectCodeName #>_object(IOTHUB_CLIENT_HANDLE h,
                 destroy_<#= ObjectCodeName #>_object(obj);
                 obj = NULL;
             }
+
             else
             {
                 set_default_<#= ObjectCodeName #>_property_values(obj);
@@ -231,7 +231,7 @@ IOTHUB_CLIENT_RESULT create_<#= ObjectCodeName #>_object(IOTHUB_CLIENT_HANDLE h,
 #define DO_SIGNAL_RESOURCE_CHANGE(index, property) \
     if (obj->resourceUpdated[index]) \
     { \
-        on_resource_value_changed(OID_<#= ObjectCodeName.ToUpper() #>, obj->instanceId, property); \
+        on_resource_value_changed(obj->channelHandle, OID_<#= ObjectCodeName.ToUpper() #>, obj->instanceId, property); \
         obj->resourceUpdated[index] = (char)false; \
     }
 
@@ -349,10 +349,12 @@ private string GetWritePrototype(PropertyToGenerate prop)
     {
         return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, " + prop.PropertyTypeCodeName + " value, size_t length)";
     }
+
     else if (prop.Type == LWM2MObjectItemType.String)
     {
         return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, const char *value, size_t length)";
     }
+
     else
     {
         return "IOTHUB_CLIENT_RESULT on_write_" + prop.PropertyName.ToLower() + "(" + ObjectStructName + " *obj, " + prop.PropertyTypeCodeName + " value)";
@@ -365,10 +367,12 @@ private string GetSetterPrototype(PropertyToGenerate prop)
     {
         return "IOTHUB_CLIENT_RESULT set_" + prop.PropertyName.ToLower() + "(uint16_t instanceId, " + prop.PropertyTypeCodeName + " value, size_t length)";
     }
+
     else if (prop.Type == LWM2MObjectItemType.String)
     {
         return "IOTHUB_CLIENT_RESULT set_" + prop.PropertyName.ToLower() + "(uint16_t instanceId, const char *value)";
     }
+
     else
     {
         return "IOTHUB_CLIENT_RESULT set_" + prop.PropertyName.ToLower() + "(uint16_t instanceId, " + prop.PropertyTypeCodeName + " value)";

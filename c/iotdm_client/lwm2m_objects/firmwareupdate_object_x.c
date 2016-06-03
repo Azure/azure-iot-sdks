@@ -53,12 +53,11 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_state(uint16_t instanceId, int value)
             obj->propval_firmwareupdate_state = value;
 
             obj->resourceUpdated[INDEX_FIRMWAREUPDATE_STATE] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -74,12 +73,11 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_updateresult(uint16_t instanceId, int va
             obj->propval_firmwareupdate_updateresult = value;
 
             obj->resourceUpdated[INDEX_FIRMWAREUPDATE_UPDATERESULT] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -96,12 +94,11 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgname(uint16_t instanceId, const char 
             obj->propval_firmwareupdate_pkgname = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_FIRMWAREUPDATE_PKGNAME] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -118,12 +115,11 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgversion(uint16_t instanceId, const ch
             obj->propval_firmwareupdate_pkgversion = lwm2m_strdup(value);
 
             obj->resourceUpdated[INDEX_FIRMWAREUPDATE_PKGVERSION] = (char)true;
-            wake_main_dm_thread(obj->channelHandle);
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -159,6 +155,7 @@ IOTHUB_CLIENT_RESULT create_firmwareupdate_object(IOTHUB_CLIENT_HANDLE h, uint16
         LogError("Failed registering dispatchers");
         res = IOTHUB_CLIENT_ERROR;
     }
+
     else
     {
         object_firmwareupdate *obj = (object_firmwareupdate *)lwm2m_malloc(sizeof(object_firmwareupdate));
@@ -167,6 +164,7 @@ IOTHUB_CLIENT_RESULT create_firmwareupdate_object(IOTHUB_CLIENT_HANDLE h, uint16
             LogError("malloc failure");
             res = IOTHUB_CLIENT_ERROR;
         }
+
         else
         {
             memset(obj,0,sizeof(*obj));
@@ -181,6 +179,7 @@ IOTHUB_CLIENT_RESULT create_firmwareupdate_object(IOTHUB_CLIENT_HANDLE h, uint16
                 destroy_firmwareupdate_object(obj);
                 obj = NULL;
             }
+
             else
             {
                 set_default_firmwareupdate_property_values(obj);
@@ -208,7 +207,7 @@ object_firmwareupdate *get_firmwareupdate_object(uint16_t instanceId)
 #define DO_SIGNAL_RESOURCE_CHANGE(index, property) \
     if (obj->resourceUpdated[index]) \
     { \
-        on_resource_value_changed(OID_FIRMWAREUPDATE, obj->instanceId, property); \
+        on_resource_value_changed(obj->channelHandle, OID_FIRMWAREUPDATE, obj->instanceId, property); \
         obj->resourceUpdated[index] = (char)false; \
     }
 
