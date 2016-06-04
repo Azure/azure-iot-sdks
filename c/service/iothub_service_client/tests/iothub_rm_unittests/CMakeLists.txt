@@ -6,10 +6,10 @@ cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC11()
 
-set(theseTestsName iothub_registrymanager_unittests)
+set(theseTestsName iothub_rm_unittests)
 
 set(${theseTestsName}_test_files
-iothub_registrymanager_unittests.c
+iothub_rm_unittests.c
 )
 
 set(${theseTestsName}_c_files

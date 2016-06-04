@@ -9,7 +9,7 @@ if(NOT ${use_http})
 endif()
 
 compileAsC11()
-set(theseTestsName iothub_client_ll_uploadtoblob_unittests )
+set(theseTestsName iothub_client_ll_u2b_unittests )
 
 set(${theseTestsName}_test_files
 ${theseTestsName}.c
