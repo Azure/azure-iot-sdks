@@ -45,6 +45,14 @@ module.exports = [
             return '"' + versions.c.device + '"$2';
         }
     },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/iothub_client/tests/iothubclient_ll_uploadtoblob_unittests/iothub_client_ll_uploadtoblob_unittests.c",
+        "search": "(TEST\\_IOTHUB\\_SDK\\_VERSION)([ ]+)(\".*\")",
+        "replaceString": function(versions) {
+            return '$1' + '$2' + '"' + versions.c.device + '"';
+        }
+    },
     ///////////////////////////////////////////////////
     // C SDK nugets
     ///////////////////////////////////////////////////
