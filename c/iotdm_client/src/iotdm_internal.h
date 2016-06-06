@@ -16,17 +16,16 @@
 
 /** from azure-shared-c-utility */
 #undef LOG
-#include "iot_logging.h"
-#include "platform.h"
-#include "sastoken.h"
-#include "string.h"
-#include "string_tokenizer.h"
-#include "tlsio.h"
-#include "urlencode.h"
-#include "xio.h"
-#include "list.h"
-#include "lock.h"
-#include "condition.h"
+#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/sastoken.h"
+#include "azure_c_shared_utility/string_tokenizer.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/urlencode.h"
+#include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/list.h"
+#include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/condition.h"
 
 #include "iotdm_lwm2m_client_apis.h"
 

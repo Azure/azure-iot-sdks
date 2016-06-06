@@ -6,7 +6,7 @@
 //
 
 #include "iotdm_client.h"
-#include "threadapi.h"
+#include "azure_c_shared_utility/threadapi.h"
 #include "device_object.h"
 #include "firmwareupdate_object.h"
 #include "config_object.h"

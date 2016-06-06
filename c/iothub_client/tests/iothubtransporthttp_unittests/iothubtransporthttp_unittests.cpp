@@ -13,7 +13,7 @@
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
 
-#include "macro_utils.h"
+#include "azure_c_shared_utility/macro_utils.h"
 #undef DEFINE_ENUM
 #define DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName; 
 

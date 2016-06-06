@@ -22,5 +22,6 @@ set(${theseTestsName}_h_files
 )
 
 include_directories(../../../certs)
+include_directories(.)
 
 build_test_artifacts(${theseTestsName} ON)

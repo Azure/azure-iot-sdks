@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "xio.h"
-#include "tlsio.h"
-#include "platform.h"
+#include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/platform.h"
 #include "certs.h"
 
 XIO_HANDLE dm_io_create(const char* iotHubName)

@@ -7,8 +7,8 @@
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
 
-#include "threadapi.h"
-#include "iot_logging.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/iot_logging.h"
 
 
 typedef void *IOTHUB_CHANNEL_HANDLE;

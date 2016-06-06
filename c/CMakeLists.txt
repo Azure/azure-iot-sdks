@@ -69,8 +69,6 @@ endif()
 enable_testing()
 
 
-include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility)
-
 #this project uses several other projects that are build not by these CMakeFiles
 #this project also targets several OSes
 
