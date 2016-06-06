@@ -1,5 +1,5 @@
 #iothub-explorer
-A sample CLI tool to manage device clients using the Azure IoT Hub service SDK. The tool enables you to manage the devices in the identity register, monitor device-to-cloud messages, and send cloud-to-device commands.
+A sample CLI tool to manage IoT devices using the Azure IoT Hub service SDK. The tool enables you to manage the devices in the identity registry, monitor device-to-cloud messages, and send cloud-to-device commands. You can also use the tool to schedule jobs on the device (e.g., firmware update).
 
 [![npm version](https://badge.fury.io/js/iothub-explorer.svg)](https://badge.fury.io/js/iothub-explorer)
 
@@ -8,10 +8,10 @@ A sample CLI tool to manage device clients using the Azure IoT Hub service SDK. 
 
 > Note: This tool requires Node.js version 4.x or higher for all features to work.
 
-To install the latest (pre-release) version of the *iothub-explorer* tool, run the following command in your command-line environment:
+To install the *dmpreview* version of the *iothub-explorer* tool, run the following command in your command-line environment:
 
 ```
-npm install -g iothub-explorer@latest
+npm install -g iothub-explorer@dmpreview
 ```
 
 You can use the following command to get additional help about all the iothub-explorer commands and their parameters:
