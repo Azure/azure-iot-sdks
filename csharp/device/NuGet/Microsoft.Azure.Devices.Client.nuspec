@@ -18,8 +18,8 @@
                 <dependency id="Newtonsoft.Json" version="6.0.8" />
                 <dependency id="PCLCrypto" version="1.0.86" />
                 <dependency id="Microsoft.Azure.Amqp" version="1.1.5" />
-                <dependency id="DotNetty.Codecs.Mqtt-signed" version="0.3.0" />
-                <dependency id="DotNetty.Handlers-signed" version="0.3.0" />
+                <dependency id="DotNetty.Codecs.Mqtt-signed" version="0.3.1" />
+                <dependency id="DotNetty.Handlers-signed" version="0.3.1" />
                 <dependency id="EnterpriseLibrary.TransientFaultHandling" version="6.0.1304" />
                 <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
                 <dependency id="WindowsAzure.Storage" version="7.0.0" />
