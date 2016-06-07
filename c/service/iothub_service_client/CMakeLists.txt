@@ -42,7 +42,9 @@ add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_serv
 
 target_link_libraries(iothub_service_client uamqp)
 
-add_subdirectory(samples)
+if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+	add_subdirectory(samples)
+endif()
 
 if(NOT IN_OPENWRT)
 # Disable tests for OpenWRT
