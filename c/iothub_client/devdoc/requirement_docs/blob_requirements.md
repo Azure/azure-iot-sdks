@@ -38,6 +38,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
 
 **SRS_BLOB_02_001: [** If `SASURI` is NULL then `Blob_UploadFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
 **SRS_BLOB_02_002: [** If `source` is NULL and `size` is not zero then `Blob_UploadFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
+**SRS_BLOB_02_034: [** If size is bigger than 50000\*4\*1024\*1024 then `Blob_UploadFromSasUri` shall fail and return `BLOB_INVALID_ARG`. **]**
 
 Steps to follow when size < 64MB:
 
