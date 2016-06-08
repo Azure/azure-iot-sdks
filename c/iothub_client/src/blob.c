@@ -36,6 +36,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
             LogError("combination of source = %p and size = %zu is invalid", source, size);
             result = BLOB_INVALID_ARG;
         }
+        /*Codes_SRS_BLOB_02_034: [ If size is bigger than 50000*4*1024*1024 then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
         else if (size > 50000ULL * 4 * 1024 * 1024) /*https://msdn.microsoft.com/en-us/library/azure/dd179467.aspx says "Each block can be a different size, up to a maximum of 4 MB, and a block blob can include a maximum of 50,000 blocks."*/
         {
             LogError("size too big (%zu)", size);
@@ -290,7 +291,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                         }
                                         else
                                         {
-                                            /*Code_SRS_BLOB_02_029: [Blob_UploadFromSasUri shall construct a new relativePath from following string : base relativePath + "&comp=blocklist"]*/
+                                            /*Codes_SRS_BLOB_02_029: [Blob_UploadFromSasUri shall construct a new relativePath from following string : base relativePath + "&comp=blocklist"]*/
                                             STRING_HANDLE newRelativePath = STRING_construct(relativePath);
                                             if (newRelativePath == NULL)
                                             {

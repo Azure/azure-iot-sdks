@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "azure_c_shared_utility/gb_stdio.h"
+
 
 static void* my_gballoc_malloc(size_t size)
 {
@@ -34,6 +34,7 @@ static void my_gballoc_free(void* s)
 #include "testrunnerswitcher.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
+#include "umock_c_negative_tests.h"
 
 /*helps when enums are not matched*/
 #ifdef malloc
@@ -116,6 +117,9 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static BUFFER_HANDLE testValidBufferHandle; /*assigned in TEST_SUITE_INITIALIZE*/
 static unsigned int httpResponse; /*used as out parameter in every call to Blob_....*/
+static const unsigned int TwoHundred = 200;
+static const unsigned int FourHundredFour = 404;
+
 
 BEGIN_TEST_SUITE(blob_unittests)
 
@@ -127,19 +131,29 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
     (void)umocktypes_charptr_register_types();
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
 
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_Create, my_HTTPAPIEX_Create);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_Create, NULL);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_ExecuteRequest, HTTPAPIEX_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_Destroy, my_HTTPAPIEX_Destroy);
 
     REGISTER_GLOBAL_MOCK_HOOK(BUFFER_create, my_BUFFER_create);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
 
     REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_Alloc, my_HTTPHeaders_Alloc);
     REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_Free, my_HTTPHeaders_Free);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode_Bytes, my_Base64_Encode_Bytes);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
+
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __LINE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat_with_STRING, __LINE__);
+
     REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, "a");
     REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
 
@@ -523,7 +537,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_1)
     unsigned char c = '3';
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri("https:\\h.h\\doms", &c, sizeof(c), &httpResponse, testValidBufferHandle); /*wrong format for protocol, notice it is actually http:\h.h\doms (missing a \ from http)*/
+    BLOB_RESULT result = Blob_UploadFromSasUri("https:/h.h/doms", &c, sizeof(c), &httpResponse, testValidBufferHandle); /*wrong format for protocol, notice it is actually http:\h.h\doms (missing a \ from http)*/
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -539,7 +553,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_2)
     unsigned char c = '3';
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri("https:\\\\h.h", &c, sizeof(c), &httpResponse, testValidBufferHandle); /*there's no relative path here*/
+    BLOB_RESULT result = Blob_UploadFromSasUri("https://h.h", &c, sizeof(c), &httpResponse, testValidBufferHandle); /*there's no relative path here*/
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -562,19 +576,232 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_2)
 /*Tests_SRS_BLOB_02_029: [ Blob_UploadFromSasUri shall construct a new relativePath from following string: base relativePath + "&comp=blocklist" ]*/
 /*Tests_SRS_BLOB_02_030: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest with a PUT operation, passing the new relativePath, httpStatus and httpResponse and the XML string as content. ]*/
 /*Tests_SRS_BLOB_02_032: [ Otherwise, Blob_UploadFromSasUri shall succeed and return BLOB_OK. ]*/
-#define BIG_SIZE1 (64*1024*1024+1)
-TEST_FUNCTION(Blob_UploadFromSasUri_64MB_plus_1_byte_happy_path)
+TEST_FUNCTION(Blob_UploadFromSasUri_various_sizes_happy_path)
 {
+    /*the following sizes have been identified as "important to be tested*/
+    /*64MB, 64MB+1, 68MB-1, 68MB, 68MB+1*/
+    size_t sizes[] = {
 
+        64 * 1024 * 1024,
+        64 * 1024 * 1024 + 1,
+
+        68 * 1024 * 1024 - 1,
+        68 * 1024 * 1024,
+        68 * 1024 * 1024 + 1,
+    };
+
+    for (size_t iSize = 0; iSize < sizeof(sizes) / sizeof(sizes[0]);iSize++)
+    {
+        umock_c_reset_all_calls();
+        ///arrange
+        unsigned char * content = (unsigned char*)gballoc_malloc(sizes[iSize]);
+        ASSERT_IS_NOT_NULL(content);
+
+        umock_c_reset_all_calls();
+
+        memset(content, '3', sizes[iSize]);
+        content[0] = '0';
+        content[sizes[iSize] - 1] = '4';
+
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a copy of the hostname */
+            .IgnoreArgument_size();
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Create("h.h")); /*this is creating the httpapiex handle to storage (it is always the same host)*/
+        STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
+
+        /*uploading blocks (Put Block)*/
+        for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+        {
+            /*here some sprintf happens and that produces a string in the form: 000000...049999*/
+            STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, 6)) /*this is converting the produced blockID string to a base64 representation*/
+                .IgnoreArgument_source();
+
+            STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "<Latest>")) /*this is building the XML*/
+                .IgnoreArgument_handle();
+            STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is building the XML*/
+                .IgnoreArgument_s1()
+                .IgnoreArgument_s2();
+            STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "</Latest>")) /*this is building the XML*/
+                .IgnoreArgument_handle();
+            STRICT_EXPECTED_CALL(STRING_construct("/something?a=b")); /*this is building the relativePath*/
+
+            STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "&comp=block&blockid=")) /*this is building the relativePath*/
+                .IgnoreArgument_handle();
+            STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*this is building the relativePath by adding the blockId (base64 encoded_*/
+                .IgnoreArgument_s1()
+                .IgnoreArgument_s2();
+
+            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
+                (blockNumber != (sizes[iSize] - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (sizes[iSize] - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            )); /*this is the content to be uploaded by this call*/
+
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */
+                .IgnoreArgument_handle();
+
+            STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
+                .IgnoreArgument_handle()
+                .IgnoreArgument_relativePath()
+                .IgnoreArgument_requestContent();
+
+            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/
+                .IgnoreArgument_handle();
+            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the relativePath*/
+                .IgnoreArgument_handle();
+            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the blockID string to a base64 representation*/
+                .IgnoreArgument_handle();
+        }
+
+        /*this part is Put Block list*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "</BlockList>")) /*This is closing the XML*/
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(STRING_construct("/something?a=b")); /*this is building the relative path for the Put BLock list*/
+
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "&comp=blocklist")) /*This is still building relative path for Put Block list*/
+            .IgnoreArgument_handle();
+
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the XML as const char* so it can be passed to _ExecuteRequest*/
+            .IgnoreArgument_handle();
+
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG)) /*this is creating the XML body as BUFFER_HANDLE*/
+            .IgnoreAllArguments();
+
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path*/
+            .IgnoreArgument_handle();
+
+        STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
+            IGNORED_PTR_ARG,
+            HTTPAPI_REQUEST_PUT,
+            IGNORED_PTR_ARG,
+            NULL,
+            IGNORED_PTR_ARG,
+            &httpResponse,
+            NULL,
+            testValidBufferHandle
+        ))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_relativePath()
+            .IgnoreArgument_requestContent()
+            .CopyOutArgumentBuffer_statusCode(&TwoHundred, sizeof(TwoHundred))
+            ;
+
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*This is the XML as BUFFER_HANDLE*/
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is destroying the relative path for Put Block List*/
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of hte hostname*/
+            .IgnoreArgument_ptr();
+
+        ///act
+        BLOB_RESULT result = Blob_UploadFromSasUri("https://h.h/something?a=b", content, sizes[iSize], &httpResponse, testValidBufferHandle);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
+
+        ///cleanup
+        gballoc_free(content);
+    }
+}
+
+/*Tests_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
+TEST_FUNCTION(Blob_UploadFromSasUri_64MB_unhappy_path)
+{
+    size_t size = 64 * 1024 * 1024;
+
+    size_t calls_that_cannot_fail[] =
+    {
+        13   ,/*BUFFER_delete*/
+        26   ,/*BUFFER_delete*/
+        39   ,/*BUFFER_delete*/
+        52   ,/*BUFFER_delete*/
+        65   ,/*BUFFER_delete*/
+        78   ,/*BUFFER_delete*/
+        91   ,/*BUFFER_delete*/
+        104  ,/*BUFFER_delete*/
+        117  ,/*BUFFER_delete*/
+        130  ,/*BUFFER_delete*/
+        143  ,/*BUFFER_delete*/
+        156  ,/*BUFFER_delete*/
+        169  ,/*BUFFER_delete*/
+        182  ,/*BUFFER_delete*/
+        195  ,/*BUFFER_delete*/
+        208  ,/*BUFFER_delete*/
+        11   ,/*STRING_c_str*/
+        24   ,/*STRING_c_str*/
+        37   ,/*STRING_c_str*/
+        50   ,/*STRING_c_str*/
+        63   ,/*STRING_c_str*/
+        76   ,/*STRING_c_str*/
+        89   ,/*STRING_c_str*/
+        102  ,/*STRING_c_str*/
+        115  ,/*STRING_c_str*/
+        128  ,/*STRING_c_str*/
+        141  ,/*STRING_c_str*/
+        154  ,/*STRING_c_str*/
+        167  ,/*STRING_c_str*/
+        180  ,/*STRING_c_str*/
+        193  ,/*STRING_c_str*/
+        206  ,/*STRING_c_str*/
+        14   ,/*STRING_delete*/
+        27   ,/*STRING_delete*/
+        40   ,/*STRING_delete*/
+        53   ,/*STRING_delete*/
+        66   ,/*STRING_delete*/
+        79   ,/*STRING_delete*/
+        92   ,/*STRING_delete*/
+        105  ,/*STRING_delete*/
+        118  ,/*STRING_delete*/
+        131  ,/*STRING_delete*/
+        144  ,/*STRING_delete*/
+        157  ,/*STRING_delete*/
+        170  ,/*STRING_delete*/
+        183  ,/*STRING_delete*/
+        196  ,/*STRING_delete*/
+        209  ,/*STRING_delete*/
+        15   ,/*STRING_delete*/
+        28   ,/*STRING_delete*/
+        41   ,/*STRING_delete*/
+        54   ,/*STRING_delete*/
+        67   ,/*STRING_delete*/
+        80   ,/*STRING_delete*/
+        93   ,/*STRING_delete*/
+        106  ,/*STRING_delete*/
+        119  ,/*STRING_delete*/
+        132  ,/*STRING_delete*/
+        145  ,/*STRING_delete*/
+        158  ,/*STRING_delete*/
+        171  ,/*STRING_delete*/
+        184  ,/*STRING_delete*/
+        197  ,/*STRING_delete*/
+        210  ,/*STRING_delete*/
+
+
+        214, /*STRING_c_str*/
+        216, /*STRING_c_str*/
+        218, /*BUFFER_delete*/
+        219, /*STRING_delete*/
+        220, /*STRING_delete*/
+        221, /*HTTPAPIEX_Destroy*/
+        222, /*gballoc_free*/
+    };
+
+    (void)umock_c_negative_tests_init();
+    
+    
+    umock_c_reset_all_calls();
     ///arrange
-    unsigned char * content = (unsigned char*)gballoc_malloc(BIG_SIZE1);
+    unsigned char * content = (unsigned char*)gballoc_malloc(size);
     ASSERT_IS_NOT_NULL(content);
 
     umock_c_reset_all_calls();
 
-    memset(content, '3', BIG_SIZE1);
+    memset(content, '3', size);
     content[0] = '0';
-    content[BIG_SIZE1 - 1] = '4';
+    content[size - 1] = '4';
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a copy of the hostname */
         .IgnoreArgument_size();
@@ -583,10 +810,10 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_plus_1_byte_happy_path)
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
     /*uploading blocks (Put Block)*/
-    for (int blockNumber = 0;blockNumber < (BIG_SIZE1 - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
     {
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, 6)) /*this is converting the produced blockID string to a base64 representation*/
+        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, 6)) /*this is converting the produced blockID string to a base64 representation*/ /*3, 16, 29... (16 numbers)*/
             .IgnoreArgument_source();
 
         STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "<Latest>")) /*this is building the XML*/
@@ -605,27 +832,29 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_plus_1_byte_happy_path)
             .IgnoreArgument_s2();
 
         STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (BIG_SIZE1 - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (BIG_SIZE1 - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */ /*11, 24, 27...*/
             .IgnoreArgument_handle();
 
         STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
             .IgnoreArgument_handle()
             .IgnoreArgument_relativePath()
-            .IgnoreArgument_requestContent();
+            .IgnoreArgument_requestContent()
+            .CopyOutArgumentBuffer_statusCode(&TwoHundred, sizeof(TwoHundred))
+            ;
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/ /*13, 26, 39... (16 numbers)*/
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the relativePath*/
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the relativePath*/ /*14, 27, 40...*/
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the blockID string to a base64 representation*/
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is unbuilding the blockID string to a base64 representation*/ /*15, 28, 41... 210*/
             .IgnoreArgument_handle();
     }
 
     /*this part is Put Block list*/
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "</BlockList>")) /*This is closing the XML*/
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "</BlockList>")) /*This is closing the XML*/ /*211*/
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_construct("/something?a=b")); /*this is building the relative path for the Put BLock list*/
 
@@ -654,6 +883,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_plus_1_byte_happy_path)
         .IgnoreArgument_handle()
         .IgnoreArgument_relativePath()
         .IgnoreArgument_requestContent()
+        .CopyOutArgumentBuffer_statusCode(&TwoHundred, sizeof(TwoHundred))
         ;
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*This is the XML as BUFFER_HANDLE*/
@@ -667,30 +897,82 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_plus_1_byte_happy_path)
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of hte hostname*/
         .IgnoreArgument_ptr();
 
-    ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri("https://h.h/something?a=b", content, BIG_SIZE1, &httpResponse, testValidBufferHandle); /*there's no relative path here*/
+    umock_c_negative_tests_snapshot();
 
-    ///assert
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+    {
+        size_t j;
+        umock_c_negative_tests_reset();
+        
+        for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that have failed that cannot fail*/
+        {
+            if (calls_that_cannot_fail[j] == i)
+                break;
+        }
+
+        if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
+        {
+            
+            umock_c_negative_tests_fail_call(i);
+            char temp_str[128];
+            sprintf(temp_str, "On failed call %zu", i);
+            
+            ///act
+            BLOB_RESULT result = Blob_UploadFromSasUri("https://h.h/something?a=b", content, size, &httpResponse, testValidBufferHandle);
+
+            ///assert
+            ASSERT_ARE_NOT_EQUAL_WITH_MSG(BLOB_RESULT, BLOB_OK, result, temp_str);
+        }
+    }
+
+    umock_c_negative_tests_deinit();
 
     ///cleanup
     gballoc_free(content);
+    
 }
-#undef BIG_SIZE1
-#define BIG_SIZE1 (64*1024*1024)
-TEST_FUNCTION(Blob_UploadFromSasUri_64MB_happy_path)
+
+/*50000*4*1024*1024 is                   209715200000. 
+UINT32_MAX is                              4294967295.
+SIZE_MAX might be                          4294967295 or 
+                                 18446744073709551615
+                                 depending on platform
+*/
+
+/*run this test only on platforms where 50000*4*1024*1024 does not overflow. Note: code does not have this problem, as 50000 is written as 50000ULL...*/
+#if SIZE_MAX > 4294967295
+/*Tests_SRS_BLOB_02_034: [ If size is bigger than 50000*4*1024*1024 then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
+TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_size_is_exceeded)
 {
+    ///arrange
+    size_t size = 50000ULL * 4 * 1024 * 1024 + 1;
+    unsigned char c = 3;
+
+    ///act
+    BLOB_RESULT result = Blob_UploadFromSasUri("https://h.h", &c, size, &httpResponse, testValidBufferHandle);
+
+    ///assert
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    
+    ///cleanup
+}
+#endif
+
+/*Tests_SRS_BLOB_02_026: [ Otherwise, if HTTP response code is >=300 then Blob_UploadFromSasUri shall succeed and return BLOB_OK. ]*/
+TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeeds)
+{
+    size_t size = 64 * 1024 * 1024;
 
     ///arrange
-    unsigned char * content = (unsigned char*)gballoc_malloc(BIG_SIZE1);
+    unsigned char * content = (unsigned char*)gballoc_malloc(size);
     ASSERT_IS_NOT_NULL(content);
 
     umock_c_reset_all_calls();
 
-    memset(content, '3', BIG_SIZE1);
+    memset(content, '3', size);
     content[0] = '0';
-    content[BIG_SIZE1 - 1] = '4';
+    content[size - 1] = '4';
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a copy of the hostname */
         .IgnoreArgument_size();
@@ -698,8 +980,8 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_happy_path)
     STRICT_EXPECTED_CALL(HTTPAPIEX_Create("h.h")); /*this is creating the httpapiex handle to storage (it is always the same host)*/
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
-                                                                                                         /*uploading blocks (Put Block)*/
-    for (int blockNumber = 0;blockNumber < (BIG_SIZE1 - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+    /*uploading blocks (Put Block)*/ /*this simply fails first block*/
+    size_t blockNumber = 0;
     {
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
         STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, 6)) /*this is converting the produced blockID string to a base64 representation*/
@@ -721,7 +1003,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_happy_path)
             .IgnoreArgument_s2();
 
         STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (BIG_SIZE1 - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (BIG_SIZE1 - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */
@@ -730,7 +1012,9 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_happy_path)
         STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
             .IgnoreArgument_handle()
             .IgnoreArgument_relativePath()
-            .IgnoreArgument_requestContent();
+            .IgnoreArgument_requestContent()
+            .CopyOutArgumentBuffer_statusCode(&FourHundredFour, sizeof(FourHundredFour))
+            ;
 
         STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*this was the content to be uploaded*/
             .IgnoreArgument_handle();
@@ -740,42 +1024,8 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_happy_path)
             .IgnoreArgument_handle();
     }
 
-    /*this part is Put Block list*/
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "</BlockList>")) /*This is closing the XML*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_construct("/something?a=b")); /*this is building the relative path for the Put BLock list*/
+    /*this part is Put Block list*/ /*notice: no op because it failed before with 404*/
 
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "&comp=blocklist")) /*This is still building relative path for Put Block list*/
-        .IgnoreArgument_handle();
-
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the XML as const char* so it can be passed to _ExecuteRequest*/
-        .IgnoreArgument_handle();
-
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG)) /*this is creating the XML body as BUFFER_HANDLE*/
-        .IgnoreAllArguments();
-
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path*/
-        .IgnoreArgument_handle();
-
-    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        HTTPAPI_REQUEST_PUT,
-        IGNORED_PTR_ARG,
-        NULL,
-        IGNORED_PTR_ARG,
-        &httpResponse,
-        NULL,
-        testValidBufferHandle
-    ))
-        .IgnoreArgument_handle()
-        .IgnoreArgument_relativePath()
-        .IgnoreArgument_requestContent()
-        ;
-
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG)) /*This is the XML as BUFFER_HANDLE*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is destroying the relative path for Put Block List*/
-        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
@@ -784,14 +1034,16 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_happy_path)
         .IgnoreArgument_ptr();
 
     ///act
-    BLOB_RESULT result = Blob_UploadFromSasUri("https://h.h/something?a=b", content, BIG_SIZE1, &httpResponse, testValidBufferHandle); /*there's no relative path here*/
+    BLOB_RESULT result = Blob_UploadFromSasUri("https://h.h/something?a=b", content, size, &httpResponse, testValidBufferHandle);
 
-                                                                                                                                       ///assert
+    ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
 
     ///cleanup
     gballoc_free(content);
+    
 }
+
 
 END_TEST_SUITE(blob_unittests);
