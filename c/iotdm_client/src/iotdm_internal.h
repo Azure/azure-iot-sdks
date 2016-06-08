@@ -16,6 +16,7 @@
 
 /** from azure-shared-c-utility */
 #undef LOG
+
 #include "azure_c_shared_utility/iot_logging.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/sastoken.h"
@@ -43,8 +44,7 @@ typedef enum IOTHUB_CLIENT_STATE_TAG
 {
     BLOCKED,
     LENGTH,
-    RECEIVING,
-    SHUTTING_DOWN
+    RECEIVING
 } IOTHUB_CLIENT_STATE;
 
 
@@ -67,6 +67,8 @@ typedef struct CLIENT_DATA_TAG
     IO_BUFFER             input;
     IOTHUB_CLIENT_CONFIG  config;
     STRING_HANDLE         SAS;
+
+    LOCK_HANDLE           lockHandle;
 } CLIENT_DATA;
 
 typedef void(*ON_REGISTER_COMPLETE)(IOTHUB_CLIENT_RESULT result, void* context);

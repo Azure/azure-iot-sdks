@@ -350,6 +350,8 @@
 
         static void RunTestCases()
         {
+            DateTime start = DateTime.Now;
+
             try
             {
                 _dj = JobClient.CreateFromConnectionString(_cs);
@@ -391,6 +393,9 @@
             {
                 Console.WriteLine(ex.Message);
             }
+
+            TimeSpan ts = DateTime.Now.Subtract(start);
+            Console.WriteLine("\nE2E took {0} seconds.", ts.TotalSeconds);
         }
 
 

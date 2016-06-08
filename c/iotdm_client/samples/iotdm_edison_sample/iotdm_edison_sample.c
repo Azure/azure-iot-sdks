@@ -13,6 +13,8 @@
 //     the code is regenerated.
 
 #include "iotdm_client.h"
+#include "azure_c_shared_utility/platform.h"
+
 #include "azure_c_shared_utility/threadapi.h"
 #include "device_object.h"
 #include "firmwareupdate_object.h"
@@ -116,7 +118,7 @@ int main(int argc, char *argv[])
     }
 
     // No connection string yet, look in ~/.cs
-    if (cs ==NULL)
+    if (cs == NULL)
     {
         cs = read_connection_string();
         if (cs != NULL)
@@ -140,6 +142,12 @@ int main(int argc, char *argv[])
     
     LogInfo("Connection string is \"%s\"\r\n",cs);
 
+    if (0 != platform_init())
+    {
+        LogError("failed to initialize the platform");
+        return -1;
+    }
+
     if (runAsService)
     {
         LogInfo("--service flag specified.  Running as service\r\n ");
@@ -158,14 +166,6 @@ int main(int argc, char *argv[])
 
     LogInfo("IoTHubClientHandle: %p\r\n", IoTHubChannel);
 
-    LogInfo("prepare LWM2M objects");
-    if (IOTHUB_CLIENT_OK != IoTHubClient_DM_CreateDefaultObjects(IoTHubChannel))
-    {
-        LogError("failure to create LWM2M objects for client: %p\r\n", IoTHubChannel);
-
-        return -1;
-    }
-
     set_device_state();
     set_callbacks();
 
@@ -177,15 +177,13 @@ int main(int argc, char *argv[])
     }
 
 
-    if (IOTHUB_CLIENT_OK != IoTHubClient_DM_Start(IoTHubChannel))
-    {
-        LogError("failure to start the client: %p\r\n", IoTHubChannel);
-
-        return -1;
-    }
+    IoTHubClient_DM_Start(IoTHubChannel);
 
     /* Disconnect and cleanup */
     IoTHubClient_DM_Close(IoTHubChannel);
+    platform_deinit();
+
+    return 0;
 }
 
 void set_device_state()

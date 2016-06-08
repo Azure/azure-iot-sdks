@@ -89,7 +89,6 @@ void on_resource_value_changed(IOTHUB_CHANNEL_HANDLE iotHubChannel, uint16_t obj
 
     else
     {
-        lwm2m_context_t *contextP = ((CLIENT_DATA *) iotHubChannel)->session;
         lwm2m_uri_t uri = {
             LWM2M_URI_FLAG_OBJECT_ID | LWM2M_URI_FLAG_INSTANCE_ID | LWM2M_URI_FLAG_RESOURCE_ID,
             objectID,
@@ -97,7 +96,8 @@ void on_resource_value_changed(IOTHUB_CHANNEL_HANDLE iotHubChannel, uint16_t obj
             resourceID
         };
 
-        lwm2m_resource_value_changed(contextP, &uri);
+        CLIENT_DATA *cd = (CLIENT_DATA *) iotHubChannel;
+        lwm2m_resource_value_changed(cd->session, &uri);
     }
 }
 

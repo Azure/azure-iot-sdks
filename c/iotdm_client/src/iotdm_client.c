@@ -17,7 +17,7 @@ char *strdup(const char *s);
 static const char HOSTNAME_TOKEN[] = "HostName";
 static const char DEVICEID_TOKEN[] = "DeviceId";
 static const char DEVICEKEY_TOKEN[] = "SharedAccessKey";
-int IoTHubClient_InitializeFromConnectionString(IOTHUB_CHANNEL_HANDLE iotDMClientHandle, const char *connectionString)
+static int initialize_from_connection_string(IOTHUB_CHANNEL_HANDLE iotDMClientHandle, const char *connectionString)
 {
     int retValue = 0;
 
@@ -63,7 +63,7 @@ int IoTHubClient_InitializeFromConnectionString(IOTHUB_CHANNEL_HANDLE iotDMClien
 
     else
     {
-        CLIENT_DATA *cd = (CLIENT_DATA *)iotDMClientHandle;
+        CLIENT_DATA *cd = (CLIENT_DATA *) iotDMClientHandle;
         while ((STRING_TOKENIZER_get_next_token(tokenizer, tokenString, "=") == 0))
         {
             if (STRING_TOKENIZER_get_next_token(tokenizer, valueString, ";") != 0)
@@ -128,8 +128,6 @@ static const uint16_t msft_server_ID = 124;
  */
 static IOTHUB_CHANNEL_HANDLE create_iothub_handle()
 {
-    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-
     CLIENT_DATA *returnValue = (CLIENT_DATA *)lwm2m_malloc(sizeof(CLIENT_DATA));
     if (NULL == returnValue)
     {
@@ -139,9 +137,16 @@ static IOTHUB_CHANNEL_HANDLE create_iothub_handle()
     else
     {
         memset(returnValue, 0, sizeof(CLIENT_DATA));
+
+        returnValue->lockHandle = Lock_Init();
+        if (NULL == returnValue->lockHandle)
+        {
+            lwm2m_free(returnValue);
+            returnValue = NULL;
+        }
     }
 
-    return (IOTHUB_CHANNEL_HANDLE)returnValue;
+    return (IOTHUB_CHANNEL_HANDLE) returnValue;
 }
 
 
@@ -149,6 +154,12 @@ static void destroy_iothub_handle(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
     if (iotDMClientHandle != NULL)
     {
+        CLIENT_DATA *client = (CLIENT_DATA *) iotDMClientHandle;
+        if (LOCK_ERROR == Lock_Deinit(client->lockHandle))
+        {
+            LogError("Lock_Deinit returned LOCK_ERROR");
+        }
+
         lwm2m_free(iotDMClientHandle);
     }
 }
@@ -160,66 +171,121 @@ void* lwm2m_connect_server(uint16_t secObjInstID, void* userData)
     abort();
 }
 
-IOTHUB_CHANNEL_HANDLE IoTHubClient_DM_Open(const char *connectionString, IOTHUB_TRANSPORT transport)
+
+static IOTHUB_CLIENT_RESULT create_default_lwm2m_objects(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
-    IOTHUB_CHANNEL_HANDLE *returnValue = create_iothub_handle();
-    if (IoTHubClient_InitializeFromConnectionString(returnValue, connectionString) != 0)
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+
+    LogInfo("prepare the LWM2M Server Object");
+    create_lwm2mserver_object(iotDMClientHandle, NULL);
+    if (result != IOTHUB_CLIENT_OK != result)
     {
-        destroy_iothub_handle(returnValue);
-        returnValue = NULL;
+        LogError("failure to add the LWM2M Server object for client: %p", iotDMClientHandle);
     }
 
     else
     {
-        CLIENT_DATA *cd = (CLIENT_DATA *)returnValue;
-        LogInfo("HostName: %s\r\n", cd->config.iotHubName);
-    }
+        LogInfo("prepare the Device Object");
+        result = create_device_object(iotDMClientHandle, NULL);
+        if (IOTHUB_CLIENT_OK != result)
+        {
+            LogError("failure to add the Device object for client: %p", iotDMClientHandle);
 
-    return returnValue;
-}
+            /** TODO: */
+            /** delete_lwm2mserver_object() */
+        }
 
+        else
+        {
+            LogInfo("prepare the Firmware Update Object");
+            result = create_firmwareupdate_object(iotDMClientHandle, NULL);
+            if (IOTHUB_CLIENT_OK != result)
+            {
+                LogError("failure to add the Firmware Update object for client: %p", iotDMClientHandle);
 
-IOTHUB_CLIENT_RESULT IoTHubClient_DM_CreateDefaultObjects(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
-{
-    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    
-    LogInfo("prepare the LWM2M Server Object\r\n");
-    result = create_lwm2mserver_object(iotDMClientHandle, NULL);
-    if (result != IOTHUB_CLIENT_OK)
-    {
-        LogError("failure to add the LWM2M Server object for client: %p\r\n", iotDMClientHandle);
+                /** TODO: */
+                /** delete_lwm2mserver_object() */
+                /** delete_firmwareupdate_object() */
+            }
 
-        return result;
-    }
+            else
+            {
+                LogInfo("prepare the Config Object");
+                result = create_config_object(iotDMClientHandle, NULL);
+                if (IOTHUB_CLIENT_OK != result)
+                {
+                    LogError("failure to add the Config object for client: %p", iotDMClientHandle);
 
-    LogInfo("prepare the Device Object\r\n");
-    result = create_device_object(iotDMClientHandle, NULL);
-    if (result != IOTHUB_CLIENT_OK)
-    {
-        LogError("failure to add the Device object for client: %p\r\n", iotDMClientHandle);
-
-        return result;
-    }
-
-    LogInfo("prepare the Firmware Update Object\r\n");
-    result = create_firmwareupdate_object(iotDMClientHandle, NULL);
-    if (result != IOTHUB_CLIENT_OK)
-    {
-        LogError("failure to add the Firmware Update object for client: %p\r\n", iotDMClientHandle);
-
-        return result;
-    }
-
-    LogInfo("prepare the Config Object\r\n");
-    result = create_config_object(iotDMClientHandle, NULL);
-    if (result != IOTHUB_CLIENT_OK)
-    {
-        LogError("failure to add the Config object for client: %p\r\n", iotDMClientHandle);
-
-        return result;
+                    /** TODO: */
+                    /** delete_lwm2mserver_object() */
+                    /** delete_firmwareupdate_object() */
+                    /** delete_config_object() */
+                }
+            }
+        }
     }
 
     return result;
+}
+
+
+IOTHUB_CHANNEL_HANDLE IoTHubClient_DM_Open(const char *connectionString, IOTHUB_TRANSPORT transport)
+{
+    CLIENT_DATA *returnValue = (CLIENT_DATA *) create_iothub_handle();
+    if (NULL == returnValue)
+    {
+        LogError("failed to create iothub handle");
+    }
+
+    else
+    {
+        if (LOCK_ERROR == Lock(returnValue->lockHandle))
+        {
+            LogError("lock returned LOCK_ERROR");
+        }
+
+        else
+        {
+            bool bHappy;
+            if (initialize_from_connection_string(returnValue, connectionString) == 0)
+            {
+                LogInfo("HostName: %s", returnValue->config.iotHubName);
+
+                LogInfo("prepare LWM2M objects");
+                if (IOTHUB_CLIENT_OK == create_default_lwm2m_objects(returnValue))
+                {
+                    bHappy = true;
+                }
+
+                else
+                {
+                    LogError("failure to create LWM2M objects for client");
+
+                    bHappy = false;
+                }
+            }
+
+            else
+            {
+                LogError("failed to initialize from connection string");
+
+                bHappy = false;
+            }
+
+            if (LOCK_ERROR == Unlock(returnValue->lockHandle))
+            {
+                LogError("Unlock returned LOCK_ERROR");
+            }
+
+            if (false == bHappy)
+            {
+                destroy_iothub_handle(returnValue);
+                returnValue = NULL;
+            }
+        }
+    }
+
+    return returnValue;
 }
 
 
@@ -227,57 +293,70 @@ void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
     if (NULL != iotDMClientHandle)
     {
-        CLIENT_DATA *client = (CLIENT_DATA *)iotDMClientHandle;
+        CLIENT_DATA *client = (CLIENT_DATA *) iotDMClientHandle;
 
-        client->state = SHUTTING_DOWN;
-
-        lwm2m_close(client->session);
-        client->session = NULL;
-
-        xio_destroy(client->ioHandle);
-        client->ioHandle = NULL;
-
-        if (NULL != client->config.deviceId)
+        if (LOCK_ERROR == Lock(client->lockHandle))
         {
-            free((void *)(client->config.deviceId));
-            client->config.deviceId = NULL;
+            LogError("Lock returned LOCK_ERROR");
         }
 
-        if (NULL != client->config.deviceKey)
+        else
         {
-            free((void *)(client->config.deviceKey));
-            client->config.deviceKey = NULL;
-        }
+            if (NULL != client->session)
+            {
+                lwm2m_close(client->session);
+                client->session = NULL;
+            }
 
-        if (NULL != client->config.iotHubName)
-        {
-            free((void *)(client->config.iotHubName));
-            client->config.iotHubName = NULL;
-        }
+            if (NULL != client->ioHandle)
+            {
+                xio_destroy(client->ioHandle);
+                client->ioHandle = NULL;
+            }
 
-        if (NULL != client->config.iotHubSuffix)
-        {
-            free((void *)(client->config.iotHubSuffix));
-            client->config.iotHubSuffix = NULL;
-        }
+            if (NULL != client->config.deviceId)
+            {
+                free((void *)(client->config.deviceId));
+                client->config.deviceId = NULL;
+            }
 
-        lwm2m_free(client);
+            if (NULL != client->config.deviceKey)
+            {
+                free((void *)(client->config.deviceKey));
+                client->config.deviceKey = NULL;
+            }
+
+            if (NULL != client->config.iotHubName)
+            {
+                free((void *)(client->config.iotHubName));
+                client->config.iotHubName = NULL;
+            }
+
+            if (NULL != client->config.iotHubSuffix)
+            {
+                free((void *)(client->config.iotHubSuffix));
+                client->config.iotHubSuffix = NULL;
+            }
+
+            if (LOCK_ERROR == Unlock(client->lockHandle))
+            {
+                LogError("Unlock return LOCK_ERROR");
+            }
+        }
     }
-
-    platform_deinit();
 }
 
 
 typedef struct
 {
-    CLIENT_DATA* client;
+    CLIENT_DATA *client;
     ON_DM_CONNECT_COMPLETE onComplete;
-    void* context;
+    void *context;
 } ON_REGISTER_COMPLETE_CONTEXT;
 
-void on_register_complete(IOTHUB_CLIENT_RESULT result, void* context)
+void on_register_complete(IOTHUB_CLIENT_RESULT result, void *context)
 {
-    ON_REGISTER_COMPLETE_CONTEXT* registerContext = (ON_REGISTER_COMPLETE_CONTEXT*)context;
+    ON_REGISTER_COMPLETE_CONTEXT *registerContext = (ON_REGISTER_COMPLETE_CONTEXT *) context;
     registerContext->onComplete(result, registerContext->context);
     free(context);
 }
@@ -326,57 +405,78 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHa
         return IOTHUB_CLIENT_ERROR;
     }
 
-    platform_init();
-
-#if defined(WIN32)
-#pragma warning(push)
-#pragma warning(disable:4113)
-#endif
-
-    CLIENT_DATA *client = (CLIENT_DATA *)iotDMClientHandle;
-    client->session = lwm2m_init(client);
-
-#if defined(WIN32)
-#pragma warning(pop)
-#endif
-
-    if (NULL == client->session)
+    IOTHUB_CLIENT_RESULT  retValue;
+    CLIENT_DATA          *client = (CLIENT_DATA *)iotDMClientHandle;
+    if (LOCK_ERROR == Lock(client->lockHandle))
     {
-        LogError("    failed to initiate a client lwm2m session.\n");
-        return IOTHUB_CLIENT_ERROR;
+        LogError("Lock returned LOCK_ERROR");
     }
 
-    lwm2m_object_t *three[3] = {
-        make_security_object(msft_server_ID, client->config.iotHubName, false),
-        make_server_object(msft_server_ID, 300, false),
-        make_global_object(client)
-    };
-    int result = lwm2m_configure(client->session, client->config.deviceId, NULL, NULL, 3, &three[0]);
-    if (0 != result)
+    else
     {
-        LogError("    failed to configure lwm2m session\n");
-        return IOTHUB_CLIENT_ERROR;
+        client->session = lwm2m_init(client);
+        if (NULL == client->session)
+        {
+            LogError("    failed to initiate a client lwm2m session.\n");
+
+            retValue = IOTHUB_CLIENT_ERROR;
+        }
+
+        else
+        {
+            lwm2m_object_t *three[3] = {
+                make_security_object(msft_server_ID, client->config.iotHubName, false),
+                make_server_object(msft_server_ID, 300, false),
+                make_global_object(client)
+            };
+
+            int result = lwm2m_configure(client->session, client->config.deviceId, NULL, NULL, 3, &three[0]);
+            if (0 != result)
+            {
+                LogError("    failed to configure lwm2m session");
+
+                retValue = IOTHUB_CLIENT_ERROR;
+            }
+
+            else
+            {
+                result = lwm2m_start(client->session);
+                if (0 != result)
+                {
+                    LogError("    failed to start lwm2m session");
+
+                    retValue = IOTHUB_CLIENT_ERROR;
+                }
+
+                else
+                {
+                    ON_REGISTER_COMPLETE_CONTEXT *context = (ON_REGISTER_COMPLETE_CONTEXT *)malloc(sizeof(ON_REGISTER_COMPLETE_CONTEXT));
+                    if (NULL == context)
+                    {
+                        LogError("    failed to allocate context object");
+
+                        retValue = IOTHUB_CLIENT_ERROR;
+                    }
+
+                    else
+                    {
+                        context->client = client;
+                        context->onComplete = onComplete;
+                        context->context = callbackContext;
+
+                        retValue = iotdmc_register(client, on_register_complete, context);
+                    }
+                }
+            }
+        }
+
+        if (LOCK_ERROR == Unlock(client->lockHandle))
+        {
+            LogError("Unlock returned LOKC_ERROR");
+        }
     }
 
-    result = lwm2m_start(client->session);
-    if (0 != result)
-    {
-        LogError("    failed to start lwm2m session\n");
-        return IOTHUB_CLIENT_ERROR;
-    }
-
-    ON_REGISTER_COMPLETE_CONTEXT* context = malloc(sizeof(ON_REGISTER_COMPLETE_CONTEXT));
-    if (!context)
-    {
-        LogError("    failed to allocate context object\n");
-        return IOTHUB_CLIENT_ERROR;
-    }
-
-    context->client = client;
-    context->onComplete = onComplete;
-    context->context = callbackContext;
-
-    return iotdmc_register(client, on_register_complete, context);
+    return retValue;
 }
 
 
@@ -395,52 +495,67 @@ bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 
     else
     {
-        CLIENT_DATA *client = (CLIENT_DATA *)iotDMClientHandle;
+        CLIENT_DATA *client = (CLIENT_DATA *) iotDMClientHandle;
 
-        if (client->state == SHUTTING_DOWN)
+        if (LOCK_ERROR == Lock(client->lockHandle))
         {
-            LogInfo("Client is shutting down.");
+            LogError("Lock returned LOCK_ERROR");
 
-            return false;
+            retValue = false;
         }
 
-        /* check for pending requests. */
-        xio_dowork(client->ioHandle);
-
-        /**
-         * LOOK: This code will only work for simple clients. The cases for bootstrap must be considered carefully.
-         */
-        switch (client->session->serverList->status)
+        else if (NULL == client->session)
         {
-            case STATE_REGISTERED:
-                /* process any updates that are due. */
-                signal_all_resource_changes();
+            LogError("Uninitialized lwm2m session");
 
-                time_t now = lwm2m_gettime();
-                time_t timeout = 60;
-                observe_step(client->session, now, &timeout);
-                transaction_step(client->session, now, &timeout);
+            retValue = false;
+        }
 
-                retValue = true;
-                break;
+        else
+        {
+            /* check for pending requests. */
+            xio_dowork(client->ioHandle);
 
-            case STATE_REG_FAILED:
-                retValue = false;
-                LogError("Registration request failed.");
+            /**
+             * LOOK: This code will only work for simple clients. The cases for bootstrap must be considered carefully.
+             */
+            switch (client->session->serverList->status)
+            {
+                case STATE_REGISTERED:
+                    /* process any updates that are due. */
+                    signal_all_resource_changes();
 
-                break;
+                    time_t now = lwm2m_gettime();
+                    time_t timeout = 60;
+                    observe_step(client->session, now, &timeout);
+                    transaction_step(client->session, now, &timeout);
 
-            case STATE_REG_PENDING:
-                retValue = true;
-                LogInfo("Registration request is pending...");
+                    retValue = true;
+                    break;
 
-                break;
+                case STATE_REG_FAILED:
+                    retValue = false;
+                    LogError("Registration request failed.");
 
-            default:
-                retValue = true;
-                LogInfo("LWM2M Session Connection State is 'other'.");
+                    break;
 
-                break;
+                case STATE_REG_PENDING:
+                    retValue = true;
+                    LogInfo("Registration request is pending...");
+
+                    break;
+
+                default:
+                    retValue = true;
+                    LogInfo("LWM2M Session Connection State is 'other'.");
+
+                    break;
+            }
+        }
+
+        if (LOCK_ERROR == Unlock(client->lockHandle))
+        {
+            LogError("Unlock returned LOCK_ERROR");
         }
     }
 
@@ -470,9 +585,19 @@ void on_dm_connect_complete(IOTHUB_CLIENT_RESULT result, void* context)
     else
     {
         CN_RESULT *cnResultPtr = (CN_RESULT *) context;
-        Lock(cnResultPtr->my_lock);
-        cnResultPtr->connectionResult = result;
-        Unlock(cnResultPtr->my_lock);
+        if (LOCK_ERROR == Lock(cnResultPtr->my_lock))
+        {
+            LogError("Lock returned LOCK_ERROR");
+        }
+
+        else
+        {
+            cnResultPtr->connectionResult = result;
+            if (LOCK_ERROR == Unlock(cnResultPtr->my_lock))
+            {
+                LogError("Unlock returned LOCK_ERROR");
+            }
+        }
     }
 }
 
@@ -480,11 +605,7 @@ void on_dm_connect_complete(IOTHUB_CLIENT_RESULT result, void* context)
 /***------------------------------------------------------------------- */
 IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 {
-    CLIENT_DATA *cd = (CLIENT_DATA *) iotDMClientHandle;
-    CN_RESULT    cnResult;
-
-    cnResult.connectionResult = IOTHUB_CLIENT_OK;
-    cnResult.my_lock = Lock_Init();
+    CN_RESULT    cnResult = { IOTHUB_CLIENT_OK, Lock_Init() };
 
     IOTHUB_CLIENT_RESULT result = IoTHubClient_DM_Connect(iotDMClientHandle, on_dm_connect_complete, &cnResult);
     while (result == IOTHUB_CLIENT_OK)
@@ -492,20 +613,32 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
         // If the asynchronous call to IoTHubClient_DM_Connect above eventually fails,
         // then exit this blocking function. If the connection is still pending, or if the
         // connection was successful, continue calling IoTHubClient_DM_DoWork in a loop.
-        Lock(cnResult.my_lock);
-        result = cnResult.connectionResult;
-        Unlock(cnResult.my_lock);
-
-        if (result == IOTHUB_CLIENT_OK)
+        if (LOCK_ERROR == Lock(cnResult.my_lock))
         {
-            if (IoTHubClient_DM_DoWork(iotDMClientHandle))
+            LogError("Lock returned LOCK_ERROR");
+
+            result = IOTHUB_CLIENT_ERROR;
+        }
+
+        else
+        {
+            result = cnResult.connectionResult;
+            if (LOCK_ERROR == Unlock(cnResult.my_lock))
             {
-                ThreadAPI_Sleep(1000);
+                LogError("Unlock returned LOCK_ERROR");
             }
 
-            else
+            if (result == IOTHUB_CLIENT_OK)
             {
-                result = IOTHUB_CLIENT_ERROR;
+                if (IoTHubClient_DM_DoWork(iotDMClientHandle))
+                {
+                    ThreadAPI_Sleep(1000);
+                }
+
+                else
+                {
+                    result = IOTHUB_CLIENT_ERROR;
+                }
             }
         }
     }
