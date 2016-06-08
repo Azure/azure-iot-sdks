@@ -533,6 +533,9 @@ namespace Microsoft.Azure.Devices.Client
             {
                 this.bodyStream.Seek(position, SeekOrigin.Begin);
                 Interlocked.Exchange(ref this.getBodyCalled, 0);
+#if !PCL && !NETMF
+                this.serializedAmqpMessage = null;
+#endif
                 return true;
             }
             return false;
