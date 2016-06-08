@@ -17,6 +17,10 @@ namespace Microsoft.Azure.Devices.Client.Transport
     using Microsoft.Azure.Devices.Client.Extensions;
     using Newtonsoft.Json;
 
+#if !WINDOWS_UWP && !PCL
+    using Microsoft.WindowsAzure.Storage.Blob;
+#endif
+
     sealed class HttpTransportHandler : DefaultDelegatingHandler
     {
         readonly Http1TransportSettings transportSettings;
@@ -35,8 +39,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         readonly IHttpClientHelper httpClientHelper;
         readonly string deviceId;
 
-#if WINDOWS_UWP
-
+#if WINDOWS_UWP || PCL
         internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString)
         {
             this.deviceId = iotHubConnectionString.DeviceId;
@@ -51,10 +54,12 @@ namespace Microsoft.Azure.Devices.Client.Transport
         internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString)
             : this(iotHubConnectionString, new Http1TransportSettings())
         {
-
         }
+#endif
 
+#if WINDOWS_UWP || PCL
         internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString, Http1TransportSettings transportSettings)
+            : this(iotHubConnectionString)
         {
             this.transportSettings = transportSettings;
             this.deviceId = iotHubConnectionString.DeviceId;
@@ -64,6 +69,19 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 ExceptionHandlingHelper.GetDefaultErrorMapping(),
                 DefaultOperationTimeout,
                 null);
+        }
+#else
+        internal HttpTransportHandler(IotHubConnectionString iotHubConnectionString, Http1TransportSettings transportSettings)
+        {
+            this.transportSettings = transportSettings;
+            this.deviceId = iotHubConnectionString.DeviceId;
+            this.httpClientHelper = new HttpClientHelper(
+                iotHubConnectionString.HttpsEndpoint,
+                iotHubConnectionString,
+                ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                DefaultOperationTimeout,
+                null,
+                this.transportSettings.ClientCertificate);
         }
 #endif
         /// <summary>
@@ -191,6 +209,71 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 customHeaders,
                 CancellationToken.None);
         }
+
+#if !WINDOWS_UWP && !PCL
+        internal async Task UploadToBlobAsync(String blobName, System.IO.Stream source)
+        {
+            // 1. Construct GET request to get SAS URI for storage account
+            var responseMessage = await this.httpClientHelper.GetAsync<HttpResponseMessage>(
+            GetRequestUri(this.deviceId, CommonConstants.BlobUploadPathTemplate + blobName, null),
+            ExceptionHandlingHelper.GetDefaultErrorMapping(),
+            null,
+            true,
+            CancellationToken.None);
+
+            if (responseMessage.StatusCode != HttpStatusCode.OK)
+            {
+                throw new HttpRequestException(responseMessage.StatusCode.ToString());
+            }
+
+            var stringContent = await responseMessage.Content.ReadAsStringAsync();
+            var getResponseData = JsonConvert.DeserializeObject<FileUploadGetResponse>(stringContent);
+
+            string putString = String.Format("https://{0}/{1}/{2}{3}",
+                getResponseData.HostName,
+                getResponseData.ContainerName,
+                getResponseData.BlobName,
+                getResponseData.SasToken);
+
+            FileUploadNotificationResponse notification = new FileUploadNotificationResponse();
+
+            try
+            {
+                // 2. Use SAS URI to send data to Azure Storage Blob (PUT)
+                CloudBlockBlob blob = new CloudBlockBlob(new Uri(putString));
+                var uploadTask = blob.UploadFromStreamAsync(source);
+                await uploadTask;
+
+                notification.IsSuccess = uploadTask.IsCompleted;
+                notification.StatusCode = uploadTask.IsCompleted ? 0 : -1;
+                notification.StatusDescription = uploadTask.IsCompleted ? null : "Failed to upload to storage.";
+
+                // 3. POST to IoTHub with upload status
+                await this.httpClientHelper.PostAsync<FileUploadNotificationResponse>(
+                    GetRequestUri(this.deviceId, CommonConstants.BlobUploadPathTemplate + "notifications/" + getResponseData.CorrelationId, null),
+                    notification,
+                    ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                    null,
+                    CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                // 3. POST to IoTHub with upload status
+                notification.IsSuccess = false;
+                notification.StatusCode = -1;
+                notification.StatusDescription = ex.Message;
+
+                await this.httpClientHelper.PostAsync<FileUploadNotificationResponse>(
+                    GetRequestUri(this.deviceId, CommonConstants.BlobUploadPathTemplate + "notifications/" + getResponseData.CorrelationId, null),
+                    notification,
+                    ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                    null,
+                    CancellationToken.None);
+
+                throw ex;
+            }
+        }
+#endif
 
         public override Task<Message> ReceiveAsync()
         {

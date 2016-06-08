@@ -5,9 +5,9 @@
 #include <stdlib.h>
 
 /* This sample uses the _LL APIs of iothub_client for example purposes.
-   That does not mean that HTTP only works with the _LL APIs.
-   Simply changing the using the convenience layer (functions not having _LL)
-   and removing calls to _DoWork will yield the same results. */
+That does not mean that HTTP only works with the _LL APIs.
+Simply changing the using the convenience layer (functions not having _LL)
+and removing calls to _DoWork will yield the same results. */
 
 #ifdef ARDUINO
 #include "AzureIoT.h"
@@ -43,7 +43,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     int* counter = (int*)userContextCallback;
     const char* buffer;
     size_t size;
-	MAP_HANDLE mapProperties;
+    MAP_HANDLE mapProperties;
 
     if (IoTHubMessage_GetByteArray(message, (const unsigned char**)&buffer, &size) != IOTHUB_MESSAGE_OK)
     {
@@ -65,7 +65,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         {
             if (propertyCount > 0)
             {
-				size_t index;
+                size_t index;
 
                 printf("Message Properties:\r\n");
                 for (index = 0; index < propertyCount; index++)

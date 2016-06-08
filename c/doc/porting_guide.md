@@ -32,7 +32,7 @@ There are also a number of components that must be implemented, depending on the
 <a name="Porting-steps"/>
 ## Porting steps
 
-- After downloading the source code from GitHub, navigate to the Platform folder located at ..\\common\\adapters.
+- After downloading the source code from GitHub, navigate to the Platform folder located at ..\\adapters which is part of submodule linked to the repo at https://github.com/Azure/azure-c-shared-utility.
 
 - In the adapters folder, create the following .c files that implement the platform-specific interfaces:
 
@@ -42,7 +42,7 @@ There are also a number of components that must be implemented, depending on the
 
    - ThreadApi\_\<Library\>.c
 
-- In each of these files, implement the functions provided in the header files, relying on the APIs of the libraries provided for that specific platform. You can see the implementation of these components provided for the platforms already supported in the SDK, under .\\common\\adapters. For more information, also refer to the specification for modules in the .\\common\\doc folder.
+- In each of these files, implement the functions provided in the header files, relying on the APIs of the libraries provided for that specific platform. You can see the implementation of these components provided for the platforms already supported in the SDK, under .\\adapters. For more information, also refer to the specification for modules in the .\\common\\doc folder.
 
 <a name="httpapi"/>
 ## HttpApi\_\<Library\>.c

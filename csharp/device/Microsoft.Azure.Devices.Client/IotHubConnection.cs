@@ -204,7 +204,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
 #if !WINDOWS_UWP
-        static async Task<ClientWebSocket> CreateClientWebSocketAsync(Uri websocketUri, TimeSpan timeout)
+        async Task<ClientWebSocket> CreateClientWebSocketAsync(Uri websocketUri, TimeSpan timeout)
         {
             var websocket = new ClientWebSocket();
 
@@ -220,7 +220,14 @@ namespace Microsoft.Azure.Devices.Client
                 websocket.Options.Proxy = webProxy;
             }
 
-            websocket.Options.UseDefaultCredentials = true;
+            if (this.AmqpTransportSettings.ClientCertificate != null)
+            {
+                websocket.Options.ClientCertificates.Add(this.AmqpTransportSettings.ClientCertificate);
+            }
+            else
+            {
+                websocket.Options.UseDefaultCredentials = true;
+            }
 
             using (var cancellationTokenSource = new CancellationTokenSource(timeout))
             {
@@ -234,7 +241,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             var timeoutHelper = new TimeoutHelper(timeout);
             Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.hostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
-            var websocket = await CreateClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
+            var websocket = await this.CreateClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
             return new ClientWebSocketTransport(
                 websocket,
                 null,
@@ -259,7 +266,7 @@ namespace Microsoft.Azure.Devices.Client
 #if WINDOWS_UWP
             // System.Reflection.Assembly.GetExecutingAssembly() does not exist for UWP, therefore use a hard-coded version name
             // (This string is picked up by the bump_version script, so don't change the line below)
-            var UWPAssemblyVersion = "1.0.7";
+            var UWPAssemblyVersion = "1.0.12";
             linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, UWPAssemblyVersion);
 #else
             linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, Utils.GetClientVersion());
@@ -280,10 +287,17 @@ namespace Microsoft.Azure.Devices.Client
             {
                 TargetHost = this.hostName,
 #if !WINDOWS_UWP // Not supported in UWP
-                Certificate = null, // TODO: add client cert support
+                Certificate = null,
                 CertificateValidationCallback = OnRemoteCertificateValidation
 #endif
             };
+
+#if !WINDOWS_UWP
+            if (this.AmqpTransportSettings.ClientCertificate != null)
+            {
+                tlsTransportSettings.Certificate = this.AmqpTransportSettings.ClientCertificate;
+            }
+#endif
 
             return tlsTransportSettings;
         }

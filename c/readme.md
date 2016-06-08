@@ -52,60 +52,67 @@ For information on how to use this library refer to the documents below:
 
 For guides on how to run the sample applications on supported platforms, check out in this [folder](../doc/get_started/).
 
-## SDK directory structure
-All C specific resources are located in the **azure-iot-sdks\c** folder. A description of the directories follows:
+## SDK folder structure
+
+All C specific resources are located in the **azure-iot-sdks\c** folder. A description of the key directories follows:
+
+### /azure-c-shared-utility, /azure-uamqp-c, and /azure-umqtt-c
+
+These are git submodules that contain code, such as adapters and protocol implementations, shared with other projects. Note that some of them contain nested submodules.
+
+### /blob
+
+This folder contains client components that enable access to Azure blob storage.
+
+### /certs
+
+Contains certificates needed to communicate with Azure IoT Hub.
+
 ### /doc
-This directory contains application development guides and device setup instructions.
+
+This folder contains application development guides and device setup instructions.
 
 ### /build_all
 
 This folder contains platform-specific build scripts for the client libraries and dependent components.
 
-### /common
-
-The C library source code is contained in three directories: common, iothub_client and serializer. The Common folder contains components such as adapters and linked-list implementations used by all the C libraries. It includes the following subfolders:
-
-   * **build**: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
-   * **doc**: contains requirements, designs notes, manuals.
-   * **inc**: public include files.
-   * **src**: client libraries source files.
-   * **tools**: tools used for libraries.
-   * **unittests**: unit tests for source code.
-
-
 ### /iothub_client
 
 Contains Azure IoT Hub client components that provide the raw messaging capabilities of the library. Refer to the API documentation and samples for information on how to use it.
 
-   * **build**: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
-   * **devdoc**: contains requirements, designs notes, manuals.
-   * **inc**: public include files.
-   * **src**: client libraries source files.
-   * **samples**: contains the send event and receive message samples (with ports for the supported platforms).
-   * **tests**: unit tests for source code.
+   * build: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
+   * devdoc: contains requirements, designs notes, manuals.
+   * inc: public include files.
+   * src: client libraries source files.
+   * samples: contains the send event and receive message samples (with ports for the supported platforms).
+   * tests: unit and end-to-end tests for source code.
 
 ### /iotdm_client [PREVIEW]
 
 Contains the Azure IoT Hub device management library for C that enables the creation of IoT devices that can be managed by Azure IoT Hub. Device makers can use this library to report device properties (such as manufacturer information, serial number, model number, firmware version, and battery power level) and implement the execute actions required by device jobs, which enable remote actions such as firmware update, factory reset, reboot, and configuration update.  
 
-* **devdoc**: contains requirements, designs notes, manuals.
-* **inc**: public include files.
-* **lwm2m_objects**: public source files containing implementation of lwm2m objects.
-* **src**: client libraries source files.
-* **samples**: contains DM enabled device samples, e.g.: [iotdm_simple_sample](https://github.com/Azure/azure-iot-sdks/tree/dmpreview/c/iotdm_client/samples/iotdm_simple_sample) and  [iotdm_edison_sample](https://github.com/Azure/azure-iot-sdks/tree/dmpreview/c/iotdm_client/samples/iotdm_edison_sample)  
-* **tests**: unit tests for source code.
-* **tools**: tools used for libraries.
+   * devdocs: contains requirements, designs notes, manuals.
+   * inc: public include files.
+   * lwm2m_objects: public source files containing implementation of lwm2m objects.
+   * samples: contains DM enabled device samples, e.g.: [iotdm_simple_sample](https://github.com/Azure/azure-iot-sdks/tree/dmpreview/c/iotdm_client/samples/iotdm_simple_sample) and  [iotdm_edison_sample](https://github.com/Azure/azure-iot-sdks/tree/dmpreview/c/iotdm_client/samples/iotdm_edison_sample)  
+   * src: client libraries source files.
+   * tests: unit tests for source code.
+   * tools: tools used for libraries.
 
 ### /serializer
 
 Contains libraries that provide modeling and JSON serialization capabilities on top of the raw messaging library. These libraries facilitate uploading structured data and command and control for use with Azure IoT services. Refer to the API documentation and samples for information on how to use it.
 
-   * **build**: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
-   * **devdoc**: contains requirements, designs notes, manuals.
-   * **inc**: public include files.
-   * **src**: client libraries source files.
-   * **samples**: contains the send event and receive message samples (with ports for the supported platforms).
-   * **unittests**: unit tests for source code.
+   * build: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
+   * devdoc: contains requirements, designs notes, manuals.
+   * inc: public include files.
+   * src: client libraries source files.
+   * samples: contains the send event and receive message samples (with ports for the supported platforms).
+   * tests: unit tests and end-to-end tests for source code.
+
+### /service
+
+Contains libraries that enable interactions with the IoT Hub service to perform operations such as sending messages to devices and managing the device identity registry.
 
 ### /testtools
 

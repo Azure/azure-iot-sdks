@@ -16,10 +16,10 @@ var SharedAccessSignature = require('./shared_access_signature.js');
  *                  {@link module:azure-iothub.Client.fromConnectionString|fromConnectionString} or
  *                  {@link module:azure-iothub.Client.fromSharedAccessSignature|fromSharedAccessSignature},
  *                  to create an IoT Hub service Client.
- * @param {Object}  transport   An object that implements the interface
- *                              expected of a transport object, e.g.,
- *                              {@link module:azure-iothub~Transport|Transport}.
-  * @prop {FeedbackReceiver} FeedbackReceiver
+ * @param {Object}       transport   An object that implements the interface
+ *                                   expected of a transport object, e.g.,
+ *                                   {@link module:azure-iothub~Transport|Transport}.
+  * @prop {AmqpReceiver} FeedbackReceiver
  */
 function Client(transport) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_001: [The Client constructor shall throw ReferenceError if the transport argument is falsy.]*/
@@ -179,20 +179,33 @@ Client.prototype.send = function send(deviceId, message, done) {
 
 /**
  * @method            module:azure-iothub.Client#getFeedbackReceiver
- * @description       Returns a FeedbackReceiver object which emits events when new feedback messages are received by the client.
+ * @description       Returns a AmqpReceiver object which emits events when new feedback messages are received by the client.
  * @param {Function}  done      The function to call when the operation is
  *                              complete. `done` will be called with two
  *                              arguments: an Error object (can be null) and a
- *                              FeedbackReceiver object.
+ *                              AmqpReceiver object.
  */
 Client.prototype.getFeedbackReceiver = function getFeedbackReceiver(done) {
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_026: [If the connection has not already been opened (e.g., by a call to open), the getFeedbackReceiver method shall open the connection.]*/
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_027: [When the getFeedbackReceiver method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
-  err - standard JavaScript Error object (or subclass)
-  receiver - an instance of Client.FeedbackReceiver]*/
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_028: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_029: [Otherwise the argument err shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.]*/
-  this._transport.getReceiver(done);
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_05_027: [When the `getFeedbackReceiver` method completes, the callback function (indicated by the `done` argument) shall be invoked with the following arguments:
+  - `err` - standard JavaScript `Error` object (or subclass): `null` if the operation was successful
+  - `receiver` - an `AmqpReceiver` instance: `undefined` if the operation failed]*/
+
+  this._transport.getFeedbackReceiver(done);
+};
+
+/**
+ * @method            module:azure-iothub.Client#getFileNotificationReceiver
+ * @description       Returns a AmqpReceiver object which emits events when new file upload notifications are received by the client.
+ * @param {Function}  done      The function to call when the operation is
+ *                              complete. `done` will be called with two
+ *                              arguments: an Error object (can be null) and a
+ *                              AmqpReceiver object.
+ */
+Client.prototype.getFileNotificationReceiver = function getFileNotificationReceiver(done) {
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_001: [When the `getFileNotificationReceiver` method completes, the callback function (indicated by the `done` argument) shall be invoked with the following arguments:
+- `err` - standard JavaScript `Error` object (or subclass): `null` if the operation was successful
+- `receiver` - an `AmqpReceiver` instance: `undefined` if the operation failed]*/
+  this._transport.getFileNotificationReceiver(done);
 };
 
 module.exports = Client;

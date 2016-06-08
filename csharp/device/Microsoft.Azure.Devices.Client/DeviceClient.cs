@@ -4,7 +4,6 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using Microsoft.Azure.Devices.Client.Extensions;
@@ -22,7 +21,7 @@ namespace Microsoft.Azure.Devices.Client
     using AsyncTask = System.Threading.Tasks.Task;
     using AsyncTaskOfMessage = System.Threading.Tasks.Task<Message>;
 #endif
-    
+
     /// <summary>
     /// Transport types supported by DeviceClient - Amqp and HTTP 1.1
     /// </summary>
@@ -72,16 +71,26 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, RegexOptions);
 
+        IotHubConnectionString iotHubConnectionString = null;
+
         internal IDelegatingHandler InnerHandler { get; set; }
 
-#if !WINDOWS_UWP && !PCL
+#if !PCL
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
         {
-            this.InnerHandler = new GateKeeperDelegatingHandler(
-                new RetryDelegatingHandler(
-                    new ErrorDelegatingHandler(
-                        () => new RoutingDelegatingHandler(this.CreateTransportHandler, iotHubConnectionString, transportSettings)))
-                );
+            this.iotHubConnectionString = iotHubConnectionString;
+
+#if !WINDOWS_UWP
+            var innerHandler = new RetryDelegatingHandler(
+                new ErrorDelegatingHandler(
+                    () => new RoutingDelegatingHandler(this.CreateTransportHandler, iotHubConnectionString, transportSettings)));
+#else
+            // UWP does not support retry yet. We need to make the underlying Message stream accessible internally on UWP
+            // to be sure that either the stream has not been read or it is seekable to safely retry operation
+            var innerHandler = new ErrorDelegatingHandler(
+                () => new RoutingDelegatingHandler(this.CreateTransportHandler, iotHubConnectionString, transportSettings));
+#endif
+            this.InnerHandler = new GateKeeperDelegatingHandler(innerHandler);
         }
 
         DefaultDelegatingHandler CreateTransportHandler(IotHubConnectionString iotHubConnectionString, ITransportSettings transportSetting)
@@ -93,8 +102,10 @@ namespace Microsoft.Azure.Devices.Client
                     return new AmqpTransportHandler(iotHubConnectionString, transportSetting as AmqpTransportSettings);
                 case TransportType.Http1:
                     return new HttpTransportHandler(iotHubConnectionString, transportSetting as Http1TransportSettings);
+#if !WINDOWS_UWP && !NETMF
                 case TransportType.Mqtt:
                     return new MqttTransportHandler(iotHubConnectionString, transportSetting as MqttTransportSettings);
+#endif
                 default:
                     throw new InvalidOperationException("Unsupported Transport Setting {0}".FormatInvariant(transportSetting));
             }
@@ -123,6 +134,9 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         }
 
+#if WINDOWS_UWP
+        [Windows.Foundation.Metadata.DefaultOverloadAttribute()]
+#endif
         /// <summary>
         /// Create a DeviceClient from individual parameters
         /// </summary>
@@ -142,9 +156,57 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentNullException(nameof(authenticationMethod));
             }
 
-            IotHubConnectionStringBuilder connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authenticationMethod);
+            var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authenticationMethod);
+
+#if !WINDOWS_UWP && !PCL && !NETMF
+            if (authenticationMethod is DeviceAuthenticationWithX509Certificate)
+            {
+                if (connectionStringBuilder.Certificate == null)
+                {
+                    throw new ArgumentException("certificate must be present in DeviceAuthenticationWithX509Certificate");
+                }
+
+                return CreateFromConnectionString(connectionStringBuilder.ToString(), PopulateCertificateInTransportSettings(connectionStringBuilder, transportType));
+            }
+#endif
             return CreateFromConnectionString(connectionStringBuilder.ToString(), transportType);
         }
+
+#if !PCL
+        /// <summary>
+        /// Create a DeviceClient from individual parameters
+        /// </summary>
+        /// <param name="hostname">The fully-qualified DNS hostname of IoT Hub</param>
+        /// <param name="authenticationMethod">The authentication method that is used</param>
+        /// <param name="transportSettings">Prioritized list of transportTypes and their settings</param>
+        /// <returns>DeviceClient</returns>
+        public static DeviceClient Create(string hostname, IAuthenticationMethod authenticationMethod, [System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute] ITransportSettings[] transportSettings)
+        {
+            if (hostname == null)
+            {
+                throw new ArgumentNullException("hostname");
+            }
+
+            if (authenticationMethod == null)
+            {
+                throw new ArgumentNullException("authenticationMethod");
+            }
+
+            var connectionStringBuilder = IotHubConnectionStringBuilder.Create(hostname, authenticationMethod);
+#if !WINDOWS_UWP && !PCL && !NETMF
+            if (authenticationMethod is DeviceAuthenticationWithX509Certificate)
+            {
+                if (connectionStringBuilder.Certificate == null)
+                {
+                    throw new ArgumentException("certificate must be present in DeviceAuthenticationWithX509Certificate");
+                }
+
+                return CreateFromConnectionString(connectionStringBuilder.ToString(), PopulateCertificateInTransportSettings(connectionStringBuilder, transportSettings));
+            }
+#endif
+            return CreateFromConnectionString(connectionStringBuilder.ToString(), transportSettings);
+        }
+#endif
 
         /// <summary>
         /// Create a DeviceClient using Amqp transport from the specified connection string
@@ -158,7 +220,6 @@ namespace Microsoft.Azure.Devices.Client
 #else
             return CreateFromConnectionString(connectionString, TransportType.Amqp);
 #endif
-
         }
 
         /// <summary>
@@ -268,7 +329,7 @@ namespace Microsoft.Azure.Devices.Client
         /// Create DeviceClient from the specified connection string using a prioritized list of transports
         /// </summary>
         /// <param name="connectionString">Connection string for the IoT hub (with DeviceId)</param>
-        /// <param name="transportSettings">Prioritized list of transports</param>
+        /// <param name="transportSettings">Prioritized list of transports and their settings</param>
         /// <returns>DeviceClient</returns>
         public static DeviceClient CreateFromConnectionString(string connectionString, [System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute] ITransportSettings[] transportSettings)
         {
@@ -319,12 +380,8 @@ namespace Microsoft.Azure.Devices.Client
                 }
             }
 
-#if !WINDOWS_UWP
             // Defer concrete DeviceClient creation to OpenAsync
             return new DeviceClient(iotHubConnectionString, transportSettings);
-#else
-            return new DeviceClient(iotHubConnectionString);
-#endif
         }
 
         /// <summary>
@@ -332,7 +389,7 @@ namespace Microsoft.Azure.Devices.Client
         /// </summary>
         /// <param name="connectionString">Connection string for the IoT hub (without DeviceId)</param>
         /// <param name="deviceId">Id of the device</param>
-        /// <param name="transportSettings">Prioritized list of transportTypes</param>
+        /// <param name="transportSettings">Prioritized list of transportTypes and their settings</param>
         /// <returns>DeviceClient</returns>
 #if WINDOWS_UWP
         [Windows.Foundation.Metadata.DefaultOverloadAttribute]
@@ -422,7 +479,7 @@ namespace Microsoft.Azure.Devices.Client
                 throw Fx.Exception.ArgumentNull("message");
             }
 
-            return CompleteAsync(message.LockToken);
+            return this.CompleteAsync(message.LockToken);
         }
 
 #if WINDOWS_UWP
@@ -454,7 +511,7 @@ namespace Microsoft.Azure.Devices.Client
                 throw Fx.Exception.ArgumentNull("message");
             }
 
-            return AbandonAsync(message.LockToken);
+            return this.AbandonAsync(message.LockToken);
         }
 
 #if WINDOWS_UWP
@@ -517,9 +574,101 @@ namespace Microsoft.Azure.Devices.Client
             return this.InnerHandler.SendEventAsync(messages).AsTaskOrAsyncOp();
         }
 
+#if !WINDOWS_UWP && !PCL
+        /// <summary>
+        /// Uploads a stream to a block blob in a storage account associated with the IoTHub for that device.
+        /// If the blob already exists, it will be overwritten.
+        /// </summary>
+        /// <param name="blobName"></param>
+        /// <param name="source"></param>
+        /// <returns>AsncTask</returns>
+        public AsyncTask UploadToBlobAsync(String blobName, System.IO.Stream source)
+        {
+            if (String.IsNullOrEmpty(blobName))
+            {
+                throw Fx.Exception.ArgumentNull("blobName");
+            }
+            if (source == null)
+            {
+                throw Fx.Exception.ArgumentNull("source");
+            }
+
+            var httpTransport = new HttpTransportHandler(iotHubConnectionString);
+            return httpTransport.UploadToBlobAsync(blobName, source);
+        }
+#endif
+
         public void Dispose()
         {
             this.InnerHandler?.Dispose();
         }
+
+#if !WINDOWS_UWP && !PCL
+        static ITransportSettings[] PopulateCertificateInTransportSettings(IotHubConnectionStringBuilder connectionStringBuilder, TransportType transportType)
+        {
+            switch (transportType)
+            {
+                case TransportType.Amqp:
+                    return new ITransportSettings[]
+                    {
+                        new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        },
+                        new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        },
+                    };
+                case TransportType.Amqp_Tcp_Only:
+                    return new ITransportSettings[]
+                    {
+                        new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        }
+                    };
+                case TransportType.Amqp_WebSocket_Only:
+                    return new ITransportSettings[]
+                    {
+                        new AmqpTransportSettings(TransportType.Amqp_WebSocket_Only)
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        }
+                    };
+                case TransportType.Http1:
+                    return new ITransportSettings[]
+                    {
+                        new Http1TransportSettings()
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        }
+                    };
+                default:
+                    throw new InvalidOperationException("Unsupported Transport {0}".FormatInvariant(transportType));
+            }
+        }
+
+        static ITransportSettings[] PopulateCertificateInTransportSettings(IotHubConnectionStringBuilder connectionStringBuilder, ITransportSettings[] transportSettings)
+        {
+            foreach (var transportSetting in  transportSettings)
+            {
+                switch (transportSetting.GetTransportType())
+                {
+                    case TransportType.Amqp_WebSocket_Only:
+                    case TransportType.Amqp_Tcp_Only:
+                        ((AmqpTransportSettings)transportSetting).ClientCertificate = connectionStringBuilder.Certificate;
+                        break;
+                    case TransportType.Http1:
+                        ((Http1TransportSettings)transportSetting).ClientCertificate = connectionStringBuilder.Certificate;
+                        break;
+                    case TransportType.Mqtt:
+                        throw new InvalidOperationException("Unsupported Transport {0}".FormatInvariant(transportSetting.GetTransportType()));
+                }
+            }
+
+            return transportSettings;
+        }
+#endif
     }
 }

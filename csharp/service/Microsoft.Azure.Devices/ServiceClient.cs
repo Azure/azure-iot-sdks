@@ -99,6 +99,12 @@ namespace Microsoft.Azure.Devices
         public abstract FeedbackReceiver<FeedbackBatch> GetFeedbackReceiver();
 
         /// <summary>
+        /// Get the FeedbackReceiver
+        /// </summary>
+        /// <returns>An instance of the FeedbackReceiver</returns>
+        public abstract FileNotificationReceiver<FileNotification> GetFileNotificationReceiver();
+
+        /// <summary>
         /// Gets service statistics for the Iot Hub.
         /// </summary>
         /// <returns>returns ServiceStatistics object containing current service statistics</returns>

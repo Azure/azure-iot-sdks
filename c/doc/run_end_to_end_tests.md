@@ -3,8 +3,8 @@
 This document describes how to run the end to end tests.
 
 - [Set up the test parameters](#testparams)
-- [Run end to end tests for a Windows development environment](#windows_client)
-- [Run end to end tests for for a Windows development environment](#linux_client)
+- [Run end to end tests on a Windows development environment](#windows_client)
+- [Run end to end tests for "iothub_client" on a Linux development environment](#linux_client)
 
 <a name="testparams"/>
 ## Setup the test parameters
@@ -30,21 +30,11 @@ This document describes how to run the end to end tests.
 
     - Populate the following variables as described below.
 
-      - IOTHUB_EVENTHUB_LISTEN_NAME=[Event Hub-compatible name]
       - IOTHUB_EVENTHUB_CONNECTION_STRING=Endpoint=[Event Hub-compatible endpoint];SharedAccessKeyName=[IOTHUB_POLICY_NAME];SharedAccessKey=[IOTHUB_POLICY_KEY]
       - IOTHUB_EVENTHUB_CONSUMER_GROUP=$Default
       - IOTHUB_PARTITION_COUNT=[Partition count from portal]
 	  
 	  Note: IOTHUB_EVENTHUB_CONSUMER_GROUP is optional. If not provided, the assumed value is "$Default".
-
-    - Populate the following variables in the "iot_device_params.txt" by extracting the information from Device Explorer.
-
-      - IOTHUB_DEVICE_ID=[The ID for the devie you created under the Management tab]
-      - IOTHUB_DEVICE_KEY=[The key for the devie you created under the Management tab]
-      - IOTHUB_SHARED_ACCESS_SIGNATURE=[By clicking the "Generate SAS" button]
-
-    ![](../../tools/DeviceExplorer/doc/media/device_explorer/iotgetstart1.png)
-
 
 <a name="windows_client"/>
 ## Run end to end tests on a Windows development environment

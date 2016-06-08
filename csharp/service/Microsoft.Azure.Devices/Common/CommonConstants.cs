@@ -84,6 +84,7 @@ namespace Microsoft.Azure.Devices.Common
         public const string ContentEncodingHeaderName = "Content-Encoding";
         public const string BatchedMessageContentType = "application/vnd.microsoft.iothub.json";
         public const string BatchedFeedbackContentType = "application/vnd.microsoft.iothub.feedback.json";
+        public const string FileNotificationContentType = "application/vnd.microsoft.iothub.filenotification.json";
 
         public const string IotHubSystemStoreServiceName = "iothub-systemstore";
         public const string IotHubStatsCacheKey = "_cache_key_for_iothub_stats";

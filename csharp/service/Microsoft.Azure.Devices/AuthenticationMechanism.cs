@@ -10,9 +10,13 @@ namespace Microsoft.Azure.Devices
     /// </summary>
     public sealed class AuthenticationMechanism
     {
+        /// <summary>
+        /// default ctor
+        /// </summary>
         public AuthenticationMechanism()
         {
             this.SymmetricKey = new SymmetricKey();
+            this.X509Thumbprint = new X509Thumbprint();
         }
 
         /// <summary>
@@ -20,5 +24,11 @@ namespace Microsoft.Azure.Devices
         /// </summary>
         [JsonProperty(PropertyName = "symmetricKey")]
         public SymmetricKey SymmetricKey { get; set; }
+
+        /// <summary>
+        /// X509 client certificate thumbprints
+        /// </summary>
+        [JsonProperty(PropertyName = "x509Thumbprint")]
+        public X509Thumbprint X509Thumbprint { get; set; }
     }
 }

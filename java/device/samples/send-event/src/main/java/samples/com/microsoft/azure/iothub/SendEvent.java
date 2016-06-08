@@ -124,6 +124,7 @@ public class SendEvent
             {
                 Message msg = new Message(msgStr);
                 msg.setProperty("messageCount", Integer.toString(i));
+                msg.setExpiryTime(5000);
                 System.out.println(msgStr);
 
                 EventCallback callback = new EventCallback();

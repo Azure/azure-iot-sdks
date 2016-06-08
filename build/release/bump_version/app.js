@@ -58,7 +58,8 @@ function runTask(input, callback) {
             }
 
             callback(err);
-        }
+        },
+        input
     );
 }
 
@@ -121,20 +122,54 @@ var TaskRunners = {
         ], callback);
     },
     
-    xmlReplaceTask: function(filePath, selector, replace_string, callback) {
+    xmlReplaceTask: function(filePath, selector, replace_string, callback, input) {
         async.waterfall([
             function(cb) {
                 fs.readFile(filePath, 'utf-8', cb);
             },
             function(data, cb) {
                 var doc = new DOMParser().parseFromString(data, 'text/xml');
-                
+                var select = xpath.select;
+                if(input.nsmap) {
+                    select = xpath.useNamespaces(input.nsmap);
+                }
+
                 // we expect selectors to match only one node
-                var nodes = xpath.select(selector, doc);
-                if(nodes.length > 0) {
+                var nodes = select(selector, doc);
+                if(!!nodes && nodes.length > 0) {
                     var textNode = nodes[0].childNodes[0];
                     textNode.replaceData(0, textNode.data.length, replace_string);
     
+                    // write the file back out
+                    var serializer = new XMLSerializer();
+                    var xml = serializer.serializeToString(doc);
+                    fs.writeFile(filePath, xml, cb);
+                }
+                else {
+                    cb(null);
+                }
+            }
+        ], callback);
+    },
+
+    xmlAttributeReplaceTask: function(filePath, selector, replace_string, callback, input) {
+        async.waterfall([
+            function(cb) {
+                fs.readFile(filePath, 'utf-8', cb);
+            },
+            function(data, cb) {
+                var doc = new DOMParser().parseFromString(data, 'text/xml');
+
+                var select = xpath.select;
+                if(input.nsmap) {
+                    select = xpath.useNamespaces(input.nsmap);
+                }
+
+                // we expect selectors to match only one node
+                var node = select(selector, doc);
+                if(!!node && node.length > 0) {
+                    node[0].value = replace_string;
+
                     // write the file back out
                     var serializer = new XMLSerializer();
                     var xml = serializer.serializeToString(doc);

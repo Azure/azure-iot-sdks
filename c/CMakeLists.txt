@@ -72,6 +72,37 @@ enable_testing()
 #this project uses several other projects that are build not by these CMakeFiles
 #this project also targets several OSes
 
+include(CheckSymbolExists)
+function(detect_architecture symbol arch) 
+    if (NOT DEFINED ARCHITECTURE) 
+        set(CMAKE_REQUIRED_QUIET 1)
+        check_symbol_exists("${symbol}" "" ARCHITECTURE_${arch}) 
+        unset(CMAKE_REQUIRED_QUIET) 
+  
+        # The output variable needs to be unique across invocations otherwise 
+        # CMake's crazy scope rules will keep it defined 
+        if (ARCHITECTURE_${arch}) 
+            set(ARCHITECTURE "${arch}" PARENT_SCOPE) 
+            set(ARCHITECTURE_${arch} 1 PARENT_SCOPE) 
+            add_definitions(-DARCHITECTURE_${arch}=1) 
+        endif() 
+    endif() 
+endfunction() 
+
+if (MSVC) 
+    detect_architecture("_M_AMD64" x86_64) 
+    detect_architecture("_M_IX86" x86) 
+    detect_architecture("_M_ARM" ARM) 
+else() 
+    detect_architecture("__x86_64__" x86_64) 
+    detect_architecture("__i386__" x86) 
+    detect_architecture("__arm__" ARM) 
+endif() 
+if (NOT DEFINED ARCHITECTURE) 
+    set(ARCHITECTURE "GENERIC") 
+endif() 
+message(STATUS "Target architecture: ${ARCHITECTURE}")
+
 function(linkUAMQP whatExecutableIsBuilding)
     include_directories(${UAMQP_INC_FOLDER})
     
@@ -155,7 +186,7 @@ macro(compileAsC11)
 endmacro(compileAsC11)
 
 if(WIN32)
-    set(LOCK_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/lock_c11.c)
+    set(LOCK_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/lock_win32.c)
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_c11.c)
 else()
     set(LOCK_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/lock_pthreads.c)
@@ -166,7 +197,6 @@ if(${run_e2e_tests} OR ${run_longhaul_tests})
     add_subdirectory(testtools)
 endif()
 
-add_subdirectory(blob)
 add_subdirectory(iothub_client)
 add_subdirectory(service)
 add_subdirectory(iotdm_client)

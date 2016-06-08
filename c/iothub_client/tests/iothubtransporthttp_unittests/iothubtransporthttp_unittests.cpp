@@ -1211,8 +1211,7 @@ public:
 
 		MOCK_STATIC_METHOD_1(, size_t, VECTOR_size, VECTOR_HANDLE, vector)
 		size_t result2 = BASEIMPLEMENTATION::VECTOR_size(vector);
-	MOCK_METHOD_END(size_t, result2)
-
+    MOCK_METHOD_END(size_t, result2)
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportHttpMocks, , void, DList_InitializeListHead, PDLIST_ENTRY, listHead);

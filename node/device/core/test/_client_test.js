@@ -5,6 +5,7 @@
 
 var assert = require('chai').assert;
 var sinon = require('sinon');
+var stream = require('stream');
 
 var Client = require('../lib/client.js');
 var SimulatedHttp = require('./http_simulated.js');
@@ -106,6 +107,65 @@ describe('Client', function () {
         assert.strictEqual(config.sharedAccessSignature, sharedAccessSignature);
       };
       Client.fromSharedAccessSignature(sharedAccessSignature, DummyTransport);
+    });
+  });
+  
+  describe('uploadToBlob', function() {
+    /*Tests_SRS_NODE_DEVICE_CLIENT_16_037: [The `uploadToBlob` method shall throw a `ReferenceError` if `blobName` is falsy.]*/
+    [undefined, null, ''].forEach(function (blobName) {
+      it('throws a ReferenceError if \'blobName\' is ' + blobName + '\'', function() {
+        var client = new Client({}, null, {});
+        assert.throws(function() {
+          client.uploadToBlob(blobName, new stream.Readable(), 42, function() {});
+        });
+      });
+    });
+
+    /*Tests_SRS_NODE_DEVICE_CLIENT_16_038: [The `uploadToBlob` method shall throw a `ReferenceError` if `stream` is falsy.]*/
+    [undefined, null, ''].forEach(function (stream) {
+      it('throws a ReferenceError if \'stream\' is ' + stream + '\'', function() {
+        var client = new Client({}, null, {});
+        assert.throws(function() {
+          client.uploadToBlob('blobName', stream, 42, function() {});
+        });
+      });
+    });
+
+    /*Tests_SRS_NODE_DEVICE_CLIENT_16_039: [The `uploadToBlob` method shall throw a `ReferenceError` if `streamLength` is falsy.]*/
+    [undefined, null, '', 0].forEach(function (streamLength) {
+      it('throws a ReferenceError if \'streamLength\' is ' + streamLength + '\'', function() {
+        var client = new Client({}, null, {});
+        assert.throws(function() {
+          client.uploadToBlob('blobName', new stream.Readable(), streamLength, function() {});
+        });
+      });
+    });
+
+    /*Tests_SRS_NODE_DEVICE_CLIENT_16_040: [The `uploadToBlob` method shall call the `done` callback with an `Error` object if the upload fails.]*/
+    it('calls the done callback with an Error object if the upload fails', function(done) {
+      var DummyBlobUploader = function () {
+        this.uploadToBlob = function(blobName, stream, streamLength, callback) {
+          callback(new Error('fake error'));
+        };
+      };
+
+      var client = new Client({}, null, new DummyBlobUploader());
+      client.uploadToBlob('blobName', new stream.Readable(), 42, function(err) {
+        assert.instanceOf(err, Error);
+        done();
+      });
+    });
+
+    /*Tests_SRS_NODE_DEVICE_CLIENT_16_041: [The `uploadToBlob` method shall call the `done` callback no parameters if the upload succeeds.]*/
+    it('calls the done callback with no parameters if the upload succeeded', function (done) {
+      var DummyBlobUploader = function () {
+        this.uploadToBlob = function(blobName, stream, streamLength, callback) {
+          callback();
+        };
+      };
+
+      var client = new Client({}, null, new DummyBlobUploader());
+      client.uploadToBlob('blobName', new stream.Readable(), 42, done);
     });
   });
 });

@@ -5,7 +5,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 {
     using DotNetty.Codecs.Mqtt.Packets;
 
-    interface IWillMessage
+    public interface IWillMessage
     {
         Message Message { get; }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0"?><package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Microsoft.Azure.IoTHub.HttpTransport</id>
-    <version>1.0.7</version>
+    <version>1.0.9</version>
     <title>Microsoft Azure IoTHub HTTP transport</title>
     <authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
@@ -13,24 +13,29 @@
     <summary>This nuget package can be used to connect to IoTHub over HTTP.</summary>
     <releaseNotes/>
     <copyright>Copyright 2015</copyright>
-    <tags>HTTP Microsoft Azure IoT Native x86 x64 native package</tags>
+    <tags>HTTP Microsoft Azure IoT Native x86 x64 arm native package</tags>
     <dependencies>
-		<dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.7"/>
-        <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.7"/>
+		<dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.9"/>
+        <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.9"/>
     </dependencies>
   </metadata>
     <files>
     <!-- these are files for x86 plaform -->
-    <file src="..\..\..\..\build_output\c\win32\debug\iothub_client_http_transport.lib" target="build\native\Win32\Debug"/>
-    <file src="..\..\..\..\build_output\c\win32\debug\iothub_client_http_transport.pdb" target="build\native\Win32\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\win32\debug\iothub_client_http_transport.lib" target="build\native\Win32\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\win32\debug\iothub_client_http_transport.pdb" target="build\native\Win32\Debug"/>
 
-    <file src="..\..\..\..\build_output\c\win32\release\iothub_client_http_transport.lib" target="build\native\Win32\Release"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\win32\release\iothub_client_http_transport.lib" target="build\native\Win32\Release"/>
 
     <!-- these are files for x64 plaform -->
-    <file src="..\..\..\..\build_output\c\x64\debug\iothub_client_http_transport.lib" target="build\native\x64\Debug"/>
-    <file src="..\..\..\..\build_output\c\x64\debug\iothub_client_http_transport.pdb" target="build\native\x64\Debug"/>
-    <file src="..\..\..\..\build_output\c\x64\release\iothub_client_http_transport.lib" target="build\native\x64\Release"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\x64\debug\iothub_client_http_transport.lib" target="build\native\x64\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\x64\debug\iothub_client_http_transport.pdb" target="build\native\x64\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\x64\release\iothub_client_http_transport.lib" target="build\native\x64\Release"/>
 
+    <!-- these are files for arm plaform -->
+    <file src="..\..\..\cmake\iot_sdk_output\c\arm\debug\iothub_client_http_transport.lib" target="build\native\arm\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\arm\debug\iothub_client_http_transport.pdb" target="build\native\arm\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\arm\release\iothub_client_http_transport.lib" target="build\native\arm\Release"/>
+	
     <file src="Microsoft.Azure.IoTHub.HttpTransport.targets" target="build\native"/>
     <file src="..\..\..\iothub_client\inc\iothubtransporthttp.h" target="build\native\include"/>
 </files>

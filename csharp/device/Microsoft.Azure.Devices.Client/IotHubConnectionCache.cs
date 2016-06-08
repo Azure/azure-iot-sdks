@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             IotHubConnection iotHubConnection;
-            if (connectionString.SharedAccessKeyName != null  || connectionString.SharedAccessSignature != null)
+            if (connectionString.SharedAccessKeyName != null || connectionString.SharedAccessSignature != null)
             {
                 // Connections are not pooled when SAS signatures are used. However, we still use a connection pool object
                 // Connections are not shared since the SAS signature will not match another connection string

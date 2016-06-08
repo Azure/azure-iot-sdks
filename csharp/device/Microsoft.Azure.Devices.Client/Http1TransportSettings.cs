@@ -4,6 +4,9 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+#if !WINDOWS_UWP && !PCL
+    using System.Security.Cryptography.X509Certificates;
+#endif
 
     /// <summary>
     /// contains Http1 transport-specific settings for DeviceClient
@@ -17,6 +20,9 @@ namespace Microsoft.Azure.Devices.Client
             return TransportType.Http1;
         }
 
+#if !WINDOWS_UWP && !PCL
+        public X509Certificate2 ClientCertificate { get; set; }
+#endif
         public TimeSpan DefaultReceiveTimeout => DefaultOperationTimeout;
     }
 }

@@ -529,15 +529,17 @@ namespace Microsoft.Azure.Devices.Client
                         // correct this gap. The intention of setting this two variable is
                         // so that GetBody should not be called and all Properties are
                         // readonly because the amqpMessage has been serialized.
-                        if (setBodyCalled)
+                        
+                        this.SetSizeInBytesCalled();
+                        if (this.bodyStream == null)
                         {
+                            this.serializedAmqpMessage = AmqpMessage.Create();
+                        }
+                        else
+                        {
+                            this.serializedAmqpMessage = AmqpMessage.Create(this.bodyStream, false);
                             this.SetGetBodyCalled();
                         }
-
-                        this.SetSizeInBytesCalled();
-                        this.serializedAmqpMessage = this.bodyStream == null
-                            ? AmqpMessage.Create()
-                            : AmqpMessage.Create(this.bodyStream, false);
                         this.serializedAmqpMessage = this.PopulateAmqpMessageForSend(this.serializedAmqpMessage);
                     }
                 }
@@ -555,6 +557,19 @@ namespace Microsoft.Azure.Devices.Client
                 this.bodyStream.Seek(0, SeekOrigin.Begin);
             }
         }
+
+        internal bool TryResetBody(long position)
+        {
+            if (this.bodyStream != null && this.bodyStream.CanSeek)
+            {
+                this.bodyStream.Seek(position, SeekOrigin.Begin);
+                Interlocked.Exchange(ref this.getBodyCalled, 0);
+                return true;
+            }
+            return false;
+        }
+
+        internal bool IsBodyCalled => Volatile.Read(ref this.getBodyCalled) == 1;
 
         void SetGetBodyCalled()
         {

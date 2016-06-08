@@ -1,7 +1,7 @@
 <?xml version="1.0"?><package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Microsoft.Azure.IoTHub.Serializer</id>
-    <version>1.0.7</version>
+    <version>1.0.9</version>
     <title>Microsoft Azure IoTHub Serializer</title>
     <authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
@@ -13,22 +13,27 @@
     <summary>This nuget package contains a serializer library for IoTHub</summary>
     <releaseNotes/>
     <copyright>Copyright 2015</copyright>
-    <tags>Microsoft Azure IoT Native x86 x64 native package</tags>
+    <tags>Microsoft Azure IoT Native x86 x64 arm native package</tags>
     <dependencies>
-          <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.7"/>
+          <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.9"/>
     </dependencies>
   </metadata>
     <files>
     <!-- these are files for x86 plaform -->
-    <file src="..\..\..\..\build_output\c\win32\debug\serializer.lib" target="build\native\Win32\Debug"/>
-    <file src="..\..\..\..\build_output\c\win32\debug\serializer.pdb" target="build\native\Win32\Debug"/>
-    <file src="..\..\..\..\build_output\c\win32\release\serializer.lib" target="build\native\Win32\Release"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\win32\debug\serializer.lib" target="build\native\Win32\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\win32\debug\serializer.pdb" target="build\native\Win32\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\win32\release\serializer.lib" target="build\native\Win32\Release"/>
 
     <!-- these are files for x64 plaform -->
-    <file src="..\..\..\..\build_output\c\x64\debug\serializer.lib" target="build\native\x64\Debug"/>
-    <file src="..\..\..\..\build_output\c\x64\debug\serializer.pdb" target="build\native\x64\Debug"/>
-    <file src="..\..\..\..\build_output\c\x64\release\serializer.lib" target="build\native\x64\Release"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\x64\debug\serializer.lib" target="build\native\x64\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\x64\debug\serializer.pdb" target="build\native\x64\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\x64\release\serializer.lib" target="build\native\x64\Release"/>
 
+    <!-- these are files for arm plaform -->
+    <file src="..\..\..\cmake\iot_sdk_output\c\arm\debug\serializer.lib" target="build\native\arm\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\arm\debug\serializer.pdb" target="build\native\arm\Debug"/>
+    <file src="..\..\..\cmake\iot_sdk_output\c\arm\release\serializer.lib" target="build\native\arm\Release"/>
+	
     <file src="Microsoft.Azure.IoTHub.Serializer.targets" target="build\native"/>
     <file src="..\..\..\serializer\inc\*.h" target="build\native\include"/>
 </files>

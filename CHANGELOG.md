@@ -1,27 +1,61 @@
 # C Device SDK
-- 
+- Upload to blob functionality
 
-# Java SDK
-- 
+# C# Device SDK
+- Add new UploadToBlobAsync API implementing upload of a stream to Azure Storage.
+- Now utilizes amqp 1.1.5
 
 # C# Service SDK
-- 
+- Now utilizes amqp 1.1.5
+- Adding API support for receiving file upload notifications
 
-# Node Device Client
-- 
-
-# Python SDK
-- 
-
-# General
-- 
-
-# Bug fixes
-
-- 
+#Java SDK
+- Implemented message timeout for AMQP protocol
+- Java device client maven package is now Java 7/Android compatible
+- Java sample for Android added
 
 # Internal Changes
-- Fixed C longhaul tests for Windows, Linux and MBED platforms.
+- Updated the shared utility to use the ctest repo
+- Shared utility updated with a new string function
+
+# Node.js Device SDK
+- Upload to blob
+
+# Node.js Service SDK
+- Upload notifications
+- Deprecating `Amqp.getReceiver` in favor of `Amqp.getFeedbackReceiver`. `Amqp.getReceiver` will be removed for the next major release
+
+# General
+- Change the location of the binaries produced with the build script to be contained within the repository directory
+- Added arm support for the Nuget and apt-get packages
+
+# Bug fixes
+- Adjusted the tls not to provide credentials by default.
+- Fixed regressions with AMQP on UWP
+- Python vcproj file contained a false ref to azure_shared_utility 1.0.7
+
+
+Release for May 20, 2016
+
+# C# Device SDK
+- Device Client code cleanup & refactoring (changed to pipeline model)
+- Thread pool for MQTT threads
+- More sophisticated error handling
+- Retry operation if transient error occurred
+- Support for X.509 client certificates as an authentication mechanism for devices
+
+# General
+- Iothub-explorer - Pull request #551, tomconte – Add an option to generate a SAS Token for a device
+
+# Bug fixes
+- Fix tlsio_schannel bug (not all input bytes were being read)
+- Fix for the linux socket io layer
+- C# MQTT Fixed exception handling to properly propagate to a user
+- C# MQTT Fixed race in the message complete operation
+- Linux defaults to not run the e2e tests
+
+# Internal Changes
+- Fixed C longhaul tests for Windows, Linux and MBED platforms
 
 
 Release for May 6, 2016
@@ -37,6 +71,10 @@ Release for May 6, 2016
 # C# Service SDK
 - Support for PurgeMessageQueueAsync
 - Revised service API version with added support for custom blob names for Import/ExportDevicesAsync + quality of life changes for bulk operations
+- Adding support for receiving file upload notifications from service client. 
+	- Implemented 'AmqpFileNotificationReceiver'
+	- Moved common code for 'AmqpFileNotificationReceiver' and 'AmqpFeedbackReceiver' to common helpers
+
 
 # Node Device Client
 - Added a node-RED module for Azure IoT Hub
