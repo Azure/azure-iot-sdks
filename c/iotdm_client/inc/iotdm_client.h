@@ -41,17 +41,6 @@ extern IOTHUB_CHANNEL_HANDLE IoTHubClient_DM_Open(const char *connectionString, 
 */
 extern void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
 
-/**
-*   @brief      Creates the default LWM2M objects provided in the SDK. Upon success,
-*               the client can sepcify the starting default value for any or all
-*               resources as appropriate.
-*
-*   @param      iotDMClientHandle   The handle created by a call to the create function.
-*
-*   @return     IOTHUB_CLIENT_OK upon success or an error code upon failure.
-*/
-extern IOTHUB_CLIENT_RESULT IoTHubClient_DM_CreateDefaultObjects(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
-
 
 /** @brief      Starts the client and remain running. A high level function which makes use
 *               of IoTHubClient_DM_Connect and IoTHubClient_DM_DoWork.

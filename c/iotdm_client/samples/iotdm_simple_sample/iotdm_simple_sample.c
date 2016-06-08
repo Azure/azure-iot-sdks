@@ -6,6 +6,8 @@
 //
 
 #include "iotdm_client.h"
+#include "azure_c_shared_utility/platform.h"
+
 #include "azure_c_shared_utility/threadapi.h"
 #include "device_object.h"
 #include "firmwareupdate_object.h"
@@ -171,24 +173,22 @@ int main(int argc, char *argv[])
         }
     }
 
-    IOTHUB_CHANNEL_HANDLE IoTHubChannel = IoTHubClient_DM_Open(cs, COAP_TCPIP);
-    if (NULL == IoTHubChannel)
+    if (0 != platform_init())
     {
-        LogError("IoTHubClientHandle is NULL!\r\n");
+        LogError("failed to initialize the platform");
 
         return -1;
     }
 
-    LogInfo("IoTHubClientHandle: %p\r\n", IoTHubChannel);
-
-    LogInfo("prepare LWM2M objects");
-    if (IOTHUB_CLIENT_OK != IoTHubClient_DM_CreateDefaultObjects(IoTHubChannel))
+    IOTHUB_CHANNEL_HANDLE IoTHubChannel = IoTHubClient_DM_Open(cs, COAP_TCPIP);
+    if (NULL == IoTHubChannel)
     {
-        LogError("failure to create LWM2M objects for client: %p\r\n", IoTHubChannel);
+        LogError("IoTHubClientHandle is NULL!");
 
-        IoTHubClient_DM_Close(IoTHubChannel);
         return -2;
     }
+
+    LogInfo("IoTHubClientHandle: %p", IoTHubChannel);
 
     set_initial_property_state();
     set_callbacks();
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
 
     if (IOTHUB_CLIENT_OK != create_update_thread())
     {
-        LogError("failure to create the udpate thread\r\n");
+        LogError("failure to create the udpate thread");
 
         IoTHubClient_DM_Close(IoTHubChannel);
         return -3;
@@ -216,16 +216,12 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (IOTHUB_CLIENT_OK != IoTHubClient_DM_Start(IoTHubChannel))
-    {
-        LogError("failure to start the client: %p\r\n", IoTHubChannel);
-
-        IoTHubClient_DM_Close(IoTHubChannel);
-        return -4;
-    }
+    IoTHubClient_DM_Start(IoTHubChannel);
 
     /* Disconnect and cleanup */
     IoTHubClient_DM_Close(IoTHubChannel);
+    platform_deinit();
+
     return 0;
 }
 

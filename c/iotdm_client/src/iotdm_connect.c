@@ -104,20 +104,20 @@ void iotdmc_handle_registration_reply(lwm2m_transaction_t *transacP, void *messa
 }
 
 void on_bytes_received(void *context, const unsigned char *buffer, size_t size);
-IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA* cd);
+IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA *cd);
 
 typedef struct
 {
-    CLIENT_DATA* client;
+    CLIENT_DATA *client;
     ON_REGISTER_COMPLETE onComplete;
-    void* context;
+    void *context;
 } IO_OPEN_COMPLETE_CONTEXT;
 
 
 //void(*ON_IO_OPEN_COMPLETE)(void* context, IO_OPEN_RESULT open_result);
-void on_io_open_complete(void* context, IO_OPEN_RESULT open_result)
+void on_io_open_complete(void *context, IO_OPEN_RESULT open_result)
 {
-    IO_OPEN_COMPLETE_CONTEXT* openContext = (IO_OPEN_COMPLETE_CONTEXT*)context;
+    IO_OPEN_COMPLETE_CONTEXT *openContext = (IO_OPEN_COMPLETE_CONTEXT *) context;
     IOTHUB_CLIENT_RESULT result = (open_result == IO_OPEN_OK) ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR;
 
     if (result == IOTHUB_CLIENT_OK)
@@ -147,19 +147,22 @@ int dm_io_open(IO_OPEN_COMPLETE_CONTEXT *openContext)
         retValue = xio_open(cd->ioHandle, on_io_open_complete, openContext, on_bytes_received, cd, on_io_error, cd);
         if (retValue == 0)
         {
-            return 0;
+            retValue = 0;
+            retry = MAX_CONNECT_RETRY + 1;
         }
 
-        int retValue2 = xio_close(cd->ioHandle,  NULL, NULL);
-        if (retValue2 != 0)
+        else
         {
-            LogError("xio_close failed");
-            // What to do here?  Swallow and continue for now.
-        }
+            if (0 != xio_close(cd->ioHandle, NULL, NULL))
+            {
+                LogError("xio_close failed");
+                // What to do here?  absorb and continue for now.
+            }
 
-        LogInfo("Retry open in %d seconds\n", retry);
-        ThreadAPI_Sleep(retry * 1000);
-        retry *= 2;
+            LogInfo("Retry open in %d seconds\n", retry);
+            ThreadAPI_Sleep(retry * 1000);
+            retry *= 2;
+        }
     }
 
     return retValue;
@@ -171,11 +174,11 @@ void on_io_error(void* context)
 {
     LogError("    on_io_error event\n");
 
-    CLIENT_DATA *cd = (CLIENT_DATA *)context;
+    CLIENT_DATA *cd = (CLIENT_DATA *) context;
     (void)xio_close(cd->ioHandle, NULL, NULL);
 
-    IO_OPEN_COMPLETE_CONTEXT* openContext = malloc(sizeof(IO_OPEN_COMPLETE_CONTEXT));
-    if (!openContext)
+    IO_OPEN_COMPLETE_CONTEXT *openContext = (IO_OPEN_COMPLETE_CONTEXT *) malloc(sizeof(IO_OPEN_COMPLETE_CONTEXT));
+    if (NULL == openContext)
     {
         LogError("    failed to allocate context object\n");
     }
@@ -185,9 +188,9 @@ void on_io_error(void* context)
         openContext->client = cd;
         openContext->onComplete = on_reconnect_complete;
         openContext->context = openContext;
-    }
 
-    (void)dm_io_open(openContext);
+        (void)dm_io_open(openContext);
+    }
 }
 
 static int set_keep_alive(CLIENT_DATA *cd)
@@ -201,6 +204,7 @@ static int set_keep_alive(CLIENT_DATA *cd)
     {
         LogError("    xio_setoption(\"tcp_keepalive\") failed, returned = %d\r\n", result);
     }
+
     else
     {
         result = xio_setoption(cd->ioHandle, "tcp_keepalive_time", &keepAliveTime);
@@ -208,6 +212,7 @@ static int set_keep_alive(CLIENT_DATA *cd)
         {
             LogError("    xio_setoption(\"tcp_keepalive_time\") failed, returned = %d\r\n", result);
         }
+
         else
         {
             result = xio_setoption(cd->ioHandle, "tcp_keepalive_interval", &keepAliveInterval);
@@ -226,7 +231,7 @@ XIO_HANDLE dm_io_create(const char* iotHubName);
 IOTHUB_CLIENT_RESULT iotdmc_register(CLIENT_DATA *cd, ON_REGISTER_COMPLETE onComplete, void* callbackContext)
 {
     IO_OPEN_COMPLETE_CONTEXT* openContext = malloc(sizeof(IO_OPEN_COMPLETE_CONTEXT));
-    if (!openContext)
+    if (NULL == openContext)
     {
         LogError("    failed to allocate context object\n");
     }
@@ -308,7 +313,7 @@ static STRING_HANDLE get_registration_payload()
     return NULL;
 }
 
-IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA* cd)
+IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA *cd)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -316,6 +321,7 @@ IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA* cd)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
+
     else
     {
         STRING_HANDLE hPayload = get_registration_payload();
@@ -323,6 +329,7 @@ IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA* cd)
         {
             result = IOTHUB_CLIENT_ERROR;
         }
+
         else
         {
             STRING_HANDLE hQuery = iotdmc_get_registration_query(cd->session->endpointName, cd->config.iotHubName, cd->config.deviceKey);
@@ -330,6 +337,7 @@ IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA* cd)
             {
                 result = IOTHUB_CLIENT_ERROR;
             }
+
             else
             {
                 lwm2m_context_t *contextP = cd->session;
@@ -343,6 +351,7 @@ IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA* cd)
                 {
                     result = IOTHUB_CLIENT_ERROR;
                 }
+
                 else
                 {
                     coap_set_header_uri_query(transaction->message, STRING_c_str(hQuery));
@@ -361,6 +370,7 @@ IOTHUB_CLIENT_RESULT send_register_transaction(CLIENT_DATA* cd)
                         server->status = STATE_REG_PENDING;
                         result = IOTHUB_CLIENT_OK;
                     }
+
                     else
                     {
                         result = IOTHUB_CLIENT_ERROR;
@@ -402,7 +412,7 @@ uint16_t prv_min(uint16_t x, uint16_t y, uint16_t z)
 }
 
 
-void reset_input_buffer(CLIENT_DATA* cd)
+void reset_input_buffer(CLIENT_DATA *cd)
 {
     cd->state = BLOCKED;
     cd->input.available = 0;
@@ -413,69 +423,76 @@ void reset_input_buffer(CLIENT_DATA* cd)
 //void(*ON_BYTES_RECEIVED)(void* context, const unsigned char* buffer, size_t size);
 void on_bytes_received(void *context, const unsigned char *buffer, size_t size)
 {
-    CLIENT_DATA* client = (CLIENT_DATA*)context;
-
+    CLIENT_DATA *client = (CLIENT_DATA *) context;
     while (size != 0)
     {
         switch (client->state)
         {
-        case BLOCKED:
-            client->input.buffer[client->input.available] = buffer[0];
-            ++client->input.available;
-            client->state = LENGTH;
-
-            ++buffer;
-            --size;
-
-            break;
-
-        case LENGTH:
-            client->input.buffer[client->input.available] = buffer[0];
-            client->input.length = parse_int(client->input.buffer, SIZEOF_MESSAGE_LENGTH_FIELD);
-            ++client->input.available;
-            client->state = RECEIVING;
-
-            ++buffer;
-            --size;
-
-            break;
-
-        case RECEIVING:
-        {
-            uint16_t toCopy = prv_min(
-                (uint16_t)size, // remaining source buffer size
-                sizeof(client->input.buffer) - client->input.available, // remaining destination buffer size
-                client->input.length + SIZEOF_MESSAGE_LENGTH_FIELD - client->input.available // remaining message size
-                );
-            if (toCopy == 0)
+            case BLOCKED:
             {
-                LogInfo(" on_bytes_received buffer argument is larger than destination");
-                size = 0;
-                reset_input_buffer(client);
+                client->input.buffer[client->input.available] = buffer[0];
+                ++client->input.available;
+                client->state = LENGTH;
+
+                ++buffer;
+                --size;
+
+                break;
             }
-            else
+
+            case LENGTH:
             {
-                memcpy(&(client->input.buffer[client->input.available]), buffer, toCopy);
-                client->input.available += toCopy;
+                client->input.buffer[client->input.available] = buffer[0];
+                client->input.length = parse_int(client->input.buffer, SIZEOF_MESSAGE_LENGTH_FIELD);
+                ++client->input.available;
+                client->state = RECEIVING;
 
-                buffer += toCopy;
-                size -= toCopy;
+                ++buffer;
+                --size;
 
-                if ((client->input.available - SIZEOF_MESSAGE_LENGTH_FIELD) == client->input.length)
+                break;
+            }
+
+            case RECEIVING:
+            {
+                uint16_t toCopy = prv_min(
+                    (uint16_t)size, // remaining source buffer size
+                    sizeof(client->input.buffer) - client->input.available, // remaining destination buffer size
+                    client->input.length + SIZEOF_MESSAGE_LENGTH_FIELD - client->input.available // remaining message size
+                    );
+                if (toCopy == 0)
                 {
-                    LogInfo(" on_bytes_received - msgLength: %d\n", client->input.length);
-                    lwm2m_handle_packet(client->session, &(client->input.buffer[SIZEOF_MESSAGE_LENGTH_FIELD]), client->input.length, client->ioHandle);
+                    LogInfo(" on_bytes_received buffer argument is larger than destination");
+                    size = 0;
                     reset_input_buffer(client);
                 }
+
+                else
+                {
+                    memcpy(&(client->input.buffer[client->input.available]), buffer, toCopy);
+                    client->input.available += toCopy;
+
+                    buffer += toCopy;
+                    size -= toCopy;
+
+                    if ((client->input.available - SIZEOF_MESSAGE_LENGTH_FIELD) == client->input.length)
+                    {
+                        LogInfo(" on_bytes_received - msgLength: %d\n", client->input.length);
+                        lwm2m_handle_packet(client->session, &(client->input.buffer[SIZEOF_MESSAGE_LENGTH_FIELD]), client->input.length, client->ioHandle);
+                        reset_input_buffer(client);
+                    }
+                }
+
+                break;
             }
 
-            break;
-        }
+            default:
+            {
+                LogError("  Illegal client state.");
+                size = 0;
 
-        default:
-            LogError("  Illegal client state.");
-
-            break;
+                break;
+            }
         }
     }
 }
@@ -535,7 +552,7 @@ static void output_buffer(FILE *stream, uint8_t *buffer, int length, int indent)
 
 uint8_t lwm2m_buffer_send(void *context, uint8_t *buffer, size_t length, void *userData)
 {
-    XIO_HANDLE io_handle = (XIO_HANDLE)context;
+    XIO_HANDLE io_handle = (XIO_HANDLE) context;
 
     LogInfo("    Sending %zd bytes\n", length);
 #ifdef WITH_LOGS
