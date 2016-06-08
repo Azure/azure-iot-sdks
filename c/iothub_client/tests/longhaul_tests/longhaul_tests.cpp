@@ -1132,7 +1132,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
 			result = 0;
 		}
 
-		ASSERT_ARE_EQUAL_WITH_MSG(int, result, 0, "Test IoTHubClient_LongHaul_12h_Run_1_Event_Per_Sec failed")
+		ASSERT_ARE_EQUAL_WITH_MSG(int, result, 0, "Test IoTHubClient_LongHaul_12h_Run_1_Event_Per_Sec failed");
 	}
 
 	TEST_FUNCTION(IoTHubClient_LongHaul_12h_Run_1_Message_Per_Sec)
@@ -1156,7 +1156,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
 			result = 0;
 		}
 
-		ASSERT_ARE_EQUAL_WITH_MSG(int, result, 0, "Test IoTHubClient_LongHaul_12h_Run_1_Message_Per_Sec failed")
+		ASSERT_ARE_EQUAL_WITH_MSG(int, result, 0, "Test IoTHubClient_LongHaul_12h_Run_1_Message_Per_Sec failed");
 	}
 
 	TEST_FUNCTION(IoTHubClient_LongHaul_12h_Run_Send_Events_Expon_Delay)
@@ -1181,7 +1181,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
 			result = 0;
 		}
 
-		ASSERT_ARE_EQUAL_WITH_MSG(int, result, 0, "Test IoTHubClient_LongHaul_12h_Run_Send_Events_Expon_Delay failed")
+		ASSERT_ARE_EQUAL_WITH_MSG(int, result, 0, "Test IoTHubClient_LongHaul_12h_Run_Send_Events_Expon_Delay failed");
 	}
 
 END_TEST_SUITE(longhaul_tests)
