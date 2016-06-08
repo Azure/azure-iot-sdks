@@ -268,6 +268,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
                     /* Codes_SRS_IOTHUBCLIENT_01_003: [If IoTHubClient_LL_Create fails, then IoTHubClient_Create shall return NULL.] */
                     /* Codes_SRS_IOTHUBCLIENT_01_031: [If IoTHubClient_Create fails, all resources allocated by it shall be freed.] */
                     Lock_Deinit(result->LockHandle);
+                    list_destroy(result->savedDataToBeCleaned);
                     free(result);
                     result = NULL;
                 }
@@ -403,6 +404,11 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
 
         /* Codes_SRS_IOTHUBCLIENT_01_006: [That includes destroying the IoTHubClient_LL instance by calling IoTHubClient_LL_Destroy.] */
         IoTHubClient_LL_Destroy(iotHubClientInstance->IoTHubClientLLHandle);
+
+        if (iotHubClientInstance->savedDataToBeCleaned != NULL)
+        {
+            list_destroy(iotHubClientInstance->savedDataToBeCleaned);
+        }
 
         /*Codes_SRS_IOTHUBCLIENT_02_045: [ IoTHubClient_Destroy shall unlock the serializing lock. ]*/
         if (Unlock(iotHubClientInstance->LockHandle) != LOCK_OK)
