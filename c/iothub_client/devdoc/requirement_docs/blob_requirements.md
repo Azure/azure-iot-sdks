@@ -63,7 +63,7 @@ In order for `Blob_UploadFromSasUri` to call `HTTPAPIEX_ExecuteRequest` it will 
 Steps to follow when size >= 64MB
 
 Design considerations: Blob_UploadFromSasUri will break the souce into 4MB blocks.
-These blocks have the IDs starting from 000000 and ending with 999999 (potentially). 
+These blocks have the IDs starting from 000000 and ending with 049999 (potentially). 
     Note: the URL encoding of the BASE64 of these numbers is the same as the BASE64 representation (therefore no URL encoding needed)
 Blocks are uploaded serially by "Put block" REST API. After all the blocks have been uploaded, a "Put Block List" is executed.
 
@@ -73,7 +73,7 @@ Blocks are uploaded serially by "Put block" REST API. After all the blocks have 
  
 **SRS_BLOB_02_021: [** For every block of 4MB the following operations shall happen: **]**
   
-1. **SRS_BLOB_02_020: [** `Blob_UploadFromSasUri` shall construct a BASE64 encoded string from the block ID (000000... 999999) **]**
+1. **SRS_BLOB_02_020: [** `Blob_UploadFromSasUri` shall construct a BASE64 encoded string from the block ID (000000... 049999) **]**
 2. **SRS_BLOB_02_022: [** `Blob_UploadFromSasUri` shall construct a new relativePath from following string: base relativePath + "&comp=block&blockid=BASE64 encoded string of blockId" **]**
 3. **SRS_BLOB_02_023: [** `Blob_UploadFromSasUri` shall create a BUFFER_HANDLE from `source` and `size` parameters. **]**
 4. **SRS_BLOB_02_024: [** `Blob_UploadFromSasUri` shall call `HTTPAPIEX_ExecuteRequest` with a PUT operation, passing `httpStatus` and `httpResponse`. **]**
