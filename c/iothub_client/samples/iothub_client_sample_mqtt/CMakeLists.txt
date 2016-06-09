@@ -13,12 +13,6 @@ set(iothub_client_sample_mqtt_c_files
     iothub_client_sample_mqtt.c
 )
 
-if(WIN32)
-    set(iothub_client_sample_mqtt_c_files ${iothub_client_sample_mqtt_c_files} ./windows/main.c)
-else()
-    set(iothub_client_sample_mqtt_c_files ${iothub_client_sample_mqtt_c_files} ./linux/main.c)
-endif()
-
 set(iothub_client_sample_mqtt_h_files
     iothub_client_sample_mqtt.h
 )

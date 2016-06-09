@@ -14,7 +14,6 @@ include_directories(${AZUREIOT_INC_FOLDER})
 
 set(iothub_client_sample_amqp_c_files
     ../iothub_client_sample_amqp.c
-    ./main.c
 )
 
 set(iothub_client_sample_amqp_h_files
