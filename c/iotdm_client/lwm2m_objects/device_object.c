@@ -155,7 +155,7 @@ IOTHUB_CLIENT_RESULT on_read_device_memoryfree(object_device *obj, int *value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, int *value)
+IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, time_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->device_currenttime_read_callback != NULL)
@@ -165,15 +165,15 @@ IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, int *value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_device_currenttime;
-        LogInfo("returning %d for Device_CurrentTime", *value);
+        LogInfo("returning %lld for Device_CurrentTime", *value);
     }
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, int value)
+IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, time_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("Device_CurrentTime being set to %d", value);
+    LogInfo("Device_CurrentTime being set to %lld", value);
     obj->propval_device_currenttime = value;
 
     if (obj->device_currenttime_write_callback != NULL)

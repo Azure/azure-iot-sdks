@@ -51,8 +51,8 @@ IOTHUB_CLIENT_RESULT set_config_name(uint16_t instanceId, const char *value)
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -108,6 +108,7 @@ IOTHUB_CLIENT_RESULT create_config_object(IOTHUB_CLIENT_HANDLE h, uint16_t *inst
         LogError("Failed registering dispatchers");
         res = IOTHUB_CLIENT_ERROR;
     }
+
     else
     {
         object_config *obj = (object_config *)lwm2m_malloc(sizeof(object_config));
@@ -116,6 +117,7 @@ IOTHUB_CLIENT_RESULT create_config_object(IOTHUB_CLIENT_HANDLE h, uint16_t *inst
             LogError("malloc failure");
             res = IOTHUB_CLIENT_ERROR;
         }
+
         else
         {
             memset(obj,0,sizeof(*obj));
@@ -130,6 +132,7 @@ IOTHUB_CLIENT_RESULT create_config_object(IOTHUB_CLIENT_HANDLE h, uint16_t *inst
                 destroy_config_object(obj);
                 obj = NULL;
             }
+
             else
             {
                 set_default_config_property_values(obj);

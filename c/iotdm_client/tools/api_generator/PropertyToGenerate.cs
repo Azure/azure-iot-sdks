@@ -103,7 +103,7 @@ namespace api_generator
                 case LWM2MObjectItemType.Opaque:
                     return "void*";
                 case LWM2MObjectItemType.Time:
-                    return "int";
+                    return "time_t";
                 default:
                     return "UNKONWN_OBJECT_TYPE";
             }

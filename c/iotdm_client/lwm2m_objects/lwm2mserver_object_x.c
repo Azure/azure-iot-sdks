@@ -51,8 +51,8 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_lifetime(uint16_t instanceId, int value)
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -71,8 +71,8 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultminimumperiod(uint16_t instanceId, i
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -91,8 +91,8 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultmaximumperiod(uint16_t instanceId, i
         }
 
         result = IOTHUB_CLIENT_OK;
-
     }
+
     return result;
 }
 
@@ -125,6 +125,7 @@ IOTHUB_CLIENT_RESULT create_lwm2mserver_object(IOTHUB_CLIENT_HANDLE h, uint16_t 
         LogError("Failed registering dispatchers");
         res = IOTHUB_CLIENT_ERROR;
     }
+
     else
     {
         object_lwm2mserver *obj = (object_lwm2mserver *)lwm2m_malloc(sizeof(object_lwm2mserver));
@@ -133,6 +134,7 @@ IOTHUB_CLIENT_RESULT create_lwm2mserver_object(IOTHUB_CLIENT_HANDLE h, uint16_t 
             LogError("malloc failure");
             res = IOTHUB_CLIENT_ERROR;
         }
+
         else
         {
             memset(obj,0,sizeof(*obj));
@@ -147,6 +149,7 @@ IOTHUB_CLIENT_RESULT create_lwm2mserver_object(IOTHUB_CLIENT_HANDLE h, uint16_t 
                 destroy_lwm2mserver_object(obj);
                 obj = NULL;
             }
+
             else
             {
                 set_default_lwm2mserver_property_values(obj);

@@ -56,7 +56,7 @@ typedef struct TAG_object_device {
     char* propval_device_firmwareversion;        // /3/x/3
     int propval_device_batterylevel;        // /3/x/9
     int propval_device_memoryfree;        // /3/x/10
-    int propval_device_currenttime;        // /3/x/13
+    time_t propval_device_currenttime;        // /3/x/13
     char* propval_device_utcoffset;        // /3/x/14
     char* propval_device_timezone;        // /3/x/15
     char* propval_device_devicetype;        // /3/x/17
@@ -93,7 +93,7 @@ IOTHUB_CLIENT_RESULT set_device_serialnumber(uint16_t instanceId, const char *va
 IOTHUB_CLIENT_RESULT set_device_firmwareversion(uint16_t instanceId, const char *value);
 IOTHUB_CLIENT_RESULT set_device_batterylevel(uint16_t instanceId, int value);
 IOTHUB_CLIENT_RESULT set_device_memoryfree(uint16_t instanceId, int value);
-IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, int value);
+IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, time_t value);
 IOTHUB_CLIENT_RESULT set_device_utcoffset(uint16_t instanceId, const char *value);
 IOTHUB_CLIENT_RESULT set_device_timezone(uint16_t instanceId, const char *value);
 IOTHUB_CLIENT_RESULT set_device_devicetype(uint16_t instanceId, const char *value);

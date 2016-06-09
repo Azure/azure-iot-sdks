@@ -44,8 +44,8 @@ IOTHUB_CLIENT_RESULT on_exec_device_reboot(object_device *obj);
 IOTHUB_CLIENT_RESULT on_exec_device_factoryreset(object_device *obj);
 IOTHUB_CLIENT_RESULT on_read_device_batterylevel(object_device *obj, int *value);
 IOTHUB_CLIENT_RESULT on_read_device_memoryfree(object_device *obj, int *value);
-IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, int *value);
-IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, int value);
+IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, time_t *value);
+IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, time_t value);
 IOTHUB_CLIENT_RESULT on_read_device_utcoffset(object_device *obj, char **value);
 IOTHUB_CLIENT_RESULT on_write_device_utcoffset(object_device *obj, const char *value, size_t length);
 IOTHUB_CLIENT_RESULT on_read_device_timezone(object_device *obj, char **value);
@@ -184,7 +184,7 @@ IOTHUB_CLIENT_RESULT set_device_memoryfree(uint16_t instanceId, int value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, int value)
+IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, time_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -192,7 +192,7 @@ IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, int value)
     {
         if (obj->propval_device_currenttime != value)
         {
-            LogInfo("Device_CurrentTime being set to %d", value);
+            LogInfo("Device_CurrentTime being set to %lld", value);
             obj->propval_device_currenttime = value;
 
             obj->resourceUpdated[INDEX_DEVICE_CURRENTTIME] = (char)true;
@@ -365,6 +365,7 @@ IOTHUB_CLIENT_RESULT create_device_object(IOTHUB_CLIENT_HANDLE h, uint16_t *inst
         LogError("Failed registering dispatchers");
         res = IOTHUB_CLIENT_ERROR;
     }
+
     else
     {
         object_device *obj = (object_device *)lwm2m_malloc(sizeof(object_device));
@@ -373,6 +374,7 @@ IOTHUB_CLIENT_RESULT create_device_object(IOTHUB_CLIENT_HANDLE h, uint16_t *inst
             LogError("malloc failure");
             res = IOTHUB_CLIENT_ERROR;
         }
+
         else
         {
             memset(obj,0,sizeof(*obj));
@@ -387,6 +389,7 @@ IOTHUB_CLIENT_RESULT create_device_object(IOTHUB_CLIENT_HANDLE h, uint16_t *inst
                 destroy_device_object(obj);
                 obj = NULL;
             }
+
             else
             {
                 set_default_device_property_values(obj);

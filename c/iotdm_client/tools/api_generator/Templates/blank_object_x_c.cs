@@ -327,7 +327,6 @@ foreach (var prop in allProps)
 
                     break;
                 case LWM2MObjectItemType.Integer:
-                case LWM2MObjectItemType.Time:
 
             
             #line default
@@ -347,6 +346,44 @@ foreach (var prop in allProps)
             #line default
             #line hidden
             this.Write(" being set to %d\", value);\r\n            obj->");
+            
+            #line 123 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
+            
+            #line default
+            #line hidden
+            this.Write(" = value;\r\n\r\n            obj->resourceUpdated[INDEX_");
+            
+            #line 125 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName.ToUpper()));
+            
+            #line default
+            #line hidden
+            this.Write("] = (char)true;\r\n        }\r\n\r\n        result = IOTHUB_CLIENT_OK;\r\n");
+            
+            #line 129 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+
+                    break;
+                case LWM2MObjectItemType.Time:
+
+            
+            #line default
+            #line hidden
+            this.Write("        if (obj->");
+            
+            #line 120 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
+            
+            #line default
+            #line hidden
+            this.Write(" != value)\r\n        {\r\n            LogInfo(\"");
+            
+            #line 122 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(prop.PropertyName));
+            
+            #line default
+            #line hidden
+            this.Write(" being set to %lld\", value);\r\n            obj->");
             
             #line 123 "D:\Workspaces\azure-iot-sdks\c\iotdm_client\tools\api_generator\Templates\blank_object_x_c.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(prop.SampleVariableName));
