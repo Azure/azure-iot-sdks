@@ -69,7 +69,7 @@ goto args-loop
 rem -----------------------------------------------------------------------------
 rem -- build device explorer
 rem -----------------------------------------------------------------------------
-call nuget restore "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln"
 if %build-clean%==1 (
     call :clean-a-solution "%build-root%\..\tools\deviceexplorer\deviceexplorer.sln" %build-config% %build-platform%
     if not !errorlevel!==0 exit /b !errorlevel!
