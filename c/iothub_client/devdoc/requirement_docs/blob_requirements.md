@@ -65,7 +65,7 @@ Steps to follow when size >= 64MB
 Design considerations: Blob_UploadFromSasUri will break the souce into 4MB blocks.
 These blocks have the IDs starting from 000000 and ending with 049999 (potentially). 
     Note: the URL encoding of the BASE64 of these numbers is the same as the BASE64 representation (therefore no URL encoding needed)
-Blocks are uploaded serially by "Put block" REST API. After all the blocks have been uploaded, a "Put Block List" is executed.
+Blocks are uploaded serially by "Put Block" REST API. After all the blocks have been uploaded, a "Put Block List" is executed.
 
 **SRS_BLOB_02_017: [** `Blob_UploadFromSasUri` shall copy from `SASURI` the hostname to a new const char\* **]**
 **SRS_BLOB_02_018: [** `Blob_UploadFromSasUri` shall create a new `HTTPAPI_EX_HANDLE` by calling `HTTPAPIEX_Create` passing the hostname. **]**

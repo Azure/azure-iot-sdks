@@ -531,7 +531,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_malloc_fails)
 }
 
 /*Tests_SRS_BLOB_02_005: [ If the hostname cannot be determined, then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
-TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_1)
+TEST_FUNCTION(Blob_UploadFromSasUri_when_SasUri_is_wrong_fails_1)
 {
     ///arrange
     unsigned char c = '3';
@@ -547,7 +547,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_1)
 }
 
 /*Tests_SRS_BLOB_02_005: [ If the hostname cannot be determined, then Blob_UploadFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
-TEST_FUNCTION(Blob_UploadFromSasUri_fails_when_SasUri_is_wrong_fails_2)
+TEST_FUNCTION(Blob_UploadFromSasUri_when_SasUri_is_wrong_fails_2)
 {
     ///arrange
     unsigned char c = '3';
