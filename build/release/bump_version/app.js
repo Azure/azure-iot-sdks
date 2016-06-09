@@ -13,7 +13,7 @@ var XMLSerializer = require('xmldom').XMLSerializer;
 var versions = require('./versions.json');
 var inputs = require('./inputs');
 var colors = require('colors');
-var basePath = path.normalize(__dirname + '../../../..');
+var basePath = path.normalize(__dirname + '/../../..');
 
 function main() {
     // process all inputs
@@ -122,7 +122,7 @@ var TaskRunners = {
         ], callback);
     },
     
-    xmlReplaceTask: function(filePath, selector, replace_string, callback) {
+    xmlReplaceTask: function(filePath, selector, replace_string, callback, input) {
         async.waterfall([
             function(cb) {
                 fs.readFile(filePath, 'utf-8', cb);
@@ -136,7 +136,7 @@ var TaskRunners = {
 
                 // we expect selectors to match only one node
                 var nodes = select(selector, doc);
-                if(nodes.length > 0) {
+                if(!!nodes && nodes.length > 0) {
                     var textNode = nodes[0].childNodes[0];
                     textNode.replaceData(0, textNode.data.length, replace_string);
     

@@ -529,11 +529,7 @@ namespace Microsoft.Azure.Devices.Client
                         // correct this gap. The intention of setting this two variable is
                         // so that GetBody should not be called and all Properties are
                         // readonly because the amqpMessage has been serialized.
-                        if (setBodyCalled)
-                        {
-                            this.SetGetBodyCalled();
-                        }
-
+                        
                         this.SetSizeInBytesCalled();
                         if (this.bodyStream == null)
                         {

@@ -561,6 +561,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Create(&TEST_CONFIG))
             .SetReturn((IOTHUB_CLIENT_LL_HANDLE)NULL);
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
         // act
@@ -900,6 +901,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
@@ -925,6 +927,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 			.SetFailReturn((LOCK_RESULT)LOCK_ERROR);
 
 		STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
 		STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
 		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
@@ -992,6 +995,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(TEST_THREAD_HANDLE, IGNORED_PTR_ARG))
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
@@ -1023,6 +1027,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
 
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
@@ -1058,6 +1063,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
         // act
@@ -1089,6 +1095,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
         // act

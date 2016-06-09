@@ -27,14 +27,6 @@ call windows_slow.cmd
 if errorlevel 1 goto :eof
 cd %build-root%\build\release
 
-rem -----------------------------------------------------------------------------
-rem -- Release mbed code
-rem -----------------------------------------------------------------------------
-if not defined nuget_feed (
-	call release_mbed.cmd
-) else (
-	echo "Skipping releasing MBED (for dry run)."
-)
 
 rem -----------------------------------------------------------------------------
 rem -- Publish C nuget packages

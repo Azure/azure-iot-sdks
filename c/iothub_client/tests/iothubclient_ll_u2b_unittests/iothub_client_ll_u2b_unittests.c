@@ -186,7 +186,7 @@ static const void* provideFAKE(void);
 #define TEST_STRING_HANDLE_DEVICE_SAS ((STRING_HANDLE)0x2)
 
 #define TEST_API_VERSION "?api-version=2016-02-03"
-#define TEST_IOTHUB_SDK_VERSION "1.0.7"
+#define TEST_IOTHUB_SDK_VERSION "1.0.8"
 
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_SAS =
 {

@@ -19,6 +19,7 @@ for %%i in ("%repo_root%") do set repo_root=%%~fi
 echo Build Root: %build-root%
 echo Repo Root: %repo_root%
 
+set cmake-root=%build-root%
 rem -----------------------------------------------------------------------------
 rem -- check prerequisites
 rem -----------------------------------------------------------------------------
@@ -50,6 +51,7 @@ if "%1" equ "--run-longhaul-tests" goto arg-longhaul-tests
 if "%1" equ "--skip-unittests" goto arg-skip-unittests
 if "%1" equ "--use-websockets" goto arg-use-websockets
 if "%1" equ "--make_nuget" goto arg-build-nuget
+if "%1" equ "--cmake-root" goto arg-cmake-root
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -96,6 +98,12 @@ if "%1" equ "" call :usage && exit /b 1
 set MAKE_NUGET_PKG=%1
 set CMAKE_skip_unittests=ON
 set build-samples=no
+goto args-continue
+
+:arg-cmake-root
+shift
+if "%1" equ "" call :usage && exit /b 1
+set cmake-root=%1
 goto args-continue
 
 :args-continue
@@ -193,15 +201,15 @@ if %CMAKE_use_wsio% == ON (
 	echo WebSockets support only available for x86 platform.
 )
 
-if EXIST %build-root%\cmake\%CMAKE_DIR% (
-    rmdir /s/q %build-root%\cmake\%CMAKE_DIR%
+if EXIST %cmake-root%\cmake\%CMAKE_DIR% (
+    rmdir /s/q %cmake-root%\cmake\%CMAKE_DIR%
     rem no error checking
 )
 
-echo CMAKE Output Path: %build-root%\cmake\%CMAKE_DIR%
-mkdir %build-root%\cmake\%CMAKE_DIR%
+echo CMAKE Output Path: %cmake-root%\cmake\%CMAKE_DIR%
+mkdir %cmake-root%\cmake\%CMAKE_DIR%
 rem no error checking
-pushd %build-root%\cmake\%CMAKE_DIR%
+pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
@@ -210,21 +218,21 @@ if %MAKE_NUGET_PKG% == yes (
     popd
 	
     echo ***Running CMAKE for Win64***
-    if EXIST %build-root%\cmake\iotsdk_win64 (
-        rmdir /s/q %build-root%\cmake\iotsdk_win64
+    if EXIST %cmake-root%\cmake\iotsdk_win64 (
+        rmdir /s/q %cmake-root%\cmake\iotsdk_win64
     )
-	mkdir %build-root%\cmake\iotsdk_win64
-	pushd %build-root%\cmake\iotsdk_win64
+	mkdir %cmake-root%\cmake\iotsdk_win64
+	pushd %cmake-root%\cmake\iotsdk_win64
 	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 Win64"
 	if not %errorlevel%==0 exit /b %errorlevel%
     popd
 
     echo ***Running CMAKE for ARM***
-    if EXIST %build-root%\cmake\iotsdk_arm (
-        rmdir /s/q %build-root%\cmake\iotsdk_arm
+    if EXIST %cmake-root%\cmake\iotsdk_arm (
+        rmdir /s/q %cmake-root%\cmake\iotsdk_arm
     )
-	mkdir %build-root%\cmake\iotsdk_arm
-	pushd %build-root%\cmake\iotsdk_arm
+	mkdir %cmake-root%\cmake\iotsdk_arm
+	pushd %cmake-root%\cmake\iotsdk_arm
 	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 ARM"
 	if not %errorlevel%==0 exit /b %errorlevel%
 
@@ -244,16 +252,16 @@ if %MAKE_NUGET_PKG% == yes (
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Building all configurations***
-	msbuild /m %build-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Release
-	msbuild /m %build-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Debug
+	msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Release
+	msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Debug
 	if not %errorlevel%==0 exit /b %errorlevel%
 
-	msbuild /m %build-root%\cmake\iotsdk_win64\azure_iot_sdks.sln /p:Configuration=Release
-	msbuild /m %build-root%\cmake\iotsdk_win64\azure_iot_sdks.sln /p:Configuration=Debug
+	msbuild /m %cmake-root%\cmake\iotsdk_win64\azure_iot_sdks.sln /p:Configuration=Release
+	msbuild /m %cmake-root%\cmake\iotsdk_win64\azure_iot_sdks.sln /p:Configuration=Debug
 	if not %errorlevel%==0 exit /b %errorlevel%
 
-	msbuild /m %build-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Release
-	msbuild /m %build-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Debug
+	msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Release
+	msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Debug
 	if not %errorlevel%==0 exit /b %errorlevel%
 	
 ) else (
@@ -292,6 +300,8 @@ echo  --run-e2e-tests       run end-to-end tests
 echo  --run-longhaul-tests  run long-haul tests
 echo  --use-websockets        Enables the support for AMQP over WebSockets.
 echo  --make_nuget ^<value^>  [no] generates the binaries to be used for nuget packaging (e.g. yes, no)
+echo  --cmake-root			Directory to place the cmake files used for building the project
+
 goto :eof
 
 
