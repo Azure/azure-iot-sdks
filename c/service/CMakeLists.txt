@@ -11,4 +11,6 @@ include_directories(${PARSON_INC_FOLDER})
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/../iothub_client/inc CACHE INTERNAL "this is what needs to be included if using iothub_message" FORCE)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
-add_subdirectory(iothub_service_client)
+if(${use_http} AND ${use_amqp})
+	add_subdirectory(iothub_service_client)
+endif()

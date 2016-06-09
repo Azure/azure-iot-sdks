@@ -16,26 +16,61 @@ On a Linux 64-bit Ubuntu 14.04 follow these steps to build the latest Yocto buil
 
 Below are the commands we used to create the image:
 
-    ```
-    sudo apt-get -y install build-essential git diffstat gawk chrpath texinfo libtool gcc-multilib libsdl1.2-dev u-boot-tools
-    mkdir -p ~/src/edison
-    cd ~/src/edison
-    curl -O http://downloadmirror.intel.com/25028/eng/edison-src-ww25.5-15.tgz
-    tar xfvz edison-src-ww25.5-15.tgz
-    cd edison-src
-    ./meta-intel-edison/setup.sh --parallel_make=4 --bb_number_thread=4
-    cd out/linux64
-    source poky/oe-init-build-env
-    bitbake -c fetchall edison-image
-    bitbake edison-image
-    mkdir ~/src/edison/edison-src/build
-    cd ~/src/edison/edison-src/
-    ln -s ~/src/edison/edison-src/out/linux64/build/tmp ~/src/edison/edison-src/build/tmp
-    ./meta-intel-edison/utils/flash/postBuild.sh
-    cd build/toFlash/
-    rm ~/edison.zip
-    zip -r ~/edison.zip .
-    ```
+```
+sudo apt-get -y install build-essential git diffstat gawk chrpath texinfo libtool gcc-multilib libsdl1.2-dev u-boot-tools
+mkdir -p ~/src/edison
+cd ~/src/edison
+curl -O http://downloadmirror.intel.com/25028/eng/edison-src-ww25.5-15.tgz
+tar xfvz edison-src-ww25.5-15.tgz
+cd edison-src
+./meta-intel-edison/setup.sh --parallel_make=4 --bb_number_thread=4
+cd out/linux64
+source poky/oe-init-build-env
+bitbake -c fetchall edison-image
+```
+
+>Note: We've recently seen the following errors when running `bitbake -c fetchall edison-image`:
+>
+>```
+>ERROR: Fetcher failure: Fetch command failed with exit code 128, output:
+>Cloning into bare repository '~/src/edison/edison-src/bbcache/downloads/git2/git.eclipse.org.gitroot.paho.org.eclipse.paho.mqtt.c.git'...
+>fatal: repository 'http://git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.c.git/' not found
+>
+>ERROR: Function failed: Fetcher failure for URL: 'git://git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.c.git;protocol=http'. Unable to fetch URL from any source.
+>ERROR: Logfile of failure stored in: ~/src/edison/edison-src/out/linux64/build/tmp/work/core2-32-poky-linux/paho-mqtt/3.1-r1/temp/log.do_fetch.45221
+>ERROR: Task 105 (~/src/edison/edison-src/out/linux64/poky/meta-intel-iot-middleware/recipes-connectivity/paho-mqtt/paho-mqtt_3.1.bb, do_fetch) failed with exit code '1'
+>```
+>
+>You can work around these errors by opening ~/src/edison/edison-src/meta-intel-edison/meta-intel-edison-distro/recipes-core/images/edison-image.bb and commenting out lines to match the following:
+>
+>```
+># Edison Middleware stuff
+>IMAGE_INSTALL += "packagegroup-core-buildessential"
+># IMAGE_INSTALL += "iotkit-opkg"
+>IMAGE_INSTALL += "zeromq-dev"
+>IMAGE_INSTALL += "cppzmq-dev"
+># IMAGE_INSTALL += "paho-mqtt-dev"
+>IMAGE_INSTALL += "mdns-dev"
+># IMAGE_INSTALL += "iotkit-comm-js"
+># IMAGE_INSTALL += "iotkit-comm-c-dev"
+># IMAGE_INSTALL += "iotkit-agent"
+># IMAGE_INSTALL += "iotkit-lib-c-dev"
+>IMAGE_INSTALL += "xdk-daemon"
+>IMAGE_INSTALL += "oobe"
+>```
+>
+>Now re-run the previous bitbake command, and continue with the proceeding instructions.
+
+```
+bitbake edison-image
+mkdir ~/src/edison/edison-src/build
+cd ~/src/edison/edison-src/
+ln -s ~/src/edison/edison-src/out/linux64/build/tmp ~/src/edison/edison-src/build/tmp
+./meta-intel-edison/utils/flash/postBuild.sh
+cd build/toFlash/
+rm ~/edison.zip
+zip -r ~/edison.zip .
+```
 
 Note: the bitbake image build process is particularly sensitive to the differences between dashes and underscores. Dashers are a character that you can use in identifiers. Underscores can sometimes be used in identifiers, but they are also sometimes used as a separator. You should pay particular attention to the difference between dashes and underscores in these instructions
 
@@ -81,7 +116,7 @@ Any deviations on the formatting of the **wpa\_supplicant.conf-sane** file can c
     ./do_populate.sh
     ```
 
--   Edit **~/src/edison/edison-src/meta-intel-edison/meta-intel-edison-distro/recipes-support/iotdm-edison-sample/iotdm-edison-sample.bb** and add this line at the bottom:
+-   Edit **~/src/edison/edison-src/meta-intel-edison/meta-intel-edison-distro/recipes-core/images/edison-image.bb** and add this line at the bottom:
 
     ```
     IMAGE_INSTALL += "iotdm-edison-sample"

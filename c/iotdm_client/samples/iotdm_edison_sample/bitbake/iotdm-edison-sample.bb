@@ -17,7 +17,7 @@ PROVIDES = "iotdm-edison-sample"
 DEPENDS = "glib-2.0 curl openssl util-linux"
  
 #parameters to cmake
-EXTRA_OECMAKE = "-Drun_valgrind:BOOL=OFF -DcompileOption_C:STRING=OFF -Drun_e2e_tests:BOOL=OFF -Drun_longhaul_tests=OFF -Duse_amqp:BOOL=OFF -Duse_http:BOOL=ON -Duse_mqtt:BOOL=OFF -Dskip_unittests:BOOL=ON"
+EXTRA_OECMAKE = "-Drun_valgrind:BOOL=OFF -DcompileOption_C:STRING=OFF -Drun_e2e_tests:BOOL=OFF -Drun_longhaul_tests=OFF -Duse_amqp:BOOL=OFF -Duse_http:BOOL=OFF -Duse_mqtt:BOOL=OFF -Dskip_unittests:BOOL=ON"
  
 SYSTEMD_SERVICE_${PN} = "iotdm_edison_sample.service"
  

@@ -100,11 +100,11 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
 
 ## Running a firmware update job on the Intel Edison
 
-1.  Create an image using the instructions in [How to create a firmware image for Intel Edison](https://github.com/Azure/azure-iot-sdks/blob/dmpreview/c/iotdm_client/samples/iotdm_edison_sample/how_to_create_an_image_for_Intel_Edison.md)
+1.  Create an image using the instructions in [How to create a firmware image for Intel Edison](https://github.com/Azure/azure-iot-sdks/blob/dmpreview/c/iotdm_client/samples/iotdm_edison_sample/how_to_create_an_image_for_Intel_Edison.md).
 
-2.  Transfer your new image “edison.zip” to your Edison device. Place it in the folder ~/home/root/
+2.  Transfer your new image “edison.zip” to your Edison device. Place it in the folder /home/root/.
 
-3.  In your ~/home/root/ folder create a file called "**.cs**" and add your device connection string to it. Save the file.
+3.  In your /home/root/ folder create a file called "**.cs**" and add your device connection string to it. Save the file.
 
 4.  Run the iotdm\_edison\_sample application you created earlier:
 
