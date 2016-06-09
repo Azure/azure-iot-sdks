@@ -2,7 +2,7 @@ CODEGEN_INSTALLATION_DIR = $(ti.targets.arm.elf.M4)
 CC = $(ti.targets.arm.elf.M4)/bin/armcl
 LD = $(ti.targets.arm.elf.M4)/bin/armcl -z
 
-XDCPATH = $(NS_INSTALLATION_DIR)/packages/;$(BIOS_INSTALLATION_DIR)/packages;$(TIRTOS_INSTALLATION_DIR)/packages;$(UIA_INSTALLATION_DIR)/packages;
+XDCPATH = $(NS_INSTALLATION_DIR)/packages/;$(BIOS_INSTALLATION_DIR)/packages;$(TIRTOS_INSTALLATION_DIR)/packages;$(UIA_INSTALLATION_DIR)/packages;$(CC3200SDK_INSTALLATION_DIR)/simplelink_extlib/provisioninglib
 CONFIGURO = $(XDCTOOLS_INSTALLATION_DIR)/xs --xdcpath="$(XDCPATH)" xdc.tools.configuro
 
 TARGET = ti.targets.arm.elf.M4

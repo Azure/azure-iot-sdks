@@ -33,7 +33,7 @@ XDCARGS= \
     ti.targets.arm.elf.M4=\"$(ti.targets.arm.elf.M4)\"
 
 # Set XDCPATH to contain necessary repositories.
-XDCPATH = $(NS_INSTALLATION_DIR)/packages;$(BIOS_INSTALLATION_DIR)/packages;$(TIRTOS_INSTALLATION_DIR)/packages;$(WOLFSSL_INSTALLATION_DIR)/tirtos/packages;$(NDK_INSTALLATION_DIR)/packages
+XDCPATH = $(NS_INSTALLATION_DIR)/packages;$(BIOS_INSTALLATION_DIR)/packages;$(TIRTOS_INSTALLATION_DIR)/packages;$(WOLFSSL_INSTALLATION_DIR)/tirtos/packages;$(NDK_INSTALLATION_DIR)/packages;$(CC3200SDK_INSTALLATION_DIR)/simplelink_extlib/provisioninglib
 export XDCPATH
 
 #
