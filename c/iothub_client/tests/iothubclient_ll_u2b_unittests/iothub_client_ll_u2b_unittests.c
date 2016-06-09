@@ -495,29 +495,6 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_with_NULL_source_and_non_zero_size_fa
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_with_64MB_size_fails)
-{
-    ///arrange
-    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS);
-    void* arr = malloc(64 * 1024 * 1024);
-    ASSERT_IS_NOT_NULL(arr);
-
-    umock_c_reset_all_calls();
-
-
-    ///act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, "text.txt", (const unsigned char*)arr, 64*1024*2014);
-
-    ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    ///cleanup
-    free(arr);
-    IoTHubClient_LL_UploadToBlob_Destroy(h);
-}
-
-
 /*Tests_SRS_IOTHUBCLIENT_LL_02_064: [ IoTHubClient_LL_UploadToBlob shall create an HTTPAPIEX_HANDLE to the IoTHub hostname. ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_066: [ IoTHubClient_LL_UploadToBlob shall create an HTTP relative path formed from "/devices/" + deviceId + "/files/" + destinationFileName + "?api-version=API_VERSION". ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_068: [ IoTHubClient_LL_UploadToBlob shall create an HTTP responseContent BUFFER_HANDLE. ]*/

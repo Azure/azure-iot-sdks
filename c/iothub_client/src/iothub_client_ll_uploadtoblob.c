@@ -607,8 +607,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
     if (
         (handle == NULL) ||
         (destinationFileName == NULL) ||
-        ((source == NULL) && (size > 0)) ||
-        (size >= 64*1024*1024)
+        ((source == NULL) && (size > 0))
         )
     {
         LogError("invalid argument detected handle=%p destinationFileName=%p source=%p size=%zu", handle, destinationFileName, source, size);
