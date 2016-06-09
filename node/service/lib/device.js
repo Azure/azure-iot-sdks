@@ -44,6 +44,18 @@ var AuthenticationMechanism = function (authInfo) {
       },
     }
   });
+  Object.defineProperties(this, {
+    'x509Thumbprint': {
+      enumerable: true,
+      get: function () {
+        if (authInfo) {
+          return authInfo.x509Thumbprint;
+        } else {
+          return undefined;
+        }
+      },
+    }
+  });
 };
 
 /**
