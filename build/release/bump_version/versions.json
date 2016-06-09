@@ -2,6 +2,9 @@
     "c": {
         "device": "1.0.8"
     },
+    "c_arduino": {
+        "device": "1.0.8"
+    },
     "c_nuget": {
         "device": "1.0.9"
     },

@@ -12,7 +12,7 @@ Simply changing the using the convenience layer (functions not having _LL)
 and removing calls to _DoWork will yield the same results. */
 
 #ifdef ARDUINO
-#include "AzureIoT.h"
+#include "AzureIoTHub.h"
 #else
 #include "serializer.h"
 #include "iothub_client_ll.h"

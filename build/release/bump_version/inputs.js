@@ -39,6 +39,22 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
+        "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTHub/library.properties",
+        "search": "(version\\=)(.*)",
+        "replaceString": function(versions) {
+            return '$1' + versions.c_arduino.device;
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTHub/src/AzureIoTHub.h",
+        "search": "(AzureIoTHubVersion\\=)([ ]+)(\".*\")",
+        "replaceString": function(versions) {
+            return '$1' + '$2' + '"' + versions.c_arduino.device + '"';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
         "filePath": "c/iothub_client/tests/version_unittests/version_unittests.cpp",
         "search": "(\\\".*\\\")([ \t]*\\,[ \t]*IOTHUB\\_SDK\\_VERSION)",
         "replaceString": function(versions) {
