@@ -108,7 +108,7 @@ static IOTHUB_CLIENT_RESULT on_read_valid_float(object_fake_readonly *obj, doubl
     return IOTHUB_CLIENT_OK;
 }
 
-static IOTHUB_CLIENT_RESULT on_read_valid_time(object_fake_readonly *obj, int *value)
+static IOTHUB_CLIENT_RESULT on_read_valid_time(object_fake_readonly *obj, time_t *value)
 {
     *value = VALID_TIME;
     return IOTHUB_CLIENT_OK;
