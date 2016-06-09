@@ -14,6 +14,7 @@ and removing calls to _DoWork will yield the same results. */
 #else
 #include "iothub_client_ll.h"
 #include "iothub_message.h"
+#include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothubtransporthttp.h"
 #include "azure_c_shared_utility/platform.h"
@@ -29,6 +30,8 @@ and removing calls to _DoWork will yield the same results. */
 static const char* connectionString = "[device connection string]";
 
 static int callbackCounter;
+#define MESSAGE_COUNT 5
+static bool g_continueRunning;
 
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
@@ -52,6 +55,10 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     else
     {
         (void)printf("Received Message [%d] with Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
+        if (memcmp(buffer, "quit", size) == 0)
+        {
+            g_continueRunning = false;
+        }
     }
 
     // Retrieve properties from the message
@@ -102,6 +109,7 @@ void iothub_client_sample_http_run(void)
     EVENT_INSTANCE messages[MESSAGE_COUNT];
     double avgWindSpeed = 10.0;
     int receiveContext = 0;
+    g_continueRunning = true;
 
     srand((unsigned int)time(NULL));
 
@@ -152,52 +160,57 @@ void iothub_client_sample_http_run(void)
             }
             else
             {
-                int i;
-
                 (void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
 
                 /* Now that we are ready to receive commands, let's send some messages */
-                for (i = 0; i < MESSAGE_COUNT; i++)
+                size_t iterator = 0;
+                do
                 {
-                    sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"myFirstDevice\",\"windSpeed\": %.2f}", avgWindSpeed + (rand() % 4 + 2));
-                    if ((messages[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
+                    if (iterator < MESSAGE_COUNT)
                     {
-                        (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
-                    }
-                    else
-                    {
-                        MAP_HANDLE propMap;
-
-                        messages[i].messageTrackingId = i;
-
-                        propMap = IoTHubMessage_Properties(messages[i].messageHandle);
-                        sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
-                        if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                        sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"myFirstDevice\",\"windSpeed\": %.2f}", avgWindSpeed + (rand() % 4 + 2));
+                        if ((messages[iterator].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
                         {
-                            (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
-                        }
-
-                        if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[i].messageHandle, SendConfirmationCallback, &messages[i]) != IOTHUB_CLIENT_OK)
-                        {
-                            (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
+                            (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
                         }
                         else
                         {
-                            (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub.\r\n", i);
+                            MAP_HANDLE propMap;
+
+                            messages[iterator].messageTrackingId = iterator;
+
+                            propMap = IoTHubMessage_Properties(messages[iterator].messageHandle);
+                            sprintf_s(propText, sizeof(propText), "PropMsg_%d", iterator);
+                            if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                            {
+                                (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
+                            }
+
+                            if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[iterator].messageHandle, SendConfirmationCallback, &messages[iterator]) != IOTHUB_CLIENT_OK)
+                            {
+                                (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
+                            }
+                            else
+                            {
+                                (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub.\r\n", iterator);
+                            }
+
                         }
-
                     }
-                }
-            }
+                    IoTHubClient_LL_DoWork(iotHubClientHandle);
+                    ThreadAPI_Sleep(1);
 
-            /* Wait for Commands. */
-            while (1)
-            {
-                IoTHubClient_LL_DoWork(iotHubClientHandle);
+                    iterator++;
+                } while (g_continueRunning);
             }
-
             IoTHubClient_LL_Destroy(iotHubClientHandle);
         }
         platform_deinit();
     }
+}
+
+int main(void)
+{
+    iothub_client_sample_http_run();
+    return 0;
 }
