@@ -6,9 +6,13 @@ namespace Microsoft.Azure.Devices.Common.Security
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+#if WINDOWS_UWP
+    using PCLCrypto;
+#else
     using System.Security.Cryptography;
+#endif
     using System.Text;
-    using System.Web;
+    using System.Net;
 
     public sealed class SharedAccessSignatureBuilder
     {
@@ -47,7 +51,7 @@ namespace Microsoft.Azure.Devices.Common.Security
         static string BuildSignature(string keyName, string key, string target, TimeSpan timeToLive)
         {
             string expiresOn = BuildExpiresOn(timeToLive);
-            string audience = HttpUtility.UrlEncode(target);
+            string audience = WebUtility.UrlEncode(target);
             List<string> fields = new List<string>();
             fields.Add(audience);
             fields.Add(expiresOn);
@@ -65,13 +69,13 @@ namespace Microsoft.Azure.Devices.Common.Security
             buffer.AppendFormat(CultureInfo.InvariantCulture, "{0} {1}={2}&{3}={4}&{5}={6}",
                 SharedAccessSignatureConstants.SharedAccessSignature,
                 SharedAccessSignatureConstants.AudienceFieldName, audience,
-                SharedAccessSignatureConstants.SignatureFieldName, HttpUtility.UrlEncode(signature),
-                SharedAccessSignatureConstants.ExpiryFieldName, HttpUtility.UrlEncode(expiresOn));
+                SharedAccessSignatureConstants.SignatureFieldName, WebUtility.UrlEncode(signature),
+                SharedAccessSignatureConstants.ExpiryFieldName, WebUtility.UrlEncode(expiresOn));
 
             if (!string.IsNullOrEmpty(keyName))
             {
                 buffer.AppendFormat(CultureInfo.InvariantCulture, "&{0}={1}",
-                    SharedAccessSignatureConstants.KeyNameFieldName, HttpUtility.UrlEncode(keyName));
+                    SharedAccessSignatureConstants.KeyNameFieldName, WebUtility.UrlEncode(keyName));
             }
 
             return buffer.ToString();
@@ -87,10 +91,18 @@ namespace Microsoft.Azure.Devices.Common.Security
 
         static string Sign(string requestString, string key)
         {
+#if WINDOWS_UWP
+            var algorithm = WinRTCrypto.MacAlgorithmProvider.OpenAlgorithm(MacAlgorithm.HmacSha256);
+            var hash = algorithm.CreateHash(Convert.FromBase64String(key));
+            hash.Append(Encoding.UTF8.GetBytes(requestString));
+            var mac = hash.GetValueAndReset();
+            return Convert.ToBase64String(mac);
+#else
             using (var hmac = new HMACSHA256(Convert.FromBase64String(key)))
             {
                 return Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(requestString)));
             }
+#endif
         }
     }
 }

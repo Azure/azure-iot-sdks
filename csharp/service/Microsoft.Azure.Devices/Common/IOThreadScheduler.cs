@@ -3,6 +3,7 @@
 
 namespace Microsoft.Azure.Devices.Common
 {
+#if !WINDOWS_UWP
     using System.Threading;
     using System.Security;
     using System;
@@ -429,7 +430,7 @@ namespace Microsoft.Azure.Devices.Common
             }
         }
 
-#endif 
+#endif
 
         // TryEnqueueWorkItem and DequeueWorkItem use the slot's 'gate' field for synchronization.  Because the
         // slot array is circular and there are no locks, we must assume that multiple threads can be entering each
@@ -655,4 +656,5 @@ namespace Microsoft.Azure.Devices.Common
             }
         }
     }
+#endif
 }

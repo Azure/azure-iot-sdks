@@ -11,7 +11,9 @@ namespace Microsoft.Azure.Devices
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+#if !WINDOWS_UWP
     using System.Net.Http.Formatting;
+#endif
     using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
@@ -103,6 +105,10 @@ namespace Microsoft.Azure.Devices
         {
             T result = default(T);
 
+#if WINDOWS_UWP
+            throw new NotImplementedException("ObjectContent class is missing");
+#else
+
             await this.ExecuteAsync(
                     HttpMethod.Put,
                     new Uri(this.baseAddress, requestUri),
@@ -115,7 +121,7 @@ namespace Microsoft.Azure.Devices
                     async (httpClient, token) => result = await ReadResponseMessageAsync<T>(httpClient, token),
                     errorMappingOverrides,
                     cancellationToken);
-
+#endif
             return result;
         }
 
@@ -126,6 +132,9 @@ namespace Microsoft.Azure.Devices
                 return (T) (object)message;
             }
 
+#if WINDOWS_UWP
+            throw new NotImplementedException("missing API");
+#else
             T entity = await message.Content.ReadAsAsync<T>(token);
 
             // Etag in the header is considered authoritative
@@ -140,6 +149,7 @@ namespace Microsoft.Azure.Devices
             }
 
             return entity;
+#endif
         }
 
         static Task AddCustomHeaders(HttpRequestMessage requestMessage, IDictionary<string, string> customHeaders)
@@ -274,7 +284,11 @@ namespace Microsoft.Azure.Devices
                         }
                         else
                         {
+#if WINDOWS_UWP
+                            throw new NotImplementedException("missing API 2!");
+#else
                             requestMsg.Content = new ObjectContent<T1>(entity, new JsonMediaTypeFormatter());
+#endif
                         }
                     }
 

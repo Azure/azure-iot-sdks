@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.Azure.Devices</id>
+    <version>$Version$</version>
+    <title>Microsoft Azure IoT Service SDK</title>
+    <authors>Microsoft</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/master/LICENSE</licenseUrl>
+    <description>Service SDK for Azure IoT Devices</description>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
+    <language>en-US</language>
+    <dependencies>
+      <group targetFramework="net45" >
+        <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
+        <dependency id="Microsoft.AspNet.WebApi.Core" version="5.2.3" />
+        <dependency id="Microsoft.Azure.Amqp" version="1.1.5" />
+        <dependency id="PCLCrypto" version="1.0.86" />
+      </group>
+      <group targetFramework="uap">
+        <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
+        <dependency id="Microsoft.Azure.Amqp" version="1.1.5" />
+        <dependency id="PCLCrypto" version="1.0.86" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="System.Net.Http" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="System.Runtime.Serialization" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.5.1" />
+    </frameworkAssemblies>
+  </metadata>
+  <files>
+    <file src="..\..\..\thirdpartynotice.txt" target="thirdpartynotice.txt" />
+    <file src="..\Microsoft.Azure.Devices\bin\release_delay_sign\Microsoft.Azure.Devices.dll" target="lib\net451\Microsoft.Azure.Devices.dll" />
+    <file src="..\Microsoft.Azure.Devices\bin\release_delay_sign\Microsoft.Azure.Devices.XML" target="lib\net451\Microsoft.Azure.Devices.XML" />
+    <file src="..\Microsoft.Azure.Devices.Uwp\bin\release_delay_sign\Microsoft.Azure.Devices.Uwp.dll" target="lib\uap10.0\Microsoft.Azure.Devices.Uwp.dll" />
+    <file src="..\Microsoft.Azure.Devices.Uwp\bin\release_delay_sign\Microsoft.Azure.Devices.Uwp.XML" target="lib\uap10.0\Microsoft.Azure.Devices.Uwp.XML" />
+  </files>
+</package>

@@ -507,7 +507,12 @@ namespace Microsoft.Azure.Devices.Common
                     // byte overhead for an array so we use 85000-24=84976 as the limit
                     if (bufferSize < 84976)
                     {
+#if WINDOWS_UWP
+                        // Consider fallback to LargeBufferPool
+                        throw new NotImplementedException();
+#else
                         return new SynchronizedBufferPool(bufferSize, limit);
+#endif
                     }
                     else
                     {
@@ -515,6 +520,7 @@ namespace Microsoft.Azure.Devices.Common
                     }
                 }
 
+#if !WINDOWS_UWP
                 class SynchronizedBufferPool : BufferPool
                 {
                     SynchronizedPool<byte[]> innerPool;
@@ -540,7 +546,7 @@ namespace Microsoft.Azure.Devices.Common
                         return this.innerPool.Return(buffer);
                     }
                 }
-
+#endif
                 class LargeBufferPool : BufferPool
                 {
                     Stack<byte[]> items;

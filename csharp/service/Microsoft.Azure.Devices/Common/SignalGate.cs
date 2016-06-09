@@ -6,12 +6,16 @@ namespace Microsoft.Azure.Devices.Common
     using System;
     using System.Threading;
 
+#if !WINDOWS_UWP
     [Fx.Tag.SynchronizationPrimitive(Fx.Tag.BlocksUsing.NonBlocking)]
     //TODO: 171524 - Across remoting boundary Serializable is not sufficient, and requires AsyncResult that derives from MarshalByRefObject.  
     [Serializable]
+#endif
     class SignalGate
     {
+#if !WINDOWS_UWP
         [Fx.Tag.SynchronizationObject(Blocking = false, Kind = Fx.Tag.SynchronizationKind.InterlockedNoSpin)]
+#endif
         int state;
 
         public SignalGate()
@@ -96,8 +100,10 @@ namespace Microsoft.Azure.Devices.Common
         }
     }
 
+#if !WINDOWS_UWP
     [Fx.Tag.SynchronizationPrimitive(Fx.Tag.BlocksUsing.NonBlocking)]
     [Serializable]
+#endif
     class SignalGate<T> : SignalGate
     {
         T Result { get; set; }

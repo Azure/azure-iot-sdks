@@ -217,6 +217,7 @@ namespace Microsoft.Azure.Devices
             }
         }
 
+        /// <summary>
         /// [Required] SequenceNumber of the received message
         /// </summary>
         internal ulong SequenceNumber

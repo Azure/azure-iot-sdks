@@ -9,6 +9,7 @@ namespace Microsoft.Azure.Devices.Common
     
     static class Ticks
     {
+#if !WINDOWS_UWP
         public static long Now
         {
             [Fx.Tag.SecurityNote(Miscellaneous = "Why isn't the SuppressUnmanagedCodeSecurity attribute working in this case?")]
@@ -22,6 +23,7 @@ namespace Microsoft.Azure.Devices.Common
                 return time;
             }
         }
+#endif
 
         public static long FromMilliseconds(int milliseconds)
         {

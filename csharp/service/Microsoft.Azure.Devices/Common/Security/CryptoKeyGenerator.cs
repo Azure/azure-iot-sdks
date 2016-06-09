@@ -4,9 +4,13 @@
 namespace Microsoft.Azure.Devices.Common
 {
     using System;
-    using System.Security.Cryptography;
     using System.Text;
+#if WINDOWS_UWP
+    using Windows.Security.Cryptography;
+#else
     using System.Web.Security;
+    using System.Security.Cryptography;
+#endif
 
     /// <summary>
     /// Utility methods for generating cryptographically secure keys and passwords
@@ -19,12 +23,17 @@ namespace Microsoft.Azure.Devices.Common
 
         public static byte[] GenerateKeyBytes(int keySize)
         {
+#if WINDOWS_UWP
+            Windows.Storage.Streams.IBuffer keyBytesBuffer = CryptographicBuffer.GenerateRandom((uint)keySize);
+            byte[] keyBytes;
+            CryptographicBuffer.CopyToByteArray(keyBytesBuffer, out keyBytes);
+#else
             var keyBytes = new byte[keySize];
             using (var cyptoProvider = new RNGCryptoServiceProvider())
             {
                 cyptoProvider.GetNonZeroBytes(keyBytes);
             }
-
+#endif
             return keyBytes;
         }
 
@@ -33,24 +42,26 @@ namespace Microsoft.Azure.Devices.Common
             return Convert.ToBase64String(GenerateKeyBytes(keySize));
         }
 
+#if !WINDOWS_UWP
         public static string GenerateKeyInHex(int keySize)
         {
             var keyBytes = new byte[keySize];
+            throw new NotImplementedException();
+
             using (var cyptoProvider = new RNGCryptoServiceProvider())
             {
                 cyptoProvider.GetNonZeroBytes(keyBytes);
             }
-
             return BitConverter.ToString(keyBytes).Replace("-", "");
         }
 
         public static Guid GenerateGuid()
         {
             byte[] bytes = new byte[GuidLength];
+            throw new NotImplementedException();
             using (var rng = new RNGCryptoServiceProvider())
             {
                 rng.GetBytes(bytes);
-
             }
 
             var time = BitConverter.ToUInt32(bytes, 0);
@@ -63,7 +74,6 @@ namespace Microsoft.Azure.Devices.Common
             return new Guid(time, time_mid, time_hi_and_ver, bytes[8], bytes[9],
                 bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]);
         }
-
 
         public static string GeneratePassword()
         {
@@ -79,5 +89,6 @@ namespace Microsoft.Azure.Devices.Common
             }
             return password;
         }
+#endif
     }
 }

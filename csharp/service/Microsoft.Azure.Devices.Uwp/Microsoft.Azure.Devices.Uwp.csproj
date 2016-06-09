@@ -1,0 +1,226 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8C408658-3797-4F57-9F37-DE1C086A0685}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.Azure.Devices</RootNamespace>
+    <AssemblyName>Microsoft.Azure.Devices.Uwp</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
+    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_Delay_Sign|AnyCPU'">
+    <OutputPath>bin\Release_Delay_Sign\</OutputPath>
+    <DefineConstants>WINDOWS_UWP;TRACE;RELEASE_DELAY_SIGN</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\Microsoft.Azure.Devices.Uwp.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>1591</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <None Include="project.json" />
+    <PRIResource Include="Resources.resw" />
+    <PRIResource Include="ApiResources.resw" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Microsoft.Azure.Devices\AmqpClientHelper.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\AmqpFeedbackReceiver.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\AmqpFileNotificationReceiver.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\AmqpServiceClient.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\UwpResources.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Amqp\WebSocketConstants.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\ErrorCode.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\TooManyDevicesException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Extensions\AmqpExtensions.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\PerfectHash.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\AuthenticationMechanism.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\AuthenticationMethodFactory.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ClientApiVersionHelper.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\AmqpTrace.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Client\IotHubAmqpProperty.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\CommonConstants.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\CommonResources.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Data\AccessRights.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Data\AmqpErrorMapper.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Data\SharedAccessSignatureAuthorizationRule.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\EventHubPartitionKeyResolver.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\ExceptionDispatcher.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\AssertionFailedException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\CallbackException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\DeviceAlreadyExistsException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\DeviceInvalidResultCountException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\DeviceMaximumQueueDepthExceededException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\DeviceMessageLockLostException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\DeviceNotFoundException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\FatalException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\InvalidProtocolVersionException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\IotHubAmqpErrorCode.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\IotHubCommunicationException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\IotHubException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\IotHubNotFoundException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\IotHubSerializationException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\IotHubSerializationVersionException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\IotHubSuspendedException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\IotHubThrottledException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\JobCancelledException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\JobNotFoundException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\JobQuotaExceededException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\MessageTooLargeException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\PreconditionFailedException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\QuotaExceededException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\ServerBusyException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\ServerErrorException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\ThrottlingException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Exceptions\UnauthorizedException.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\ExceptionTrace.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Extensions\CommonExtensions.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Extensions\DictionaryExtensions.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Extensions\EnumerableExtensions.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Extensions\ExceptionExtensions.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Extensions\MemberInfoExtensions.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Extensions\OtherExtensions.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Extensions\StringFormattingExtensions.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Fx.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\FxCop.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\FxTrace.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\HashCode.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\IAmqpTrace.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\IETagHolder.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\InternalBufferManager.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Interop\SafeEventLogWriteHandle.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Interop\UnsafeNativeMethods.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\IOThreadScheduler.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\IOThreadTimer.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\PartialTrustHelpers.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\ReadOnlyDictionary45.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Security\CryptoKeyGenerator.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Security\ISharedAccessSignatureCredential.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Security\SecurityConstants.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Security\SecurityHelper.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Security\SharedAccessSignature.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Security\SharedAccessSignatureBuilder.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Security\SharedAccessSignatureConstants.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\SerializationUtilities.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\SignalGate.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\SingletonDictionary.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\StringValidationHelper.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\SynchronizedPool.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\TaskHelpers.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Ticks.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\TimeoutHelper.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Timestamp.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\TraceOperation.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Tracing\EventTraceActivity.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\TrackingHelper.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\Utils.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\WaitCallbackActionItem.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\WebApi\CustomHeaderConstants.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\WebApi\ResourceRequest.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\DeliveryAcknowledgement.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\DeliveryFailureReason.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Device.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\DeviceConnectionState.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\BulkRegistryOperationResult.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\DeviceStatus.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\EndpointKind.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ETagHolder.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ExceptionHandlingHelper.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ExportDevicesRequest.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ExportImportDevice.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ExportImportRequest.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\FeedbackBatch.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\FeedbackReceiver.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\FeedbackRecord.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\FeedbackStatusCode.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\FileNotification.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\FileNotificationReceiver.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\HttpClientHelper.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\HttpRegistryManager.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\IAuthenticationMethod.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\IAuthorizationHeaderProvider.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\IHttpClientHelper.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ImportDevicesRequest.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\DeviceRegistryOperationError.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ImportMode.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\PurgeMessageQueueResult.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\IotHubApiResources.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\IotHubConnection.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\IotHubConnectionString.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\IotHubConnectionStringBuilder.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\JobProperties.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\JobStatus.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\JobType.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\MappingType.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Message.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\MessageConverter.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\MessageSystemPropertyNames.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\PutOperationType.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Receiver.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\RegistryManager.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\RegistryStatistics.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ServiceAuthenticationWithSharedAccessPolicyKey.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ServiceAuthenticationWithSharedAccessPolicyToken.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ServiceClient.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\ServiceStatistics.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\SymmetricKey.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\X509Thumbprint.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\UWPSupport.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\IOThreadTimerSlim.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Properties\Microsoft.Azure.Devices.Uwp.rd.xml" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+    <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

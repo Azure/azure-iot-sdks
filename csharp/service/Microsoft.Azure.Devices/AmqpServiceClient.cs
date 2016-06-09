@@ -9,7 +9,6 @@ namespace Microsoft.Azure.Devices
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Web;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Devices.Common;
@@ -120,7 +119,7 @@ namespace Microsoft.Azure.Devices
             Outcome outcome;
             using (AmqpMessage amqpMessage = message.ToAmqpMessage())
             {
-                amqpMessage.Properties.To = "/devices/" + HttpUtility.UrlEncode(deviceId) + "/messages/deviceBound";
+                amqpMessage.Properties.To = "/devices/" + WebUtility.UrlEncode(deviceId) + "/messages/deviceBound";
                 try
                 {
                     SendingAmqpLink sendingLink = await this.GetSendingLinkAsync();
