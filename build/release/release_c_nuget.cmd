@@ -16,12 +16,6 @@ if not defined nuget_feed (
 )
 
 rem -----------------------------------------------------------------------------
-rem -- Auto Sign csharp client with Strong Name & Authenticode
-rem -----------------------------------------------------------------------------
-call %build-root%\build\release\auto_sign_c_client.cmd
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-rem -----------------------------------------------------------------------------
 rem -- Build all native client configurations & platforms
 rem -----------------------------------------------------------------------------
 call %build-root%\c\build_all\windows\build_client.cmd --platform Win32
