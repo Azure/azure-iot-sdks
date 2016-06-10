@@ -117,6 +117,20 @@ rem -- restore packages for solutions
 rem -----------------------------------------------------------------------------
 
 if %build-samples%==yes (
+	where /q nuget.exe
+	if not !errorlevel! == 0 (
+	@Echo Azure IoT SDK needs to download nuget.exe from https://www.nuget.org/nuget.exe 
+	@Echo https://www.nuget.org 
+	choice /C yn /M "Do you want to download and run nuget.exe?" 
+	if not !errorlevel!==1 goto :eof
+	rem if nuget.exe is not found, then ask user
+	Powershell.exe wget -outf nuget.exe https://nuget.org/nuget.exe
+		if not exist .\nuget.exe (
+			echo nuget does not exist
+			exit /b 1
+		)
+	)
+
 	rem call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
 	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
 	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
