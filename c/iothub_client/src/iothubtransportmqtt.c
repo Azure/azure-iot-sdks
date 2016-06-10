@@ -63,7 +63,7 @@ static SYSTEM_PROPERTY_INFO sysPropList[] = {
 	{ "iothub-ack", 10 }
 };
 
-TICK_COUNTER_HANDLE g_msgTickCounter;
+static TICK_COUNTER_HANDLE g_msgTickCounter;
 
 typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 {
@@ -888,7 +888,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
 	return state;
 }
 
-extern TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config)
+static TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config)
 {
 	PMQTTTRANSPORT_HANDLE_DATA result;
 	size_t deviceIdSize;
@@ -956,6 +956,9 @@ extern TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONF
 	return result;
 }
 
+/*forward declaration*/
+static void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle);
+
 static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transportState)
 {
 	/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [If the parameter subscribe is true then IoTHubTransportMqtt_Destroy shall call IoTHubTransportMqtt_Unsubscribe.] */
@@ -972,7 +975,7 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transportState)
 	transportState->currPacketState = DISCONNECT_TYPE;
 }
 
-void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle)
+static void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle)
 {
 	/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [IoTHubTransportMqtt_Destroy shall do nothing if parameter handle is NULL.] */
 	PMQTTTRANSPORT_HANDLE_DATA transportState = (PMQTTTRANSPORT_HANDLE_DATA)handle;
@@ -1005,7 +1008,7 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle)
 	}
 }
 
-int IoTHubTransportMqtt_Subscribe(IOTHUB_DEVICE_HANDLE handle)
+static int IoTHubTransportMqtt_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 {
 	int result;
 	PMQTTTRANSPORT_HANDLE_DATA transportState = (PMQTTTRANSPORT_HANDLE_DATA)handle;
@@ -1032,7 +1035,7 @@ int IoTHubTransportMqtt_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 	return result;
 }
 
-void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
+static void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 {
 	PMQTTTRANSPORT_HANDLE_DATA transportState = (PMQTTTRANSPORT_HANDLE_DATA)handle;
 	/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_019: [If parameter handle is NULL then IoTHubTransportMqtt_Unsubscribe shall do nothing.] */
@@ -1050,7 +1053,7 @@ void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 	}
 }
 
-extern void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
+static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
 	/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_026: [IoTHubTransportMqtt_DoWork shall do nothing if parameter handle and/or iotHubClientHandle is NULL.] */
 	PMQTTTRANSPORT_HANDLE_DATA transportState = (PMQTTTRANSPORT_HANDLE_DATA)handle;
@@ -1167,7 +1170,7 @@ extern void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
 	}
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
+static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
 	IOTHUB_CLIENT_RESULT result;
 
@@ -1195,7 +1198,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(IOTHUB_DEVICE_HANDLE hand
 	return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE handle, const char* option, const void* value)
+static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE handle, const char* option, const void* value)
 {
 	/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_021: [If any parameter is NULL then IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
 	IOTHUB_CLIENT_RESULT result;
@@ -1258,7 +1261,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE handle, c
 	return result;
 }
 
-IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
+static IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
 	IOTHUB_DEVICE_HANDLE result;
 	// Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransportMqtt_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.]
@@ -1323,7 +1326,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, co
 }
 
 // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_005: [ IoTHubTransportMqtt_Unregister shall return. ]
-void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
+static void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 {
 	if (deviceHandle != NULL)
 	{
@@ -1333,7 +1336,24 @@ void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 	}
 }
 
-TRANSPORT_PROVIDER myfunc = {
+static STRING_HANDLE IoTHubTransportMqtt_GetHostname(TRANSPORT_LL_HANDLE handle)
+{
+    STRING_HANDLE result;
+    /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_02_001: [ If handle is NULL then IoTHubTransportMqtt_GetHostname shall fail and return NULL. ]*/
+    if (handle == NULL)
+    {
+        result = NULL;
+    }
+    else
+    {
+        /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_02_002: [ Otherwise IoTHubTransportMqtt_GetHostname shall return a non-NULL STRING_HANDLE containg the hostname. ]*/
+        result = ((MQTTTRANSPORT_HANDLE_DATA*)handle)->hostAddress;
+    }
+    return result;
+}
+
+static TRANSPORT_PROVIDER myfunc = {
+    IoTHubTransportMqtt_GetHostname,
 	IoTHubTransportMqtt_SetOption,
 	IoTHubTransportMqtt_Create,
 	IoTHubTransportMqtt_Destroy,
@@ -1351,7 +1371,7 @@ IoTHubTransport_Subscribe = IoTHubTransportMqtt_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportMqtt_DoWork
 IoTHubTransport_SetOption = IoTHubTransportMqtt_SetOption] */
-extern const void* MQTT_Protocol(void)
+extern const TRANSPORT_PROVIDER* MQTT_Protocol(void)
 {
 	return &myfunc;
 }

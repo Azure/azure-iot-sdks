@@ -60,7 +60,7 @@ static size_t howManyDoWorkCalls = 0;
 static size_t doWorkCallCount = 0;
 static THREAD_START_FUNC threadFunc;
 static void* threadFuncArg;
-static const void* provideFAKE(void);
+static const TRANSPORT_PROVIDER* provideFAKE(void);
 extern "C" const size_t IoTHubClient_ThreadTerminationOffset;
 
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG =
@@ -347,7 +347,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , LIST_ITEM_HANDLE, list_get_ne
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, ,void, uploadToBlobAsyncCallback, IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result, void*, userContextCallback);
 
-static const void* provideFAKE(void)
+static const TRANSPORT_PROVIDER* provideFAKE(void)
 {
     return NULL;
 }

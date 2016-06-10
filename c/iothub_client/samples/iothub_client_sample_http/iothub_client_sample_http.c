@@ -192,7 +192,7 @@ void iothub_client_sample_http_run(void)
                             }
                             else
                             {
-                                (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub.\r\n", iterator);
+                                (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", iterator);
                             }
 
                         }

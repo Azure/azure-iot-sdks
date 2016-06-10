@@ -4,7 +4,12 @@
 #ifndef IOTHUB_TRANSPORT_LL_H
 #define IOTHUB_TRANSPORT_LL_H
 
+typedef void* TRANSPORT_LL_HANDLE;
+typedef void* IOTHUB_DEVICE_HANDLE;
+typedef struct TRANSPORT_PROVIDER_TAG TRANSPORT_PROVIDER;
+
 #include "azure_c_shared_utility/doublylinkedlist.h"
+#include "azure_c_shared_utility/strings.h"
 #include "iothub_message.h"
 #include "iothub_client_ll.h"
 
@@ -27,9 +32,7 @@ extern "C"
 
 	} IOTHUB_DEVICE_CONFIG;
 
-	typedef void* TRANSPORT_LL_HANDLE;
-	typedef void* IOTHUB_DEVICE_HANDLE;
-
+    typedef STRING_HANDLE (*pfIoTHubTransport_GetHostname)(TRANSPORT_LL_HANDLE handle);
 	typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_SetOption)(TRANSPORT_LL_HANDLE handle, const char *optionName, const void* value);
 	typedef TRANSPORT_LL_HANDLE(*pfIoTHubTransport_Create)(const IOTHUBTRANSPORT_CONFIG* config);
 	typedef void (*pfIoTHubTransport_Destroy)(TRANSPORT_LL_HANDLE handle);
@@ -41,11 +44,12 @@ extern "C"
 	typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetSendStatus)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
 
 #define TRANSPORT_PROVIDER_FIELDS                            \
+pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;   \
 pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       \
 pfIoTHubTransport_Create IoTHubTransport_Create;             \
 pfIoTHubTransport_Destroy IoTHubTransport_Destroy;           \
 pfIotHubTransport_Register IoTHubTransport_Register;         \
-pfIotHubTransport_Unregister IoTHubTransport_Unregister;      \
+pfIotHubTransport_Unregister IoTHubTransport_Unregister;     \
 pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;       \
 pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;   \
 pfIoTHubTransport_DoWork IoTHubTransport_DoWork;             \

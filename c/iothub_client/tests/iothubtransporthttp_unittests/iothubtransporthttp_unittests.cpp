@@ -1733,6 +1733,17 @@ static void setupDoWorkLoopForNextDevice(CIoTHubTransportHttpMocks &mocks, size_
 //}
 //
 
+static pfIoTHubTransport_GetHostname    IoTHubTransportHttp_GetHostname;
+static pfIoTHubTransport_SetOption      IoTHubTransportHttp_SetOption;
+static pfIoTHubTransport_Create         IoTHubTransportHttp_Create;
+static pfIoTHubTransport_Destroy        IoTHubTransportHttp_Destroy;
+static pfIotHubTransport_Register       IoTHubTransportHttp_Register;
+static pfIotHubTransport_Unregister     IoTHubTransportHttp_Unregister;
+static pfIoTHubTransport_Subscribe      IoTHubTransportHttp_Subscribe;
+static pfIoTHubTransport_Unsubscribe    IoTHubTransportHttp_Unsubscribe;
+static pfIoTHubTransport_DoWork         IoTHubTransportHttp_DoWork;
+static pfIoTHubTransport_GetSendStatus  IoTHubTransportHttp_GetSendStatus;
+
 BEGIN_TEST_SUITE(iothubtransporthttp)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -1757,6 +1768,17 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	temp = (unsigned char*)malloc(buffer11_size);
 	memset(temp, '3', buffer11_size);
 	buffer11 = temp;
+
+    IoTHubTransportHttp_GetHostname = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetHostname;
+    IoTHubTransportHttp_SetOption = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SetOption;
+    IoTHubTransportHttp_Create = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Create;
+    IoTHubTransportHttp_Destroy = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Destroy;
+    IoTHubTransportHttp_Register = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Register;
+    IoTHubTransportHttp_Unregister = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Unregister;
+    IoTHubTransportHttp_Subscribe = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Subscribe;
+    IoTHubTransportHttp_Unsubscribe = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Unsubscribe;
+    IoTHubTransportHttp_DoWork = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_DoWork;
+    IoTHubTransportHttp_GetSendStatus = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetSendStatus;
 
 }
 
@@ -14407,6 +14429,42 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
 
 	///cleanup
 	IoTHubTransportHttp_Destroy(handle);
+}
+
+/*Tests_SRS_TRANSPORTMULTITHTTP_02_001: [ If handle is NULL then IoTHubTransportHttp_GetHostname shall fail and return NULL. ]*/
+TEST_FUNCTION(IoTHubTransportHttp_GetHostname_with_NULL_handle_fails)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+
+    ///act
+    STRING_HANDLE hostname = IoTHubTransportHttp_GetHostname(NULL);
+
+    ///assert
+    ASSERT_IS_NULL(hostname);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+}
+
+/*Tests_SRS_TRANSPORTMULTITHTTP_02_001: [ If handle is NULL then IoTHubTransportHttp_GetHostname shall fail and return NULL. ]*/
+TEST_FUNCTION(IoTHubTransportHttp_GetHostname_with_non_NULL_handle_succeeds)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
+    mocks.ResetAllCalls();
+
+    ///act
+    STRING_HANDLE hostname = IoTHubTransportHttp_GetHostname(handle);
+
+    ///assert
+    ASSERT_IS_NOT_NULL(hostname);
+    mocks.AssertActualAndExpectedCalls();
+    ASSERT_ARE_EQUAL(char_ptr, TEST_IOTHUB_NAME "." TEST_IOTHUB_SUFFIX, STRING_c_str(hostname));
+
+    ///cleanup
+    IoTHubTransportHttp_Destroy(handle);
 }
 
 END_TEST_SUITE(iothubtransporthttp)

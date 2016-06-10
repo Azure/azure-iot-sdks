@@ -44,26 +44,6 @@ const char* IOTHUB_CORRELATION_ID = "iothub-correlationid";
 /*forward declaration*/
 static int appendMapToJSON(STRING_HANDLE existing, const char* const* keys, const char* const* values, size_t count);
 
-/*Codes_SRS_TRANSPORTMULTITHTTP_17_125: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */
-static TRANSPORT_PROVIDER thisTransportProvider =
-{
-	IoTHubTransportHttp_SetOption, /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       */
-	IoTHubTransportHttp_Create, /*pfIoTHubTransport_Create IoTHubTransport_Create;                                                  */
-	IoTHubTransportHttp_Destroy, /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;                                                */
-	IoTHubTransportHttp_Register, /* pfIotHubTransport_Register IoTHubTransport_Register; */
-	IoTHubTransportHttp_Unregister, /* pfIotHubTransport_Unregister IoTHubTransport_Unegister; */
-	IoTHubTransportHttp_Subscribe, /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;                                            */
-	IoTHubTransportHttp_Unsubscribe, /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;                                        */
-	IoTHubTransportHttp_DoWork, /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork; */
-	IoTHubTransportHttp_GetSendStatus /* pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus */
-};
-
-const void* HTTP_Protocol(void)
-{
-	return &thisTransportProvider;
-}
-
-
 typedef struct HTTPTRANSPORT_HANDLE_DATA_TAG
 {
 	STRING_HANDLE hostName;
@@ -475,7 +455,7 @@ static bool create_deviceSasToken(HTTPTRANSPORT_PERDEVICE_DATA* handleData, cons
 */
 
 /*Codes_SRS_TRANSPORTMULTITHTTP_17_137: [ IoTHubTransportHttp_Register shall search the devices list for any device matching name deviceId. If deviceId is found it shall return NULL. ]*/
-bool findDeviceHandle(const void* element, const void* value)
+static bool findDeviceHandle(const void* element, const void* value)
 {
 	bool result;
 	/* data stored at element is device handle */
@@ -496,7 +476,7 @@ static bool findDeviceById(const void* element, const void* value)
 	return result;
 }
 
-IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
+static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
 	HTTPTRANSPORT_PERDEVICE_DATA* result;
 	if (handle == NULL || device == NULL)
@@ -636,7 +616,7 @@ static IOTHUB_DEVICE_HANDLE* get_perDeviceDataItem(IOTHUB_DEVICE_HANDLE deviceHa
 	return listItem;
 }
 
-void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
+static void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 {
 	if (deviceHandle == NULL)
 	{
@@ -752,7 +732,7 @@ static bool create_perDeviceList(HTTPTRANSPORT_HANDLE_DATA* handleData)
 }
 
 
-TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config)
+static TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* config)
 {
 	HTTPTRANSPORT_HANDLE_DATA* result;
 	if (config == NULL)
@@ -820,7 +800,7 @@ TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONFIG* con
 	return result;
 }
 
-void IoTHubTransportHttp_Destroy(TRANSPORT_LL_HANDLE handle)
+static void IoTHubTransportHttp_Destroy(TRANSPORT_LL_HANDLE handle)
 {
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_012: [ IoTHubTransportHttp_Destroy shall do nothing is handle is NULL. ]*/
 	if (handle != NULL)
@@ -846,7 +826,7 @@ void IoTHubTransportHttp_Destroy(TRANSPORT_LL_HANDLE handle)
 	}
 }
 
-int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
+static int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 {
 	int result;
 	if (handle == NULL)
@@ -879,7 +859,7 @@ int IoTHubTransportHttp_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 	return result;
 }
 
-void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
+static void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 {
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_107: [ If parameter deviceHandle is NULL then IoTHubTransportHttp_Unsubscribe shall fail do nothing. ]*/
 	if (handle != NULL)
@@ -2014,7 +1994,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
 	}
 }
 
-void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
+static void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_049: [ If handle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_140: [ If iotHubClientHandle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
@@ -2043,7 +2023,7 @@ void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HAN
 	}
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
+static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
 	IOTHUB_CLIENT_RESULT result;
 
@@ -2088,7 +2068,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetSendStatus(IOTHUB_DEVICE_HANDLE hand
 	return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_LL_HANDLE handle, const char* option, const void* value)
+static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_LL_HANDLE handle, const char* option, const void* value)
 {
 	IOTHUB_CLIENT_RESULT result;
 	/*Codes_SRS_TRANSPORTMULTITHTTP_17_114: [If handle parameter is NULL then IoTHubTransportHttp_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
@@ -2144,4 +2124,42 @@ IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_LL_HANDLE handle, c
 		}
 	}
 	return result;
+}
+
+static STRING_HANDLE IoTHubTransportHttp_GetHostname(TRANSPORT_LL_HANDLE handle)
+{
+    STRING_HANDLE result;
+    /*Codes_SRS_TRANSPORTMULTITHTTP_02_001: [ If handle is NULL then IoTHubTransportHttp_GetHostname shall fail and return NULL. ]*/
+    if (handle == NULL)
+    {
+        LogError("invalid parameter handle=%p", handle);
+        result = NULL;
+    }
+    else
+    {
+        /*Codes_SRS_TRANSPORTMULTITHTTP_02_002: [ Otherwise IoTHubTransportHttp_GetHostname shall return a non-NULL STRING_HANDLE containing the hostname. ]*/
+        HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
+        result = handleData->hostName;
+    }
+    return result;
+}
+
+/*Codes_SRS_TRANSPORTMULTITHTTP_17_125: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */
+static TRANSPORT_PROVIDER thisTransportProvider =
+{
+    IoTHubTransportHttp_GetHostname, /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname; */
+    IoTHubTransportHttp_SetOption, /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       */
+    IoTHubTransportHttp_Create, /*pfIoTHubTransport_Create IoTHubTransport_Create;                                                  */
+    IoTHubTransportHttp_Destroy, /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;                                                */
+    IoTHubTransportHttp_Register, /* pfIotHubTransport_Register IoTHubTransport_Register; */
+    IoTHubTransportHttp_Unregister, /* pfIotHubTransport_Unregister IoTHubTransport_Unegister; */
+    IoTHubTransportHttp_Subscribe, /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;                                            */
+    IoTHubTransportHttp_Unsubscribe, /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;                                        */
+    IoTHubTransportHttp_DoWork, /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork; */
+    IoTHubTransportHttp_GetSendStatus /* pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus */
+};
+
+const TRANSPORT_PROVIDER* HTTP_Protocol(void)
+{
+    return &thisTransportProvider;
 }

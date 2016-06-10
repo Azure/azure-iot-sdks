@@ -173,7 +173,7 @@ void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL("umock_c reported error");
 }
 
-static const void* provideFAKE(void);
+static const TRANSPORT_PROVIDER* provideFAKE(void);
 #define TEST_DEVICE_ID "theidofTheDevice"
 #define TEST_DEVICE_KEY "theKeyoftheDevice"
 #define TEST_DEVICE_SAS "theSasOfTheDevice"
@@ -208,7 +208,7 @@ static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_DEVICE_KEY =
     TEST_IOTHUBSUFFIX,      /* const char* iotHubSuffix;                    */
 };
 
-static const void* provideFAKE(void)
+static const TRANSPORT_PROVIDER* provideFAKE(void)
 {
     return NULL;
 }

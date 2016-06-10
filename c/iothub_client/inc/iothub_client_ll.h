@@ -23,16 +23,7 @@
 #ifndef IOTHUB_CLIENT_LL_H
 #define IOTHUB_CLIENT_LL_H
 
-#include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/xio.h"
-#include "azure_c_shared_utility/doublylinkedlist.h"
-#include "iothub_message.h"
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 #define IOTHUB_CLIENT_RESULT_VALUES       \
     IOTHUB_CLIENT_OK,                     \
@@ -41,9 +32,34 @@ extern "C"
     IOTHUB_CLIENT_INVALID_SIZE,           \
     IOTHUB_CLIENT_INDEFINITE_TIME         \
 
-	/** @brief Enumeration specifying the status of calls to various APIs in this module.
-	*/
-	DEFINE_ENUM(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+/** @brief Enumeration specifying the status of calls to various APIs in this module.
+*/
+
+DEFINE_ENUM(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+
+typedef struct IOTHUBTRANSPORT_CONFIG_TAG IOTHUBTRANSPORT_CONFIG;
+
+typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
+
+#define IOTHUB_CLIENT_STATUS_VALUES       \
+    IOTHUB_CLIENT_SEND_STATUS_IDLE,       \
+    IOTHUB_CLIENT_SEND_STATUS_BUSY        \
+
+/** @brief Enumeration returned by the ::IoTHubClient_LL_GetSendStatus
+*		   API to indicate the current sending status of the IoT Hub client.
+*/
+DEFINE_ENUM(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
+
+#include "azure_c_shared_utility/agenttime.h"
+#include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/doublylinkedlist.h"
+#include "iothub_message.h"
+#include "iothub_transport_ll.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #define IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES     \
     IOTHUB_CLIENT_CONFIRMATION_OK,                   \
@@ -56,15 +72,6 @@ extern "C"
 	*		   the hub.
 	*/
 	DEFINE_ENUM(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
-
-#define IOTHUB_CLIENT_STATUS_VALUES       \
-    IOTHUB_CLIENT_SEND_STATUS_IDLE,       \
-    IOTHUB_CLIENT_SEND_STATUS_BUSY        \
-
-	/** @brief Enumeration returned by the ::IoTHubClient_LL_GetSendStatus
-	*		   API to indicate the current sending status of the IoT Hub client.
-	*/
-	DEFINE_ENUM(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 
 #define TRANSPORT_TYPE_VALUES \
     TRANSPORT_LL, /*LL comes from "LowLevel" */ \
@@ -82,10 +89,10 @@ extern "C"
 	*/
 	DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 
-	typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
+	
 	typedef void(*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
 	typedef IOTHUBMESSAGE_DISPOSITION_RESULT (*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
-	typedef const void*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
+	typedef const TRANSPORT_PROVIDER*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
 
 	/** @brief	This struct captures IoTHub client configuration. */
 	typedef struct IOTHUB_CLIENT_CONFIG_TAG
