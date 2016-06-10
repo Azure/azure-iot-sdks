@@ -44,8 +44,8 @@ typedef struct TAG_object_firmwareupdate {
     char resourceUpdated[FIRMWAREUPDATE_PROPERTY_COUNT];
     void* propval_firmwareupdate_package;        // /5/x/0
     char* propval_firmwareupdate_packageuri;        // /5/x/1
-    int propval_firmwareupdate_state;        // /5/x/3
-    int propval_firmwareupdate_updateresult;        // /5/x/5
+    int64_t propval_firmwareupdate_state;        // /5/x/3
+    int64_t propval_firmwareupdate_updateresult;        // /5/x/5
     char* propval_firmwareupdate_pkgname;        // /5/x/6
     char* propval_firmwareupdate_pkgversion;        // /5/x/7
     FIRMWAREUPDATE_RESOURCE_CALLBACK firmwareupdate_package_write_callback;
@@ -61,8 +61,8 @@ IOTHUB_CLIENT_RESULT create_firmwareupdate_object(IOTHUB_CLIENT_HANDLE h, uint16
 object_firmwareupdate *get_firmwareupdate_object(uint16_t instanceId);
 
 // Property setters for firmwareupdate object
-IOTHUB_CLIENT_RESULT set_firmwareupdate_state(uint16_t instanceId, int value);
-IOTHUB_CLIENT_RESULT set_firmwareupdate_updateresult(uint16_t instanceId, int value);
+IOTHUB_CLIENT_RESULT set_firmwareupdate_state(uint16_t instanceId, int64_t value);
+IOTHUB_CLIENT_RESULT set_firmwareupdate_updateresult(uint16_t instanceId, int64_t value);
 IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgname(uint16_t instanceId, const char *value);
 IOTHUB_CLIENT_RESULT set_firmwareupdate_pkgversion(uint16_t instanceId, const char *value);
 

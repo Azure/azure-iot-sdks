@@ -33,7 +33,7 @@ void set_default_lwm2mserver_property_values(object_lwm2mserver *obj)
  * CALLBACK HANDLERS
  *
  **********************************************************************************/
-IOTHUB_CLIENT_RESULT on_read_lwm2mserver_lifetime(object_lwm2mserver *obj, int *value)
+IOTHUB_CLIENT_RESULT on_read_lwm2mserver_lifetime(object_lwm2mserver *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->lwm2mserver_lifetime_read_callback != NULL)
@@ -43,15 +43,15 @@ IOTHUB_CLIENT_RESULT on_read_lwm2mserver_lifetime(object_lwm2mserver *obj, int *
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_lwm2mserver_lifetime;
-        LogInfo("returning %d for LWM2MServer_Lifetime", *value);
+        LogInfo("returning %lld for LWM2MServer_Lifetime", *value);
     }
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_lwm2mserver_lifetime(object_lwm2mserver *obj, int value)
+IOTHUB_CLIENT_RESULT on_write_lwm2mserver_lifetime(object_lwm2mserver *obj, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("LWM2MServer_Lifetime being set to %d", value);
+    LogInfo("LWM2MServer_Lifetime being set to %lld", value);
     obj->propval_lwm2mserver_lifetime = value;
 
     if (obj->lwm2mserver_lifetime_write_callback != NULL)
@@ -61,7 +61,7 @@ IOTHUB_CLIENT_RESULT on_write_lwm2mserver_lifetime(object_lwm2mserver *obj, int 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int *value)
+IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->lwm2mserver_defaultminimumperiod_read_callback != NULL)
@@ -71,15 +71,15 @@ IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultminimumperiod(object_lwm2mserver
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_lwm2mserver_defaultminimumperiod;
-        LogInfo("returning %d for LWM2MServer_DefaultMinimumPeriod", *value);
+        LogInfo("returning %lld for LWM2MServer_DefaultMinimumPeriod", *value);
     }
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int value)
+IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("LWM2MServer_DefaultMinimumPeriod being set to %d", value);
+    LogInfo("LWM2MServer_DefaultMinimumPeriod being set to %lld", value);
     obj->propval_lwm2mserver_defaultminimumperiod = value;
 
     if (obj->lwm2mserver_defaultminimumperiod_write_callback != NULL)
@@ -89,7 +89,7 @@ IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultminimumperiod(object_lwm2mserve
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int *value)
+IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->lwm2mserver_defaultmaximumperiod_read_callback != NULL)
@@ -99,15 +99,15 @@ IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultmaximumperiod(object_lwm2mserver
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_lwm2mserver_defaultmaximumperiod;
-        LogInfo("returning %d for LWM2MServer_DefaultMaximumPeriod", *value);
+        LogInfo("returning %lld for LWM2MServer_DefaultMaximumPeriod", *value);
     }
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int value)
+IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    LogInfo("LWM2MServer_DefaultMaximumPeriod being set to %d", value);
+    LogInfo("LWM2MServer_DefaultMaximumPeriod being set to %lld", value);
     obj->propval_lwm2mserver_defaultmaximumperiod = value;
 
     if (obj->lwm2mserver_defaultmaximumperiod_write_callback != NULL)

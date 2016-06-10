@@ -97,13 +97,13 @@ namespace api_generator
                 case LWM2MObjectItemType.String:
                     return "char*";
                 case LWM2MObjectItemType.Integer:
-                    return "int";
+                    return "int64_t";
                 case LWM2MObjectItemType.Float:
                     return "double";
                 case LWM2MObjectItemType.Opaque:
                     return "void*";
                 case LWM2MObjectItemType.Time:
-                    return "time_t";
+                    return "int64_t";
                 default:
                     return "UNKONWN_OBJECT_TYPE";
             }

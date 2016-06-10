@@ -215,10 +215,10 @@ typedef struct TAG_object_fake_writeexec {
     uint16_t instanceId;    // Must be first member of structure
     bool exec_called;
     bool write_integer_called;
-    int integer_property;
+    int64_t integer_property;
     bool bool_property;
     double float_property;
-    int time_property;
+    int64_t time_property;
     uint8_t *opaque_property;
     size_t opaque_length;
     char *string_property;
@@ -619,7 +619,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_INTEGER, &data);
 
         ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_INTEGER);
-        ASSERT_ARE_EQUAL(uint64_t, data.value.asInteger, VALID_INT);
+        ASSERT_ARE_EQUAL(int64_t, data.value.asInteger, VALID_INT);
 
         free_lwm2m_data_t(data);
     }
@@ -649,7 +649,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
         uint8_t res = dispatch_read(OID_FAKE_READONLY, INSTANCE_ID_FAKE_READONLY_OBJECT, PID_READ_VALID_TIME, &data);
 
         ASSERT_ARE_EQUAL(int, data.type, LWM2M_TYPE_INTEGER);
-        ASSERT_ARE_EQUAL(uint64_t, data.value.asInteger, VALID_TIME);
+        ASSERT_ARE_EQUAL(int64_t, data.value.asInteger, VALID_TIME);
 
         free_lwm2m_data_t(data);
     }
@@ -733,7 +733,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
         ASSERT_ARE_EQUAL(int, res, COAP_405_METHOD_NOT_ALLOWED);
     }
 
-    void populate_lwm2m_integer(lwm2m_data_t *data, uint32_t value)
+    void populate_lwm2m_integer(lwm2m_data_t *data, int64_t value)
     {
         data->type = LWM2M_TYPE_INTEGER;
         data->value.asInteger = value;
@@ -745,7 +745,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
         data->value.asBoolean = value;
     }
 
-    void populate_lwm2m_time(lwm2m_data_t *data, int value)
+    void populate_lwm2m_time(lwm2m_data_t *data, int64_t value)
     {
         data->type = LWM2M_TYPE_INTEGER;
         populate_lwm2m_integer(data, value);
@@ -975,7 +975,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
         (void)dispatch_write(OID_FAKE_WRITEEXEC, INSTANCE_ID_FAKE_WRITEEXEC_OBJECT, PID_WRITE_INTEGER, &data);
 
-        ASSERT_ARE_EQUAL(int, obj->integer_property, VALID_INT);
+        ASSERT_ARE_EQUAL(int64_t, obj->integer_property, VALID_INT);
 
         free_lwm2m_data_t(data);
     }
@@ -990,7 +990,7 @@ BEGIN_TEST_SUITE(iotdm_dispatchers_unittests)
         object_fake_writeexec *obj = create_and_register_fake_writeexec_object();
         (void)dispatch_write(OID_FAKE_WRITEEXEC, INSTANCE_ID_FAKE_WRITEEXEC_OBJECT, PID_WRITE_TIME, &data);
 
-        ASSERT_ARE_EQUAL(int, obj->time_property, VALID_TIME);
+        ASSERT_ARE_EQUAL(int64_t, obj->time_property, VALID_TIME);
 
         free_lwm2m_data_t(data);
     }

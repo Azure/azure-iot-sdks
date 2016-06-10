@@ -42,18 +42,18 @@ IOTHUB_CLIENT_RESULT on_read_device_serialnumber(object_device *obj, char **valu
 IOTHUB_CLIENT_RESULT on_read_device_firmwareversion(object_device *obj, char **value);
 IOTHUB_CLIENT_RESULT on_exec_device_reboot(object_device *obj);
 IOTHUB_CLIENT_RESULT on_exec_device_factoryreset(object_device *obj);
-IOTHUB_CLIENT_RESULT on_read_device_batterylevel(object_device *obj, int *value);
-IOTHUB_CLIENT_RESULT on_read_device_memoryfree(object_device *obj, int *value);
-IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, time_t *value);
-IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, time_t value);
+IOTHUB_CLIENT_RESULT on_read_device_batterylevel(object_device *obj, int64_t *value);
+IOTHUB_CLIENT_RESULT on_read_device_memoryfree(object_device *obj, int64_t *value);
+IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, int64_t *value);
+IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, int64_t value);
 IOTHUB_CLIENT_RESULT on_read_device_utcoffset(object_device *obj, char **value);
 IOTHUB_CLIENT_RESULT on_write_device_utcoffset(object_device *obj, const char *value, size_t length);
 IOTHUB_CLIENT_RESULT on_read_device_timezone(object_device *obj, char **value);
 IOTHUB_CLIENT_RESULT on_write_device_timezone(object_device *obj, const char *value, size_t length);
 IOTHUB_CLIENT_RESULT on_read_device_devicetype(object_device *obj, char **value);
 IOTHUB_CLIENT_RESULT on_read_device_hardwareversion(object_device *obj, char **value);
-IOTHUB_CLIENT_RESULT on_read_device_batterystatus(object_device *obj, int *value);
-IOTHUB_CLIENT_RESULT on_read_device_memorytotal(object_device *obj, int *value);
+IOTHUB_CLIENT_RESULT on_read_device_batterystatus(object_device *obj, int64_t *value);
+IOTHUB_CLIENT_RESULT on_read_device_memorytotal(object_device *obj, int64_t *value);
 
 
 /**********************************************************************************
@@ -144,7 +144,7 @@ IOTHUB_CLIENT_RESULT set_device_firmwareversion(uint16_t instanceId, const char 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_batterylevel(uint16_t instanceId, int value)
+IOTHUB_CLIENT_RESULT set_device_batterylevel(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -152,7 +152,7 @@ IOTHUB_CLIENT_RESULT set_device_batterylevel(uint16_t instanceId, int value)
     {
         if (obj->propval_device_batterylevel != value)
         {
-            LogInfo("Device_BatteryLevel being set to %d", value);
+            LogInfo("Device_BatteryLevel being set to %lld", value);
             obj->propval_device_batterylevel = value;
 
             obj->resourceUpdated[INDEX_DEVICE_BATTERYLEVEL] = (char)true;
@@ -164,7 +164,7 @@ IOTHUB_CLIENT_RESULT set_device_batterylevel(uint16_t instanceId, int value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_memoryfree(uint16_t instanceId, int value)
+IOTHUB_CLIENT_RESULT set_device_memoryfree(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -172,7 +172,7 @@ IOTHUB_CLIENT_RESULT set_device_memoryfree(uint16_t instanceId, int value)
     {
         if (obj->propval_device_memoryfree != value)
         {
-            LogInfo("Device_MemoryFree being set to %d", value);
+            LogInfo("Device_MemoryFree being set to %lld", value);
             obj->propval_device_memoryfree = value;
 
             obj->resourceUpdated[INDEX_DEVICE_MEMORYFREE] = (char)true;
@@ -184,7 +184,7 @@ IOTHUB_CLIENT_RESULT set_device_memoryfree(uint16_t instanceId, int value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, time_t value)
+IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -288,7 +288,7 @@ IOTHUB_CLIENT_RESULT set_device_hardwareversion(uint16_t instanceId, const char 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_batterystatus(uint16_t instanceId, int value)
+IOTHUB_CLIENT_RESULT set_device_batterystatus(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -296,7 +296,7 @@ IOTHUB_CLIENT_RESULT set_device_batterystatus(uint16_t instanceId, int value)
     {
         if (obj->propval_device_batterystatus != value)
         {
-            LogInfo("Device_BatteryStatus being set to %d", value);
+            LogInfo("Device_BatteryStatus being set to %lld", value);
             obj->propval_device_batterystatus = value;
 
             obj->resourceUpdated[INDEX_DEVICE_BATTERYSTATUS] = (char)true;
@@ -308,7 +308,7 @@ IOTHUB_CLIENT_RESULT set_device_batterystatus(uint16_t instanceId, int value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_device_memorytotal(uint16_t instanceId, int value)
+IOTHUB_CLIENT_RESULT set_device_memorytotal(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_device *obj = get_object_instance(OID_DEVICE, instanceId);
@@ -316,7 +316,7 @@ IOTHUB_CLIENT_RESULT set_device_memorytotal(uint16_t instanceId, int value)
     {
         if (obj->propval_device_memorytotal != value)
         {
-            LogInfo("Device_MemoryTotal being set to %d", value);
+            LogInfo("Device_MemoryTotal being set to %lld", value);
             obj->propval_device_memorytotal = value;
 
             obj->resourceUpdated[INDEX_DEVICE_MEMORYTOTAL] = (char)true;

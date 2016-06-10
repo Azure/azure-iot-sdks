@@ -24,19 +24,19 @@ DISPATCHER_FORWARD_DECLARATIONS(object_lwm2mserver);
 #define INDEX_LWM2MSERVER_DEFAULTMAXIMUMPERIOD 2
 
 void set_default_lwm2mserver_property_values(object_lwm2mserver *obj);
-IOTHUB_CLIENT_RESULT on_read_lwm2mserver_lifetime(object_lwm2mserver *obj, int *value);
-IOTHUB_CLIENT_RESULT on_write_lwm2mserver_lifetime(object_lwm2mserver *obj, int value);
-IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int *value);
-IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int value);
-IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int *value);
-IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int value);
+IOTHUB_CLIENT_RESULT on_read_lwm2mserver_lifetime(object_lwm2mserver *obj, int64_t *value);
+IOTHUB_CLIENT_RESULT on_write_lwm2mserver_lifetime(object_lwm2mserver *obj, int64_t value);
+IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int64_t *value);
+IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int64_t value);
+IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int64_t *value);
+IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int64_t value);
 
 
 /**********************************************************************************
  * LWM2M Server setters
  *
  **********************************************************************************/
-IOTHUB_CLIENT_RESULT set_lwm2mserver_lifetime(uint16_t instanceId, int value)
+IOTHUB_CLIENT_RESULT set_lwm2mserver_lifetime(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_lwm2mserver *obj = get_object_instance(OID_LWM2MSERVER, instanceId);
@@ -44,7 +44,7 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_lifetime(uint16_t instanceId, int value)
     {
         if (obj->propval_lwm2mserver_lifetime != value)
         {
-            LogInfo("LWM2MServer_Lifetime being set to %d", value);
+            LogInfo("LWM2MServer_Lifetime being set to %lld", value);
             obj->propval_lwm2mserver_lifetime = value;
 
             obj->resourceUpdated[INDEX_LWM2MSERVER_LIFETIME] = (char)true;
@@ -56,7 +56,7 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_lifetime(uint16_t instanceId, int value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultminimumperiod(uint16_t instanceId, int value)
+IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultminimumperiod(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_lwm2mserver *obj = get_object_instance(OID_LWM2MSERVER, instanceId);
@@ -64,7 +64,7 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultminimumperiod(uint16_t instanceId, i
     {
         if (obj->propval_lwm2mserver_defaultminimumperiod != value)
         {
-            LogInfo("LWM2MServer_DefaultMinimumPeriod being set to %d", value);
+            LogInfo("LWM2MServer_DefaultMinimumPeriod being set to %lld", value);
             obj->propval_lwm2mserver_defaultminimumperiod = value;
 
             obj->resourceUpdated[INDEX_LWM2MSERVER_DEFAULTMINIMUMPERIOD] = (char)true;
@@ -76,7 +76,7 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultminimumperiod(uint16_t instanceId, i
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultmaximumperiod(uint16_t instanceId, int value)
+IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultmaximumperiod(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_lwm2mserver *obj = get_object_instance(OID_LWM2MSERVER, instanceId);
@@ -84,7 +84,7 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultmaximumperiod(uint16_t instanceId, i
     {
         if (obj->propval_lwm2mserver_defaultmaximumperiod != value)
         {
-            LogInfo("LWM2MServer_DefaultMaximumPeriod being set to %d", value);
+            LogInfo("LWM2MServer_DefaultMaximumPeriod being set to %lld", value);
             obj->propval_lwm2mserver_defaultmaximumperiod = value;
 
             obj->resourceUpdated[INDEX_LWM2MSERVER_DEFAULTMAXIMUMPERIOD] = (char)true;

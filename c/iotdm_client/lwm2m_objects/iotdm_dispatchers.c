@@ -27,7 +27,7 @@ IOTHUB_CLIENT_RESULT dispatch_string_read_to_callback(void *obj, void *function,
 IOTHUB_CLIENT_RESULT dispatch_integer_read_to_callback(void *obj, void *function, lwm2m_data_t *tlvP)
 {
     IOTHUB_CLIENT_RESULT res = IOTHUB_CLIENT_OK;
-    int data = 0;
+    int64_t data = 0;
     res = ((IOTHUB_CLIENT_GET_INTEGERPROP)function)(obj, &data);
     if (res == IOTHUB_CLIENT_OK)
     {
@@ -40,7 +40,7 @@ IOTHUB_CLIENT_RESULT dispatch_integer_read_to_callback(void *obj, void *function
 IOTHUB_CLIENT_RESULT dispatch_time_read_to_callback(void *obj, void *function, lwm2m_data_t *tlvP)
 {
     IOTHUB_CLIENT_RESULT res = IOTHUB_CLIENT_OK;
-    time_t data;
+    int64_t data;
     res = ((IOTHUB_CLIENT_GET_TIMEPROP)function)(obj, &data);
     if (res == IOTHUB_CLIENT_OK)
     {

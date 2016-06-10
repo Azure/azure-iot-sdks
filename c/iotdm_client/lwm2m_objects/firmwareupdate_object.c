@@ -67,7 +67,7 @@ IOTHUB_CLIENT_RESULT on_exec_firmwareupdate_update(object_firmwareupdate *obj)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_read_firmwareupdate_state(object_firmwareupdate *obj, int *value)
+IOTHUB_CLIENT_RESULT on_read_firmwareupdate_state(object_firmwareupdate *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->firmwareupdate_state_read_callback != NULL)
@@ -77,12 +77,12 @@ IOTHUB_CLIENT_RESULT on_read_firmwareupdate_state(object_firmwareupdate *obj, in
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_firmwareupdate_state;
-        LogInfo("returning %d for FirmwareUpdate_State", *value);
+        LogInfo("returning %lld for FirmwareUpdate_State", *value);
     }
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_read_firmwareupdate_updateresult(object_firmwareupdate *obj, int *value)
+IOTHUB_CLIENT_RESULT on_read_firmwareupdate_updateresult(object_firmwareupdate *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->firmwareupdate_updateresult_read_callback != NULL)
@@ -92,7 +92,7 @@ IOTHUB_CLIENT_RESULT on_read_firmwareupdate_updateresult(object_firmwareupdate *
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_firmwareupdate_updateresult;
-        LogInfo("returning %d for FirmwareUpdate_UpdateResult", *value);
+        LogInfo("returning %lld for FirmwareUpdate_UpdateResult", *value);
     }
     return result;
 }

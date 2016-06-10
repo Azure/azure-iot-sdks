@@ -54,15 +54,15 @@ typedef struct TAG_object_device {
     char* propval_device_modelnumber;        // /3/x/1
     char* propval_device_serialnumber;        // /3/x/2
     char* propval_device_firmwareversion;        // /3/x/3
-    int propval_device_batterylevel;        // /3/x/9
-    int propval_device_memoryfree;        // /3/x/10
-    time_t propval_device_currenttime;        // /3/x/13
+    int64_t propval_device_batterylevel;        // /3/x/9
+    int64_t propval_device_memoryfree;        // /3/x/10
+    int64_t propval_device_currenttime;        // /3/x/13
     char* propval_device_utcoffset;        // /3/x/14
     char* propval_device_timezone;        // /3/x/15
     char* propval_device_devicetype;        // /3/x/17
     char* propval_device_hardwareversion;        // /3/x/18
-    int propval_device_batterystatus;        // /3/x/20
-    int propval_device_memorytotal;        // /3/x/21
+    int64_t propval_device_batterystatus;        // /3/x/20
+    int64_t propval_device_memorytotal;        // /3/x/21
     DEVICE_RESOURCE_CALLBACK device_manufacturer_read_callback;
     DEVICE_RESOURCE_CALLBACK device_modelnumber_read_callback;
     DEVICE_RESOURCE_CALLBACK device_serialnumber_read_callback;
@@ -91,15 +91,15 @@ IOTHUB_CLIENT_RESULT set_device_manufacturer(uint16_t instanceId, const char *va
 IOTHUB_CLIENT_RESULT set_device_modelnumber(uint16_t instanceId, const char *value);
 IOTHUB_CLIENT_RESULT set_device_serialnumber(uint16_t instanceId, const char *value);
 IOTHUB_CLIENT_RESULT set_device_firmwareversion(uint16_t instanceId, const char *value);
-IOTHUB_CLIENT_RESULT set_device_batterylevel(uint16_t instanceId, int value);
-IOTHUB_CLIENT_RESULT set_device_memoryfree(uint16_t instanceId, int value);
-IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, time_t value);
+IOTHUB_CLIENT_RESULT set_device_batterylevel(uint16_t instanceId, int64_t value);
+IOTHUB_CLIENT_RESULT set_device_memoryfree(uint16_t instanceId, int64_t value);
+IOTHUB_CLIENT_RESULT set_device_currenttime(uint16_t instanceId, int64_t value);
 IOTHUB_CLIENT_RESULT set_device_utcoffset(uint16_t instanceId, const char *value);
 IOTHUB_CLIENT_RESULT set_device_timezone(uint16_t instanceId, const char *value);
 IOTHUB_CLIENT_RESULT set_device_devicetype(uint16_t instanceId, const char *value);
 IOTHUB_CLIENT_RESULT set_device_hardwareversion(uint16_t instanceId, const char *value);
-IOTHUB_CLIENT_RESULT set_device_batterystatus(uint16_t instanceId, int value);
-IOTHUB_CLIENT_RESULT set_device_memorytotal(uint16_t instanceId, int value);
+IOTHUB_CLIENT_RESULT set_device_batterystatus(uint16_t instanceId, int64_t value);
+IOTHUB_CLIENT_RESULT set_device_memorytotal(uint16_t instanceId, int64_t value);
 
 #ifdef __cplusplus
 }

@@ -35,10 +35,10 @@ typedef  IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_GET_STRINGPROP)(void *obj, char **
 
 /** @brief Callback used when DM client needs to set an Integer Property to the application.
  */
-typedef IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_SET_INTEGERPROP)(void *obj, int value);
+typedef IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_SET_INTEGERPROP)(void *obj, int64_t value);
 /** @brief Callback used when DM client needs to get an Integer Property from the application.
  */
-typedef  IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_GET_INTEGERPROP)(void *obj, int *value);
+typedef  IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_GET_INTEGERPROP)(void *obj, int64_t *value);
 
 /** @brief Callback used when DM client needs to set an Float Property to the application.
  */
@@ -56,10 +56,10 @@ typedef  IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_GET_OPAQUEPROP)(void *obj, void **
 
 /** @brief Callback used when DM client needs to set an Time Property to the application.
  */
-typedef IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_SET_TIMEPROP)(void *obj, int value);
+typedef IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_SET_TIMEPROP)(void *obj, int64_t value);
 /** @brief Callback used when DM client needs to get an Time Property from the application.
  */
-typedef  IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_GET_TIMEPROP)(void *obj, int *value);
+typedef  IOTHUB_CLIENT_RESULT (*IOTHUB_CLIENT_GET_TIMEPROP)(void *obj, int64_t *value);
 
 
 /** @brief Callback used when the DM client needs to execute an action in the application

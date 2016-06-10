@@ -125,7 +125,7 @@ IOTHUB_CLIENT_RESULT on_exec_device_factoryreset(object_device *obj)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_read_device_batterylevel(object_device *obj, int *value)
+IOTHUB_CLIENT_RESULT on_read_device_batterylevel(object_device *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->device_batterylevel_read_callback != NULL)
@@ -135,12 +135,12 @@ IOTHUB_CLIENT_RESULT on_read_device_batterylevel(object_device *obj, int *value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_device_batterylevel;
-        LogInfo("returning %d for Device_BatteryLevel", *value);
+        LogInfo("returning %lld for Device_BatteryLevel", *value);
     }
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_read_device_memoryfree(object_device *obj, int *value)
+IOTHUB_CLIENT_RESULT on_read_device_memoryfree(object_device *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->device_memoryfree_read_callback != NULL)
@@ -150,12 +150,12 @@ IOTHUB_CLIENT_RESULT on_read_device_memoryfree(object_device *obj, int *value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_device_memoryfree;
-        LogInfo("returning %d for Device_MemoryFree", *value);
+        LogInfo("returning %lld for Device_MemoryFree", *value);
     }
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, time_t *value)
+IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->device_currenttime_read_callback != NULL)
@@ -170,7 +170,7 @@ IOTHUB_CLIENT_RESULT on_read_device_currenttime(object_device *obj, time_t *valu
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, time_t value)
+IOTHUB_CLIENT_RESULT on_write_device_currenttime(object_device *obj, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     LogInfo("Device_CurrentTime being set to %lld", value);
@@ -271,7 +271,7 @@ IOTHUB_CLIENT_RESULT on_read_device_hardwareversion(object_device *obj, char **v
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_read_device_batterystatus(object_device *obj, int *value)
+IOTHUB_CLIENT_RESULT on_read_device_batterystatus(object_device *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->device_batterystatus_read_callback != NULL)
@@ -281,12 +281,12 @@ IOTHUB_CLIENT_RESULT on_read_device_batterystatus(object_device *obj, int *value
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_device_batterystatus;
-        LogInfo("returning %d for Device_BatteryStatus", *value);
+        LogInfo("returning %lld for Device_BatteryStatus", *value);
     }
     return result;
 }
 
-IOTHUB_CLIENT_RESULT on_read_device_memorytotal(object_device *obj, int *value)
+IOTHUB_CLIENT_RESULT on_read_device_memorytotal(object_device *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     if (obj->device_memorytotal_read_callback != NULL)
@@ -296,7 +296,7 @@ IOTHUB_CLIENT_RESULT on_read_device_memorytotal(object_device *obj, int *value)
     if (result == IOTHUB_CLIENT_OK)
     {
         *value = obj->propval_device_memorytotal;
-        LogInfo("returning %d for Device_MemoryTotal", *value);
+        LogInfo("returning %lld for Device_MemoryTotal", *value);
     }
     return result;
 }

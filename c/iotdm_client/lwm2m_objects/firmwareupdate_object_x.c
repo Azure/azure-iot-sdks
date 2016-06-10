@@ -31,8 +31,8 @@ void set_default_firmwareupdate_property_values(object_firmwareupdate *obj);
 IOTHUB_CLIENT_RESULT on_write_firmwareupdate_package(object_firmwareupdate *obj, void* value, size_t length);
 IOTHUB_CLIENT_RESULT on_write_firmwareupdate_packageuri(object_firmwareupdate *obj, const char *value, size_t length);
 IOTHUB_CLIENT_RESULT on_exec_firmwareupdate_update(object_firmwareupdate *obj);
-IOTHUB_CLIENT_RESULT on_read_firmwareupdate_state(object_firmwareupdate *obj, int *value);
-IOTHUB_CLIENT_RESULT on_read_firmwareupdate_updateresult(object_firmwareupdate *obj, int *value);
+IOTHUB_CLIENT_RESULT on_read_firmwareupdate_state(object_firmwareupdate *obj, int64_t *value);
+IOTHUB_CLIENT_RESULT on_read_firmwareupdate_updateresult(object_firmwareupdate *obj, int64_t *value);
 IOTHUB_CLIENT_RESULT on_read_firmwareupdate_pkgname(object_firmwareupdate *obj, char **value);
 IOTHUB_CLIENT_RESULT on_read_firmwareupdate_pkgversion(object_firmwareupdate *obj, char **value);
 
@@ -41,7 +41,7 @@ IOTHUB_CLIENT_RESULT on_read_firmwareupdate_pkgversion(object_firmwareupdate *ob
  * Firmware Update setters
  *
  **********************************************************************************/
-IOTHUB_CLIENT_RESULT set_firmwareupdate_state(uint16_t instanceId, int value)
+IOTHUB_CLIENT_RESULT set_firmwareupdate_state(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_firmwareupdate *obj = get_object_instance(OID_FIRMWAREUPDATE, instanceId);
@@ -49,7 +49,7 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_state(uint16_t instanceId, int value)
     {
         if (obj->propval_firmwareupdate_state != value)
         {
-            LogInfo("FirmwareUpdate_State being set to %d", value);
+            LogInfo("FirmwareUpdate_State being set to %lld", value);
             obj->propval_firmwareupdate_state = value;
 
             obj->resourceUpdated[INDEX_FIRMWAREUPDATE_STATE] = (char)true;
@@ -61,7 +61,7 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_state(uint16_t instanceId, int value)
     return result;
 }
 
-IOTHUB_CLIENT_RESULT set_firmwareupdate_updateresult(uint16_t instanceId, int value)
+IOTHUB_CLIENT_RESULT set_firmwareupdate_updateresult(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     object_firmwareupdate *obj = get_object_instance(OID_FIRMWAREUPDATE, instanceId);
@@ -69,7 +69,7 @@ IOTHUB_CLIENT_RESULT set_firmwareupdate_updateresult(uint16_t instanceId, int va
     {
         if (obj->propval_firmwareupdate_updateresult != value)
         {
-            LogInfo("FirmwareUpdate_UpdateResult being set to %d", value);
+            LogInfo("FirmwareUpdate_UpdateResult being set to %lld", value);
             obj->propval_firmwareupdate_updateresult = value;
 
             obj->resourceUpdated[INDEX_FIRMWAREUPDATE_UPDATERESULT] = (char)true;
