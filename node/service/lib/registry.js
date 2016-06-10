@@ -9,6 +9,9 @@ var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./registry_http.js');
 var Device = require('./device.js');
 var endpoint = require('azure-iot-common').endpoint;
+// TODO: Remove this hack and update the version to the following in the common module when the service deployment has happened
+endpoint.versionQueryString = function() { return '?api-version=2016-04-30'; };
+
 var SharedAccessSignature = require('./shared_access_signature.js');
 
 /**
