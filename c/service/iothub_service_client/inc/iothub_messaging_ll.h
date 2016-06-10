@@ -47,11 +47,11 @@ DEFINE_ENUM(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
 
 typedef struct IOTHUB_SERVICE_FEEDBACK_RECORD_TAG
 {
+    char* description;
     const char* deviceId;
     const char* correlationId;
-    const char* description;
     const char* generationId;
-    time_t enqueuedTimeUtc;
+    const char* enqueuedTimeUtc;
     IOTHUB_FEEDBACK_STATUS_CODE statusCode;
 } IOTHUB_SERVICE_FEEDBACK_RECORD;
 
@@ -64,9 +64,9 @@ typedef struct IOTHUB_SERVICE_FEEDBACK_BATCH_TAG
 
 typedef struct IOTHUB_MESSAGING_TAG* IOTHUB_MESSAGING_HANDLE;
 
-typedef void(*IOTHUB_OPEN_COMPLETE_CALLBACK)(void);
-typedef void(*IOTHUB_SEND_COMPLETE_CALLBACK)(void* context, IOTHUB_MESSAGE_HANDLE message);
-typedef void(*IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK)(IOTHUB_SERVICE_FEEDBACK_BATCH* feedbackBatch);
+typedef void(*IOTHUB_OPEN_COMPLETE_CALLBACK)(void* context);
+typedef void(*IOTHUB_SEND_COMPLETE_CALLBACK)(void* context, IOTHUB_MESSAGING_RESULT messagingResult);
+typedef void(*IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK)(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH* feedbackBatch);
 
 extern IOTHUB_MESSAGING_HANDLE IoTHubMessaging_LL_Create(IOTHUB_SERVICE_CLIENT_AUTH_HANDLE serviceClientHandle);
 extern void IoTHubMessaging_LL_Destroy(IOTHUB_MESSAGING_HANDLE messagingHandle);
@@ -78,7 +78,7 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE m
 
 extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SetFeedbackMessageCallback(IOTHUB_MESSAGING_HANDLE messagingHandle, IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK feedbackMessageReceivedCallback, void* userContextCallback);
 
-extern void IoTHubMessaging_LL_DoWork(void);
+extern void IoTHubMessaging_LL_DoWork(IOTHUB_MESSAGING_HANDLE messagingHandle);
 
 #ifdef __cplusplus
 }

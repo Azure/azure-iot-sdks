@@ -583,7 +583,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
 
         REGISTER_GLOBAL_MOCK_RETURN(json_array_get_count, 42);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_array_get_count, 0);
-}
+    }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {

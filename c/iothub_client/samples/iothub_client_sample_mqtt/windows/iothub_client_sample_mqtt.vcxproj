@@ -177,7 +177,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\iothub_client_sample_mqtt.c" />
-    <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\iothub_client_sample_mqtt.h" />

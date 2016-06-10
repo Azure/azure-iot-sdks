@@ -151,7 +151,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\iothub_client_sample_amqp.c" />
-    <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\iothub_client_sample_amqp.h" />

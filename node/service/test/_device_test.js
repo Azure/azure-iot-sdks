@@ -8,7 +8,7 @@ var Device = require('../lib/device.js');
 
 var deviceJson = JSON.stringify({ deviceId: 'testDevice', generationId:'123456789012345678', etag:'' });
 var invalidDev = JSON.stringify({ deviceId: '' });
-var initializeDevice = { 
+var initializeDeviceWithKeys = { 
   deviceId: 'fullDevice',
   generationId:'635756100743433650',
   etag:554111,
@@ -19,11 +19,34 @@ var initializeDevice = {
   statusUpdatedTime:'0001-01-01T00:00:00',
   lastActivityTime:'2015-08-26T01:00:51.6950626',
   cloudToDeviceMessageCount:4,
-  authentication:
-    {symmetricKey: 
-      {primaryKey:"aBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJK=",secondaryKey:"ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="}}
+  authentication: {
+      symmetricKey: {
+        primaryKey:"aBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJK=",
+        secondaryKey:"ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="
+      }
+    }
 };
-var fullDevice = JSON.stringify(initializeDevice);
+
+var initializeDeviceWithThumbprints = { 
+  deviceId: 'fullDevice',
+  generationId:'635756100743433650',
+  etag:554111,
+  connectionState:'Disconnected',
+  status:'Enabled',
+  statusReason:'Some Reason',
+  connectionStateUpdatedTime:'2015-08-20T18:08:49.9738417',
+  statusUpdatedTime:'0001-01-01T00:00:00',
+  lastActivityTime:'2015-08-26T01:00:51.6950626',
+  cloudToDeviceMessageCount:4,
+  authentication: {
+      x509Thumbprint: {
+        primaryThumbprint:"0000000000000000000000000000000000000000",
+        secondaryThumbprint:"1111111111111111111111111111111111111111"
+      }
+    }
+};
+var fullDeviceWithKeys = JSON.stringify(initializeDeviceWithKeys);
+var fullDeviceWithThumbprints = JSON.stringify(initializeDeviceWithThumbprints);
 var deviceName = 'testDevice';
 
 function throwsRedefineError(device, fieldName, descriptor) {
@@ -72,19 +95,32 @@ describe('Device', function () {
       throwsReferenceError(invalidDev);
     });
     
-    it('JSON is created correctly', function() {
-      var device = new Device(fullDevice);
-      
-      assert.equal(device.deviceId, initializeDevice.deviceId);
-      assert.equal(device.generationId, initializeDevice.generationId);
-      assert.equal(device.etag, initializeDevice.etag);
-      assert.equal(device.connectionState, initializeDevice.connectionState);
-      assert.equal(device.status, initializeDevice.status);
-      assert.equal(device.statusReason, initializeDevice.statusReason);
-      assert.equal(device.connectionStateUpdatedTime, initializeDevice.connectionStateUpdatedTime);
-      assert.equal(device.statusUpdatedTime, initializeDevice.statusUpdatedTime);
-      assert.equal(device.lastActivityTime, initializeDevice.lastActivityTime);
-      assert.equal(device.cloudToDeviceMessageCount, initializeDevice.cloudToDeviceMessageCount);
+    var verifyDeviceProps = function(newDevice, referenceDevice) {
+      assert.equal(newDevice.deviceId, referenceDevice.deviceId);
+      assert.equal(newDevice.generationId, referenceDevice.generationId);
+      assert.equal(newDevice.etag, referenceDevice.etag);
+      assert.equal(newDevice.connectionState, referenceDevice.connectionState);
+      assert.equal(newDevice.status, referenceDevice.status);
+      assert.equal(newDevice.statusReason, referenceDevice.statusReason);
+      assert.equal(newDevice.connectionStateUpdatedTime, referenceDevice.connectionStateUpdatedTime);
+      assert.equal(newDevice.statusUpdatedTime, referenceDevice.statusUpdatedTime);
+      assert.equal(newDevice.lastActivityTime, referenceDevice.lastActivityTime);
+      assert.equal(newDevice.cloudToDeviceMessageCount, referenceDevice.cloudToDeviceMessageCount);
+    };
+
+    it('JSON is created correctly when using symmetric keys', function() {
+      var device = new Device(fullDeviceWithKeys);
+      verifyDeviceProps(device, initializeDeviceWithKeys);
+      assert.equal(device.authentication.SymmetricKey.primaryKey, initializeDeviceWithKeys.authentication.symmetricKey.primaryKey);
+      assert.equal(device.authentication.SymmetricKey.secondaryKey, initializeDeviceWithKeys.authentication.symmetricKey.secondaryKey);
+    });
+    
+    it('JSON is created correctly when using x509 certificate', function() {
+      var device = new Device(fullDeviceWithThumbprints);
+      verifyDeviceProps(device, initializeDeviceWithThumbprints);
+
+      assert.equal(device.authentication.x509Thumbprint.primaryThumbprint, initializeDeviceWithThumbprints.authentication.x509Thumbprint.primaryThumbprint);
+      assert.equal(device.authentication.x509Thumbprint.secondaryThumbprint, initializeDeviceWithThumbprints.authentication.x509Thumbprint.secondaryThumbprint);
     });
   });
 

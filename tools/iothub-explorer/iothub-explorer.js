@@ -266,9 +266,11 @@ else if (command === 'receive') {
 
         receiver.on('errorReceived', function (err) { serviceError(err); });
         receiver.on('message', function (feedbackRecords) {
+          var records = JSON.parse(feedbackRecords.data);
           var output = {
-            'iothub-enqueuedtime': feedbackRecords.data[0].enqueuedTimeUtc,
-            body: feedbackRecords.data[0].description
+            originalMessageId: records[0].originalMessageId,
+            'iothub-enqueuedtime': records[0].enqueuedTimeUtc,
+            body: records[0].description
           };
 
           var rendered = parsed.raw ?

@@ -134,8 +134,9 @@ IoTHubTransportMqtt_GetHostname returns a STRING_HANDLE for the hostname.
 ```
 const TRANSPORT_PROVIDER* MQTT_Protocol(void)
 ```
-**SRS_IOTHUB_MQTT_TRANSPORT_07_022: [**This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it’s fields: 
-IoTHubTransport_GetHostname = IoTHubTransportMqtt_GetHostname
+**SRS_IOTHUB_MQTT_TRANSPORT_07_022: [**This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it’s fields:
+ 
+IoTHubTransport_GetHostname = IoTHubTransportMqtt_GetHostname   
 IoTHubTransport_Create = IoTHubTransportMqtt_Create  
 IoTHubTransport_Destroy = IoTHubTransportMqtt_Destroy  
 IoTHubTransport_Subscribe = IoTHubTransportMqtt_Subscribe  

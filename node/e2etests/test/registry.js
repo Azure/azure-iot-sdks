@@ -22,7 +22,18 @@ var runTests = function (hubConnectionString, storageConnectionString) {
     authentication: {
       SymmetricKey: {
         primaryKey: new Buffer("1234567890qwerty").toString('base64'),
-        secondaryKey: new Buffer("ytrewq0987654321").toString('base64'),
+        secondaryKey: new Buffer("ytrewq0987654321").toString('base64')
+      }
+    },
+    status: "disabled"
+  };
+
+  var deviceIdWithThumbprints = {
+    deviceId: uuid.v4(),
+    authentication: {
+      x509Thumbprint: {
+        primaryThumbprint: '0000000000000000000000000000000000000000',
+        secondaryThumbprint: '1111111111111111111111111111111111111111'
       }
     },
     status: "disabled"
@@ -73,6 +84,29 @@ var runTests = function (hubConnectionString, storageConnectionString) {
       });
     });
 
+    it('Creates a device with thumbprint parameters and gets it', function (done){
+      var registry = Registry.fromConnectionString(hubConnectionString);
+
+      registry.create(deviceIdWithThumbprints, function(createErr, createResult) {
+        if (createErr) {
+          done(createErr);
+        } else {
+          assert.equal(createResult.deviceId, deviceIdWithThumbprints.deviceId, 'created device doesn\'t have the requested deviceId');
+          registry.get(deviceIdWithThumbprints.deviceId, function(getErr, getResult) {
+            if (getErr) {
+              done(getErr);
+            } else {
+              assert.equal(getResult.deviceId, deviceIdWithThumbprints.deviceId);
+              assert.equal(getResult.authentication.x509Thumbprint.primaryThumbprint, deviceIdWithThumbprints.authentication.x509Thumbprint.primaryThumbprint);
+              assert.equal(getResult.authentication.x509Thumbprint.secondaryThumbprint, deviceIdWithThumbprints.authentication.x509Thumbprint.secondaryThumbprint);
+              assert.equal(getResult.disabled, deviceIdWithThumbprints.disabled);
+              done();
+            }
+          });
+        }
+      });
+    });
+
     it('Fails to create a device with an invalid name', function(done) {
       var registry = Registry.fromConnectionString(hubConnectionString);
 
@@ -82,25 +116,27 @@ var runTests = function (hubConnectionString, storageConnectionString) {
       });
     });
 
-    it('Lists devices and both test devices are there', function (done) {
+    it('Lists devices and all test devices are there', function (done) {
       var registry = Registry.fromConnectionString(hubConnectionString);
       registry.list(function(err, deviceList) {
         if (err) {
           done(err);
         } else {
-          var foundOne = false;
-          var foundTwo = false;
+          var found = 0;
 
           deviceList.forEach(function (device) {
             if (device.deviceId === deviceIdOnly.deviceId) {
-              foundOne = true;
+              found++;
             }
             if (device.deviceId === deviceIdWithKeys.deviceId) {
-              foundTwo = true;
+              found++;
+            }
+            if (device.deviceId === deviceIdWithThumbprints.deviceId) {
+              found++;
             }
           });
 
-          if (foundOne && foundTwo) {
+          if (found === 3) {
             done();
           } else {
             done(new Error('One device not found'));
@@ -180,19 +216,22 @@ var runTests = function (hubConnectionString, storageConnectionString) {
       });
     });
 
-    it('Deletes the last device created for the test', function (done) {
-      var registry = Registry.fromConnectionString(hubConnectionString);
-      registry.delete(deviceIdWithKeys.deviceId, function(delErr){
-        if(delErr) {
-          done(delErr);
-        } else {
-          registry.get(deviceIdOnly.deviceId, function (getErr) {
-            assert.instanceOf(getErr, errors.DeviceNotFoundError);
-            done();
-          });
-        }
+    [deviceIdWithKeys.deviceId, deviceIdWithThumbprints.deviceId].forEach(function(deviceId) {
+      it('Deletes device created for the test with id ' + deviceId, function (done) {
+        var registry = Registry.fromConnectionString(hubConnectionString);
+        registry.delete(deviceId, function(delErr){
+          if(delErr) {
+            done(delErr);
+          } else {
+            registry.get(deviceId, function (getErr) {
+              assert.instanceOf(getErr, errors.DeviceNotFoundError);
+              done();
+            });
+          }
+        });
       });
     });
+    
 
     it('Imports then exports devices', function(done) {
       this.timeout(120000);

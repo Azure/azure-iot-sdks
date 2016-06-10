@@ -382,7 +382,7 @@ This function provides a structure containing the function pointers of this impl
 
 **SRS_TRANSPORTMULTITHTTP_17_125: [** This function shall return a pointer to a structure of type `IOTHUB_TRANSPORT_PROVIDER` having the following values for its fields: **]** 
 
-IoTHubTransport_GetHostname=IoTHubTransportHttp_GetHostName
+IoTHubTransport_GetHostname=IoTHubTransportHttp_GetHostName   
 IoTHubTransport_SetOption=IoTHubTransportHttp_SetOption   
 IoTHubTransport_Create=IoTHubTransportHttp_Create   
 IoTHubTransport_Destroy=IoTHubTransportHttp_Destroy   
