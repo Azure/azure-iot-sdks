@@ -4,6 +4,8 @@
 #this is CMakeLists.txt for samples. There's noithig here, except redirections to 
 #individual samples
 
+Option(build_edison_sample "set build_edison_sample to OFF to skip the edison sample" ON)
+
 function(add_sample_directory whatIsBuilding)
 	add_subdirectory(${whatIsBuilding})
 
@@ -15,7 +17,7 @@ endfunction()
 
 add_sample_directory(iotdm_simple_sample)
 
-if(NOT WIN32)
+if(${build_edison_sample} AND (NOT WIN32))
     add_subdirectory(iotdm_edison_sample)
 endif()
 

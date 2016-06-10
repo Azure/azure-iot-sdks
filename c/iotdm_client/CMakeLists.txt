@@ -31,8 +31,17 @@ set(wakaama_c_files
     ${LIBLWM2M_DIR}/core/uri.c
     ${LIBLWM2M_DIR}/core/utils.c
     ${LIBLWM2M_DIR}/core/er-coap-13/er-coap-13.c
-    ${LIBLWM2M_DIR}/platforms/${CMAKE_SYSTEM_NAME}/platform.c
 )
+
+if (WIN32)
+    set(wakaama_c_files ${wakaama_c_files} 
+        ${LIBLWM2M_DIR}/platforms/Windows/platform.c
+    )
+else()
+    set(wakaama_c_files ${wakaama_c_files} 
+        ${LIBLWM2M_DIR}/platforms/Linux/platform.c
+    )
+endif(WIN32)
 
 set(wakaama_h_files
     ${LIBLWM2M_DIR}/core/internals.h

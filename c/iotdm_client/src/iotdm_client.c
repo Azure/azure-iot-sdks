@@ -370,7 +370,10 @@ typedef struct
 void on_register_complete(IOTHUB_CLIENT_RESULT result, void *context)
 {
     ON_REGISTER_COMPLETE_CONTEXT *registerContext = (ON_REGISTER_COMPLETE_CONTEXT *) context;
-    registerContext->onComplete(result, registerContext->context);
+    if (registerContext->onComplete)
+    {
+        registerContext->onComplete(result, registerContext->context);
+    }
     free(context);
 }
 
