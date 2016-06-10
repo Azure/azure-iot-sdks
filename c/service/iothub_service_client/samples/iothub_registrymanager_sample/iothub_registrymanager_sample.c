@@ -61,7 +61,7 @@ void printDeviceInfo(IOTHUB_DEVICE* device, int orderNum)
         (void)printf("    statusReason                : %s\r\n", device->statusReason);
         (void)printf("    statusUpdatedTime           : %s\r\n", device->statusUpdatedTime);
         (void)printf("    lastActivityTime            : %s\r\n", device->lastActivityTime);
-        (void)printf("    cloudToDeviceMessageCount   : %d\r\n", device->cloudToDeviceMessageCount);
+        (void)printf("    cloudToDeviceMessageCount   : %d\r\n", (int)device->cloudToDeviceMessageCount);
     }
 }
 
@@ -212,9 +212,9 @@ void iothub_registrymanager_sample_run(void)
         {
         case IOTHUB_REGISTRYMANAGER_OK:
             (void)printf("IoTHubRegistryManager_GetStatistics: Successfully got registry statistics\r\n");
-            (void)printf("Total device count: %d\r\n", registryStatistics.totalDeviceCount);
-            (void)printf("Enabled device count: %d\r\n", registryStatistics.enabledDeviceCount);
-            (void)printf("Disabled device count: %d\r\n", registryStatistics.disabledDeviceCount);
+            (void)printf("Total device count: %zu\r\n", registryStatistics.totalDeviceCount);
+            (void)printf("Enabled device count: %zu\r\n", registryStatistics.enabledDeviceCount);
+            (void)printf("Disabled device count: %zu\r\n", registryStatistics.disabledDeviceCount);
             break;
         case IOTHUB_REGISTRYMANAGER_ERROR:
             (void)printf("IoTHubRegistryManager_GetStatistics failed\r\n");
