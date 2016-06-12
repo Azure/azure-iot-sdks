@@ -25,7 +25,7 @@
     "check-cover": "istanbul check-coverage --statements 98 --branches 100 --functions 95 --lines 98"
   },
   "engines": {
-    "node": "0.10.x || 0.12.x || 4.x.x || 5.x.x"
+    "node": ">= 0.10"
   },
   "repository": {
     "type": "git",

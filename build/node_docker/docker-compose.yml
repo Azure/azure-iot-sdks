@@ -13,6 +13,12 @@ services:
       context: ../..
       dockerfile: ./build/node_docker/dockerfiles/aziot-node5.dockerfile
     env_file: ./env/aziot-node5.env
+  node6:
+    image: nodebuild:node6
+    build: 
+      context: ../..
+      dockerfile: ./build/node_docker/dockerfiles/aziot-node6.dockerfile
+    env_file: ./env/aziot-node6.env
   node010:
     image: nodebuild:node010
     build: 
