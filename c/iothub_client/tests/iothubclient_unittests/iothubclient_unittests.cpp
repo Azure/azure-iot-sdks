@@ -645,6 +645,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 	//Tests_SRS_IOTHUBCLIENT_17_003: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_HL_GetLLTransport on transportHandle to get lower layer transport. ]
 	//Tests_SRS_IOTHUBCLIENT_17_005: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLock to get the transport lock to be used later for serializing IoTHubClient calls. ]
 	//Tests_SRS_IOTHUBCLIENT_17_007: [ IoTHubClient_CreateWithTransport shall instantiate a new IoTHubClient_LL instance by calling IoTHubClient_LL_CreateWithTransport and passing the lower layer transport and config argument. ]
+    /*Tests_SRS_IOTHUBCLIENT_02_073: [ IoTHubClient_CreateWithTransport shall create a LIST_HANDLE that shall be used by IoTHubClient_UploadToBlobAsync. ]*/
 	TEST_FUNCTION(When_creating_with_transport_success_returns_non_null)
 	{
 		// arrange
@@ -654,6 +655,9 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_IOTHUBTRANSPORT_LOCK));
 
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+
+        STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
+
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLock(TEST_IOTHUBTRANSPORT_HANDLE));
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLLTransport(TEST_IOTHUBTRANSPORT_HANDLE));
 		STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_CreateWithTransport(IGNORED_PTR_ARG))
@@ -680,6 +684,9 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 			.SetFailReturn((LOCK_RESULT)LOCK_ERROR);
 
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+
+        STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
+
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLock(TEST_IOTHUBTRANSPORT_HANDLE));
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLLTransport(TEST_IOTHUBTRANSPORT_HANDLE));
 		STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_CreateWithTransport(IGNORED_PTR_ARG))
@@ -708,6 +715,11 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
+        STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLock(TEST_IOTHUBTRANSPORT_HANDLE));
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLLTransport(TEST_IOTHUBTRANSPORT_HANDLE));
 		STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_CreateWithTransport(IGNORED_PTR_ARG))
@@ -734,6 +746,11 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
+        STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLock(TEST_IOTHUBTRANSPORT_HANDLE));
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLLTransport(TEST_IOTHUBTRANSPORT_HANDLE));
 
@@ -753,6 +770,10 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		CIoTHubClientMocks mocks;
 
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
+        STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
 		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLock(TEST_IOTHUBTRANSPORT_HANDLE));
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLLTransport(TEST_IOTHUBTRANSPORT_HANDLE))
@@ -776,6 +797,11 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
+        STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
 		STRICT_EXPECTED_CALL(mocks, IoTHubTransport_GetLock(TEST_IOTHUBTRANSPORT_HANDLE))
 			.SetFailReturn((LOCK_HANDLE)NULL);
 
@@ -788,6 +814,28 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
 		///cleanup
 	}
+
+    /*Tests_SRS_IOTHUBCLIENT_02_074: [ If creating the LIST_HANDLE fails then IoTHubClient_CreateWithTransport shall fail and return NULL. ]*/
+    TEST_FUNCTION(When_creating_with_transport_list_create_fails_returns_null)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+
+        EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
+        EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mocks, list_create()) /*this is the list of SAVED_DATA*/
+            .SetFailReturn((LIST_HANDLE)NULL);
+
+        // act
+        IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_CreateWithTransport(TEST_IOTHUBTRANSPORT_HANDLE, &TEST_CONFIG);
+
+        // assert
+        ASSERT_IS_NULL(iotHubClient);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+    }
 
 	//Tests_SRS_IOTHUBCLIENT_17_002: [ If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_CreateWithTransport shall return NULL. ]
 	TEST_FUNCTION(When_creating_with_transport_IoTHubClient_alloc_fails_returns_null)
@@ -947,6 +995,8 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
 		STRICT_EXPECTED_CALL(mocks, Lock(TEST_IOTHUBTRANSPORT_LOCK));
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_IOTHUBTRANSPORT_LOCK));
 
