@@ -2463,7 +2463,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_IoTHubClient_LL_UploadToBlob_C
 
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG)) /*this is creating the UploadToBlob HANDLE*/
         .IgnoreArgument(1)
-        .SetReturn((IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE)NULL);
+        .SetFailReturn((IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE)NULL);
 
     ///act
     auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
