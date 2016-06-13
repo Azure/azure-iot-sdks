@@ -33,7 +33,7 @@
     "test": "npm -s run lint && npm -s run unittest"
   },
   "engines": {
-    "node": "0.10.x || 0.12.x || 4.x.x || 5.x.x"
+    "node": ">= 0.10"
   },
   "repository": {
     "type": "git",
