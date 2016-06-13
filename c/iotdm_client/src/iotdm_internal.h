@@ -68,7 +68,8 @@ typedef struct CLIENT_DATA_TAG
     IOTHUB_CLIENT_CONFIG  config;
     STRING_HANDLE         SAS;
 
-    LOCK_HANDLE           lockHandle;
+    LOCK_HANDLE           sessionLock;
+	LOCK_HANDLE           channelLock;
 } CLIENT_DATA;
 
 typedef void(*ON_REGISTER_COMPLETE)(IOTHUB_CLIENT_RESULT result, void* context);

@@ -73,4 +73,24 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMC
 */
 extern bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
 
+
+/** @brief      Protects session specific data and should be used only for multi-threaded clients.
+*               For example, if a client establishes a connection to an IotHub and has the
+*               need to use worker threads to update session data from sensor feeds.
+*
+*   @param      iotDMClientHandle   The handle created by a call to the create function.
+*
+*   @return     true if work is succesfully completed.
+*/
+extern bool IotHubClient_DM_EnterCriticalSection(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
+
+
+/** @brief		Releases the session lock.
+*
+*   @param      iotDMClientHandle   The handle created by a call to the create function.
+*
+*   @return     true if work is succesfully completed.
+*/
+extern bool IotHubClient_DM_LeaveCriticalSection(IOTHUB_CHANNEL_HANDLE iotDMClientHandle);
+
 #endif /* IOTDM_CLIENT_H */

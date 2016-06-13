@@ -337,7 +337,10 @@
                 get
                 {
                     string message = this.Type.ToString() + "_" + this.Name;
-                    return AreEqual(ExpectedValue.ToString(), RecordedValue, message);
+                    if (HasRun) return AreEqual(ExpectedValue.ToString(), RecordedValue, message);
+
+                    Console.WriteLine(message + " failed to run");
+                    return false;
                 }
             }
 
