@@ -79,7 +79,7 @@ SimulatedDeviceState *g_sds = NULL;
 #define FLASH_TIME_S 20
 
 // Forwards declarations
-IOTHUB_CLIENT_RESULT create_update_thread();
+IOTHUB_CLIENT_RESULT create_update_thread(IOTHUB_CHANNEL_HANDLE iotHubChannel);
 
 const char target_version[] = "3.0";
 void set_initial_firmware_version()
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
     // override default version for this sample
     set_initial_firmware_version();
 
-    if (IOTHUB_CLIENT_OK != create_update_thread())
+    if (IOTHUB_CLIENT_OK != create_update_thread(IoTHubChannel))
     {
         LogError("failure to create the udpate thread");
 
@@ -219,7 +219,6 @@ int main(int argc, char *argv[])
     IoTHubClient_DM_Start(IoTHubChannel);
 
     /* Disconnect and cleanup */
-    IoTHubClient_DM_Close(IoTHubChannel);
     platform_deinit();
 
     return 0;
@@ -231,8 +230,6 @@ void update_battery_level(SimulatedDeviceState *sds)
     if (sds->LastBatteryUpdateTime == 0)
     {
         sds->BatteryLevel = 100;
-        sds->LastBatteryUpdateTime = time(NULL);
-        set_device_batterylevel(0, sds->BatteryLevel);
     }
 
     else if ((time(NULL) - sds->LastBatteryUpdateTime) >= BATTERY_DRAIN_INTERVAL_S)
@@ -242,11 +239,12 @@ void update_battery_level(SimulatedDeviceState *sds)
         {
             sds->BatteryLevel = 100;
         }
-        LogInfo("** New Battery Level: %d\r\n", sds->BatteryLevel);
 
-        sds->LastBatteryUpdateTime = time(NULL);
-        set_device_batterylevel(0, sds->BatteryLevel);
+		LogInfo("** New Battery Level: %d\r\n", sds->BatteryLevel);
     }
+
+	sds->LastBatteryUpdateTime = time(NULL);
+	set_device_batterylevel(0, sds->BatteryLevel);
 }
 
 
@@ -371,11 +369,24 @@ int update_thread(void *v)
     SimulatedDeviceState sds = { 0 };
     g_sds = &sds;
 
+	IOTHUB_CLIENT_RESULT result;
+	IOTHUB_CHANNEL_HANDLE iotHubChannel = (IOTHUB_CHANNEL_HANDLE *) v;
     while (true)
     {
-        ThreadAPI_Sleep(1000);
-        if (update_property_values(&sds) != IOTHUB_CLIENT_OK)
-        {
+        ThreadAPI_Sleep(5000);
+		if (IotHubClient_DM_EnterCriticalSection(iotHubChannel))
+		{
+			result = update_property_values(&sds);
+			IotHubClient_DM_LeaveCriticalSection(iotHubChannel);
+		}
+
+		else
+		{
+			result = IOTHUB_CLIENT_ERROR;
+		}
+
+		if (result != IOTHUB_CLIENT_OK)
+		{
             LogError("Failed updating property values.  Exiting thread");
             return -1;
         }
@@ -385,12 +396,12 @@ int update_thread(void *v)
 }
 
 
-IOTHUB_CLIENT_RESULT create_update_thread()
+IOTHUB_CLIENT_RESULT create_update_thread(IOTHUB_CHANNEL_HANDLE iotHubChannel)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     THREAD_HANDLE th = NULL;
 
-    THREADAPI_RESULT tr = ThreadAPI_Create(&th, &update_thread, NULL);
+    THREADAPI_RESULT tr = ThreadAPI_Create(&th, &update_thread, (void *) iotHubChannel);
     if (tr != THREADAPI_OK)
     {
         LogError("failed to create background thread, error=%d", tr);

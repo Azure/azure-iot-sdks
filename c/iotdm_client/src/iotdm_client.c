@@ -138,13 +138,21 @@ static IOTHUB_CHANNEL_HANDLE create_iothub_handle()
     {
         memset(returnValue, 0, sizeof(CLIENT_DATA));
 
-        returnValue->lockHandle = Lock_Init();
-        if (NULL == returnValue->lockHandle)
+		returnValue->channelLock = Lock_Init();
+        if (NULL == returnValue->channelLock)
         {
             lwm2m_free(returnValue);
             returnValue = NULL;
         }
-    }
+	
+		returnValue->sessionLock = Lock_Init();
+		if (NULL == returnValue->sessionLock)
+		{
+			Lock_Deinit(returnValue->channelLock);
+			lwm2m_free(returnValue);
+			returnValue = NULL;
+		}
+	}
 
     return (IOTHUB_CHANNEL_HANDLE) returnValue;
 }
@@ -155,10 +163,15 @@ static void destroy_iothub_handle(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
     if (iotDMClientHandle != NULL)
     {
         CLIENT_DATA *client = (CLIENT_DATA *) iotDMClientHandle;
-        if (LOCK_ERROR == Lock_Deinit(client->lockHandle))
-        {
-            LogError("Lock_Deinit returned LOCK_ERROR");
-        }
+		if (LOCK_ERROR == Lock_Deinit(client->sessionLock))
+		{
+			LogError("Lock_Deinit returned LOCK_ERROR");
+		}
+
+		if (LOCK_ERROR == Lock_Deinit(client->channelLock))
+		{
+			LogError("Lock_Deinit returned LOCK_ERROR");
+		}
 
         lwm2m_free(iotDMClientHandle);
     }
@@ -239,7 +252,7 @@ IOTHUB_CHANNEL_HANDLE IoTHubClient_DM_Open(const char *connectionString, IOTHUB_
 
     else
     {
-        if (LOCK_ERROR == Lock(returnValue->lockHandle))
+        if (LOCK_ERROR == Lock(returnValue->channelLock))
         {
             LogError("lock returned LOCK_ERROR");
         }
@@ -272,7 +285,7 @@ IOTHUB_CHANNEL_HANDLE IoTHubClient_DM_Open(const char *connectionString, IOTHUB_
                 bHappy = false;
             }
 
-            if (LOCK_ERROR == Unlock(returnValue->lockHandle))
+            if (LOCK_ERROR == Unlock(returnValue->channelLock))
             {
                 LogError("Unlock returned LOCK_ERROR");
             }
@@ -295,7 +308,7 @@ void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
     {
         CLIENT_DATA *client = (CLIENT_DATA *) iotDMClientHandle;
 
-        if (LOCK_ERROR == Lock(client->lockHandle))
+        if (LOCK_ERROR == Lock(client->channelLock))
         {
             LogError("Lock returned LOCK_ERROR");
         }
@@ -338,7 +351,7 @@ void IoTHubClient_DM_Close(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
                 client->config.iotHubSuffix = NULL;
             }
 
-            if (LOCK_ERROR == Unlock(client->lockHandle))
+            if (LOCK_ERROR == Unlock(client->channelLock))
             {
                 LogError("Unlock return LOCK_ERROR");
             }
@@ -407,7 +420,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHa
 
     IOTHUB_CLIENT_RESULT  retValue;
     CLIENT_DATA          *client = (CLIENT_DATA *)iotDMClientHandle;
-    if (LOCK_ERROR == Lock(client->lockHandle))
+    if (LOCK_ERROR == Lock(client->channelLock))
     {
         LogError("Lock returned LOCK_ERROR");
     }
@@ -470,7 +483,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHa
             }
         }
 
-        if (LOCK_ERROR == Unlock(client->lockHandle))
+        if (LOCK_ERROR == Unlock(client->channelLock))
         {
             LogError("Unlock returned LOKC_ERROR");
         }
@@ -496,17 +509,19 @@ bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
     else
     {
         CLIENT_DATA *client = (CLIENT_DATA *) iotDMClientHandle;
+		if (LOCK_ERROR == Lock(client->channelLock))
+		{
+			LogError("lock returned LOCK_ERROR");
+			retValue = false;
+		}
 
-        if (LOCK_ERROR == Lock(client->lockHandle))
-        {
-            LogError("Lock returned LOCK_ERROR");
-
-            retValue = false;
-        }
-
-        else if (NULL == client->session)
+		else if (NULL == client->session)
         {
             LogError("Uninitialized lwm2m session");
+			if (LOCK_ERROR == Unlock(client->channelLock))
+			{
+				LogError("unlock returned LOCK_ERROR");
+			}
 
             retValue = false;
         }
@@ -523,7 +538,9 @@ bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
             {
                 case STATE_REGISTERED:
                     /* process any updates that are due. */
+					Lock(client->sessionLock);
                     signal_all_resource_changes();
+					Unlock(client->sessionLock);
 
                     time_t now = lwm2m_gettime();
                     time_t timeout = 60;
@@ -551,11 +568,11 @@ bool IoTHubClient_DM_DoWork(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
 
                     break;
             }
-        }
 
-        if (LOCK_ERROR == Unlock(client->lockHandle))
-        {
-            LogError("Unlock returned LOCK_ERROR");
+			if (LOCK_ERROR == Unlock(client->channelLock))
+			{
+				LogError("unlock returned LOCK_ERROR");
+			}
         }
     }
 
@@ -647,6 +664,39 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Start(IOTHUB_CHANNEL_HANDLE iotDMClientHand
     return result;
 }
 
+bool IotHubClient_DM_EnterCriticalSection(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
+{
+	bool retValue;
+	if (NULL == iotDMClientHandle)
+	{
+		retValue = false;
+	}
+
+	else
+	{
+		CLIENT_DATA *client = (CLIENT_DATA *)iotDMClientHandle;
+		retValue = LOCK_OK == Lock(client->sessionLock);
+	}
+
+	return retValue;
+}
+
+bool IotHubClient_DM_LeaveCriticalSection(IOTHUB_CHANNEL_HANDLE iotDMClientHandle)
+{
+	bool retValue;
+	if (NULL == iotDMClientHandle)
+	{
+		retValue = false;
+	}
+
+	else
+	{
+		CLIENT_DATA *client = (CLIENT_DATA *)iotDMClientHandle;
+		retValue = LOCK_OK == Unlock(client->sessionLock);
+	}
+
+	return retValue;
+}
 
 char * iotdm_strndup(const char *buffer, size_t length)
 {

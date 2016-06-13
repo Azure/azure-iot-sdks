@@ -29,47 +29,70 @@ static uint8_t prv_set_value(lwm2m_data_t *tlvP, uint16_t objectID, uint16_t ins
 
 uint8_t global_object_read(uint16_t instanceId, int *numDataP, lwm2m_data_t **dataArrayP, lwm2m_object_t *objectP)
 {
-    uint8_t result = COAP_404_NOT_FOUND;
-    uint16_t index;
+    uint8_t result;
+	if (IotHubClient_DM_EnterCriticalSection((IOTHUB_CHANNEL_HANDLE)(objectP->userData)) == false)
+	{
+		LogError("enter critical section");
+		result = COAP_500_INTERNAL_SERVER_ERROR;
+	}
 
-    // is the server asking for the full instance ?
-    if (*numDataP == 0)
-    {
-        uint16_t nbRes = get_property_count(objectP->objID, OP_R);
-        if (nbRes == PROP_ERROR)
-        {
-            return COAP_400_BAD_REQUEST;
-        }
-            
-        *dataArrayP = lwm2m_data_new(nbRes);
-        if (*dataArrayP == NULL)
-        {
-            return COAP_500_INTERNAL_SERVER_ERROR;
-        }
+	else
+	{
+		uint16_t index;
 
-        *numDataP = nbRes;
-        for (index = 0 ; index < nbRes ; ++index)
-        {
-            uint16_t id = get_property_for_index(objectP->objID, OP_R, index);
-            if (id == PROP_ERROR)
-            {
-                lwm2m_free(*dataArrayP);
-                *dataArrayP = NULL;
-                return COAP_500_INTERNAL_SERVER_ERROR;
-            }
-            else
-            {
-                (*dataArrayP)[index].id = id;
-            }
-        }
-    }
+		// is the server asking for the full instance ?
+		if (*numDataP == 0)
+		{
+			uint16_t nbRes = get_property_count(objectP->objID, OP_R);
+			if (nbRes == PROP_ERROR)
+			{
+				result = COAP_400_BAD_REQUEST;
+			}
 
-    index = 0;
-    do
-    {
-        result = prv_get_value((*dataArrayP) + index, objectP->objID, instanceId);
-        index++;
-    } while (index < *numDataP && result == COAP_205_CONTENT);
+			else
+			{
+				*dataArrayP = lwm2m_data_new(nbRes);
+				if (*dataArrayP == NULL)
+				{
+					result = COAP_500_INTERNAL_SERVER_ERROR;
+				}
+
+				else
+				{
+					uint16_t id = 0;
+
+					*numDataP = nbRes;
+					for (index = 0; (id != PROP_ERROR) && (index < nbRes); ++index)
+					{
+						id = get_property_for_index(objectP->objID, OP_R, index);
+						if (id == PROP_ERROR)
+						{
+							lwm2m_free(*dataArrayP);
+							*dataArrayP = NULL;
+							result = COAP_500_INTERNAL_SERVER_ERROR;
+						}
+
+						else
+						{
+							(*dataArrayP)[index].id = id;
+						}
+					}
+				}
+			}
+		}
+
+		index = 0;
+		do
+		{
+			result = prv_get_value((*dataArrayP) + index, objectP->objID, instanceId);
+			index++;
+		} while (index < *numDataP && result == COAP_205_CONTENT);
+
+		if (IotHubClient_DM_LeaveCriticalSection((IOTHUB_CHANNEL_HANDLE)(objectP->userData)) == false)
+		{
+			LogError("leave critical section");
+		}
+	}
 
     fflush(stdout);
     fflush(stderr);
@@ -104,21 +127,35 @@ void on_resource_value_changed(IOTHUB_CHANNEL_HANDLE iotHubChannel, uint16_t obj
 
 uint8_t global_object_write(uint16_t instanceID, int numData, lwm2m_data_t *dataArray, lwm2m_object_t *objectP)
 {
-    uint8_t  result = COAP_404_NOT_FOUND;
-    int index = 0;
-    do
-    {
-        uint16_t  resourceID = dataArray[index].id;
+    uint8_t  result;
+	if (IotHubClient_DM_EnterCriticalSection((IOTHUB_CHANNEL_HANDLE)(objectP->userData)) == false)
+	{
+		LogError("enter critical section");
+		result = COAP_500_INTERNAL_SERVER_ERROR;
+	}
 
-        result = prv_set_value(&dataArray[index], objectP->objID, instanceID);
-        if (result == COAP_204_CHANGED)
-        {
-            on_resource_value_changed((IOTHUB_CHANNEL_HANDLE) (objectP->userData), objectP->objID, instanceID, resourceID);
-        }
+	else
+	{
+		int index = 0;
+		do
+		{
+			uint16_t  resourceID = dataArray[index].id;
 
-        index++;
+			result = prv_set_value(&dataArray[index], objectP->objID, instanceID);
+			if (result == COAP_204_CHANGED)
+			{
+				on_resource_value_changed((IOTHUB_CHANNEL_HANDLE)(objectP->userData), objectP->objID, instanceID, resourceID);
+			}
 
-    } while (index < numData && result == COAP_204_CHANGED);
+			index++;
+
+		} while (index < numData && result == COAP_204_CHANGED);
+
+		if (IotHubClient_DM_LeaveCriticalSection((IOTHUB_CHANNEL_HANDLE)(objectP->userData)) == false)
+		{
+			LogError("leave critical section");
+		}
+	}
 
     fflush(stdout);
     fflush(stderr);
@@ -129,7 +166,21 @@ uint8_t global_object_write(uint16_t instanceID, int numData, lwm2m_data_t *data
 
 uint8_t global_object_execute(uint16_t instanceID, uint16_t resourceID, uint8_t *buffer, int length, lwm2m_object_t *objectP)
 {
-    uint8_t rv = dispatch_exec(objectP->objID, instanceID, resourceID);
+	uint8_t rv;
+	if (IotHubClient_DM_EnterCriticalSection((IOTHUB_CHANNEL_HANDLE)(objectP->userData)) == false)
+	{
+		LogError("enter critical section");
+		rv = COAP_500_INTERNAL_SERVER_ERROR;
+	}
+
+	else
+	{
+		rv = dispatch_exec(objectP->objID, instanceID, resourceID);
+		if (IotHubClient_DM_LeaveCriticalSection((IOTHUB_CHANNEL_HANDLE)(objectP->userData)) == false)
+		{
+			LogError("leave critical section");
+		}
+	}
 
     fflush(stdout);
     fflush(stderr);
@@ -138,7 +189,7 @@ uint8_t global_object_execute(uint16_t instanceID, uint16_t resourceID, uint8_t 
 }
 
 
-static uint8_t prv_OBJECT_delete(uint16_t id, lwm2m_object_t *objectP)
+static uint8_t prv_OBJECT_delete(uint16_t instanceID, lwm2m_object_t *objectP)
 {
     return COAP_405_METHOD_NOT_ALLOWED;
 }
@@ -150,14 +201,10 @@ static uint8_t prv_OBJECT_create(uint16_t instanceID, int numData, lwm2m_data_t 
 }
 
 
-static void prv_OBJECT_close(lwm2m_object_t *object)
+static uint8_t prv_OBJECT_discover(uint16_t instanceID, int *numDataP, lwm2m_data_t **dataArrayP, lwm2m_object_t *objectP)
 {
-    while (object->instanceList != NULL)
-    {
-        OBJECT_instance_t *oneInstance = (OBJECT_instance_t *)object->instanceList;
-        object->instanceList = object->instanceList->next;
-        lwm2m_free(oneInstance);
-    }
+	LogError("DISCOVER OPERATION NOT ALLOWED!");
+	return COAP_405_METHOD_NOT_ALLOWED;
 }
 
 
@@ -193,6 +240,7 @@ lwm2m_object_t *make_global_object(IOTHUB_CHANNEL_HANDLE iotHubChannel)
             oneObj->createFunc = prv_OBJECT_create;
             oneObj->deleteFunc = prv_OBJECT_delete;
             oneObj->executeFunc = global_object_execute;
+			oneObj->discoverFunc = prv_OBJECT_discover;
 
             oneObj->userData = (void *) iotHubChannel;
         }
