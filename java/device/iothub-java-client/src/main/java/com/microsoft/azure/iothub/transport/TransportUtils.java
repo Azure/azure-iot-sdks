@@ -13,17 +13,17 @@ public class TransportUtils
      * and a maximum value of 60 seconds.
      *
      * @param currentAttempt the number of attempts
-     * @return the sleep interval until the next attempt.
+     * @return the sleep interval in milliseconds until the next attempt.
      */
-    public static byte generateSleepInterval(int currentAttempt)
+    public static int generateSleepInterval(int currentAttempt)
     {
         if (currentAttempt > 7)
         {
-            return sleepIntervals[6];
+            return sleepIntervals[6] * 1000;
         }
         else if (currentAttempt > 0)
         {
-            return sleepIntervals[currentAttempt - 1];
+            return sleepIntervals[currentAttempt - 1] * 1000;
         }
         else
         {
