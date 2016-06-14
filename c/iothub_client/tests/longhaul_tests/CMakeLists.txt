@@ -25,7 +25,7 @@ set(${theseTestsName}_h_files
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 
 build_test_artifacts(${theseTestsName} ON)
-set_tests_properties(${theseTestsName} PROPERTIES TIMEOUT 86400)
+set_tests_properties(${theseTestsName} PROPERTIES TIMEOUT 1296000)
 
 if(WIN32)
 	if(TARGET ${theseTestsName}_dll)
