@@ -2298,6 +2298,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_null_transportHandle_fails)
 }
 
 /*Tests_SRS_IOTHUBCLIENT_LL_17_002: [IoTHubClient_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_LL_HANDLE.] */
+/*Tests_SRS_IOTHUBCLIENT_LL_02_096: [ IoTHubClient_LL_CreateWithTransport shall create the data structures needed to instantiate a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE. ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_047: [ IoTHubClient_LL_CreateWithTransport shall create a TICK_COUNTER_HANDLE. ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_17_004: [IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.] */
 /*Tests_SRS_IOTHUBCLIENT_LL_17_006: [IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.]*/
@@ -2309,6 +2310,20 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_Succeeds)
 	device.deviceId = TEST_DEVICE_CONFIG.deviceId;
 	device.deviceKey = TEST_DEVICE_CONFIG.deviceKey;
 	device.deviceSasToken = NULL;
+
+    STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_GetHostname(IGNORED_PTR_ARG)) /*this is getting the hostname as STRING_HANDLE*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
+        .IgnoreArgument(1)
+        .SetReturn(TEST_HOSTNAME_VALUE);
+    
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is IoTHubName (temporary)*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG)) /*this is creating the UploadToBlob HANDLE*/
+        .IgnoreArgument(1);
 
 	STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 
@@ -2342,6 +2357,22 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_transport_register_fails_retur
 	device.deviceId = TEST_DEVICE_CONFIG.deviceId;
 	device.deviceKey = TEST_DEVICE_CONFIG.deviceKey;
 	device.deviceSasToken = NULL;
+
+    STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_GetHostname(IGNORED_PTR_ARG)) /*this is getting the hostname as STRING_HANDLE*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
+        .IgnoreArgument(1)
+        .SetReturn(TEST_HOSTNAME_VALUE);
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is IoTHubName (temporary)*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG)) /*this is creating the UploadToBlob HANDLE*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
 
 	STRICT_EXPECTED_CALL(mocks, tickcounter_create());
 	STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(IGNORED_PTR_ARG))
@@ -2380,6 +2411,22 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_tick_counter_fails_returns_nul
 	STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
 		.IgnoreArgument(1);
 
+    STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_GetHostname(IGNORED_PTR_ARG)) /*this is getting the hostname as STRING_HANDLE*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
+        .IgnoreArgument(1)
+        .SetReturn(TEST_HOSTNAME_VALUE);
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is IoTHubName (temporary)*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG)) /*this is creating the UploadToBlob HANDLE*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_Destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
 	STRICT_EXPECTED_CALL(mocks, tickcounter_create())
 		.SetFailReturn((TICK_COUNTER_HANDLE)NULL);
 
@@ -2390,6 +2437,71 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_tick_counter_fails_returns_nul
 	ASSERT_IS_NULL(result);
 
 	///cleanup
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_02_048: [ If creating the handle fails, then IoTHubClient_LL_CreateWithTransport shall fail and return NULL ]*/
+TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_IoTHubClient_LL_UploadToBlob_Create_fails_returns_null)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_GetHostname(IGNORED_PTR_ARG)) /*this is getting the hostname as STRING_HANDLE*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
+        .IgnoreArgument(1)
+        .SetReturn(TEST_HOSTNAME_VALUE);
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is IoTHubName (temporary)*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG)) /*this is creating the UploadToBlob HANDLE*/
+        .IgnoreArgument(1)
+        .SetFailReturn((IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE)NULL);
+
+    ///act
+    auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+
+    ///assert
+    ASSERT_IS_NULL(result);
+
+    ///cleanup
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClient_LL_CreateWithTransport shall fail and return NULL. ]*/
+TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_when_malloc_fails_returns_NULL)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_GetHostname(IGNORED_PTR_ARG)) /*this is getting the hostname as STRING_HANDLE*/
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
+        .IgnoreArgument(1)
+        .SetReturn(TEST_HOSTNAME_VALUE);
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)) /*this is IoTHubName (temporary)*/
+        .IgnoreArgument(1)
+        .SetFailReturn((void*)NULL);
+
+    ///act
+    auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+
+    ///assert
+    ASSERT_IS_NULL(result);
+
+    ///cleanup
 }
 
 /*Tests_SRS_IOTHUBCLIENT_LL_17_003: [If allocation fails, the function shall fail and return NULL.]*/
@@ -2461,6 +2573,9 @@ TEST_FUNCTION(IoTHubClient_LL_Destroys_unregisters_but_does_not_destroy_transpor
 {
 	///arrange
 	CIoTHubClientLLMocks mocks;
+    STRICT_EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(TEST_HOSTNAME_VALUE);
 	auto handle = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
 	mocks.ResetAllCalls();
 

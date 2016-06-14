@@ -160,7 +160,12 @@ add_library(iothub_client
 )
 linkSharedUtil(iothub_client)
 
-if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+# Don't build samples under Win32 ARM for now
+if(WIN32)
+	if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+		add_subdirectory(samples)
+	endif()
+else()
 	add_subdirectory(samples)
 endif()
 

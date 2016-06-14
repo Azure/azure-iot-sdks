@@ -59,7 +59,7 @@ static void garbageCollectorImpl(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance)
 
         if (Lock(savedData->lockGarbage) != LOCK_OK)
         {
-            LogError("unabel to Lock");
+            LogError("unable to Lock");
         }
         else
         {
@@ -291,6 +291,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
     /*Codes_SRS_IOTHUBCLIENT_17_014: [ IoTHubClient_CreateWithTransport shall return NULL if config is NULL. ]*/
     if (transportHandle == NULL || config == NULL)
     {
+        LogError("invalid parameter TRANSPORT_HANDLE transportHandle=%p, const IOTHUB_CLIENT_CONFIG* config=%p", transportHandle, config);
         result = NULL;
     }
     else
@@ -298,66 +299,89 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
         /*Codes_SRS_IOTHUBCLIENT_17_001: [ IoTHubClient_CreateWithTransport shall allocate a new IoTHubClient instance and return a non-NULL handle to it. ]*/
         result = (IOTHUB_CLIENT_INSTANCE*)malloc(sizeof(IOTHUB_CLIENT_INSTANCE));
         /*Codes_SRS_IOTHUBCLIENT_17_002: [ If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
-        if (result != NULL)
+        if (result == NULL)
         {
-            result->savedDataToBeCleaned = NULL;
-            result->ThreadHandle = NULL;
-            result->TransportHandle = transportHandle;
-            /*Codes_SRS_IOTHUBCLIENT_17_005: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLock to get the transport lock to be used later for serializing IoTHubClient calls. ]*/
-            LOCK_HANDLE transportLock = IoTHubTransport_GetLock(transportHandle);
-            result->LockHandle = transportLock;
-            if (result->LockHandle == NULL)
+            LogError("unable to malloc");
+            /*return as is*/
+        }
+        else
+        {
+            /*Codes_SRS_IOTHUBCLIENT_02_073: [ IoTHubClient_CreateWithTransport shall create a LIST_HANDLE that shall be used by IoTHubClient_UploadToBlobAsync. ]*/
+            if ((result->savedDataToBeCleaned = list_create()) == NULL)
             {
-                /*Codes_SRS_IOTHUBCLIENT_17_006: [ If IoTHubTransport_GetLock fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
+                /*Codes_SRS_IOTHUBCLIENT_02_074: [ If creating the LIST_HANDLE fails then IoTHubClient_CreateWithTransport shall fail and return NULL. ]*/
+                LogError("unable to list_create");
                 free(result);
                 result = NULL;
             }
             else
             {
-                IOTHUB_CLIENT_DEVICE_CONFIG deviceConfig;
-                deviceConfig.deviceId = config->deviceId;
-                deviceConfig.deviceKey = config->deviceKey;
-                deviceConfig.protocol = config->protocol;
-                deviceConfig.deviceSasToken = config->deviceSasToken;
-                deviceConfig.protocol = config->protocol;
-
-                /*Codes_SRS_IOTHUBCLIENT_17_003: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLLTransport on transportHandle to get lower layer transport. ]*/
-                deviceConfig.transportHandle = IoTHubTransport_GetLLTransport(transportHandle);
-
-                if (deviceConfig.transportHandle == NULL)
+                result->ThreadHandle = NULL;
+                result->TransportHandle = transportHandle;
+                /*Codes_SRS_IOTHUBCLIENT_17_005: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLock to get the transport lock to be used later for serializing IoTHubClient calls. ]*/
+                LOCK_HANDLE transportLock = IoTHubTransport_GetLock(transportHandle);
+                result->LockHandle = transportLock;
+                if (result->LockHandle == NULL)
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_17_004: [ If IoTHubTransport_GetLLTransport fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
+                    LogError("unable to IoTHubTransport_GetLock");
+                    /*Codes_SRS_IOTHUBCLIENT_17_006: [ If IoTHubTransport_GetLock fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
+                    list_destroy(result->savedDataToBeCleaned);
                     free(result);
                     result = NULL;
                 }
                 else
                 {
-                    if (Lock(transportLock) != LOCK_OK)
+                    IOTHUB_CLIENT_DEVICE_CONFIG deviceConfig;
+                    deviceConfig.deviceId = config->deviceId;
+                    deviceConfig.deviceKey = config->deviceKey;
+                    deviceConfig.protocol = config->protocol;
+                    deviceConfig.deviceSasToken = config->deviceSasToken;
+                    deviceConfig.protocol = config->protocol;
+
+                    /*Codes_SRS_IOTHUBCLIENT_17_003: [ IoTHubClient_CreateWithTransport shall call IoTHubTransport_GetLLTransport on transportHandle to get lower layer transport. ]*/
+                    deviceConfig.transportHandle = IoTHubTransport_GetLLTransport(transportHandle);
+
+                    if (deviceConfig.transportHandle == NULL)
                     {
+                        LogError("unable to IoTHubTransport_GetLLTransport");
+                        /*Codes_SRS_IOTHUBCLIENT_17_004: [ If IoTHubTransport_GetLLTransport fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
+                        list_destroy(result->savedDataToBeCleaned);
                         free(result);
                         result = NULL;
                     }
                     else
                     {
-                        /*Codes_SRS_IOTHUBCLIENT_17_007: [ IoTHubClient_CreateWithTransport shall instantiate a new IoTHubClient_LL instance by calling IoTHubClient_LL_CreateWithTransport and passing the lower layer transport and config argument. ]*/
-                        result->IoTHubClientLLHandle = IoTHubClient_LL_CreateWithTransport(&deviceConfig);
-                        if (result->IoTHubClientLLHandle == NULL)
+                        if (Lock(transportLock) != LOCK_OK)
                         {
-                            /*Codes_SRS_IOTHUBCLIENT_17_008: [ If IoTHubClient_LL_CreateWithTransport fails, then IoTHubClient_Create shall return NULL. ]*/
-                            /*Codes_SRS_IOTHUBCLIENT_17_009: [ If IoTHubClient_LL_CreateWithTransport fails, all resources allocated by it shall be freed. ]*/
+                            LogError("unable to Lock");
+                            list_destroy(result->savedDataToBeCleaned);
                             free(result);
                             result = NULL;
                         }
-
-                        if (Unlock(transportLock) != LOCK_OK)
+                        else
                         {
-                            LogError("unable to Unlock");
+                            /*Codes_SRS_IOTHUBCLIENT_17_007: [ IoTHubClient_CreateWithTransport shall instantiate a new IoTHubClient_LL instance by calling IoTHubClient_LL_CreateWithTransport and passing the lower layer transport and config argument. ]*/
+                            result->IoTHubClientLLHandle = IoTHubClient_LL_CreateWithTransport(&deviceConfig);
+                            if (result->IoTHubClientLLHandle == NULL)
+                            {
+                                LogError("unable to IoTHubClient_LL_CreateWithTransport");
+                                /*Codes_SRS_IOTHUBCLIENT_17_008: [ If IoTHubClient_LL_CreateWithTransport fails, then IoTHubClient_Create shall return NULL. ]*/
+                                /*Codes_SRS_IOTHUBCLIENT_17_009: [ If IoTHubClient_LL_CreateWithTransport fails, all resources allocated by it shall be freed. ]*/
+                                list_destroy(result->savedDataToBeCleaned);
+                                free(result);
+                                result = NULL;
+                            }
+
+                            if (Unlock(transportLock) != LOCK_OK)
+                            {
+                                LogError("unable to Unlock");
+                            }
                         }
                     }
-
                 }
             }
         }
+
     }
 
     return result;

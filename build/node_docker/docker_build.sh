@@ -11,7 +11,7 @@ envdir=$dockerdir/env
 
 mkdir $envdir
 
-for build_container in "aziot-node010" "aziot-node012" "aziot-node4" "aziot-node5"
+for build_container in "aziot-node010" "aziot-node012" "aziot-node4" "aziot-node5" "aziot-node6"
 do
     ENV_FILE=$envdir/$build_container.env
     echo IOTHUB_DEVICE_ID=$IOTHUB_DEVICE_ID > $ENV_FILE
