@@ -277,9 +277,7 @@ namespace Microsoft.Azure.Devices
                 websocket.Options.Proxy = webProxy;
             }
 
-#if !WINDOWS_UWP
             websocket.Options.UseDefaultCredentials = true;
-#endif
 
             using (var cancellationTokenSource = new CancellationTokenSource(timeout))
             {

@@ -9,14 +9,26 @@ namespace ConsoleSample
 {
     class Program
     {
+        const string connectionString = "...";
         static void Main(string[] args)
         {
-            var connectionString = "HostName=arturl-home-hub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=oeB6/pY72ulF8VCBuAStTKo9r4z4K1UcBvHK5tkTq4Q=";
+            //SendMessage();
+            AddDevice();
+        }
+
+        static void SendMessage()
+        {
             var serviceClient = ServiceClient.CreateFromConnectionString(connectionString, TransportType.Amqp);
             var str = "Hello, Cloud!";
             var message = new Message(Encoding.ASCII.GetBytes(str));
             serviceClient.SendAsync("GarageDoorSensor", message).Wait();
             Console.WriteLine("done");
+        }
+
+        static void AddDevice()
+        {
+            RegistryManager manager = RegistryManager.CreateFromConnectionString(connectionString);
+            manager.AddDeviceAsync(new Device("new_device"));
         }
     }
 }

@@ -46,8 +46,6 @@ namespace Microsoft.Azure.Devices.Common
         public static string GenerateKeyInHex(int keySize)
         {
             var keyBytes = new byte[keySize];
-            throw new NotImplementedException();
-
             using (var cyptoProvider = new RNGCryptoServiceProvider())
             {
                 cyptoProvider.GetNonZeroBytes(keyBytes);
@@ -58,7 +56,6 @@ namespace Microsoft.Azure.Devices.Common
         public static Guid GenerateGuid()
         {
             byte[] bytes = new byte[GuidLength];
-            throw new NotImplementedException();
             using (var rng = new RNGCryptoServiceProvider())
             {
                 rng.GetBytes(bytes);

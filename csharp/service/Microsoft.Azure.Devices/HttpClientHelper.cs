@@ -105,23 +105,24 @@ namespace Microsoft.Azure.Devices
         {
             T result = default(T);
 
-#if WINDOWS_UWP
-            throw new NotImplementedException("ObjectContent class is missing");
-#else
-
             await this.ExecuteAsync(
                     HttpMethod.Put,
                     new Uri(this.baseAddress, requestUri),
                     (requestMsg, token) =>
                     {
                         InsertEtag(requestMsg, entity, operationType);
+#if WINDOWS_UWP
+                        var str = Newtonsoft.Json.JsonConvert.SerializeObject(entity);
+                        requestMsg.Content = new StringContent(str, System.Text.Encoding.UTF8, "application/json");
+#else
                         requestMsg.Content = new ObjectContent<T>(entity, new JsonMediaTypeFormatter());
+#endif
                         return Task.FromResult(0);
                     },
                     async (httpClient, token) => result = await ReadResponseMessageAsync<T>(httpClient, token),
                     errorMappingOverrides,
                     cancellationToken);
-#endif
+
             return result;
         }
 
@@ -133,10 +134,11 @@ namespace Microsoft.Azure.Devices
             }
 
 #if WINDOWS_UWP
-            throw new NotImplementedException("missing API");
+            var str = await message.Content.ReadAsStringAsync();
+            T entity = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(str);
 #else
             T entity = await message.Content.ReadAsAsync<T>(token);
-
+#endif
             // Etag in the header is considered authoritative
             var eTagHolder = entity as IETagHolder;
             if (eTagHolder != null)
@@ -149,7 +151,7 @@ namespace Microsoft.Azure.Devices
             }
 
             return entity;
-#endif
+//#endif
         }
 
         static Task AddCustomHeaders(HttpRequestMessage requestMessage, IDictionary<string, string> customHeaders)
@@ -396,9 +398,8 @@ namespace Microsoft.Azure.Devices
             using (var msg = new HttpRequestMessage(httpMethod, requestUri))
             {
                 msg.Headers.Add(HttpRequestHeader.Authorization.ToString(), this.authenticationHeaderProvider.GetAuthorizationHeader());
-#if !WINDOWS_UWP
                 msg.Headers.Add(HttpRequestHeader.UserAgent.ToString(), Utils.GetClientVersion());
-#endif
+
                 if (modifyRequestMessageAsync != null) await modifyRequestMessageAsync(msg, cancellationToken);
 
                 // TODO: pradeepc - find out the list of exceptions that HttpClient can throw.

@@ -133,7 +133,6 @@
     <Compile Include="..\Microsoft.Azure.Devices\Common\Interop\SafeEventLogWriteHandle.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\Common\Interop\UnsafeNativeMethods.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\Common\IOThreadScheduler.cs" />
-    <Compile Include="..\Microsoft.Azure.Devices\Common\IOThreadTimer.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\Common\PartialTrustHelpers.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\Common\ReadOnlyDictionary45.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\Common\Security\CryptoKeyGenerator.cs" />
@@ -208,7 +207,7 @@
     <Compile Include="..\Microsoft.Azure.Devices\SymmetricKey.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\X509Thumbprint.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\UWPSupport.cs" />
-    <Compile Include="..\Microsoft.Azure.Devices\IOThreadTimerSlim.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices\Common\IOThreadTimerSlim.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Microsoft.Azure.Devices.Uwp.rd.xml" />
   </ItemGroup>

@@ -21,15 +21,27 @@ namespace UWPSample
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        const string connectionString = "...";
+
         public MainPage()
         {
             this.InitializeComponent();
+            //SendMessage();
+            AddDevice();
+        }
 
-            var connectionString = "<replace>";
+        void SendMessage()
+        {
             var serviceClient = ServiceClient.CreateFromConnectionString(connectionString, TransportType.Amqp);
             var str = "Hello, Cloud, from a UWP app that uses Microsoft.Azure.Devices";
             var message = new Message(System.Text.Encoding.ASCII.GetBytes(str));
             serviceClient.SendAsync("GarageDoorSensor", message);
+        }
+
+        void AddDevice()
+        {
+            RegistryManager manager = RegistryManager.CreateFromConnectionString(connectionString);
+            manager.AddDeviceAsync(new Device("new_device"));
         }
     }
 }
