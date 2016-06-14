@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifndef USE_UPLOADTOBLOB
+#error "trying to compile iothub_client_sample_upload_to_blob.c in absence of a #define USE_UPLOADTOBLOB"
+#else
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -62,3 +66,4 @@ void iothub_client_sample_upload_to_blob_run(void)
         platform_deinit();
     }
 }
+#endif /*USE_UPLOADTOBLOB*/

@@ -193,7 +193,8 @@ extern "C"
 	* @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
 	*/
 	extern IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
-    
+
+#ifdef USE_UPLOADTOBLOB
     /**
     * @brief	IoTHubClient_UploadToBlobAsync uploads data from memory to a file in Azure Blob Storage.
     *
@@ -207,6 +208,7 @@ extern "C"
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     extern IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context);
+#endif
 #ifdef __cplusplus
 }
 #endif

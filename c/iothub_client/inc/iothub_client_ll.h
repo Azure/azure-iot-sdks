@@ -325,7 +325,21 @@ extern "C"
 	*/
 	extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value);
 
+#ifdef USE_UPLOADTOBLOB
+    /**
+    * @brief	This API uploads to Azure Storage the content pointed to by @p source having the size @p size
+    *           under the blob name devicename/@pdestinationFileName
+    *
+    * @param	iotHubClientHandle	    The handle created by a call to the create function.
+    * @param	destinationFileName     name of the file.
+    * @param	source                  pointer to the source for file content (can be NULL)
+    * @param    size                    the size of the source in memory (if @p source is NULL then size needs to be 0).
+    *
+    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
     extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size);
+
+#endif /*USE_UPLOADTOBLOB*/
 
 #ifdef __cplusplus
 }

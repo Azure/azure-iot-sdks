@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+
+#ifndef USE_UPLOADTOBLOB
+#error "trying to compile iothub_client_ll_u2b_unittests.c without having #define USE_UPLOADTOBLOB"
+#else
 #include <stdlib.h>
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
@@ -142,8 +146,6 @@ static HTTPAPIEX_RESULT my_HTTPAPIEX_SAS_ExecuteRequest(HTTPAPIEX_SAS_HANDLE sas
 #include "azure_c_shared_utility/gballoc.h"
 
 #undef ENABLE_MOCKS
-
-
 
 #include "iothub_client_ll_uploadtoblob.h"
 
@@ -3065,3 +3067,4 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
 }
 
 END_TEST_SUITE(iothubclient_ll_uploadtoblob_unittests)
+#endif /*USE_UPLOADTOBLOB*/

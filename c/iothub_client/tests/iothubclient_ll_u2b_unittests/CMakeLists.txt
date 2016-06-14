@@ -4,10 +4,6 @@
 #this is CMakeLists.txt for iothub_client_ll_uploadtoblob_unittests
 cmake_minimum_required(VERSION 2.8.11)
 
-if(NOT ${use_http})
-	message(FATAL_ERROR "iothub_client_ll_uploadtoblob being generated without HTTP support")
-endif()
-
 compileAsC11()
 set(theseTestsName iothub_client_ll_u2b_unittests )
 

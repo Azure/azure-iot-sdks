@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifndef USE_UPLOADTOBLOB
+#error "trying to compile iothub_client_ll_uploadtoblob.c without #define USE_UPLOADTOBLOB"
+#else
+
 #include <stdlib.h>
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
@@ -776,3 +780,4 @@ void IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h
         free(handleData);
     }
 }
+#endif /*USE_UPLOADTOBLOB*/

@@ -10,7 +10,6 @@ set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../../parson/parson.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_transport_ll.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_ll_uploadtoblob.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/blob.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_ll.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_message.c
@@ -20,3 +19,8 @@ set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../../parson/parson.c
 	)
 	
+if(${USE_UPLOADTOBLOB})
+    set(mbed_project_files
+        ${mbed_project_files} 
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_ll_uploadtoblob.c)
+endif()
