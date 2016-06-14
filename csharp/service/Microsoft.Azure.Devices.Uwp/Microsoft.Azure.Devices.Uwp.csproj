@@ -133,7 +133,6 @@
     <Compile Include="..\Microsoft.Azure.Devices\Common\Interop\SafeEventLogWriteHandle.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\Common\Interop\UnsafeNativeMethods.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\Common\IOThreadScheduler.cs" />
-    <Compile Include="..\Microsoft.Azure.Devices\Common\PartialTrustHelpers.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\Common\ReadOnlyDictionary45.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\Common\Security\CryptoKeyGenerator.cs" />
     <Compile Include="..\Microsoft.Azure.Devices\Common\Security\ISharedAccessSignatureCredential.cs" />

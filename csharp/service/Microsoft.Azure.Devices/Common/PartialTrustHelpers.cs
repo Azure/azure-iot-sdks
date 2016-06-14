@@ -3,7 +3,6 @@
 
 namespace Microsoft.Azure.Devices.Common
 {
-#if !WINDOWS_UWP
     using System;
     using System.Reflection;
     using System.Runtime.CompilerServices;
@@ -145,5 +144,4 @@ namespace Microsoft.Azure.Devices.Common
         }
 
     }
-#endif
 }

@@ -151,7 +151,6 @@ namespace Microsoft.Azure.Devices
             }
 
             return entity;
-//#endif
         }
 
         static Task AddCustomHeaders(HttpRequestMessage requestMessage, IDictionary<string, string> customHeaders)
