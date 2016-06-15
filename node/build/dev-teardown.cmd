@@ -8,6 +8,11 @@ set node-root=%~dp0..
 REM // resolve to fully qualified path
 for %%i in ("%node-root%") do set node-root=%%~fi
 
+cd %node-root%\build\tools
+echo .
+echo -- Removing links for build tools --
+call npm rm azure-iothub
+
 cd %node-root%\..\tools\iothub-explorer
 echo -- Removing links for %cd% --
 call npm rm azure-iothub

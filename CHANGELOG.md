@@ -1,3 +1,11 @@
+# Node.js Device SDK
+- Add support for x509 authentication with HTTP
+- Node.js v6 support
+
+# Node.js Service SDK
+- Add support for x509 certificate thumbprints in the Registry 
+
+Release for June 3, 2016
 # C Device SDK
 - Upload to blob functionality
 
