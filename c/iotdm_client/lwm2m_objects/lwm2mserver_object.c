@@ -24,15 +24,32 @@
 
 void set_default_lwm2mserver_property_values(object_lwm2mserver *obj)
 {
+    set_lwm2mserver_shortserverid(obj->instanceId, -1);
     set_lwm2mserver_lifetime(obj->instanceId, -1);
     set_lwm2mserver_defaultminimumperiod(obj->instanceId, -1);
     set_lwm2mserver_defaultmaximumperiod(obj->instanceId, -1);
+    set_lwm2mserver_binding(obj->instanceId, "LWM2MServer_Binding");
 }
 
 /**********************************************************************************
  * CALLBACK HANDLERS
  *
  **********************************************************************************/
+IOTHUB_CLIENT_RESULT on_read_lwm2mserver_shortserverid(object_lwm2mserver *obj, int64_t *value)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    if (obj->lwm2mserver_shortserverid_read_callback != NULL)
+    {
+        result = obj->lwm2mserver_shortserverid_read_callback(obj);
+    }
+    if (result == IOTHUB_CLIENT_OK)
+    {
+        *value = obj->propval_lwm2mserver_shortserverid;
+        LogInfo("returning %lld for LWM2MServer_ShortServerID", *value);
+    }
+    return result;
+}
+
 IOTHUB_CLIENT_RESULT on_read_lwm2mserver_lifetime(object_lwm2mserver *obj, int64_t *value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
@@ -113,6 +130,35 @@ IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultmaximumperiod(object_lwm2mserve
     if (obj->lwm2mserver_defaultmaximumperiod_write_callback != NULL)
     {
         result = obj->lwm2mserver_defaultmaximumperiod_write_callback(obj);
+    }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT on_read_lwm2mserver_binding(object_lwm2mserver *obj, char **value)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    if (obj->lwm2mserver_binding_read_callback != NULL)
+    {
+        result = obj->lwm2mserver_binding_read_callback(obj);
+    }
+    if (result == IOTHUB_CLIENT_OK)
+    {
+        *value = lwm2m_strdup(obj->propval_lwm2mserver_binding);
+        LogInfo("returning [%s] for LWM2MServer_Binding", *value);
+    }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT on_write_lwm2mserver_binding(object_lwm2mserver *obj, const char *value, size_t length)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    lwm2m_free(obj->propval_lwm2mserver_binding);
+    obj->propval_lwm2mserver_binding = iotdm_strndup(value, length);
+    LogInfo("LWM2MServer_Binding being set to [%s]", obj->propval_lwm2mserver_binding);
+
+    if (obj->lwm2mserver_binding_write_callback != NULL)
+    {
+        result = obj->lwm2mserver_binding_write_callback(obj);
     }
     return result;
 }

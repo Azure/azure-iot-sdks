@@ -74,7 +74,6 @@ set(iotdm_client_h_files
 set(iotdm_lwm2m_objects_c_files
     ${LWM2M_OBJECTS_DIR}/object_global.c
     ${LWM2M_OBJECTS_DIR}/object_security.c
-    ${LWM2M_OBJECTS_DIR}/object_server.c
     ${LWM2M_OBJECTS_DIR}/lwm2m_object_list.c
     ${LWM2M_OBJECTS_DIR}/iotdm_dispatchers.c
     ${LWM2M_OBJECTS_DIR}/iotdm_dispatcher_list.c
