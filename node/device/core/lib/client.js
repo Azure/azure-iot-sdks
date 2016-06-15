@@ -224,11 +224,17 @@ Client.prototype.open = function (done) {
 
   /* Codes_SRS_NODE_DEVICE_CLIENT_12_001: [The open function shall call the transport’s connect function, if it exists.] */
   if (typeof this._transport.connect === 'function') {
+    this._disconnectHandler = function (err) {
+      this.emit('disconnect', new results.Disconnected(err));
+    };
+
     this._transport.connect(function (err, res) {
       if (err) {
         done(err);
       } else {
         debug('Open transport successful');
+        /*Codes_SRS_NODE_DEVICE_CLIENT_16_045: [If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.]*/
+        this._transport.on('disconnect', this._disconnectHandler.bind(this));
         connectReceiverIfListening();
         done(null, res);
       }
@@ -294,6 +300,8 @@ Client.prototype.close = function (done) {
       if (err) {
         done(err);
       } else {
+        /*Codes_SRS_NODE_DEVICE_CLIENT_16_046: [The `disconnect` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
+        this._transport.removeListener('disconnect', this._disconnectReceiver);
         done(null, result);
       }
     }.bind(this));

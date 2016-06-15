@@ -56,10 +56,14 @@ client.sendEvent(new Message('hello world'), print);
 
 **SRS_NODE_DEVICE_CLIENT_12_001: [** The `open` function shall call the transport's `connect` function, if it exists. **]**
 
+**SRS_NODE_DEVICE_CLIENT_16_045: [** If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport. **]**
+
 **SRS_NODE_DEVICE_CLIENT_16_020: [** The `open` function should start listening for C2D messages if there are listeners on the `message` event **]**
 
 #### close(done)
 **SRS_NODE_DEVICE_CLIENT_16_001: [** The `close` function shall call the transport's `disconnect` function if it exists. **]**
+
+**SRS_NODE_DEVICE_CLIENT_16_046: [** The `disconnect` method shall remove the listener that has been attached to the transport `disconnect` event. **]**
 
 #### sendEvent(message, done)
 The `sendEvent` method sends an event message to the IoT Hub as the device indicated in the constructor argument.

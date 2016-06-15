@@ -127,16 +127,18 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, certifi
     });
 
     describe('#open', function () {
+      var TransportCanOpen = function (config) {
+        EventEmitter.call(this);
+        this.config = config;
+      };
+      util.inherits(TransportCanOpen, EventEmitter);
+
+      TransportCanOpen.prototype.connect = function (callback) {
+        callback(null, new results.Connected());
+      };
+
       /* Tests_SRS_NODE_DEVICE_CLIENT_12_001: [The open function shall call the transport’s connect function, if it exists.] */
       it('calls connect on the transport if the method exists', function (done) {
-        var TransportCanOpen = function (config) {
-          this.config = config;
-        };
-
-        TransportCanOpen.prototype.connect = function (callback) {
-          callback(null, new results.Connected());
-        };
-
         var client = Client.fromConnectionString(goodConnectionString, TransportCanOpen);
         client.open(function (err, result) {
           if (err) {
@@ -183,12 +185,29 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, certifi
           }
         });
       });
+
+      /*Tests_SRS_NODE_DEVICE_CLIENT_16_045: [If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.]*/
+      it('connects a handler for the \'disconnect\' event of the transport', function(done) {
+        var transport = new TransportCanOpen({});
+        transport.on = sinon.spy();
+        var client = new Client(transport);
+        client.open(function (err) {
+          if (err) {
+            done(err);
+          } else {
+            assert(transport.on.calledWith('disconnect'));
+            done();
+          }
+        });
+      });
     });
 
     describe('#close', function () {
       var TransportCanClose = function (config) {
+        EventEmitter.call(this);
         this.config = config;
       };
+      util.inherits(TransportCanClose, EventEmitter);
 
       TransportCanClose.prototype.disconnect = function (callback) {
         callback(null, new results.Disconnected(null, 'Disconnected by the client'));
@@ -199,6 +218,21 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, certifi
         var client = Client.fromConnectionString(goodConnectionString, TransportCanClose);
         client.close(function () {
           done();
+        });
+      });
+
+      /*Tests_SRS_NODE_DEVICE_CLIENT_16_046: [** The `disconnect` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
+      it('connects a handler for the \'disconnect\' event of the transport', function(done) {
+        var transport = new TransportCanClose({});
+        transport.removeListener = sinon.spy();
+        var client = new Client(transport);
+        client.close(function (err) {
+          if (err) {
+            done(err);
+          } else {
+            assert(transport.removeListener.calledWith('disconnect'));
+            done();
+          }
         });
       });
     });
@@ -513,6 +547,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, certifi
         var connectCalled = false;
         var getReceiverCalled = false;
         var DummyTransport = function () {
+          EventEmitter.call(this);
           this.connect = function (callback) {
             connectCalled = true;
             callback(null);
@@ -525,6 +560,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, certifi
             callback(null, new EventEmitter());
           };
         };
+        util.inherits(DummyTransport, EventEmitter);
 
         var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
         client.on('message', function () { });

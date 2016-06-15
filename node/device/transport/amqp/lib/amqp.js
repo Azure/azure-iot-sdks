@@ -42,7 +42,7 @@ Amqp.prototype._initialize = function () {
 
   this._amqp = new Base(uri, false, 'azure-iot-device/' + PackageJson.version);
   this._amqp.setDisconnectHandler(function (err) {
-    this.emit('disconnect', new results.Disconnected(err));
+    this.emit('disconnect', err);
   }.bind(this));
 };
 
