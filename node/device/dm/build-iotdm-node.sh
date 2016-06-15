@@ -5,10 +5,12 @@
 
 script_dir=$(cd "$(dirname "$0")" && pwd)
 build_root=${script_dir}
+# BKTODO: use environment variable for find enmscripten another way
 emscripten_root=/home/bertk/emsdk_portable
 
 extracloptions=-Wtautological-constant-out-of-range-compare
 
+# BKTODO: find better location.  home directory isn't appropriate anymore.
 cmakedir=~/emscripten
 rm -r -f ${cmakedir}
 mkdir ${cmakedir}
@@ -37,6 +39,7 @@ cmake \
     -Duse_socketio:BOOL=OFF \
     $build_root
 
+# BKTODO: enable mproc builds
 make
 
 cp emwrapper.js $build_root
