@@ -7,8 +7,9 @@ namespace Microsoft.Azure.Devices.Common
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
+#if !WINDOWS_UWP
     using System.Transactions;
-
+#endif
     static class TaskHelpers
     {
         public static readonly Task CompletedTask = Task.FromResult(default(VoidTaskResult));
@@ -69,6 +70,7 @@ namespace Microsoft.Azure.Devices.Common
             return retval;
         }
 
+#if !WINDOWS_UWP
         /// <summary>
         /// Create a Task based on Begin/End IAsyncResult pattern.
         /// </summary>
@@ -141,7 +143,7 @@ namespace Microsoft.Azure.Devices.Common
 
             return retval;
         }
-
+#endif
         public static Task ExecuteAndGetCompletedTask(Action action)
         {
             TaskCompletionSource<object> completedTcs = new TaskCompletionSource<object>();

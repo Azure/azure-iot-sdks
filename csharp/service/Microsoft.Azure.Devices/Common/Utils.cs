@@ -86,6 +86,7 @@ namespace Microsoft.Azure.Devices.Common
             return toReturn;
         }
 
+#if !WINDOWS_UWP
         public static void StartProcessMonitor(Action<string> traceEventAction)
         {
             while (true)
@@ -104,6 +105,7 @@ namespace Microsoft.Azure.Devices.Common
                 Thread.Sleep(CommonConstants.ProcessThreadCheckInterval);
             }
         }
+#endif
 
         public static void ValidateBufferBounds(byte[] buffer, int offset, int size)
         {
@@ -141,9 +143,16 @@ namespace Microsoft.Azure.Devices.Common
 
         public static string GetClientVersion()
         {
+#if WINDOWS_UWP
+            // System.Reflection.Assembly.GetExecutingAssembly() does not exist for UWP, therefore use a hard-coded version name
+            // (This string is picked up by the bump_version script, so don't change the line below)
+            var UWPAssemblyVersion = "1.0.10";
+            return UWPAssemblyVersion;
+#else
             var a = Assembly.GetExecutingAssembly();
             var attribute = (AssemblyInformationalVersionAttribute)a.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), true)[0];
             return a.GetName().Name + "/" + attribute.InformationalVersion;
+#endif
         }
     }
 }

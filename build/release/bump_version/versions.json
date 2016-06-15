@@ -8,7 +8,7 @@
     "csharp": {
         "device": "1.0.12",
         "devicepcl": "1.0.7",
-        "service": "1.0.9"
+        "service": "1.0.10"
     },
     "java": {
         "device": "1.0.7",

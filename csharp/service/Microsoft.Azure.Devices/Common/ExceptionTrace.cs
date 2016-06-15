@@ -5,6 +5,9 @@ namespace Microsoft.Azure.Devices.Common
 {
     using System;
     using System.Diagnostics;
+#if WINDOWS_UWP
+    using Microsoft.Azure.Devices.PlatformSupport.System.Diagnostics;
+#endif
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Runtime.CompilerServices;
@@ -87,6 +90,7 @@ namespace Microsoft.Azure.Devices.Common
 
         public void TraceHandled(Exception exception, string catchLocation, EventTraceActivity activity = null)
         {
+#if !WINDOWS_UWP
 #if DEBUG
             Trace.WriteLine(string.Format(
                 CultureInfo.InvariantCulture,
@@ -95,6 +99,7 @@ namespace Microsoft.Azure.Devices.Common
                 catchLocation,
                 exception.GetType(),
                 exception.ToStringSlim()));
+#endif
 #endif
 
             ////MessagingClientEtwProvider.Provider.HandledExceptionWithFunctionName(
@@ -108,9 +113,11 @@ namespace Microsoft.Azure.Devices.Common
             ////MessagingClientEtwProvider.Provider.EventWriteUnhandledException(this.eventSourceName + ": " + exception.ToStringSlim());
         }
 
+#if !WINDOWS_UWP
         [ResourceConsumption(ResourceScope.Process)]
         [Fx.Tag.SecurityNote(Critical = "Calls 'System.Runtime.Interop.UnsafeNativeMethods.IsDebuggerPresent()' which is a P/Invoke method",
             Safe = "Does not leak any resource, needed for debugging")]
+#endif
         public TException TraceException<TException>(TException exception, TraceEventType level, EventTraceActivity activity = null)
             where TException : Exception
         {
@@ -165,8 +172,10 @@ namespace Microsoft.Azure.Devices.Common
 
         public static string GetDetailsForThrownException(Exception e)
         {
-            const int MaxStackFrames = 10;
             string details = e.GetType().ToString();
+
+#if !WINDOWS_UWP
+            const int MaxStackFrames = 10;
 
             // Include the current callstack (this ensures we see the Stack in case exception is not output when caught)
             var stackTrace = new StackTrace();
@@ -180,15 +189,21 @@ namespace Microsoft.Azure.Devices.Common
             details += Environment.NewLine + stackTraceString;
             details += Environment.NewLine + "Exception ToString:" + Environment.NewLine;
             details += e.ToStringSlim();
+#endif
             return details;
         }
 
         [SuppressMessage(FxCop.Category.Performance, FxCop.Rule.MarkMembersAsStatic, Justification = "CSDMain #183668")]
+#if !WINDOWS_UWP
         [Fx.Tag.SecurityNote(Critical = "Calls into critical method UnsafeNativeMethods.IsDebuggerPresent and UnsafeNativeMethods.DebugBreak",
             Safe = "Safe because it's a no-op in retail builds.")]
+#endif
         internal void BreakOnException(Exception exception)
         {
 #if DEBUG
+#if WINDOWS_UWP
+            Debugger.Launch();
+#else
             if (Fx.BreakOnExceptionTypes != null)
             {
                 foreach (Type breakType in Fx.BreakOnExceptionTypes)
@@ -205,6 +220,7 @@ namespace Microsoft.Azure.Devices.Common
                     }
                 }
             }
+#endif
 #endif
         }
 

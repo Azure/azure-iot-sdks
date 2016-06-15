@@ -11,7 +11,9 @@ namespace Microsoft.Azure.Devices
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+#if !WINDOWS_UWP
     using System.Net.Http.Formatting;
+#endif
     using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
@@ -109,7 +111,12 @@ namespace Microsoft.Azure.Devices
                     (requestMsg, token) =>
                     {
                         InsertEtag(requestMsg, entity, operationType);
+#if WINDOWS_UWP
+                        var str = Newtonsoft.Json.JsonConvert.SerializeObject(entity);
+                        requestMsg.Content = new StringContent(str, System.Text.Encoding.UTF8, "application/json");
+#else
                         requestMsg.Content = new ObjectContent<T>(entity, new JsonMediaTypeFormatter());
+#endif
                         return Task.FromResult(0);
                     },
                     async (httpClient, token) => result = await ReadResponseMessageAsync<T>(httpClient, token),
@@ -126,8 +133,12 @@ namespace Microsoft.Azure.Devices
                 return (T) (object)message;
             }
 
+#if WINDOWS_UWP
+            var str = await message.Content.ReadAsStringAsync();
+            T entity = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(str);
+#else
             T entity = await message.Content.ReadAsAsync<T>(token);
-
+#endif
             // Etag in the header is considered authoritative
             var eTagHolder = entity as IETagHolder;
             if (eTagHolder != null)
@@ -274,7 +285,11 @@ namespace Microsoft.Azure.Devices
                         }
                         else
                         {
+#if WINDOWS_UWP
+                            throw new NotImplementedException("missing API 2!");
+#else
                             requestMsg.Content = new ObjectContent<T1>(entity, new JsonMediaTypeFormatter());
+#endif
                         }
                     }
 
@@ -382,9 +397,8 @@ namespace Microsoft.Azure.Devices
             using (var msg = new HttpRequestMessage(httpMethod, requestUri))
             {
                 msg.Headers.Add(HttpRequestHeader.Authorization.ToString(), this.authenticationHeaderProvider.GetAuthorizationHeader());
-#if !WINDOWS_UWP
                 msg.Headers.Add(HttpRequestHeader.UserAgent.ToString(), Utils.GetClientVersion());
-#endif
+
                 if (modifyRequestMessageAsync != null) await modifyRequestMessageAsync(msg, cancellationToken);
 
                 // TODO: pradeepc - find out the list of exceptions that HttpClient can throw.

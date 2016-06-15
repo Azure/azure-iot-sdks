@@ -6,9 +6,13 @@ namespace Microsoft.Azure.Devices.Common.Security
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+#if WINDOWS_UWP
+    using PCLCrypto;
+#else
     using System.Security.Cryptography;
+#endif
     using System.Text;
-    using System.Web;
+    using System.Net;
 
     using Microsoft.Azure.Devices.Common.Data;
     
@@ -37,7 +41,7 @@ namespace Microsoft.Azure.Devices.Common.Security
 
             this.iotHubName = iotHubName;
             this.signature = signature;
-            this.audience = HttpUtility.UrlDecode(encodedAudience);
+            this.audience = WebUtility.UrlDecode(encodedAudience);
             this.encodedAudience = encodedAudience;
             this.expiry = expiry;
             this.keyName = keyName ?? string.Empty;
@@ -194,6 +198,17 @@ namespace Microsoft.Azure.Devices.Common.Security
 
         public string ComputeSignature(byte[] key)
         {
+#if WINDOWS_UWP
+            var fields = new List<string>();
+            fields.Add(this.encodedAudience);
+            fields.Add(this.expiry);
+            string value = string.Join("\n", fields);
+            var algorithm = WinRTCrypto.MacAlgorithmProvider.OpenAlgorithm(MacAlgorithm.HmacSha256);
+            var hash = algorithm.CreateHash(key);
+            hash.Append(Encoding.UTF8.GetBytes(value));
+            var mac = hash.GetValueAndReset();
+            return Convert.ToBase64String(mac);
+#else
             List<string> fields = new List<string>();
             fields.Add(this.encodedAudience);
             fields.Add(this.expiry);
@@ -203,6 +218,7 @@ namespace Microsoft.Azure.Devices.Common.Security
                 string value = string.Join("\n", fields);
                 return Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(value)));
             }
+#endif
         }
 
         static IDictionary<string, string> ExtractFieldValues(string sharedAccessSignature)
@@ -230,7 +246,7 @@ namespace Microsoft.Azure.Devices.Common.Security
                     }
                     else
                     {
-                        parsedFields.Add(fieldParts[0], HttpUtility.UrlDecode(fieldParts[1]));
+                        parsedFields.Add(fieldParts[0], WebUtility.UrlDecode(fieldParts[1]));
                     }
                 }
             }
