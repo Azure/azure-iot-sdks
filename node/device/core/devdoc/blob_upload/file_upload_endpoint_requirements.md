@@ -18,7 +18,7 @@ The `FileUploadApi` class provide methods to get an Azure Storage blob SAS URI f
 
 **SRS_NODE_FILE_UPLOAD_ENDPOINT_16_004: [** `getBlobSharedAccessSignature` shall throw a `ReferenceError` if `blobName` is falsy. **]**
 
-**SRS_NODE_FILE_UPLOAD_ENDPOINT_16_005: [** `getBlobSharedAccessSignature` shall throw a `ReferenceError` if `iotHubSas` is falsy. **]**
+**SRS_NODE_FILE_UPLOAD_ENDPOINT_16_005: [** `getBlobSharedAccessSignature` shall throw a `ReferenceError` if `auth` is falsy. **]**
 
 **SRS_NODE_FILE_UPLOAD_ENDPOINT_16_006: [** `getBlobSharedAccessSignature` shall create a `GET` HTTP request to a path formatted as the following:
 `/devices/<deviceId>/files/<filename>?api-version=<api-version>`
@@ -48,7 +48,7 @@ Authorization: <iotHubSas>
 ### notifyUploadComplete(correlationId, sharedAccessSignature, uploadResult, done)
 **SRS_NODE_FILE_UPLOAD_ENDPOINT_16_010: [** `notifyUploadComplete` shall throw a `ReferenceError` if `correlationId` is falsy. **]**
 
-**SRS_NODE_FILE_UPLOAD_ENDPOINT_16_011: [** `notifyUploadComplete` shall throw a `ReferenceError` if `sharedAccessSignature` is falsy. **]**
+**SRS_NODE_FILE_UPLOAD_ENDPOINT_16_011: [** `notifyUploadComplete` shall throw a `ReferenceError` if `auth` is falsy. **]**
 
 **SRS_NODE_FILE_UPLOAD_ENDPOINT_16_012: [** `notifyUploadComplete` shall throw a `ReferenceError` if `uploadResult` is falsy. **]**
 

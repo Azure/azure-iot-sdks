@@ -8,10 +8,10 @@ var sinon = require('sinon');
 var util = require('util');
 
 var Client = require('../lib/client.js');
+var ConnectionString = require('../lib/connection_string.js');
 var Message = require('azure-iot-common').Message;
 var EventEmitter = require('events').EventEmitter;
 var results = require('azure-iot-common').results;
-var errors = require('azure-iot-common').errors;
 
 function badConfigTests(opName, badConnStrings, Transport, requestFn) {
 
@@ -52,7 +52,19 @@ function badConfigTests(opName, badConnStrings, Transport, requestFn) {
   });
 }
 
-function runTests(Transport, goodConnectionString, badConnectionStrings) {
+function runTests(Transport, goodConnectionString, badConnectionStrings, certificate, key, passphrase) {
+  var cn = ConnectionString.parse(goodConnectionString);
+  var x509 = !!cn.x509;
+
+  var setx509OptionsIfSpecified = function(client) {
+    if(x509) {
+      client.setOptions({
+        cert: certificate,
+        key: key,
+        passphrase: passphrase
+      });
+    }
+  };
 
   describe('Client', function () {
     describe('#sendEvent', function () {
@@ -60,9 +72,12 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
       /*Tests_SRS_NODE_DEVICE_CLIENT_05_017: [With the exception of receive, when a Client method completes successfully, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - null
       response - a transport-specific response object]*/
-      it('sends the event', function (done) {
+      it('sends the event using shared access signature', function (done) {
         var client = Client.fromConnectionString(goodConnectionString, Transport);
         var message = new Message('hello');
+
+        setx509OptionsIfSpecified(client);
+
         client.sendEvent(message, function (err, res) {
           if (err) {
             done(err);
@@ -76,7 +91,6 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
       badConfigTests('send an event', badConnectionStrings, Transport, function (client, done) {
         client.sendEvent(new Message(''), done);
       });
-
     });
 
     describe('#sendEventBatch', function () {
@@ -90,6 +104,9 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         for (var i = 0; i < 5; i++) {
           messages[i] = new Message('Event Msg ' + i);
         }
+
+        setx509OptionsIfSpecified(client);
+
         client.sendEventBatch(messages, function (err, res) {
           if (err) {
             done(err);
@@ -183,66 +200,6 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
         client.close(function () {
           done();
         });
-      });
-    });
-
-    describe('#setTransportOptions', function () {
-      /*Tests_SRS_NODE_DEVICE_CLIENT_16_021: [The ‘setTransportOptions’ method shall call the ‘setOptions’ method on the transport object.]*/
-      /*Tests_SRS_NODE_DEVICE_CLIENT_16_022: [The ‘done’ callback shall be invoked with a null error object and a ‘TransportConfigured’ object nce the transport has been configured.]*/
-      it('calls the setOptions method on the transport object and gives it the options parameter', function (done) {
-        var testOptions = { foo: 42 };
-        var DummyTransport = function () {
-          this.setOptions = function (options, callback) {
-            assert.equal(options, testOptions);
-            callback(null, new results.TransportConfigured());
-          };
-        };
-        var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
-        client.setTransportOptions(testOptions, function (err, result) {
-          if (err) {
-            done(err);
-          } else {
-            assert.equal(result.constructor.name, 'TransportConfigured');
-            done();
-          }
-        });
-      });
-
-      /*Tests_SRS_NODE_DEVICE_CLIENT_16_023: [The ‘done’ callback shall be invoked with a standard javascript Error object and no result object if the transport could not be configued as requested.]*/
-      it('calls the \'done\' callback with an error object if setOptions failed', function (done) {
-        var DummyTransport = function () {
-          this.setOptions = function (options, callback) {
-            var err = new Error('fail');
-            callback(err);
-          };
-        };
-        var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
-        client.setTransportOptions({ foo: 42 }, function (err) {
-          assert.isNotNull(err);
-          done();
-        });
-      });
-
-      /*Tests_SRS_NODE_DEVICE_CLIENT_16_024: [The ‘setTransportOptions’ method shall throw a ‘ReferenceError’ if the options object is falsy] */
-      [null, undefined, '', 0].forEach(function (option) {
-        it('throws a ReferenceError if options is ' + option, function () {
-          var DummyTransport = function () {
-            this.setOptions = function () { };
-          };
-          var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
-          assert.throws(function () {
-            client.setTransportOptions(option, function () { });
-          }, ReferenceError);
-        });
-      });
-
-      /*Tests_SRS_NODE_DEVICE_CLIENT_16_025: [The ‘setTransportOptions’ method shall throw a ‘NotImplementedError’ if the transport doesn’t implement a ‘setOption’ method.]*/
-      it('throws a NotImplementedError if the setOptions method is not implemented on the transport', function () {
-        var DummyTransport = function () { };
-        var client = Client.fromConnectionString(goodConnectionString, DummyTransport);
-        assert.throws(function () {
-          client.setTransportOptions({ foo: 42 }, function () { });
-        }, errors.NotImplementedError);
       });
     });
 

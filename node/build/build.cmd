@@ -41,6 +41,14 @@ if %min-output%==1 if %integration-tests%==0 set "npm-command=npm -s run lint &&
 if %min-output%==1 if %integration-tests%==1 set "npm-command=npm -s run ci"
 
 rem ---------------------------------------------------------------------------
+rem -- create x509 test device
+rem ---------------------------------------------------------------------------
+set IOTHUB_X509_DEVICE_ID=x509device-node-%RANDOM%
+call node %node-root%\build\tools\create_device_certs.js --connectionString %IOTHUB_CONNECTION_STRING% --deviceId %IOTHUB_X509_DEVICE_ID%
+set IOTHUB_X509_CERTIFICATE=%node-root%\%IOTHUB_X509_DEVICE_ID%-cert.pem
+set IOTHUB_X509_KEY=%node-root%\%IOTHUB_X509_DEVICE_ID%-key.pem
+
+rem ---------------------------------------------------------------------------
 rem -- lint and run tests
 rem ---------------------------------------------------------------------------
 
@@ -50,40 +58,40 @@ if %integration-tests%==1 echo -- Linting and running unit + integration tests -
 echo.
 
 call :lint-and-test %node-root%\common\core
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\common\transport\amqp
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\common\transport\http
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\common\transport\mqtt
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\device\core
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\device\transport\amqp
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\device\transport\amqp-ws
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\device\transport\http
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\device\transport\mqtt
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\service
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
 cd %node-root%\..\tools\iothub-explorer
 call npm -s test
-if errorlevel 1 goto :eof
+if errorlevel 1 goto :cleanup
 
-goto :eof
+goto :cleanup
 
 
 rem ---------------------------------------------------------------------------
@@ -103,3 +111,8 @@ cd "%1"
 echo %cd%
 call %npm-command%
 goto :eof
+
+:cleanup
+call node %node-root%\..\tools\iothub-explorer\iothub-explorer.js %IOTHUB_CONNECTION_STRING% delete %IOTHUB_X509_DEVICE_ID%
+del %IOTHUB_X509_CERTIFICATE%
+del %IOTHUB_X509_KEY%

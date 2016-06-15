@@ -48,7 +48,7 @@ client.sendEvent(new Message('hello world'), print);
 
 **SRS_NODE_DEVICE_CLIENT_16_026: [** The `Client` constructor shall accept a connection string as an optional second argument **]**
 
-**SRS_NODE_DEVICE_CLIENT_16_027: [** If a connection string argument is provided, the `Client` shall automatically generate and renew SAS tokens. **]**
+**SRS_NODE_DEVICE_CLIENT_16_027: [** If a connection string argument is provided and is using SharedAccessKey authentication, the `Client` shall automatically generate and renew SAS tokens. **]**
 
 ### Public Methods
 
@@ -76,6 +76,7 @@ The `sendEventBatch` method sends a list of event messages to the IoT Hub as the
 **SRS_NODE_DEVICE_CLIENT_07_005: [** When the `sendEventBatch` method completes the callback function shall be invoked with the same arguments as the underlying transport method's callback. **]**
 
 #### setTransportOptions(options, done)
+**`setTransportOptions` is deprecated and will be removed at the next major release.**
 
 **SRS_NODE_DEVICE_CLIENT_16_024: [** The `setTransportOptions` method shall throw a `ReferenceError` if the options object is falsy **]**
 
@@ -86,6 +87,15 @@ The `sendEventBatch` method sends a list of event messages to the IoT Hub as the
 **SRS_NODE_DEVICE_CLIENT_16_022: [** The `done` callback shall be invoked with a `null` error object and a `TransportConfigured` object once the transport has been configured. **]**
 
 **SRS_NODE_DEVICE_CLIENT_16_023: [** The `done` callback shall be invoked with a standard javascript `Error` object and no result object if the transport could not be configured as requested. **]**
+
+#### setOptions(options, done)
+`setOptions` is used to configure the client.
+
+**SRS_NODE_DEVICE_CLIENT_16_042: [** The `setOptions` method shall throw a `ReferenceError` if the options object is falsy. **]**
+
+**SRS_NODE_DEVICE_CLIENT_16_043: [** The `done` callback shall be invoked no parameters when it has successfully finished setting the client and/or transport options. **]**
+
+**SRS_NODE_DEVICE_CLIENT_16_044: [** The `done` callback shall be invoked with a standard javascript `Error` object and no result object if the client could not be configured as requested. **]**
 
 #### complete(message, done)
 

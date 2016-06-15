@@ -31,12 +31,11 @@ var Client = function (transport, connStr, blobUploadClient) {
   if (!transport) throw new ReferenceError('transport is \'' + transport + '\'');
 
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_026: [The Client constructor shall accept a connection string as an optional second argument] */
-  if (connStr) {
-    this._connectionString = connStr;
-    /*Codes_SRS_NODE_DEVICE_CLIENT_16_027: [If a connection string argument is provided, the Client shall automatically generate and renew SAS tokens.] */
+  this._connectionString = connStr;
+
+  if (this._connectionString && ConnectionString.parse(this._connectionString).SharedAccessKey) {
+    /*Codes_SRS_NODE_DEVICE_CLIENT_16_027: [If a connection string argument is provided and is using SharedAccessKey authentication, the Client shall automatically generate and renew SAS tokens.] */
     this._sharedAccessSignatureRenewalInterval = setInterval(this._renewSharedAccessSignature.bind(this), 2700000); // SAS token created by the client have a lifetime of 60 minutes, renew every 45 minutes
-  } else {
-    this._connectionString = null;
   }
 
   this.blobUploadClient = blobUploadClient;
@@ -116,14 +115,17 @@ Client.fromConnectionString = function fromConnectionString(connStr, Transport) 
 
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_005: [fromConnectionString shall derive and transform the needed parts from the connection string in order to create a new instance of Transport.]*/
   var cn = ConnectionString.parse(connStr);
-  var sas = SharedAccessSignature.create(cn.HostName, cn.DeviceId, cn.SharedAccessKey, anHourFromNow());
 
   var config = {
     host: cn.HostName,
     deviceId: cn.DeviceId,
-    hubName: cn.HostName.split('.')[0],
-    sharedAccessSignature: sas.toString()
+    hubName: cn.HostName.split('.')[0]
   };
+
+  if (cn.hasOwnProperty('SharedAccessKey')) {
+    var sas = SharedAccessSignature.create(cn.HostName, cn.DeviceId, cn.SharedAccessKey, anHourFromNow());
+    config.sharedAccessSignature = sas.toString();
+  }
 
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_006: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(new Transport(...)).]*/
   return new Client(new Transport(config), connStr, new BlobUploadClient(config));
@@ -302,6 +304,7 @@ Client.prototype.close = function (done) {
 };
 
 /**
+ * @deprecated      Use Client.setOptions instead.
  * @method          module:azure-iot-device.Client#setTransportOptions
  * @description     The `setTransportOptions` method configures transport-specific options for the client and its underlying transport object.
  *
@@ -314,18 +317,44 @@ Client.prototype.setTransportOptions = function (options, done) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_025: [The ‘setTransportOptions’ method shall throw a ‘NotImplementedError’ if the transport doesn’t implement a ‘setOption’ method.] */
   if (typeof this._transport.setOptions !== 'function') throw new errors.NotImplementedError('setOptions does not exist on this transport');
 
+  var clientOptions = {
+    http: {
+      receivePolicy: options
+    }
+  };
+
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_021: [The ‘setTransportOptions’ method shall call the ‘setOptions’ method on the transport object.]*/
-  this._transport.setOptions(options, function (err, result) {
-    /*Codes_SRS_NODE_DEVICE_CLIENT_16_022: [The ‘done’ callback shall be invoked with a null error object and a ‘SetOptionsResult’ object nce the transport has been configured.]*/
-    /*Codes_SRS_NODE_DEVICE_CLIENT_16_023: [The ‘done’ callback shall be invoked with a standard javascript Error object and no result object if the transport could not be configued as requested.]*/
+  this._transport.setOptions(clientOptions, function(err) {
     if (err) {
       done(err);
     } else {
-      done(null, result);
+      done(null, new results.TransportConfigured());
     }
   });
 };
 
+/**
+ * @method          module:azure-iot-device.Client#setOptions
+ * @description     The `setOptions` method let the user configure the client.
+ * 
+ * @param  {Object}    options  The options structure
+ * @param  {Function}  done     The callback that shall be called when setOptions is finished.
+ * 
+ * @throws {ReferenceError}     If the options structure is falsy
+ */
+
+Client.prototype.setOptions = function (options, done) {
+  /*Codes_SRS_NODE_DEVICE_CLIENT_16_042: [The `setOptions` method shall throw a `ReferenceError` if the options object is falsy.]*/
+  if (!options) throw new ReferenceError('options cannot be falsy.');
+
+  this._transport.setOptions(options, function(err) {
+    /*Codes_SRS_NODE_DEVICE_CLIENT_16_043: [The `done` callback shall be invoked no parameters when it has successfully finished setting the client and/or transport options.]*/
+    /*Codes_SRS_NODE_DEVICE_CLIENT_16_044: [The `done` callback shall be invoked with a standard javascript `Error` object and no result object if the client could not be configured as requested.]*/
+    if (done) {
+      done(err);
+    }
+  });
+};
 
 /**
  * @method           module:azure-iot-device.Client#complete
@@ -334,7 +363,7 @@ Client.prototype.setTransportOptions = function (options, done) {
  * @param {Message}  message    The message to settle.
  * @param {Function} done       The callback to call when the message is completed.
  *
- * @throws {ReferenceException} If the message is falsy.
+ * @throws {ReferenceError} If the message is falsy.
  */
 Client.prototype.complete = function (message, done) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_016: [The ‘complete’ method shall throw a ReferenceError if the ‘message’ parameter is falsy.] */

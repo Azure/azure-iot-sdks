@@ -1,0 +1,26 @@
+{
+  "name": "iothub-buildtools",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Build tools for the Azure IoT Hub Node.js SDK Build",
+  "main": "create_certs.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/azure/azure-iot-sdks.git"
+  },
+  "author": "Microsoft Corporation",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/azure/azure-iot-sdks/issues"
+  },
+  "homepage": "https://github.com/azure/azure-iot-sdks#readme",
+  "dependencies": {
+    "azure-iothub": "^1.0.9",
+    "chalk": "^1.1.3",
+    "pem": "^1.8.3",
+    "yargs": "^4.7.1"
+  }
+}
