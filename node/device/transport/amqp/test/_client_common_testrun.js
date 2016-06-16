@@ -3,6 +3,7 @@
 
 'use strict';
 
+var ConnectionString = require('azure-iot-common').ConnectionString;
 var assert = require('chai').assert;
 var Client = require('azure-iot-device').Client;
 var Message = require('azure-iot-common').Message;
@@ -41,7 +42,19 @@ function badConfigTests(opName, badConnStrings, Transport, requestFn) {
   });
 }
 
-function runTests(Transport, goodConnectionString, badConnectionStrings) {
+function runTests(Transport, goodConnectionString, badConnectionStrings, certificate, key, passphrase) {
+  var cn = ConnectionString.parse(goodConnectionString);
+  var x509 = !!cn.x509;
+
+  var setx509OptionsIfSpecified = function(client) {
+    if(x509) {
+      client.setOptions({
+        cert: certificate,
+        key: key,
+        passphrase: passphrase
+      });
+    }
+  };
 
   describe('Client', function () {
     describe('#sendEvent', function () {
@@ -54,6 +67,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings) {
       /*Tests_SRS_NODE_DEVICE_AMQP_16_004: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message). ] */
       it('sends the event', function (done) {
         var client = Client.fromConnectionString(goodConnectionString, Transport);
+        setx509OptionsIfSpecified(client);
         client.open(function (err, res) {
           if (err) {
             done(err);

@@ -62,4 +62,36 @@ describe('Amqp', function () {
       assert(receiver.abandon.calledWith(testMessage, testCallback));
     });
   });
+
+  describe('#setOptions', function () {
+    var testOptions = {
+      http: {
+        receivePolicy: {interval: 1}
+      }
+    };
+    /*Tests_SRS_NODE_DEVICE_AMQP_06_001: [The `setOptions` method shall throw a ReferenceError if the `options` parameter has not been supplied.]*/
+    [undefined, null, ''].forEach(function (badOptions){
+      it('throws if options is \'' + badOptions +'\'', function () {
+        var transport = new Amqp({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sas: 'sas.key' });
+        assert.throws(function () {
+          transport.setOptions(badOptions);
+        }, ReferenceError, '');
+      });
+    });
+
+    /*Tests_SRS_NODE_DEVICE_AMQP_06_002: [If `done` has been specified the `setOptions` method shall call the `done` callback with no arguments when successful.]*/
+    it('calls the done callback with no arguments', function(done) {
+      var transport = new Amqp({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sas: 'sas.key' });
+      transport.setOptions(testOptions, done);
+    });
+
+    /*Tests_SRS_NODE_DEVICE_AMQP_06_003: [`setOptions` should not throw if `done` has not been specified.]*/
+    it('does not throw if `done` is not specified', function() {
+      var transport = new Amqp({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sas: 'sas.key' });
+      assert.doesNotThrow(function() {
+        transport.setOptions({});
+      });
+    });
+  });
+
 });

@@ -14,7 +14,7 @@ var fakeConfig = {
 
 describe('Amqp', function() {
   var fakeAmqpBase = {
-    connect: function (callback) {
+    connect: function (uri, sslOptions, callback) {
       callback();
     },
     disconnect: function (callback) {

@@ -12,6 +12,7 @@ npm rm azure-iothub
 cd $node_root/../tools/iothub-explorer
 echo "-- Removing links for `pwd` --"
 npm rm azure-iothub
+npm rm azure-iot-device
 npm rm azure-iot-common
 
 cd $node_root/e2etests
