@@ -6,7 +6,6 @@ namespace Microsoft.Azure.Devices.Client
     using System;
     using System.Linq;
 #if !WINDOWS_UWP && !PCL
-    using Microsoft.WindowsAzure.ServiceRuntime;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
 #endif
@@ -19,7 +18,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public static string GenerateTrackingId()
         {
-            return GenerateTrackingId(String.Empty, String.Empty);
+            return GenerateTrackingId(string.Empty, string.Empty);
         }
 
         public static string GenerateTrackingId(string backendId, string partitionId)
@@ -32,28 +31,20 @@ namespace Microsoft.Azure.Devices.Client
         {
             string trackingId;
             trackingId = Guid.NewGuid().ToString("N");
-            if (!String.IsNullOrEmpty(gatewayId))
+            if (!string.IsNullOrEmpty(gatewayId))
             {
-#if !WINDOWS_UWP && !PCL
-                if (RoleEnvironment.IsAvailable)
-                {
-                    gatewayId = gatewayId.Substring(gatewayId.LastIndexOf("_") + 1);
-                }
-                else
-#endif
-                {
-                    gatewayId = "0";
-                }
+
+                gatewayId = "0";
                 trackingId = "{0}-G:{1}".FormatInvariant(trackingId, gatewayId);
             }
 
-            if (!String.IsNullOrEmpty(backendId))
+            if (!string.IsNullOrEmpty(backendId))
             {
                 backendId = backendId.Substring(backendId.LastIndexOf("_") + 1);
                 trackingId = "{0}-B:{1}".FormatInvariant(trackingId, backendId);
             }
 
-            if (!String.IsNullOrEmpty(partitionId))
+            if (!string.IsNullOrEmpty(partitionId))
             {
                 trackingId = "{0}-P:{1}".FormatInvariant(trackingId, partitionId);
             }
@@ -92,7 +83,7 @@ namespace Microsoft.Azure.Devices.Client
         public static string CheckAndAddGatewayIdToTrackingId(string gatewayId, string trackingId)
         {
 
-            if (!String.IsNullOrEmpty(trackingId) && trackingId.Contains("-B:"))
+            if (!string.IsNullOrEmpty(trackingId) && trackingId.Contains("-B:"))
             {
                 return "{0}-G:{1}{2}".FormatInvariant(trackingId.Substring(0, trackingId.IndexOf("-B:")), gatewayId, trackingId.Substring(trackingId.IndexOf("-B:") + 3));
             }

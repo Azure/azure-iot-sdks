@@ -110,7 +110,6 @@
       <HintPath>$(SolutionDir)\packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8\Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.ServiceRuntime, Version=2.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.WindowsAzure.Storage, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\WindowsAzure.Storage.7.0.0\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
       <Private>True</Private>
@@ -159,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AmqpConnectionPoolSettings.cs" />
+    <Compile Include="Common\Amqp\LegacyClientWebSocketTransport.cs" />
     <Compile Include="Common\Exceptions\IotHubClientException.cs" />
     <Compile Include="AmqpTransportSettings.cs" />
     <Compile Include="Common\PerfectHash.cs" />
@@ -166,6 +166,7 @@
     <Compile Include="Common\TaskConstants.cs" />
     <Compile Include="Common\TaskUtils.cs" />
     <Compile Include="DeviceAuthenticationWithX509Certificate.cs" />
+    <Compile Include="IotHubClientWebSocket.cs" />
     <Compile Include="Transport\DefaultDelegatingHandler.cs" />
     <Compile Include="IDelegatingHandler.cs" />
     <Compile Include="IotHubDeviceScopeConnectionPool.cs" />

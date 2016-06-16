@@ -1,38 +1,42 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.Azure.Devices
+namespace Microsoft.Azure.Devices.Client
 {
     using System;
     using System.IO;
     using System.Net;
     using System.Net.WebSockets;
-    using System.Threading;
     using System.Threading.Tasks;
-
-    using Microsoft.Azure.Devices.Common;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Transport;
 
-    sealed class ClientWebSocketTransport : TransportBase
+    sealed class LegacyClientWebSocketTransport : TransportBase
     {
-        static readonly AsyncCallback onReadComplete = OnReadComplete;
+        const string ClientWebSocketTransportReadBufferTooSmall = "LegacyClientWebSocketTransport Read Buffer too small.";
+        const int MaxReadBufferSize = 256 * 1024; // Max Read buffer size is hard-coded to 256k
         static readonly AsyncCallback onWriteComplete = OnWriteComplete;
-        static readonly TimeSpan CloseTimeout = TimeSpan.FromSeconds(30);
 
-        readonly ClientWebSocket webSocket;
+        readonly IotHubClientWebSocket webSocket;
         readonly EndPoint localEndPoint;
         readonly EndPoint remoteEndPoint;
-        volatile CancellationTokenSource writeCancellationTokenSource;
-        bool disposed;
+        readonly TimeSpan operationTimeout;
+        readonly int asyncReadBufferSize;
+        readonly byte[] asyncReadBuffer;
 
-        public ClientWebSocketTransport(ClientWebSocket webSocket, EndPoint localEndpoint, EndPoint remoteEndpoint)
-            : base("clientwebsocket")
+        bool disposed;
+        int asyncReadBufferOffset;
+        int remainingBytes;
+
+        public LegacyClientWebSocketTransport(IotHubClientWebSocket webSocket, TimeSpan operationTimeout,  EndPoint localEndpoint, EndPoint remoteEndpoint)
+            : base("legacyclientwebsocket")
         {
             this.webSocket = webSocket;
+            this.operationTimeout = operationTimeout;
             this.localEndPoint = localEndpoint;
             this.remoteEndPoint = remoteEndpoint;
-            this.writeCancellationTokenSource = new CancellationTokenSource();
+            this.asyncReadBufferSize = MaxReadBufferSize; // TODO: read from Config Settings
+            this.asyncReadBuffer = new byte[this.asyncReadBufferSize];
         }
 
         public override EndPoint LocalEndPoint
@@ -80,19 +84,48 @@ namespace Microsoft.Azure.Devices
             {
                 if (args.Buffer != null)
                 {
-                    var arraySegment = new ArraySegment<byte>(args.Buffer, args.Offset, args.Count);
-                    await this.webSocket.SendAsync(arraySegment, WebSocketMessageType.Binary, true, this.writeCancellationTokenSource.Token);
+                    await this.webSocket.SendAsync(args.Buffer, args.Offset, args.Count, IotHubClientWebSocket.WebSocketMessageType.Binary, this.operationTimeout);
                 }
                 else
                 {
                     foreach (ByteBuffer byteBuffer in args.ByteBufferList)
                     {
-                        await this.webSocket.SendAsync(new ArraySegment<byte>(byteBuffer.Buffer, byteBuffer.Offset, byteBuffer.Length),
-                            WebSocketMessageType.Binary, true, this.writeCancellationTokenSource.Token);
+                        await this.webSocket.SendAsync(byteBuffer.Buffer, byteBuffer.Offset, byteBuffer.Length, IotHubClientWebSocket.WebSocketMessageType.Binary, this.operationTimeout);
                     }
                 }
 
                 succeeded = true;
+            }
+            catch (WebSocketException webSocketException)
+            {
+                throw new IOException(webSocketException.Message, webSocketException);
+            }
+            catch (HttpListenerException httpListenerException)
+            {
+                throw new IOException(httpListenerException.Message, httpListenerException);
+            }
+            catch (TaskCanceledException taskCanceledException)
+            {
+                throw new TimeoutException(taskCanceledException.Message, taskCanceledException);
+            }
+            finally
+            {
+                if (!succeeded)
+                {
+                    this.Abort();
+                }
+            }
+        }
+
+        async Task<int> ReadAsyncCore()
+        {
+            bool succeeded = false;
+            try
+            {
+                int numBytes = await this.webSocket.ReceiveAsync(this.asyncReadBuffer, this.asyncReadBufferOffset, this.asyncReadBufferSize, this.operationTimeout);
+
+                succeeded = true;
+                return numBytes;
             }
             catch (WebSocketException webSocketException)
             {
@@ -123,49 +156,31 @@ namespace Microsoft.Azure.Devices
             Fx.AssertAndThrow(args.Buffer != null, "must have buffer to read");
             Fx.AssertAndThrow(args.CompletedCallback != null, "must have a valid callback");
 
-            Utils.ValidateBufferBounds(args.Buffer, args.Offset, args.Count);
-            args.Exception = null; // null out any exceptions
+            // TODO: Is this assert valid at all?  It should be ok for caller to ask for more bytes than we can give...
+            Fx.AssertAndThrow(args.Count <= this.asyncReadBufferSize, ClientWebSocketTransportReadBufferTooSmall);
 
-            Task<int> taskResult = this.ReadAsyncCore(args);
-            if (ReadTaskDone(taskResult, args))
+            Utils.ValidateBufferBounds(args.Buffer, args.Offset, args.Count);
+            args.Exception = null;
+
+            if (this.asyncReadBufferOffset > 0)
+            {
+                Fx.AssertAndThrow(this.remainingBytes > 0, "Must have data in buffer to transfer");
+
+                // Data left over from previous read
+                this.TransferData(this.remainingBytes, args);
+                return false;
+            }
+
+            args.Exception = null; // null out any exceptions
+            Task<int> taskResult = this.ReadAsyncCore();
+
+            if (this.ReadTaskDone(taskResult, args))
             {
                 return false;
             }
 
-            taskResult.ToAsyncResult(onReadComplete, args);
+            taskResult.ToAsyncResult(this.OnReadComplete, args);
             return true;
-        }
-
-        async Task<int> ReadAsyncCore(TransportAsyncCallbackArgs args)
-        {
-            bool succeeded = false;
-            try
-            {
-                WebSocketReceiveResult receiveResult = await this.webSocket.ReceiveAsync(
-                    new ArraySegment<byte>(args.Buffer, args.Offset, args.Count), CancellationToken.None);
-
-                succeeded = true;
-                return receiveResult.Count;
-            }
-            catch (WebSocketException webSocketException)
-            {
-                throw new IOException(webSocketException.Message, webSocketException);
-            }
-            catch (HttpListenerException httpListenerException)
-            {
-                throw new IOException(httpListenerException.Message, httpListenerException);
-            }
-            catch (TaskCanceledException taskCanceledException)
-            {
-                throw new TimeoutException(taskCanceledException.Message, taskCanceledException);
-            }
-            finally
-            {
-                if (!succeeded)
-                {
-                    this.Abort();
-                }
-            }
         }
 
         protected override bool OpenInternal()
@@ -178,25 +193,19 @@ namespace Microsoft.Azure.Devices
         protected override bool CloseInternal()
         {
             var webSocketState = this.webSocket.State;
-            if (webSocketState != WebSocketState.Closed && webSocketState != WebSocketState.Aborted)
+            if (webSocketState != IotHubClientWebSocket.WebSocketState.Closed && webSocketState != IotHubClientWebSocket.WebSocketState.Aborted)
             {
-                this.CloseInternalAsync(CloseTimeout).Fork();
+                this.CloseInternalAsync().Fork();
             }
 
             return true;
         }
 
-        async Task CloseInternalAsync(TimeSpan timeout)
+        async Task CloseInternalAsync()
         {
             try
             {
-                // Cancel any pending write
-                this.CancelPendingWrite();
-
-                using (var cancellationTokenSource = new CancellationTokenSource(timeout))
-                {
-                    await this.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, cancellationTokenSource.Token);
-                }
+               await this.webSocket.CloseAsync();
             }
             catch (Exception e)
             {
@@ -205,53 +214,32 @@ namespace Microsoft.Azure.Devices
                     throw;
                 }
             }
-
-            // Call Abort anyway to ensure that all WebSocket Resources are released 
-            this.Abort();
-        }
-
-        void CancelPendingWrite()
-        {
-            try
-            {
-                this.writeCancellationTokenSource.Cancel();
-            }
-            catch (ObjectDisposedException)
-            {
-                // ignore this error
-            }
         }
 
         protected override void AbortInternal()
         {
-            if (!this.disposed && this.webSocket.State != WebSocketState.Aborted)
+            if (!this.disposed && this.webSocket.State != IotHubClientWebSocket.WebSocketState.Aborted)
             {
                 this.disposed = true;
                 this.webSocket.Abort();
-                this.webSocket.Dispose();
             }
         }
 
-        static void OnReadComplete(IAsyncResult result)
+        void OnReadComplete(IAsyncResult result)
         {
             if (result.CompletedSynchronously)
             {
                 return;
             }
 
-            HandleReadComplete(result);
-        }
-
-        static void HandleReadComplete(IAsyncResult result)
-        {
             Task<int> taskResult = (Task<int>)result;
             var args = (TransportAsyncCallbackArgs)taskResult.AsyncState;
 
-            ReadTaskDone(taskResult, args);
+            this.ReadTaskDone(taskResult, args);
             args.CompletedCallback(args);
         }
 
-        static bool ReadTaskDone(Task<int> taskResult, TransportAsyncCallbackArgs args)
+        bool ReadTaskDone(Task<int> taskResult, TransportAsyncCallbackArgs args)
         {
             IAsyncResult result = taskResult;
             args.BytesTransfered = 0;  // reset bytes transferred
@@ -262,7 +250,7 @@ namespace Microsoft.Azure.Devices
             }
             else if (taskResult.IsCompleted)
             {
-                args.BytesTransfered = taskResult.Result;
+                this.TransferData(taskResult.Result, args);
                 args.CompletedSynchronously = result.CompletedSynchronously;
                 return true;
             }
@@ -274,6 +262,26 @@ namespace Microsoft.Azure.Devices
             return false;
         }
 
+        void TransferData(int bytesRead, TransportAsyncCallbackArgs args)
+        {
+            if (bytesRead <= args.Count)
+            {
+                Buffer.BlockCopy(this.asyncReadBuffer, this.asyncReadBufferOffset, args.Buffer, args.Offset, bytesRead);
+                this.asyncReadBufferOffset = 0;
+                this.remainingBytes = 0;
+                args.BytesTransfered = bytesRead;
+            }
+            else
+            {
+                Buffer.BlockCopy(this.asyncReadBuffer, this.asyncReadBufferOffset, args.Buffer, args.Offset, args.Count);
+
+                // read only part of the data
+                this.asyncReadBufferOffset += args.Count;
+                this.remainingBytes = bytesRead - args.Count;
+                args.BytesTransfered = args.Count;
+            }
+        }
+
         static void OnWriteComplete(IAsyncResult result)
         {
             if (result.CompletedSynchronously)
@@ -281,11 +289,6 @@ namespace Microsoft.Azure.Devices
                 return;
             }
 
-            HandleWriteComplete(result);
-        }
-
-        static void HandleWriteComplete(IAsyncResult result)
-        {
             Task taskResult = (Task)result;
             var args = (TransportAsyncCallbackArgs)taskResult.AsyncState;
             WriteTaskDone(taskResult, args);
@@ -318,15 +321,14 @@ namespace Microsoft.Azure.Devices
         void ThrowIfNotOpen()
         {
             var webSocketState = this.webSocket.State;
-            if (webSocketState == WebSocketState.Open)
+            if (webSocketState == IotHubClientWebSocket.WebSocketState.Open)
             {
                 return;
             }
 
-            if (webSocketState == WebSocketState.Aborted ||
-                webSocketState == WebSocketState.Closed ||
-                webSocketState == WebSocketState.CloseReceived ||
-                webSocketState == WebSocketState.CloseSent)
+            if (webSocketState == IotHubClientWebSocket.WebSocketState.Aborted ||
+                webSocketState == IotHubClientWebSocket.WebSocketState.Closed
+                )
             {
                 throw new ObjectDisposedException(this.GetType().Name);
             }
