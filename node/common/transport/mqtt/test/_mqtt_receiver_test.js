@@ -47,7 +47,9 @@ describe('MqttReceiver', function () {
     it('subscribes to the topic when a listener is added', function () {
       var topicName = 'topic_subscribe_name';
       var mqttClient = new FakeMqttClient();
+      mqttClient.on = sinon.spy();
       mqttClient.subscribe = sinon.stub(mqttClient, 'subscribe', function (topic, options, callback) {
+        assert(mqttClient.on.calledWith('message'));
         assert.isOk(options);
         assert.equal(topic, topicName);
         callback();
