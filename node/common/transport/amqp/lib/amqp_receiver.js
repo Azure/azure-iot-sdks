@@ -127,7 +127,7 @@ AmqpReceiver.prototype.abandon = function (message, done) {
 /* Codes_SRS_NODE_IOTHUB_AMQPRECEIVER_16_010: [If the message object passed as an argument is falsy, a ReferenceError should be thrown]*/
 AmqpReceiver.prototype.reject = function (message, done) {
   if (!message) { throw new ReferenceError('Invalid message object.'); }
-  this._amqpReceiver.reject(message.transportObj, "Message rejected by the device");
+  this._amqpReceiver.reject(message.transportObj);
   if (done) done(null, new results.MessageRejected());
 };
 

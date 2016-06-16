@@ -15,7 +15,7 @@ var Https = require('azure-iothub').Https;
 var Client = require('azure-iothub').Client;
 var Registry = require('azure-iothub').Registry;
 var Message = require('azure-iot-common').Message;
-var EventHubClient = require('./lib/eventhubclient.js');
+var EventHubClient = require('azure-event-hubs').Client;
 var ConnectionString = require('azure-iothub').ConnectionString;
 var SharedAccessSignature = require('azure-iothub').SharedAccessSignature;
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
@@ -191,29 +191,28 @@ else if (command === 'monitor-events') {
 
   var startTime = Date.now();
 
-  var ehClient = new EventHubClient(connString, 'messages/events/');
-  ehClient.GetPartitionIds().then(function (partitionIds) {
-    partitionIds.forEach(function (partitionId) {
-      ehClient.CreateReceiver('$Default', partitionId).then(function (receiver) {
-        // start receiving
-        receiver.StartReceive(startTime).then(function () {
-          receiver.on('error', function (error) {
-            serviceError(error.description);
+  var ehClient = EventHubClient.fromConnectionString(connString);
+  ehClient.open()
+          .then(ehClient.getPartitionIds.bind(ehClient))
+          .then(function (partitionIds) {
+            return partitionIds.map(function (partitionId) {
+              return ehClient.createReceiver('$Default', partitionId, { 'startAfterTime' : startTime}).then(function(receiver) {
+                receiver.on('errorReceived', function (error) {
+                  serviceError(error.message);
+                });
+                receiver.on('message', function (eventData) {
+                  if (eventData.systemProperties['iothub-connection-device-id'] === arg1) {
+                    console.log('Event received: ');
+                    console.log(eventData.body);
+                    console.log('');
+                  }
+                });
+              });
+            });
+          })
+          .catch(function (error) {
+            serviceError(error.message);
           });
-          receiver.on('eventReceived', function (eventData) {
-            if ((eventData.SystemProperties['iothub-connection-device-id'] === arg1) &&
-              (eventData.SystemProperties['x-opt-enqueued-time'] >= startTime)) {
-              console.log('Event received: ');
-              console.log(eventData.Bytes);
-              console.log('');
-            }
-          });
-        });
-        return receiver;
-      });
-    });
-    return partitionIds;
-  });
 }
 else if (command === 'send') {
   if (!arg1) inputError('No device ID given');
