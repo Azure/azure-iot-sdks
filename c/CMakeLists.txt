@@ -7,10 +7,10 @@ project(azure_iot_sdks)
 #making a nice global variable to know if we are on linux or not.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(LINUX TRUE)
-	#on Linux, enable valgrind
-	#these commands (MEMORYCHECK...) need to apear BEFORE include(CTest) or they will not have any effect
-	find_program(MEMORYCHECK_COMMAND valgrind)	
-	set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full --error-exitcode=1")
+    #on Linux, enable valgrind
+    #these commands (MEMORYCHECK...) need to apear BEFORE include(CTest) or they will not have any effect
+    find_program(MEMORYCHECK_COMMAND valgrind)	
+    set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full --error-exitcode=1")
 endif()
 
 include (CTest)
@@ -37,8 +37,6 @@ endif()
 if(${use_uploadtoblob})
     add_definitions(-DUSE_UPLOADTOBLOB)
 endif()
-
-
 
 #Use solution folders. 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -68,7 +66,6 @@ if(NOT "${compileOption_CXX}" STREQUAL "OFF")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
 endif()
 
-
 add_subdirectory(azure-c-shared-utility)
 add_subdirectory(azure-uamqp-c)
 add_subdirectory(azure-umqtt-c)
@@ -83,7 +80,7 @@ include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility)
 
 include(CheckSymbolExists)
 function(detect_architecture symbol arch) 
-    if (NOT DEFINED ARCHITECTURE) 
+    if (NOT DEFINED ARCHITECTURE OR ARCHITECTURE STREQUAL "")
         set(CMAKE_REQUIRED_QUIET 1)
         check_symbol_exists("${symbol}" "" ARCHITECTURE_${arch}) 
         unset(CMAKE_REQUIRED_QUIET) 
@@ -94,23 +91,22 @@ function(detect_architecture symbol arch)
             set(ARCHITECTURE "${arch}" PARENT_SCOPE) 
             set(ARCHITECTURE_${arch} 1 PARENT_SCOPE) 
             add_definitions(-DARCHITECTURE_${arch}=1) 
-        endif() 
-    endif() 
-endfunction() 
-
-if (MSVC) 
-    detect_architecture("_M_AMD64" x86_64) 
-    detect_architecture("_M_IX86" x86) 
-    detect_architecture("_M_ARM" ARM) 
+        endif()
+    endif()
+endfunction()
+if (MSVC)
+    detect_architecture("_M_AMD64" x86_64)
+    detect_architecture("_M_IX86" x86)
+    detect_architecture("_M_ARM" ARM)
 else() 
-    detect_architecture("__x86_64__" x86_64) 
-    detect_architecture("__i386__" x86) 
-    detect_architecture("__arm__" ARM) 
+    detect_architecture("__x86_64__" x86_64)
+    detect_architecture("__i386__" x86)
+    detect_architecture("__arm__" ARM)
 endif() 
-if (NOT DEFINED ARCHITECTURE) 
+if (NOT DEFINED ARCHITECTURE OR ARCHITECTURE STREQUAL "") 
     set(ARCHITECTURE "GENERIC") 
 endif() 
-message(STATUS "Target architecture: ${ARCHITECTURE}")
+message(STATUS "iothub architecture: ${ARCHITECTURE}")
 
 function(linkUAMQP whatExecutableIsBuilding)
     include_directories(${UAMQP_INC_FOLDER})
@@ -216,5 +212,3 @@ endif()
 if("${build_javawrapper}" STREQUAL "ON")	
      add_subdirectory(../javawrapper/device/iothub_client_javawrapper javawrapper)
 endif()
-
-
