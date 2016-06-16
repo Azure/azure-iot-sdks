@@ -2,10 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #if defined(ARDUINO_ARCH_ESP8266)
+#include <time.h>
 
-/*
- * AzureIoTHub doesn’t need the __ctype_ptr__ table, we define it here just to make the linker happy. 
- */
-const char *__ctype_ptr__ = { 0 };
-
-#endif // (ARDUINO_ARCH_ESP8266)
+extern "C" {
+    double difftime(time_t _time2, time_t _time1)
+    {
+        return (double)_time2 - (double)_time1;
+    }
+}
+#endif
