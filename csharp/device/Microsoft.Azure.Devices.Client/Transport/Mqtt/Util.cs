@@ -241,7 +241,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         public static void PopulateMessagePropertiesFromPacket(Message message, PublishPacket publish)
         {
             message.LockToken = publish.QualityOfService == QualityOfService.AtLeastOnce ? publish.PacketId.ToString() : null;
-            Dictionary<string, string> properties = UrlEncodedDictionarySerializer.Deserialize(publish.TopicName, publish.TopicName.NthIndexOf('/', 0, 4));
+            Dictionary<string, string> properties = UrlEncodedDictionarySerializer.Deserialize(publish.TopicName, publish.TopicName.NthIndexOf('/', 0, 4) + 1);
             foreach (KeyValuePair<string, string> property in properties)
             {
                 string propertyName;
