@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Amqp.Transport
         internal const string Scheme = "wss://";
         internal const string UriSuffix = "/$iothub/websocket";
         internal const string SecurePort = "443";
+        internal const string Version = "13";
 
         internal static class SubProtocols
         {
