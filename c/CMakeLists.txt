@@ -27,15 +27,15 @@ option(compileOption_C "passes a string to the command line of the C compiler" O
 option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
 option(build_python "builds the Python native iothub_client module" OFF)
 option(build_javawrapper "builds the native iothub_client library for java C wrapper" OFF)
-option(use_uploadtoblob "set use_uploadtoblob to ON if the functionality of upload to blob is to be included, OFF otherwise. It requires HTTP" ON)
+option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
 
 #check for conflicting options
-if(${use_uploadtoblob} AND NOT ${use_http})
-    message(FATAL_ERROR "option use_uploadtoblob set to ON requires option use_http set to ON")
+if(NOT ${dont_use_uploadtoblob} AND NOT ${use_http})
+    message(FATAL_ERROR "option dont_use_uploadtoblob set to OFF requires option use_http set to ON")
 endif()
 
-if(${use_uploadtoblob})
-    add_definitions(-DUSE_UPLOADTOBLOB)
+if(${dont_use_uploadtoblob})
+    add_definitions(-DDONT_USE_UPLOADTOBLOB)
 endif()
 
 #Use solution folders. 

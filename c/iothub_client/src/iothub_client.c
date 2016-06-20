@@ -26,12 +26,12 @@ typedef struct IOTHUB_CLIENT_INSTANCE_TAG
     THREAD_HANDLE ThreadHandle;
     LOCK_HANDLE LockHandle;
     sig_atomic_t StopThread;
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
     LIST_HANDLE savedDataToBeCleaned; /*list containing UPLOADTOBLOB_SAVED_DATA*/
 #endif
 } IOTHUB_CLIENT_INSTANCE;
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
 typedef struct UPLOADTOBLOB_SAVED_DATA_TAG
 {
     unsigned char* source;
@@ -49,7 +49,7 @@ typedef struct UPLOADTOBLOB_SAVED_DATA_TAG
 /*used by unittests only*/
 const size_t IoTHubClient_ThreadTerminationOffset = offsetof(IOTHUB_CLIENT_INSTANCE, StopThread);
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
 /*this function is called from _Destroy and from ScheduleWork_Thread to join finished blobUpload threads and free that memory*/
 static void garbageCollectorImpl(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance)
 {
@@ -118,7 +118,7 @@ static int ScheduleWork_Thread(void* threadArgument)
                 /* Codes_SRS_IOTHUBCLIENT_01_039: [All calls to IoTHubClient_LL_DoWork shall be protected by the lock created in IotHubClient_Create.] */
                 IoTHubClient_LL_DoWork(iotHubClientInstance->IoTHubClientLLHandle);
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                 garbageCollectorImpl(iotHubClientInstance);
 #endif
                 (void)Unlock(iotHubClientInstance->LockHandle);
@@ -204,7 +204,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
             }
             else
             {
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                 /*Codes_SRS_IOTHUBCLIENT_02_059: [ IoTHubClient_CreateFromConnectionString shall create a LIST_HANDLE containing THREAD_HANDLE (created by future calls to IoTHubClient_UploadToBlobAsync). ]*/
                 if ((result->savedDataToBeCleaned = list_create()) == NULL)
                 {
@@ -222,7 +222,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
                     if (result->IoTHubClientLLHandle == NULL)
                     {
                         /* Codes_SRS_IOTHUBCLIENT_12_010: [If IoTHubClient_LL_CreateFromConnectionString fails then IoTHubClient_CreateFromConnectionString shall do clean - up and return NULL] */
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                         list_destroy(result->savedDataToBeCleaned);
 #endif
                         Lock_Deinit(result->LockHandle);
@@ -262,7 +262,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
         }
         else
         {
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
             /*Codes_SRS_IOTHUBCLIENT_02_060: [ IoTHubClient_Create shall create a LIST_HANDLE containing THREAD_HANDLE (created by future calls to IoTHubClient_UploadToBlobAsync). ]*/
             if ((result->savedDataToBeCleaned = list_create()) == NULL)
             {
@@ -282,7 +282,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
                     /* Codes_SRS_IOTHUBCLIENT_01_003: [If IoTHubClient_LL_Create fails, then IoTHubClient_Create shall return NULL.] */
                     /* Codes_SRS_IOTHUBCLIENT_01_031: [If IoTHubClient_Create fails, all resources allocated by it shall be freed.] */
                     Lock_Deinit(result->LockHandle);
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                     list_destroy(result->savedDataToBeCleaned);
 #endif
                     free(result);
@@ -322,7 +322,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
         }
         else
         {
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
             /*Codes_SRS_IOTHUBCLIENT_02_073: [ IoTHubClient_CreateWithTransport shall create a LIST_HANDLE that shall be used by IoTHubClient_UploadToBlobAsync. ]*/
             if ((result->savedDataToBeCleaned = list_create()) == NULL)
             {
@@ -343,7 +343,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
                 {
                     LogError("unable to IoTHubTransport_GetLock");
                     /*Codes_SRS_IOTHUBCLIENT_17_006: [ If IoTHubTransport_GetLock fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                     list_destroy(result->savedDataToBeCleaned);
 #endif
                     free(result);
@@ -365,7 +365,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
                     {
                         LogError("unable to IoTHubTransport_GetLLTransport");
                         /*Codes_SRS_IOTHUBCLIENT_17_004: [ If IoTHubTransport_GetLLTransport fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                         list_destroy(result->savedDataToBeCleaned);
 #endif
                         free(result);
@@ -376,7 +376,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
                         if (Lock(transportLock) != LOCK_OK)
                         {
                             LogError("unable to Lock");
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                             list_destroy(result->savedDataToBeCleaned);
 #endif
                             free(result);
@@ -391,7 +391,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
                                 LogError("unable to IoTHubClient_LL_CreateWithTransport");
                                 /*Codes_SRS_IOTHUBCLIENT_17_008: [ If IoTHubClient_LL_CreateWithTransport fails, then IoTHubClient_Create shall return NULL. ]*/
                                 /*Codes_SRS_IOTHUBCLIENT_17_009: [ If IoTHubClient_LL_CreateWithTransport fails, all resources allocated by it shall be freed. ]*/
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                                 list_destroy(result->savedDataToBeCleaned);
 #endif
                                 free(result);
@@ -429,7 +429,7 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
             LogError("unable to Lock - - will still proceed to try to end the thread without locking");
         }
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         /*Codes_SRS_IOTHUBCLIENT_02_069: [ IoTHubClient_Destroy shall free all data created by IoTHubClient_UploadToBlobAsync ]*/
         /*wait for all uploading threads to finish*/
         while (list_get_head_item(iotHubClientInstance->savedDataToBeCleaned) != NULL)
@@ -456,7 +456,7 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
         /* Codes_SRS_IOTHUBCLIENT_01_006: [That includes destroying the IoTHubClient_LL instance by calling IoTHubClient_LL_Destroy.] */
         IoTHubClient_LL_Destroy(iotHubClientInstance->IoTHubClientLLHandle);
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         if (iotHubClientInstance->savedDataToBeCleaned != NULL)
         {
             list_destroy(iotHubClientInstance->savedDataToBeCleaned);
@@ -697,7 +697,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHan
     return result;
 }
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
 static int uploadingThread(void *data)
 {
     UPLOADTOBLOB_SAVED_DATA* savedData = (UPLOADTOBLOB_SAVED_DATA*)data;
@@ -743,7 +743,7 @@ static int uploadingThread(void *data)
 }
 #endif
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
 IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -895,4 +895,4 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
     }
     return result;
 }
-#endif /*USE_UPLOADTOBLOB*/
+#endif /*DONT_USE_UPLOADTOBLOB*/
