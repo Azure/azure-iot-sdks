@@ -11,7 +11,7 @@ var sinon = require('sinon');
 
 var FakeHttp = function () { };
 
-FakeHttp.prototype.buildRequest = function (method, path, httpHeaders, host, done) {
+FakeHttp.prototype.buildRequest = function (method, path, httpHeaders, host, sslOptions, done) {
   return {
     end: function () {
       if (this.messageCount > 0) {

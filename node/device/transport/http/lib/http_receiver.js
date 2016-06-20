@@ -67,7 +67,7 @@ function HttpReceiver(config, httpHelper) {
 
 util.inherits(HttpReceiver, EventEmitter);
 
-/*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_031: [If using a shared access signature for authentication, the following additional header should be used in the HTTP request: 
+/*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_031: [If using a shared access signature for authentication, the following additional header should be used in the HTTP request:
 ```
 Authorization: <config.sharedAccessSignature>
 ``` ]*/
@@ -164,7 +164,7 @@ HttpReceiver.prototype.receive = function () {
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_018: [If opts.drain is false, only one message shall be received at a time]*/
   var drainRequester = new EventEmitter();
   drainRequester.on('nextRequest', function () {
-    var request = this._http.buildRequest('GET', path + endpoint.versionQueryString(), httpHeaders, this._config.host, function (err, body, res) {
+    var request = this._http.buildRequest('GET', path + endpoint.versionQueryString(), httpHeaders, this._config.host, this._config.x509, function (err, body, res) {
       if (!err) {
         if (body) {
           var msg = this._http.toMessage(res, body);
@@ -345,7 +345,7 @@ HttpReceiver.prototype._sendFeedback = function (action, message, done) {
   }
 
   /*Codes_SRS_NODE_DEVICE_HTTP_05_008: [If any Http method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-  var request = this._http.buildRequest(method, path, httpHeaders, config.host, function (err, body, response) {
+  var request = this._http.buildRequest(method, path, httpHeaders, config.host, this._config.x509, function (err, body, response) {
     if (done) {
       if (!err && response.statusCode === 204) {
         var result = new ResultConstructor(response);

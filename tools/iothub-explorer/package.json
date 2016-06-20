@@ -7,7 +7,7 @@
   "main": "iothub-explorer.js",
   "bin": "iothub-explorer.js",
   "dependencies": {
-    "amqp10": "2.1.2",
+    "azure-event-hubs": "0.0.2",
     "azure-iot-common": "1.0.7",
     "azure-iot-device": "1.0.7",
     "azure-iothub": "1.0.9",

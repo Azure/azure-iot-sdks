@@ -5,6 +5,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 {
     using System;
     using System.Net.Security;
+    using System.Security.Cryptography.X509Certificates;
     using DotNetty.Codecs.Mqtt.Packets;
 
     public class MqttTransportSettings : ITransportSettings
@@ -79,5 +80,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         public TimeSpan DefaultReceiveTimeout { get; set; }
 
         public RemoteCertificateValidationCallback RemoteCertificateValidationCallback { get; set; }
+
+        public X509Certificate ClientCertificate { get; set; }
     }
 }

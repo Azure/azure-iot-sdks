@@ -196,7 +196,7 @@ namespace Microsoft.Azure.Devices
             TimeoutHelper timeoutHelper = new TimeoutHelper(timeout);
             this.refreshTokenTimer.Cancel();
 
-            var amqpSettings = this.CreateAmqpSettings();
+            var amqpSettings = CreateAmqpSettings();
             TransportBase transport;
             if (this.useWebSocketOnly)
             {
@@ -261,7 +261,7 @@ namespace Microsoft.Azure.Devices
         }
 
 #if !WINDOWS_UWP
-        async Task<ClientWebSocket> CreateClientWebSocket(Uri websocketUri, TimeSpan timeout)
+        static async Task<ClientWebSocket> CreateClientWebSocketAsync(Uri websocketUri, TimeSpan timeout)
         {
             var websocket = new ClientWebSocket();
 
@@ -286,24 +286,44 @@ namespace Microsoft.Azure.Devices
 
             return websocket;
         }
+
+        static async Task<IotHubClientWebSocket> CreateLegacyClientWebSocketAsync(Uri webSocketUri, TimeSpan timeout)
+        {
+            var websocket = new IotHubClientWebSocket(WebSocketConstants.SubProtocols.Amqpwsb10);
+            await websocket.ConnectAsync(webSocketUri.Host, webSocketUri.Port, WebSocketConstants.Scheme, timeout);
+            return websocket;
+        }
 #endif
         async Task<TransportBase> CreateClientWebSocketTransport(TimeSpan timeout)
         {
 #if WINDOWS_UWP
             throw new NotImplementedException("web sockets are not yet supported for UWP");
 #else
-            TimeoutHelper timeoutHelper = new TimeoutHelper(timeout);
+            var timeoutHelper = new TimeoutHelper(timeout);
             Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
-            var websocket = await this.CreateClientWebSocket(websocketUri, timeoutHelper.RemainingTime());
-            return new ClientWebSocketTransport(
-                websocket,
-                this.connectionString.IotHubName,
-                null,
-                null);
+
+            // Use Legacy WebSocket if it is running on Windows 7 or older. Windows 7/Windows 2008 R2 is version 6.1
+            if (Environment.OSVersion.Version.Major < 6 || (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor <= 1))
+            {
+                var websocket = await CreateLegacyClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
+                return new LegacyClientWebSocketTransport(
+                    websocket,
+                    DefaultOperationTimeout,
+                    null,
+                    null);
+            }
+            else
+            {
+                var websocket = await CreateClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
+                return new ClientWebSocketTransport(
+                    websocket,
+                    null,
+                    null);
+            }
 #endif
         }
 
-        AmqpSettings CreateAmqpSettings()
+        static AmqpSettings CreateAmqpSettings()
         {
             var amqpSettings = new AmqpSettings();
 
@@ -335,7 +355,7 @@ namespace Microsoft.Azure.Devices
                 TargetHost = this.connectionString.HostName,
 #if !WINDOWS_UWP
                 Certificate = null, // TODO: add client cert support
-                CertificateValidationCallback = this.OnRemoteCertificateValidation
+                CertificateValidationCallback = OnRemoteCertificateValidation
 #endif
             };
 
@@ -402,7 +422,7 @@ namespace Microsoft.Azure.Devices
         }
 
 #if !WINDOWS_UWP
-        bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        public static bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
             {

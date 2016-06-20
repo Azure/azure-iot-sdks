@@ -17,7 +17,7 @@ var Message = require('azure-iot-device').Message;
 var connectionString = '<DEVICE CONNECTION STRING WITH x509=true>';
 var certFile = '<PATH-TO-CERTIFICATE-FILE>';
 var keyFile = '<PATH-TO-KEY-FILE>';
-var passphrase = '<KEY PASSPHRASE IF ANY>'
+var passphrase = '<KEY PASSPHRASE IF ANY>';
 
 // fromConnectionString must specify a transport constructor, coming from any transport package.
 var client = Client.fromConnectionString(connectionString, Protocol);

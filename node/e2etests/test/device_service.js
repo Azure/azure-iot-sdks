@@ -10,7 +10,7 @@ var deviceSas = require('azure-iot-device').SharedAccessSignature;
 var serviceSas = require('azure-iothub').SharedAccessSignature;
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
 
-var EventHubClient = require('../eh/eventhubclient.js');
+var EventHubClient = require('azure-event-hubs').Client;
 
 var assert = require('chai').assert;
 var debug = require('debug')('e2etests');
@@ -24,7 +24,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
     beforeEach(function () {
       serviceClient = serviceSdk.Client.fromConnectionString(hubConnStr);
       deviceClient = deviceSdk.Client.fromConnectionString(deviceConStr, DeviceTransport);
-      ehClient = new EventHubClient(hubConnStr, 'messages/events/');
+      ehClient = EventHubClient.fromConnectionString(hubConnStr);
     });
 
     afterEach(function (done) {
@@ -199,7 +199,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
 
     it('Device sends a message of maximum size and it is received by the service', function (done) {
       this.timeout(120000);
-      var startTime = Date.now();
+      var startTime = Date.now() - 5000;
       var bufferSize = 254 * 1024;
       var buffer = new Buffer(bufferSize);
       buffer.fill('a');
@@ -215,37 +215,28 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
         }
       });
 
-      ehClient.GetPartitionIds().then(function (partitionIds) {
-        partitionIds.forEach(function (partitionId) {
-          ehClient.CreateReceiver('$Default', partitionId).then(function (receiver) {
-            // start receiving
-            receiver.StartReceive(startTime).then(function () {
-              receiver.on('error', function (error) {
-                done(error);
-              });
-              receiver.on('eventReceived', function (eventData) {
-                if ((eventData.SystemProperties['iothub-connection-device-id'] === deviceName) &&
-                  (eventData.SystemProperties['x-opt-enqueued-time'] >= startTime - 5000)) {
-                  debug('Event received: ' + eventData.Bytes);
-                  if (eventData.Bytes.length === bufferSize) {
-                    receiver.removeAllListeners();
-                    ehClient.close();
-                    done();
-                  } else {
-                    debug('eventData.Bytes.length: ' + eventData.Bytes.length + ' doesn\'t match bufferSize: ' + bufferSize);
-                  }
-                }
-              });
-            });
-            return receiver;
-          }).catch(function (err) {
-            done(err);
-          });
-        });
-        return partitionIds;
-      }).catch(function (err) {
-        done(err);
-      });
+      ehClient.open()
+              .then(ehClient.getPartitionIds.bind(ehClient))
+              .then(function (partitionIds) {
+                return partitionIds.map(function (partitionId) {
+                  return ehClient.createReceiver('$Default', partitionId, { 'startAfterTime' : startTime}).then(function(receiver) {
+                    receiver.on('errorReceived', done);
+                    receiver.on('message', function (eventData) {
+                        if (eventData.systemProperties['iothub-connection-device-id'] === deviceName) {
+                          debug('Event received: ' + eventData.body);
+                          if (eventData.body.length === bufferSize) {
+                            receiver.removeAllListeners();
+                            ehClient.close();
+                            done();
+                          } else {
+                            debug('eventData.body.length: ' + eventData.body.length + ' doesn\'t match bufferSize: ' + bufferSize);
+                          }
+                        }
+                      });
+                  });
+                });
+              })
+              .catch(done);
     });
   });
 
