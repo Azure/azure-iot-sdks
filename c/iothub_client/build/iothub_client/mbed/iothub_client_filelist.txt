@@ -19,7 +19,7 @@ set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../../parson/parson.c
 	)
 	
-if(${USE_UPLOADTOBLOB})
+if(NOT ${DONT_USE_UPLOADTOBLOB})
     set(mbed_project_files
         ${mbed_project_files} 
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_ll_uploadtoblob.c)

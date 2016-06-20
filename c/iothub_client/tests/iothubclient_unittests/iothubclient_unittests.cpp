@@ -216,7 +216,7 @@ public:
         }
     MOCK_METHOD_END(int, result2);
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
     MOCK_STATIC_METHOD_4(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
     MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
 #endif
@@ -295,7 +295,7 @@ public:
     MOCK_STATIC_METHOD_1(, LIST_ITEM_HANDLE, list_get_next_item, LIST_ITEM_HANDLE, item)
     MOCK_METHOD_END(LIST_ITEM_HANDLE, (LIST_ITEM_HANDLE)NULL);
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
     MOCK_STATIC_METHOD_2(, void, uploadToBlobAsyncCallback, IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result3, void*, userContextCallback)
     MOCK_VOID_METHOD_END()
 #endif
@@ -339,7 +339,7 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, IoTHubTransport_JoinWor
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , int, mallocAndStrcpy_s, char**, destination, const char*, source);
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
 DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, uploadToBlobAsyncCallback, IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result, void*, userContextCallback);
 #endif
@@ -405,7 +405,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         CIoTHubClientMocks mocks;
         EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mocks, Lock_Init());
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_create());
 #endif
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE));
@@ -485,7 +485,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         mocks.AssertActualAndExpectedCalls();
     }
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
     /*Tests_SRS_IOTHUBCLIENT_02_070: [ If creating the LIST_HANDLE fails then IoTHubClient_CreateFromConnectionString shall fail and return NULL]*/
     TEST_FUNCTION(IoTHubClient_CreateFromConnectionString_if_list_create_fails_then_it_fails)
     {
@@ -517,7 +517,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
         STRICT_EXPECTED_CALL(mocks, Lock_Init());
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_create());
         STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -547,7 +547,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         CIoTHubClientMocks mocks;
         EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mocks, Lock_Init());
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_create());
 #endif
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Create(&TEST_CONFIG));
@@ -571,14 +571,14 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         CIoTHubClientMocks mocks;
         EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mocks, Lock_Init());
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_create());
 #endif
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Create(&TEST_CONFIG))
             .SetReturn((IOTHUB_CLIENT_LL_HANDLE)NULL);
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
 #endif
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
@@ -591,7 +591,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         mocks.AssertActualAndExpectedCalls();
     }
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
     /*Tests_SRS_IOTHUBCLIENT_02_061: [ If creating the LIST_HANDLE fails then IoTHubClient_Create shall fail and return NULL. ]*/
     TEST_FUNCTION(IoTHubClient_LL_Create_fails_when_list_create_fails)
     {
@@ -677,7 +677,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
 #endif
 
@@ -708,7 +708,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
 #endif
 
@@ -741,7 +741,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
         STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -774,7 +774,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
         STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -799,7 +799,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		CIoTHubClientMocks mocks;
 
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
         STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -829,7 +829,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG));
 		EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_create()); /*this is the list of SAVED_DATA*/
         STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -848,7 +848,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		///cleanup
 	}
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
     /*Tests_SRS_IOTHUBCLIENT_02_074: [ If creating the LIST_HANDLE fails then IoTHubClient_CreateWithTransport shall fail and return NULL. ]*/
     TEST_FUNCTION(When_creating_with_transport_list_create_fails_returns_null)
     {
@@ -979,14 +979,14 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         mocks.ResetAllCalls();
 
 		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 #endif
 		STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
 #endif
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
@@ -1008,7 +1008,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
 		STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
 			.SetFailReturn((LOCK_RESULT)LOCK_ERROR);
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 #endif
@@ -1016,7 +1016,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 			.SetFailReturn((LOCK_RESULT)LOCK_ERROR);
 
 		STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
 #endif
 		STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
@@ -1037,7 +1037,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 		mocks.ResetAllCalls();
 
 		STRICT_EXPECTED_CALL(mocks, Lock(TEST_IOTHUBTRANSPORT_LOCK));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(mocks, list_destroy(IGNORED_PTR_ARG))
@@ -1082,7 +1082,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         /*here StopThread=1 is set*/
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 #endif
@@ -1092,7 +1092,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, ThreadAPI_Join(TEST_THREAD_HANDLE, IGNORED_PTR_ARG))
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
 #endif
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
@@ -1117,7 +1117,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         /*here StopThread=1 is set*/
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 #endif
@@ -1128,7 +1128,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
             .IgnoreArgument(2);
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
 #endif
 
@@ -1155,7 +1155,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         /*here StopThread=1 is set*/
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 #endif
@@ -1168,7 +1168,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
 #endif
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
@@ -1193,7 +1193,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
         STRICT_EXPECTED_CALL(mocks, Lock(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 #endif
@@ -1204,7 +1204,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
 
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_Destroy(TEST_IOTHUB_CLIENT_LL_HANDLE));
         STRICT_EXPECTED_CALL(mocks, Lock_Deinit(TEST_LOCK_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_destroy(TEST_LIST_HANDLE));
 #endif
         EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG));
@@ -1823,7 +1823,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         current_iothub_client = iotHubClient;
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_DoWork(TEST_IOTHUB_CLIENT_LL_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 #endif
@@ -1858,7 +1858,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         current_iothub_client = iotHubClient;
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_DoWork(TEST_IOTHUB_CLIENT_LL_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 #endif
@@ -1867,7 +1867,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         STRICT_EXPECTED_CALL(mocks, ThreadAPI_Sleep(1));
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_DoWork(TEST_IOTHUB_CLIENT_LL_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 #endif
@@ -1907,7 +1907,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         /* second round, when lock does not fail and DoWork gets called */
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_DoWork(TEST_IOTHUB_CLIENT_LL_HANDLE));
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         STRICT_EXPECTED_CALL(mocks, list_get_head_item(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 #endif
@@ -2058,7 +2058,7 @@ BEGIN_TEST_SUITE(iothubclient_unittests)
         IoTHubClient_Destroy(handle);
     }
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
     /*Tests_SRS_IOTHUBCLIENT_02_047: [ If iotHubClientHandle is NULL then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
     TEST_FUNCTION(IoTHubClient_UploadToBlobAsync_with_NULL_iotHubClientHandle_fails)
     {

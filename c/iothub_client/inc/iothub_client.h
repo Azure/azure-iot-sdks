@@ -194,7 +194,7 @@ extern "C"
 	*/
 	extern IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
     /**
     * @brief	IoTHubClient_UploadToBlobAsync uploads data from memory to a file in Azure Blob Storage.
     *

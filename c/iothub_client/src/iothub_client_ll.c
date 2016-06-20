@@ -17,7 +17,7 @@
 #include "iothub_client_version.h"
 #include "iothub_transport_ll.h"
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
 #include "iothub_client_ll_uploadtoblob.h"
 #endif
 
@@ -38,7 +38,7 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
     time_t lastMessageReceiveTime;
     TICK_COUNTER_HANDLE tickCounter; /*shared tickcounter used to track message timeouts in waitingToSend list*/
     uint64_t currentMessageTimeout;
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE uploadToBlobHandle;
 #endif
 
@@ -314,7 +314,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
         }
         else
         {
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
             /*Codes_SRS_IOTHUBCLIENT_LL_02_094: [ IoTHubClient_LL_Create shall create a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE from IOTHUB_CLIENT_CONFIG. ]*/
             /*Codes_SRS_IOTHUBCLIENT_LL_02_092: [ IoTHubClient_LL_CreateFromConnectionString shall create a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE from IOTHUB_CLIENT_CONFIG. ]*/
             handleData->uploadToBlobHandle = IoTHubClient_LL_UploadToBlob_Create(config);
@@ -332,7 +332,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_045: [ Otherwise IoTHubClient_LL_Create shall create a new TICK_COUNTER_HANDLE ]*/
                 if ((handleData->tickCounter = tickcounter_create()) == NULL)
                 {
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_046: [ If creating the TICK_COUNTER_HANDLE fails then IoTHubClient_LL_Create shall fail and return NULL. ]*/
                     IoTHubClient_LL_UploadToBlob_Destroy(handleData->uploadToBlobHandle);
 #endif
@@ -356,7 +356,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
                     if ((handleData->transportHandle = handleData->IoTHubTransport_Create(&lowerLayerConfig)) == NULL)
                     {
                         LogError("underlying transport failed");
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                         IoTHubClient_LL_UploadToBlob_Destroy(handleData->uploadToBlobHandle);
 #endif
                         tickcounter_destroy(handleData->tickCounter);
@@ -377,7 +377,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
                             /*Codes_SRS_IOTHUBCLIENT_LL_17_009: [If the _Register function fails, this function shall fail and return NULL.]*/
                             LogError("Registering device in transport failed");
                             handleData->IoTHubTransport_Destroy(handleData->transportHandle);
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                             IoTHubClient_LL_UploadToBlob_Destroy(handleData->uploadToBlobHandle);
 #endif
                             tickcounter_destroy(handleData->tickCounter);
@@ -429,7 +429,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
             handleData->transportHandle = config->transportHandle;
             setTransportProtocol(handleData, (TRANSPORT_PROVIDER*)config->protocol());
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
             const char* hostname = STRING_c_str(handleData->IoTHubTransport_GetHostname(handleData->transportHandle));
             /*Codes_SRS_IOTHUBCLIENT_LL_02_096: [ IoTHubClient_LL_CreateWithTransport shall create the data structures needed to instantiate a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE. ]*/
             /*the first '.' says where the iothubname finishes*/
@@ -484,7 +484,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
                         {
                             /*Codes_SRS_IOTHUBCLIENT_LL_02_048: [ If creating the handle fails, then IoTHubClient_LL_CreateWithTransport shall fail and return NULL ]*/
                             LogError("unable to get a tickcounter");
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                             IoTHubClient_LL_UploadToBlob_Destroy(handleData->uploadToBlobHandle);
 #endif
                             free(handleData);
@@ -511,7 +511,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
                             {
                                 /*Codes_SRS_IOTHUBCLIENT_LL_17_007: [If the _Register function fails, this function shall fail and return NULL.]*/
                                 LogError("Registering device in transport failed");
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                                 IoTHubClient_LL_UploadToBlob_Destroy(handleData->uploadToBlobHandle);
 #endif
                                 tickcounter_destroy(handleData->tickCounter);
@@ -528,7 +528,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
                             }
                         }
                     }
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
                     free(IoTHubName);
                 }
             }
@@ -567,7 +567,7 @@ void IoTHubClient_LL_Destroy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
         }
         /*Codes_SRS_IOTHUBCLIENT_LL_17_011: [IoTHubClient_LL_Destroy  shall free the resources allocated by IoTHubClient (if any).] */
         tickcounter_destroy(handleData->tickCounter);
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
         IoTHubClient_LL_UploadToBlob_Destroy(handleData->uploadToBlobHandle);
 #endif
         free(handleData);
@@ -907,7 +907,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
     return result;
 }
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size)
 {
     IOTHUB_CLIENT_RESULT result;
