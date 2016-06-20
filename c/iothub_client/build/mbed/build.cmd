@@ -72,7 +72,6 @@ call %build-root%\..\..\build\release\release_mbed_project.cmd %build-root%\..\s
 if not %errorlevel%==0 exit /b %errorlevel%
 
 if %skip_samples%==0 (
-	goto:eof
 	rem -----------------------------------------------------------------------------
 	rem -- build iothub client samples
 	rem -----------------------------------------------------------------------------
@@ -98,8 +97,8 @@ rem ----------------------------------------------------------------------------
 rem -- build iothub longhaul tests
 rem -----------------------------------------------------------------------------
 
-call :compile longhaul_tests %build-root%\tests\longhaul_tests\mbed %longhaul_tests_download_bin_path%
-if not %errorlevel%==0 exit /b %errorlevel%
+rem call :compile longhaul_tests %build-root%\tests\longhaul_tests\mbed %longhaul_tests_download_bin_path%
+rem if not %errorlevel%==0 exit /b %errorlevel%
 
 goto:eof
 

@@ -14,7 +14,7 @@ set(iothub_client_ll_transport_c_files
 ../parson/parson.c
 )
 
-if(${use_uploadtoblob})
+if(NOT ${dont_use_uploadtoblob})
 set(iothub_client_ll_transport_c_files 
     ${iothub_client_ll_transport_c_files}
     ./src/iothub_client_ll_uploadtoblob.c
@@ -31,7 +31,7 @@ set(iothub_client_ll_transport_h_files
 ../parson/parson.h
 )
 
-if(${use_uploadtoblob})
+if(NOT ${dont_use_uploadtoblob})
     set(iothub_client_ll_transport_h_files 
         ${iothub_client_ll_transport_h_files}
         ./inc/iothub_client_ll_uploadtoblob.h

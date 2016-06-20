@@ -20,7 +20,7 @@
 *			 often not desired.
 */
 
-#ifdef USE_UPLOADTOBLOB
+#ifndef DONT_USE_UPLOADTOBLOB
 
 #ifndef IOTHUB_CLIENT_LL_UPLOADTOBLOB_H
 #define IOTHUB_CLIENT_LL_UPLOADTOBLOB_H
@@ -48,5 +48,5 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* IOTHUB_CLIENT_LL_UPLOA
 #endif /* IOTHUB_CLIENT_LL_UPLOADTOBLOB_H */
 
 #else
-#error "trying to #include iothub_client_ll_uploadtoblob.h in absence of #define USE_UPLOADTOBLOB"
-#endif /*USE_UPLOADTOBLOB*/
+#error "trying to #include iothub_client_ll_uploadtoblob.h in the presence of #define DONT_USE_UPLOADTOBLOB"
+#endif /*DONT_USE_UPLOADTOBLOB*/

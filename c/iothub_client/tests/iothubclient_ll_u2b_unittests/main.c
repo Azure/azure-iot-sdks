@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef USE_UPLOADTOBLOB
-#error "trying to compile main.c without #define USE_UPLOADTOBLOB"
+#ifdef DONT_USE_UPLOADTOBLOB
+#error "trying to compile main.c while DONT_USE_UPLOADTOBLOB is #define'd"
 #else
 
 #include "testrunnerswitcher.h"
@@ -17,4 +17,4 @@ int main(void)
     return failedTestCount;
 }
 
-#endif /*USE_UPLOADTOBLOB*/
+#endif /*DONT_USE_UPLOADTOBLOB*/
