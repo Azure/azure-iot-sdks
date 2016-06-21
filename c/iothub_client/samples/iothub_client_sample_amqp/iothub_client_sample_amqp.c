@@ -5,10 +5,11 @@
 #include <stdlib.h>
 
 #include "azure_c_shared_utility/platform.h"
-#include "iothub_client.h"
-#include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/consolelogger.h"
+#include "iothub_client.h"
+#include "iothub_message.h"
 #include "iothubtransportamqp.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -134,6 +135,8 @@ void iothub_client_sample_amqp_run(void)
     IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
 
     EVENT_INSTANCE messages[MESSAGE_COUNT];
+
+    xlogging_set_log_function(consolelogger_log);
 
     g_continueRunning = true;
     srand((unsigned int)time(NULL));

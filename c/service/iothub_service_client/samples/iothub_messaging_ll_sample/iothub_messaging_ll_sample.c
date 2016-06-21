@@ -13,6 +13,8 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/consolelogger.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #include "iothub_messaging_ll_sample.h"
 
@@ -85,6 +87,8 @@ IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
 
 void iothub_messaging_ll_sample_run(void)
 {
+    xlogging_set_log_function(consolelogger_log);
+
     if (platform_init() != 0)
     {
         (void)printf("Failed to initialize the platform.\r\n");

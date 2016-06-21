@@ -15,7 +15,7 @@
 #include "datamarshaller.h"
 #include "datapublisher.h"
 #include <stddef.h>
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "iotdevice.h"
 
 #define DEFAULT_CONTAINER_NAME  "Container"

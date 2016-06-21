@@ -8,8 +8,10 @@
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "iothubtransportmqtt.h"
+#include "azure_c_shared_utility/consolelogger.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/platform.h"
+#include "iothubtransportmqtt.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
@@ -93,6 +95,8 @@ void iothub_client_sample_mqtt_run(void)
     IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
 
     EVENT_INSTANCE messages[MESSAGE_COUNT];
+
+    xlogging_set_log_function(consolelogger_log);
 
     g_continueRunning = true;
     srand((unsigned int)time(NULL));

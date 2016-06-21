@@ -9,7 +9,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/tickcounter.h"
 
 #include "iothub_client_ll.h"
@@ -21,7 +21,7 @@
 #include "iothub_client_ll_uploadtoblob.h"
 #endif
 
-#define LOG_ERROR LogError("result = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
+#define LOG_ERROR_RESULT LogError("result = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
 #define INDEFINITE_TIME ((time_t)(-1))
 
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -614,7 +614,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
         )
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LOG_ERROR;
+        LOG_ERROR_RESULT;
     }
     else
     {
@@ -622,7 +622,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
         if (newEntry == NULL)
         {
             result = IOTHUB_CLIENT_ERROR;
-            LOG_ERROR;
+            LOG_ERROR_RESULT;
         }
         else
         {
@@ -631,7 +631,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
             if (attach_ms_timesOutAfter(handleData, newEntry) != 0)
             {
                 result = IOTHUB_CLIENT_ERROR;
-                LOG_ERROR;
+                LOG_ERROR_RESULT;
                 free(newEntry);
             }
             else
@@ -642,7 +642,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information fails for any reason, IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
                     result = IOTHUB_CLIENT_ERROR;
                     free(newEntry);
-                    LOG_ERROR;
+                    LOG_ERROR_RESULT;
                 }
                 else
                 {
@@ -667,7 +667,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE 
     if (iotHubClientHandle == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LOG_ERROR;
+        LOG_ERROR_RESULT;
     }
     else
     {
@@ -757,7 +757,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetSendStatus(IOTHUB_CLIENT_LL_HANDLE iotHu
     if (iotHubClientHandle == NULL || iotHubClientStatus == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LOG_ERROR;
+        LOG_ERROR_RESULT;
     }
     else
     {
@@ -843,7 +843,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetLastMessageReceiveTime(IOTHUB_CLIENT_LL_
     if (handleData == NULL || lastMessageReceiveTime == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LOG_ERROR;
+        LOG_ERROR_RESULT;
     }
     else
     {
@@ -851,7 +851,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetLastMessageReceiveTime(IOTHUB_CLIENT_LL_
         if (handleData->lastMessageReceiveTime == INDEFINITE_TIME)
         {
             result = IOTHUB_CLIENT_INDEFINITE_TIME;
-            LOG_ERROR;
+            LOG_ERROR_RESULT;
         }
         else
         {

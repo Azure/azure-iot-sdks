@@ -10,7 +10,7 @@
 #include "blob.h"
 
 #include "azure_c_shared_utility/httpapiex.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/base64.h"
 
 /*a block has 4MB*/

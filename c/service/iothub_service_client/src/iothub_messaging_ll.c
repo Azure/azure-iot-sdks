@@ -9,7 +9,7 @@
 
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/sastoken.h"
@@ -774,7 +774,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     result = IOTHUB_MESSAGING_ERROR;
                 }
                 /*Codes_SRS_IOTHUBMESSAGING_12_011: [ IoTHubMessaging_LL_Open shall create uAMQP TLSIO by calling the xio_create ] */
-                else if ((messagingHandle->tls_io = xio_create(tlsio_interface, &tls_io_config, NULL)) == NULL)
+                else if ((messagingHandle->tls_io = xio_create(tlsio_interface, &tls_io_config)) == NULL)
                 {
                     /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                     LogError("Could not create TLS IO.");
@@ -802,7 +802,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_012: [ IoTHubMessaging_LL_Open shall create uAMQP SASL IO by calling the xio_create with the previously created SASL mechanism and TLSIO] */
-                    else if ((messagingHandle->sasl_io = xio_create(saslclientio_interface, &sasl_io_config, NULL)) == NULL)
+                    else if ((messagingHandle->sasl_io = xio_create(saslclientio_interface, &sasl_io_config)) == NULL)
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create SASL IO.");
@@ -892,7 +892,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_023: [ IoTHubMessaging_LL_Open shall create uAMQP message sender by calling the messagesender_create with the created sender link and the local IoTHubMessaging_LL_SenderStateChanged callback ] */
-                    else if ((messagingHandle->message_sender = messagesender_create(messagingHandle->sender_link, IoTHubMessaging_LL_SenderStateChanged, messagingHandle, NULL)) == NULL)
+                    else if ((messagingHandle->message_sender = messagesender_create(messagingHandle->sender_link, IoTHubMessaging_LL_SenderStateChanged, messagingHandle)) == NULL)
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create message sender.");

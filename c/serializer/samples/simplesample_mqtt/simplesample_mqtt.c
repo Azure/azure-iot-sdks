@@ -11,11 +11,13 @@ That does not mean that MQTT only works with the _LL APIs.
 Simply changing the using the convenience layer (functions not having _LL)
 and removing calls to _DoWork will yield the same results. */
 
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/consolelogger.h"
 #include "serializer.h"
 #include "iothub_client_ll.h"
 #include "iothubtransportmqtt.h"
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/platform.h"
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
@@ -131,6 +133,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
 
 void simplesample_mqtt_run(void)
 {
+    xlogging_set_log_function(consolelogger_log);
+
     if (platform_init() != 0)
     {
         (void)printf("Failed to initialize platform.\r\n");

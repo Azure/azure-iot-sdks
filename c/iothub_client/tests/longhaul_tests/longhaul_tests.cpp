@@ -23,7 +23,7 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -1070,7 +1070,9 @@ BEGIN_TEST_SUITE(longhaul_tests)
 
 	TEST_SUITE_INITIALIZE(TestClassInitialize)
 	{
-		TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+
+        xlogging_set_log_function(consolelogger_log);
 
 		if (platform_init() != 0)
 		{

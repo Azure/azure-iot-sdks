@@ -19,6 +19,8 @@
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/consolelogger.h"
 #include "iothubtransportamqp.h"
 #include "iothubtransporthttp.h"
 #include "MacroE2EModelAction.h"
@@ -306,6 +308,9 @@ BEGIN_TEST_SUITE(serializer_e2etests)
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+
+        xlogging_set_log_function(consolelogger_log);
+
         g_testByTest = MicroMockCreateMutex();
         ASSERT_IS_NOT_NULL(g_testByTest);
 

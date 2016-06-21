@@ -21,6 +21,8 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/consolelogger.h"
 
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 static bool g_callbackRecv = false;
@@ -311,6 +313,7 @@ static void EventData_Destroy(EXPECTED_SEND_DATA* data)
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
     TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+    xlogging_set_log_function(consolelogger_log);
     platform_init();
     g_iothubAcctInfo1 = IoTHubAccount_Init(true, "http_e2e_test");
     ASSERT_IS_NOT_NULL(g_iothubAcctInfo1);

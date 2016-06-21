@@ -19,8 +19,9 @@
 
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/iot_logging.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/consolelogger.h"
 
 #include "azure_c_shared_utility/tlsio.h"
 
@@ -258,6 +259,8 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+
+        xlogging_set_log_function(consolelogger_log);
         platform_init();
         g_iothubAcctInfo = IoTHubAccount_Init(true, "mqtt_e2e_tests");
         ASSERT_IS_NOT_NULL(g_iothubAcctInfo);

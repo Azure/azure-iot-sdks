@@ -19,7 +19,8 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/strings.h"
 #include "iothubtest.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/consolelogger.h"
 #include "azure_uamqp_c/connection.h"
 #include "azure_uamqp_c/message_receiver.h"
 #include "azure_uamqp_c/message_sender.h"
@@ -30,7 +31,6 @@
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_plain.h"
 #include "azure_uamqp_c/cbs.h"
-#include "azure_uamqp_c/consolelogger.h"
 
 const char* AMQP_RECV_ADDRESS_FMT = "%s/ConsumerGroups/%s/Partitions/%u";
 const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
