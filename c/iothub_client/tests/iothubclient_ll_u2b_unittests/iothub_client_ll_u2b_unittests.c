@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
-#ifndef USE_UPLOADTOBLOB
-#error "trying to compile iothub_client_ll_u2b_unittests.c without having #define USE_UPLOADTOBLOB"
+#ifdef DONT_USE_UPLOADTOBLOB
+#error "trying to compile iothub_client_ll_u2b_unittests.c while DONT_USE_UPLOADTOBLOB is #define'd"
 #else
 #include <stdlib.h>
 #ifdef _CRTDBG_MAP_ALLOC
@@ -188,7 +188,7 @@ static const TRANSPORT_PROVIDER* provideFAKE(void);
 #define TEST_STRING_HANDLE_DEVICE_SAS ((STRING_HANDLE)0x2)
 
 #define TEST_API_VERSION "?api-version=2016-02-03"
-#define TEST_IOTHUB_SDK_VERSION "1.0.8"
+#define TEST_IOTHUB_SDK_VERSION "1.0.9"
 
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_SAS =
 {
@@ -3067,4 +3067,4 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
 }
 
 END_TEST_SUITE(iothubclient_ll_uploadtoblob_unittests)
-#endif /*USE_UPLOADTOBLOB*/
+#endif /*DONT_USE_UPLOADTOBLOB*/
