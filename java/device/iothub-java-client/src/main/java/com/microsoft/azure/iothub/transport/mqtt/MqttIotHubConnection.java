@@ -38,8 +38,6 @@ public class MqttIotHubConnection implements MqttCallback
     private MqttConnectOptions connectionOptions = new MqttConnectOptions();
     private String iotHubUserName;
 
-    private int inFlightCount = 0;
-
     //mqtt connection options
     private static final int keepAliveInterval = 20;
     private static final int mqttVersion = 4;
@@ -209,8 +207,7 @@ public class MqttIotHubConnection implements MqttCallback
 
             try
             {
-                inFlightCount++;
-                while (inFlightCount >= maxInFlightCount)
+                while (asyncClient.getPendingDeliveryTokens().length >= maxInFlightCount)
                 {
                     Thread.sleep(10);
                 }
@@ -319,7 +316,6 @@ public class MqttIotHubConnection implements MqttCallback
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
     {
-        inFlightCount--;
     }
 
     private void connect(MqttConnectOptions connectionOptions) throws MqttException
