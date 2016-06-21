@@ -595,7 +595,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                     LogError("Failed getting default TLS IO interface.");
                     result = IOTHUB_TEST_CLIENT_ERROR;
                 }
-                else if ((tls_io = xio_create(tlsio_interface, &tls_io_config, NULL)) == NULL)
+                else if ((tls_io = xio_create(tlsio_interface, &tls_io_config)) == NULL)
                 {
                     LogError("Failed creating the TLS IO.");
                     result = IOTHUB_TEST_CLIENT_ERROR;
@@ -604,7 +604,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                 {
                     /* create the SASL client IO using the TLS IO */
                     SASLCLIENTIO_CONFIG sasl_io_config = { tls_io, sasl_mechanism_handle };
-                    if ((sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_io_config, NULL)) == NULL)
+                    if ((sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_io_config)) == NULL)
                     {
                         LogError("Failed creating the SASL IO.");
                         result = IOTHUB_TEST_CLIENT_ERROR;
@@ -852,7 +852,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                             LogError("Could not get default TLS IO interface.");
                             result = IOTHUB_TEST_CLIENT_ERROR;
                         }
-                        else if ((tls_io = xio_create(tlsio_interface, &tls_io_config, NULL)) == NULL)
+                        else if ((tls_io = xio_create(tlsio_interface, &tls_io_config)) == NULL)
                         {
                             LogError("Could not create TLS IO.");
                             result = IOTHUB_TEST_CLIENT_ERROR;
@@ -868,7 +868,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                                 LogError("Could not create get SASL IO interface description.");
                                 result = IOTHUB_TEST_CLIENT_ERROR;
                             }
-                            else if ((sasl_io = xio_create(saslclientio_interface, &sasl_io_config, consolelogger_log)) == NULL)
+                            else if ((sasl_io = xio_create(saslclientio_interface, &sasl_io_config)) == NULL)
                             {
                                 LogError("Could not create SASL IO.");
                                 result = IOTHUB_TEST_CLIENT_ERROR;
@@ -957,7 +957,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                                                 LogError("Could not set the properties on the message.");
                                                 result = IOTHUB_TEST_CLIENT_ERROR;
                                             }
-                                            else if ((message_sender = messagesender_create(link, NULL, NULL, consolelogger_log)) == NULL)
+                                            else if ((message_sender = messagesender_create(link, NULL, NULL)) == NULL)
                                             {
                                                 LogError("Could not create message sender.");
                                                 result = IOTHUB_TEST_CLIENT_ERROR;
