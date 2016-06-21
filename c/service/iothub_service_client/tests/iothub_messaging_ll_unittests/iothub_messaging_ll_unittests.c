@@ -1100,6 +1100,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
             free(messagereceiver_create_return);
             messagereceiver_create_return = NULL;
         }
+        free((void*)TEST_IOTHUB_MESSAGING_DATA.sasl_plain_config.authcid);
+        free((void*)TEST_IOTHUB_MESSAGING_DATA.sasl_plain_config.passwd);
     }
 
     /*Tests_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */

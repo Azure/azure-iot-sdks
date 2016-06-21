@@ -123,12 +123,12 @@ static void defaultPrintLogFunction(unsigned int options, char* format, ...)
     }
 }
 
-static void sendMsgComplete(IOTHUB_MESSAGE_LIST* iothubMsgList, PMQTTTRANSPORT_HANDLE_DATA transportState, IOTHUB_BATCHSTATE_RESULT batchResult)
+static void sendMsgComplete(IOTHUB_MESSAGE_LIST* iothubMsgList, PMQTTTRANSPORT_HANDLE_DATA transportState, IOTHUB_CLIENT_CONFIRMATION_RESULT confirmResult)
 {
     DLIST_ENTRY messageCompleted;
     DList_InitializeListHead(&messageCompleted);
     DList_InsertTailList(&messageCompleted, &(iothubMsgList->entry));
-    IoTHubClient_LL_SendComplete(transportState->llClientHandle, &messageCompleted, batchResult);
+    IoTHubClient_LL_SendComplete(transportState->llClientHandle, &messageCompleted, confirmResult);
 }
 
 static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, const char* eventTopic)
@@ -367,7 +367,7 @@ static void MqttOpCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_
                         if (puback->packetId == mqttMsgEntry->msgPacketId)
                         {
                             (void)DList_RemoveEntryList(currentListEntry); //First remove the item from Waiting for Ack List.
-                            sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transportData, IOTHUB_BATCHSTATE_SUCCESS);
+                            sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transportData, IOTHUB_CLIENT_CONFIRMATION_OK);
                             free(mqttMsgEntry);
                         }
                         currentListEntry = saveListEntry.Flink;
@@ -982,7 +982,7 @@ static void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle)
         {
             PDLIST_ENTRY currentEntry = DList_RemoveHeadList(&transportState->waitingForAck);
             MQTT_MESSAGE_DETAILS_LIST* mqttMsgEntry = containingRecord(currentEntry, MQTT_MESSAGE_DETAILS_LIST, entry);
-            sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transportState, IOTHUB_BATCHSTATE_FAILED);
+            sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transportState, IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY);
             free(mqttMsgEntry);
         }
 
@@ -1086,7 +1086,7 @@ static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
                         if (mqttMsgEntry->retryCount >= MAX_SEND_RECOUNT_LIMIT)
                         {
                             (void)DList_RemoveEntryList(currentListEntry);
-                            sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transportState, IOTHUB_BATCHSTATE_FAILED);
+                            sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transportState, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
                             free(mqttMsgEntry);
                         }
                         else
@@ -1102,7 +1102,7 @@ static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
                                 if (publishMqttMessage(transportState, mqttMsgEntry, messagePayload, messageLength) != 0)
                                 {
                                     (void)DList_RemoveEntryList(currentListEntry);
-                                    sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transportState, IOTHUB_BATCHSTATE_FAILED);
+                                    sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transportState, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                                     free(mqttMsgEntry);
                                 }
                             }
@@ -1143,7 +1143,7 @@ static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
                             if (publishMqttMessage(transportState, mqttMsgEntry, messagePayload, messageLength) != 0)
                             {
                                 (void)(DList_RemoveEntryList(currentListEntry));
-                                sendMsgComplete(iothubMsgList, transportState, IOTHUB_BATCHSTATE_FAILED);
+                                sendMsgComplete(iothubMsgList, transportState, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                                 free(mqttMsgEntry);
                             }
                             else
