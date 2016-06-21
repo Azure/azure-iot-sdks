@@ -75,7 +75,7 @@ This script builds the **iothub_client** and **serializer** libraries and their 
 
 5. Save your changes and build the samples. To build your sample you can run the build.sh script in the **c/build_all/linux** directory.
 
-6. Run the **~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp** sample application.
+6. Run the **azure-iot-sdks/c/cmake/iotsdk_linux/serializer/samples/simplesample_amqp/simplesample_amqp** sample application.
 
 7.   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the **simplesample_amqp** application and how to send cloud-to-device messages to the **simplesample_amqp** application.
 

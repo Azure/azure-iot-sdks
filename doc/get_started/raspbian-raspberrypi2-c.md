@@ -114,7 +114,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
 -   Run the **simplesample_amqp** sample:
 
     ```
-    ~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp
+    azure-iot-sdks/c/cmake/iotsdk_linux/serializer/samples/simplesample_amqp/simplesample_amqp
     ```
 This sample application sends simulated sensor data to your IoT Hub.
 
