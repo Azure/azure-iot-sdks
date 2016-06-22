@@ -29,18 +29,19 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create_WebSocketsOverTls(const IO
 }
 
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
+	IoTHubTransportAMQP_GetHostname,
 	IoTHubTransportAMQP_SetOption,
 	IoTHubTransportAMQP_Create_WebSocketsOverTls,
 	IoTHubTransportAMQP_Destroy,
 	IoTHubTransportAMQP_Register,
-    IoTHubTransportAMQP_Unregister,
+	IoTHubTransportAMQP_Unregister,
 	IoTHubTransportAMQP_Subscribe,
 	IoTHubTransportAMQP_Unsubscribe,
 	IoTHubTransportAMQP_DoWork,
 	IoTHubTransportAMQP_GetSendStatus
 };
 
-extern const void* AMQP_Protocol_over_WebSocketsTls(void)
+extern const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void)
 {
 	return &thisTransportProvider_WebSocketsOverTls;
 }
