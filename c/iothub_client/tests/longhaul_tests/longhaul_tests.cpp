@@ -1070,9 +1070,7 @@ BEGIN_TEST_SUITE(longhaul_tests)
 
 	TEST_SUITE_INITIALIZE(TestClassInitialize)
 	{
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
-        xlogging_set_log_function(consolelogger_log);
+                TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
 		if (platform_init() != 0)
 		{

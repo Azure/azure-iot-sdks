@@ -17,8 +17,6 @@ and removing calls to _DoWork will yield the same results. */
 #include "AzureIoT.h"
 #else
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/consolelogger.h"
-#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/platform.h"
 #include "iothub_client_ll.h"
 #include "iothub_message.h"
@@ -39,8 +37,6 @@ static const char* connectionString = "<<device connection string>>";
 void iothub_client_sample_upload_to_blob_run(void)
 {
     IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
-
-    xlogging_set_log_function(consolelogger_log);
 
     if (platform_init() != 0)
     {

@@ -15,9 +15,7 @@
 #include "iothub_client.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/consolelogger.h"
 #include "azure_c_shared_utility/platform.h"
-#include "azure_c_shared_utility/xlogging.h"
 #include "iothubtransporthttp.h"
 #endif
 
@@ -154,8 +152,6 @@ void iothub_client_sample_http_run(void)
     double avgWindSpeed = 10.0;
 	int receiveContext1 = 0;
 	int receiveContext2 = 0;
-
-    xlogging_set_log_function(consolelogger_log);
 
     srand((unsigned int)time(NULL));
 

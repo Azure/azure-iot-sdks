@@ -12,8 +12,6 @@
 #include "schemaserializer.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
-#include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/consolelogger.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
@@ -136,8 +134,6 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
 
 void remote_monitoring_run(void)
 {
-    xlogging_set_log_function(consolelogger_log);
-
     if (platform_init() != 0)
     {
         printf("Failed to initialize the platform.\r\n");

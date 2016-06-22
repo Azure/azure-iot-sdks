@@ -16,8 +16,6 @@ and removing calls to _DoWork will yield the same results. */
 #else
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
-#include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/consolelogger.h"
 #include "serializer.h"
 #include "iothub_client_ll.h"
 #include "iothubtransporthttp.h"
@@ -139,8 +137,6 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
 
 void simplesample_http_run(void)
 {
-    xlogging_set_log_function(consolelogger_log);
-
     if (platform_init() != 0)
     {
         printf("Failed to initialize the platform.\r\n");
