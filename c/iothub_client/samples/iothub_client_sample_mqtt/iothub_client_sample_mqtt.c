@@ -23,8 +23,9 @@ static const char* connectionString = "[device connection string]";
 static int callbackCounter;
 static char msgText[1024];
 static char propText[1024];
-#define MESSAGE_COUNT 5
 static bool g_continueRunning;
+#define MESSAGE_COUNT 5
+#define DOWORK_LOOP_NUM     3
 
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
@@ -169,6 +170,13 @@ void iothub_client_sample_mqtt_run(void)
 
                     iterator++;
                 } while (g_continueRunning);
+
+                (void)printf("iothub_client_sample_mqtt has gotten quit message, call DoWork %d more time to complete final sending...\r\n", DOWORK_LOOP_NUM);
+                for (size_t index = 0; index < DOWORK_LOOP_NUM; index++)
+                {
+                    IoTHubClient_LL_DoWork(iotHubClientHandle);
+                    ThreadAPI_Sleep(1);
+                }
             }
             IoTHubClient_LL_Destroy(iotHubClientHandle);
         }
