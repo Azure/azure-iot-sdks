@@ -28,7 +28,7 @@ typedef struct EVENT_INSTANCE_TAG
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
-	const char* buffer = NULL;
+	const unsigned char* buffer = NULL;
 	size_t size = 0;
 	
 	if (userContextCallback == NULL)

@@ -9,9 +9,9 @@
 #define DEFAULT_WS_RELATIVE_PATH "/$iothub/websocket"
 #define DEFAULT_WS_PORT 443
 
-XIO_HANDLE getWebSocketsIOTransport(const char* fqdn, int port, const char* certificates)
+XIO_HANDLE getWebSocketsIOTransport(const char* fqdn, int port)
 {
-	WSIO_CONFIG ws_io_config = { fqdn, port, DEFAULT_WS_PROTOCOL_NAME, DEFAULT_WS_RELATIVE_PATH, true, certificates };
+	WSIO_CONFIG ws_io_config = { fqdn, port, DEFAULT_WS_PROTOCOL_NAME, DEFAULT_WS_RELATIVE_PATH, true, NULL };
 
 	return xio_create(wsio_get_interface_description(), &ws_io_config, NULL);
 }
