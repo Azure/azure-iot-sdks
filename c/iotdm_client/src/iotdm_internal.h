@@ -79,14 +79,8 @@ IOTHUB_CLIENT_RESULT iotdmc_register(CLIENT_DATA *cd, ON_REGISTER_COMPLETE onCom
 // object_security.c
 lwm2m_object_t *make_security_object(int serverId, const char* serverUri, bool isBootstrap);
 
-// object_server.c
-lwm2m_object_t *make_server_object(int serverId, int lifetime, bool storing);
-
 // object_global.c
-lwm2m_object_t *make_global_object(IOTHUB_CHANNEL_HANDLE iotHubChannel);
-uint8_t global_object_read(uint16_t instanceId, int *numDataP, lwm2m_data_t **dataArrayP, lwm2m_object_t *objectP);
-uint8_t global_object_write(uint16_t instanceId, int numData, lwm2m_data_t *dataArray, lwm2m_object_t *objectP);
-uint8_t global_object_execute(uint16_t instanceId, uint16_t resourceId, uint8_t *buffer, int length, lwm2m_object_t *objectP);
+lwm2m_object_t *make_global_object(IOTHUB_CHANNEL_HANDLE iotHubChannel, uint16_t objectID, uint16_t instanceID);
 void on_resource_value_changed(IOTHUB_CHANNEL_HANDLE iotHubChannel, uint16_t objectId, uint16_t instanceId, uint16_t resourceId);
 
 // Lwm2m_object_list.c

@@ -24,11 +24,13 @@ extern "C"
 
 // LWM2M Object IDs and Property IDs for lwm2mserver object
 #define OID_LWM2MSERVER 1
+#define PID_LWM2MSERVER_SHORTSERVERID 0
 #define PID_LWM2MSERVER_LIFETIME 1
 #define PID_LWM2MSERVER_DEFAULTMINIMUMPERIOD 2
 #define PID_LWM2MSERVER_DEFAULTMAXIMUMPERIOD 3
+#define PID_LWM2MSERVER_BINDING 7
 
-#define LWM2MSERVER_PROPERTY_COUNT 3
+#define LWM2MSERVER_PROPERTY_COUNT 5
 
 typedef struct TAG_object_lwm2mserver object_lwm2mserver;
 typedef IOTHUB_CLIENT_RESULT(*LWM2MSERVER_RESOURCE_CALLBACK)(object_lwm2mserver *obj);
@@ -38,24 +40,31 @@ typedef struct TAG_object_lwm2mserver {
     uint16_t instanceId;    // Must be first member of structure
     IOTHUB_CHANNEL_HANDLE channelHandle;
     char resourceUpdated[LWM2MSERVER_PROPERTY_COUNT];
+    int64_t propval_lwm2mserver_shortserverid;        // /1/x/0
     int64_t propval_lwm2mserver_lifetime;        // /1/x/1
     int64_t propval_lwm2mserver_defaultminimumperiod;        // /1/x/2
     int64_t propval_lwm2mserver_defaultmaximumperiod;        // /1/x/3
+    char* propval_lwm2mserver_binding;        // /1/x/7
+    LWM2MSERVER_RESOURCE_CALLBACK lwm2mserver_shortserverid_read_callback;
     LWM2MSERVER_RESOURCE_CALLBACK lwm2mserver_lifetime_read_callback;
     LWM2MSERVER_RESOURCE_CALLBACK lwm2mserver_lifetime_write_callback;
     LWM2MSERVER_RESOURCE_CALLBACK lwm2mserver_defaultminimumperiod_read_callback;
     LWM2MSERVER_RESOURCE_CALLBACK lwm2mserver_defaultminimumperiod_write_callback;
     LWM2MSERVER_RESOURCE_CALLBACK lwm2mserver_defaultmaximumperiod_read_callback;
     LWM2MSERVER_RESOURCE_CALLBACK lwm2mserver_defaultmaximumperiod_write_callback;
+    LWM2MSERVER_RESOURCE_CALLBACK lwm2mserver_binding_read_callback;
+    LWM2MSERVER_RESOURCE_CALLBACK lwm2mserver_binding_write_callback;
 } object_lwm2mserver;
 
 IOTHUB_CLIENT_RESULT create_lwm2mserver_object(IOTHUB_CLIENT_HANDLE h, uint16_t *instanceId);
 object_lwm2mserver *get_lwm2mserver_object(uint16_t instanceId);
 
 // Property setters for lwm2mserver object
+IOTHUB_CLIENT_RESULT set_lwm2mserver_shortserverid(uint16_t instanceId, int64_t value);
 IOTHUB_CLIENT_RESULT set_lwm2mserver_lifetime(uint16_t instanceId, int64_t value);
 IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultminimumperiod(uint16_t instanceId, int64_t value);
 IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultmaximumperiod(uint16_t instanceId, int64_t value);
+IOTHUB_CLIENT_RESULT set_lwm2mserver_binding(uint16_t instanceId, const char *value);
 
 #ifdef __cplusplus
 }

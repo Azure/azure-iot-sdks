@@ -198,6 +198,10 @@ static IOTHUB_CLIENT_RESULT create_default_lwm2m_objects(IOTHUB_CHANNEL_HANDLE i
 
     else
     {
+        set_lwm2mserver_shortserverid(0, msft_server_ID);
+        set_lwm2mserver_lifetime(0, 300);
+        set_lwm2mserver_binding(0, "T");
+
         LogInfo("prepare the Device Object");
         result = create_device_object(iotDMClientHandle, NULL);
         if (IOTHUB_CLIENT_OK != result)
@@ -440,13 +444,16 @@ IOTHUB_CLIENT_RESULT IoTHubClient_DM_Connect(IOTHUB_CHANNEL_HANDLE iotDMClientHa
 
         else
         {
-            lwm2m_object_t *three[3] = {
+            // BKTODO: detangle object registration even more
+            lwm2m_object_t *objs[5] = {
                 make_security_object(msft_server_ID, client->config.iotHubName, false),
-                make_server_object(msft_server_ID, 300, false),
-                make_global_object(client)
+                make_global_object(client, OID_LWM2MSERVER, 0),
+                make_global_object(client, OID_DEVICE, 0),
+                make_global_object(client, OID_CONFIG, 0),
+                make_global_object(client, OID_FIRMWAREUPDATE, 0)
             };
 
-            int result = lwm2m_configure(client->session, client->config.deviceId, NULL, NULL, 3, &three[0]);
+            int result = lwm2m_configure(client->session, client->config.deviceId, NULL, NULL, 5, &objs[0]);
             if (0 != result)
             {
                 LogError("    failed to configure lwm2m session");

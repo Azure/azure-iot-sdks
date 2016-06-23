@@ -19,23 +19,48 @@
 DISPATCHER_FORWARD_DECLARATIONS(object_lwm2mserver);
 
 // Property Indices for for lwm2mserver object
-#define INDEX_LWM2MSERVER_LIFETIME 0
-#define INDEX_LWM2MSERVER_DEFAULTMINIMUMPERIOD 1
-#define INDEX_LWM2MSERVER_DEFAULTMAXIMUMPERIOD 2
+#define INDEX_LWM2MSERVER_SHORTSERVERID 0
+#define INDEX_LWM2MSERVER_LIFETIME 1
+#define INDEX_LWM2MSERVER_DEFAULTMINIMUMPERIOD 2
+#define INDEX_LWM2MSERVER_DEFAULTMAXIMUMPERIOD 3
+#define INDEX_LWM2MSERVER_BINDING 4
 
 void set_default_lwm2mserver_property_values(object_lwm2mserver *obj);
+IOTHUB_CLIENT_RESULT on_read_lwm2mserver_shortserverid(object_lwm2mserver *obj, int64_t *value);
 IOTHUB_CLIENT_RESULT on_read_lwm2mserver_lifetime(object_lwm2mserver *obj, int64_t *value);
 IOTHUB_CLIENT_RESULT on_write_lwm2mserver_lifetime(object_lwm2mserver *obj, int64_t value);
 IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int64_t *value);
 IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultminimumperiod(object_lwm2mserver *obj, int64_t value);
 IOTHUB_CLIENT_RESULT on_read_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int64_t *value);
 IOTHUB_CLIENT_RESULT on_write_lwm2mserver_defaultmaximumperiod(object_lwm2mserver *obj, int64_t value);
+IOTHUB_CLIENT_RESULT on_read_lwm2mserver_binding(object_lwm2mserver *obj, char **value);
+IOTHUB_CLIENT_RESULT on_write_lwm2mserver_binding(object_lwm2mserver *obj, const char *value, size_t length);
 
 
 /**********************************************************************************
  * LWM2M Server setters
  *
  **********************************************************************************/
+IOTHUB_CLIENT_RESULT set_lwm2mserver_shortserverid(uint16_t instanceId, int64_t value)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
+    object_lwm2mserver *obj = get_object_instance(OID_LWM2MSERVER, instanceId);
+    if (obj != NULL)
+    {
+        if (obj->propval_lwm2mserver_shortserverid != value)
+        {
+            LogInfo("LWM2MServer_ShortServerID being set to %lld", value);
+            obj->propval_lwm2mserver_shortserverid = value;
+
+            obj->resourceUpdated[INDEX_LWM2MSERVER_SHORTSERVERID] = (char)true;
+        }
+
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    return result;
+}
+
 IOTHUB_CLIENT_RESULT set_lwm2mserver_lifetime(uint16_t instanceId, int64_t value)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
@@ -96,6 +121,27 @@ IOTHUB_CLIENT_RESULT set_lwm2mserver_defaultmaximumperiod(uint16_t instanceId, i
     return result;
 }
 
+IOTHUB_CLIENT_RESULT set_lwm2mserver_binding(uint16_t instanceId, const char *value)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
+    object_lwm2mserver *obj = get_object_instance(OID_LWM2MSERVER, instanceId);
+    if (obj != NULL)
+    {
+        if ((obj->propval_lwm2mserver_binding == NULL) || strcmp(obj->propval_lwm2mserver_binding, value))
+        {
+            LogInfo("LWM2MServer_Binding being set to [%s]", value);
+            lwm2m_free(obj->propval_lwm2mserver_binding);
+            obj->propval_lwm2mserver_binding = lwm2m_strdup(value);
+
+            obj->resourceUpdated[INDEX_LWM2MSERVER_BINDING] = (char)true;
+        }
+
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    return result;
+}
+
 
 /**********************************************************************************
  * LWM2M Server creation and destruction
@@ -105,6 +151,7 @@ static void destroy_lwm2mserver_object(object_lwm2mserver *obj)
 {
     if (obj != NULL)
     {
+        lwm2m_free(obj->propval_lwm2mserver_binding);
         lwm2m_free(obj);
     }
 }
@@ -185,15 +232,19 @@ object_lwm2mserver *get_lwm2mserver_object(uint16_t instanceId)
 void signal_object_lwm2mserver_resource_changed(void *p)
 {
     object_lwm2mserver *obj = (object_lwm2mserver*)p;
+    DO_SIGNAL_RESOURCE_CHANGE(INDEX_LWM2MSERVER_SHORTSERVERID, PID_LWM2MSERVER_SHORTSERVERID)
     DO_SIGNAL_RESOURCE_CHANGE(INDEX_LWM2MSERVER_LIFETIME, PID_LWM2MSERVER_LIFETIME)
     DO_SIGNAL_RESOURCE_CHANGE(INDEX_LWM2MSERVER_DEFAULTMINIMUMPERIOD, PID_LWM2MSERVER_DEFAULTMINIMUMPERIOD)
     DO_SIGNAL_RESOURCE_CHANGE(INDEX_LWM2MSERVER_DEFAULTMAXIMUMPERIOD, PID_LWM2MSERVER_DEFAULTMAXIMUMPERIOD)
+    DO_SIGNAL_RESOURCE_CHANGE(INDEX_LWM2MSERVER_BINDING, PID_LWM2MSERVER_BINDING)
 }
 
 BEGIN_READ_DISPATCHER(object_lwm2mserver)
+    INTEGER_READ(PID_LWM2MSERVER_SHORTSERVERID, on_read_lwm2mserver_shortserverid)
     INTEGER_READ(PID_LWM2MSERVER_LIFETIME, on_read_lwm2mserver_lifetime)
     INTEGER_READ(PID_LWM2MSERVER_DEFAULTMINIMUMPERIOD, on_read_lwm2mserver_defaultminimumperiod)
     INTEGER_READ(PID_LWM2MSERVER_DEFAULTMAXIMUMPERIOD, on_read_lwm2mserver_defaultmaximumperiod)
+    STRING_READ(PID_LWM2MSERVER_BINDING, on_read_lwm2mserver_binding)
 END_READ_DISPATCHER()
 
 BEGIN_EXEC_DISPATCHER(object_lwm2mserver)
@@ -203,12 +254,15 @@ BEGIN_WRITE_DISPATCHER(object_lwm2mserver)
     INTEGER_WRITE(PID_LWM2MSERVER_LIFETIME, on_write_lwm2mserver_lifetime)
     INTEGER_WRITE(PID_LWM2MSERVER_DEFAULTMINIMUMPERIOD, on_write_lwm2mserver_defaultminimumperiod)
     INTEGER_WRITE(PID_LWM2MSERVER_DEFAULTMAXIMUMPERIOD, on_write_lwm2mserver_defaultmaximumperiod)
+    STRING_WRITE(PID_LWM2MSERVER_BINDING, on_write_lwm2mserver_binding)
 END_WRITE_DISPATCHER();
 
 BEGIN_OPERATION_LIST(object_lwm2mserver)
+    OPERATION(PID_LWM2MSERVER_SHORTSERVERID, OP_R, LWM2M_TYPE_INTEGER)
     OPERATION(PID_LWM2MSERVER_LIFETIME, OP_RW, LWM2M_TYPE_INTEGER)
     OPERATION(PID_LWM2MSERVER_DEFAULTMINIMUMPERIOD, OP_RW, LWM2M_TYPE_INTEGER)
     OPERATION(PID_LWM2MSERVER_DEFAULTMAXIMUMPERIOD, OP_RW, LWM2M_TYPE_INTEGER)
+    OPERATION(PID_LWM2MSERVER_BINDING, OP_RW, LWM2M_TYPE_STRING)
 END_OPERATION_LIST()
 
 

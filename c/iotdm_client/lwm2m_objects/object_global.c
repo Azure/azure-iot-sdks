@@ -16,6 +16,16 @@ typedef struct _OBJECT_instance_
     uint16_t                  instanceId;   // matches lwm2m_list_t::id
 } OBJECT_instance_t;
 
+// BKTODO: this should go away with next Wakaama FI
+lwm2m_object_t * prv_findObject(lwm2m_context_t * contextP,
+                                        uint16_t Id);
+
+OBJECT_instance_t * prv_findInstance(lwm2m_object_t * object, 
+                                        uint16_t instanceID)
+{
+    return (OBJECT_instance_t *) LWM2M_LIST_FIND(object->instanceList, instanceID);
+}
+
 
 static uint8_t prv_get_value(lwm2m_data_t *tlvP, uint16_t objectID, uint16_t instanceID)
 {
@@ -207,44 +217,62 @@ static uint8_t prv_OBJECT_discover(uint16_t instanceID, int *numDataP, lwm2m_dat
 	return COAP_405_METHOD_NOT_ALLOWED;
 }
 
-
-lwm2m_object_t *make_global_object(IOTHUB_CHANNEL_HANDLE iotHubChannel)
+// BKTODO: better name to describe new functionality
+// BKTODO: this makes the object, maybe it should register it too.
+lwm2m_object_t *make_global_object(IOTHUB_CHANNEL_HANDLE iotHubChannel, uint16_t objectID, uint16_t instanceID)
 {
-    lwm2m_object_t *oneObj = (lwm2m_object_t *) lwm2m_malloc(sizeof(lwm2m_object_t));
-    if (NULL == oneObj)
+    lwm2m_object_t *obj;
+    
+    CLIENT_DATA *client = (CLIENT_DATA*)iotHubChannel;
+    if (client == NULL)
     {
-        LogError("Malloc failed");
+        LogError("NULL client");
+        obj = NULL;
     }
-
     else
     {
-        memset(oneObj, 0, sizeof(lwm2m_object_t));
-
-        OBJECT_instance_t *oneInstance = (OBJECT_instance_t *) lwm2m_malloc(sizeof(OBJECT_instance_t));
-        if (NULL == oneInstance)
+        obj = prv_findObject(client->session, objectID);
+        if (obj == NULL)
         {
-            LogError("Malloc failed");
+            obj = (lwm2m_object_t *) lwm2m_malloc(sizeof(lwm2m_object_t));
+            if (NULL == obj)
+            {
+                LogError("Malloc failed");
+            }
+            else
+            {
+                memset(obj, 0, sizeof(lwm2m_object_t));
+                
+                obj->objID = objectID;
+                obj->readFunc = global_object_read;
+                obj->writeFunc = global_object_write;
+                obj->createFunc = prv_OBJECT_create;
+                obj->deleteFunc = prv_OBJECT_delete;
+                obj->executeFunc = global_object_execute;
+                obj->discoverFunc = prv_OBJECT_discover;
+                obj->userData = (void *) iotHubChannel;
+            }
 
-            lwm2m_free(oneObj);
-            oneObj = NULL;
-        }
-
-        else
-        {
-            memset(oneInstance, 0, sizeof(OBJECT_instance_t));
-            oneObj->instanceList = LWM2M_LIST_ADD(oneObj->instanceList, oneInstance);
-
-            oneObj->objID = LWM2M_DEVICE_OBJECT_ID; /* fake out wakaama :-) */
-            oneObj->readFunc = global_object_read;
-            oneObj->writeFunc = global_object_write;
-            oneObj->createFunc = prv_OBJECT_create;
-            oneObj->deleteFunc = prv_OBJECT_delete;
-            oneObj->executeFunc = global_object_execute;
-			oneObj->discoverFunc = prv_OBJECT_discover;
-
-            oneObj->userData = (void *) iotHubChannel;
+            if (obj !=NULL)
+            {
+                OBJECT_instance_t *inst = prv_findInstance(obj, instanceID);
+                if (inst == NULL)
+                {
+                    inst = (OBJECT_instance_t *) lwm2m_malloc(sizeof(OBJECT_instance_t));
+                    if (NULL == inst)
+                    {
+                        LogError("Malloc failed");
+                    }
+                    else
+                    {
+                        memset(inst, 0, sizeof(OBJECT_instance_t));
+                        inst->instanceId = instanceID;
+                        obj->instanceList = LWM2M_LIST_ADD(obj->instanceList, inst);
+                    }
+                }
+            }
         }
     }
 
-    return oneObj;
+    return obj;
 }

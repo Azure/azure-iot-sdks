@@ -1,7 +1,17 @@
 [
 	{
+		"ServiceName" : "",
+		"Resource" : "Short Server ID" ,
+		"Object" : "LWM2M Server"
+	},
+	{
 		"ServiceName" : "RegistrationLifetime",
 		"Resource" : "Lifetime" ,
+		"Object" : "LWM2M Server"
+	},
+	{
+		"ServiceName" : "",
+		"Resource" : "Binding" ,
 		"Object" : "LWM2M Server"
 	},
 	{
