@@ -11,7 +11,7 @@ A sample CLI tool to manage IoT devices using the Azure IoT Hub service SDK. The
 To install the *dmpreview* version of the *iothub-explorer* tool, run the following command in your command-line environment:
 
 ```
-npm install -g iothub-explorer@dmpreview
+$ npm install -g iothub-explorer@dmpreview
 ```
 
 You can use the following command to get additional help about all the iothub-explorer commands and their parameters:
