@@ -108,6 +108,8 @@ See this page for a summary of available gcc flags: https://gcc.gnu.org/onlinedo
 
 If you encounter the error _error adding symbols: DSO missing from command line_ try adding a reference to libdl with  _-cl -ldl_ added to your build script command line.
 
+If you are passing the flag _--use-websockets_ to the build script and encounter a warning about the redefinition of *\__STDC_NO_ATOMICS__*, the WebSockets submodule will fail to build due to the -Werror flag used in its build script. You can circumvent this issue by adding _-cl -Wno-error_ to the build.sh parameters.
+
 ## Summary
 
 This document has demonstrated how to cross compile the Azure IoT SDK on a 64-bit Debian host targeting the Raspbian operating system.
