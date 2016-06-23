@@ -1,0 +1,8 @@
+<!-- 
+	This are properties that external modules use to allow users to override the build behavior.
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup  Label="Device Client">
+	  <DotNettyPath>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), iothub_csharp_deviceclient.sln))\external_modules\dotnetty</DotNettyPath>
+  </PropertyGroup>
+</Project>
