@@ -1154,7 +1154,7 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_PERDEVICE_DATA* deviceData,
                 }
                 else
                 {
-                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_065: [If the oldest message in waitingToSend causes the message size to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_CLIENT_CONFIRMATION_BATCHSTATE_FAILED.]*/
+                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_065: [If the oldest message in waitingToSend causes the message size to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_CLIENT_CONFIRMATION_RESULT result shall be set to IOTHUB_CLIENT_CONFIRMATION_BATCHSTATE_FAILED.]*/
                     /*Codes_SRS_TRANSPORTMULTITHTTP_17_061: [The message size shall be limited to 255KB - 1 byte.]*/
                     if (messageSize > MAXIMUM_MESSAGE_SIZE)
                     {
@@ -1313,7 +1313,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                             {
                                 if (statusCode < 300)
                                 {
-                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_070: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list containing all the items batched, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCESS. The batched items shall be removed from waitingToSend.] */
+                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_070: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list containing all the items batched, and parameter IOTHUB_CLIENT_CONFIRMATION_RESULT result shall be set to IOTHUB_CLIENT_CONFIRMATION_OK. The batched items shall be removed from waitingToSend.] */
                                     IoTHubClient_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_OK);
                                 }
                                 else
@@ -1380,7 +1380,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
             }
             else
             {
-                /*Codes_SRS_TRANSPORTMULTITHTTP_17_075: [If the oldest message in waitingToSend causes the message to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_CLIENT_CONFIRMATION_BATCHSTATE_FAILED.]*/
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_075: [If the oldest message in waitingToSend causes the message to exceed the message size limit then it shall be removed from waitingToSend, and IoTHubClient_LL_SendComplete shall be called. Parameter PDLIST_ENTRY completed shall point to a list containing only the oldest item, and parameter IOTHUB_CLIENT_CONFIRMATION_RESULT result shall be set to IOTHUB_CLIENT_CONFIRMATION_BATCHSTATE_FAILED.]*/
                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_072: [The message size shall be limited to 255KB -1 bytes.] */
                 if (messageSize > MAXIMUM_MESSAGE_SIZE)
                 {
@@ -1557,7 +1557,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                             {
                                                 if (statusCode < 300)
                                                 {
-                                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_082: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_BATCHSTATE result shall be set to IOTHUB_BATCHSTATE_SUCCESS. The item shall be removed from waitingToSend.] */
+                                                    /*Codes_SRS_TRANSPORTMULTITHTTP_17_082: [If HTTPAPIEX_SAS_ExecuteRequest does not fail and http status code <300 then IoTHubTransportHttp_DoWork shall call IoTHubClient_LL_SendComplete. Parameter PDLIST_ENTRY completed shall point to a list the item send, and parameter IOTHUB_CLIENT_CONFIRMATION_RESULT result shall be set to IOTHUB_CLIENT_CONFIRMATION_OK. The item shall be removed from waitingToSend.] */
                                                     PDLIST_ENTRY justSent = DList_RemoveHeadList(deviceData->waitingToSend); /*actually this is the same as "actual", but now it is removed*/
                                                     DList_InsertTailList(&(deviceData->eventConfirmations), justSent);
                                                     IoTHubClient_LL_SendComplete(iotHubClientHandle, &(deviceData->eventConfirmations), IOTHUB_CLIENT_CONFIRMATION_OK); /*takes care of emptying the list too*/
