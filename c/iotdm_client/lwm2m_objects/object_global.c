@@ -16,11 +16,14 @@ typedef struct _OBJECT_instance_
     uint16_t                  instanceId;   // matches lwm2m_list_t::id
 } OBJECT_instance_t;
 
-// BKTODO: this should go away with next Wakaama FI
-lwm2m_object_t * prv_findObject(lwm2m_context_t * contextP,
-                                        uint16_t Id);
 
-OBJECT_instance_t * prv_findInstance(lwm2m_object_t * object, 
+static lwm2m_object_t * prv_findObject(lwm2m_context_t * contextP,
+                                        uint16_t Id)
+{
+    return (lwm2m_object_t *)LWM2M_LIST_FIND(contextP->objectList, Id);
+}
+
+static OBJECT_instance_t * prv_findInstance(lwm2m_object_t * object, 
                                         uint16_t instanceID)
 {
     return (OBJECT_instance_t *) LWM2M_LIST_FIND(object->instanceList, instanceID);

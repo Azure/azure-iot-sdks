@@ -580,3 +580,10 @@ bool lwm2m_session_is_equal(void *lhs,  void *rhs, void *userData)
 {
     return (lhs == rhs);
 }
+
+void lwm2m_close_connection(void * sessionH, void * userData)
+{
+    // do nothing
+}
+
+
