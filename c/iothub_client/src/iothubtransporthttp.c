@@ -15,7 +15,7 @@
 
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/urlencode.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/strings.h"
