@@ -46,23 +46,21 @@ var deviceWithoutAuth = {
   }
 };
 
-var deviceWithSymmetricKeys = Object.assign(deviceWithoutAuth, {
-  authentication: {
-    symmetricKey: {
-      primaryKey:"aBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJK=",
-      secondaryKey:"ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="
-    }
-  },
-});
-
-var initializeDeviceWithThumbprints = Object.assign(deviceWithoutAuth, {
-  authentication: {
-    x509Thumbprint: {
-      primaryThumbprint: "0000000000000000000000000000000000000000",
-      secondaryThumbprint: "1111111111111111111111111111111111111111"
-    }
+var deviceWithSymmetricKeys = JSON.parse(JSON.stringify(deviceWithoutAuth));
+deviceWithSymmetricKeys.authentication = {
+  symmetricKey: {
+    primaryKey: "aBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJK=",
+    secondaryKey: "ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="
   }
-});
+};
+
+var initializeDeviceWithThumbprints = JSON.parse(JSON.stringify(deviceWithoutAuth));
+initializeDeviceWithThumbprints.authentication = {
+  x509Thumbprint: {
+    primaryThumbprint: "0000000000000000000000000000000000000000",
+    secondaryThumbprint: "1111111111111111111111111111111111111111"
+  }
+};
 
 var fullDeviceWithThumbprints = JSON.stringify(initializeDeviceWithThumbprints);
 var deviceName = 'testDevice';
@@ -116,7 +114,6 @@ describe('Device', function () {
     });
 
     var verifyDeviceProperties = function(actual, expected) {
-      var auth = actual.authentication;
       var devProp = actual.deviceProperties;
       
       assert.equal(actual.deviceId, expected.deviceId);
@@ -131,9 +128,6 @@ describe('Device', function () {
       assert.equal(actual.cloudToDeviceMessageCount, expected.cloudToDeviceMessageCount);
       assert.equal(actual.isManaged, expected.isManaged);
 
-      assert.equal(auth.symmetricKey.primaryKey, expected.authentication.symmetricKey.primaryKey);
-      assert.equal(auth.symmetricKey.secondaryKey, expected.authentication.symmetricKey.secondaryKey);
-            
       assert.equal(devProp.batteryLevel, expected.deviceProperties.batteryLevel);
       assert.equal(devProp.batteryStatus, expected.deviceProperties.batteryStatus);
       assert.equal(devProp.currentTime, expected.deviceProperties.currentTime);
@@ -167,6 +161,13 @@ describe('Device', function () {
     it('correctly creates a device from a duck-typed object', function() {
       var deviceResult = new Device(deviceWithSymmetricKeys);
       verifyDeviceProperties(deviceResult, deviceWithSymmetricKeys);
+    });
+
+    it('JSON is created correctly when using symmetric keys', function() {
+      var device = new Device(JSON.stringify(deviceWithSymmetricKeys));
+      verifyDeviceProperties(device, deviceWithSymmetricKeys);
+      assert.equal(device.authentication.symmetricKey.primaryKey, deviceWithSymmetricKeys.authentication.symmetricKey.primaryKey);
+      assert.equal(device.authentication.symmetricKey.secondaryKey, deviceWithSymmetricKeys.authentication.symmetricKey.secondaryKey);
     });
 
     it('JSON is created correctly when using x509 certificate', function() {
