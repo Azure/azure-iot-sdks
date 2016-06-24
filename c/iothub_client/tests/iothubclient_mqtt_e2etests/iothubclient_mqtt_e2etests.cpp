@@ -403,7 +403,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
         ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
 
-        (void)printf(("IoTHub_MQTT_RecvMessage_E2ETest Message recv started.");
+        (void)printf("IoTHub_MQTT_RecvMessage_E2ETest Message recv started.");
 
         time_t beginOperation, nowTime;
         beginOperation = time(NULL);
@@ -435,11 +435,11 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         // Temporary code till debug
         if (!notifyData->wasFound)
         {
-            (void)printf(("IoTHub_MQTT_RecvMessage_E2ETest message was not found.");
+            (void)printf("IoTHub_MQTT_RecvMessage_E2ETest message was not found.");
         }
         else
         {
-            (void)printf(("IoTHub_MQTT_RecvMessage_E2ETest message was successful.");
+            (void)printf("IoTHub_MQTT_RecvMessage_E2ETest message was successful.");
         }
 
         // cleanup
