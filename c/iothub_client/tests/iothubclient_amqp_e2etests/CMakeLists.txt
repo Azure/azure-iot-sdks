@@ -22,6 +22,7 @@ set(${theseTestsName}_h_files
 )
 
 include_directories(${IOTHUB_TEST_INC_FOLDER})
+include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
 build_test_artifacts(${theseTestsName} ON)
 
@@ -31,6 +32,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_amqp_transport
+			iothub_service_client
 			aziotsharedutil
 			rpcrt4			
 		)
@@ -43,6 +45,7 @@ if(WIN32)
 			iothub_test
 			iothub_client
 			iothub_client_amqp_transport
+			iothub_service_client
 			aziotsharedutil
 			rpcrt4			
 		)
@@ -55,6 +58,7 @@ else()
 			iothub_test
 			iothub_client
 			iothub_client_amqp_transport
+			iothub_service_client
 			aziotsharedutil
 		)
 		target_link_libraries(${theseTestsName}_exe pthread uuid)

@@ -61,7 +61,7 @@ void printDeviceInfo(IOTHUB_DEVICE* device, int orderNum)
         (void)printf("    statusReason                : %s\n", device->statusReason);
         (void)printf("    statusUpdatedTime           : %s\n", device->statusUpdatedTime);
         (void)printf("    lastActivityTime            : %s\n", device->lastActivityTime);
-        (void)printf("    cloudToDeviceMessageCount   : %d\n", device->cloudToDeviceMessageCount);
+        (void)printf("    cloudToDeviceMessageCount   : %zu\n", device->cloudToDeviceMessageCount);
     }
 }
 
@@ -71,8 +71,6 @@ void iothub_service_client_sample_run(void)
 
     IOTHUB_REGISTRY_DEVICE_CREATE deviceCreateInfo;
     IOTHUB_REGISTRY_DEVICE_UPDATE deviceUpdateInfo;
-
-    xlogging_set_log_function(consolelogger_log);
 
     (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with the connection string\n");
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
@@ -175,14 +173,30 @@ void iothub_service_client_sample_run(void)
         if (result == IOTHUB_REGISTRYMANAGER_OK)
         {
             (void)printf("IoTHubRegistryManager_GetStatistics: Successfully got registry statistics\n");
-            (void)printf("Total device count: %d\n", registryStatistics.totalDeviceCount);
-            (void)printf("Enabled device count: %d\n", registryStatistics.enabledDeviceCount);
-            (void)printf("Disabled device count: %d\n", registryStatistics.disabledDeviceCount);
+            (void)printf("Total device count: %zu\n", registryStatistics.totalDeviceCount);
+            (void)printf("Enabled device count: %zu\n", registryStatistics.enabledDeviceCount);
+            (void)printf("Disabled device count: %zu\n", registryStatistics.disabledDeviceCount);
         }
         else if (result == IOTHUB_REGISTRYMANAGER_ERROR)
         {
             (void)printf("IoTHubRegistryManager_GetStatistics failed\n");
         }
+
+        list_destroy(deviceList);
+
+        free((char*)deviceInfo.deviceId);
+        free((char*)deviceInfo.primaryKey);
+        free((char*)deviceInfo.secondaryKey);
+        free((char*)deviceInfo.generationId);
+        free((char*)deviceInfo.eTag);
+        free((char*)deviceInfo.connectionStateUpdatedTime);
+        free((char*)deviceInfo.statusReason);
+        free((char*)deviceInfo.statusUpdatedTime);
+        free((char*)deviceInfo.lastActivityTime);
+        free((char*)deviceInfo.configuration);
+        free((char*)deviceInfo.deviceProperties);
+        free((char*)deviceInfo.serviceProperties);
+
 
         (void)printf("Calling IoTHubRegistryManager_Destroy...\n");
         IoTHubRegistryManager_Destroy(iotHubRegistryManagerHandle);
