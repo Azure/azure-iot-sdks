@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Devices.QueryExpressions
     using Microsoft.Azure.Devices.Common;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-
+    using System.Reflection;
     internal class FilterExpressionConverter : JsonConverter
     {
         const string TypePropertyName = "type";

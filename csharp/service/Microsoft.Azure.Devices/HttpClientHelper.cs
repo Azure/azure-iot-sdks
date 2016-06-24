@@ -139,7 +139,12 @@ namespace Microsoft.Azure.Devices
                     new Uri(this.baseAddress, requestUri),
                     (requestMsg, token) =>
                     {
+#if WINDOWS_UWP
+                        var str = Newtonsoft.Json.JsonConvert.SerializeObject(entity);
+                        requestMsg.Content = new StringContent(str, System.Text.Encoding.UTF8, "application/json");
+#else
                         requestMsg.Content = new ObjectContent<T>(entity, new JsonMediaTypeFormatter());
+#endif
                         return Task.FromResult(0);
                     },
                     async (httpClient, token) => result = await ReadResponseMessageAsync<T2>(httpClient, token),
