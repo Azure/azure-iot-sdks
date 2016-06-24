@@ -8,8 +8,8 @@
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "iothubtransportmqtt.h"
 #include "azure_c_shared_utility/platform.h"
+#include "iothubtransportmqtt.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"

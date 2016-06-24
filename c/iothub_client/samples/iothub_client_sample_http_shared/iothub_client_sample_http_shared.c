@@ -14,9 +14,9 @@
 #else
 #include "iothub_client.h"
 #include "iothub_message.h"
-#include "crt_abstractions.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/platform.h"
 #include "iothubtransporthttp.h"
-#include "platform.h"
 #endif
 
 #ifdef MBED_BUILD_TIMESTAMP

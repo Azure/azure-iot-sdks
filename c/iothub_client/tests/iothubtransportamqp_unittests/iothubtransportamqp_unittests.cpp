@@ -42,7 +42,6 @@ static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 #include "azure_uamqp_c/amqp_types.h"
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/connection.h"
-#include "azure_uamqp_c/consolelogger.h"
 #include "azure_uamqp_c/frame_codec.h"
 #include "azure_uamqp_c/header_detect_io.h"
 #include "azure_uamqp_c/link.h"
@@ -474,7 +473,7 @@ public:
     MOCK_METHOD_END(STRING_HANDLE, BASEIMPLEMENTATION::STRING_construct(TEST_SAS_TOKEN));
 
     // xio.h
-    MOCK_STATIC_METHOD_3(, XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, io_create_parameters, LOGGER_LOG, logger_log)
+    MOCK_STATIC_METHOD_2(, XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, io_create_parameters)
     MOCK_METHOD_END(XIO_HANDLE, 0)
 
     MOCK_STATIC_METHOD_1(, void, xio_destroy, XIO_HANDLE, xio)
@@ -502,7 +501,7 @@ public:
     MOCK_STATIC_METHOD_0(, void, tlsio_openssl_deinit)
     MOCK_VOID_METHOD_END()
 
-    MOCK_STATIC_METHOD_2(, CONCRETE_IO_HANDLE, tlsio_openssl_create, void*, io_create_parameters, LOGGER_LOG, logger_log)
+    MOCK_STATIC_METHOD_1(, CONCRETE_IO_HANDLE, tlsio_openssl_create, void*, io_create_parameters)
     MOCK_METHOD_END(CONCRETE_IO_HANDLE, 0)
 
     MOCK_STATIC_METHOD_1(, void, tlsio_openssl_destroy, CONCRETE_IO_HANDLE, tls_io)
@@ -524,7 +523,7 @@ public:
     MOCK_METHOD_END(const IO_INTERFACE_DESCRIPTION*, 0)
 
     // tlsio_schannel.h
-    MOCK_STATIC_METHOD_2(, CONCRETE_IO_HANDLE, tlsio_schannel_create, void*, io_create_parameters, LOGGER_LOG, logger_log)
+    MOCK_STATIC_METHOD_1(, CONCRETE_IO_HANDLE, tlsio_schannel_create, void*, io_create_parameters)
     MOCK_METHOD_END(CONCRETE_IO_HANDLE, 0)
 
     MOCK_STATIC_METHOD_1(, void, tlsio_schannel_destroy, CONCRETE_IO_HANDLE, tls_io)
@@ -598,7 +597,7 @@ public:
     MOCK_STATIC_METHOD_5(, CONNECTION_HANDLE, connection_create, XIO_HANDLE, io, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context)
     MOCK_METHOD_END(CONNECTION_HANDLE, TEST_CONNECTION)
 
-    MOCK_STATIC_METHOD_10(, CONNECTION_HANDLE, connection_create2, XIO_HANDLE, io, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context, ON_CONNECTION_STATE_CHANGED, on_connection_state_changed, void*, on_connection_state_changed_context, ON_IO_ERROR, on_io_error, void*, on_io_error_context, LOGGER_LOG, logger)
+    MOCK_STATIC_METHOD_9(, CONNECTION_HANDLE, connection_create2, XIO_HANDLE, io, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context, ON_CONNECTION_STATE_CHANGED, on_connection_state_changed, void*, on_connection_state_changed_context, ON_IO_ERROR, on_io_error, void*, on_io_error_context)
     MOCK_METHOD_END(CONNECTION_HANDLE, TEST_CONNECTION)
 
     MOCK_STATIC_METHOD_1(, void, connection_destroy, CONNECTION_HANDLE, connection)
@@ -668,7 +667,7 @@ public:
 
 
     // message_sender.h
-    MOCK_STATIC_METHOD_4(, MESSAGE_SENDER_HANDLE, messagesender_create, LINK_HANDLE, link, ON_MESSAGE_SENDER_STATE_CHANGED, on_message_sender_state_changed, void*, context, LOGGER_LOG, logger_log)
+    MOCK_STATIC_METHOD_3(, MESSAGE_SENDER_HANDLE, messagesender_create, LINK_HANDLE, link, ON_MESSAGE_SENDER_STATE_CHANGED, on_message_sender_state_changed, void*, context)
     MOCK_METHOD_END(MESSAGE_SENDER_HANDLE, 0)
 
     MOCK_STATIC_METHOD_1(, void, messagesender_destroy, MESSAGE_SENDER_HANDLE, message_sender)
@@ -722,7 +721,7 @@ public:
     MOCK_METHOD_END(int, 0)
 
     // saslclientio.h
-    MOCK_STATIC_METHOD_2(, CONCRETE_IO_HANDLE, saslclientio_create, void*, io_create_parameters, LOGGER_LOG, logger_log)
+    MOCK_STATIC_METHOD_1(, CONCRETE_IO_HANDLE, saslclientio_create, void*, io_create_parameters)
     MOCK_METHOD_END(CONCRETE_IO_HANDLE, 0)
 
     MOCK_STATIC_METHOD_1(, void, saslclientio_destroy, CONCRETE_IO_HANDLE, sasl_client_io)
@@ -854,7 +853,7 @@ DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , const IO_INTERFACE_DES
 
 
 // xio.h
-DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, io_create_parameters, LOGGER_LOG, logger_log);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, io_create_parameters);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, xio_destroy, XIO_HANDLE, xio);
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , int, xio_open, XIO_HANDLE, xio, ON_IO_OPEN_COMPLETE, on_io_open_complete, ON_BYTES_RECEIVED, on_bytes_received, ON_IO_ERROR, on_io_error, void*, callback_context);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , int, xio_close, XIO_HANDLE, xio, ON_IO_CLOSE_COMPLETE, on_io_close_complete, void*, callback_context);
@@ -866,7 +865,7 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , int, xio_setoption, XI
 // tlsio_openssl.h
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , int, tlsio_openssl_init);
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , void, tlsio_openssl_deinit);
-DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , CONCRETE_IO_HANDLE, tlsio_openssl_create, void*, io_create_parameters, LOGGER_LOG, logger_log);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , CONCRETE_IO_HANDLE, tlsio_openssl_create, void*, io_create_parameters);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, tlsio_openssl_destroy, CONCRETE_IO_HANDLE, tls_io);
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , int, tlsio_openssl_open, CONCRETE_IO_HANDLE, tls_io, ON_IO_OPEN_COMPLETE, on_io_open_complete, ON_BYTES_RECEIVED, on_bytes_received, ON_IO_ERROR, on_io_error, void*, callback_context);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , int, tlsio_openssl_close, CONCRETE_IO_HANDLE, tls_io, ON_IO_CLOSE_COMPLETE, on_io_close_complete, void*, callback_context);
@@ -875,7 +874,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, tlsio_openssl_do
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportAMQPMocks, , const IO_INTERFACE_DESCRIPTION*, tlsio_openssl_get_interface_description);
 
 // tlsio_schannel.h
-DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , CONCRETE_IO_HANDLE, tlsio_schannel_create, void*, io_create_parameters, LOGGER_LOG, logger_log);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , CONCRETE_IO_HANDLE, tlsio_schannel_create, void*, io_create_parameters);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, tlsio_schannel_destroy, CONCRETE_IO_HANDLE, tls_io);
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , int, tlsio_schannel_open, CONCRETE_IO_HANDLE, tls_io, ON_IO_OPEN_COMPLETE, on_io_open_complete, ON_BYTES_RECEIVED, on_bytes_received, ON_IO_ERROR, on_io_error, void*, callback_context);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , int, tlsio_schannel_close, CONCRETE_IO_HANDLE, tls_io, ON_IO_CLOSE_COMPLETE, on_io_close_complete, void*, callback_context);
@@ -911,7 +910,7 @@ DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , int, cbs_delete_token,
 
 // connection.h
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , CONNECTION_HANDLE, connection_create, XIO_HANDLE, io, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context);
-DECLARE_GLOBAL_MOCK_METHOD_10(CIoTHubTransportAMQPMocks, , CONNECTION_HANDLE, connection_create2, XIO_HANDLE, io, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context, ON_CONNECTION_STATE_CHANGED, on_connection_state_changed, void*, on_connection_state_changed_context, ON_IO_ERROR, on_io_error, void*, on_io_error_context, LOGGER_LOG, logger);
+DECLARE_GLOBAL_MOCK_METHOD_9(CIoTHubTransportAMQPMocks, , CONNECTION_HANDLE, connection_create2, XIO_HANDLE, io, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context, ON_CONNECTION_STATE_CHANGED, on_connection_state_changed, void*, on_connection_state_changed_context, ON_IO_ERROR, on_io_error, void*, on_io_error_context);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, connection_dowork, CONNECTION_HANDLE, connection);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, connection_destroy, CONNECTION_HANDLE, connection);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , void, connection_set_trace, CONNECTION_HANDLE, connection, bool, traceOn);
@@ -941,7 +940,7 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , int, messagereceiver_o
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , int, messagereceiver_close, MESSAGE_RECEIVER_HANDLE, message_receiver);
 
 // message_sender.h
-DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubTransportAMQPMocks, , MESSAGE_SENDER_HANDLE, messagesender_create, LINK_HANDLE, link, ON_MESSAGE_SENDER_STATE_CHANGED, on_message_sender_state_changed, void*, context, LOGGER_LOG, logger_log);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , MESSAGE_SENDER_HANDLE, messagesender_create, LINK_HANDLE, link, ON_MESSAGE_SENDER_STATE_CHANGED, on_message_sender_state_changed, void*, context);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, messagesender_destroy, MESSAGE_SENDER_HANDLE, message_sender);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , int, messagesender_open, MESSAGE_SENDER_HANDLE, message_sender);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , int, messagesender_close, MESSAGE_SENDER_HANDLE, message_sender);
@@ -964,7 +963,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , const char*, saslmecha
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , int, saslmechanism_challenge, SASL_MECHANISM_HANDLE, sasl_mechanism, const SASL_MECHANISM_BYTES*, challenge_bytes, SASL_MECHANISM_BYTES*, response_bytes);
 
 // saslclientio.h
-DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , CONCRETE_IO_HANDLE, saslclientio_create, void*, io_create_parameters, LOGGER_LOG, logger_log);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , CONCRETE_IO_HANDLE, saslclientio_create, void*, io_create_parameters);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, saslclientio_destroy, CONCRETE_IO_HANDLE, sasl_client_io);
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubTransportAMQPMocks, , int, saslclientio_open, CONCRETE_IO_HANDLE, sasl_client_io, ON_IO_OPEN_COMPLETE, on_io_open_complete, ON_BYTES_RECEIVED, on_bytes_received, ON_IO_ERROR, on_io_error, void*, callback_context);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportAMQPMocks, , int, saslclientio_close, CONCRETE_IO_HANDLE, sasl_client_io, ON_IO_CLOSE_COMPLETE, on_io_close_complete, void*, callback_context);
@@ -1205,7 +1204,7 @@ static void setExpectedCallsForCreateEventSender(CIoTHubTransportAMQPMocks& mock
     EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
     EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
     EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
-    EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_SENDER);
+    EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_SENDER);
     EXPECTED_CALL(mocks, messagesender_open(TEST_MESSAGE_SENDER));
     EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
     EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
@@ -1313,7 +1312,7 @@ static void setExpectedCallsForTransportDoWorkUpTo(CIoTHubTransportAMQPMocks& mo
         {
             EXPECTED_CALL(mocks, STRING_c_str(NULL));
             EXPECTED_CALL(mocks, platform_get_default_tlsio()).SetReturn(TEST_TLS_IO_INTERFACE_DESC);
-            EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL)).SetReturn(TEST_TLS_IO_INTERFACE);
+            EXPECTED_CALL(mocks, xio_create(NULL, NULL)).SetReturn(TEST_TLS_IO_INTERFACE);
         }
         else if (step == STEP_DOWORK_CREATE_SASLMECHANISM)
         {
@@ -1326,12 +1325,12 @@ static void setExpectedCallsForTransportDoWorkUpTo(CIoTHubTransportAMQPMocks& mo
         }
         else if (step == STEP_DOWORK_CREATE_SASLIO)
         {
-            EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL)).SetReturn(TEST_SASL_IO);
+            EXPECTED_CALL(mocks, xio_create(NULL, NULL)).SetReturn(TEST_SASL_IO);
         }
         else if (step == STEP_DOWORK_CREATE_CONNECTION)
         {
             EXPECTED_CALL(mocks, STRING_c_str(NULL));
-            EXPECTED_CALL(mocks, connection_create2(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL));
+            EXPECTED_CALL(mocks, connection_create2(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL));
         }
         else if (step == STEP_DOWORK_CREATE_SESSION)
         {
@@ -2188,7 +2187,7 @@ TEST_FUNCTION(AMQP_DoWork_saslio_create_fails)
 
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_SASLIO_GET_INTERFACE, DOWORK_MESSAGERECEIVER_NONE, time(NULL));
-    EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL)).SetReturn((XIO_HANDLE)NULL);
+    EXPECTED_CALL(mocks, xio_create(NULL, NULL)).SetReturn((XIO_HANDLE)NULL);
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_SASLMECHANISM);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
 
@@ -2222,7 +2221,7 @@ TEST_FUNCTION(AMQP_DoWork_connection_create2_fails)
     mocks.ResetAllCalls();
     setExpectedCallsForTransportDoWorkUpTo(mocks, &config, STEP_DOWORK_CREATE_SASLIO, DOWORK_MESSAGERECEIVER_NONE, time(NULL));
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
-    EXPECTED_CALL(mocks, connection_create2(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)).SetReturn((CONNECTION_HANDLE)NULL);
+    EXPECTED_CALL(mocks, connection_create2(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)).SetReturn((CONNECTION_HANDLE)NULL);
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_SASLIO);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
 
@@ -2614,7 +2613,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_fails)
     EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
     EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
     EXPECTED_CALL(mocks, link_set_attach_properties(NULL, NULL)).IgnoreAllArguments().SetReturn(0);
-    EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL)).SetReturn((MESSAGE_SENDER_HANDLE)NULL);
+    EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL)).SetReturn((MESSAGE_SENDER_HANDLE)NULL);
     STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
     STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
@@ -2669,7 +2668,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_open_fails)
     EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
     EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
     EXPECTED_CALL(mocks, amqpvalue_destroy(NULL)).IgnoreArgument(1);
-    EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_SENDER);
+    EXPECTED_CALL(mocks, messagesender_create(NULL, NULL, NULL)).SetReturn(TEST_MESSAGE_SENDER);
     EXPECTED_CALL(mocks, messagesender_open(TEST_MESSAGE_SENDER)).SetReturn(1);
     STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_SOURCE));
     STRICT_EXPECTED_CALL(mocks, amqpvalue_destroy(TEST_MESSAGESENDER_TARGET));
@@ -4168,7 +4167,7 @@ TEST_FUNCTION(AMQP_SetOption_invokes_xio_setoption_succeeds)
 
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, platform_get_default_tlsio()).SetReturn(TEST_TLS_IO_INTERFACE_DESC);
-    EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL)).SetReturn(TEST_TLS_IO_INTERFACE);
+    EXPECTED_CALL(mocks, xio_create(NULL, NULL)).SetReturn(TEST_TLS_IO_INTERFACE);
     STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
         .IgnoreArgument(1);
 
@@ -4203,7 +4202,7 @@ TEST_FUNCTION(AMQP_SetOption_fails_when_xio_setoption_fails)
 
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, platform_get_default_tlsio()).SetReturn(TEST_TLS_IO_INTERFACE_DESC);
-    EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL)).SetReturn(TEST_TLS_IO_INTERFACE);
+    EXPECTED_CALL(mocks, xio_create(NULL, NULL)).SetReturn(TEST_TLS_IO_INTERFACE);
     STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
         .IgnoreArgument(1)
         .SetReturn(42);

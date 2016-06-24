@@ -7,7 +7,7 @@
 #endif
 #include "azure_c_shared_utility/gballoc.h"
 
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -109,19 +109,6 @@ typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
     uint16_t msgPacketId;
     DLIST_ENTRY entry;
 } MQTT_MESSAGE_DETAILS_LIST, *PMQTT_MESSAGE_DETAILS_LIST;
-
-static void defaultPrintLogFunction(unsigned int options, char* format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    (void)vprintf(format, args);
-    va_end(args);
-
-    if (options & LOG_LINE)
-    {
-        (void)printf("\r\n");
-    }
-}
 
 static void sendMsgComplete(IOTHUB_MESSAGE_LIST* iothubMsgList, PMQTTTRANSPORT_HANDLE_DATA transportState, IOTHUB_BATCHSTATE_RESULT batchResult)
 {
@@ -446,7 +433,7 @@ const XIO_HANDLE getIoTransportProvider(const char* fqdn, int port)
 {
     TLSIO_CONFIG tls_io_config = { fqdn, port };
     const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
-    return (void*)xio_create(io_interface_description, &tls_io_config, NULL/*defaultPrintLogFunction*/);
+    return (void*)xio_create(io_interface_description, &tls_io_config);
 }
 
 static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
@@ -816,7 +803,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
         }
         else
         {
-            state->mqttClient = mqtt_client_init(MqttRecvCallback, MqttOpCompleteCallback, state, defaultPrintLogFunction);
+            state->mqttClient = mqtt_client_init(MqttRecvCallback, MqttOpCompleteCallback, state);
             if (state->mqttClient == NULL)
             {
                 STRING_delete(state->mqttEventTopic);
