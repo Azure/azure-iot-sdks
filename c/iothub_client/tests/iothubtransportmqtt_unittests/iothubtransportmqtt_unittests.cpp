@@ -330,17 +330,17 @@ public:
     }
     MOCK_METHOD_END(MAP_RESULT, MAP_OK)
 
-        MOCK_STATIC_METHOD_3(, MAP_RESULT, Map_AddOrUpdate, MAP_HANDLE, handle, const char*, key, const char*, value)
-        MOCK_METHOD_END(MAP_RESULT, MAP_OK)
+    MOCK_STATIC_METHOD_3(, MAP_RESULT, Map_AddOrUpdate, MAP_HANDLE, handle, const char*, key, const char*, value)
+    MOCK_METHOD_END(MAP_RESULT, MAP_OK)
 
-        MOCK_STATIC_METHOD_1(, void, Map_Destroy, MAP_HANDLE, handle)
-        MOCK_VOID_METHOD_END()
+    MOCK_STATIC_METHOD_1(, void, Map_Destroy, MAP_HANDLE, handle)
+    MOCK_VOID_METHOD_END()
 
-        // Azure Mqtt
-        MOCK_STATIC_METHOD_4(, MQTT_CLIENT_HANDLE, mqtt_client_init, ON_MQTT_MESSAGE_RECV_CALLBACK, msgRecv, ON_MQTT_OPERATION_CALLBACK, opCallback, void*, callbackCtx, LOGGER_LOG, logger)
+    // Azure Mqtt
+    MOCK_STATIC_METHOD_3(, MQTT_CLIENT_HANDLE, mqtt_client_init, ON_MQTT_MESSAGE_RECV_CALLBACK, msgRecv, ON_MQTT_OPERATION_CALLBACK, opCallback, void*, callbackCtx)
         g_fnMqttMsgRecv = msgRecv;
-    g_fnMqttOperationCallback = opCallback;
-    g_callbackCtx = callbackCtx;
+        g_fnMqttOperationCallback = opCallback;
+        g_callbackCtx = callbackCtx;
     MOCK_METHOD_END(MQTT_CLIENT_HANDLE, TEST_MQTT_CLIENT_HANDLE);
 
     MOCK_STATIC_METHOD_3(, int, mqtt_client_connect, MQTT_CLIENT_HANDLE, handle, XIO_HANDLE, xioHandle, MQTT_CLIENT_OPTIONS*, mqttOptions)
@@ -431,8 +431,8 @@ public:
     MOCK_STATIC_METHOD_0(, const IO_INTERFACE_DESCRIPTION*, platform_get_default_tlsio)
         MOCK_METHOD_END(const IO_INTERFACE_DESCRIPTION*, TEST_IO_INTERFACE)
 
-        MOCK_STATIC_METHOD_3(, XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, xio_create_parameters, LOGGER_LOG, logger_log)
-        MOCK_METHOD_END(XIO_HANDLE, TEST_XIO_HANDLE);
+    MOCK_STATIC_METHOD_2(, XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, xio_create_parameters)
+    MOCK_METHOD_END(XIO_HANDLE, TEST_XIO_HANDLE);
 
     MOCK_STATIC_METHOD_3(, int, xio_close, XIO_HANDLE, ioHandle, ON_IO_CLOSE_COMPLETE, on_io_close_complete, void*, callback_context)
         MOCK_METHOD_END(int, 0);
@@ -462,7 +462,7 @@ DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DES
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, tlsio_openssl_get_interface_description);
 DECLARE_GLOBAL_MOCK_METHOD_0(CIoTHubTransportMqttMocks, , const IO_INTERFACE_DESCRIPTION*, platform_get_default_tlsio);
 
-DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, xio_create_parameters, LOGGER_LOG, logger_log);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportMqttMocks, , XIO_HANDLE, xio_create, const IO_INTERFACE_DESCRIPTION*, io_interface_description, const void*, xio_create_parameters);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , void, xio_destroy, XIO_HANDLE, ioHandle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , int, xio_close, XIO_HANDLE, ioHandle, ON_IO_CLOSE_COMPLETE, on_io_close_complete, void*, callback_context);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , int, xio_setoption, XIO_HANDLE, xio, const char*, optionName, const void*, value);
@@ -498,7 +498,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , const char*, IoTHubMes
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
-DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubTransportMqttMocks, , MQTT_CLIENT_HANDLE, mqtt_client_init, ON_MQTT_MESSAGE_RECV_CALLBACK, msgRecv, ON_MQTT_OPERATION_CALLBACK, opCallback, void*, callbackCtx, LOGGER_LOG, logger);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , MQTT_CLIENT_HANDLE, mqtt_client_init, ON_MQTT_MESSAGE_RECV_CALLBACK, msgRecv, ON_MQTT_OPERATION_CALLBACK, opCallback, void*, callbackCtx);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubTransportMqttMocks, , int, mqtt_client_connect, MQTT_CLIENT_HANDLE, handle, XIO_HANDLE, xioHandle, MQTT_CLIENT_OPTIONS*, mqttOptions);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , int, mqtt_client_disconnect, MQTT_CLIENT_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportMqttMocks, , void, mqtt_client_deinit, MQTT_CLIENT_HANDLE, handle);
@@ -556,7 +556,7 @@ static void SetupMocksForInitConnection(CIoTHubTransportMqttMocks& mocks)
     EXPECTED_CALL(mocks, mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
-    EXPECTED_CALL(mocks, xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
 }
@@ -808,7 +808,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_with_NULL_protocol_gateway_hostname_Suc
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_MQTT_SAS_TOKEN));
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_HOST_NAME));
 
-    EXPECTED_CALL(mocks, mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument(1);
 
@@ -852,7 +852,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_Succeed)
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_MQTT_SAS_TOKEN));
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_HOST_NAME));
 
-    EXPECTED_CALL(mocks, mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument(1);
@@ -897,7 +897,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_hostAddress_fails)
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_MQTT_SAS_TOKEN));
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_HOST_NAME));
 
-    EXPECTED_CALL(mocks, mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
@@ -1120,7 +1120,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_mqtt_client_init_Create_fai
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_MQTT_EVENT_TOPIC));
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_MQTT_SAS_TOKEN));
 
-    EXPECTED_CALL(mocks, mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn((MQTT_CLIENT_HANDLE)NULL);
+    EXPECTED_CALL(mocks, mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn((MQTT_CLIENT_HANDLE)NULL);
 
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
@@ -1508,7 +1508,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_invokes_xio_setoption_when_option_no
     bool traceOn = true;
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, platform_get_default_tlsio());
-    EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL));
+    EXPECTED_CALL(mocks, xio_create(NULL, NULL));
     STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
         .IgnoreArgument(1);
 
@@ -1542,7 +1542,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_xio_create_fail)
     bool traceOn = true;
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, platform_get_default_tlsio());
-    EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL)).SetReturn((XIO_HANDLE)NULL);
+    EXPECTED_CALL(mocks, xio_create(NULL, NULL)).SetReturn((XIO_HANDLE)NULL);
 
     // act
     auto result = IoTHubTransportMqtt_SetOption(handle, SOME_OPTION, SOME_VALUE);
@@ -1575,7 +1575,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_fails_when_xio_setoption_fails)
 
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, platform_get_default_tlsio());
-    EXPECTED_CALL(mocks, xio_create(NULL, NULL, NULL));
+    EXPECTED_CALL(mocks, xio_create(NULL, NULL));
     STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
         .IgnoreArgument(1)
         .SetReturn(42);
@@ -1813,7 +1813,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_mqtt_client_connect_fail)
     EXPECTED_CALL(mocks, mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__);
     EXPECTED_CALL(mocks, SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
-    EXPECTED_CALL(mocks, xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument(2);
@@ -2563,7 +2563,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_connectFailCount_exceed_succeed)
         STRICT_EXPECTED_CALL(mocks, STRING_new());
         EXPECTED_CALL(mocks, mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__);
         STRICT_EXPECTED_CALL(mocks, platform_get_default_tlsio());
-        EXPECTED_CALL(mocks, xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(mocks, xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         EXPECTED_CALL(mocks, xio_destroy(IGNORED_PTR_ARG));
         EXPECTED_CALL(mocks, SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
