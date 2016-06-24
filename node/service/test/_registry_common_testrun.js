@@ -9,10 +9,21 @@ var Device = require('../lib/device.js');
 var Registry = require('../lib/registry.js');
 var RegistryHttp = require('../lib/registry_http.js');
 
-var testDevice = {
+var basicDeviceJson = JSON.stringify({
   deviceId: 'testDevice' + Math.random(),
-  status: 'Disabled'
-};
+  status: 'disabled'
+});
+
+var deviceWithThumbprintJson = JSON.stringify({
+  deviceId: 'testDevice' + Math.random(),
+  starts: 'disabled',
+  authentication: {
+    x509Thumbprint : {
+      primaryThumbprint: '0000000000000000000000000000000000000000',
+      secondaryThumbprint: '1111111111111111111111111111111111111111'
+    }
+  }
+});
 
 function badConfigTests(opName, badConnStrings, Transport, requestFn) {
 
@@ -130,22 +141,28 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       body – the body of the HTTP response
       response - the Node.js http.ServerResponse object returned by the transport]*/
       /*Tests_SRS_NODE_IOTHUB_REGISTRY_07_002: [When the create method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an object representing the new device identity returned from the IoT hub.]*/
-      it('creates a new device', function (done) {
-        var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        registry.create(testDevice, function (err, dev) {
-          if (err) {
-            done(err);
-          } else {
-            assert.instanceOf(dev, Device);
-            assert.equal(testDevice.deviceId, dev.deviceId);
-            assert.notEqual(testDevice, dev);
-            done();
-          }
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_07_002: [When the create method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
+
+      [basicDeviceJson, deviceWithThumbprintJson].forEach(function(deviceJson) {
+        it('creates a new device', function (done) {
+          var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+          var deviceInfo = new Device(deviceJson);
+          registry.create(deviceInfo, function (err, dev) {
+            if (err) {
+              done(err);
+            } else {
+              assert.instanceOf(dev, Device);
+              assert.equal(deviceInfo.deviceId, dev.deviceId);
+              assert.notEqual(deviceInfo, dev);
+              done();
+            }
+          });
         });
       });
 
       badConfigTests('create device information', badConnectionStrings, Transport, function (registry, done) {
-        registry.create(testDevice, done);
+        var deviceInfo = new Device(basicDeviceJson);
+        registry.create(deviceInfo, done);
       });
     });
 
@@ -249,19 +266,21 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       /*Test_SRS_NODE_IOTHUB_REGISTRY_07_004: [When the update method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an object representing the new device identity returned from the IoT hub.]*/
       it('updates information about a device', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        registry.update(testDevice, function (err, dev) {
+        var device = new Device(basicDeviceJson);
+        registry.update(device, function (err, dev) {
           if (err) {
             done(err);
           } else {
             assert.instanceOf(dev, Device);
-            assert.equal(testDevice.deviceId, dev.deviceId);
+            assert.equal(device.deviceId, dev.deviceId);
             done();
           }
         });
       });
 
       badConfigTests('update device information', badConnectionStrings, Transport, function (registry, done) {
-        registry.update(testDevice, done);
+        var device = new Device(basicDeviceJson);
+        registry.update(device, done);
       });
     });
 
@@ -297,7 +316,8 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
 
         var registry = Registry.fromConnectionString(goodConnectionString, FailingTransport);
         var testServiceProperties = { TestProperty: 'TestValue' };
-        registry.setServiceProperties(testDevice.deviceId, testServiceProperties, function (err) {
+        var deviceInfo = new Device(basicDeviceJson);
+        registry.setServiceProperties(deviceInfo.deviceId, testServiceProperties, function (err) {
           assert.instanceOf(err, Error);
           done();
         });
@@ -306,13 +326,14 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_027: [The `done` callback shall be called with a null object for first parameter and the result object as a second parameter that is an associative array (dictionary) of service properties if the request succeeds.]*/
       it('calls the done callback with a null error and an object containing the updated service properties', function(done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        registry.get(testDevice.deviceId, function (err, deviceInfo) {
+        var deviceInfo = new Device(basicDeviceJson);
+        registry.get(deviceInfo.deviceId, function (err, deviceInfo) {
           if (err) {
             done(err);
           } else {
             var newProps = deviceInfo.serviceProperties;
             newProps.properties.testProp = 'testValue';
-            registry.setServiceProperties(testDevice.deviceId, newProps, function (err, result, response) {
+            registry.setServiceProperties(deviceInfo.deviceId, newProps, function (err, result, response) {
               if (err) {
                 done(err);
               } else {
@@ -349,10 +370,14 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, dmConne
       response - the Node.js http.ServerResponse object returned by the transport]*/
       /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_007: [The delete method shall delete the given device from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
       /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_005: [When the delete method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null).]*/
-      it('deletes the given device', function (done) {
-        var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        registry.delete(testDevice.deviceId, function (err) {
-          done(err);
+      
+      [basicDeviceJson, deviceWithThumbprintJson].forEach(function(deviceJson) {
+        it('deletes the given device', function (done) {
+          var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+          var deviceInfo = new Device(deviceJson);
+          registry.delete(deviceInfo.deviceId, function (err) {
+            done(err);
+          });
         });
       });
 

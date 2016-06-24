@@ -60,12 +60,12 @@ describe('FileUploadApi', function() {
       });
     });
 
-    /*Tests_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_005: [`getBlobSharedAccessSignature` shall throw a `ReferenceError` if `iotHubSas` is falsy.]*/
-    [undefined, null, ''].forEach(function (sas) {
-      it('throws if sharedAccessSignature is \'' + sas + '\'', function(){
+    /*Tests_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_005: [`getBlobSharedAccessSignature` shall throw a `ReferenceError` if `auth` is falsy.]*/
+    [undefined, null, ''].forEach(function (auth) {
+      it('throws if auth is \'' + auth + '\'', function(){
         var fileUpload = new FileUploadApi('deviceId', 'host.name', function() {});
         assert.throws(function() {
-          fileUpload.getBlobSharedAccessSignature('blobName', sas, function() {});
+          fileUpload.getBlobSharedAccessSignature('blobName', auth, function() {});
         }, ReferenceError);
       });
     });
@@ -96,7 +96,7 @@ describe('FileUploadApi', function() {
     Authorization: <sharedAccessSignature>
     'User-Agent': <sdk name and version>,
     ```]*/
-    it('builds a valid set of headers for the HTTP request', function() {
+    it('builds a valid set of headers with a shared access signature for the HTTP request', function() {
       var testFileName = 'testfile.txt';
       var testDeviceId = 'testDevice';
       var testHostName = 'host.name';
@@ -119,6 +119,33 @@ describe('FileUploadApi', function() {
       fileUpload.getBlobSharedAccessSignature(testFileName, testIoTHubSas);
     });
 
+    it('builds a valid set of headers with x509 authentication for the HTTP request', function() {
+      var testFileName = 'testfile.txt';
+      var testDeviceId = 'testDevice';
+      var testHostName = 'host.name';
+      var x509Auth = {
+        cert: 'cert',
+        key: 'key',
+        passphrase: 'passphrase'
+      };
+
+      var FakeHttpTransport = function() {
+        this.buildRequest = function (method, path, headers, host, auth) {
+          assert.equal(headers.Accept, 'application/json');
+          assert.equal(headers.Host, testHostName);
+          assert.equal(headers['User-Agent'], packageJson.name + '/' + packageJson.version);
+          assert.isUndefined(headers.Authorization);
+          assert.equal(auth, x509Auth);
+          return {
+            end: function() {}
+          };
+        };
+      };
+
+      var fileUpload = new FileUploadApi(testDeviceId, testHostName, new FakeHttpTransport());
+      fileUpload.getBlobSharedAccessSignature(testFileName, x509Auth);
+    });
+
     /*Tests_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_008: [`getBlobSharedAccessSignature` shall call the `done` callback with an `Error` object if the request fails.]*/
 
     it('calls the done callback with an error if the request fails', function (done) {
@@ -128,7 +155,7 @@ describe('FileUploadApi', function() {
       var testIoTHubSas = 'hubSas';
 
       var FailingTransport = function() {
-        this.buildRequest = function(method, path, headers, hostname, callback) {
+        this.buildRequest = function(method, path, headers, hostname, x509auth, callback) {
           return {
             end: function() {
               callback(new Error('fake failure'));
@@ -170,7 +197,7 @@ describe('FileUploadApi', function() {
       });
 
       var FakeHttpTransport = function() {
-        this.buildRequest = function(method, path, headers, hostname, callback) {
+        this.buildRequest = function(method, path, headers, hostname, x509auth, callback) {
           return {
             end: function() {
               callback(null, fakeResult);
@@ -206,12 +233,12 @@ describe('FileUploadApi', function() {
       });
     });
 
-    /*Tests_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_011: [`notifyUploadComplete` shall throw a `ReferenceError` if `sharedAccessSignature` is falsy.]*/
-    [undefined, null, ''].forEach(function (sharedAccessSignature) {
-      it('throws if sharedAccessSignature is \'' + sharedAccessSignature + '\'', function(){
+    /*Tests_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_011: [`notifyUploadComplete` shall throw a `ReferenceError` if `auth` is falsy.]*/
+    [undefined, null, ''].forEach(function (auth) {
+      it('throws if auth is \'' + auth + '\'', function(){
         var fileUpload = new FileUploadApi('deviceId', 'host.name', function() {});
         assert.throws(function() {
-          fileUpload.notifyUploadComplete('correlationId', sharedAccessSignature, {}, function() {});
+          fileUpload.notifyUploadComplete('correlationId', auth, {}, function() {});
         }, ReferenceError);
       });
     });
@@ -256,7 +283,7 @@ describe('FileUploadApi', function() {
     'Content-Length': <content length>,
     'iothub-name': <hub name>
     ```]*/
-    it('builds a valid set of headers for the HTTP request', function() {
+    it('builds a valid set of headers with a shared access signature for the HTTP request', function() {
       var testDeviceId = 'testDevice';
       var testHostName = 'host.name';
       var testIoTHubSas = 'hubSas';
@@ -280,7 +307,37 @@ describe('FileUploadApi', function() {
       var fileUpload = new FileUploadApi(testDeviceId, testHostName, new FakeHttpTransport());
       fileUpload.notifyUploadComplete('correlationId', testIoTHubSas, testUploadResult, function() {});
     });
-    
+
+    it('builds a valid set of headers and x509 authentication for the HTTP request', function() {
+      var testDeviceId = 'testDevice';
+      var testHostName = 'host.name';
+      var testUploadResult = { isSuccess: true, statusCode: 200, statusDescription: 'Success' };
+      var x509Auth = {
+        cert: 'cert',
+        key: 'key',
+        passphrase: 'passphrase'
+      };
+
+      var FakeHttpTransport = function() {
+        this.buildRequest = function (method, path, headers, host, auth) {
+          assert.equal(headers.Host, testHostName);
+          assert.isUndefined(headers.Authorization);
+          assert.equal(headers['Content-Type'], 'application/json; charset=utf-8');
+          assert.equal(headers['Content-Length'], JSON.stringify(testUploadResult).length);
+          assert.equal(headers['iothub-name'], testHostName.split('.')[0]);
+          assert.equal(auth, x509Auth);
+
+          return {
+            write: function() {},
+            end: function() {}
+          };
+        };
+      };
+
+      var fileUpload = new FileUploadApi(testDeviceId, testHostName, new FakeHttpTransport());
+      fileUpload.notifyUploadComplete('correlationId', x509Auth, testUploadResult, function() {});
+    });
+
     /*Tests_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_015: [** The `POST` HTTP request shall have the following body:
     ```
     {
@@ -313,7 +370,7 @@ describe('FileUploadApi', function() {
     /*Tests_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_016: [`notifyUploadComplete` shall call the `done` callback with an `Error` object if the request fails.]*/
     it('calls the done callback with an error if the request fails', function (done) {
       var FailingTransport = function() {
-        this.buildRequest = function(method, path, headers, hostname, callback) {
+        this.buildRequest = function(method, path, headers, hostname, x509auth, callback) {
           return {
             write: function() {},
             end: function() {
@@ -333,7 +390,7 @@ describe('FileUploadApi', function() {
     /*Tests_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_017: [`notifyUploadComplete` shall call the `done` callback with no parameters if the request succeeds.]*/
     it('calls the done callback with no parameters if the request succeeds', function (done) {
       var FakeHttpTransport = function() {
-        this.buildRequest = function(method, path, headers, hostname, callback) {
+        this.buildRequest = function(method, path, headers, hostname, x509auth, callback) {
           return {
             write: function() {},
             end: function() {

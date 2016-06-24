@@ -6,7 +6,9 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
     using System;
     using System.Runtime.Serialization;
 
+#if !WINDOWS_UWP
     [Serializable]
+#endif
     public sealed class DeviceNotFoundException : IotHubException
     {
         public DeviceNotFoundException(string deviceId)
@@ -29,9 +31,11 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
         {
         }
 
+#if !WINDOWS_UWP
         public DeviceNotFoundException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }

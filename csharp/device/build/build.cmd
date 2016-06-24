@@ -70,7 +70,7 @@ rem ----------------------------------------------------------------------------
 rem -- build csharp iot client
 rem -----------------------------------------------------------------------------
 
-call nuget restore "%build-root%\csharp\device\iothub_csharp_deviceclient.sln"
+call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\csharp\device\iothub_csharp_deviceclient.sln"
 if %build-clean%==1 (
     call :clean-a-solution "%build-root%\csharp\device\iothub_csharp_deviceclient.sln" %build-config% %build-platform%
     if not !errorlevel!==0 exit /b !errorlevel!

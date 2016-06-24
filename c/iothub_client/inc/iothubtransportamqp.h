@@ -4,7 +4,6 @@
 #ifndef IOTHUBTRANSPORTAMQP_H
 #define IOTHUBTRANSPORTAMQP_H
 
-#include "iothub_client_ll.h"
 #include "iothub_transport_ll.h"
 
 #ifdef __cplusplus
@@ -12,7 +11,7 @@ extern "C"
 {
 #endif
 
-    extern const void* AMQP_Protocol(void);
+    extern const TRANSPORT_PROVIDER* AMQP_Protocol(void);
 
 #ifdef __cplusplus
 }

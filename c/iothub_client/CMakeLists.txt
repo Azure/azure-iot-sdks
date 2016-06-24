@@ -10,20 +10,33 @@ set(iothub_client_ll_transport_c_files
 ./src/version.c
 ./src/iothub_message.c
 ./src/iothub_client_ll.c
-./src/iothub_client_ll_uploadtoblob.c
 ./src/blob.c
 ../parson/parson.c
 )
 
+if(NOT ${dont_use_uploadtoblob})
+set(iothub_client_ll_transport_c_files 
+    ${iothub_client_ll_transport_c_files}
+    ./src/iothub_client_ll_uploadtoblob.c
+    )
+endif()
+
+
 set(iothub_client_ll_transport_h_files
 ./inc/iothub_message.h
 ./inc/iothub_client_ll.h
-./inc/iothub_client_ll_uploadtoblob.h
 ./inc/iothub_client_version.h
 ./inc/iothub_transport_ll.h
 ./inc/blob.h
 ../parson/parson.h
 )
+
+if(NOT ${dont_use_uploadtoblob})
+    set(iothub_client_ll_transport_h_files 
+        ${iothub_client_ll_transport_h_files}
+        ./inc/iothub_client_ll_uploadtoblob.h
+    )
+endif()
 
 set(iothub_client_c_files
 ./src/iothub_client.c
@@ -160,7 +173,12 @@ add_library(iothub_client
 )
 linkSharedUtil(iothub_client)
 
-if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+# Don't build samples under Win32 ARM for now
+if(WIN32)
+	if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+		add_subdirectory(samples)
+	endif()
+else()
 	add_subdirectory(samples)
 endif()
 

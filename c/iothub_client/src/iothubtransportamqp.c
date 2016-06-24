@@ -1735,7 +1735,24 @@ static void IoTHubTransportAMQP_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
     }
 }
 
+static STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
+{
+    STRING_HANDLE result;
+    /*Codes_SRS_IOTHUBTRANSPORTAMQP_02_001: [ If parameter handle is NULL then IoTHubTransportAMQP_GetHostname shall return NULL. ]*/
+    if (handle == NULL)
+    {
+        result = NULL;
+    }
+    else
+    {
+        /*Codes_SRS_IOTHUBTRANSPORTAMQP_02_002: [ Otherwise IoTHubTransportAMQP_GetHostname shall return a STRING_HANDLE for the hostname. ]*/
+        result = ((AMQP_TRANSPORT_INSTANCE*)(handle))->iotHubHostFqdn;
+    }
+    return result;
+}
+
 static TRANSPORT_PROVIDER thisTransportProvider = {
+    IoTHubTransportAMQP_GetHostname,
     IoTHubTransportAMQP_SetOption,
     IoTHubTransportAMQP_Create,
     IoTHubTransportAMQP_Destroy,
@@ -1747,7 +1764,7 @@ static TRANSPORT_PROVIDER thisTransportProvider = {
     IoTHubTransportAMQP_GetSendStatus
 };
 
-extern const void* AMQP_Protocol(void)
+extern const TRANSPORT_PROVIDER* AMQP_Protocol(void)
 {
     return &thisTransportProvider;
 }

@@ -54,13 +54,24 @@ function MqttReceiver(mqttClient, topic_subscribe) {
 util.inherits(MqttReceiver, EventEmitter);
 
 MqttReceiver.prototype._setupListeners = function () {
+  /*Codes_SRS_NODE_DEVICE_MQTT_RECEIVER_16_004: [If there is a listener for the message event, a message event shall be emitted for each message received.]*/
+  var messages = [];
+  var storeMessages = function(topic, msg) {
+    messages.push({ topic: topic, message: msg });
+  };
+
+  this._client.on('message', storeMessages);
+
   debug('subscribing to ' + this._topic_subscribe);
   /*Codes_SRS_NODE_DEVICE_MQTT_RECEIVER_16_003: [When a listener is added for the message event, the topic should be subscribed to.]*/
   this._client.subscribe(this._topic_subscribe, { qos: 1 }, function () {
     debug('subscribed to ' + this._topic_subscribe);
-    /*Codes_SRS_NODE_DEVICE_MQTT_RECEIVER_16_004: [If there is a listener for the message event, a message event shall be emitted for each message received.]*/
-    this._client.on('message', this._onMqttMessage.bind(this));
     this._listenersInitialized = true;
+    messages.forEach(function(storedMessage) {
+      this._onMqttMessage(storedMessage.topic, storedMessage.message);
+    }.bind(this));
+    this._client.removeListener('message', storeMessages);
+    this._client.on('message', this._onMqttMessage.bind(this));
   }.bind(this));
 };
 

@@ -120,11 +120,13 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* c
 extern  IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(IOTHUB_CLIENT_DEVICE_CONFIG * config);
 ```
 **SRS_IOTHUBCLIENT_LL_17_001: [**IoTHubClient_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.**]** 
-**SRS_IOTHUBCLIENT_LL_17_002: [**IoTHubClient_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_LL_HANDLE.**]** 
+**SRS_IOTHUBCLIENT_LL_17_002: [**IoTHubClient_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_LL_HANDLE.**]**
 **SRS_IOTHUBCLIENT_LL_17_003: [**If allocation fails, the function shall fail and return NULL.**]** 
+**SRS_IOTHUBCLIENT_LL_02_096: [** `IoTHubClient_LL_CreateWithTransport` shall create the data structures needed to instantiate a `IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE`. **]**
+**SRS_IOTHUBCLIENT_LL_02_097: [** If creating the data structures fails or instantiating the `IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE` fails then `IoTHubClient_LL_CreateWithTransport` shall fail and return NULL. **]**
 **SRS_IOTHUBCLIENT_LL_02_047: [** IoTHubClient_LL_CreateWithTransport shall create a TICK_COUNTER_HANDLE. **]**
 **SRS_IOTHUBCLIENT_LL_02_048: [** If creating the handle fails, then IoTHubClient_LL_CreateWithTransport shall fail and return NULL **]**
-**SRS_IOTHUBCLIENT_LL_17_004: [**IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.**]** 
+**SRS_IOTHUBCLIENT_LL_17_004: [**IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void\*.**]** 
 **SRS_IOTHUBCLIENT_LL_17_005: [**IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.**]** 
 **SRS_IOTHUBCLIENT_LL_17_006: [**IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the IOTHUB_DEVICE_CONFIG populated structure and waitingToSend list.**]** 
 **SRS_IOTHUBCLIENT_LL_17_007: [**If the _Register function fails, this function shall fail and return NULL.**]** 

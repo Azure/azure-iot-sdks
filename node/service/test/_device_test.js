@@ -8,7 +8,7 @@ var Device = require('../lib/device.js');
 
 var simpleDeviceJson = JSON.stringify({ deviceId: 'testDevice', generationId:'123456789012345678', etag:'' });
 
-var testDeviceObject = { 
+var deviceWithoutAuth = {
   deviceId: 'fullDevice',
   generationId:'635756100743433650',
   etag:554111,
@@ -20,12 +20,6 @@ var testDeviceObject = {
   lastActivityTime:'2015-08-26T01:00:51.6950626',
   cloudToDeviceMessageCount:4,
   isManaged:true,
-  authentication: {
-    symmetricKey: {
-      primaryKey:"aBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJK=",
-      secondaryKey:"ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="
-    }
-  },
   deviceProperties: {
     batteryLevel:'90',
     batteryStatus:"good",
@@ -52,6 +46,25 @@ var testDeviceObject = {
   }
 };
 
+var deviceWithSymmetricKeys = Object.assign(deviceWithoutAuth, {
+  authentication: {
+    symmetricKey: {
+      primaryKey:"aBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJK=",
+      secondaryKey:"ZaBcd+eFg9h3jKl2MNO4pQrS90TUVxYzabcdefGH6iJ="
+    }
+  },
+});
+
+var initializeDeviceWithThumbprints = Object.assign(deviceWithoutAuth, {
+  authentication: {
+    x509Thumbprint: {
+      primaryThumbprint: "0000000000000000000000000000000000000000",
+      secondaryThumbprint: "1111111111111111111111111111111111111111"
+    }
+  }
+});
+
+var fullDeviceWithThumbprints = JSON.stringify(initializeDeviceWithThumbprints);
 var deviceName = 'testDevice';
 var newDeviceName = 'newDeviceName';
 var newStatusReason = 'Status Reason';
@@ -146,14 +159,22 @@ describe('Device', function () {
     };
 
     it('correctly creates a device from JSON', function() {
-      var deviceJsonString = JSON.stringify(testDeviceObject);
+      var deviceJsonString = JSON.stringify(deviceWithSymmetricKeys);
       var deviceResult = new Device(deviceJsonString);
-      verifyDeviceProperties(deviceResult, testDeviceObject);
+      verifyDeviceProperties(deviceResult, deviceWithSymmetricKeys);
     });
 
     it('correctly creates a device from a duck-typed object', function() {
-      var deviceResult = new Device(testDeviceObject);
-      verifyDeviceProperties(deviceResult, testDeviceObject);
+      var deviceResult = new Device(deviceWithSymmetricKeys);
+      verifyDeviceProperties(deviceResult, deviceWithSymmetricKeys);
+    });
+
+    it('JSON is created correctly when using x509 certificate', function() {
+      var device = new Device(fullDeviceWithThumbprints);
+      verifyDeviceProperties(device, initializeDeviceWithThumbprints);
+
+      assert.equal(device.authentication.x509Thumbprint.primaryThumbprint, initializeDeviceWithThumbprints.authentication.x509Thumbprint.primaryThumbprint);
+      assert.equal(device.authentication.x509Thumbprint.secondaryThumbprint, initializeDeviceWithThumbprints.authentication.x509Thumbprint.secondaryThumbprint);
     });
   });
 

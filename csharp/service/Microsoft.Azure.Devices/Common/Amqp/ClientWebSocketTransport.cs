@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.Azure.Amqp.Transport
+namespace Microsoft.Azure.Devices
 {
     using System;
     using System.IO;
@@ -11,6 +11,8 @@ namespace Microsoft.Azure.Amqp.Transport
     using System.Threading.Tasks;
 
     using Microsoft.Azure.Devices.Common;
+    using Microsoft.Azure.Amqp;
+    using Microsoft.Azure.Amqp.Transport;
 
     sealed class ClientWebSocketTransport : TransportBase
     {
@@ -21,15 +23,13 @@ namespace Microsoft.Azure.Amqp.Transport
         readonly ClientWebSocket webSocket;
         readonly EndPoint localEndPoint;
         readonly EndPoint remoteEndPoint;
-        readonly string iotHubName;
         volatile CancellationTokenSource writeCancellationTokenSource;
         bool disposed;
 
-        public ClientWebSocketTransport(ClientWebSocket webSocket, string iotHubName, EndPoint localEndpoint, EndPoint remoteEndpoint)
+        public ClientWebSocketTransport(ClientWebSocket webSocket, EndPoint localEndpoint, EndPoint remoteEndpoint)
             : base("clientwebsocket")
         {
             this.webSocket = webSocket;
-            this.iotHubName = iotHubName;
             this.localEndPoint = localEndpoint;
             this.remoteEndPoint = remoteEndpoint;
             this.writeCancellationTokenSource = new CancellationTokenSource();

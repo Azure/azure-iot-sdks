@@ -30,7 +30,7 @@ describe('translateError', function() {
       };
 
       var fake_error = new AMQPError();
-      fake_error.condition = { contents: testParams.errorDescription };
+      fake_error.condition = testParams.errorDescription;
 
       /*Tests_SRS_NODE_DEVICE_AMQP_ERRORS_16_010: [ `translateError` shall accept 2 argument:
       *- A custom error message to give context to the user.

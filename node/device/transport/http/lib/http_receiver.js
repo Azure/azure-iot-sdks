@@ -67,6 +67,18 @@ function HttpReceiver(config, httpHelper) {
 
 util.inherits(HttpReceiver, EventEmitter);
 
+/*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_031: [If using a shared access signature for authentication, the following additional header should be used in the HTTP request:
+```
+Authorization: <config.sharedAccessSignature>
+``` ]*/
+
+/*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_030: [If using x509 authentication the `Authorization` header shall not be set and the x509 parameters shall instead be passed to the underlying transpoort.]*/
+ HttpReceiver.prototype._insertAuthHeaderIfNecessary = function (headers) {
+  if(!this._config.x509) {
+    headers.Authorization = this._config.sharedAccessSignature.toString();
+  }
+};
+
 HttpReceiver.prototype._startReceiver = function () {
   if (!this._cronObj && !this._intervalObj && !this._timeoutObj) {
     if (this._opts.interval) {
@@ -142,16 +154,17 @@ Host: <config.host>
 HttpReceiver.prototype.receive = function () {
   var path = endpoint.messagePath(this._config.deviceId);
   var httpHeaders = {
-    'Authorization': this._config.sharedAccessSignature.toString(),
     'iothub-to': path,
     'User-Agent': 'azure-iot-device/' + PackageJson.version
   };
+
+  this._insertAuthHeaderIfNecessary(httpHeaders);
 
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_017: [If opts.drain is true all messages in the queue should be pulled at once.]*/
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_018: [If opts.drain is false, only one message shall be received at a time]*/
   var drainRequester = new EventEmitter();
   drainRequester.on('nextRequest', function () {
-    var request = this._http.buildRequest('GET', path + endpoint.versionQueryString(), httpHeaders, this._config.host, function (err, body, res) {
+    var request = this._http.buildRequest('GET', path + endpoint.versionQueryString(), httpHeaders, this._config.host, this._config.x509, function (err, body, res) {
       if (!err) {
         if (body) {
           var msg = this._http.toMessage(res, body);
@@ -293,10 +306,11 @@ HttpReceiver.prototype._sendFeedback = function (action, message, done) {
   var ResultConstructor = null;
   var path = endpoint.feedbackPath(config.deviceId, message.lockToken);
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature.toString(),
     'If-Match': message.lockToken,
     'User-Agent': 'azure-iot-device/' + PackageJson.version
   };
+
+  this._insertAuthHeaderIfNecessary(httpHeaders);
 
   /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_009: [abandon shall construct an HTTP request using information supplied by the caller, as follows:
   POST <config.host>/devices/<config.deviceId>/messages/devicebound/<lockToken>/abandon?api-version=<version> HTTP/1.1
@@ -331,7 +345,7 @@ HttpReceiver.prototype._sendFeedback = function (action, message, done) {
   }
 
   /*Codes_SRS_NODE_DEVICE_HTTP_05_008: [If any Http method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-  var request = this._http.buildRequest(method, path, httpHeaders, config.host, function (err, body, response) {
+  var request = this._http.buildRequest(method, path, httpHeaders, config.host, this._config.x509, function (err, body, response) {
     if (done) {
       if (!err && response.statusCode === 204) {
         var result = new ResultConstructor(response);

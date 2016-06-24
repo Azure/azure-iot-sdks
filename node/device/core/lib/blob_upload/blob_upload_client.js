@@ -28,7 +28,8 @@ BlobUploadClient.prototype.updateSharedAccessSignature = function (sharedAccessS
 BlobUploadClient.prototype.uploadToBlob = function(blobName, stream, streamLength, done) {
   var self = this;
   /*Codes_SRS_NODE_DEVICE_BLOB_UPLOAD_CLIENT_16_004: [`uploadToBlob` shall obtain a blob SAS token using the IoT Hub service file upload API endpoint.]*/
-  self._fileUploadApi.getBlobSharedAccessSignature(blobName, self._config.sharedAccessSignature, function (err, uploadParams) {
+  var auth = self._config.x509 ? self._config.x509 : self._config.sharedAccessSignature;
+  self._fileUploadApi.getBlobSharedAccessSignature(blobName, auth, function (err, uploadParams) {
     if (err) {
       /*Codes_SRS_NODE_DEVICE_BLOB_UPLOAD_CLIENT_16_005: [`uploadToBlob` shall call the `done` callback with a `BlobSasError` parameter if retrieving the SAS token fails.]*/
       var error = new errors.BlobSasError('Could not obtain blob shared access signature.');
@@ -39,7 +40,7 @@ BlobUploadClient.prototype.uploadToBlob = function(blobName, stream, streamLengt
       self._blobUploader.uploadToBlob(uploadParams, stream, streamLength, function (err, body, result) {
         var uploadResult = BlobUploadResult.fromAzureStorageCallbackArgs(err, body, result);
         /*Codes_SRS_NODE_DEVICE_BLOB_UPLOAD_CLIENT_16_008: [`uploadToBlob` shall notify the result of a blob upload to the IoT Hub service using the file upload API endpoint.]*/
-        self._fileUploadApi.notifyUploadComplete(uploadParams.correlationId, self._config.sharedAccessSignature, uploadResult, function (err) {
+        self._fileUploadApi.notifyUploadComplete(uploadParams.correlationId, auth, uploadResult, function (err) {
           if(err) {
             /*Codes_SRS_NODE_DEVICE_BLOB_UPLOAD_CLIENT_16_009: [`uploadToBlob` shall call the `done` callback with a `BlobUploadNotificationError` if notifying the IoT Hub instance of the transfer outcome fails.]*/
             var error = new errors.BlobUploadNotificationError('Could not notify the IoT Hub of the file upload completion.');

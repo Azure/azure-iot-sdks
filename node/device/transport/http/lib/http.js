@@ -33,14 +33,28 @@ function handleResponse(done) {
  *
  * @param   {Object}    config  Configuration object derived from the connection string by the client.
  */
-/*Codes_SRS_NODE_DEVICE_HTTP_05_001: [The Http constructor shall accept an object with three properties:
-host - (string) the fully-qualified DNS hostname of an IoT hub
-deviceId - (string) the name of the IoT hub, which is the first segment of hostname
-sharedAccessSignature - (string) a shared access signature generated from the credentials of a policy with the "device connect" permissions.]*/
+/*Codes_SRS_NODE_DEVICE_HTTP_05_001: [The Http constructor shall accept an object with the following properties:
+- `host` - (string) the fully-qualified DNS hostname of an IoT hub
+- `deviceId` - (string) the name of the IoT hub, which is the first segment of hostname
+and either:
+- `sharedAccessSignature` - (string) a shared access signature generated from the credentials of a policy with the "device connect" permissions.
+or:
+- `x509` (object) an object with 3 properties: `cert`, `key` and `passphrase`, all strings, containing the necessary information to connect to the service. 
+]*/
 function Http(config) {
   this._config = config;
   this._http = new Base();
 }
+
+ Http.prototype._insertAuthHeaderIfNecessary = function (headers) {
+  if(!this._config.x509) {
+    /*Codes_SRS_NODE_DEVICE_HTTP_16_012: [If using a shared access signature for authentication, the following additional header should be used in the HTTP request: 
+    ```
+    Authorization: <config.sharedAccessSignature>
+    ```]*/
+    headers.Authorization = this._config.sharedAccessSignature.toString();
+  }
+};
 
 /**
  * @method          module:azure-iot-device-http.Http#sendEvent
@@ -62,28 +76,33 @@ function Http(config) {
  * @param {Function} done       The callback to be invoked when `sendEvent`
  *                              completes execution.
  */
-/*Codes_SRS_NODE_DEVICE_HTTP_05_002: [The sendEvent method shall construct an HTTP request using information supplied by the caller, as follows:
-POST <config.host>/devices/<config.deviceId>/messages/events?api-version=<version> HTTP/1.1
-Authorization: <config.sharedAccessSignature>
-iothub-to: /devices/<config.deviceId>/messages/events
-Host: <config.host>
-User-Agent: <version string>
-
-<message>
-]*/
 Http.prototype.sendEvent = function (message, done) {
   var config = this._config;
+  /*Codes_SRS_NODE_DEVICE_HTTP_05_002: [The `sendEvent` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  POST <config.host>/devices/<config.deviceId>/messages/events?api-version=<version> HTTP/1.1
+  iothub-to: /devices/<config.deviceId>/messages/events
+  User-Agent: <version string>
+  Host: <config.host>
+
+  <message>
+  ```]*/
   var path = endpoint.eventPath(config.deviceId);
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature.toString(),
     'iothub-to': path,
-    'User-Agent': 'azure-iot-device/' + PackageJson.version
+    'User-Agent': 'azure-iot-device/' + PackageJson.version,
   };
+
+  this._insertAuthHeaderIfNecessary(httpHeaders);
+
   for (var i = 0; i < message.properties.count(); i++) {
     var propItem = message.properties.getItem(i);
     httpHeaders[propItem.key] = propItem.value;
   }
-  var request = this._http.buildRequest('POST', path + endpoint.versionQueryString(), httpHeaders, config.host, handleResponse(done));
+
+  /*Codes_SRS_NODE_DEVICE_HTTP_16_013: [If using x509 authentication the `Authorization` header shall not be set and the x509 parameters shall instead be passed to the underlying transpoort.]*/
+  var request = this._http.buildRequest('POST', path + endpoint.versionQueryString(), httpHeaders, config.host, config.x509, handleResponse(done));
+
   request.write(message.getBytes());
   request.end();
 };
@@ -135,28 +154,31 @@ function constructBatchBody(messages) {
  * @param {Function}      done      The callback to be invoked when
  *                                  `sendEventBatch` completes execution.
  */
-/*Codes_SRS_NODE_DEVICE_HTTP_05_003: [The sendEventBatch method shall construct an HTTP request using information supplied by the caller, as follows:
-POST <config.host>/devices/<config.deviceId>/messages/events?api-version=<version> HTTP/1.1
-Authorization: <config.sharedAccessSignature>
-iothub-to: /devices/<config.deviceId>/messages/events
-Content-Type: application/vnd.microsoft.iothub.json
-Host: <config.host>
-User-Agent: <version string>
-
-{"body":"<Base64 Message1>","properties":{"<key>":"<value>"}},
-{"body":"<Base64 Message1>"}...
-]*/
 Http.prototype.sendEventBatch = function (messages, done) {
   var config = this._config;
+
+  /*Codes_SRS_NODE_DEVICE_HTTP_05_003: [The `sendEventBatch` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  POST <config.host>/devices/<config.deviceId>/messages/events?api-version=<version> HTTP/1.1
+  iothub-to: /devices/<config.deviceId>/messages/events
+  User-Agent: <version string>
+  Content-Type: application/vnd.microsoft.iothub.json
+  Host: <config.host>
+
+  {"body":"<Base64 Message1>","properties":{"<key>":"<value>"}},
+  {"body":"<Base64 Message1>"}...
+  ```]*/
   var path = endpoint.eventPath(config.deviceId);
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature.toString(),
     'iothub-to': path,
     'Content-Type': 'application/vnd.microsoft.iothub.json',
     'User-Agent': 'azure-iot-device/' + PackageJson.version
   };
+  
+  this._insertAuthHeaderIfNecessary(httpHeaders);
 
-  var request = this._http.buildRequest('POST', path + endpoint.versionQueryString(), httpHeaders, config.host, handleResponse(done));
+  /*Codes_SRS_NODE_DEVICE_HTTP_16_013: [If using x509 authentication the `Authorization` header shall not be set and the x509 parameters shall instead be passed to the underlying transpoort.]*/
+  var request = this._http.buildRequest('POST', path + endpoint.versionQueryString(), httpHeaders, config.host, config.x509, handleResponse(done));
   var body = constructBatchBody(messages);
   request.write(body);
   request.end();
@@ -182,13 +204,36 @@ Http.prototype.getReceiver = function getReceiver(done) {
  *
  * @param {Function}      done      The callback to be invoked when `setOptions` completes.
  */
-/*Codes_SRS_NODE_DEVICE_HTTP_16_004: [The ‘setOptions’ method shall call the setOptions method of the HTTP Receiver with the options parameter.]*/
-/*Codes_SRS_NODE_DEVICE_HTTP_16_005: [The ‘setOptions’ method shall call the ‘done’ callback when finished.]*/
 Http.prototype.setOptions = function (options, done) {
-  this.getReceiver(function (err, receiver) {
-    receiver.setOptions(options);
-    done(null, new results.TransportConfigured());
-  });
+  /*Codes_SRS_NODE_DEVICE_HTTP_16_011: [The HTTP transport should use the x509 settings passed in the `options` object to connect to the service if present.]*/
+  if (options.hasOwnProperty('cert')) {
+    this._config.x509 = {
+      cert: options.cert,
+      key: options.key,
+      passphrase: options.passphrase
+    };
+  }
+
+  var calldoneifspecified = function(err) {
+    /*Codes_SRS_NODE_DEVICE_HTTP_16_010: [`setOptions` should not throw if `done` has not been specified.]*/
+    if (done) {
+      /*Codes_SRS_NODE_DEVICE_HTTP_16_005: [If `done` has been specified the `setOptions` method shall call the `done` callback with no arguments when successful.]*/
+      /*Codes_SRS_NODE_DEVICE_HTTP_16_009: [If `done` has been specified the `setOptions` method shall call the `done` callback with a standard javascript `Error` object when unsuccessful.]*/
+      done(err);
+    }
+  };
+
+  if(options.hasOwnProperty('http') && options.http.hasOwnProperty('receivePolicy')) {
+    /*Codes_SRS_NODE_DEVICE_HTTP_16_004: [The `setOptions` method shall call the `setOptions` method of the HTTP Receiver with the content of the `http.receivePolicy` property of the `options` parameter.]*/
+    this.getReceiver(function (err, receiver) {
+      if(!err) {
+        receiver.setOptions(options.http.receivePolicy);
+      }
+      calldoneifspecified(err);
+    });
+  } else {
+    calldoneifspecified();
+  }
 };
 
 /**

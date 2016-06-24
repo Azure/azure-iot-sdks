@@ -41,7 +41,7 @@ Mqtt.prototype.connect = function (done) {
       if (done) done(err);
     } else {
       this._mqtt.client.on('disconnect', function (err) {
-        this.emit('disconnect', new results.Disconnected(err));
+        this.emit('disconnect', err);
       }.bind(this));
       if (done) done(null, result);
     }

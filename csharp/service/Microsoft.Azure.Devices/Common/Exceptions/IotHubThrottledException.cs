@@ -6,7 +6,9 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
     using System;
     using System.Runtime.Serialization;
 
+#if !WINDOWS_UWP
     [Serializable]
+#endif
     public sealed class IotHubThrottledException : IotHubException
     {
         public IotHubThrottledException(int maximumBatchCount)
@@ -19,9 +21,11 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
         {
         }
 
+#if !WINDOWS_UWP
         IotHubThrottledException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }

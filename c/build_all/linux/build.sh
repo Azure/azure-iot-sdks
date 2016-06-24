@@ -87,7 +87,7 @@ process_args ()
       fi
     done
 
-    if [ $toolchainfile != " " ]
+    if [ "$toolchainfile" != " " ]
     then
       toolchainfile=$(readlink -f $toolchainfile)
       toolchainfile="-DCMAKE_TOOLCHAIN_FILE=$toolchainfile"

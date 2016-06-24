@@ -89,7 +89,7 @@ static void* threadFuncArg;
 #define TEST_STRING_HANDLE (STRING_HANDLE)0x46
 static const char* TEST_CHAR = "TestChar";
 
-static const void* provideFAKE(void);
+static const TRANSPORT_PROVIDER* provideFAKE(void);
 
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG =
 {
@@ -212,6 +212,9 @@ public:
 		result2 = (TRANSPORT_LL_HANDLE)(0x42);
 	}
 	MOCK_METHOD_END(TRANSPORT_LL_HANDLE, result2)
+
+        MOCK_STATIC_METHOD_1(, STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle);
+        MOCK_METHOD_END(STRING_HANDLE, (STRING_HANDLE)0x42)
 
 		MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_LL_HANDLE, handle, const char*, optionName, const void*, value)
 		MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK)
@@ -363,6 +366,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , void*, gballoc_malloc, siz
 DECLARE_GLOBAL_MOCK_METHOD_2(CIotHubTransportMocks, , void*, gballoc_realloc, void*, ptr, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , void, gballoc_free, void*, ptr)
 
+DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIotHubTransportMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_LL_HANDLE, handle, const char*, optionName, const void*, value);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , TRANSPORT_LL_HANDLE, FAKE_IoTHubTransport_Create, const IOTHUBTRANSPORT_CONFIG*, config);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , void, FAKE_IoTHubTransport_Destroy, TRANSPORT_LL_HANDLE, handle);
@@ -415,6 +419,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , LOCK_RESULT, Lock_Deinit, 
 
 static TRANSPORT_PROVIDER FAKE_transport_provider =
 {
+    FAKE_IoTHubTransport_GetHostname,   /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;   */
 	FAKE_IoTHubTransport_SetOption,     /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       */
 	FAKE_IoTHubTransport_Create,        /*pfIoTHubTransport_Create IoTHubTransport_Create;              */
 	FAKE_IoTHubTransport_Destroy,       /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;            */
@@ -426,7 +431,7 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
 	FAKE_IoTHubTransport_GetSendStatus  /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus; */
 };
 
-static const void* provideFAKE(void)
+static const TRANSPORT_PROVIDER* provideFAKE(void)
 {
 	return &FAKE_transport_provider; /*by convention... */
 }

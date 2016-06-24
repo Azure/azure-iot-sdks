@@ -62,7 +62,11 @@ add_library(
 serializer ${serializer_c_files} ${serializer_h_files}
 )
 
-if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+if(WIN32)
+	if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+		add_subdirectory(samples)
+	endif()
+else()
 	add_subdirectory(samples)
 endif()
 

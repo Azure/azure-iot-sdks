@@ -31,6 +31,7 @@ The buildRequest method receives all the information necessary to make an HTTP r
 - `path` - the path to the resource, not including the hostname
 - `httpHeaders` - an object whose properties represent the names and values of HTTP headers to include in the request
 - `host` - the fully-qualified DNS hostname of the IoT hub
+- `x509Options` - *[optional]* the x509 certificate, key and passphrase that are needed to connect to the service using x509 certificate authentication
 - `done` - a callback that will be invoked when a completed response is returned from the server**]**
 
 **SRS_NODE_HTTP_05_002: **`buildRequest` shall return a Node.js https.ClientRequest object, upon which the caller must invoke the end method in order to actually send the request.**]**
@@ -41,6 +42,8 @@ The buildRequest method receives all the information necessary to make an HTTP r
 - `err` - the standard JavaScript `Error` object if status code >= 300, otherwise null
 - `body` - the body of the HTTP response as a string
 - `response` - the Node.js `http.ServerResponse` object returned by the transport**]**
+
+**SRS_NODE_HTTP_16_001: [** If `x509Options` is specified, the certificate, key and passphrase in the structure shall be used to authenticate the connection. **]**
 
 ### toMessage(response, body)
 The `toMessage` function converts an HTTP response to an IoT Hub Message.

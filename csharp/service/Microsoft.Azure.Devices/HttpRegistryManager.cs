@@ -28,8 +28,7 @@ namespace Microsoft.Azure.Devices
         const string DevicesQueryUriFormat = "/devices/query?tags={0}&top={1}&{2}";
         const string DevicesQueryExpressionUriFormat = "/devices/query?" + ClientApiVersionHelper.ApiVersionQueryString;
 
-        static readonly Regex DeviceIdRegex = new Regex(@"^[A-Za-z0-9\-:.+%_#*?!(),=@;$']{1,128}$", RegexOptions.Compiled | RegexOptions.ECMAScript | RegexOptions.IgnoreCase);
-
+        static readonly Regex DeviceIdRegex = new Regex(@"^[A-Za-z0-9\-:.+%_#*?!(),=@;$']{1,128}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(100);
 
         IHttpClientHelper httpClientHelper;

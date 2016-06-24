@@ -6,7 +6,9 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
     using System;
     using System.Runtime.Serialization;
 
+#if !WINDOWS_UWP
     [Serializable]
+#endif
     public sealed class MessageTooLargeException : IotHubException
     {
         public MessageTooLargeException(int maximumMessageSizeInBytes)
@@ -30,11 +32,13 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
         {
         }
 
+#if !WINDOWS_UWP
         MessageTooLargeException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             this.MaximumMessageSizeInBytes = info.GetInt32("MaximumMessageSizeInBytes");
         }
+#endif
 
         internal int MaximumMessageSizeInBytes
         {
@@ -42,11 +46,13 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
             private set;
         }
 
+#if !WINDOWS_UWP
         /// <inheritdoc />
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
             info.AddValue("MaximumMessageSizeInBytes", this.MaximumMessageSizeInBytes);
         }
+#endif
     }
 }

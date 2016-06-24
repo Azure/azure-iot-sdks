@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+
+#ifdef DONT_USE_UPLOADTOBLOB
+#error "trying to compile iothub_client_ll_u2b_unittests.c while DONT_USE_UPLOADTOBLOB is #define'd"
+#else
 #include <stdlib.h>
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
@@ -143,8 +147,6 @@ static HTTPAPIEX_RESULT my_HTTPAPIEX_SAS_ExecuteRequest(HTTPAPIEX_SAS_HANDLE sas
 
 #undef ENABLE_MOCKS
 
-
-
 #include "iothub_client_ll_uploadtoblob.h"
 
 TEST_DEFINE_ENUM_TYPE       (HTTPAPI_RESULT, HTTPAPI_RESULT_VALUES);
@@ -173,7 +175,7 @@ void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL("umock_c reported error");
 }
 
-static const void* provideFAKE(void);
+static const TRANSPORT_PROVIDER* provideFAKE(void);
 #define TEST_DEVICE_ID "theidofTheDevice"
 #define TEST_DEVICE_KEY "theKeyoftheDevice"
 #define TEST_DEVICE_SAS "theSasOfTheDevice"
@@ -186,7 +188,7 @@ static const void* provideFAKE(void);
 #define TEST_STRING_HANDLE_DEVICE_SAS ((STRING_HANDLE)0x2)
 
 #define TEST_API_VERSION "?api-version=2016-02-03"
-#define TEST_IOTHUB_SDK_VERSION "1.0.8"
+#define TEST_IOTHUB_SDK_VERSION "1.0.9"
 
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_SAS =
 {
@@ -208,7 +210,7 @@ static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_DEVICE_KEY =
     TEST_IOTHUBSUFFIX,      /* const char* iotHubSuffix;                    */
 };
 
-static const void* provideFAKE(void)
+static const TRANSPORT_PROVIDER* provideFAKE(void)
 {
     return NULL;
 }
@@ -494,29 +496,6 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_with_NULL_source_and_non_zero_size_fa
     ///cleanup
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
-
-TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_with_64MB_size_fails)
-{
-    ///arrange
-    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS);
-    void* arr = malloc(64 * 1024 * 1024);
-    ASSERT_IS_NOT_NULL(arr);
-
-    umock_c_reset_all_calls();
-
-
-    ///act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, "text.txt", (const unsigned char*)arr, 64*1024*2014);
-
-    ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    ///cleanup
-    free(arr);
-    IoTHubClient_LL_UploadToBlob_Destroy(h);
-}
-
 
 /*Tests_SRS_IOTHUBCLIENT_LL_02_064: [ IoTHubClient_LL_UploadToBlob shall create an HTTPAPIEX_HANDLE to the IoTHub hostname. ]*/
 /*Tests_SRS_IOTHUBCLIENT_LL_02_066: [ IoTHubClient_LL_UploadToBlob shall create an HTTP relative path formed from "/devices/" + deviceId + "/files/" + destinationFileName + "?api-version=API_VERSION". ]*/
@@ -3088,3 +3067,4 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
 }
 
 END_TEST_SUITE(iothubclient_ll_uploadtoblob_unittests)
+#endif /*DONT_USE_UPLOADTOBLOB*/

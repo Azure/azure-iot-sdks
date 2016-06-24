@@ -4,11 +4,16 @@
 namespace Microsoft.Azure.Devices
 {
     using System;
+#if !WINDOWS_UWP
     using System.Configuration;
+#endif
     using System.Net;
     using System.Net.Security;
+#if !WINDOWS_UWP
     using System.Net.WebSockets;
     using System.Security.Cryptography.X509Certificates;
+#endif
+
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -31,7 +36,11 @@ namespace Microsoft.Azure.Devices
         readonly IotHubConnectionString connectionString;
         readonly AccessRights accessRights;
         readonly FaultTolerantAmqpObject<AmqpSession> faultTolerantSession;
+#if WINDOWS_UWP
+        readonly IOThreadTimerSlim refreshTokenTimer;
+#else
         readonly IOThreadTimer refreshTokenTimer;
+#endif
         readonly bool useWebSocketOnly;
 
         public IotHubConnection(IotHubConnectionString connectionString, AccessRights accessRights, bool useWebSocketOnly)
@@ -39,7 +48,11 @@ namespace Microsoft.Azure.Devices
             this.connectionString = connectionString;
             this.accessRights = accessRights;
             this.faultTolerantSession = new FaultTolerantAmqpObject<AmqpSession>(this.CreateSessionAsync, this.CloseConnection);
+#if WINDOWS_UWP
+            this.refreshTokenTimer = new IOThreadTimerSlim(s => ((IotHubConnection)s).OnRefreshToken(), this, false);
+#else
             this.refreshTokenTimer = new IOThreadTimer(s => ((IotHubConnection)s).OnRefreshToken(), this, false);
+#endif
             this.useWebSocketOnly = useWebSocketOnly;
         }
 
@@ -168,12 +181,13 @@ namespace Microsoft.Azure.Devices
 
         static bool InitializeDisableServerCertificateValidation()
         {
+#if !WINDOWS_UWP
             string value = ConfigurationManager.AppSettings[DisableServerCertificateValidationKeyName];
             if (!string.IsNullOrEmpty(value))
             {
                 return bool.Parse(value);
             }
-
+#endif
             return false;
         }
 
@@ -182,7 +196,7 @@ namespace Microsoft.Azure.Devices
             TimeoutHelper timeoutHelper = new TimeoutHelper(timeout);
             this.refreshTokenTimer.Cancel();
 
-            var amqpSettings = this.CreateAmqpSettings();
+            var amqpSettings = CreateAmqpSettings();
             TransportBase transport;
             if (this.useWebSocketOnly)
             {
@@ -246,7 +260,8 @@ namespace Microsoft.Azure.Devices
             amqpSession.Connection.SafeClose();
         }
 
-        async Task<ClientWebSocket> CreateClientWebSocket(Uri websocketUri, TimeSpan timeout)
+#if !WINDOWS_UWP
+        static async Task<ClientWebSocket> CreateClientWebSocketAsync(Uri websocketUri, TimeSpan timeout)
         {
             var websocket = new ClientWebSocket();
 
@@ -272,19 +287,43 @@ namespace Microsoft.Azure.Devices
             return websocket;
         }
 
+        static async Task<IotHubClientWebSocket> CreateLegacyClientWebSocketAsync(Uri webSocketUri, TimeSpan timeout)
+        {
+            var websocket = new IotHubClientWebSocket(WebSocketConstants.SubProtocols.Amqpwsb10);
+            await websocket.ConnectAsync(webSocketUri.Host, webSocketUri.Port, WebSocketConstants.Scheme, timeout);
+            return websocket;
+        }
+#endif
         async Task<TransportBase> CreateClientWebSocketTransport(TimeSpan timeout)
         {
-            TimeoutHelper timeoutHelper = new TimeoutHelper(timeout);
+#if WINDOWS_UWP
+            throw new NotImplementedException("web sockets are not yet supported for UWP");
+#else
+            var timeoutHelper = new TimeoutHelper(timeout);
             Uri websocketUri = new Uri(WebSocketConstants.Scheme + this.ConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
-            var websocket = await this.CreateClientWebSocket(websocketUri, timeoutHelper.RemainingTime());
-            return new ClientWebSocketTransport(
-                websocket,
-                this.connectionString.IotHubName,
-                null,
-                null);
+
+            // Use Legacy WebSocket if it is running on Windows 7 or older. Windows 7/Windows 2008 R2 is version 6.1
+            if (Environment.OSVersion.Version.Major < 6 || (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor <= 1))
+            {
+                var websocket = await CreateLegacyClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
+                return new LegacyClientWebSocketTransport(
+                    websocket,
+                    DefaultOperationTimeout,
+                    null,
+                    null);
+            }
+            else
+            {
+                var websocket = await CreateClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
+                return new ClientWebSocketTransport(
+                    websocket,
+                    null,
+                    null);
+            }
+#endif
         }
 
-        AmqpSettings CreateAmqpSettings()
+        static AmqpSettings CreateAmqpSettings()
         {
             var amqpSettings = new AmqpSettings();
 
@@ -314,8 +353,10 @@ namespace Microsoft.Azure.Devices
             var tlsTransportSettings = new TlsTransportSettings(tcpTransportSettings)
             {
                 TargetHost = this.connectionString.HostName,
+#if !WINDOWS_UWP
                 Certificate = null, // TODO: add client cert support
-                CertificateValidationCallback = this.OnRemoteCertificateValidation
+                CertificateValidationCallback = OnRemoteCertificateValidation
+#endif
             };
 
             return tlsTransportSettings;
@@ -380,7 +421,8 @@ namespace Microsoft.Azure.Devices
             }
         }
 
-        bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+#if !WINDOWS_UWP
+        public static bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
             {
@@ -395,7 +437,7 @@ namespace Microsoft.Azure.Devices
             return false;
 
         }
-
+#endif
         public static ArraySegment<byte> GetNextDeliveryTag(ref int deliveryTag)
         {
             int nextDeliveryTag = Interlocked.Increment(ref deliveryTag);

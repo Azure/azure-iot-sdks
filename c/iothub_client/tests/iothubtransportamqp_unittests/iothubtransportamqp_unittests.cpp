@@ -5450,5 +5450,48 @@ TEST_FUNCTION(AMQP_Register_transport_Register_Unregister_Register_success_retur
     cleanupList(config.waitingToSend);
 }
 
+/*Tests_SRS_IOTHUBTRANSPORTAMQP_02_001: [ If parameter handle is NULL then IoTHubTransportAMQP_GetHostname shall return NULL. ]*/
+TEST_FUNCTION(IoTHubTransportAMQP_GetHostname_with_NULL_handle_fails)
+{
+    ///arrange
+    CIoTHubTransportAMQPMocks mocks;
+    TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
+    ///act
+    STRING_HANDLE hostname = transport_interface->IoTHubTransport_GetHostname(NULL);
+
+    ///assert
+    ASSERT_IS_NULL(hostname);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+}
+
+/*Tests_SRS_IOTHUBTRANSPORTAMQP_02_002: [ Otherwise IoTHubTransportAMQP_GetHostname shall return a STRING_HANDLE for the hostname. ]*/
+TEST_FUNCTION(IoTHubTransportAMQP_GetHostname_succeeds)
+{
+    /// arrange
+    CIoTHubTransportAMQPMocks mocks;
+
+    DLIST_ENTRY wts;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+
+    IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+        TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+    IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    mocks.ResetAllCalls();
+
+    ///act
+    STRING_HANDLE hostname = transport_interface->IoTHubTransport_GetHostname(transport);
+
+    ///assert
+    ASSERT_IS_NOT_NULL(hostname);
+    mocks.AssertActualAndExpectedCalls();
+    ASSERT_ARE_EQUAL(char_ptr, TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX, STRING_c_str(hostname));
+    
+    ///cleanup
+    transport_interface->IoTHubTransport_Destroy(transport);
+}
 END_TEST_SUITE(iothubtransportamqp_unittests)

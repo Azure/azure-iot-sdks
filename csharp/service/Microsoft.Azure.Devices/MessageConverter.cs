@@ -336,7 +336,12 @@ namespace Microsoft.Azure.Devices
                 memoryStream.Write(readBuffer, 0, bytesRead);
             }
 
+#if WINDOWS_UWP
+            // UWP doesn't have GetBuffer.
+            return new ArraySegment<byte>(memoryStream.ToArray(), 0, (int)memoryStream.Length);
+#else
             return new ArraySegment<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+#endif
         }
     }
 }

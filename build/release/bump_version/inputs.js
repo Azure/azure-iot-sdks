@@ -47,7 +47,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "c/iothub_client/tests/iothubclient_ll_uploadtoblob_unittests/iothub_client_ll_uploadtoblob_unittests.c",
+        "filePath": "c/iothub_client/tests/iothubclient_ll_u2b_unittests/iothub_client_ll_u2b_unittests.c",
         "search": "(TEST\\_IOTHUB\\_SDK\\_VERSION)([ ]+)(\".*\")",
         "replaceString": function(versions) {
             return '$1' + '$2' + '"' + versions.c.device + '"';
@@ -308,6 +308,7 @@ module.exports = [
             return '$1' + versions.csharp.device + '$2';
         }
     },
+
     ///////////////////////////////////////////////////
     // C# Service SDK
     ///////////////////////////////////////////////////
@@ -319,6 +320,23 @@ module.exports = [
             return '$1' + versions.csharp.service + '$2';
         }
     },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "csharp/service/Microsoft.Azure.Devices.Uwp/Properties/AssemblyInfo.cs",
+        "search": "(AssemblyInformationalVersion\\(\").*(\"\\)\\])",
+        "replaceString": function(versions) {
+            return '$1' + versions.csharp.service + '$2';
+        }
+    },
+
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "csharp/service/Microsoft.Azure.Devices/Common/Utils.cs",
+        "search": "(UWPAssemblyVersion[ \t]*=[ \t]*\").*(\")",
+        "replaceString": function(versions) {
+            return '$1' + versions.csharp.service + '$2';
+        }
+    },    
 
     ///////////////////////////////////////////////////
     // Java Device SDK files
