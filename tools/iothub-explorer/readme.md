@@ -143,8 +143,8 @@ The device management commands offered by `iothub-explorer` are as follows:
 - `[<connection-string>] {green}reboot{/green} <device-ids> [--async]`
   - Issues a command to one or more devices to reboot.
 
-*NOTE:*
+> NOTE:
 
-- *`<device-ids>` are comma-delimited.*
+> - `<device-ids>` are comma-delimited.
 
-- *Use the `--async` option to display the job ID and return immediately (the job ID can be given to `get-job`).*
+> - Use the `--async` option to display the job ID and return immediately (the job ID can be given to `get-job`).
