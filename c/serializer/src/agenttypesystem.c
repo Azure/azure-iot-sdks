@@ -361,24 +361,16 @@ static void scanOptionalNDigits(const char* source, size_t sourceSize, size_t* p
 /*this function will attempt to read a decimal number having an optional sign(+/-) followed by precisely N digits */
 /*will return 0 if in the string there was a number and that number has been read in the *value parameter*/
 /*will update position parameter to reflect the first character not belonging to the number*/
-static int scanAndReadNDigitsInt(const char* source, size_t sourceSize, size_t* position, int *value, size_t N)
+static int scanAndReadNDigitsInt(const char* source, size_t* position, int *value, size_t N)
 {
     N++;
     *value = 0;
-    while ((*position < sourceSize) &&
+    while ((IS_DIGIT(source[*position])) &&
         (N > 0))
     {
-        if (IS_DIGIT(source[*position]))
-        {
-            *value *= 10;
-            *value += (source[*position] - '0');
-            (*position)++;
-        }
-        else
-        {
-            break;
-        }
-
+        *value *= 10;
+        *value += (source[*position] - '0');
+        (*position)++;
         N--;
     }
 
@@ -2967,74 +2959,131 @@ static int sscanf2d(const char *pos2, int* sec)
     size_t position = 1;
     if (
         (pos2[0] == ':') &&
-        (scanAndReadNDigitsInt(pos2, strlen(pos2), &position, sec, 2) == 0)
+        (scanAndReadNDigitsInt(pos2, &position, sec, 2) == 0)
         )
     {
         result = 1;
     }
     else
     {
-        result = 0;
+        result = EOF;
     }
 
     return result;
     
 }
 
-/*the following function does the same as  (sscanf(pos2, ".%llu", &fractionalSeconds) != 1)*/
-static int sscanfllu(const char*pos2, unsigned long long* fractionalSeconds)
+/*the following function does the same as  sscanf(pos2, "%d", &sec)*/
+/*this function only exists because of optimizing valgrind time, otherwise sscanf would be just as good*/
+static int sscanfd(const char *src, int* dst)
+{
+    char* next;
+    (*dst) = strtol(src, &next, 10);
+    if ((src == next) || ((((*dst) == LONG_MAX) || ((*dst) == LONG_MIN)) && (errno != 0)))
+    {
+        return EOF;
+    }
+    return 1;
+}
+
+/*the following function does the same as  sscanf(src, "%llu", &dst), but, it changes the src pointer.*/
+static int sscanfllu(const char** src, unsigned long long* dst)
+{
+    int result = 1;
+    char* next;
+    (*dst) = strtoull((*src), &next, 10);
+    if (((*src) == (const char*)next) || (((*dst) == ULLONG_MAX) && (errno != 0)))
+    {
+        result = EOF;
+    }
+    (*src) = (const char*)next;
+    return result;
+}
+
+/*the following function does the same as  sscanf(src, ".%llu", &dst)*/
+static int sscanfdotllu(const char*src, unsigned long long* dst)
 {
     int result;
 
-    if (pos2[0] != '.')
+    if ((*src) != '.')
     {
         /*doesn't start with '.' error out*/
-        result = 0;
+        result = EOF;
     }
     else
     {
-        size_t index=1;
-        *fractionalSeconds = 0;
-        bool error = true;
-        while (IS_DIGIT(pos2[index]))
-        {
-            if ((ULLONG_MAX - (pos2[index]-'0'))/10 < *fractionalSeconds)
-            {
-                /*overflow... */
-                error = true;
-                break;
-            }
-            else
-            {
-                *fractionalSeconds = *fractionalSeconds * 10 + (pos2[index] - '0');
-                error = false;
-            }
-            index++;
-        }
+        src++;
+        result = sscanfllu(&src, dst);
+    }
 
-        if (error)
-        {
-            result = 0; /*return 0 fields converted*/
-        }
-        else
-        {
-            result = 1; /*1 field converted*/
-        }
+    return result;
+}
+
+/*the following function does the same as  sscanf(src, "%u", &dst)*/
+static int sscanfu(const char*src, unsigned int* dst)
+{
+    char* next;
+    (*dst) = strtoul(src, &next, 10);
+    int error = errno;
+    if ((src == next) || (((*dst) == ULONG_MAX) && (error != 0)))
+    {
+        return EOF; 
+    }
+    return 1;
+}
+
+/*the following function does the same as  sscanf(src, "%f", &dst)*/
+static int sscanff(const char*src, float* dst)
+{
+    int result = 1;
+    char* next;
+    (*dst) = strtof(src, &next);
+    errno_t error = errno;
+    if ((src == next) || (((*dst) == HUGE_VALF) && (error != 0)))
+    {
+        result = EOF;
     }
     return result;
 }
 
-/*the below function replaces sscanf(pos2, "%03d:%02d\"", &hourOffset, &minOffset)*/
+/*the following function does the same as  sscanf(src, "%lf", &dst)*/
+static int sscanflf(const char*src, long double* dst)
+{
+    int result = 1;
+    char* next;
+    (*dst) = strtold(src, &next);
+    errno_t error = errno;
+    if ((src == next) || (((*dst) == HUGE_VALL) && (error != 0)))
+    {
+        result = EOF;
+    }
+    return result;
+}
+
+
+/*the below function replaces sscanf(src, "%03d:%02d\"", &hourOffset, &minOffset)*/
 /*return 2 if success*/
 
-static int sscanf3d2d(const char* pos2, int* hourOffset, int* minOffset)
+static int sscanf3d2d(const char* src, int* hourOffset, int* minOffset)
 {
     size_t position = 0;
-    int result;
+    int result = EOF;
+    bool isNegative = false;
+
+    if (*src == '+')
+    {
+        position++;
+    }
+    else if (*src == '-')
+    {
+        isNegative = true;
+        position++;
+    }
+
     if (
-        (scanAndReadNDigitsInt(pos2, strlen(pos2), &position, hourOffset, 2) == 0) &&
-        (pos2 += position, pos2[0] == ':') &&
-        (scanAndReadNDigitsInt(pos2, strlen(pos2), &position, minOffset, 2) == 0)
+        (scanAndReadNDigitsInt(src, &position, hourOffset, (3-position)) == 0) &&
+        (src[position] == ':', position++) &&
+        (scanAndReadNDigitsInt(src, &position, minOffset, 2) == 0)
         )
     {
         result = 2;
@@ -3043,6 +3092,9 @@ static int sscanf3d2d(const char* pos2, int* hourOffset, int* minOffset)
     {
         result = 0;
     }
+    if (isNegative)
+        *hourOffset *= -1;
+
     return result;
 }
 
@@ -3116,7 +3168,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
             case EDM_SBYTE_TYPE:
             {
                 int sByteValue;
-                if ((sscanf(source, "%d", &sByteValue) != 1) ||
+                if ((sscanfd(source, &sByteValue) != 1) ||
                     (sByteValue < -128) ||
                     (sByteValue > 127))
                 {
@@ -3138,7 +3190,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
             case EDM_BYTE_TYPE:
             {
                 int byteValue;
-                if ((sscanf(source, "%d", &byteValue) != 1) ||
+                if ((sscanfd(source, &byteValue) != 1) ||
                     (byteValue < 0) ||
                     (byteValue > 255))
                 {
@@ -3160,7 +3212,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
             case EDM_INT16_TYPE:
             {
                 int int16Value;
-                if ((sscanf(source, "%d", &int16Value) != 1) ||
+                if ((sscanfd(source, &int16Value) != 1) ||
                     (int16Value < -32768) ||
                     (int16Value > 32767))
                 {
@@ -3200,7 +3252,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 
                 strLength = strlen(source);
 
-                if ((sscanf(pos, "%" SCNu32, &uint32Value) != 1) ||
+                if ((sscanfu(pos, &uint32Value) != 1) ||
                     (strLength > 11) ||
                     ((uint32Value > 2147483648UL) && isNegative) ||
                     ((uint32Value > 2147483647UL) && (!isNegative)))
@@ -3257,7 +3309,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 
                 strLength = strlen(source);
 
-                if ((sscanf(pos, "%llu", &ullValue) != 1) ||
+                if ((sscanfllu(&pos, &ullValue) != 1) ||
                     (strLength > 20) ||
                     ((ullValue > 9223372036854775808ULL) && isNegative) ||
                     ((ullValue > 9223372036854775807ULL) && (!isNegative)))
@@ -3301,7 +3353,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 
                 if ((strLength < 2) ||
                     (source[0] != '"') ||
-                    (source[strlen(source) - 1] != '"'))
+                    (source[strLength - 1] != '"'))
                 {
                     /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -3313,11 +3365,11 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                     int sign; 
                     scanOptionalMinusSign(source, 2, &pos, &sign);
 
-                    if ((scanAndReadNDigitsInt(source, strLength, &pos, &year, 4) != 0) ||
+                    if ((scanAndReadNDigitsInt(source, &pos, &year, 4) != 0) ||
                         (source[pos++] != '-') ||
-                        (scanAndReadNDigitsInt(source, strLength, &pos, &month, 2) != 0) ||
+                        (scanAndReadNDigitsInt(source, &pos, &month, 2) != 0) ||
                         (source[pos++] != '-') ||
-                        (scanAndReadNDigitsInt(source, strLength, &pos, &day, 2) != 0) ||
+                        (scanAndReadNDigitsInt(source, &pos, &day, 2) != 0) ||
                         (Create_AGENT_DATA_TYPE_from_date(agentData, (int16_t)(sign*year), (uint8_t)month, (uint8_t)day) != AGENT_DATA_TYPES_OK))
                     {
                         /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
@@ -3355,7 +3407,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 
                 if ((strLength < 2) ||
                     (source[0] != '"') ||
-                    (source[strlen(source) - 1] != '"'))
+                    (source[strLength - 1] != '"'))
                 {
                     /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -3367,15 +3419,15 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                     int sign;
                     scanOptionalMinusSign(source, 2, &pos, &sign);
                     
-                    if ((scanAndReadNDigitsInt(source, strLength, &pos, &year, 4) != 0) ||
+                    if ((scanAndReadNDigitsInt(source, &pos, &year, 4) != 0) ||
                         (source[pos++] != '-') ||
-                        (scanAndReadNDigitsInt(source, strLength, &pos, &month, 2) != 0) ||
+                        (scanAndReadNDigitsInt(source, &pos, &month, 2) != 0) ||
                         (source[pos++] != '-') ||
-                        (scanAndReadNDigitsInt(source, strLength, &pos, &day, 2) != 0) ||
+                        (scanAndReadNDigitsInt(source, &pos, &day, 2) != 0) ||
                         (source[pos++] != 'T') ||
-                        (scanAndReadNDigitsInt(source, strLength, &pos, &hour, 2) != 0) ||
+                        (scanAndReadNDigitsInt(source, &pos, &hour, 2) != 0) ||
                         (source[pos++] != ':') ||
-                        (scanAndReadNDigitsInt(source, strLength, &pos, &min, 2) != 0))
+                        (scanAndReadNDigitsInt(source, &pos, &min, 2) != 0))
                     {
                         /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -3409,7 +3461,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                             if ((pos2 != NULL) &&
                                 (*pos2 == '.'))
                             {
-                                if (sscanfllu(pos2, &fractionalSeconds) != 1)
+                                if (sscanfdotllu(pos2, &fractionalSeconds) != 1)
                                 {
                                     pos2 = NULL;
                                 }
@@ -3442,8 +3494,9 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                             {
                                 hourOffset = 0;
                                 minOffset = 0;
+                                size_t pos = 0;
 
-                                if (sscanf(pos2, "%03d:%02d\"", &hourOffset, &minOffset) == 2)
+                                if (sscanf3d2d(pos2, &hourOffset, &minOffset) == 2)
                                 {
                                     agentData->value.edmDateTimeOffset.hasTimeZone = 1;
                                 }
@@ -3527,7 +3580,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 #endif
                     result = AGENT_DATA_TYPES_OK;
                 }
-                else if (sscanf(source, "%lf", &agentData->value.edmDouble.value) != 1)
+                else if (sscanflf(source, &agentData->value.edmDouble.value) != 1)
                 {
                     /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -3568,7 +3621,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 #endif
 result = AGENT_DATA_TYPES_OK;
                 }
-                else if (sscanf(source, "%f", &agentData->value.edmSingle.value) != 1)
+                else if (sscanff(source, &agentData->value.edmSingle.value) != 1)
                 {
                     /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
