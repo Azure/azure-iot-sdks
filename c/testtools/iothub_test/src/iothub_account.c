@@ -14,12 +14,11 @@
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/hmacsha256.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/sastoken.h"
 
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/base64.h"
-#include "azure_c_shared_utility/iot_logging.h"
 #include "azure_c_shared_utility/uniqueid.h"
 
 #ifdef MBED_BUILD_TIMESTAMP

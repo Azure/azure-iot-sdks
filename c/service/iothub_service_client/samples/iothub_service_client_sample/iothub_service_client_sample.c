@@ -12,6 +12,8 @@
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
+#include "azure_c_shared_utility/consolelogger.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #include "connection_string_parser.h"
 #include "iothub_service_client_auth.h"
@@ -69,6 +71,8 @@ void iothub_service_client_sample_run(void)
 
     IOTHUB_REGISTRY_DEVICE_CREATE deviceCreateInfo;
     IOTHUB_REGISTRY_DEVICE_UPDATE deviceUpdateInfo;
+
+    xlogging_set_log_function(consolelogger_log);
 
     (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with the connection string\n");
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);

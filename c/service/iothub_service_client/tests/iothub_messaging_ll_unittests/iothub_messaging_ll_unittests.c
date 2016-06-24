@@ -17,7 +17,7 @@
 #include "azure_c_shared_utility/list.h"
 #include "parson.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/sastoken.h"
@@ -31,7 +31,6 @@
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_plain.h"
 #include "azure_uamqp_c/cbs.h"
-#include "azure_uamqp_c/consolelogger.h"
 #include "azure_uamqp_c/amqp_definitions.h"
 
 #include "iothub_message.h"
@@ -61,7 +60,7 @@ MOCKABLE_FUNCTION(, void, message_destroy, MESSAGE_HANDLE, message);
 MOCKABLE_FUNCTION(, int, message_add_body_amqp_data, MESSAGE_HANDLE, message, BINARY_DATA, binary_data);
 MOCKABLE_FUNCTION(, int, messagesender_open, MESSAGE_SENDER_HANDLE, message_sender);
 MOCKABLE_FUNCTION(, void, messagesender_destroy, MESSAGE_SENDER_HANDLE, message_sender);
-MOCKABLE_FUNCTION(, MESSAGE_SENDER_HANDLE, messagesender_create, LINK_HANDLE, link, ON_MESSAGE_SENDER_STATE_CHANGED, on_message_sender_state_changed, void*, context, LOGGER_LOG, logger_log);
+MOCKABLE_FUNCTION(, MESSAGE_SENDER_HANDLE, messagesender_create, LINK_HANDLE, link, ON_MESSAGE_SENDER_STATE_CHANGED, on_message_sender_state_changed, void*, context);
 MOCKABLE_FUNCTION(, int, link_set_max_message_size, LINK_HANDLE, link, uint64_t, max_message_size);
 MOCKABLE_FUNCTION(, int, link_set_snd_settle_mode, LINK_HANDLE, link, sender_settle_mode, snd_settle_mode);
 MOCKABLE_FUNCTION(, int, link_set_rcv_settle_mode, LINK_HANDLE, link, sender_settle_mode, snd_settle_mode);
@@ -275,7 +274,7 @@ static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, 
 
 static ON_MESSAGE_SENDER_STATE_CHANGED onMessageSenderStateChangedCallback;
 static MESSAGE_SENDER_HANDLE messagesender_create_return = NULL;
-MESSAGE_SENDER_HANDLE my_messagesender_create(LINK_HANDLE link, ON_MESSAGE_SENDER_STATE_CHANGED on_message_sender_state_changed, void* context, LOGGER_LOG logger_log)
+MESSAGE_SENDER_HANDLE my_messagesender_create(LINK_HANDLE link, ON_MESSAGE_SENDER_STATE_CHANGED on_message_sender_state_changed, void* context)
 {
     onMessageSenderStateChangedCallback = on_message_sender_state_changed;
     messagesender_create_return = (MESSAGE_SENDER_HANDLE)malloc(sizeof(MESSAGE_SENDER_HANDLE));
@@ -1023,17 +1022,15 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
 
-        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .IgnoreArgument(3);
+            .IgnoreArgument(2);
 
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
 
-        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .IgnoreArgument(3);
+            .IgnoreArgument(2);
 
         STRICT_EXPECTED_CALL(connection_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -1053,7 +1050,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagesender_open(IGNORED_NUM_ARG))
             .IgnoreAllArguments();
@@ -1149,17 +1146,15 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
 
-        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .IgnoreArgument(3);
+            .IgnoreArgument(2);
 
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
 
-        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
-            .IgnoreArgument(2)
-            .IgnoreArgument(3);
+            .IgnoreArgument(2);
 
         STRICT_EXPECTED_CALL(connection_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -1179,7 +1174,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagesender_open(IGNORED_NUM_ARG))
             .IgnoreAllArguments();
