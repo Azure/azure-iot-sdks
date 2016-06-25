@@ -73,10 +73,8 @@ void feedbackReceivedCallback(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH* feed
                     (void)printf("    enqueuedTimeUtc : %s\r\n", feedback->enqueuedTimeUtc);
 
                     feedbackRecord = list_get_next_item(feedbackRecord);
-                    free(feedback);
                 }
             }
-            list_destroy(feedbackBatch->feedbackRecordList);
         }
     }
 }

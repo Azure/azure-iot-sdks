@@ -243,5 +243,6 @@ void IoTHubServiceClientAuth_Destroy(IOTHUB_SERVICE_CLIENT_AUTH_HANDLE serviceCl
         free(authInfo->iothubSuffix);
         free(authInfo->sharedAccessKey);
         free(authInfo->keyName);
+        free(authInfo);
     }
 }
