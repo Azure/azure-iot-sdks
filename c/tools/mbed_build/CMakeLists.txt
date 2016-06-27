@@ -104,33 +104,64 @@ function(cloneMBEDRepository)
     endif()
 endfunction(cloneMBEDRepository)
 
-
 function(updateMBEDSourceFiles)
     set(source_file_destination ${local_repo_path})
     set(exported_file_destination ${local_repo_path}/${mbed_project_base})
-
     #
-    # go through and delete every non lib file in the local repo path - Don't delete the exported file directory though!!!
+    # go through and delete every non .lib .hg .bld file in the directory. Don't delete the exported file directory though!!!
     #
     file(GLOB existingFiles ${local_repo_path}/*)
     foreach (file_item ${existingFiles})
-        STRING(REGEX MATCH *\.lib$ string_with_lib ${file_item})
-        if (NOT ${string_with_lib} STREQUAL "")
-            if (NOT ${file_item} STREQUAL ${mbed_project_base})
-                message(STATUS "would delete file: " ${local_repo_path}/${file_item})
-                # really want to execute file(REMOVE ${local_repo_path}/${file_item})
+        STRING(FIND ${file_item} ".lib" string_with_lib)
+        STRING(FIND ${file_item} ".bld" string_with_bld)
+        STRING(FIND ${file_item} ".hg" string_with_hg)
+        #
+        # We try to see if the we have the subdirectory of the exported files.  We don't want to delete that directory
+        # basically we are detecting if the subdirectory name is the very last thing in the file name.
+        #
+        STRING(FIND ${file_item} ${mbed_project_base} string_with_base REVERSE)
+        if (NOT (${string_with_base} EQUAL -1))
+            STRING(LENGTH ${file_item} file_item_length)
+            STRING(LENGTH ${mbed_project_base} mbed_project_base_length)
+            math(EXPR offset_of_end_of_base "${string_with_base} + ${mbed_project_base_length}")
+            if (NOT (${offset_of_end_of_base} EQUAL ${file_item_length}))
+                set(string_with_base -1)
             endif()
+        endif()
+        if ((${string_with_lib} EQUAL -1) AND
+            (${string_with_hg} EQUAL -1) AND
+            (${string_with_bld} EQUAL -1) AND
+            (${string_with_base} EQUAL -1))
+            message(STATUS "would delete file: " ${file_item})
+            # really want to execute file(REMOVE ${file_item})
         endif()
     endforeach()
     #
-    # go through and delete every non lib file in the exported file directory
+    # go through and delete every non .lib .hg .bld file in the exported file directory
     #
     file(GLOB existingFiles ${local_repo_path}/${mbed_project_base}/*)
     foreach (file_item ${existingFiles})
-        STRING(REGEX MATCH *\.lib$ string_with_lib ${file_item})
-        if (NOT ${string_with_lib} STREQUAL "")
-            message(STATUS "would delete file: " ${local_repo_path}/${mbed_project_base}/${file_item})
-            # really want to execute file(REMOVE ${local_repo_path}/${mbed_project_base}/${file_item})
+        STRING(FIND ${file_item} ".lib" string_with_lib)
+        STRING(FIND ${file_item} ".bld" string_with_bld)
+        STRING(FIND ${file_item} ".hg" string_with_hg)
+        STRING(FIND ${file_item} ${mbed_project_base} string_with_base REVERSE)
+        #
+        # We try to see if the we have the subdirectory of the exported files.  We don't want to delete that directory
+        # basically we are detecting if the subdirectory name is the very last thing in the file name.
+        #
+        if (NOT (${string_with_base} EQUAL -1))
+            STRING(LENGTH ${file_item} file_item_length)
+            STRING(LENGTH ${mbed_project_base} mbed_project_base_length)
+            math(EXPR offset_of_end_of_base "${string_with_base} + ${mbed_project_base_length}")
+            if (NOT (${offset_of_end_of_base} EQUAL ${file_item_length}))
+                set(string_with_base -1)
+            endif()
+        endif()
+        if ((${string_with_lib} EQUAL -1) AND
+            (${string_with_hg} EQUAL -1) AND
+            (${string_with_bld} EQUAL -1))
+            message(STATUS "would delete file: " ${file_item})
+            # really want to execute file(REMOVE ${file_item})
         endif()
     endforeach()
     message(STATUS "Copying target project files.")
