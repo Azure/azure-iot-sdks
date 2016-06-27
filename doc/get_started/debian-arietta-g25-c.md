@@ -228,11 +228,11 @@ In this section you will run the Azure IoT client SDK samples of communication b
 
     **If using AMQP protocol:** Run sample *iothub_client_sample_amqp*
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
+        azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
 
     **If using HTTP protocol:** Run sample *iothub_client_sample_http*
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
+        azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
 
 4.  Verify that the confirmation messages show an OK. If not, then you may have incorrectly copied the device hub connection information.
 

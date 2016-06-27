@@ -76,7 +76,7 @@ You should have the following items ready before beginning the process:
 
 -   Run the sample by issuing following command:
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
+        azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 

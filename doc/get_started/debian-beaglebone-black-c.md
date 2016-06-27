@@ -98,7 +98,7 @@ You should have the following items ready before beginning the process:
 
 -   Run the sample by issuing following command:
 
-        ~/cmake/serializer/samples/simplesample_amqp/simplesample_amqp
+        azure-iot-sdks/c/cmake/iotsdk_linux/serializer/samples/simplesample_amqp/simplesample_amqp
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 
@@ -112,7 +112,7 @@ You should have the following items ready before beginning the process:
 
 -   If you just want to build the serializer samples, run the following commands:
 
-        cd ~/cmake/serializer/samples
+        cd azure-iot-sdks/c/cmake/iotsdk_linux/serializer/samples	
         make -f Makefile all
 
 
