@@ -13,6 +13,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
     using DotNetty.Codecs.Mqtt.Packets;
     using DotNetty.Transport.Channels;
     using Microsoft.Azure.Devices.Client.Common;
+    using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
 
     static class Util
@@ -210,7 +211,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                 long streamLength = payloadStream.Length;
                 if (streamLength > MaxPayloadSize)
                 {
-                    throw new InvalidOperationException($"Message size ({streamLength} bytes) is too big to process. Maximum allowed payload size is {MaxPayloadSize}");
+                    throw new MessageTooLargeException($"Message size ({streamLength} bytes) is too big to process. Maximum allowed payload size is {MaxPayloadSize}");
                 }
 
                 int length = (int)streamLength;

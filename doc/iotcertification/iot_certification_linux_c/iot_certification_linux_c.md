@@ -206,11 +206,11 @@ This section walks you through building, deploying and validating the IoT Client
 
 -   Build the SDK using following command. If you are facing any issues during build, follow troubleshooting [Step 5](#Step-5-Troubleshooting).
 
-        sudo ./azure-iot-sdks/c/build_all/linux/build.sh | tee LogFile.txt
+        sudo ./azure-iot-sdks/c/build_all/linux/build.sh --run-e2e-tests | tee LogFile.txt
 
     ***Note:*** *LogFile.txt in above command should be replaced with a file name where build output will be written.*
     
-    *build.sh creates a folder called "cmake" in your home folder. Inside "cmake" are all the results of the compilation of the complete software.*
+    *build.sh creates a folder called "cmake" under "~/azure-iot-sdks/c/". Inside "cmake" are all the results of the compilation of the complete software.*
 
 
 <a name="Step-3-3-Run"></a>

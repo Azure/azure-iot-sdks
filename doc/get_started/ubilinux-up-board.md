@@ -95,7 +95,7 @@ you obtained in the [step](#DeviceConnectionString) above.
 -   Run the **iothub_client_sample_http** sample:
 
     ```
-	sudo ~/cmake/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
+    sudo azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
     ```
 
 This sample application sends simulated sensor data to your IoT Hub.

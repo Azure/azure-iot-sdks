@@ -97,7 +97,7 @@ You should have the following items ready before beginning the process:
 
     **For AMQP protocol:** Run sample *iothub\_client\_sample\_amqp*
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
+        azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 
