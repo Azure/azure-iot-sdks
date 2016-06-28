@@ -36,6 +36,24 @@ namespace TraceabilityTool
         static extern bool FreeConsole();
 
 
+        private static bool enableConsole()
+        {
+            IntPtr ptr = GetForegroundWindow();
+            int cmdProcessID;
+            bool consoleEnabled = false;
+
+            GetWindowThreadProcessId(ptr, out cmdProcessID);
+            Process process = Process.GetProcessById(cmdProcessID);
+            if (process.ProcessName.ToLower() == "cmd")
+            {
+                // The uppermost window is a cmd process.  The console is already running.
+                AttachConsole(process.Id);
+                consoleEnabled = true;
+            }
+
+            return consoleEnabled;
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -48,89 +66,93 @@ namespace TraceabilityTool
             bool exclusionDirsValid = false;
             bool buildCheck = false;
             bool optionGUI = false;
+            // Command line interface can be enabled as a command line option
+            bool consoleEnabled = false;
 
-            for (int i = 0; i < args.Length; i++)
+            if (args.Length > 0)
             {
-                // Find the input directory paramter, which should follow the "-i" parameter
-                if(args[i].Equals("-i", StringComparison.OrdinalIgnoreCase) && (i < args.Length - 1))
+                for (int i = 0; i < args.Length; i++)
                 {
-                    inputDirValid = Directory.Exists(args[i+1]);
-                    if (inputDirValid)
-                        inputDir = args[i + 1];
-                }
-
-                // Find the output directory parameter, which should follow the "-o" parameter
-                if (args[i].Equals("-o", StringComparison.OrdinalIgnoreCase) && (i < args.Length - 1))
-                {
-                    outputDirValid = Directory.Exists(args[i + 1]);
-                    if (outputDirValid)
+                    // Find the input directory paramter, which should follow the "-i" parameter
+                    if (args[i].Equals("-i", StringComparison.OrdinalIgnoreCase) && (i < args.Length - 1))
                     {
-                        outputDir = args[i + 1];
+                        inputDirValid = Directory.Exists(args[i + 1]);
+                        if (inputDirValid)
+                            inputDir = args[i + 1];
+                    }
+
+                    // Find the output directory parameter, which should follow the "-o" parameter
+                    if (args[i].Equals("-o", StringComparison.OrdinalIgnoreCase) && (i < args.Length - 1))
+                    {
+                        outputDirValid = Directory.Exists(args[i + 1]);
+                        if (outputDirValid)
+                        {
+                            outputDir = args[i + 1];
+                        }
+                    }
+
+                    // The "GUI" option enables GUI mode of operation as opposed to command-line mode.
+                    if (args[i].Equals("-GUI", StringComparison.OrdinalIgnoreCase))
+                        optionGUI = true;
+
+                    // The "CSV" option forces reports to be generated in the comma-separated values (CSV) format in addition to plain text reports.
+                    if (args[i].Equals("-CSV", StringComparison.OrdinalIgnoreCase))
+                        MainForm.outputCSV = true;
+
+                    // The "BUILDCHECK" option forces reports to be generated in the comma-separated values (CSV) format in addition to plain text reports.
+                    if (args[i].Equals("-BUILDCHECK", StringComparison.OrdinalIgnoreCase))
+                    {
+                        MainForm.buildCheck = true;
+                        buildCheck = true;
+                    }
+
+                    if (args[i].Equals("-e", StringComparison.OrdinalIgnoreCase) && (i < args.Length - 1))
+                    {
+                        string[] dirs = args[i + 1].Split(';');
+                        exclusionDirsValid = true;
+                        foreach (string d in dirs)
+                        {
+                            exclusionDirsValid &= Directory.Exists(d);
+                        }
+                        if (exclusionDirsValid)
+                        {
+                            exclusionDirs = dirs;
+                        }
                     }
                 }
 
-                // The "GUI" option enables GUI mode of operation as opposed to command-line mode.
-                if (args[i].Equals("-GUI", StringComparison.OrdinalIgnoreCase))
-                    optionGUI = true;
-
-                // The "CSV" option forces reports to be generated in the comma-separated values (CSV) format in addition to plain text reports.
-                if (args[i].Equals("-CSV", StringComparison.OrdinalIgnoreCase))
-                    MainForm.outputCSV = true;
-
-                // The "BUILDCHECK" option forces reports to be generated in the comma-separated values (CSV) format in addition to plain text reports.
-                if (args[i].Equals("-BUILDCHECK", StringComparison.OrdinalIgnoreCase))
+                // parse out incompatible options
+                if ((buildCheck && (optionGUI || MainForm.outputCSV || outputDirValid)) ||
+                     (!buildCheck && (!outputDirValid && !optionGUI)))
                 {
-                    MainForm.buildCheck = true;
-                    buildCheck = true;
+                    Usage();
+                    exitCode = 1;
                 }
 
-                if (args[i].Equals("-e", StringComparison.OrdinalIgnoreCase) && (i < args.Length - 1))
+                if (!optionGUI && !inputDirValid)
                 {
-                    string[] dirs = args[i + 1].Split(';');
-                    exclusionDirsValid = true;
-                    foreach (string d in dirs)
-                    {
-                        exclusionDirsValid &= Directory.Exists(d);
-                    }
-                    if (exclusionDirsValid)
-                    {
-                        exclusionDirs = dirs;
-                    }
+                    Usage();
+                    exitCode = 1;
                 }
             }
-
-            // parse out incompatible options
-            if ( (buildCheck && (optionGUI || MainForm.outputCSV || outputDirValid)) ||
-                 (!buildCheck && (!outputDirValid && !optionGUI)))
+            else
             {
+                //Default to enable console if Usage is wrong.
+                consoleEnabled = enableConsole();
                 Usage();
                 exitCode = 1;
             }
+            
 
-            if (!optionGUI && !inputDirValid)
-            {
-                Usage();
-                exitCode = 1;
-            }
+
 
             if (exitCode == 0)
             {
-                // Command line interface can be enabled as a command line option
-                bool consoleEnabled = false;
+
 
                 if (!optionGUI)
                 {
-                    // Locate the console (cmd process) from which the program was started if it was invoked from command line.
-                    IntPtr ptr = GetForegroundWindow();
-                    int cmdProcessID;
-                    GetWindowThreadProcessId(ptr, out cmdProcessID);
-                    Process process = Process.GetProcessById(cmdProcessID);
-                    if (process.ProcessName == "cmd")
-                    {
-                        // The uppermost window is a cmd process.  The console is already running.
-                        AttachConsole(process.Id);
-                        consoleEnabled = true;
-                    }
+                    consoleEnabled = enableConsole();
                 }
 
                 if (optionGUI)
@@ -151,15 +173,17 @@ namespace TraceabilityTool
                     }
                 }
 
-                if (consoleEnabled)
-                    FreeConsole();
             }
 
+
+            if (consoleEnabled)
+                FreeConsole();
 
             System.Environment.Exit(exitCode);
         }
         public static void Usage()
         {
+            Console.WriteLine("");
             Console.WriteLine("Command line parameters are invalid.");
             Console.WriteLine("Valid parameters:");
             Console.WriteLine("-i <path> to specify the input/root directory path to search for requirements documents and source code in.");
@@ -170,8 +194,6 @@ namespace TraceabilityTool
             Console.WriteLine("-buildcheck to generate reports to the console for build checking.");
             Console.WriteLine("-buildcheck is incompatible with -o, -gui and -csv");
             Console.WriteLine("When not running in buildcheck mode, input and output directories are required.");
-
-
         }
     }
 
