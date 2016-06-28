@@ -135,6 +135,14 @@ static const IOTHUB_CLIENT_DEVICE_CONFIG TEST_DEVICE_CONFIG_null_handle =
 	TEST_DEVICE_KEY
 };
 
+static const IOTHUB_CLIENT_DEVICE_CONFIG TEST_DEVICE_CONFIG_NULL_device_key_NULL_sas_token =
+{
+    provideFAKE,
+    FAKE_TRANSPORT_HANDLE,
+    NULL,
+    NULL
+};
+
 static size_t currentmalloc_call;
 static size_t whenShallmalloc_fail;
 static IOTHUB_CLIENT_STATUS currentIotHubClientStatus;
@@ -2325,6 +2333,16 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_null_transportHandle_fails)
 	auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG_null_handle);
 
 	ASSERT_IS_NULL(result);
+}
+
+/*Codes_SRS_IOTHUBCLIENT_LL_02_098: [ IoTHubClient_LL_CreateWithTransport shall fail and return NULL if both config->deviceKey AND config->deviceSasToken are NULL. ]*/
+TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_with_NULL_deviceKey_AND_NULL_sas_token_fails)
+{
+    CIoTHubClientLLMocks mocks;
+
+    auto result = IoTHubClient_LL_CreateWithTransport(&TEST_DEVICE_CONFIG_NULL_device_key_NULL_sas_token);
+
+    ASSERT_IS_NULL(result);
 }
 
 /*Tests_SRS_IOTHUBCLIENT_LL_17_002: [IoTHubClient_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_LL_HANDLE.] */

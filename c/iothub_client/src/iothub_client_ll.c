@@ -408,7 +408,9 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
     if (
         (config == NULL) ||
         (config->protocol == NULL) ||
-        (config->transportHandle == NULL)
+        (config->transportHandle == NULL) ||
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_098: [ IoTHubClient_LL_CreateWithTransport shall fail and return NULL if both config->deviceKey AND config->deviceSasToken are NULL. ]*/
+        ((config->deviceKey == NULL) && (config->deviceSasToken == NULL))
         )
     {
         result = NULL;
