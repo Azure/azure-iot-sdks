@@ -176,6 +176,9 @@ namespace TraceabilityTool
             sourceCodeFilterList.Add("*.c");
             sourceCodeFilterList.Add("*.cpp");
             sourceCodeFilterList.Add("*.h");
+            sourceCodeFilterList.Add("*.cs");
+            sourceCodeFilterList.Add("*.java");
+
             FileFinder.SetFileFilters(sourceCodeFilterList);
             FileFinder.GetFileList(rootFolderPath, exclusionDirs, ref sourceCodeFiles);
 

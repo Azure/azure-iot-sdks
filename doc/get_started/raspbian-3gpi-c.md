@@ -112,7 +112,7 @@ Then cd to the directory:
 
 - Run the **simplesample_http** sample by issuing the following command:
 
-		~/cmake/serializer/samples/simplesample_http/simplesample_http
+        azure-iot-sdks/c/cmake/iotsdk_linux/serializer/samples/simplesample_http/simplesample_http
 
 - Verify that the **Confirmation** messages show an **OK**. If not, then you may have incorrectly pasted the device hub connection information.
 

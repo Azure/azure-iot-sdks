@@ -47,7 +47,7 @@ You should have the following items ready before beginning the process:
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
--	Using the µUSB as power supply for the CloudPlug
+-	Using the ÂµUSB as power supply for the CloudPlug
 -	Plug in the JR45-network connect to get access to the CloudPlug device using the defined IP-Address
 - 	Modify the default IP-Address 192.168.1.41 using the Web-Configuration of the CloudPlug
 
@@ -100,3 +100,7 @@ You should have the following items ready before beginning the process:
 # Tips
   Use always the ECLIPSE cross compiler settings for the CloudPlug from the customised embedded LINUX distribution built with YOCTO.
   More information regarding the CloudPlug can be found on www.sotec.eu
+
+
+[lnk-setup-iot-hub]: ../../setup_iothub.md
+[lnk-manage-iot-hub]: ../../manage_iot_hub.md
