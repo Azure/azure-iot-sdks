@@ -112,3 +112,39 @@ body:
     deviceId:           myFirstDevice
     enqueuedTimeUtc:    2016-01-26T15:51:03.4197888Z
 ```
+<a name="devicemanagement"/>
+## Working with Device Management
+
+The Azure IoT Hub device management client library enables you to manage your IoT devices with Azure IoT Hub. “Manage” includes actions such as rebooting, factory resetting, and updating firmware. Today, we provide a platform-independent C library, but we will add support for other languages soon.
+
+For greater detail, please reference the following blog:
+
+[Introducing the Azure IoT Hub device management (DM) client library](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-device-management-library/)
+
+###Commands:
+The device management commands offered by `iothub-explorer` are as follows:
+
+- `iothub-explorer [<connection-string>] get-job <job-id>`
+  - Displays information about the given job.
+
+- `[<connection-string>] read <device-ids> <device-properties> [--async]`
+  - Reads and displays properties, given as a comma-delimted list of names, from one or more devices (aka "deep read").
+
+- `[<connection-string>] write <device-ids> <device-properties> [--async]`
+  - Writes properties, given as a JSON object, to one or more devices (aka "deep write").
+
+- `[<connection-string>] firmware-update <device-ids> <firmware-uri> [--async] [--timeout=<num-minutes>]`
+  - Issues a command to one or more devices to update their firmware to the specified image.
+  - The job will fail if it does not complete within the given timeout period; default timeout is one hour.
+
+- `[<connection-string>] factory-reset <device-ids> [--async]`
+  - Issues a command to one or more devices to reset their firmware to the factory default image.
+
+- `[<connection-string>] {green}reboot{/green} <device-ids> [--async]`
+  - Issues a command to one or more devices to reboot.
+
+> NOTE:
+
+> - `<device-ids>` are comma-delimited.
+
+> - Use the `--async` option to display the job ID and return immediately (the job ID can be given to `get-job`).
