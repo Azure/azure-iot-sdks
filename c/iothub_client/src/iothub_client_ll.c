@@ -208,7 +208,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                             {
                                 if (strcmp(STRING_c_str(valueString), X509_TOKEN_ONLY_ACCEPTABLE_VALUE) != 0)
                                 {
-                                    LogError("x509 option has wrong value, the only acceptable one is \"false\"");
+                                    LogError("x509 option has wrong value, the only acceptable one is \"true\"");
                                 }
                                 else
                                 {

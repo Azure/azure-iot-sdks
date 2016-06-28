@@ -75,7 +75,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE io
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size);
 ```
 
-###IoTHubClient_LL_CreateFromConnectionString
+###IoTHubClient_LL_CreateFromConnectionString 
 ```c
 extern IOTHUB_CLIENT_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 ```
@@ -86,8 +86,8 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_LL_CreateFromConnectionString(const cha
 **SRS_IOTHUBCLIENT_LL_12_012: [**If the allocation failed IoTHubClient_LL_CreateFromConnectionString  returns NULL.**]**  
 **SRS_IOTHUBCLIENT_LL_12_005: [**IoTHubClient_LL_CreateFromConnectionString shall try to parse the connectionString input parameter for the following structure: "Key1=value1;key2=value2;key3=value3..."**]** 
 **SRS_IOTHUBCLIENT_LL_12_013: [**If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL**]**  
-**SRS_IOTHUBCLIENT_LL_12_006: [**IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey or SharedAccessSignature.**]**
-**SRS_IOTHUBCLIENT_LL_12_014: [**If either of key is missing then IoTHubClient_LL_CreateFromConnectionString returns NULL **]**
+**SRS_IOTHUBCLIENT_LL_12_006: [**IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey, SharedAccessSignature or x509**]**
+**SRS_IOTHUBCLIENT_LL_12_014: [**If either of key is missing or x509 is not set to `"true"` then IoTHubClient_LL_CreateFromConnectionString returns NULL **]**
 **SRS_IOTHUBCLIENT_LL_02_092: [** `IoTHubClient_LL_CreateFromConnectionString` shall create a `IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE` from `IOTHUB_CLIENT_CONFIG`. **]**
 **SRS_IOTHUBCLIENT_LL_02_093: [** If creating the `IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE` fails then `IoTHubClient_LL_CreateFromConnectionString` shall fail and return NULL. **]**  
 **SRS_IOTHUBCLIENT_LL_12_009: [**IoTHubClient_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator**]** 
