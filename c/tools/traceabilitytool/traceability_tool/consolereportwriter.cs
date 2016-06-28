@@ -4,6 +4,7 @@
 using System;
 using System.Text;   // Used for StringBuilder class.
 using System.Linq;
+using System.Collections.Generic;
 
 namespace TraceabilityTool
 {
@@ -14,6 +15,7 @@ namespace TraceabilityTool
             int errorCount = 0;
             StringBuilder sb = new StringBuilder();
             int count = 0;
+            Dictionary<string, string> requirementsToFix = new Dictionary<string, string>();
 
             // Print table header.
             sb.AppendLine("Requirement ID,Reason,Found in,Line Number");
@@ -72,6 +74,16 @@ namespace TraceabilityTool
                     // this number of missing code coverage is not a problem.
                     newRequirementCount += codeMissingCount;
                 }
+                else
+                {
+                    foreach (KeyValuePair<string, string> entry in ReportGenerator.missingCodeCoverage.Where(t => t.Value == filePath))
+                    {
+                        if (!requirementsToFix.ContainsKey(entry.Key))
+                        {
+                            requirementsToFix.Add(entry.Key, entry.Value);
+                        }
+                    }
+                }
             }
 
             foreach (string filePath in ReportGenerator.missingTestCoverage.Values.Distinct())
@@ -83,6 +95,16 @@ namespace TraceabilityTool
                 {
                     // this number of missing test coverage is not a problem.
                     newRequirementCount += testMissingCount;
+                }
+                else
+                {
+                    foreach (KeyValuePair<string, string> entry in ReportGenerator.missingTestCoverage.Where(t => t.Value == filePath))
+                    {
+                        if (!requirementsToFix.ContainsKey(entry.Key))
+                        {
+                            requirementsToFix.Add(entry.Key, entry.Value);
+                        }
+                    }
                 }
             }
             errorCount -= newRequirementCount;
@@ -99,6 +121,12 @@ namespace TraceabilityTool
             sb.AppendLine("Total requirements missing both implementation and tests," + count.ToString());
             sb.AppendLine("New requirements excluded," + newRequirementCount.ToString());
             sb.AppendLine("Total failing (minus new requirement exclusion)," + errorCount.ToString());
+            sb.AppendLine("");
+
+            foreach (KeyValuePair<string, string> entry in requirementsToFix)
+            {
+                sb.AppendLine("Need to fix requirement: " + entry.Key);
+            }
 
             // Output data to console.
             Console.Write(sb.ToString());
