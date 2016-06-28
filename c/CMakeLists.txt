@@ -198,12 +198,13 @@ else()
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_pthreads.c)
 endif()
 
+add_subdirectory(service)
+
 if(${run_e2e_tests} OR ${run_longhaul_tests})
     add_subdirectory(testtools)
 endif()
 
 add_subdirectory(iothub_client)
-add_subdirectory(service)
 add_subdirectory(serializer)
 if(NOT "${build_python}" STREQUAL "OFF")
     add_subdirectory(../python/device/iothub_client_python python)

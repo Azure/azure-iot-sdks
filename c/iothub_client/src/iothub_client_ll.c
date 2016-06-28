@@ -9,7 +9,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/tickcounter.h"
 
 #include "iothub_client_ll.h"
@@ -21,10 +21,11 @@
 #include "iothub_client_ll_uploadtoblob.h"
 #endif
 
-#define LOG_ERROR LogError("result = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
+#define LOG_ERROR_RESULT LogError("result = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
 #define INDEFINITE_TIME ((time_t)(-1))
 
 DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
 typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
 {
@@ -614,7 +615,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
         )
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LOG_ERROR;
+        LOG_ERROR_RESULT;
     }
     else
     {
@@ -622,7 +623,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
         if (newEntry == NULL)
         {
             result = IOTHUB_CLIENT_ERROR;
-            LOG_ERROR;
+            LOG_ERROR_RESULT;
         }
         else
         {
@@ -631,7 +632,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
             if (attach_ms_timesOutAfter(handleData, newEntry) != 0)
             {
                 result = IOTHUB_CLIENT_ERROR;
-                LOG_ERROR;
+                LOG_ERROR_RESULT;
                 free(newEntry);
             }
             else
@@ -642,7 +643,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotH
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_014: [If cloning and/or adding the information fails for any reason, IoTHubClient_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
                     result = IOTHUB_CLIENT_ERROR;
                     free(newEntry);
-                    LOG_ERROR;
+                    LOG_ERROR_RESULT;
                 }
                 else
                 {
@@ -667,7 +668,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE 
     if (iotHubClientHandle == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LOG_ERROR;
+        LOG_ERROR_RESULT;
     }
     else
     {
@@ -757,7 +758,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetSendStatus(IOTHUB_CLIENT_LL_HANDLE iotHu
     if (iotHubClientHandle == NULL || iotHubClientStatus == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LOG_ERROR;
+        LOG_ERROR_RESULT;
     }
     else
     {
@@ -771,7 +772,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetSendStatus(IOTHUB_CLIENT_LL_HANDLE iotHu
     return result;
 }
 
-void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY completed, IOTHUB_BATCHSTATE_RESULT result)
+void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY completed, IOTHUB_CLIENT_CONFIRMATION_RESULT result)
 {
     /*Codes_SRS_IOTHUBCLIENT_LL_02_022: [If parameter completed is NULL, or parameter handle is NULL then IoTHubClient_LL_SendBatch shall return.]*/
     if (
@@ -784,9 +785,8 @@ void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY c
     }
     else
     {
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_027: [If parameter result is IOTHUB_BACTHSTATE_FAILED then IoTHubClient_LL_SendComplete shall call all the non-NULL callbacks with the result parameter set to IOTHUB_CLIENT_CONFIRMATION_ERROR and the context set to the context passed originally in the SendEventAsync call.] */
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_025: [If parameter result is IOTHUB_BATCHSTATE_SUCCESS then IoTHubClient_LL_SendComplete shall call all the non-NULL callbacks with the result parameter set to IOTHUB_CLIENT_CONFIRMATION_OK and the context set to the context passed originally in the SendEventAsync call.]*/
-        IOTHUB_CLIENT_CONFIRMATION_RESULT resultToBeCalled = (result == IOTHUB_BATCHSTATE_SUCCESS) ? IOTHUB_CLIENT_CONFIRMATION_OK : IOTHUB_CLIENT_CONFIRMATION_ERROR;
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_027: [If parameter result is IOTHUB_CLIENT_CONFIRMATION_ERROR then IoTHubClient_LL_SendComplete shall call all the non-NULL callbacks with the result parameter set to IOTHUB_CLIENT_CONFIRMATION_ERROR and the context set to the context passed originally in the SendEventAsync call.] */
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_025: [If parameter result is IOTHUB_CLIENT_CONFIRMATION_OK then IoTHubClient_LL_SendComplete shall call all the non-NULL callbacks with the result parameter set to IOTHUB_CLIENT_CONFIRMATION_OK and the context set to the context passed originally in the SendEventAsync call.]*/
         PDLIST_ENTRY oldest;
         while ((oldest = DList_RemoveHeadList(completed)) != completed)
         {
@@ -794,7 +794,7 @@ void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY c
             /*Codes_SRS_IOTHUBCLIENT_LL_02_026: [If any callback is NULL then there shall not be a callback call.]*/
             if (messageList->callback != NULL)
             {
-                messageList->callback(resultToBeCalled, messageList->context);
+                messageList->callback(result, messageList->context);
             }
             IoTHubMessage_Destroy(messageList->messageHandle);
             free(messageList);
@@ -843,7 +843,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetLastMessageReceiveTime(IOTHUB_CLIENT_LL_
     if (handleData == NULL || lastMessageReceiveTime == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LOG_ERROR;
+        LOG_ERROR_RESULT;
     }
     else
     {
@@ -851,7 +851,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetLastMessageReceiveTime(IOTHUB_CLIENT_LL_
         if (handleData->lastMessageReceiveTime == INDEFINITE_TIME)
         {
             result = IOTHUB_CLIENT_INDEFINITE_TIME;
-            LOG_ERROR;
+            LOG_ERROR_RESULT;
         }
         else
         {
