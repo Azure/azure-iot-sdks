@@ -1817,7 +1817,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_mqtt_client_connect_fail)
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument(2);
-    EXPECTED_CALL(mocks, xio_destroy(IGNORED_PTR_ARG));
 
     // act
     IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2554,6 +2553,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_connectFailCount_exceed_succeed)
     auto handle = IoTHubTransportMqtt_Create(&config);
     mocks.ResetAllCalls();
 
+    STRICT_EXPECTED_CALL(mocks, platform_get_default_tlsio());
+    EXPECTED_CALL(mocks, xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
     //STRICT_EXPECTED_CALL(mocks, mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE)).ExpectedAtLeastTimes(iterationCount-1);
     //EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)).ExpectedTimesExactly(9);
     for (size_t index = 0; index < iterationCount-1; index++)
@@ -2562,15 +2564,12 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_connectFailCount_exceed_succeed)
         STRICT_EXPECTED_CALL(mocks, get_time(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mocks, STRING_new());
         EXPECTED_CALL(mocks, mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__);
-        STRICT_EXPECTED_CALL(mocks, platform_get_default_tlsio());
-        EXPECTED_CALL(mocks, xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        EXPECTED_CALL(mocks, xio_destroy(IGNORED_PTR_ARG));
         EXPECTED_CALL(mocks, SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
         EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     }
     STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument(2);
-    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)).ExpectedTimesExactly(30);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)).ExpectedTimesExactly(25);
 
     // act
     for (size_t index = 0; index < iterationCount; index++)
