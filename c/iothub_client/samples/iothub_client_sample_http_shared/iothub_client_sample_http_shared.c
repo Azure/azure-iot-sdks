@@ -32,7 +32,6 @@ static const char* deviceKey2 = "[device key 2]";
 
 static int callbackCounter;
 
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
 typedef struct EVENT_INSTANCE_TAG
 {
