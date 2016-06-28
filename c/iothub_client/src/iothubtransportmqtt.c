@@ -640,8 +640,6 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transportState)
                 if (mqtt_client_connect(transportState->mqttClient, transportState->xioTransport, &options) != 0)
                 {
                     LogError("failure connecting to address %s:%d.", STRING_c_str(transportState->hostAddress), transportState->portNum);
-                    xio_destroy(transportState->xioTransport);
-                    transportState->xioTransport = NULL;
                     result = __LINE__;
                 }
                 else
