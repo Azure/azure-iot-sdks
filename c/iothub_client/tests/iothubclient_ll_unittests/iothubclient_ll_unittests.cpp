@@ -79,6 +79,7 @@ static bool checkProtocolGatewayIsNull;
 #define TEST_DEVICEKEY_TOKEN "SharedAccessKey"
 #define TEST_DEVICESAS_TOKEN "SharedAccessSignature"
 #define TEST_PROTOCOL_GATEWAY_HOST_NAME_TOKEN "GatewayHostName"
+#define TEST_X509 "x509"
 
 #define TEST_DEVICEMESSAGE_HANDLE (IOTHUB_MESSAGE_HANDLE)0x52
 #define TEST_DEVICEMESSAGE_HANDLE_2 (IOTHUB_MESSAGE_HANDLE)0x53
@@ -770,7 +771,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceSasToken_suc
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_03_010: [IoTHubClient_LL_CreateFromConnectionString shall return NULL if both a deviceKey & a deviceSasToken are specified.] */
+/*Tests_SRS_IOTHUBCLIENT_LL_03_010: [IoTHubClient_LL_CreateFromConnectionString shall return NULL if both a deviceKey & a deviceSasToken are specified.] */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceKey_and_DeviceSasToken_fails)
 {
 	///arrange
@@ -1091,7 +1092,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_withoutGatewayHostName_
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_003: [IoTHubClient_LL_CreateFromConnectionString shall verify the input parameters and if any of them NULL then return NULL] */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_003: [IoTHubClient_LL_CreateFromConnectionString shall verify the input parameters and if any of them NULL then return NULL] */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_input_parameter_connectionString_is_NULL_then_return_NULL)
 {
 	///arrange
@@ -1109,7 +1110,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_input_parameter_conn
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_003: [IoTHubClient_LL_CreateFromConnectionString shall return NULL if any of the input parameter is NULL] */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_003: [IoTHubClient_LL_CreateFromConnectionString shall return NULL if any of the input parameter is NULL] */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_input_parameter_protocol_is_NULL_then_return_NULL)
 {
 	///arrange
@@ -1127,7 +1128,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_input_parameter_prot
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_004: [IoTHubClient_LL_CreateFromConnectionString shall allocate IOTHUB_CLIENT_CONFIG structure] */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_004: [IoTHubClient_LL_CreateFromConnectionString shall allocate IOTHUB_CLIENT_CONFIG structure] */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_config_structure_allocation_fails)
 {
 	///arrange
@@ -1150,7 +1151,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_config_structure_alloca
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_016: [IoTHubClient_LL_CreateFromConnectionString shall return NULL if IoTHubClient_LL_Create call fails] */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_016: [IoTHubClient_LL_CreateFromConnectionString shall return NULL if IoTHubClient_LL_Create call fails] */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_IoTHubClient_LL_Create_fails_then_IoTHubClient_LL_CreateFromConnectionString_return_NULL)
 {
 	///arrange
@@ -1259,8 +1260,8 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_IoTHubClient_LL_Crea
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey or SharedAccessSignature.]  */
-/* SRS_IOTHUBCLIENT_LL_12_014: [If either of key is missing then IoTHubClient_LL_CreateFromConnectionString returns NULL ] */
+/* Tests_IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey, SharedAccessSignature or x509.]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_014: [If either of key is missing or x509 is not set to "true" then IoTHubClient_LL_CreateFromConnectionString returns NULL ]*/
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_hostName_missing_then_return_NULL)
 {
 	///arrange
@@ -1328,8 +1329,8 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_hostName_missing_the
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey or SharedAccessSignature.]  */
-/* SRS_IOTHUBCLIENT_LL_12_014: [If either of key is missing then IoTHubClient_LL_CreateFromConnectionString returns NULL ] */
+/* Tests_SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey, SharedAccessSignature or x509.]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_014: [If either of key is missing or x509 is not set to "true" then IoTHubClient_LL_CreateFromConnectionString returns NULL ]*/
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_deviceId_missing_then_return_NULL)
 {
 	///arrange
@@ -1401,8 +1402,8 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_deviceId_missing_the
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey.]  */
-/* SRS_IOTHUBCLIENT_LL_12_014: [If either of key is missing then IoTHubClient_LL_CreateFromConnectionString returns NULL ] */
+/* Tests_SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey, SharedAccessSignature or x509.]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_014: [If either of key is missing or x509 is not set to "true" then IoTHubClient_LL_CreateFromConnectionString returns NULL ]*/
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_deviceKey_and_deviceSasToken_missing_then_return_NULL)
 {
 	///arrange
@@ -1473,8 +1474,193 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_deviceKey_and_device
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* Codes_SRS_IOTHUBCLIENT_LL_12_009: [IoTHubClient_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator] */
-/* Codes_SRS_IOTHUBCLIENT_LL_12_015: [If the string split failed, IoTHubClient_LL_CreateFromConnectionString returns NULL ] */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_014: [If either of key is missing or x509 is not set to "true" then IoTHubClient_LL_CreateFromConnectionString returns NULL ]*/
+TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_x509_true_succeeds)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+
+#ifndef DONT_USE_UPLOADTOBLOB
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+#endif 
+
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR));
+    STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, STRING_new());
+    STRICT_EXPECTED_CALL(mocks, STRING_new());
+    STRICT_EXPECTED_CALL(mocks, STRING_new());
+    STRICT_EXPECTED_CALL(mocks, STRING_new());
+
+    /* loop 1 -- HostName*/
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn(TEST_HOSTNAME_TOKEN);
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+
+    /* loop 2 -- DeviceId*/
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn(TEST_DEVICEID_TOKEN);
+    STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn(TEST_CHAR);
+
+    /* loop 3 -- x509*/
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn(TEST_X509);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn("true");
+
+    /* loop exit */
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(1);
+
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+
+    /* underlying IoTHubClient_LL_Create call */
+    STRICT_EXPECTED_CALL(mocks, tickcounter_create());
+
+    STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn((TRANSPORT_LL_HANDLE)0x42);
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    ///act
+    auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
+
+    ///assert
+    ASSERT_ARE_NOT_EQUAL(void_ptr, NULL, result);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubClient_LL_Destroy(result);
+
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_12_014: [If either of key is missing or x509 is not set to "true" then IoTHubClient_LL_CreateFromConnectionString returns NULL ]*/
+TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_x509_BLA_BLA_BLA_fails)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+    STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR));
+    STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
+    STRICT_EXPECTED_CALL(mocks, STRING_new());
+    STRICT_EXPECTED_CALL(mocks, STRING_new());
+    STRICT_EXPECTED_CALL(mocks, STRING_new());
+    STRICT_EXPECTED_CALL(mocks, STRING_new());
+
+    /* loop 1 -- HostName*/
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn(TEST_HOSTNAME_TOKEN);
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_create(TEST_STRING_HANDLE));
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+
+    /* loop 2 -- DeviceId*/
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn(TEST_DEVICEID_TOKEN);
+    STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn(TEST_CHAR);
+
+    /* loop 3 -- x509*/
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(0);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn(TEST_X509);
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn("BLKA_BLA_BLA");
+
+    /* loop exit */
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(TEST_STRING_TOKENIZER_HANDLE, TEST_STRING_HANDLE, IGNORED_PTR_ARG))
+        .SetReturn(1);
+
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+
+   
+    ///act
+    auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, provideFAKE);
+
+    ///assert
+    ASSERT_ARE_EQUAL(void_ptr, NULL, result);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubClient_LL_Destroy(result);
+
+}
+/* Tests_SRS_IOTHUBCLIENT_LL_12_009: [IoTHubClient_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator] */
+/* Tests_SRS_IOTHUBCLIENT_LL_12_015: [If the string split failed, IoTHubClient_LL_CreateFromConnectionString returns NULL ] */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_iotHubName_is_NULL_return_NULL)
 {
 	///arrange
@@ -1559,8 +1745,8 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_iotHubName_is_NULL_r
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_009: [IoTHubClient_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator] */
-/* SRS_IOTHUBCLIENT_LL_12_015: [If the string split failed, IoTHubClient_LL_CreateFromConnectionString returns NULL ] */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_009: [IoTHubClient_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator] */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_015: [If the string split failed, IoTHubClient_LL_CreateFromConnectionString returns NULL ] */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_iotHubSuffix_is_NULL_return_NULL)
 {
 	///arrange
@@ -1645,7 +1831,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_iotHubSuffix_is_NULL
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_construct_fails)
 {
 	///arrange
@@ -1673,7 +1859,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_construct_fails)
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_tokenizer_create_fails_1)
 {
 	///arrange
@@ -1703,7 +1889,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_tokenizer_create
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_tokenizer_create_fails_2)
 {
 	///arrange
@@ -1753,7 +1939,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_tokenizer_create
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_1)
 {
 	///arrange
@@ -1786,7 +1972,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_1)
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_2)
 {
 	///arrange
@@ -1821,7 +2007,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_2)
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_3)
 {
 	///arrange
@@ -1858,7 +2044,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_3)
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_4)
 {
 	///arrange
@@ -1897,7 +2083,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_4)
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_fails_1)
 {
 	///arrange
@@ -1939,7 +2125,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_f
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_fails_2)
 {
 	///arrange
@@ -1982,7 +2168,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_f
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_fails_3)
 {
 	///arrange
@@ -2033,7 +2219,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_f
 	IoTHubClient_LL_Destroy(result);
 }
 
-/* SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
+/*Tests_SRS_IOTHUBCLIENT_LL_12_013: [If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL]  */
 TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_fails_4)
 {
 	///arrange
@@ -2335,7 +2521,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_null_transportHandle_fails)
 	ASSERT_IS_NULL(result);
 }
 
-/*Codes_SRS_IOTHUBCLIENT_LL_02_098: [ IoTHubClient_LL_CreateWithTransport shall fail and return NULL if both config->deviceKey AND config->deviceSasToken are NULL. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_02_098: [ IoTHubClient_LL_CreateWithTransport shall fail and return NULL if both config->deviceKey AND config->deviceSasToken are NULL. ]*/
 TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_with_NULL_deviceKey_AND_NULL_sas_token_fails)
 {
     CIoTHubClientLLMocks mocks;

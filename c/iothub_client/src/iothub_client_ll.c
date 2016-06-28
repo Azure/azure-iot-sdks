@@ -46,6 +46,8 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
 
 static const char HOSTNAME_TOKEN[] = "HostName";
 static const char DEVICEID_TOKEN[] = "DeviceId";
+static const char X509_TOKEN[] = "x509";
+static const char X509_TOKEN_ONLY_ACCEPTABLE_VALUE[] = "true";
 static const char DEVICEKEY_TOKEN[] = "SharedAccessKey";
 static const char DEVICESAS_TOKEN[] = "SharedAccessSignature";
 static const char PROTOCOL_GATEWAY_HOST[] = "GatewayHostName";
@@ -126,9 +128,10 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                 LogError("Error creating HostSuffix String");
             }
             /* Codes_SRS_IOTHUBCLIENT_LL_12_005: [IoTHubClient_LL_CreateFromConnectionString shall try to parse the connectionString input parameter for the following structure: "Key1=value1;key2=value2;key3=value3..."] */
-            /* Codes_SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey or SharedAccessSignature.]  */
+            /* Codes_SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey, SharedAccessSignature or x509]  */
             else
             {
+                int isx509found = 0;
                 while ((STRING_TOKENIZER_get_next_token(tokenizer1, tokenString, "=") == 0))
                 {
                     if (STRING_TOKENIZER_get_next_token(tokenizer1, valueString, ";") != 0)
@@ -201,6 +204,17 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                     config->deviceSasToken = STRING_c_str(deviceSasTokenString);
                                 }
                             }
+                            else if (strcmp(s_token, X509_TOKEN) == 0)
+                            {
+                                if (strcmp(STRING_c_str(valueString), X509_TOKEN_ONLY_ACCEPTABLE_VALUE) != 0)
+                                {
+                                    LogError("x509 option has wrong value, the only acceptable one is \"false\"");
+                                }
+                                else
+                                {
+                                    isx509found = 1;
+                                }
+                            }
                             /* Codes_SRS_IOTHUBCLIENT_LL_04_001: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of key/value pair GatewayHostName. If it does exist it shall pass the value to IoTHubClient_LL_Create API.] */
                             else if (strcmp(s_token, PROTOCOL_GATEWAY_HOST) == 0)
                             {
@@ -226,13 +240,12 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                 {
                     LogError("deviceId is not found");
                 }
-                else if (config->deviceKey == NULL && config->deviceSasToken == NULL)
+                else if (!(
+                    ((!isx509found) && (config->deviceSasToken == NULL) ^ (config->deviceKey == NULL)) ||
+                    ((isx509found) && (config->deviceSasToken == NULL) && (config->deviceKey == NULL))
+                    ))
                 {
-                    LogError("deviceKey/deviceSasToken not found");
-                }
-                else if (config->deviceKey != NULL && config->deviceSasToken != NULL)
-                {
-                    LogError("Both device Key & SAS token are defined. Only one should be provided.");
+                    LogError("invalid combination of x509, deviceSasToken and deviceKey");
                 }
                 else
                 {
