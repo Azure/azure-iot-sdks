@@ -44,7 +44,7 @@ namespace TraceabilityTool
 
             GetWindowThreadProcessId(ptr, out cmdProcessID);
             Process process = Process.GetProcessById(cmdProcessID);
-            if (process.ProcessName == "cmd")
+            if (process.ProcessName.ToLower() == "cmd")
             {
                 // The uppermost window is a cmd process.  The console is already running.
                 AttachConsole(process.Id);
