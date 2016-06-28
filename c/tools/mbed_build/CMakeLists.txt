@@ -132,8 +132,7 @@ function(updateMBEDSourceFiles)
             (${string_with_hg} EQUAL -1) AND
             (${string_with_bld} EQUAL -1) AND
             (${string_with_base} EQUAL -1))
-            message(STATUS "would delete file: " ${file_item})
-            # really want to execute file(REMOVE ${file_item})
+            file(REMOVE ${file_item})
         endif()
     endforeach()
     #
@@ -160,8 +159,7 @@ function(updateMBEDSourceFiles)
         if ((${string_with_lib} EQUAL -1) AND
             (${string_with_hg} EQUAL -1) AND
             (${string_with_bld} EQUAL -1))
-            message(STATUS "would delete file: " ${file_item})
-            # really want to execute file(REMOVE ${file_item})
+            file(REMOVE ${file_item})
         endif()
     endforeach()
     message(STATUS "Copying target project files.")
