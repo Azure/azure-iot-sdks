@@ -17,7 +17,23 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
 
 ## Building and running iotdm\_simple\_sample on Intel Edison
 
-1.  Update packages on the Edison
+1. Setup your Edison board and connect it to your wireless network.
+
+  To set up your Edison board, you need to connect it to a host computer. Intel has a set of getting started guides that include guides for the following operating systems:
+
+ -   [Get Started with the Intel Edison Development Board on Windows 64-bit.](https://software.intel.com/get-started-edison-windows)
+ -   [Get Started with the Intel Edison Development Board on Windows 32-bit.](https://software.intel.com/get-started-edison-windows-32)
+ -   [Getting Started with the Intel® Edison Board on Linux.](https://software.intel.com/get-started-edison-linux)
+
+  To set up your Edison board and familiarize yourself with it, you should complete all the steps in these "Get started" articles except for:
+
+ -  Flashing the latest firmware. You update the firmware as part of this tutorial so you don't need to complete this step at this time.
+ - The last step, "Choose IDE", which is unnecessary for the current tutorial.
+
+   When you have set up the Edison board and installed the necessary drivers on your host machine, you should make sure you can connect to the Edison board using a serial terminal. The [Setting up a serial terminal](https://software.intel.com/setting-up-serial-terminal-intel-edison-board) page on the Intel website has links to set up instructions for host operating systems such as Windows and Linux.
+
+
+2. Update packages on the Edison
 
     Add these package repositories to the list of feeds (`vi /etc/opkg/base-feeds.conf`)
 
@@ -83,14 +99,16 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
 
 5.  Run the sample
 
-    The iotdm\_edison\_sample application needs a valid device connection string. If you have configured it in source code, then you are good to go. Otherwise you need to add it as parameter to the iotdm\_edison\_sample command line call as shown below:
+    The iotdm\_edison\_sample application needs a valid device connection string. If you have configured it in source code, then you are good to go. Otherwise you need to pass the device connection string as a command line parameter to the iotdm\_edison\_sample application as shown below:
 
     ```
     cd ~/cmake/iotdm_client/samples/iotdm_edison_sample/
     ./iotdm_edison_sample "[device connection string]"
     ```
 
-    Note to rebuild an individual component, you can run make in ~/cmake/path/to/component you want to rebuild. To rebuild iotdm_simple_sample after changing the connection string simply type:
+    Note the double quotes around the connection string are required. If you don't use them the iotdm\_edison\_sample application will not start properly.
+
+    To rebuild an individual component, you can run *make* in ~/cmake/path/to/component you want to rebuild. To rebuild iotdm_simple_sample after changing the connection string simply type:
 
     ```
     make
@@ -113,13 +131,12 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
     ./iotdm_edison_sample
     ```    
 
-5. To apply the new image on your Edison device use the ScheduleFirmwareUpdateAsync in the IoT Hub .NET Service SDK or the JobClient\#scheduleFirmwareUpdate in the Node.js service SDK. As the packageURI parameter use "file:////home/root/edison.zip" (note the 4 backslashes is intentional)
+5. To submit the firmware update job and monitor its progress, use the Node.js [device management sample UI](https://acom-sandbox.azurewebsites.net/en-us/documentation/articles/iot-hub-device-management-ui-sample/). You can run this sample on either Windows or Linux and it requires Node.js 6.1.0 or greater. As the packageURI parameter use "file:////home/root/edison.zip" (note the 4 backslashes is intentional)
 
-    After the firmware has been applied and the machine reboots, you can prepare your machine to accept a new firmware job by typing the following commands:
+    After the firmware has been applied and the machine reboots, the iotdm\_edison\_sample application will automatically run as a service and reconnect to Azure IoT Hub. To verify that the iotdm\_edison\_sample is running in the background type the following command:
 
     ```
-    killall iotdm_edison_sample
-    ./iotdm_edison_sample
+    ps | grep iotdm
     ```
 
 [Setup your IoT hub]: https://github.com/Azure/azure-iot-sdks/blob/master/doc/setup_iothub.md
