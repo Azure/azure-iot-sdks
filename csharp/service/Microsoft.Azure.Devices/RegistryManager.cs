@@ -342,22 +342,22 @@ namespace Microsoft.Azure.Devices
         /// <summary>
         /// Copies registered device data to a set of blobs in a specific container in a storage account. 
         /// </summary>
-        protected abstract Task ExportRegistryAsync(string storageAccountConnectionString, string containerName);
+        internal abstract Task ExportRegistryAsync(string storageAccountConnectionString, string containerName);
 
         /// <summary>
         /// Copies registered device data to a set of blobs in a specific container in a storage account. 
         /// </summary>
-        protected abstract Task ExportRegistryAsync(string storageAccountConnectionString, string containerName, CancellationToken cancellationToken);
+        internal abstract Task ExportRegistryAsync(string storageAccountConnectionString, string containerName, CancellationToken cancellationToken);
 
         /// <summary>
         /// Imports registered device data from a set of blobs in a specific container in a storage account. 
         /// </summary>
-        protected abstract Task ImportRegistryAsync(string storageAccountConnectionString, string containerName);
+        internal abstract Task ImportRegistryAsync(string storageAccountConnectionString, string containerName);
 
         /// <summary>
         /// Imports registered device data from a set of blobs in a specific container in a storage account. 
         /// </summary>
-        protected abstract Task ImportRegistryAsync(string storageAccountConnectionString, string containerName, CancellationToken cancellationToken);
+        internal abstract Task ImportRegistryAsync(string storageAccountConnectionString, string containerName, CancellationToken cancellationToken);
 
         /// <summary>
         /// Creates a new bulk job to export device registrations to the container specified by the provided URI.
