@@ -17,10 +17,6 @@ set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothub_client_version.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/version.c
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../../parson/parson.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_ll_uploadtoblob.c
 	)
 	
-if(NOT ${DONT_USE_UPLOADTOBLOB})
-    set(mbed_project_files
-        ${mbed_project_files} 
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothub_client_ll_uploadtoblob.c)
-endif()
