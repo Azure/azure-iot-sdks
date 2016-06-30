@@ -19,7 +19,7 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
 
 1. Setup your Edison board and connect it to your wireless network.
 
-  To set up your Edison board, you need to connect it to a host computer. Intel has a set of getting started guides that include guides for the following operating systems:
+  To set up your Edison board, you need to connect it to a host computer. Intel has a set of getting started guides for the following operating systems:
 
  -   [Get Started with the Intel Edison Development Board on Windows 64-bit.](https://software.intel.com/get-started-edison-windows)
  -   [Get Started with the Intel Edison Development Board on Windows 32-bit.](https://software.intel.com/get-started-edison-windows-32)
