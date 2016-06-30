@@ -413,6 +413,11 @@ namespace DeviceExplorer
                             }
                         }
                         eventHubTextBox.Text += "\r\n";
+
+                        // scroll text box to last line by moving caret to the end of the text
+                        eventHubTextBox.SelectionStart = eventHubTextBox.Text.Length - 1;
+                        eventHubTextBox.SelectionLength = 0;
+                        eventHubTextBox.ScrollToCaret();
                     }
                 }
 
@@ -446,6 +451,10 @@ namespace DeviceExplorer
                             eventHubTextBox.Text += "\r\n";
                         }
 
+                        // scroll text box to last line by moving caret to the end of the text
+                        eventHubTextBox.SelectionStart = eventHubTextBox.Text.Length - 1;
+                        eventHubTextBox.SelectionLength = 0;
+                        eventHubTextBox.ScrollToCaret();
                     }
                 }
             }
