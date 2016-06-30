@@ -109,15 +109,15 @@ You should have the following items ready before beginning the process:
 
     {{**If using AMQP protocol:**}}
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_amqp/linux/iothub_client_sample_amqp
+        ~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
 
-    {{**If using HTTPS protocol:**}}
+    {{**If using HTTP protocol:**}}
 
-        ~/cmake/c/iothub\_client/samples/iothub_client_sample_http/linux/iothub_client_sample_http
+        ~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
 
     {{**If using MQTT protocol:**}}
 
-        ~/cmake/c/iothub\_client/samples/iothub_client_sample_mqtt/linux/iothub_client_sample_mqtt
+        ~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 
