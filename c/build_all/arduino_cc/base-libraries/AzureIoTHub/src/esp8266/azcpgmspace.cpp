@@ -12,4 +12,7 @@ char* az_c_strncpy_P(char* dest, PGM_P src, size_t size) {
 size_t az_c_strlen_P(PGM_P s) {
     return strlen_P(s);
 }
+
+const char *__ctype_ptr__ = NULL;
+
 #endif
