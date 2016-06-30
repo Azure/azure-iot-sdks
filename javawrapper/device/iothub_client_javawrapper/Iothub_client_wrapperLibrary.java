@@ -80,8 +80,12 @@ public interface Iothub_client_wrapperLibrary extends Library{
      * Original signature : IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE, const char*, const void*)
      */
     public int IoTHubClient_SetOption(Pointer iotHubClientHandle, String optionName, Object value);
-    
-    
+
+    /*
+     * Original signature : IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context)
+     */
+    public int IoTHubClient_UploadToBlobAsync(Pointer iotHubClientHandle, String destinationFileName, String source, int size, IotHubFileUploadCallback fileUploadCallback, Pointer userContextCallback);
+
     /*
      *				iothubtransporthttp.h		
      */
@@ -294,7 +298,11 @@ public interface Iothub_client_wrapperLibrary extends Library{
     public interface MapFilterCallback extends Callback {
          int execute(String mapProperty, String mapValue);
     };
-        
+
+    public interface IotHubFileUploadCallback extends Callback {
+        void execute(int status, Pointer userContextCallback);
+    };
+
     public static class IOTHUB_MESSAGE_HANDLE extends PointerType {
         public IOTHUB_MESSAGE_HANDLE(Pointer address) {
             super(address);
