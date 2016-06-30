@@ -15,6 +15,7 @@ import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_CLIENT_RESULT;
 import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_MESSAGE_HANDLE;
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubEventCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubMessageCallback;
+import javaWrapper.Iothub_client_wrapperLibrary.IotHubFileUploadCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.MAP_HANDLE;
 import javaWrapper.Iothub_client_wrapperLibrary.MQTT_Protocol;
 
@@ -120,6 +121,13 @@ public class Main {
         }
         else
         {
+            System.out.println("Upload blob to file storage.");
+            String filename= "hello_javawrapper_directcall_blob.txt";
+            String content = "Hello World from JavaWrapper (Direct Call) Blob APi";
+            Pointer userContext = new Pointer(1001);
+
+            IoTHub.IoTHubClient_UploadToBlobAsync(handle.getPointer(), filename, content, content.length(), UploadConfirmationCallback, userContext);
+
             for (int i = 0; i < MESSAGE_COUNT; i++)
             {
                 messages[i] = new EVENT_INSTANCE();
@@ -156,6 +164,19 @@ public class Main {
         
         while(true);
     }
+
+    static IotHubFileUploadCallback UploadConfirmationCallback = new IotHubFileUploadCallback()
+    {
+        public void execute(int status, Pointer userContextCallback)
+        {
+            EVENT_INSTANCE eventInstance = new EVENT_INSTANCE(userContextCallback);
+
+            System.out.printf("Confirmation[%d] received for upload, message tracking id = %d with result = %d\r\n", callbackCounter, eventInstance.messageTrackingId, status);
+
+            IoTHub.IoTHubMessage_Destroy(messages[eventInstance.messageTrackingId].messageHandle);
+            callbackCounter++;
+        }
+    };
 
     static IotHubEventCallback SendConfirmationCallback = new IotHubEventCallback()
     {

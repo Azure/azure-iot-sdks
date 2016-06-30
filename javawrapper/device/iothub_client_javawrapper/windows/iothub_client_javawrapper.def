@@ -15,6 +15,7 @@ EXPORTS
     IoTHubClient_SetMessageCallback
     IoTHubClient_GetLastMessageReceiveTime
     IoTHubClient_SetOption
+    IoTHubClient_UploadToBlobAsync
 ;   iothub_client_ll.h
     IoTHubClient_LL_CreateFromConnectionString
     IoTHubClient_LL_Create
