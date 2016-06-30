@@ -33,7 +33,7 @@ process_args ()
             * ) usage;;
         esac
     done
-    
+
     case "$min_output$integration_tests" in
         "00" ) npm_command="npm -s test";;
         "01" ) npm_command="npm -s run lint && npm -s run alltest";;
@@ -59,7 +59,7 @@ create_test_device()
 
 delete_test_device()
 {
-    node $node_root/../iothub-explorer/iothub-explorer.js $IOTHUB_CONNECTION_STRING delete $IOTHUB_X509_DEVICE_ID
+    node $node_root/../tools/iothub-explorer/iothub-explorer.js $IOTHUB_CONNECTION_STRING delete $IOTHUB_X509_DEVICE_ID
     rm $IOTHUB_X509_CERTIFICATE
     rm $IOTHUB_X509_KEY
 }

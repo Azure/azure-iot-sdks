@@ -8,7 +8,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 
 #include "dataserializer.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 DEFINE_ENUM_STRINGS(DATA_SERIALIZER_RESULT, DATA_SERIALIZER_RESULT_VALUES);
 

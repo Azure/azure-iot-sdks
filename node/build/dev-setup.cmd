@@ -98,6 +98,7 @@ cd %node-root%\..\tools\iothub-explorer
 echo.
 echo -- Creating links for %cd% --
 call npm link azure-iot-common
+call npm link azure-iot-device
 call npm link azure-iothub
 call npm install
 

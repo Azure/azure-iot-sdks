@@ -20,6 +20,8 @@ set(iothub_test_h_files
 set(IOTHUB_TEST_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_test" FORCE)
 
 include_directories(${IOTHUB_TEST_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER} ${UAMQP_INC_FOLDER})
+include_directories(${IOTHUB_CLIENT_INC_FOLDER})
+include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
 IF(WIN32)
 	#windows needs this define
@@ -29,4 +31,4 @@ ENDIF(WIN32)
 
 add_library(iothub_test ${iothub_test_c_files} ${iothub_test_h_files})
 
-target_link_libraries(iothub_test uamqp)
+target_link_libraries(iothub_test uamqp iothub_service_client)

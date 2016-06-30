@@ -106,10 +106,12 @@ extern "C"
 		/** @brief	A string that identifies the device. */
 		const char* deviceId;
 
-		/** @brief	The device key used to authenticate the device. */
+		/** @brief	The device key used to authenticate the device. 
+        If neither deviceSasToken nor deviceKey is present then the authentication is assumed x509.*/
 		const char* deviceKey;
 
-		/** @brief	The device SAS Token used to authenticate the device in place of device key. */
+		/** @brief	The device SAS Token used to authenticate the device in place of device key. 
+        If neither deviceSasToken nor deviceKey is present then the authentication is assumed x509.*/
 		const char* deviceSasToken;
 
 		/** @brief	The IoT Hub name to which the device is connecting. */
@@ -136,10 +138,12 @@ extern "C"
 		/** @brief	A string that identifies the device. */
 		const char* deviceId;
 
-		/** @brief	The device key used to authenticate the device. */
+		/** @brief	The device key used to authenticate the device. 
+        x509 authentication is is not supported for multiplexed connections*/
 		const char* deviceKey;
 
-		/** @brief	The device SAS Token used to authenticate the device in place of device key. */
+		/** @brief	The device SAS Token used to authenticate the device in place of device key. 
+        x509 authentication is is not supported for multiplexed connections.*/
 		const char* deviceSasToken;
 	} IOTHUB_CLIENT_DEVICE_CONFIG;
 

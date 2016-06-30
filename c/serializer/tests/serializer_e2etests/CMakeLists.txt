@@ -23,6 +23,7 @@ set(${theseTestsName}_h_files
 )
 
 include_directories(${IOTHUB_TEST_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER} ${SERIALIZER_INC_FOLDER})
+include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
 build_test_artifacts(${theseTestsName} ON)
 
@@ -34,14 +35,15 @@ if(WIN32)
 			iothub_client
 			iothub_client_amqp_transport
 			iothub_client_http_transport
+			iothub_service_client
 			aziotsharedutil
-			iothub_client_http_transport	
+			iothub_client_http_transport
 		)
 		linkSharedUtil(${theseTestsName}_dll)
-		linkUAMQP(${theseTestsName}_dll)		
+		linkUAMQP(${theseTestsName}_dll)
 		linkHttp(${theseTestsName}_dll)
 	endif()
-	
+
 	if(TARGET ${theseTestsName}_exe)
 		target_link_libraries(${theseTestsName}_exe
 			serializer
@@ -49,11 +51,12 @@ if(WIN32)
 			iothub_client
 			iothub_client_amqp_transport
 			iothub_client_http_transport
+			iothub_service_client
 			aziotsharedutil
-			iothub_client_http_transport	
+			iothub_client_http_transport
 		)
 		linkSharedUtil(${theseTestsName}_exe)
-		linkUAMQP(${theseTestsName}_exe)			
+		linkUAMQP(${theseTestsName}_exe)
 		linkHttp(${theseTestsName}_exe)
 	endif()
 else()
@@ -64,12 +67,13 @@ else()
 				iothub_client
 				iothub_client_amqp_transport
 				iothub_client_http_transport
+				iothub_service_client
 				aziotsharedutil
-				iothub_client_http_transport	
+				iothub_client_http_transport
 			)
 		target_link_libraries(${theseTestsName}_exe pthread)
 		linkSharedUtil(${theseTestsName}_exe)
-		linkUAMQP(${theseTestsName}_exe)	
+		linkUAMQP(${theseTestsName}_exe)
 		linkHttp(${theseTestsName}_exe)
 	endif()
 endif()
