@@ -431,12 +431,12 @@ namespace Microsoft.Azure.Devices
 
         }
 
-        protected override Task ExportRegistryAsync(string storageAccountConnectionString, string containerName)
+        internal override Task ExportRegistryAsync(string storageAccountConnectionString, string containerName)
         {
             return this.ExportRegistryAsync(storageAccountConnectionString, containerName, CancellationToken.None);
         }
 
-        protected override Task ExportRegistryAsync(string storageAccountConnectionString, string containerName, CancellationToken cancellationToken)
+        internal override Task ExportRegistryAsync(string storageAccountConnectionString, string containerName, CancellationToken cancellationToken)
         {
             this.EnsureInstanceNotClosed();
 
@@ -457,12 +457,12 @@ namespace Microsoft.Azure.Devices
                 cancellationToken);
         }
 
-        protected override Task ImportRegistryAsync(string storageAccountConnectionString, string containerName)
+        internal override Task ImportRegistryAsync(string storageAccountConnectionString, string containerName)
         {
             return this.ImportRegistryAsync(storageAccountConnectionString, containerName, CancellationToken.None);
         }
 
-        protected override Task ImportRegistryAsync(string storageAccountConnectionString, string containerName, CancellationToken cancellationToken)
+        internal override Task ImportRegistryAsync(string storageAccountConnectionString, string containerName, CancellationToken cancellationToken)
         {
             this.EnsureInstanceNotClosed();
 
