@@ -70,7 +70,7 @@ The `sendEvent` method sends an event message to the IoT Hub as the device indic
 
 **SRS_NODE_DEVICE_CLIENT_05_002: [** The `sendEvent` method shall send the event (indicated by the message argument) via the transport associated with the Client instance. **]**
 
-**SRS_NODE_DEVICE_CLIENT_05_003: [** When the `sendEvent` method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method's callback. **]**  
+**SRS_NODE_DEVICE_CLIENT_05_003: [** When the `sendEvent` method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method's callback. **]**
 
 #### sendEventBatch(messages, done)
 The `sendEventBatch` method sends a list of event messages to the IoT Hub as the device indicated in the constructor argument.
@@ -97,7 +97,7 @@ The `sendEventBatch` method sends a list of event messages to the IoT Hub as the
 
 **SRS_NODE_DEVICE_CLIENT_16_042: [** The `setOptions` method shall throw a `ReferenceError` if the options object is falsy. **]**
 
-**SRS_NODE_DEVICE_CLIENT_16_043: [** The `done` callback shall be invoked no parameters when it has successfully finished setting the client and/or transport options. **]**
+**SRS_NODE_DEVICE_CLIENT_16_043: [** The `done` callback shall be invoked with no parameters when it has successfully finished setting the client and/or transport options. **]**
 
 **SRS_NODE_DEVICE_CLIENT_16_044: [** The `done` callback shall be invoked with a standard javascript `Error` object and no result object if the client could not be configured as requested. **]**
 

@@ -6,6 +6,10 @@
 ## Example usage
 ```js
 'use strict';
+
+/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
+/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
+
 var ConnectionString = require('azure-iot-device').ConnectionString;
 
 var cn = ConnectionString.parse('[Connection string]');
@@ -23,6 +27,6 @@ The parse static method returns a new instance of the ConnectionString object wi
 
 **SRS_NODE_DEVICE_CONNSTR_05_001: [** The `parse` method shall return the result of calling `azure-iot-common.ConnectionString.parse`.**]**
 
-**SRS_NODE_DEVICE_CONNSTR_05_002: [** It shall throw `ArgumentError` if any of `HostName` or `DeviceId` fields are not found in the source argument.**]** 
+**SRS_NODE_DEVICE_CONNSTR_05_002: [** It shall throw `ArgumentError` if any of `HostName` or `DeviceId` fields are not found in the source argument.**]**
 
 **SRS_NODE_DEVICE_CONNSTR_16_001: [** It shall throw `ArgumentError` if `SharedAccessKey` and `x509` are present at the same time or if none of them are present. **]**

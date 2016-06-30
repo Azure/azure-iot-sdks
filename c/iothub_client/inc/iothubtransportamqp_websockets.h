@@ -5,13 +5,14 @@
 #define IOTHUBTRANSPORTAMQP_WEBSOCKETS_H
 
 #include "iothub_client_private.h"
+#include "iothub_transport_ll.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-	extern const void* AMQP_Protocol_over_WebSocketsTls(void);
+	extern const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void);
 
 #ifdef __cplusplus
 }

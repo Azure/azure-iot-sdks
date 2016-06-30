@@ -31,16 +31,7 @@ function Amqp(config) {
 util.inherits(Amqp, EventEmitter);
 
 Amqp.prototype._initialize = function () {
-  var uri = 'amqps://';
-  uri += encodeURIComponent(this._config.deviceId) +
-         '@sas.' +
-         this._config.hubName +
-         ':' +
-         encodeURIComponent(this._config.sharedAccessSignature) +
-         '@' +
-         this._config.host;
-
-  this._amqp = new Base(uri, false, 'azure-iot-device/' + PackageJson.version);
+  this._amqp = new Base(false, 'azure-iot-device/' + PackageJson.version);
   this._amqp.setDisconnectHandler(function (err) {
     this.emit('disconnect', err);
   }.bind(this));
@@ -65,7 +56,19 @@ var handleResult = function (errorMessage, done) {
 /*Codes_SRS_NODE_DEVICE_AMQP_16_008: [The done callback method passed in argument shall be called if the connection is established]*/
 /*Codes_SRS_NODE_DEVICE_AMQP_16_009: [The done callback method passed in argument shall be called with an error object if the connecion fails]*/
 Amqp.prototype.connect = function connect(done) {
-  this._amqp.connect(handleResult('AMQP Transport: Could not connect', done));
+  var uri = 'amqps://';
+  if (!this._config.x509) {
+    uri += encodeURIComponent(this._config.deviceId) +
+           '@sas.' +
+           this._config.hubName +
+           ':' +
+          encodeURIComponent(this._config.sharedAccessSignature) + '@';
+  }
+  uri += this._config.host;
+
+  var sslOptions = this._config.x509;
+
+  this._amqp.connect(uri, sslOptions, handleResult('AMQP Transport: Could not connect', done));
 };
 
 /**
@@ -170,6 +173,35 @@ Amqp.prototype.updateSharedAccessSignature = function (sharedAccessSignature, do
       done(null, new results.SharedAccessSignatureUpdated(true));
     }
   }.bind(this));
+};
+
+/**
+ * @method          module:azure-iot-device-http.Amqp#setOptions
+ * @description     This methods sets the AMQP specific options of the transport.
+ *
+ * @param {object}        options   Options to set.  Currently for amqp these are the x509 cert, key, and optional passphrase properties. (All strings)
+ * @param {Function}      done      The callback to be invoked when `setOptions` completes.
+ */
+Amqp.prototype.setOptions = function (options, done) {
+/*Codes_SRS_NODE_DEVICE_AMQP_06_001: [The `setOptions` method shall throw a ReferenceError if the `options` parameter has not been supplied.]*/
+  if (!options) throw new ReferenceError('The options parameter can not be \'' + options + '\'');
+  if (options.hasOwnProperty('cert')) {
+    this._config.x509 = {
+      cert: options.cert,
+      key: options.key,
+      passphrase: options.passphrase
+    };
+  } else if (options.hasOwnProperty('certFile')) {
+    this._config.x509 = {
+      certFile: options.certFile,
+      keyFile: options.keyFile,
+    };
+  }
+  /*Codes_SRS_NODE_DEVICE_AMQP_06_002: [If `done` has been specified the `setOptions` method shall call the `done` callback with no arguments.]*/
+  if (done) {
+    /*Codes_SRS_NODE_DEVICE_AMQP_06_003: [`setOptions` should not throw if `done` has not been specified.]*/
+    done();
+  }
 };
 
 /**
