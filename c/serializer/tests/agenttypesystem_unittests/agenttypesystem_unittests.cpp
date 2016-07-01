@@ -14,6 +14,7 @@
 
 #include "agenttypesystem.h"
 #include <limits>
+#include <cfloat>
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/strings.h"
 
