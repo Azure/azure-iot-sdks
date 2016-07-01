@@ -1,10 +1,10 @@
 ---
 platform: linux
-device: vanegw
+device: vho1-x
 language: c
 ---
 
-Run a simple C sample on VaneGW running Linux Beaglebone 3.2.0
+Run a simple C sample on VHo1-X running Linux Beaglebone 3.2.0
 ===
 ---
 
@@ -21,7 +21,7 @@ Run a simple C sample on VaneGW running Linux Beaglebone 3.2.0
 
 **About this document**
 
-This document describes how to connect **VaneGW** device running **Linux** with Azure IoT SDK. This multi-step process includes:
+This document describes how to connect **VHo1-X** device running **Linux** with Azure IoT SDK. This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -31,19 +31,19 @@ This document describes how to connect **VaneGW** device running **Linux** with 
 
 You should have the following items ready before beginning the process:
 -   Computer with a Git client installed so that you can access the azure-iot-sdks code on GitHub.
--   VaneGW Device.
+-   VHo1-X Device.
 -   Ubuntu x86 machine (for cross compiling) 
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
--  Connect the VaneGW using the twisted pair for SDK download and data transfer.
+-  Connect the VHo1-X using the twisted pair for SDK download and data transfer.
 
 <a name="Setup"></a>
 # Step 3: Setup the development environment
 
-This section shows you how to set up a development environment for the Azure IoT device SDK for C on VaneGW.
+This section shows you how to set up a development environment for the Azure IoT device SDK for C on VHo1-X.
 
 ## Install dependencies under /usr/lib
 

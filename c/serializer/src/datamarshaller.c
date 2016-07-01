@@ -13,7 +13,7 @@
 #include "schema.h"
 #include "jsonencoder.h"
 #include "agenttypesystem.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 DEFINE_ENUM_STRINGS(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
 

@@ -1,4 +1,4 @@
-﻿---
+---
 platform: yocto
 device: intel-edison
 language: c
@@ -107,7 +107,7 @@ We first need to update the credentials in the sample AMPQ app to match those of
             cd ~/azure-iot-sdks/c/build_all/linux
             ./build.sh --no-mqtt 
     
-- Navigate to: ~/cmake/iothub_client/samples/iothub_client_sample_amqp/ and run the following commands
+- Navigate to: ~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_amqp/ and run the following commands
   
         ./iothub_client_sample_amqp
     

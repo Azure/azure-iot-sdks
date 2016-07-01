@@ -14,9 +14,9 @@ remote_monitoring.c
 )
 
 if(WIN32)
-	set(remote_monitoring_c_files ${remote_monitoring_c_files} ./windows/main.c)
+	set(remote_monitoring_c_files ${remote_monitoring_c_files})
 else()
-	set(remote_monitoring_c_files ${remote_monitoring_c_files} ./linux/main.c)
+	set(remote_monitoring_c_files ${remote_monitoring_c_files})
 endif()
 
 set(remote_monitoring_h_files

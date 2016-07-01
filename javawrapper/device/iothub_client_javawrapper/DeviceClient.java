@@ -12,6 +12,7 @@ import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_CLIENT_RESULT;
 import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_CLIENT_TRANSPORT_PROVIDER;
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubEventCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubMessageCallback;
+import javaWrapper.Iothub_client_wrapperLibrary.IotHubFileUploadCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.MQTT_Protocol;
 import javaWrapper.Iothub_client_wrapperLibrary.AMQP_Protocol_over_WebSocketsTls;
 
@@ -79,7 +80,12 @@ public final class DeviceClient
     {
         return Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_SetOption(handle.getPointer(), optionName, value);	
     }
-    
+
+    public int uploadToBlobAsync(String destinationFileName, String source, int size, IotHubFileUploadCallback fileUploadCallback, Pointer userContextCallback)
+    {
+        return Iothub_client_wrapperLibrary.INSTANCE.IoTHubClient_UploadToBlobAsync(handle.getPointer(), destinationFileName, source, size, fileUploadCallback, userContextCallback);
+    }
+
     public void destroy()
     {
         if (handle.getPointer().getInt(0) != 0)

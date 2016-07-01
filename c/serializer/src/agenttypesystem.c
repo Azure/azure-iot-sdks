@@ -19,6 +19,7 @@
 #include <float.h>
 #include <math.h>
 #include <limits.h>
+#include <errno.h>
 
 /*if ULLONG_MAX is defined by limits.h for whatever reasons... */
 #ifndef ULLONG_MAX
@@ -30,7 +31,7 @@
 #include "jsonencoder.h"
 #include "multitree.h"
 
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #define NaN_STRING "NaN"
 #define MINUSINF_STRING "-INF"
@@ -3047,11 +3048,11 @@ static int sscanff(const char*src, float* dst)
 }
 
 /*the following function does the same as  sscanf(src, "%lf", &dst)*/
-static int sscanflf(const char*src, long double* dst)
+static int sscanflf(const char*src, double* dst)
 {
     int result = 1;
     char* next;
-    (*dst) = strtold(src, &next);
+    (*dst) = strtod(src, &next);
     errno_t error = errno;
     if ((src == next) || (((*dst) == HUGE_VALL) && (error != 0)))
     {
@@ -3580,7 +3581,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 #endif
                     result = AGENT_DATA_TYPES_OK;
                 }
-                else if (sscanflf(source, &agentData->value.edmDouble.value) != 1)
+                else if (sscanflf(source, &(agentData->value.edmDouble.value)) != 1)
                 {
                     /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;

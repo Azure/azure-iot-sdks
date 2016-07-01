@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "platform.h"
+#include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothub_client.h"
 #include "iothub_message.h"
-#include "threadapi.h"
-#include "crt_abstractions.h"
 #include "iothubtransportamqp_websockets.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -18,7 +18,6 @@
 static const char* connectionString = "[IoT Hub Device Connection String]";
 static int callbackCounter;
 
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
 typedef struct EVENT_INSTANCE_TAG
 {
@@ -28,7 +27,7 @@ typedef struct EVENT_INSTANCE_TAG
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
-	const char* buffer = NULL;
+	const unsigned char* buffer = NULL;
 	size_t size = 0;
 	
 	if (userContextCallback == NULL)

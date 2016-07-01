@@ -252,6 +252,17 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHan
 	return IOTHUB_CLIENT_OK;
 }
 
+IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context)
+{
+    if ((iotHubClientHandle == NULL) || (destinationFileName == NULL) || (source == NULL))
+    {
+        return IOTHUB_CLIENT_INVALID_ARG;
+    }
+
+    return IOTHUB_CLIENT_OK;
+}
+
+
 // "iothub_client_version.h"
 
 const char* IoTHubClient_GetVersionString(void)
@@ -409,29 +420,29 @@ void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 }
 
 // "iothubtransporthttp.h"
-void *mockProtocol = (void *)0x12345678;
-const void* HTTP_Protocol(void)
+TRANSPORT_PROVIDER *mockProtocol = (TRANSPORT_PROVIDER *)0x12345678;
+const TRANSPORT_PROVIDER* HTTP_Protocol(void)
 {
 	return mockProtocol;
 }
 
 // "iothubtransportamqp.h"
 
-const void* AMQP_Protocol(void)
+const TRANSPORT_PROVIDER* AMQP_Protocol(void)
 {
 	return mockProtocol;
 }
 
 // "iothubtransportmqtt.h"
 
-const void* MQTT_Protocol(void)
+const TRANSPORT_PROVIDER* MQTT_Protocol(void)
 {
 	return mockProtocol;
 }
 
 // "iothubtransportamqp_websockets.h"
 
-const void* AMQP_Protocol_over_WebSocketsTls(void)
+const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void)
 {
 	return mockProtocol;
 }
