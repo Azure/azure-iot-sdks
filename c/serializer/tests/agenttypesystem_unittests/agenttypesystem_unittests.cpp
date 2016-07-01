@@ -12144,9 +12144,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
 
             // assert
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
-
-            // cleanup
-            Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
         /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
@@ -12366,9 +12363,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
 
             // assert
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
-
-            // cleanup
-            Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
         /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
@@ -12383,9 +12377,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
 
             // assert
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
-
-            // cleanup
-            Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
         /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
