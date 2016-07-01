@@ -4,9 +4,36 @@
 'use strict';
 
 var util = require('util');
-var Base = require('azure-iot-amqp-base').Amqp;
+// var Base = require('azure-iot-amqp-base').Amqp;
 var Amqp = require('azure-iot-device-amqp').Amqp;
-var PackageJson = require('../package.json');
+var errors = require('azure-iot-common').errors;
+var translateCommonError = require('azure-iot-amqp-base').translateError;
+
+var translateError = function translateError(message, amqpError) {
+  var error;
+
+  if (amqpError.constructor.name === 'AMQPError' && amqpError.condition.contents === 'amqp:resource-limit-exceeded') {
+    /*Codes_SRS_NODE_DEVICE_AMQP_DEVICE_ERRORS_16_001: [`translateError` shall return an `IotHubQuotaExceededError` if the AMQP error condition is `amqp:resource-limit-exceeded`.]*/
+    error = new errors.IotHubQuotaExceededError(message);
+  } else {
+    error = translateCommonError(message, amqpError);
+  }
+
+  error.amqpError = amqpError;
+
+  return error;
+};
+
+
+var handleResult = function (errorMessage, done) {
+  return function (err, result) {
+    if (err) {
+      done(translateError(errorMessage, err));
+    } else {
+      done(null, result);
+    }
+  };
+};
 
 /**
  * @class module:azure-iot-device-amqp-ws.AmqpWs
@@ -19,23 +46,27 @@ var PackageJson = require('../package.json');
  * @param {Object}  config   Configuration object generated from the connection string by the client.
  */
 function AmqpWs(config) {
-  this._config = config;
-  this._initialize();
+  Amqp.call(this, config);
 }
 
 util.inherits(AmqpWs, Amqp);
 
-AmqpWs.prototype._initialize = function () {
+AmqpWs.prototype.connect = function connect(done) {
   var uri = 'wss://';
-  uri += encodeURIComponent(this._config.deviceId) +
-         '@sas.' +
-         this._config.hubName +
-         ':' +
-         encodeURIComponent(this._config.sharedAccessSignature) +
-         '@' +
-         this._config.host + ':443/$iothub/websocket';
+  if (!this._config.x509) {
+    uri += encodeURIComponent(this._config.deviceId) +
+           '@sas.' +
+           this._config.hubName +
+           ':' +
+           encodeURIComponent(this._config.sharedAccessSignature) +
+          '@';
+  }
+  uri += this._config.host + ':443/$iothub/websocket';
 
-  this._amqp = new Base(uri, false, 'azure-iot-device/' + PackageJson.version);
+  var sslOptions = this._config.x509;
+
+  this._amqp.connect(uri, sslOptions, handleResult('AMQP Transport: Could not connect', done));
 };
+
 
 module.exports = AmqpWs;

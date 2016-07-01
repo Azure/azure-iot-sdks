@@ -16,18 +16,16 @@ var debug = require('debug')('amqp-common');
  *            Usually you'll want to avoid using this class and instead rely on higher-level implementations
  *            of the AMQP transport (see [azure-iot-device-amqp.Amqp]{@link module:azure-iot-device-amqp.Amqp} for example).
  *
- * @param   {String}    saslPlainUri            URL to the IoT Hub instance including SASL-Plain credentials.
  * @param   {Boolean}   autoSettleMessages      Boolean indicating whether messages should be settled automatically or if the calling code will handle it.
  * @param   {String}    sdkVersionString        String identifying the SDK used (device or service).
  */
 
-/*Codes_SRS_NODE_COMMON_AMQP_16_001: [The Amqp constructor shall accept three parameters:
-    A SASL-Plain URI to be used to connect to the IoT Hub instance
+/*Codes_SRS_NODE_COMMON_AMQP_16_001: [The Amqp constructor shall accept two parameters:
     A Boolean indicating whether the client should automatically settle messages:
         True if the messages should be settled automatically
         False if the caller intends to manually settle messages
         A string containing the version of the SDK used for telemetry purposes] */
-function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
+function Amqp(autoSettleMessages, sdkVersionString) {
   var autoSettleMode = autoSettleMessages ? amqp10.Constants.receiverSettleMode.autoSettle : amqp10.Constants.receiverSettleMode.settleOnDisposition;
   // node-amqp10 has an automatic reconnection/link re-attach feature that is enabled by default.
   // In our case we want to control the reconnection flow ourselves, so we need to disable it.
@@ -81,21 +79,24 @@ function Amqp(saslPlainUri, autoSettleMessages, sdkVersionString) {
   this._sender = null;
   this._connected = false;
 
-  this.uri = saslPlainUri;
-
-  if (this.uri.substring(0, 3) === 'wss') {
-    var wsTransport = require('amqp10-transport-ws');
-    wsTransport.register(amqp10.TransportProvider);
-  }
 }
 
 /**
  * @method             module:azure-iot-amqp-base.Amqp#connect
  * @description        Establishes a connection with the IoT Hub instance.
+ * @param              uri    The uri to connect with.
  * @param {Function}   done   Called when the connection is established of if an error happened.
  */
-Amqp.prototype.connect = function connect(done) {
+Amqp.prototype.connect = function connect(uri, sslOptions, done) {
+  /*Codes_SRS_NODE_COMMON_AMQP_06_002: [The connect method shall throw a ReferenceError if the uri parameter has not been supplied.] */
+  if (!uri) throw new ReferenceError('The uri parameter can not be \'' + uri + '\'');
   if (!this._connected) {
+    this.uri = uri;
+    if (this.uri.substring(0, 3) === 'wss') {
+      var wsTransport = require('amqp10-transport-ws');
+      wsTransport.register(amqp10.TransportProvider);
+    }
+    this._amqp.policy.connect.options.sslOptions = sslOptions;
     this._amqp.connect(this.uri)
       .then(function (result) {
         debug('AMQP transport connected.');

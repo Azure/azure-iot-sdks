@@ -12,12 +12,12 @@ and removing calls to _DoWork will yield the same results. */
 #ifdef ARDUINO
 #include "AzureIoT.h"
 #else
-#include "iothub_client_ll.h"
-#include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "iothubtransporthttp.h"
 #include "azure_c_shared_utility/platform.h"
+#include "iothub_client_ll.h"
+#include "iothub_message.h"
+#include "iothubtransporthttp.h"
 #endif
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -36,7 +36,6 @@ static char propText[1024];
 #define MESSAGE_COUNT       5
 #define DOWORK_LOOP_NUM     3
 
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
 typedef struct EVENT_INSTANCE_TAG
 {
@@ -108,6 +107,7 @@ void iothub_client_sample_http_run(void)
     EVENT_INSTANCE messages[MESSAGE_COUNT];
     double avgWindSpeed = 10.0;
     int receiveContext = 0;
+
     g_continueRunning = true;
 
     srand((unsigned int)time(NULL));

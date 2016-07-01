@@ -6,8 +6,8 @@
 var fs = require('fs');
 // var Protocol = require('azure-iot-device-amqp').Amqp;
 // Uncomment one of these transports and then change it in fromConnectionString to test other transports
-// var Protocol = require('azure-iot-device-amqp-ws').AmqpWs;
-var Protocol = require('azure-iot-device-http').Http;
+var Protocol = require('azure-iot-device-amqp-ws').AmqpWs;
+// var Protocol = require('azure-iot-device-http').Http;
 // var Protocol = require('azure-iot-device-mqtt').Mqtt;
 var Client = require('azure-iot-device').Client;
 var Message = require('azure-iot-device').Message;
@@ -55,11 +55,11 @@ var connectCallback = function (err) {
   }
 };
 
-var options = {
-  cert : fs.readFileSync(certFile).toString(),
-  key : fs.readFileSync(keyFile).toString(),
-  passphrase: passphrase
-};
+ var options = {
+   cert : fs.readFileSync(certFile).toString(),
+   key : fs.readFileSync(keyFile).toString(),
+   passphrase: passphrase
+ };
 
 // Calling setOptions with the x509 certificate and key (and optionally, passphrase) will configure the client transport to use x509 when connecting to IoT Hub
 client.setOptions(options);

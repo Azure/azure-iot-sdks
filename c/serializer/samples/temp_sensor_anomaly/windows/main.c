@@ -2,13 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/platform.h"
 #include "iothubtransporthttp.h"
 #include "schemalib.h"
 #include "serializer.h"
 #include "schemaserializer.h"
-#include "azure_c_shared_utility/threadapi.h"
 #include "iothub_client_ll.h"
-#include "azure_c_shared_utility/platform.h"
 
 static const char* connectionString = "[device connection string]";
 static const char* deviceId = "[deviceName]"; /*must match the one on connectionString*/

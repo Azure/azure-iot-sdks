@@ -19,7 +19,6 @@
 
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/iot_logging.h"
 #include "azure_c_shared_utility/platform.h"
 
 #include "azure_c_shared_utility/tlsio.h"
@@ -258,6 +257,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+
         platform_init();
         g_iothubAcctInfo = IoTHubAccount_Init(true, "mqtt_e2e_tests");
         ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
@@ -403,7 +403,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
         ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
 
-        LogInfo("IoTHub_MQTT_RecvMessage_E2ETest Message recv started.");
+        (void)printf("IoTHub_MQTT_RecvMessage_E2ETest Message recv started.");
 
         time_t beginOperation, nowTime;
         beginOperation = time(NULL);
@@ -435,11 +435,11 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         // Temporary code till debug
         if (!notifyData->wasFound)
         {
-            LogError("IoTHub_MQTT_RecvMessage_E2ETest message was not found.");
+            (void)printf("IoTHub_MQTT_RecvMessage_E2ETest message was not found.");
         }
         else
         {
-            LogInfo("IoTHub_MQTT_RecvMessage_E2ETest message was successful.");
+            (void)printf("IoTHub_MQTT_RecvMessage_E2ETest message was successful.");
         }
 
         // cleanup

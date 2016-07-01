@@ -10,7 +10,8 @@
 #include "multitree.h"
 #include <string.h>
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/macro_utils.h"
 
 /*assume a name cannot be longer than 100 characters*/
 #define INNER_NODE_NAME_SIZE 128
@@ -97,10 +98,10 @@ typedef enum CREATELEAF_RESULT_TAG
 
 static const char* CreateLeaf_ResultAsString[CREATELEAF_RESULT_COUNT] =
 {   
-    STRINGIFY(CREATELEAF_OK),
-    STRINGIFY(CREATELEAF_ALREADY_EXISTS),
-    STRINGIFY(CREATELEAF_EMPTY_NAME),
-    STRINGIFY(CREATELEAF_ERROR)
+    TOSTRING(CREATELEAF_OK),
+    TOSTRING(CREATELEAF_ALREADY_EXISTS),
+    TOSTRING(CREATELEAF_EMPTY_NAME),
+    TOSTRING(CREATELEAF_ERROR)
 };
 
 /*name cannot be empty, value can be empty or NULL*/

@@ -8,8 +8,8 @@
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "iothubtransportmqtt.h"
 #include "azure_c_shared_utility/platform.h"
+#include "iothubtransportmqtt.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
@@ -27,7 +27,6 @@ static bool g_continueRunning;
 #define MESSAGE_COUNT 5
 #define DOWORK_LOOP_NUM     3
 
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
 typedef struct EVENT_INSTANCE_TAG
 {

@@ -18,6 +18,7 @@ if(${use_http})
     if(NOT ${dont_use_uploadtoblob})
         add_sample_directory(iothub_client_sample_upload_to_blob)
     endif()
+    add_sample_directory(iothub_client_sample_http_x509)
 endif()
 
 if(${use_mqtt})

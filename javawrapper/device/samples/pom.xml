@@ -17,6 +17,7 @@
     <version>1.0.1</version>
   </parent>  
   <modules>
+    <module>file-upload-sample</module>
     <module>send-event-sample</module>
     <module>send-receive-sample</module>
     <module>send-serialized-event</module>

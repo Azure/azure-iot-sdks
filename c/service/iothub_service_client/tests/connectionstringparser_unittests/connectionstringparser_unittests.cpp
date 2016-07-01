@@ -16,7 +16,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/map.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/lock.h"
 
 #define GBALLOC_H
