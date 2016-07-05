@@ -910,14 +910,40 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
         }
         else
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_038: [Otherwise, IoTHubClient_LL shall call the function _SetOption of the underlying transport and return what that function is returning.] */
-            result = handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value);
 
-            if (result != IOTHUB_CLIENT_OK)
+            /*Codes_SRS_IOTHUBCLIENT_LL_02_099: [ IoTHubClient_LL_SetOption shall return according to the table below ]*/
+            IOTHUB_CLIENT_RESULT uploadToBlob_result; 
+#ifndef DONT_USE_UPLOADTOBLOB
+            uploadToBlob_result = IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
+            if(uploadToBlob_result == IOTHUB_CLIENT_ERROR)
             {
-                LogError("underlying transport failed, returned = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
+                LogError("unable to IoTHubClient_LL_UploadToBlob_SetOption");
+                result = IOTHUB_CLIENT_ERROR;
             }
-        }
+#else
+            uploadToBlob_result = IOTHUB_CLIENT_INVALID_ARG; /*harmless value (IOTHUB_CLIENT_INVALID_ARG)in the case when uploadtoblob is not compiled in, otherwise whatever IoTHubClient_LL_UploadToBlob_SetOption returned*/
+#endif /*DONT_USE_UPLOADTOBLOB*/
+
+                
+            result =
+                /*based on uploadToBlob_result value this is what happens:*/
+                /*IOTHUB_CLIENT_INVALID_ARG always returns what IoTHubTransport_SetOption returns*/
+                /*IOTHUB_CLIENT_ERROR always returns IOTHUB_CLIENT_ERROR */
+                /*IOTHUB_CLIENT_OK returns OK
+                    IOTHUB_CLIENT_OK if IoTHubTransport_SetOption returns OK or INVALID_ARG
+                    IOTHUB_CLIENT_ERROR if IoTHubTransport_SetOption returns ERROR*/
+
+                (uploadToBlob_result == IOTHUB_CLIENT_INVALID_ARG) ? handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value) :
+                (uploadToBlob_result == IOTHUB_CLIENT_ERROR) ? IOTHUB_CLIENT_ERROR :
+                (handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value) == IOTHUB_CLIENT_ERROR) ? IOTHUB_CLIENT_ERROR : IOTHUB_CLIENT_OK;
+
+                if (result != IOTHUB_CLIENT_OK)
+                {
+                    LogError("underlying transport failed, returned = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
+                }
+#ifndef DONT_USE_UPLOADTOBLOB
+            }
+#endif
     }
     return result;
 }
