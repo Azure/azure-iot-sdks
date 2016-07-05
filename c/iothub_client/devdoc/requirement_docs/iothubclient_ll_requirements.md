@@ -354,10 +354,12 @@ If the credentials used to create `iotHubClientHandle` do not have "deviceKey" o
 
 ###IoTHubClient_LL_UploadToBlob_SetOption
 ```c
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size);
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* optionName, const void* value)
 ```
 
 IoTHubClient_LL_UploadToBlob_SetOption sets an option for UploadToBlob.
+
+**SRS_IOTHUBCLIENT_LL_02_110: [** If parameter `handle` is NULL then IoTHubClient_LL_UploadToBlob_SetOption shall fail and return IOTHUB_CLIENT_ERROR. **]**
 
 Handled options are
 
@@ -365,6 +367,8 @@ Handled options are
 **SRS_IOTHUBCLIENT_LL_02_101: [** `x509privatekey` - then `value` is a null terminated string that contains the x509 privatekey. **]**
 
 **SRS_IOTHUBCLIENT_LL_02_102: [** If an unknown option is presented then `IoTHubClient_LL_UploadToBlob_SetOption` shall return IOTHUB_CLIENT_INVALID_ARG. **]**
+
+**SRS_IOTHUBCLIENT_LL_02_109: [** If the authentication scheme is NOT x509 then `IoTHubClient_LL_UploadToBlob_SetOption` shall return IOTHUB_CLIENT_INVALID_ARG. **]**
 
 **SRS_IOTHUBCLIENT_LL_02_103: [** The options shall be saved. **]** 
 **SRS_IOTHUBCLIENT_LL_02_104: [** If saving fails, then `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return IOTHUB_CLIENT_ERROR. **]**

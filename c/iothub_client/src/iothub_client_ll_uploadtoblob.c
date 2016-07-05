@@ -175,11 +175,12 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
             else
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_072: [ IoTHubClient_LL_UploadToBlob shall add the following name:value to request HTTP headers: ] "Content-Type": "application/json" "Accept": "application/json" "User-Agent": "iothubclient/" IOTHUB_SDK_VERSION*/
+                /*Codes_SRS_IOTHUBCLIENT_LL_02_107: [ - "Authorization" header shall not be build. ]*/
                 if (!(
                     (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, "Content-Type", "application/json") == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, "Accept", "application/json") == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, "User-Agent", "iothubclient/" IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK) &&
-                    (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, "Authorization", "") == HTTP_HEADERS_OK)
+                    (handleData->authorizationScheme==X509 || (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, "Authorization", "") == HTTP_HEADERS_OK))
                     ))
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_071: [ If creating the HTTP headers fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
@@ -195,6 +196,41 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                     {
                         /*wasIoTHubRequestSuccess takes care of the return value*/
                         LogError("Internal Error: unexpected value in handleData->authorizationScheme = %d", handleData->authorizationScheme);
+                        break;
+                    }
+                    case(X509):
+                    {
+                        unsigned int statusCode;
+                        /*Codes_SRS_IOTHUBCLIENT_LL_02_108: [ IoTHubClient_LL_UploadToBlob shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
+                        if (HTTPAPIEX_ExecuteRequest(
+                            iotHubHttpApiExHandle,          /*HTTPAPIEX_HANDLE handle - the handle created at the beginning of `IoTHubClient_LL_UploadToBlob`*/
+                            HTTPAPI_REQUEST_GET,            /*HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_GET*/
+                            STRING_c_str(relativePath),     /*const char* relativePath - the HTTP relative path*/
+                            requestHttpHeaders,             /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle - request HTTP headers*/
+                            NULL,                           /*BUFFER_HANDLE requestContent - NULL*/
+                            &statusCode,                    /*unsigned int* statusCode - the address of an unsigned int that will contain the HTTP status code*/
+                            NULL,                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandl - NULL*/
+                            responseContent                 /*BUFFER_HANDLE responseContent - the HTTP response BUFFER_HANDLE - responseContent*/
+                        ) != HTTPAPIEX_OK)
+                        {
+                            /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                            result = __LINE__;
+                            LogError("unable to HTTPAPIEX_ExecuteRequest");
+                        }
+                        else
+                        {
+                            /*Codes_SRS_IOTHUBCLIENT_LL_02_077: [ If HTTP statusCode is greater than or equal to 300 then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                            if (statusCode >= 300)
+                            {
+                                result = __LINE__;
+                                wasIoTHubRequestSuccess = 0;
+                                LogError("HTTP code was %u", statusCode);
+                            }
+                            else
+                            {
+                                wasIoTHubRequestSuccess = 1;
+                            }
+                        }
                         break;
                     }
                     case (SAS_TOKEN):
@@ -520,6 +556,37 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
                         result = __LINE__;
                         break;
                     }
+                    case (X509):
+                    {
+                        unsigned int notificationStatusCode;
+                        if (HTTPAPIEX_ExecuteRequest(
+                            iotHubHttpApiExHandle,
+                            HTTPAPI_REQUEST_POST,
+                            STRING_c_str(relativePathNotification),
+                            requestHttpHeaders,
+                            messageBody,
+                            &notificationStatusCode,
+                            NULL,
+                            NULL) != HTTPAPIEX_OK)
+                        {
+                            LogError("unable to do HTTPAPIEX_ExecuteRequest");
+                            result = __LINE__;
+                        }
+                        else
+                        {
+                            if (notificationStatusCode >= 300)
+                            {
+                                /*Codes_SRS_IOTHUBCLIENT_LL_02_087: [If the statusCode of the HTTP request is greater than or equal to 300 then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_ERROR]*/
+                                LogError("server didn't like the notification request");
+                                result = __LINE__;
+                            }
+                            else
+                            {
+                                result = 0;
+                            }
+                        }
+                        break;
+                    }
                     case (DEVICE_KEY):
                     {
                         STRING_HANDLE empty = STRING_new();
@@ -647,11 +714,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
         }
         else
         {
-            /*TODO: here is a bug*/
             if (
                 (handleData->authorizationScheme == X509) &&
 
                 /*transmit the x509certificate and x509privatekey*/
+                /*Codes_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
                 (!(
                     (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, "x509certificate", handleData->credentials.x509credentials.x509certificate) == HTTPAPIEX_OK) &&
                     (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, "x509privatekey", handleData->credentials.x509credentials.x509privatekey) == HTTPAPIEX_OK)
@@ -829,6 +896,7 @@ void IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* optionName, const void* value)
 {
     IOTHUB_CLIENT_RESULT result;
+    /*Codes_SRS_IOTHUBCLIENT_LL_02_110: [ If parameter handle is NULL then IoTHubClient_LL_UploadToBlob_SetOption shall fail and return IOTHUB_CLIENT_ERROR. ]*/
     if (handle == NULL)
     {
         LogError("invalid argument detected: IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle=%p, const char* optionName=%s, const void* value=%p", handle, optionName, value);
