@@ -113,6 +113,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -166,8 +167,8 @@
     <Import Project="packages\Microsoft.Azure.C.SharedUtility.1.0.11\build\native\Microsoft.Azure.C.SharedUtility.targets" Condition="Exists('packages\Microsoft.Azure.C.SharedUtility.1.0.11\build\native\Microsoft.Azure.C.SharedUtility.targets')" />
     <Import Project="packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.11\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.11\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
     <Import Project="packages\Microsoft.Azure.IoTHub.Serializer.1.0.11\build\native\Microsoft.Azure.IoTHub.Serializer.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.Serializer.1.0.11\build\native\Microsoft.Azure.IoTHub.Serializer.targets')" />
-    <Import Project="packages\Microsoft.Azure.umqtt.1.0.11\build\native\Microsoft.Azure.umqtt.targets" Condition="Exists('packages\Microsoft.Azure.umqtt.1.0.11\build\native\Microsoft.Azure.umqtt.targets')" />
-    <Import Project="packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.10\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.10\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" />
+    <Import Project="packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.11\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.11\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" />
+    <Import Project="packages\Microsoft.Azure.umqtt.1.0.10\build\native\Microsoft.Azure.umqtt.targets" Condition="Exists('packages\Microsoft.Azure.umqtt.1.0.10\build\native\Microsoft.Azure.umqtt.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -176,7 +177,7 @@
     <Error Condition="!Exists('packages\Microsoft.Azure.C.SharedUtility.1.0.11\build\native\Microsoft.Azure.C.SharedUtility.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.C.SharedUtility.1.0.11\build\native\Microsoft.Azure.C.SharedUtility.targets'))" />
     <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.11\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.11\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
     <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.Serializer.1.0.11\build\native\Microsoft.Azure.IoTHub.Serializer.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.Serializer.1.0.11\build\native\Microsoft.Azure.IoTHub.Serializer.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Azure.umqtt.1.0.11\build\native\Microsoft.Azure.umqtt.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.umqtt.1.0.11\build\native\Microsoft.Azure.umqtt.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.10\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.10\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.11\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.MqttTransport.1.0.11\build\native\Microsoft.Azure.IoTHub.MqttTransport.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.umqtt.1.0.10\build\native\Microsoft.Azure.umqtt.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.umqtt.1.0.10\build\native\Microsoft.Azure.umqtt.targets'))" />
   </Target>
 </Project>
