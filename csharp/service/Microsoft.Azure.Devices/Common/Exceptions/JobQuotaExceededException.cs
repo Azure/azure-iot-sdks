@@ -5,7 +5,9 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
 {
     using System;
 
+#if !WINDOWS_UWP
     [Serializable]
+#endif
     public sealed class JobQuotaExceededException : IotHubException
     {
         public JobQuotaExceededException()

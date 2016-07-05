@@ -193,6 +193,7 @@ namespace Microsoft.Azure.Devices.Common
             }
         }
 
+#if !WINDOWS_UWP
         [Fx.Tag.Blocking]
         public static bool WaitOne(WaitHandle waitHandle, TimeSpan timeout)
         {
@@ -207,5 +208,6 @@ namespace Microsoft.Azure.Devices.Common
                 return waitHandle.WaitOne(timeout, false);
             }
         }
+#endif
     }
 }

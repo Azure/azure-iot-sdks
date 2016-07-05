@@ -306,6 +306,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+
         g_testByTest = MicroMockCreateMutex();
         ASSERT_IS_NOT_NULL(g_testByTest);
 

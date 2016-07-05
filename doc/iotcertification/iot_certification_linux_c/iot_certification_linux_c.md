@@ -186,8 +186,7 @@ This section walks you through building, deploying and validating the IoT Client
 -   Set the values for all the variables listed in the file as explained below.
 
     -   **IOTHUB_CONNECTION_STRING:** Connection string to your IoT Hub you have received in [Step 1](#Step-1-Configure)
-    -   **IOTHUB_DEVICE_ID:** Id of the device you have registered in [Step 2](#Step-2-Register)
-    -   **IOTHUB_DEVICE_KEY:** Primary key of the device registered in [Step 2](#Step-2-Register)
+
     -   **IOTHUB_EVENTHUB_CONNECTION_STRING:** Connection string to your Event Hub. It should be in the form:
     
             Endpoint=[Event Hub-compatible endpoint];SharedAccessKeyName=[IOTHUB_POLICY_NAME];SharedAccessKey=[IOTHUB_POLICY_KEY]
@@ -207,11 +206,11 @@ This section walks you through building, deploying and validating the IoT Client
 
 -   Build the SDK using following command. If you are facing any issues during build, follow troubleshooting [Step 5](#Step-5-Troubleshooting).
 
-        sudo ./azure-iot-sdks/c/build_all/linux/build.sh | tee LogFile.txt
+        sudo ./azure-iot-sdks/c/build_all/linux/build.sh --run-e2e-tests | tee LogFile.txt
 
     ***Note:*** *LogFile.txt in above command should be replaced with a file name where build output will be written.*
     
-    *build.sh creates a folder called "cmake" in your home folder. Inside "cmake" are all the results of the compilation of the complete software.*
+    *build.sh creates a folder called "cmake" under "~/azure-iot-sdks/c/". Inside "cmake" are all the results of the compilation of the complete software.*
 
 
 <a name="Step-3-3-Run"></a>
@@ -237,15 +236,18 @@ section. These will be needed in [Step 4](#Step-4-2-Share)
 
     **If using AMQP protocol:** Run sample *iothub\_client\_sample\_amqp*
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
+		~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
+
 
     **If using HTTP protocol:** Run sample *iothub\_client\_sample\_http*
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
+		~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
+
 
     **If using MQTT protocol:** Run sample *iothub\_client\_sample\_mqtt*
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt
+		~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt
+
 
 4.  Verify that the confirmation messages show an OK. If not, then you may have
     incorrectly copied the device hub connection information.

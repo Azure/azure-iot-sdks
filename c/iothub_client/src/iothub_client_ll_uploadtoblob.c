@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef DONT_USE_UPLOADTOBLOB
+#error "trying to compile iothub_client_ll_uploadtoblob.c while the symbol DONT_USE_UPLOADTOBLOB is #define'd"
+#else
+
 #include <stdlib.h>
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
@@ -9,7 +13,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
 
@@ -607,8 +611,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
     if (
         (handle == NULL) ||
         (destinationFileName == NULL) ||
-        ((source == NULL) && (size > 0)) ||
-        (size >= 64*1024*1024)
+        ((source == NULL) && (size > 0))
         )
     {
         LogError("invalid argument detected handle=%p destinationFileName=%p source=%p size=%zu", handle, destinationFileName, source, size);
@@ -777,3 +780,4 @@ void IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h
         free(handleData);
     }
 }
+#endif /*DONT_USE_UPLOADTOBLOB*/

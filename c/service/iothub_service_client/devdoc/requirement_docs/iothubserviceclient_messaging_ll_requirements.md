@@ -80,12 +80,37 @@ extern IOTHUB_MESSAGING_HANDLE IoTHubMessaging_LL_Create(IOTHUB_SERVICECLIENT_HA
 ```
 **SRS_IOTHUBMESSAGING_12_001: [** If the serviceClientHandle input parameter is NULL IoTHubMessaging_LL_Create shall return NULL **]**
 
+**SRS_IOTHUBMESSAGING_12_064: [** If any member of the serviceClientHandle input parameter is NULL IoTHubMessaging_LL_Create shall return NULL **]**
+
 **SRS_IOTHUBMESSAGING_12_002: [** IoTHubMessaging_LL_Create shall allocate memory for a new messaging instance **]**
 
 **SRS_IOTHUBMESSAGING_12_003: [** If the allocation failed, IoTHubMessaging_LL_Create shall return NULL **]**
 
 **SRS_IOTHUBMESSAGING_12_004: [** If the allocation and creation is successful, IoTHubMessaging_LL_Create shall return with the messaging instance, a non-NULL value **]**
 
+**SRS_IOTHUBMESSAGING_12_065: [** IoTHubMessaging_LL_Create shall allocate memory and copy hostName to result->hostName by calling mallocAndStrcpy_s **]**
+
+**SRS_IOTHUBMESSAGING_12_066: [** If the mallocAndStrcpy_s fails, IoTHubMessaging_LL_Create shall do clean up and return NULL **]**
+
+**SRS_IOTHUBMESSAGING_12_067: [** IoTHubMessaging_LL_Create shall allocate memory and copy iothubName to result->iothubName by calling mallocAndStrcpy_s **]**
+
+**SRS_IOTHUBMESSAGING_12_068: [** If the mallocAndStrcpy_s fails, IoTHubMessaging_LL_Create shall do clean up and return NULL **]**
+
+**SRS_IOTHUBMESSAGING_12_069: [** IoTHubMessaging_LL_Create shall allocate memory and copy iothubSuffix to result->iothubSuffix by calling mallocAndStrcpy_s **]**
+
+**SRS_IOTHUBMESSAGING_12_070: [** If the mallocAndStrcpy_s fails, IoTHubMessaging_LL_Create shall do clean up and return NULL **]**
+
+**SRS_IOTHUBMESSAGING_12_071: [** IoTHubMessaging_LL_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s **]**
+
+**SRS_IOTHUBMESSAGING_12_072: [** If the mallocAndStrcpy_s fails, IoTHubMessaging_LL_Create shall do clean up and return NULL **]**
+
+**SRS_IOTHUBMESSAGING_12_073: [** IoTHubMessaging_LL_Create shall allocate memory and copy keyName to result->keyName by calling mallocAndStrcpy_s **]**
+
+**SRS_IOTHUBMESSAGING_12_075: [** IoTHubMessaging_LL_Create shall set messaging isOpened flag to false **]**
+
+**SRS_IOTHUBMESSAGING_12_074: [** If the mallocAndStrcpy_s fails, IoTHubMessaging_LL_Create shall do clean up and return NULL **]**
+
+**SRS_IOTHUBMESSAGING_12_076: [** If create is successfull IoTHubMessaging_LL_Create shall save the callback data return the valid messaging handle **]**
 
 ## IoTHubMessaging_LL_Destroy
 ```c
@@ -101,6 +126,8 @@ extern void IoTHubMessaging_LL_Destroy(IOTHUB_MESSAGING_HANDLE messagingHandle);
 extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagingHandle, IOTHUB_OPEN_COMPLETE_CALLBACK openCompleteCallback, void* userContextCallback);
 ```
 **SRS_IOTHUBMESSAGING_12_007: [** If the messagingHandle input parameter is NULL IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_INVALID_ARG **]**
+
+**SRS_IOTHUBMESSAGING_12_077: [** If the messagingHandle->hostname input parameter is NULL IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_INVALID_ERROR **]**
 
 **SRS_IOTHUBMESSAGING_12_008: [** If messaging is already opened IoTHubMessaging_LL_Open return shall IOTHUB_MESSAGING_OK **]**
 
@@ -120,8 +147,6 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE m
 
 **SRS_IOTHUBMESSAGING_12_016: [** IoTHubMessaging_LL_Open shall set the AMQP outgoing window to UINT32 maximum value by calling session_set_outgoing_window **]**
 
-**SRS_IOTHUBMESSAGING_12_017: [** IoTHubMessaging_LL_Open shall set uAMQP "amqp.annotation.x-opt-enqueuedtimeutc" filter for the link with the current time by calling get_time **]**
-
 **SRS_IOTHUBMESSAGING_12_018: [** IoTHubMessaging_LL_Open shall create uAMQP sender link by calling the link_create **]**
 
 **SRS_IOTHUBMESSAGING_12_019: [** IoTHubMessaging_LL_Open shall set the AMQP sender link settle mode to sender_settle_mode_unsettled  by calling link_set_snd_settle_mode **]**
@@ -137,8 +162,6 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE m
 **SRS_IOTHUBMESSAGING_12_024: [** IoTHubMessaging_LL_Open shall create uAMQP receiver link by calling the link_create **]**
 
 **SRS_IOTHUBMESSAGING_12_025: [** IoTHubMessaging_LL_Open shall set the AMQP receiver link settle mode to receiver_settle_mode_first by calling link_set_rcv_settle_mode **]**
-
-**SRS_IOTHUBMESSAGING_12_026: [** IoTHubMessaging_LL_Open shall set receiver link AMQP maximum message size to the server maximum (255K) by calling link_set_max_message_size **]**
 
 **SRS_IOTHUBMESSAGING_12_027: [** IoTHubMessaging_LL_Open shall create uAMQP messaging source for receiver by calling the messaging_create_source **]**
 
@@ -212,11 +235,11 @@ extern void IoTHubMessaging_LL_DoWork();
 ```c 
 static void IoTHubMessaging_LL_SenderStateChanged(void* context, MESSAGE_SENDER_STATE new_state, MESSAGE_SENDER_STATE previous_state);
 ```
-**SRS_IOTHUBMESSAGING_12_049: [** If new_state is not equal to MESSAGE_RECEIVER_STATE_OPEN IoTHubMessaging_LL_SenderStateChanged shall return **]**
+**SRS_IOTHUBMESSAGING_12_049: [** IoTHubMessaging_LL_SenderStateChanged shall save the new_state to local variable **]**
 
-**SRS_IOTHUBMESSAGING_12_050: [** If new_state is equal to MESSAGE_RECEIVER_STATE_OPEN IoTHubMessaging_LL_SenderStateChanged shall save change the sender_state local variable to open  **]**
+**SRS_IOTHUBMESSAGING_12_050: [** If both sender and receiver state is open IoTHubMessaging_LL_SenderStateChanged shall set the isOpened local variable to true **]**
 
-**SRS_IOTHUBMESSAGING_12_051: [** If either sender_state nor receiver_state open IoTHubMessaging_LL_SenderStateChanged shall return **]**
+**SRS_IOTHUBMESSAGING_12_051: [** If neither sender_state nor receiver_state is open IoTHubMessaging_LL_SenderStateChanged shall set the local isOpened variable to false **]**
 
 
 
@@ -224,11 +247,11 @@ static void IoTHubMessaging_LL_SenderStateChanged(void* context, MESSAGE_SENDER_
 ```c 
 static void IoTHubMessaging_LL_ReceiverStateChanged(const void* context, MESSAGE_RECEIVER_STATE new_state, MESSAGE_RECEIVER_STATE previous_state);
 ```
-**SRS_IOTHUBMESSAGING_12_052: [** If new_state is not equal to MESSAGE_RECEIVER_STATE_OPEN IoTHubMessaging_LL_ReceiverStateChanged shall return **]**
+**SRS_IOTHUBMESSAGING_12_052: [** IoTHubMessaging_LL_ReceiverStateChanged shall save the new_state to local variable **]**
 
-**SRS_IOTHUBMESSAGING_12_053: [** If new_state is equal to MESSAGE_RECEIVER_STATE_OPEN IoTHubMessaging_LL_ReceiverStateChanged shall save change the receiver_state local variable to open  **]**
+**SRS_IOTHUBMESSAGING_12_053: [** If both sender and receiver state is open IoTHubMessaging_LL_ReceiverStateChanged shall set the isOpened local variable to true **]**
 
-**SRS_IOTHUBMESSAGING_12_054: [** If either sender_state nor receiver_state open IoTHubMessaging_LL_ReceiverStateChanged shall return **]**
+**SRS_IOTHUBMESSAGING_12_054: [** If neither sender_state nor receiver_state is open IoTHubMessaging_LL_ReceiverStateChanged shall set the local isOpened variable to false **]**
 
 
 
@@ -236,7 +259,7 @@ static void IoTHubMessaging_LL_ReceiverStateChanged(const void* context, MESSAGE
 ```c 
 static void IoTHubMessaging_LL_SendMessageComplete(void* context, MESSAGE_SEND_RESULT send_result);
 ```
-**SRS_IOTHUBMESSAGING_12_055: [** If context is not NULL and send_result is equal to MESSAGE_SEND_ERROR IoTHubMessaging_LL_SendMessageComplete shall call IOTHUB_SEND_COMPLETE_CALLBACK with NULL **]**
+**SRS_IOTHUBMESSAGING_12_055: [** If context is not NULL and IoTHubMessaging_LL_SendMessageComplete shall call user callback with user context and messaging result **]**
 
 **SRS_IOTHUBMESSAGING_12_056: [** If context is NULL IoTHubMessaging_LL_SendMessageComplete shall return **]**
 
@@ -245,7 +268,7 @@ static void IoTHubMessaging_LL_SendMessageComplete(void* context, MESSAGE_SEND_R
 ```c 
 static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context, MESSAGE_HANDLE message);
 ```
-**SRS_IOTHUBMESSAGING_12_057: [** If context is NULL IoTHubMessaging_LL_FeedbackMessageReceived shall do nothing and return NULL **]**
+**SRS_IOTHUBMESSAGING_12_057: [** If context is NULL IoTHubMessaging_LL_FeedbackMessageReceived shall do nothing and return delivery_accepted **]**
 
 **SRS_IOTHUBMESSAGING_12_058: [** If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall get the content string of the message by calling message_get_body_amqp_data **]**
 
@@ -257,4 +280,4 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
 
 **SRS_IOTHUBMESSAGING_12_062: [** If context is not NULL IoTHubMessaging_LL_FeedbackMessageReceived shall call IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK with the received IOTHUB_SERVICE_FEEDBACK_BATCH **]**
 
-**SRS_IOTHUBMESSAGING_12_063: [** If context is NULL IoTHubMessaging_LL_FeedbackMessageReceived shall do nothing and return NULL **]**
+**SRS_IOTHUBMESSAGING_12_078: [** IoTHubMessaging_LL_FeedbackMessageReceived shall do clean up before exits **]**

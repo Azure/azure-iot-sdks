@@ -265,3 +265,10 @@ void remote_monitoring_run(void)
         platform_deinit();
     }
 }
+
+int main(void)
+{
+    remote_monitoring_run();
+    return 0;
+}
+

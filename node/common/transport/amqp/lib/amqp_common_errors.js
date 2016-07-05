@@ -13,8 +13,8 @@ var amqp10 = require('amqp10');
 var translateError = function translateError(message, amqpError) {
   var error;
 
-  if (amqpError.constructor.name === 'AMQPError') {
-    switch (amqpError.condition.contents) {
+  if (amqpError.condition) {
+    switch (amqpError.condition) {
       case 'amqp:not-found':
         /*Codes_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_006: [`translateError` shall return an `DeviceNotFoundError` if the AMQP error condition is `amqp:not-found`.]*/
         error = new errors.DeviceNotFoundError(message);

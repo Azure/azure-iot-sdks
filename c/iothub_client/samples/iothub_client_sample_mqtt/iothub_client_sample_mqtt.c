@@ -8,8 +8,8 @@
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "iothubtransportmqtt.h"
 #include "azure_c_shared_utility/platform.h"
+#include "iothubtransportmqtt.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
@@ -23,10 +23,10 @@ static const char* connectionString = "[device connection string]";
 static int callbackCounter;
 static char msgText[1024];
 static char propText[1024];
+static bool g_continueRunning;
 #define MESSAGE_COUNT 5
-static bool continueRunning;
+#define DOWORK_LOOP_NUM     3
 
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
 typedef struct EVENT_INSTANCE_TAG
 {
@@ -34,12 +34,12 @@ typedef struct EVENT_INSTANCE_TAG
     int messageTrackingId;  // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
 
-
 static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
     int* counter = (int*)userContextCallback;
     const char* buffer;
     size_t size;
+
     if (IoTHubMessage_GetByteArray(message, (const unsigned char**)&buffer, &size) != IOTHUB_MESSAGE_OK)
     {
         (void)printf("unable to retrieve the message data\r\n");
@@ -50,7 +50,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         // If we receive the work 'quit' then we stop running
         if (memcmp(buffer, "quit", size) == 0)
         {
-            continueRunning = false;
+            g_continueRunning = false;
         }
     }
 
@@ -94,7 +94,7 @@ void iothub_client_sample_mqtt_run(void)
 
     EVENT_INSTANCE messages[MESSAGE_COUNT];
 
-    continueRunning = true;
+    g_continueRunning = true;
     srand((unsigned int)time(NULL));
     double avgWindSpeed = 10.0;
     
@@ -107,8 +107,6 @@ void iothub_client_sample_mqtt_run(void)
     }
     else
     {
-        (void)printf("Starting the IoTHub client sample MQTT...\r\n");
-
         if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
         {
             (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
@@ -136,44 +134,57 @@ void iothub_client_sample_mqtt_run(void)
                 (void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
 
                 /* Now that we are ready to receive commands, let's send some messages */
-                for (size_t i = 0; i < MESSAGE_COUNT; i++)
+                size_t iterator = 0;
+                do
                 {
-                    sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f}", avgWindSpeed + (rand() % 4 + 2));
-                    if ((messages[i].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
+                    if (iterator < MESSAGE_COUNT)
                     {
-                        (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
-                    }
-                    else
-                    {
-                        messages[i].messageTrackingId = i;
-                        MAP_HANDLE propMap = IoTHubMessage_Properties(messages[i].messageHandle);
-                        sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
-                        if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                        sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"windSpeed\":%.2f}", avgWindSpeed + (rand() % 4 + 2));
+                        if ((messages[iterator].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
                         {
-                            (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
-                        }
-
-                        if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[i].messageHandle, SendConfirmationCallback, &messages[i]) != IOTHUB_CLIENT_OK)
-                        {
-                            (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
+                            (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
                         }
                         else
                         {
-                            (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub.\r\n", (int)i);
+                            messages[iterator].messageTrackingId = iterator;
+                            MAP_HANDLE propMap = IoTHubMessage_Properties(messages[iterator].messageHandle);
+                            sprintf_s(propText, sizeof(propText), "PropMsg_%d", iterator);
+                            if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                            {
+                                (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
+                            }
+
+                            if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messages[iterator].messageHandle, SendConfirmationCallback, &messages[iterator]) != IOTHUB_CLIENT_OK)
+                            {
+                                (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
+                            }
+                            else
+                            {
+                                (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub.\r\n", (int)iterator);
+                            }
                         }
-
                     }
-                }
-            }
+                    IoTHubClient_LL_DoWork(iotHubClientHandle);
+                    ThreadAPI_Sleep(1);
 
-            /* Wait for Commands. */
-            while (continueRunning)
-            {
-                IoTHubClient_LL_DoWork(iotHubClientHandle);
-                ThreadAPI_Sleep(1);
+                    iterator++;
+                } while (g_continueRunning);
+
+                (void)printf("iothub_client_sample_mqtt has gotten quit message, call DoWork %d more time to complete final sending...\r\n", DOWORK_LOOP_NUM);
+                for (size_t index = 0; index < DOWORK_LOOP_NUM; index++)
+                {
+                    IoTHubClient_LL_DoWork(iotHubClientHandle);
+                    ThreadAPI_Sleep(1);
+                }
             }
             IoTHubClient_LL_Destroy(iotHubClientHandle);
         }
         platform_deinit();
     }
+}
+
+int main(void)
+{
+    iothub_client_sample_mqtt_run();
+    return 0;
 }

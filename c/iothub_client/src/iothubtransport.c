@@ -17,7 +17,7 @@
 #include "iothub_client_private.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/vector.h"
 
 typedef struct TRANSPORT_HANDLE_DATA_TAG
@@ -109,6 +109,7 @@ TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
 						/*Codes_SRS_IOTHUBTRANSPORT_17_001: [ IoTHubTransport_Create shall return a non-NULL handle on success.]*/
 						result->stopThread = 1;
 						result->workerThreadHandle = NULL; /* create thread when work needs to be done */
+                        result->IoTHubTransport_GetHostname = transportProtocol->IoTHubTransport_GetHostname;
 						result->IoTHubTransport_SetOption = transportProtocol->IoTHubTransport_SetOption;
 						result->IoTHubTransport_Create = transportProtocol->IoTHubTransport_Create;
 						result->IoTHubTransport_Destroy = transportProtocol->IoTHubTransport_Destroy;

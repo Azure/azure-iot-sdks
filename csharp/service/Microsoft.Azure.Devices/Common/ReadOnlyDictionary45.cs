@@ -18,18 +18,28 @@ namespace Microsoft.Azure.Devices.Common
     ** Purpose: Read-only wrapper for another generic dictionary.
     **
     ===========================================================*/
+#if !WINDOWS_UWP
     [Serializable]
+#endif
     [DebuggerDisplay("Count = {Count}")]
     public sealed class ReadOnlyDictionary45<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary //, IReadOnlyDictionary<TKey, TValue>
     {
         readonly IDictionary<TKey, TValue> m_dictionary;
+#if !WINDOWS_UWP
         [NonSerialized]
+#endif
         Object m_syncRoot;
+#if !WINDOWS_UWP
         [NonSerialized]
+#endif
         KeyCollection m_keys;
+#if !WINDOWS_UWP
         [NonSerialized]
+#endif
         ValueCollection m_values;
+#if !WINDOWS_UWP
         [NonSerialized]
+#endif
         IReadOnlyIndicator m_readOnlyIndicator;
 
         public ReadOnlyDictionary45(IDictionary<TKey, TValue> dictionary)
@@ -413,8 +423,9 @@ namespace Microsoft.Azure.Devices.Common
                 return m_syncRoot;
             }
         }
-
+#if !WINDOWS_UWP
         [Serializable]
+#endif
         private struct DictionaryEnumerator : IDictionaryEnumerator
         {
             private readonly IDictionary<TKey, TValue> m_dictionary;
@@ -460,13 +471,19 @@ namespace Microsoft.Azure.Devices.Common
         #endregion
 
         [DebuggerDisplay("Count = {Count}")]
+#if !WINDOWS_UWP
         [Serializable]
+#endif
         public sealed class KeyCollection : ICollection<TKey>, ICollection
         {
             private readonly ICollection<TKey> m_collection;
+#if !WINDOWS_UWP
             [NonSerialized]
+#endif
             private Object m_syncRoot;
+#if !WINDOWS_UWP
             [NonSerialized]
+#endif
             private readonly IReadOnlyIndicator m_readOnlyIndicator;
 
             internal KeyCollection(ICollection<TKey> collection, IReadOnlyIndicator readOnlyIndicator)
@@ -587,13 +604,19 @@ namespace Microsoft.Azure.Devices.Common
         }
 
         [DebuggerDisplay("Count = {Count}")]
+#if !WINDOWS_UWP
         [Serializable]
+#endif
         public sealed class ValueCollection : ICollection<TValue>, ICollection
         {
             private readonly ICollection<TValue> m_collection;
+#if !WINDOWS_UWP
             [NonSerialized]
+#endif
             private Object m_syncRoot;
+#if !WINDOWS_UWP
             [NonSerialized]
+#endif
             private readonly IReadOnlyIndicator m_readOnlyIndicator;
 
             internal ValueCollection(ICollection<TValue> collection, IReadOnlyIndicator readOnlyIndicator)
@@ -722,7 +745,7 @@ namespace Microsoft.Azure.Devices.Common
             }
         }
     }
-    
+
     internal interface IReadOnlyIndicator
     {
         bool IsReadOnly { get; }

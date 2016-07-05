@@ -15,6 +15,7 @@ EXPORTS
     IoTHubClient_SetMessageCallback
     IoTHubClient_GetLastMessageReceiveTime
     IoTHubClient_SetOption
+    IoTHubClient_UploadToBlobAsync
 ;   iothub_client_ll.h
     IoTHubClient_LL_CreateFromConnectionString
     IoTHubClient_LL_Create
@@ -39,24 +40,10 @@ EXPORTS
     IoTHubMessage_SetCorrelationId
     IoTHubMessage_Destroy
 ;   iothubtransporthttp.h
-    IoTHubTransportHttp_Create
-    IoTHubTransportHttp_Destroy
-    IoTHubTransportHttp_Subscribe
-    IoTHubTransportHttp_Unsubscribe
-    IoTHubTransportHttp_DoWork
-    IoTHubTransportHttp_GetSendStatus
-    IoTHubTransportHttp_SetOption
     HTTP_Protocol
 ;   iothubtransportamqp.h
     AMQP_Protocol
 ;   iothubtransportmqtt.h
-    IoTHubTransportMqtt_Create
-    IoTHubTransportMqtt_Destroy
-    IoTHubTransportMqtt_Subscribe
-    IoTHubTransportMqtt_Unsubscribe
-    IoTHubTransportMqtt_DoWork
-    IoTHubTransportMqtt_GetSendStatus
-    IoTHubTransportMqtt_SetOption
     MQTT_Protocol
 ;   map.h (azure-c-shared-utility)
     Map_Create

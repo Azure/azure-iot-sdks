@@ -29,24 +29,32 @@ Access to the static functions described in this document is possible through th
 ##Exposed API
 
 ```c
-static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG* config)
-
-static void IoTHubTransportAMQP_Destroy(TRANSPORT_LL_HANDLE handle)
-
-static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
-
-static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
-
-static void IoTHubTransportAMQP_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
-
-static int IoTHubTransportAMQP_Subscribe(IOTHUB_DEVICE_HANDLE handle)
-
-static void IoTHubTransportAMQP_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
-
-static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
-
-static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE handle, const char* option, const void* value);
+extern const TRANSPORT_PROVIDER* AMQP_Protocol(void);
 ```
+  
+  The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
+	- IoTHubTransportAMQP_GetHostname,
+    - IoTHubTransportAMQP_SetOption,
+    - IoTHubTransportAMQP_Create,
+    - IoTHubTransportAMQP_Destroy,
+    - IoTHubTransportAMQP_Register,
+    - IoTHubTransportAMQP_Unregister,
+    - IoTHubTransportAMQP_Subscribe,
+    - IoTHubTransportAMQP_Unsubscribe,
+    - IoTHubTransportAMQP_DoWork,
+    - IoTHubTransportAMQP_GetSendStatus
+  
+ </br>
+ ###IoTHubTransportAMQP_GetHostname
+ ```c
+ STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
+ ```
+ 
+IoTHubTransportAMQP_GetHostname provides a STRING_HANDLE containing the hostname with which the transport has been created.
+
+
+**SRS_IOTHUBTRANSPORTAMQP_02_001: [** If parameter `handle` is NULL then `IoTHubTransportAMQP_GetHostname` shall return NULL. **]**
+**SRS_IOTHUBTRANSPORTAMQP_02_002: [**  Otherwise IoTHubTransportAMQP_GetHostname shall return a STRING_HANDLE for the hostname. **]**
   
  </br>     
  ###IoTHubTransportAMQP_Create

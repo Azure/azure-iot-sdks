@@ -40,10 +40,14 @@ http.getReceiver(function (receiver) {
 
 ### Http constructor
 
-**SRS_NODE_DEVICE_HTTP_05_001: [**The Http constructor shall accept an object with three properties:
+**SRS_NODE_DEVICE_HTTP_05_001: [**The Http constructor shall accept an object with the following properties:
 - `host` - (string) the fully-qualified DNS hostname of an IoT hub
 - `deviceId` - (string) the name of the IoT hub, which is the first segment of hostname
-- `sharedAccessSignature` - (string) a shared access signature generated from the credentials of a policy with the "device connect" permissions.**]**
+and either:
+- `sharedAccessSignature` - (string) a shared access signature generated from the credentials of a policy with the "device connect" permissions.
+or:
+- `x509` (object) an object with 3 properties: `cert`, `key` and `passphrase`, all strings, containing the necessary information to connect to the service. 
+**]**
 
 ### sendEvent(message, done)
 
@@ -52,7 +56,6 @@ The `sendEvent` method sends an event to an IoT hub on behalf of the device indi
 **SRS_NODE_DEVICE_HTTP_05_002: [**The `sendEvent` method shall construct an HTTP request using information supplied by the caller, as follows:
 ```
 POST <config.host>/devices/<config.deviceId>/messages/events?api-version=<version> HTTP/1.1
-Authorization: <config.sharedAccessSignature>
 iothub-to: /devices/<config.deviceId>/messages/events
 User-Agent: <version string>
 Host: <config.host>
@@ -68,7 +71,6 @@ The sendEventBatch method sends a list of events to an IoT hub on behalf of the 
 **SRS_NODE_DEVICE_HTTP_05_003: [**The `sendEventBatch` method shall construct an HTTP request using information supplied by the caller, as follows:
 ```
 POST <config.host>/devices/<config.deviceId>/messages/events?api-version=<version> HTTP/1.1
-Authorization: <config.sharedAccessSignature>
 iothub-to: /devices/<config.deviceId>/messages/events
 User-Agent: <version string>
 Content-Type: application/vnd.microsoft.iothub.json
@@ -88,8 +90,15 @@ the getReceiver method queries the client for an `HttpReceiver` object that can 
 
 ### setOptions(options, done)
 
-**SRS_NODE_DEVICE_HTTP_16_004: [**The `setOptions` method shall call the `setOptions` method of the HTTP Receiver with the options parameter.**]**
-**SRS_NODE_DEVICE_HTTP_16_005: [**The `setOptions` method shall call the `done` callback when finished.**]**
+**SRS_NODE_DEVICE_HTTP_16_004: [** The `setOptions` method shall call the `setOptions` method of the HTTP Receiver with the content of the `http.receivePolicy` property of the `options` parameter.**]**
+
+**SRS_NODE_DEVICE_HTTP_16_005: [** If `done` has been specified the `setOptions` method shall call the `done` callback with no arguments when successful.**]**
+
+**SRS_NODE_DEVICE_HTTP_16_009: [** If `done` has been specified the `setOptions` method shall call the `done` callback with a standard javascript `Error` object when unsuccessful. **]**
+
+**SRS_NODE_DEVICE_HTTP_16_010: [** `setOptions` should not throw if `done` has not been specified. **]**
+
+**SRS_NODE_DEVICE_HTTP_16_011: [** The HTTP transport should use the x509 settings passed in the `options` object to connect to the service if present. **]**
 
 ### abandon(message, done)
 
@@ -122,3 +131,11 @@ err - the standard JavaScript Error object, with the Node.js http.ServerResponse
 - `err` - null
 - `body` - the body of the HTTP response
 - `response` - the Node.js http.ServerResponse object returned by the transport**]**
+
+**SRS_NODE_DEVICE_HTTP_16_012: [** If using a shared access signature for authentication, the following additional header should be used in the HTTP request: 
+```
+Authorization: <config.sharedAccessSignature>
+```
+**]**
+
+**SRS_NODE_DEVICE_HTTP_16_013: [** If using x509 authentication the `Authorization` header shall not be set and the x509 parameters shall instead be passed to the underlying transpoort. **]**

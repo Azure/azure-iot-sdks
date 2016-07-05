@@ -18,6 +18,9 @@ build_python=OFF
 build_javawrapper=OFF
 run_valgrind=0
 build_folder=$build_root"/cmake/iotsdk_linux"
+make=true
+toolchainfile=" "
+cmake_install_prefix=" "
 
 usage ()
 {
@@ -32,8 +35,10 @@ usage ()
     echo " --no-amqp                     do no build AMQP transport and samples"
     echo " --no-http                     do no build HTTP transport and samples"
     echo " --no-mqtt                     do no build MQTT transport and samples"
+    echo " --no-make                     do not run make after cmake"
     echo " --use-websockets              Enables the support for AMQP over WebSockets."
     echo " --toolchain-file <file>       pass cmake a toolchain file for cross compiling"
+    echo " --install-path-prefix         alternative prefix for make install"
     echo " --build-python <version>      build Python C wrapper module (requires boost) with given python version (2.7 3.4 3.5 are currently supported)"
     echo " --build-javawrapper           build java C wrapper module"
     echo " -rv, --run_valgrind           will execute ctest with valgrind"
@@ -44,7 +49,6 @@ process_args ()
 {
     save_next_arg=0
     extracloptions=" "
-    toolchainfile=" "
 
     for arg in $*
     do      
@@ -68,6 +72,11 @@ process_args ()
           exit 1
         fi 
         save_next_arg=0
+      elif [ $save_next_arg == 4 ]
+      then
+        # save arg for install prefix
+        cmake_install_prefix="$arg"
+        save_next_arg=0
       else
           case "$arg" in
               "-cl" | "--compileoption" ) save_next_arg=1;;
@@ -77,21 +86,28 @@ process_args ()
               "--no-amqp" ) build_amqp=OFF;;
               "--no-http" ) build_http=OFF;;
               "--no-mqtt" ) build_mqtt=OFF;;
+              "--no-make" ) make=false;;
               "--use-websockets" ) use_wsio=ON;;
               "--build-python" ) save_next_arg=3;;
               "--build-javawrapper" ) build_javawrapper=ON;;
               "--toolchain-file" ) save_next_arg=2;;
               "-rv" | "--run_valgrind" ) run_valgrind=1;;
+              "--install-path-prefix" ) save_next_arg=4;;
               * ) usage;;
           esac
       fi
     done
 
-    if [ $toolchainfile != " " ]
+    if [ "$toolchainfile" != " " ]
     then
       toolchainfile=$(readlink -f $toolchainfile)
       toolchainfile="-DCMAKE_TOOLCHAIN_FILE=$toolchainfile"
     fi
+	
+	if [ "$cmake_install_prefix" != " " ]
+	then
+	  cmake_install_prefix="-DCMAKE_INSTALL_PREFIX=$cmake_install_prefix"
+	fi
 }
 
 process_args $*
@@ -99,19 +115,22 @@ process_args $*
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $toolchainfile -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Duse_wsio:BOOL=$use_wsio -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper $build_root
+cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Duse_wsio:BOOL=$use_wsio -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper $build_root
 
-CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
-make --jobs=$CORES
-
-if [[ $run_valgrind == 1 ]] ;
+if [ "$make" = true ]
 then
+  CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+  make --jobs=$CORES
+
+  if [[ $run_valgrind == 1 ]] ;
+  then
     #use doctored openssl
     export LD_LIBRARY_PATH=/usr/local/ssl/lib
     ctest -j $CORES --output-on-failure
     export LD_LIBRARY_PATH=
-else
+  else
     ctest -j $CORES -C "Debug" --output-on-failure
+  fi
 fi
 
 popd

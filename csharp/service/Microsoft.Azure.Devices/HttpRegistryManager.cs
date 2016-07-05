@@ -23,7 +23,7 @@ namespace Microsoft.Azure.Devices
         const string StatisticsUriFormat = "/statistics/devices?" + ClientApiVersionHelper.ApiVersionQueryString;
         const string DevicesRequestUriFormat = "/devices/?top={0}&{1}";
 
-        static readonly Regex DeviceIdRegex = new Regex(@"^[A-Za-z0-9\-:.+%_#*?!(),=@;$']{1,128}$", RegexOptions.Compiled | RegexOptions.ECMAScript | RegexOptions.IgnoreCase);
+        static readonly Regex DeviceIdRegex = new Regex(@"^[A-Za-z0-9\-:.+%_#*?!(),=@;$']{1,128}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(100);
         
         IHttpClientHelper httpClientHelper;

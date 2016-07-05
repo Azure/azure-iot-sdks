@@ -11,8 +11,16 @@ IF [%installers-path%]==[] goto:installerspath-not-set
 set install-root=c:\\ti
 if not exist "%install-root%" mkdir %install-root%
 
+set sdkversion=1.1.0
+
+rem // This Script can run for multiple TI SDK versions based on the value of the enviornment variable.
+rem // Check for enviornment variable defining CC3200 SDK version. If defined use the SDK version
+if defined CC3200_SDK_VERSION set sdkversion=%CC3200_SDK_VERSION%
+
+set cc3200sdk=CC3200SDK_%sdkversion%
+
 echo ********** INSTALLING CC3200 SDK **********
-if not exist "%install-root%\CC3200SDK_1.1.0" start /wait %installers-path%\CC3200SDK-1.1.0-windows-installer.exe --mode unattended --prefix %install-root%\CC3200SDK_1.1.0
+if not exist "%install-root%\%cc3200sdk%" start /wait %installers-path%\%cc3200sdk%-windows-installer.exe --mode unattended --prefix %install-root%\%cc3200sdk%
 
 echo ********** INSTALLING Tirtos Simplelink **********
 if not exist "%install-root%\tirtos_simplelink_2_14_01_20" start /wait %installers-path%\tirtos_simplelink_setupwin32_2_14_01_20.exe --mode unattended --prefix %install-root%
@@ -32,12 +40,13 @@ cd /d %build-root%\c\build_all\tirtos
 
 @echo off
 echo ********** UPDATING products.mak **********
-call:DoReplace "/path/to/xdctools_installation" "%install-root%\\xdctools_3_31_01_33_core" products.mak
-call:DoReplace "/path/to/tirtos_installation" "%install-root%/tirtos_simplelink_2_14_01_20" products.mak
+call:DoReplace "c:\\ti\\xdctools_3_31_01_33_core" "%install-root%\\xdctools_3_31_01_33_core" products.mak
+call:DoReplace "c:\\ti/tirtos_simplelink_2_14_01_20" "%install-root%/tirtos_simplelink_2_14_01_20" products.mak
 call:DoReplace "bios_6_42_02_29" "bios_6_42_02_29" products.mak
-call:DoReplace "/path/to/ns_installation" "%install-root%/ns_1_10_00_00_eng" products.mak
-call:DoReplace "/path/to/cc3200-sdk" "%install-root%/CC3200SDK_1.1.0/cc3200-sdk" products.mak
-call:DoReplace "/path/to/TI_ARM_compiler" "%install-root%/ti-cgt-arm_5.2.5" products.mak
+call:DoReplace "c:\\ti/ns_1_10_00_00_eng" "%install-root%/ns_1_10_00_00_eng" products.mak
+call:DoReplace "c:\\ti/CC3200SDK_1.1.0/cc3200-sdk" "%install-root%/%cc3200sdk%/cc3200-sdk" products.mak
+call:DoReplace "c:\\ti/ti-cgt-arm_5.2.5" "%install-root%/ti-cgt-arm_5.2.5" products.mak
+call:DoReplace "CC3200SDK_VERSION = 1.1.0" "CC3200SDK_VERSION = %sdkversion%" products.mak
 
 @echo on
 call %install-root%\\xdctools_3_31_01_33_core\\gmake.exe clean

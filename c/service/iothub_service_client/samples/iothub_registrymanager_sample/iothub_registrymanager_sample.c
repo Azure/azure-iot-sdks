@@ -12,6 +12,8 @@
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
+#include "azure_c_shared_utility/consolelogger.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #include "iothub_registrymanager_sample.h"
 
@@ -61,7 +63,7 @@ void printDeviceInfo(IOTHUB_DEVICE* device, int orderNum)
         (void)printf("    statusReason                : %s\r\n", device->statusReason);
         (void)printf("    statusUpdatedTime           : %s\r\n", device->statusUpdatedTime);
         (void)printf("    lastActivityTime            : %s\r\n", device->lastActivityTime);
-        (void)printf("    cloudToDeviceMessageCount   : %d\r\n", device->cloudToDeviceMessageCount);
+        (void)printf("    cloudToDeviceMessageCount   : %zu\r\n", device->cloudToDeviceMessageCount);
     }
 }
 
@@ -71,6 +73,8 @@ void iothub_registrymanager_sample_run(void)
 
     IOTHUB_REGISTRY_DEVICE_CREATE deviceCreateInfo;
     IOTHUB_REGISTRY_DEVICE_UPDATE deviceUpdateInfo;
+
+    xlogging_set_log_function(consolelogger_log);
 
     (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with the connection string\r\n");
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
@@ -212,9 +216,9 @@ void iothub_registrymanager_sample_run(void)
         {
         case IOTHUB_REGISTRYMANAGER_OK:
             (void)printf("IoTHubRegistryManager_GetStatistics: Successfully got registry statistics\r\n");
-            (void)printf("Total device count: %d\r\n", registryStatistics.totalDeviceCount);
-            (void)printf("Enabled device count: %d\r\n", registryStatistics.enabledDeviceCount);
-            (void)printf("Disabled device count: %d\r\n", registryStatistics.disabledDeviceCount);
+            (void)printf("Total device count: %zu\r\n", registryStatistics.totalDeviceCount);
+            (void)printf("Enabled device count: %zu\r\n", registryStatistics.enabledDeviceCount);
+            (void)printf("Disabled device count: %zu\r\n", registryStatistics.disabledDeviceCount);
             break;
         case IOTHUB_REGISTRYMANAGER_ERROR:
             (void)printf("IoTHubRegistryManager_GetStatistics failed\r\n");

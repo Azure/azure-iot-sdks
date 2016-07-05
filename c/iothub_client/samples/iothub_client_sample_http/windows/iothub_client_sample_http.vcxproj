@@ -156,7 +156,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\iothub_client_sample_http.c" />
-    <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

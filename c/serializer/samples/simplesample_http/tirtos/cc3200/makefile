@@ -56,7 +56,7 @@ VPATH = ../..
 
 all: simplesample_http.bin
 
-simplesample_http.out: main.o simplesample_http.o rom_pin_mux_config.o netwifi.o UARTUtils.o CC3200_LAUNCHXL.o CC3200_LAUNCHXL.cmd $(CONFIG)/linker.cmd $(LIBS)
+simplesample_http.out: main.o simplesample_http.o rom_pin_mux_config.o netwifi.o UARTUtils.o CC3200_LAUNCHXL.o network_common.o CC3200_LAUNCHXL.cmd $(CONFIG)/linker.cmd $(LIBS)
 	@echo building $@ ..
 	@$(LD) -o $@ $^ -x -m $@.map $(LFLAGS)
 

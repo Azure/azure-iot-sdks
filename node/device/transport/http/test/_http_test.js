@@ -36,15 +36,17 @@ describe('Http', function () {
   });
 
   describe('#setOptions', function () {
-    /*Tests_SRS_NODE_DEVICE_HTTP_16_004: [The ‘setOptions’ method shall call the setOptions method of the HTTP Receiver with the options parameter.] */
-    /*Tests_SRS_NODE_DEVICE_HTTP_16_005: [The ‘setOptions’ method shall call the ‘done’ callback when finished.] */
+    var testOptions = {
+      http: {
+        receivePolicy: {interval: 1}
+      }
+    };
 
+    /*Tests_SRS_NODE_DEVICE_HTTP_16_004: [The `setOptions` method shall call the `setOptions` method of the HTTP Receiver with the content of the `http.receivePolicy` property of the `options` parameter.]*/
     it('calls the receiver `setOptions` method', function (done) {
-      var testOptions = { foo: 42 };
-      transport.setOptions(testOptions, function (err, result) {
+      transport.setOptions(testOptions, function (err) {
         assert.isNull(err);
-        assert.equal(result.constructor.name, 'TransportConfigured');
-        assert(receiver.setOptions.calledWith(testOptions));
+        assert(receiver.setOptions.calledWith(testOptions.http.receivePolicy));
         done();
       });
     });
@@ -52,10 +54,36 @@ describe('Http', function () {
     it('instanciate the receiver if necessary', function() {
       var transport = new Http({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sas: 'sas.key' });
       assert.doesNotThrow(function() {
-        transport.setOptions({interval: 1}, function(err, result){
+        transport.setOptions(testOptions, function(err){
           assert.isNull(err);
-          assert.equal(result.constructor.name, 'TransportConfigured');
         });
+      });
+    });
+
+    /*Tests_SRS_NODE_DEVICE_HTTP_16_005: [If `done` has been specified the `setOptions` method shall call the `done` callback with no arguments when successful.]*/
+    it('calls the done callback with no arguments if successful', function(done) {
+      var transport = new Http({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sas: 'sas.key' });
+      transport.setOptions(testOptions, done);
+    });
+
+    /*Tests_SRS_NODE_DEVICE_HTTP_16_009: [If `done` has been specified the `setOptions` method shall call the `done` callback with a standard javascript `Error` object when unsuccessful.]*/
+    it('calls the done callback with an error object if the method is unsuccessful', function(done) {
+      var transport = new Http({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sas: 'sas.key' });
+      transport.getReceiver = function(callback) {
+        callback(new Error('fake error'));
+      };
+
+      transport.setOptions(testOptions, function(err) {
+        assert.instanceOf(err, Error);
+        done();
+      });
+    });
+
+    /*Tests_SRS_NODE_DEVICE_HTTP_16_010: [`setOptions` should not throw if `done` has not been specified.]*/
+    it('does not throw if `done` is not specified', function() {
+      var transport = new Http({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sas: 'sas.key' });
+      assert.doesNotThrow(function() {
+        transport.setOptions({});
       });
     });
   });

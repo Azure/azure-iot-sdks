@@ -139,9 +139,9 @@ and then you can connect to SMART device.
         sudo ./c/build_all/linux/build.sh --toolchain-file ./gcc_qti.cmake --skip-e2e-tests --skip-unittests  -cl -D__STDC_NO_ATOMICS__ -cl --sysroot=$QTI_SYSTEM_ROOT
 -   Copy exe-data and dll to SMART device
     
-        adb push ~/cmake/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http /home/iottest/
-        adb push ~/cmake/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt /home/iottest/
-        adb push ~/cmake/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp /home/iottest/
+        adb push ~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http /home/iottest/
+        adb push ~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt /home/iottest/
+        adb push ~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp /home/iottest/
         adb push ${QTI_SYSTEM_ROOT}/usr/lib/libcurl* /usr/lib/ 
 
 ## 3.2 Send Device Events to IoT Hub:

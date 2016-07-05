@@ -105,6 +105,7 @@
       <DependentUpon>ApiResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Common\Amqp\ClientWebSocketTransport.cs" />
+    <Compile Include="Common\Amqp\LegacyClientWebSocketTransport.cs" />
     <Compile Include="Common\Amqp\WebSocketConstants.cs" />
     <Compile Include="Common\Exceptions\ErrorCode.cs" />
     <Compile Include="Common\Exceptions\TooManyDevicesException.cs" />
@@ -224,6 +225,7 @@
     <Compile Include="ImportDevicesRequest.cs" />
     <Compile Include="DeviceRegistryOperationError.cs" />
     <Compile Include="ImportMode.cs" />
+    <Compile Include="IotHubClientWebSocket.cs" />
     <Compile Include="PurgeMessageQueueResult.cs" />
     <Compile Include="IotHubApiResources.cs" />
     <Compile Include="IotHubConnection.cs" />

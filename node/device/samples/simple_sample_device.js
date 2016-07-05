@@ -47,7 +47,7 @@ var connectCallback = function (err) {
     client.on('disconnect', function () {
       clearInterval(sendInterval);
       client.removeAllListeners();
-      client.connect(connectCallback);
+      client.open(connectCallback);
     });
   }
 };

@@ -9,10 +9,10 @@
 #include "serializer.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/sastoken.h"
+#include "azure_c_shared_utility/platform.h"
 #include "iothub_client.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_ll.h"
-#include "azure_c_shared_utility/platform.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
@@ -35,7 +35,6 @@ WITH_ACTION(SetAirResistance, int, Position)
 
 END_NAMESPACE(WeatherStation);
 
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES)
 
 EXECUTE_COMMAND_RESULT TurnFanOn(ContosoAnemometer* device)
 {

@@ -6,7 +6,9 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
     using System;
     using System.Runtime.Serialization;
 
+#if !WINDOWS_UWP
     [Serializable]
+#endif
     public sealed class QuotaExceededException : IotHubException
     {
         public QuotaExceededException(string message)
@@ -19,9 +21,11 @@ namespace Microsoft.Azure.Devices.Common.Exceptions
         {
         }
 
+#if !WINDOWS_UWP
         QuotaExceededException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }

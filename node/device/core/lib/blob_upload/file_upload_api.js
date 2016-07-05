@@ -30,11 +30,11 @@ function FileUploadApi(deviceId, hostname, httpTransport) {
   this.http = httpTransport ? httpTransport : new DefaultHttpTransport();
 }
 
-FileUploadApi.prototype.getBlobSharedAccessSignature = function (blobName, iotHubSas, done) {
+FileUploadApi.prototype.getBlobSharedAccessSignature = function (blobName, auth, done) {
   /*Codes_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_004: [`getBlobSharedAccessSignature` shall throw a `ReferenceError` if `blobName` is falsy.]*/
-  /*Codes_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_005: [`getBlobSharedAccessSignature` shall throw a `ReferenceError` if `iotHubSas` is falsy.]*/
+  /*Codes_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_005: [`getBlobSharedAccessSignature` shall throw a `ReferenceError` if `auth` is falsy.]*/
   if (!blobName) throw new ReferenceError('blobName cannot be \'' + blobName + '\'');
-  if (!iotHubSas) throw new ReferenceError('iotHubSas cannot be \'' + iotHubSas + '\'');
+  if (!auth) throw new ReferenceError('auth cannot be \'' + auth + '\'');
 
   /*Codes_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_006: [`getBlobSharedAccessSignature` shall create a `GET` HTTP request to a path formatted as the following:`/devices/<deviceId>/files/<filename>?api-version=<api-version>]*/
   var path = endpoint.devicePath(this.deviceId) + '/files/' + blobName + endpoint.versionQueryString();
@@ -49,11 +49,17 @@ FileUploadApi.prototype.getBlobSharedAccessSignature = function (blobName, iotHu
   var headers = {
     Accept: 'application/json',
     Host: this.hostname,
-    Authorization: iotHubSas,
     'User-Agent': packageJson.name + '/' + packageJson.version,
   };
 
-  var req = this.http.buildRequest('GET', path, headers, this.hostname, function (err, body, response) {
+  var x509Opts = null;
+  if (typeof auth === 'string') {
+    headers.Authorization  = auth;
+  } else {
+    x509Opts = auth;
+  }
+
+  var req = this.http.buildRequest('GET', path, headers, this.hostname, x509Opts, function (err, body, response) {
     if (err) {
       err.responseBody = body;
       err.response = response;
@@ -68,12 +74,12 @@ FileUploadApi.prototype.getBlobSharedAccessSignature = function (blobName, iotHu
   req.end();
 };
 
-FileUploadApi.prototype.notifyUploadComplete = function (correlationId, sharedAccessSignature, uploadResult, done) {
+FileUploadApi.prototype.notifyUploadComplete = function (correlationId, auth, uploadResult, done) {
   /*Codes_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_010: [`notifyUploadComplete` shall throw a `ReferenceError` if `correlationId` is falsy.]*/
-  /*Codes_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_011: [`notifyUploadComplete` shall throw a `ReferenceError` if `sharedAccessSignature` is falsy.]*/
+  /*Codes_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_011: [`notifyUploadComplete` shall throw a `ReferenceError` if `auth` is falsy.]*/
   /*Codes_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_012: [`notifyUploadComplete` shall throw a `ReferenceError` if `uploadResult` is falsy.]*/
   if (!correlationId) throw new ReferenceError('correlationId cannot be \'' + correlationId + '\'');
-  if (!sharedAccessSignature) throw new ReferenceError('sharedAccessSignature cannot be \'' + sharedAccessSignature + '\'');
+  if (!auth) throw new ReferenceError('auth cannot be \'' + auth + '\'');
   if (!uploadResult) throw new ReferenceError('uploadResult cannot be \'' + uploadResult + '\'');
 
   /*Codes_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_013: [`notifyUploadComplete` shall create a `POST` HTTP request to a path formatted as the following:`/devices/<deviceId>/files/<correlationId>?api-version=<api-version>`]*/
@@ -91,14 +97,20 @@ FileUploadApi.prototype.notifyUploadComplete = function (correlationId, sharedAc
   ```]*/
   var headers = {
     Host: this.hostname,
-    Authorization: sharedAccessSignature,
     'User-Agent': packageJson.name + '/' + packageJson.version,
     'Content-Type': 'application/json; charset=utf-8',
     'Content-Length': body.length,
     'iothub-name': this.hostname.split('.')[0]
   };
 
-  var req = this.http.buildRequest('POST', path, headers, this.hostname, function (err) {
+  var x509Opts = null;
+  if (typeof auth === 'string') {
+    headers.Authorization  = auth;
+  } else {
+    x509Opts = auth;
+  }
+
+  var req = this.http.buildRequest('POST', path, headers, this.hostname, x509Opts, function (err) {
     if (err) {
       /*Codes_SRS_NODE_FILE_UPLOAD_ENDPOINT_16_016: [** `notifyUploadComplete` shall call the `done` callback with an `Error` object if the request fails.]*/
       done(err);

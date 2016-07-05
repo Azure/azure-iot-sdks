@@ -135,11 +135,11 @@ See the setting details below.
 
     {{**If using AMQP protocol:**}}
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
+        azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
 
     {{**If using HTTPS protocol:**}}
 
-        ~/cmake/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
+        azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
 
 -   On Windows, refer "Monitor device-to-cloud events" in [DeviceExplorer Usage document](https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/doc/how_to_use_device_explorer.md) to see the data your device is sending.
 

@@ -88,6 +88,12 @@ npm install
 cd $node_root/../tools/iothub-explorer
 echo "\n-- Creating links for `pwd` --"
 npm link azure-iot-common
+npm link azure-iot-device
 npm link azure-iothub
 npm install
 [ $? -eq 0 ] || exit $?
+
+cd $node_root/build/tools
+echo "\n-- Creating links for `pwd` --"
+npm link azure-iothub
+npm install

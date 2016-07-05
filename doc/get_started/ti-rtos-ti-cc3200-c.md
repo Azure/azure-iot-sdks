@@ -41,7 +41,7 @@ While not strictly required, we recommend that you install the following tools f
 
 - Install [Uniflash Tool](http://www.ti.com/tool/Uniflash) 3.2 or later for SimpleLink CC3200
 
-- Install [CC3200 SDK 1.1.0](http://www.ti.com/tool/cc3200sdk)
+- Install [CC3200 SDK 1.1.0](http://processors.wiki.ti.com/index.php/CC32xx_Release_Notes_1.1.0)
 
 - Install [TI-RTOS SDK for SimpleLink](http://downloads.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/tirtos/index.html) 2.14.01.20 or above
 

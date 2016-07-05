@@ -5,7 +5,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/map.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
-#include "azure_c_shared_utility/iot_logging.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 /* Codes_SRS_CONNECTIONSTRINGPARSER_01_001: [connectionstringparser_parse shall parse all key value pairs from the connection_string passed in as argument and return a new map that holds the key/value pairs.] */
 MAP_HANDLE connectionstringparser_parse(STRING_HANDLE connection_string)

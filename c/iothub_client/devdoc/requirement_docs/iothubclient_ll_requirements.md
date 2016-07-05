@@ -75,7 +75,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE io
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size);
 ```
 
-###IoTHubClient_LL_CreateFromConnectionString
+###IoTHubClient_LL_CreateFromConnectionString 
 ```c
 extern IOTHUB_CLIENT_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 ```
@@ -86,8 +86,8 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_LL_CreateFromConnectionString(const cha
 **SRS_IOTHUBCLIENT_LL_12_012: [**If the allocation failed IoTHubClient_LL_CreateFromConnectionString  returns NULL.**]**  
 **SRS_IOTHUBCLIENT_LL_12_005: [**IoTHubClient_LL_CreateFromConnectionString shall try to parse the connectionString input parameter for the following structure: "Key1=value1;key2=value2;key3=value3..."**]** 
 **SRS_IOTHUBCLIENT_LL_12_013: [**If the parsing failed IoTHubClient_LL_CreateFromConnectionString returns NULL**]**  
-**SRS_IOTHUBCLIENT_LL_12_006: [**IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey or SharedAccessSignature.**]**
-**SRS_IOTHUBCLIENT_LL_12_014: [**If either of key is missing then IoTHubClient_LL_CreateFromConnectionString returns NULL **]**
+**SRS_IOTHUBCLIENT_LL_12_006: [**IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey, SharedAccessSignature or x509**]**
+**SRS_IOTHUBCLIENT_LL_12_014: [**If either of key is missing or x509 is not set to `"true"` then IoTHubClient_LL_CreateFromConnectionString returns NULL **]**
 **SRS_IOTHUBCLIENT_LL_02_092: [** `IoTHubClient_LL_CreateFromConnectionString` shall create a `IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE` from `IOTHUB_CLIENT_CONFIG`. **]**
 **SRS_IOTHUBCLIENT_LL_02_093: [** If creating the `IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE` fails then `IoTHubClient_LL_CreateFromConnectionString` shall fail and return NULL. **]**  
 **SRS_IOTHUBCLIENT_LL_12_009: [**IoTHubClient_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator**]** 
@@ -120,11 +120,14 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* c
 extern  IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(IOTHUB_CLIENT_DEVICE_CONFIG * config);
 ```
 **SRS_IOTHUBCLIENT_LL_17_001: [**IoTHubClient_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.**]** 
-**SRS_IOTHUBCLIENT_LL_17_002: [**IoTHubClient_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_LL_HANDLE.**]** 
+**SRS_IOTHUBCLIENT_LL_02_098: [** IoTHubClient_LL_CreateWithTransport shall fail and return NULL if both `config->deviceKey` AND `config->deviceSasToken` are NULL. **]**
+**SRS_IOTHUBCLIENT_LL_17_002: [**IoTHubClient_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_LL_HANDLE.**]**
 **SRS_IOTHUBCLIENT_LL_17_003: [**If allocation fails, the function shall fail and return NULL.**]** 
+**SRS_IOTHUBCLIENT_LL_02_096: [** `IoTHubClient_LL_CreateWithTransport` shall create the data structures needed to instantiate a `IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE`. **]**
+**SRS_IOTHUBCLIENT_LL_02_097: [** If creating the data structures fails or instantiating the `IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE` fails then `IoTHubClient_LL_CreateWithTransport` shall fail and return NULL. **]**
 **SRS_IOTHUBCLIENT_LL_02_047: [** IoTHubClient_LL_CreateWithTransport shall create a TICK_COUNTER_HANDLE. **]**
 **SRS_IOTHUBCLIENT_LL_02_048: [** If creating the handle fails, then IoTHubClient_LL_CreateWithTransport shall fail and return NULL **]**
-**SRS_IOTHUBCLIENT_LL_17_004: [**IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.**]** 
+**SRS_IOTHUBCLIENT_LL_17_004: [**IoTHubClient_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void\*.**]** 
 **SRS_IOTHUBCLIENT_LL_17_005: [**IoTHubClient_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.**]** 
 **SRS_IOTHUBCLIENT_LL_17_006: [**IoTHubClient_LL_CreateWithTransport shall call the transport _Register function with the IOTHUB_DEVICE_CONFIG populated structure and waitingToSend list.**]** 
 **SRS_IOTHUBCLIENT_LL_17_007: [**If the _Register function fails, this function shall fail and return NULL.**]** 

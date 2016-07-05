@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef DONT_USE_UPLOADTOBLOB
+#error "trying to compile iothub_client_sample_upload_to_blob.c while DONT_USE_UPLOADTOBLOB is #define'd"
+#else
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,11 +16,11 @@ and removing calls to _DoWork will yield the same results. */
 #ifdef ARDUINO
 #include "AzureIoT.h"
 #else
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/platform.h"
 #include "iothub_client_ll.h"
 #include "iothub_message.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothubtransporthttp.h"
-#include "azure_c_shared_utility/platform.h"
 #endif
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -62,3 +66,4 @@ void iothub_client_sample_upload_to_blob_run(void)
         platform_deinit();
     }
 }
+#endif /*DONT_USE_UPLOADTOBLOB*/

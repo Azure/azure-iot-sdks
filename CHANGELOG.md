@@ -1,3 +1,13 @@
+# Node.js Device SDK
+- Add support for x509 authentication with HTTP
+- Node.js v6 support
+- Migrate to node-amqp10 v3.x.x
+
+# Node.js Service SDK
+- Add support for x509 certificate thumbprints in the Registry
+- Migrate to node-amqp10 v3.x.x
+
+Release for June 3, 2016
 # C Device SDK
 - Upload to blob functionality
 

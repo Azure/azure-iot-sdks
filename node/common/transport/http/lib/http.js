@@ -32,16 +32,29 @@ function Http() {
     path - the path to the resource, not including the hostname
     httpHeaders - an object whose properties represent the names and values of HTTP headers to include in the request
     host - the fully-qualified DNS hostname of the IoT hub
+    x509Options - [optional] the x509 certificate, key and passphrase that are needed to connect to the service using x509 certificate authentication
     done - a callback that will be invoked when a completed response is returned from the server]*/
-Http.prototype.buildRequest = function (method, path, httpHeaders, host, done) {
-  var options = {
+Http.prototype.buildRequest = function (method, path, httpHeaders, host, x509Options, done) {
+  if (!done && (typeof x509Options === 'function')) {
+    done = x509Options;
+    x509Options = null;
+  }
+
+  var httpOptions = {
     host: host,
     path: path,
     method: method,
     headers: httpHeaders
   };
 
-  var request = this._https.request(options, function onResponse(response) {
+  /*Codes_SRS_NODE_HTTP_16_001: [If `x509Options` is specified, the certificate, key and passphrase in the structure shall be used to authenticate the connection.]*/
+  if (x509Options) {
+    httpOptions.cert = x509Options.cert;
+    httpOptions.key = x509Options.key;
+    httpOptions.passphrase = x509Options.passphrase;
+  }
+
+  var request = this._https.request(httpOptions, function onResponse(response) {
     var responseBody = '';
     response.on('error', function (err) {
       done(err);
