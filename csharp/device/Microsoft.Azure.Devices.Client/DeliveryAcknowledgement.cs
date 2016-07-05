@@ -3,29 +3,34 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
+    using System.Runtime.Serialization;
     /// <summary>
     /// Specifies the different acknowledgement levels for message delivery.
     /// </summary>
-    enum DeliveryAcknowledgement
+    public enum DeliveryAcknowledgement
     {
         /// <summary>
         /// Acknowledgement is NOT sent on delivery or failure.
         /// </summary>
+        [EnumMember(Value = "none")]
         None,
 
         /// <summary>
         /// Acknowledgement is sent only if delivery fails.
         /// </summary>
+        [EnumMember(Value = "negative")]
         NegativeOnly,
 
         /// <summary>
         /// Acknowledgement is sent only on delivery succeeds.
         /// </summary>
+        [EnumMember(Value = "positive")]
         PositiveOnly,
 
         /// <summary>
         /// An acknowledgement is sent on delivery success or failure.
         /// </summary>
+        [EnumMember(Value = "full")]
         Full
     }
 }

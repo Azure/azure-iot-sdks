@@ -219,6 +219,7 @@
     <Compile Include="$(DeviceClientDir)\Transport\GateKeeperDelegatingHandler.cs" />
     <Compile Include="$(DeviceClientDir)\Transport\TransportHandler.cs" />
     <Compile Include="$(DeviceClientDir)\Transport\RoutingDelegatingHandler.cs" />
+    <Compile Include="$(DeviceClientDir)\Common\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="$(DeviceClientDir)\AmqpTransportSettings.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Client\IotHubAmqpProperty.cs" />

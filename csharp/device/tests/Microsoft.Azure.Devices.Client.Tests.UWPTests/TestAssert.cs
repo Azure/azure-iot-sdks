@@ -7,7 +7,7 @@ namespace Microsoft.Azure.Devices.Client.Test
     using System.Threading.Tasks;
 
     using Microsoft.Azure.Devices.Client.Extensions;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 
     public static class TestAssert
     {
@@ -41,7 +41,7 @@ namespace Microsoft.Azure.Devices.Client.Test
         {
             errorMessage = errorMessage ?? "Failed";
             try
-            {   
+            {
                 await action();
             }
             catch (TException ex)

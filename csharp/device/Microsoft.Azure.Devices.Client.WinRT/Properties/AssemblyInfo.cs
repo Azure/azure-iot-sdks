@@ -29,3 +29,4 @@ using System.Runtime.InteropServices;
 // Version information for an assembly follows semantic versioning 1.0.0 (because
 // NuGet didn't support semver 2.0.0 before VS 2015). See semver.org for details.
 [assembly: AssemblyInformationalVersion("1.0.13")]
+[assembly: InternalsVisibleTo("Microsoft.Azure.Devices.Client.Tests.UWPTests")]
