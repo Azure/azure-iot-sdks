@@ -20,6 +20,7 @@
     <module>file-upload-sample</module>
     <module>send-event-sample</module>
     <module>send-receive-sample</module>
+    <module>send-receive-sample-http-x509</module>
     <module>send-serialized-event</module>
     <module>direct_call_of_wrapped_functions</module>
   </modules>
