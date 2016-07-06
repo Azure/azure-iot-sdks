@@ -28,6 +28,13 @@ namespace Microsoft.Azure.Devices.Client
             {
                 Interlocked.CompareExchange(ref this.amqpTransportSettings, amqpTransportSetting, null);
             }
+            else
+            {
+#if !WINDOWS_UWP
+                // Client certificate is per device and must be overriden
+                this.amqpTransportSettings.ClientCertificate = amqpTransportSetting.ClientCertificate;
+#endif
+            }
 
             IotHubConnection iotHubConnection;
             if (connectionString.SharedAccessKeyName != null || connectionString.SharedAccessSignature != null)

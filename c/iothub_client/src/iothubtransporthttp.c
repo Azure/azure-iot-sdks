@@ -160,7 +160,7 @@ static void destroy_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handle
     handleData->eventHTTPrequestHeaders = NULL;
 }
 
-static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, const char * deviceId)
+static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, const char * deviceId, bool is_x509_used)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_021: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "event HTTP request headers") consisting of the following fixed field names and values: "iothub-to":"/devices/" + URL_ENCODED(deviceId) + "/messages/events"; "Authorization":""
     "Accept":"application/json"
@@ -198,7 +198,7 @@ static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleD
             {
                 if (!(
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "iothub-to", STRING_c_str(temp)) == HTTP_HEADERS_OK) &&
-                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK) &&
+                    (is_x509_used || (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK)) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Accept", "application/json") == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Connection", "Keep-Alive") == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK)
@@ -227,7 +227,7 @@ static void destroy_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* hand
     handleData->messageHTTPrequestHeaders = NULL;
 }
 
-static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
+static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, bool is_x509_used)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_132: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "message HTTP request headers") consisting of the following fixed field names and values:
     "Authorization": "" ]*/
@@ -242,7 +242,7 @@ static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handl
     {
         if (!(
             (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK) &&
-            (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK)
+            (is_x509_used || (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK))
             ))
         {
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_023: [ If creating message HTTP request headers then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
@@ -485,19 +485,14 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE han
         LogError("Transport handle is NULL");
         result = NULL;
     }
-    else if (device->deviceId == NULL || ((device->deviceKey == NULL) && (device->deviceSasToken == NULL)) || waitingToSend == NULL || iotHubClientHandle == NULL)
+    else if (device->deviceId == NULL || ((device->deviceKey != NULL) && (device->deviceSasToken != NULL)) || waitingToSend == NULL || iotHubClientHandle == NULL)
     {
-        /*Codes_SRS_TRANSPORTMULTITHTTP_17_015: [ If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_015: [ If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are NULL, then IoTHubTransportHttp_Register shall assume a x509 authentication. ]*/
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_014: [ If IOTHUB_DEVICE_CONFIG field deviceId is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_016: [ If parameter waitingToSend is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_143: [ If parameter iotHubClientHandle is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
-        LogError("Some parameters expected to be non-NULL");
-        result = NULL;
-    }
-    else if ( (device->deviceKey != NULL) && (device->deviceSasToken != NULL) )
-    {
-        /* Codess_SRS_TRANSPORTMULTITHTTP_03_015: [If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are both NOT NULL, then IoTHubTransportHttp_Register shall return NULL.]*/
-        LogError("deviceKey & deviceSasToken cannot be both defined.");
+        LogError("invalid parameters detected TRANSPORT_LL_HANDLE handle=%p, const IOTHUB_DEVICE_CONFIG* device=%p, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle=%p, PDLIST_ENTRY waitingToSend=%p",
+            handle, device, iotHubClientHandle, waitingToSend);
         result = NULL;
     }
     else
@@ -516,36 +511,59 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE han
             bool was_create_deviceKey_ok = false;
             bool was_create_deviceSasToken_ok = false;
             bool was_sasObject_ok = false;
+            bool was_x509_ok = false; /*there's nothing "created" in the case of x509, it is a flag indicating that x509 is used*/
 
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_038: [ Otherwise, IoTHubTransportHttp_Register shall allocate the IOTHUB_DEVICE_HANDLE structure. ]*/
             bool was_resultCreated_ok = ((result = malloc(sizeof(HTTPTRANSPORT_PERDEVICE_DATA))) != NULL);
             bool was_create_deviceId_ok = was_resultCreated_ok && create_deviceId(result, device->deviceId);
 
-            if (was_create_deviceId_ok && (device->deviceSasToken != NULL))
+            if (was_create_deviceId_ok)
             {
-                was_create_deviceSasToken_ok = create_deviceSasToken(result, device->deviceSasToken);
-                result->deviceKey = NULL;
-                result->sasObject = NULL;
-            }
-            if (was_create_deviceId_ok && (device->deviceKey != NULL))
-            {
-                was_create_deviceKey_ok = create_deviceKey(result, device->deviceKey);
-                result->deviceSasToken = NULL;
+                if (device->deviceSasToken != NULL)
+                {
+                    /*device->deviceKey is certainly NULL (because of the validation condition (else if (device->deviceId == NULL || ((device->deviceKey != NULL) && (device->deviceSasToken != NULL)) || waitingToSend == NULL || iotHubClientHandle == NULL))that does not accept that both satoken AND devicekey are non-NULL*/
+                    was_create_deviceSasToken_ok = create_deviceSasToken(result, device->deviceSasToken);
+                    result->deviceKey = NULL;
+                    result->sasObject = NULL;
+                }
+                else /*when deviceSasToken == NULL*/
+                {
+                    if (device->deviceKey != NULL)
+                    {
+                        was_create_deviceKey_ok = create_deviceKey(result, device->deviceKey);
+                        result->deviceSasToken = NULL;
+                    }
+                    else
+                    {
+                        /*when both of them are NULL*/
+                        was_x509_ok = true;
+                        result->deviceKey = NULL;
+                        result->deviceSasToken = NULL;
+                    }
+                }
             }
 
-            bool was_eventHTTPrelativePath_ok = (was_create_deviceKey_ok || was_create_deviceSasToken_ok) && create_eventHTTPrelativePath(result, device->deviceId);
+            bool was_eventHTTPrelativePath_ok = (was_create_deviceKey_ok || was_create_deviceSasToken_ok || was_x509_ok) && create_eventHTTPrelativePath(result, device->deviceId);
             bool was_messageHTTPrelativePath_ok = was_eventHTTPrelativePath_ok && create_messageHTTPrelativePath(result, device->deviceId);
-            bool was_eventHTTPrequestHeaders_ok = was_messageHTTPrelativePath_ok && create_eventHTTPrequestHeaders(result, device->deviceId);
-            bool was_messageHTTPrequestHeaders_ok = was_eventHTTPrequestHeaders_ok && create_messageHTTPrequestHeaders(result);
+            bool was_eventHTTPrequestHeaders_ok = was_messageHTTPrelativePath_ok && create_eventHTTPrequestHeaders(result, device->deviceId, was_x509_ok);
+            bool was_messageHTTPrequestHeaders_ok = was_eventHTTPrequestHeaders_ok && create_messageHTTPrequestHeaders(result, was_x509_ok);
             bool was_abandonHTTPrelativePathBegin_ok = was_messageHTTPrequestHeaders_ok && create_abandonHTTPrelativePathBegin(result, device->deviceId);
 
-            if (!was_create_deviceSasToken_ok)
+            if (was_x509_ok)
             {
-                was_sasObject_ok = was_abandonHTTPrelativePathBegin_ok && create_deviceSASObject(result, handleData->hostName, device->deviceId, device->deviceKey);
+                result->sasObject = NULL; /**/
+                was_sasObject_ok = true;
+            }
+            else
+            {
+                if (!was_create_deviceSasToken_ok)
+                {
+                    was_sasObject_ok = was_abandonHTTPrelativePathBegin_ok && create_deviceSASObject(result, handleData->hostName, device->deviceId, device->deviceKey);
+                }
             }
 
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_041: [ IoTHubTransportHttp_Register shall call VECTOR_push_back to store the new device information. ]*/
-            bool was_list_add_ok = (was_sasObject_ok || was_create_deviceSasToken_ok) && (VECTOR_push_back(handleData->perDeviceList, &result, 1) == 0);
+            bool was_list_add_ok = (was_sasObject_ok || was_create_deviceSasToken_ok || was_x509_ok) && (VECTOR_push_back(handleData->perDeviceList, &result, 1) == 0);
 
             if (was_list_add_ok)
             {
