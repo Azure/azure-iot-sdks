@@ -186,5 +186,21 @@ namespace Microsoft.Azure.Devices.Client.Test
 
             var deviceClient = DeviceClient.Create(hostName, authMethod, new ITransportSettings[] { new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 100) });
         }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("TransportSettings")]
+        public void X509Certificate_MutipleClientAuthMechanism()
+        {
+            string hostName = "acme.azure-devices.net";
+            var amqpConnectionPoolSettings = new AmqpConnectionPoolSettings();
+            var transportSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 200, amqpConnectionPoolSettings);
+            var authMethod1 = new DeviceAuthenticationWithRegistrySymmetricKey("device1", "CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=");
+            var deviceClient = DeviceClient.Create(hostName, authMethod1, new ITransportSettings[] { transportSetting });
+
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
+            var authMethod2 = new DeviceAuthenticationWithX509Certificate("device2", cert);
+            var device2Client = DeviceClient.Create(hostName, authMethod2, new ITransportSettings[] { new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 100) });
+        }
     }
 }
