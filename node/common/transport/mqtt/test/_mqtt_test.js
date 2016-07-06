@@ -81,7 +81,7 @@ describe('Mqtt', function () {
       assert.equal(transport._options.protocolId, 'MQTT');
       assert.equal(transport._options.protocolVersion, '4');
       assert.equal(transport._options.clean, false);
-      assert.equal(transport._options.rejectUnauthorized, false);
+      assert.equal(transport._options.rejectUnauthorized, true);
     });
   });
   describe('#publish', function () {
