@@ -16,15 +16,26 @@ var assert = require('chai').assert;
 var debug = require('debug')('e2etests');
 var uuid = require('uuid');
 
-var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, deviceKey) {
-  describe('Device connected over ' + DeviceTransport.name + ':', function () {
+var runTests = function (deviceTransport, hubConnectionString, provisionedDevice) {
+  describe('Device utilizing ' + provisionedDevice.authenticationDescription + ' authentication, connected over ' + deviceTransport.name + ':', function () {
 
     var serviceClient, deviceClient, ehClient;
 
     beforeEach(function () {
-      serviceClient = serviceSdk.Client.fromConnectionString(hubConnStr);
-      deviceClient = deviceSdk.Client.fromConnectionString(deviceConStr, DeviceTransport);
-      ehClient = EventHubClient.fromConnectionString(hubConnStr);
+      serviceClient = serviceSdk.Client.fromConnectionString(hubConnectionString);
+      ehClient = EventHubClient.fromConnectionString(hubConnectionString);
+      if (provisionedDevice.hasOwnProperty('primaryKey')) {
+        deviceClient = deviceSdk.Client.fromConnectionString(provisionedDevice.connectionString, deviceTransport);
+      } else if (provisionedDevice.hasOwnProperty('certificate')) {
+        deviceClient = deviceSdk.Client.fromConnectionString(provisionedDevice.connectionString, deviceTransport);
+        var options = {
+          cert: provisionedDevice.certificate,
+          key: provisionedDevice.clientKey,
+        };
+        deviceClient.setOptions(options);
+      } else {
+        deviceClient = deviceSdk.Client.fromSharedAccessSignature(provisionedDevice.connectionString, deviceTransport)
+      }
     });
 
     afterEach(function (done) {
@@ -33,121 +44,18 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
           done(err);
         } else {
           serviceClient = null;
-          debug('Connection to the service closed.');
           deviceClient.close(function (err) {
             if (err) {
               done(err);
             } else {
               deviceClient = null;
-              debug('Connection as the device closed.');
               ehClient.close().then(function () {
                 ehClient = null;
-                debug('Event hub connection closed');
                 done();
               }).catch(function (err) {
                 done(err);
               });
             }
-          });
-        }
-      });
-    });
-
-    it('Service sends 1 C2D message and it is re-sent until the device completes it', function (done) {
-      this.timeout(60000);
-      var guid = uuid.v4();
-
-      var abandonnedOnce = false;
-      deviceClient.open(function (openErr) {
-        if (openErr) {
-          done(openErr);
-        } else {
-          deviceClient.on('message', function (msg) {
-            debug('Received a message with guid: ' + msg.data);
-            if (msg.data.toString() === guid) {
-              if (!abandonnedOnce) {
-                debug('Abandon the message with guid ' + msg.data);
-                abandonnedOnce = true;
-                deviceClient.abandon(msg, function (err, result) {
-                  assert.isNull(err);
-                  assert.equal(result.constructor.name, 'MessageAbandoned');
-                });
-              } else {
-                debug('Complete the message with guid ' + msg.data);
-                deviceClient.complete(msg, function (err, res) {
-                  assert.isNull(err);
-                  assert.equal(res.constructor.name, 'MessageCompleted');
-                  done();
-                });
-              }
-            } else {
-              debug('not the message I\'m looking for, completing it to clean the queue (' + msg.data + ')');
-              deviceClient.complete(msg, function (err, result) {
-                assert.isNull(err);
-                assert.equal(result.constructor.name, 'MessageCompleted');
-              });
-            }
-          });
-        }
-      });
-
-      serviceClient.open(function (serviceErr) {
-        if (serviceErr) {
-          done(serviceErr);
-        } else {
-          serviceClient.send(deviceName, guid, function (sendErr) {
-            assert.isNull(sendErr);
-            debug('Sent one message with guid: ' + guid);
-          });
-        }
-      });
-    });
-
-    it('Service sends 1 C2D message and it is re-sent until the device rejects it', function (done) {
-      this.timeout(60000);
-      var guid = uuid.v4();
-
-      var abandonnedOnce = false;
-      deviceClient.open(function (openErr) {
-        if (openErr) {
-          done(openErr);
-        } else {
-          deviceClient.on('message', function (msg) {
-            debug('Received a message with guid: ' + msg.data);
-            if (msg.data.toString() === guid) {
-              if (!abandonnedOnce) {
-                debug('Abandon the message with guid ' + msg.data);
-                abandonnedOnce = true;
-                deviceClient.abandon(msg, function (err, result) {
-                  assert.isNull(err);
-                  assert.equal(result.constructor.name, 'MessageAbandoned');
-                });
-              } else {
-                debug('Rejects the message with guid ' + msg.data);
-                deviceClient.reject(msg, function (err, res) {
-                  assert.isNull(err);
-                  assert.equal(res.constructor.name, 'MessageRejected');
-                  done();
-                });
-              }
-            } else {
-              debug('not the message I\'m looking for, completing it to clean the queue (' + msg.data + ')');
-              deviceClient.complete(msg, function (err, result) {
-                assert.isNull(err);
-                assert.equal(result.constructor.name, 'MessageCompleted');
-              });
-            }
-          });
-        }
-      });
-
-      serviceClient.open(function (serviceErr) {
-        if (serviceErr) {
-          done(serviceErr);
-        } else {
-          serviceClient.send(deviceName, guid, function (sendErr) {
-            assert.isNull(sendErr);
-            debug('Sent one message with guid: ' + guid);
           });
         }
       });
@@ -191,7 +99,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
             debug('Sending message #' + i);
             var msg = new Message({ 'counter': i });
             msg.expiryTimeUtc = Date.now() + 10000; // Expire 10s from now, to reduce the chance of us hitting the 50-message limit on the IoT Hub
-            serviceClient.send(deviceName, msg, sendCallback);
+            serviceClient.send(provisionedDevice.deviceId, msg, sendCallback);
           }
         }
       });
@@ -222,7 +130,7 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
                   return ehClient.createReceiver('$Default', partitionId, { 'startAfterTime' : startTime}).then(function(receiver) {
                     receiver.on('errorReceived', done);
                     receiver.on('message', function (eventData) {
-                        if (eventData.systemProperties['iothub-connection-device-id'] === deviceName) {
+                        if (eventData.systemProperties['iothub-connection-device-id'] === provisionedDevice.deviceId) {
                           debug('Event received: ' + eventData.body);
                           if (eventData.body.length === bufferSize) {
                             receiver.removeAllListeners();
@@ -238,41 +146,52 @@ var runTests = function (DeviceTransport, hubConnStr, deviceConStr, deviceName, 
               })
               .catch(done);
     });
-  });
 
-  describe('Using a SAS token over ' + DeviceTransport.name + ':', function() {
-    it('Device can connect and send a message', function(done) {
+    it('Device can connect and send a smalll message', function(done) {
       this.timeout(60000);
-      var host = serviceSdk.ConnectionString.parse(hubConnStr).HostName;
-      var sas = deviceSas.create(host, deviceName, deviceKey, anHourFromNow()).toString();
-      var client = deviceSdk.Client.fromSharedAccessSignature(sas, DeviceTransport);
-      client.open(function(openErr, openResult) {
-        if(openErr) {
+      var startTime = Date.now() - 5000;
+      var bufferSize = 1024;
+      var buffer = new Buffer(bufferSize);
+      buffer.fill('s');
+      deviceClient.open(function (openErr) {
+        if (openErr) {
           done(openErr);
         } else {
-          assert.equal(openResult.constructor.name, 'Connected');
-          var msg = new Message('foo');
-          client.sendEvent(msg, function(sendErr, sendResult) {
-            if(sendErr) {
-              done(sendErr);
-            } else {
-              assert.equal(sendResult.constructor.name, 'MessageEnqueued');
-              client.close(function(closeErr) {
-                if (closeErr) {
-                  done(closeErr);
-                } else {
-                  done();
-                }
-              });
-            }
+          var message = new Message(buffer);
+          deviceClient.sendEvent(message, function (sendErr) {
+            assert.isNull(sendErr);
+            debug('Message sent at ' + Date.now());
           });
         }
       });
+
+      ehClient.open()
+              .then(ehClient.getPartitionIds.bind(ehClient))
+              .then(function (partitionIds) {
+                return partitionIds.map(function (partitionId) {
+                  return ehClient.createReceiver('$Default', partitionId, { 'startAfterTime' : startTime}).then(function(receiver) {
+                    receiver.on('errorReceived', done);
+                    receiver.on('message', function (eventData) {
+                        if (eventData.systemProperties['iothub-connection-device-id'] === provisionedDevice.deviceId) {
+                          debug('Event received: ' + eventData.body);
+                          if (eventData.body.length === bufferSize) {
+                            receiver.removeAllListeners();
+                            ehClient.close();
+                            done();
+                          } else {
+                            debug('eventData.body.length: ' + eventData.body.length + ' doesn\'t match bufferSize: ' + bufferSize);
+                          }
+                        }
+                      });
+                  });
+                });
+              })
+              .catch(done);
     });
 
     it('Service can connect', function(done) {
       this.timeout(60000);
-      var connStr = serviceSdk.ConnectionString.parse(hubConnStr);
+      var connStr = serviceSdk.ConnectionString.parse(hubConnectionString);
       var sas = serviceSas.create(connStr.HostName, connStr.SharedAccessKeyName, connStr.SharedAccessKey, anHourFromNow()).toString();
       var client = serviceSdk.Client.fromSharedAccessSignature(sas);
       client.open(function(err, result) {

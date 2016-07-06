@@ -27,7 +27,7 @@ function Mqtt(mqttprovider) {
  * @description       Establishes a secure connection to the IoT Hub instance using the MQTT protocol.
  *
  * @param {Function}  done  Callback that shall be called when the connection is established.
- */
+*/
 Mqtt.prototype.connect = function (config, done) {
   /*Codes_SRS_NODE_COMMON_MQTT_16_006: [The `connect` method shall throw a ReferenceError if the config argument is falsy, or if one of the following properties of the config argument is falsy: deviceId, host, and one of sharedAccessSignature or x509.cert and x509.key.]*/
   if ((!config) ||
@@ -60,13 +60,13 @@ Mqtt.prototype.connect = function (config, done) {
 
   if (config.sharedAccessSignature) {
     this._options.password = new Buffer(config.sharedAccessSignature);
-    debug('username: ' + this._options.username);
-    debug('hostname: ' + this._hostName);
+  debug('username: ' + this._options.username);
+  debug('hostname: ' + this._hostName);
   } else {
     this._options.cert = config.x509.cert;
     this._options.key = config.x509.key;
     this._options.passphrase = config.x509.passphrase;
-  }
+}
 
   this.client = this.mqttprovider.connect(this._hostName, this._options);
   /*Codes_SRS_NODE_COMMON_MQTT_16_007: [The `connect` method shall not throw if the `done` argument has not been passed.]*/
@@ -74,7 +74,7 @@ Mqtt.prototype.connect = function (config, done) {
     var errCallback = function (error) {
       done(error);
     };
-
+    
   /*Codes_SRS_NODE_COMMON_MQTT_16_003: [The `connect` method shall call the `done` callback with a standard javascript `Error` object if the connection failed.]*/
     this.client.on('error', errCallback);
     this.client.on('close', errCallback);

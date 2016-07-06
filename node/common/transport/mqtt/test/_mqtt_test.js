@@ -68,17 +68,17 @@ describe('Mqtt', function () {
       ].forEach(function (x509) {
         it('throws if sharedAccessSignature is \'' + sas + '\' and x509 options are \'' + JSON.stringify(x509) + '\'', function () {
           var mqtt = new Mqtt(new FakeMqtt());
-          var config = {
-            host: "host.name",
-            deviceId: "deviceId",
+        var config = {
+          host: "host.name",
+          deviceId: "deviceId",
             sharedAccessSignature: sas,
             x509: x509
-          };
-          assert.throws(function () {
+        };
+        assert.throws(function () {
             mqtt.connect(config);
-          }, ReferenceError, 'Invalid transport configuration');
-        });
+        }, ReferenceError, 'Invalid transport configuration');
       });
+    });
     });
 
     /*Tests_SRS_NODE_COMMON_MQTT_16_002: [The `connect` method shall use the authentication parameters contained in the `config` argument to connect to the server.]*/
@@ -108,9 +108,9 @@ describe('Mqtt', function () {
     });
 
     it('uses the authentication parameters contained in the config structure (x509)', function () {
-      var config = {
-        host: "host.name",
-        deviceId: "deviceId",
+        var config = {
+          host: "host.name",
+          deviceId: "deviceId",
         x509: {
           cert: 'cert',
           key: 'key',
@@ -133,7 +133,7 @@ describe('Mqtt', function () {
         assert.equal(options.protocolVersion, '4');
         assert.equal(options.clean, false);
         assert.equal(options.rejectUnauthorized, true);
-      };
+        };
 
       transport.connect(config);
     });
@@ -149,12 +149,12 @@ describe('Mqtt', function () {
       var fakemqtt = new FakeMqtt();
       var transport = new Mqtt(fakemqtt);
       transport.connect(config, function(err) {
-        if(err) {
+          if(err) {
           done(err);
-        } else {
-          done();
-        }
-      });
+          } else {
+            done();
+          }
+        });
 
       fakemqtt.emit('connect', { connack: true });
     });
@@ -162,13 +162,13 @@ describe('Mqtt', function () {
     /*Tests_SRS_NODE_COMMON_MQTT_16_003: [The `connect` method shall call the `done` callback with a standard javascript `Error` object if the connection failed.]*/
     ['close', 'offline', 'error', 'disconnect'].forEach(function(event) {
       it('calls the done callback with an error if we get the \'' + event + '\' event before connect', function(done) {
-        var config = {
-          host: "host.name",
-          deviceId: "deviceId",
-          sharedAccessSignature: "sasToken"
-        };
+      var config = {
+        host: "host.name",
+        deviceId: "deviceId",
+        sharedAccessSignature: "sasToken"
+      };
 
-        var fakemqtt = new FakeMqtt();
+      var fakemqtt = new FakeMqtt();
         var transport = new Mqtt(fakemqtt);
         transport.connect(config, function(err) {
           assert.isNotNull(err);
@@ -189,7 +189,7 @@ describe('Mqtt', function () {
         });
       });
     });
-  });
+      });
 
   describe('#publish', function () {
     /* Tests_SRS_NODE_HTTP_12_006: The PUBLISH method shall throw ReferenceError “Invalid message” if the message is falsy */
@@ -204,8 +204,8 @@ describe('Mqtt', function () {
         assert.throws(function () {
           transport.publish(message);
         }, ReferenceError, 'Invalid message');
-      });
     });
+  });
 
     it('calls publish on the MQTT library', function(done) {
       var config = {
@@ -219,26 +219,26 @@ describe('Mqtt', function () {
       transport.connect(config, function () {
         transport.client.publishShouldSucceed(true);
         transport.publish(new Message('message'), function(err, result) {
-          if(err) {
+        if(err) {
             done (err);
-          } else {
+        } else {
             assert.equal(result.constructor.name, 'MessageEnqueued');
-            done();
-          }
-        });
+          done();
+        }
+      });
       });
       fakemqtt.emit('connect', { connack: true });
     });
 
     // Publish errors are handled with a callback, so 'error' should be subscribed only once when connecting, to get link errors.
     it('does not subscribe to the error event', function (done) {
-      var config = {
-        host: "host.name",
-        deviceId: "deviceId",
-        sharedAccessSignature: "sasToken"
-      };
+        var config = {
+          host: "host.name",
+          deviceId: "deviceId",
+          sharedAccessSignature: "sasToken"
+        };
 
-      var fakemqtt = new FakeMqtt();
+        var fakemqtt = new FakeMqtt();
       var transport = new Mqtt(fakemqtt);
       transport.connect(config, function () {
         assert.equal(transport.client.listeners('error').length, 1);

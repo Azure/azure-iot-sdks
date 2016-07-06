@@ -3,24 +3,41 @@
 
 'use strict';
 
-var deviceAmqp = require('azure-iot-device-amqp');
-var deviceHttp = require('azure-iot-device-http');
-var ConnectionString = require('azure-iothub').ConnectionString;
 
+var deviceAmqp = require('azure-iot-device-amqp');
+var deviceAmqpWs = require('azure-iot-device-amqp-ws');
+var deviceHttp = require('azure-iot-device-http');
+var deviceMqtt = require('azure-iot-device-mqtt');
+
+var device_provision = require('./test/device_provision.js');
 var device_service_tests = require('./test/device_service.js');
 var registry_tests = require('./test/registry.js');
 var file_upload_tests = require('./test/file_upload.js');
+var device_acknowledge_tests = require('./test/device_acknowledge_tests.js')
+var device_teardown = require('./test/device_teardown.js');
 
-var deviceName = process.env.IOTHUB_DEVICE_ID;
-var deviceKey = process.env.IOTHUB_DEVICE_KEY;
 var hubConnectionString = process.env.IOTHUB_CONNECTION_STRING;
 var storageConnectionString = process.env.STORAGE_CONNECTION_STRING;
-var host = ConnectionString.parse(process.env.IOTHUB_CONNECTION_STRING).HostName;
-var deviceConnectionString = 'HostName=' + host + ';DeviceId=' + deviceName + ';SharedAccessKey=' + deviceKey;
+var generalProtocols = [deviceHttp.Http];//, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs];
+var acknowledgementProtocols = [deviceHttp.Http, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs]
+var deviceToTest;
+var protocolToTest;
 
-device_service_tests(deviceAmqp.Amqp, hubConnectionString, deviceConnectionString, deviceName, deviceKey);
-device_service_tests(deviceHttp.Http, hubConnectionString, deviceConnectionString, deviceName, deviceKey);
-
-registry_tests(hubConnectionString, storageConnectionString);
-
-file_upload_tests(hubConnectionString, deviceConnectionString, deviceName);
+device_provision(hubConnectionString, function (err, provisionedDevices) {
+  if (err) {
+    console.log('Unable to create the devices needed.');
+  } else {
+    for (deviceToTest = 0; deviceToTest < provisionedDevices.length; deviceToTest++) {
+      for (protocolToTest = 0; protocolToTest < generalProtocols.length; protocolToTest++) {
+        device_service_tests(generalProtocols[protocolToTest], hubConnectionString, provisionedDevices[deviceToTest]);
+//        file_upload_tests(generalProtocols[protocolToTest], hubConnectionString, provisionedDevices[deviceToTest]);
+      }
+      for (protocolToTest = 0; protocolToTest < acknowledgementProtocols.length; protocolToTest++) {
+//        device_acknowledge_tests(generalProtocols[protocolToTest], hubConnectionString, provisionedDevices[deviceToTest]);
+      }
+    }
+//    registry_tests(hubConnectionString, storageConnectionString);
+  }
+  if (provisionedDevices) device_teardown(hubConnectionString, provisionedDevices);
+  run();
+});
