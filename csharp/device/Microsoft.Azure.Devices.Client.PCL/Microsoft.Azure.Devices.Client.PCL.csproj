@@ -234,6 +234,9 @@
     <Compile Include="..\Microsoft.Azure.Devices.Client\Common\TrackingHelper.cs">
       <Link>TrackingHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Utils.cs">
+      <Link>Utils.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.Azure.Devices.Client\Common\WaitCallbackActionItem.cs">
       <Link>WaitCallbackActionItem.cs</Link>
     </Compile>

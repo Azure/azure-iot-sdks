@@ -71,6 +71,7 @@
     <Compile Include="RoutingDelegatingHandlerTests.cs" />
     <Compile Include="TestAssert.cs" />
     <Compile Include="TransportSettingsTests.cs" />
+    <Compile Include="UtilsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
