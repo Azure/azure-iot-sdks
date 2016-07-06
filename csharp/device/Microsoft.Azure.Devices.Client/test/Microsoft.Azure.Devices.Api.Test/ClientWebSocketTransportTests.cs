@@ -27,7 +27,7 @@ namespace Microsoft.Azure.Devices.Client.Test
         static byte[] byteArray = new byte[10] { 0x5, 0x6, 0x7, 0x8, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
         static volatile bool readComplete;
 
-        [AssemblyInitialize()]
+        [ClassInitialize()]
         public static void AssembyInitialize(TestContext testcontext)
         {
             listener = new HttpListener();
@@ -36,7 +36,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             RunWebSocketServer().Fork();
         }
 
-        [AssemblyCleanup()]
+        [ClassCleanup()]
         public static void AssemblyCleanup()
         {
             listener.Stop();

@@ -14,6 +14,7 @@
 
 #include "agenttypesystem.h"
 #include <limits>
+#include <cfloat>
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/strings.h"
 
@@ -12113,6 +12114,58 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
         }
 
         /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
+        TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Max_Positive_Value_Succeeds)
+        {
+            // arrange
+            AGENT_DATA_TYPE agentData;
+            const char* source = "1.7976931348623158e+308";
+
+            // act
+            AGENT_DATA_TYPES_RESULT result = CreateAgentDataType_From_String(source, EDM_DOUBLE_TYPE, &agentData);
+
+            // assert
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK, result);
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPE_TYPE, EDM_DOUBLE_TYPE, agentData.type);
+            ASSERT_ARE_EQUAL(double, DBL_MAX, agentData.value.edmDouble.value);
+
+            // cleanup
+            Destroy_AGENT_DATA_TYPE(&agentData);
+        }
+
+        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
+        TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Overflow_Max_Positive_Value_Fails)
+        {
+            // arrange
+            AGENT_DATA_TYPE agentData;
+            const char* source = "1.7976931348623159e+308";
+
+            // act
+            AGENT_DATA_TYPES_RESULT result = CreateAgentDataType_From_String(source, EDM_DOUBLE_TYPE, &agentData);
+
+            // assert
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
+        }
+
+        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
+        TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Min_Positive_Value_Succeeds)
+        {
+            // arrange
+            AGENT_DATA_TYPE agentData;
+            const char* source = "2.2250738585072014e-308";
+
+            // act
+            AGENT_DATA_TYPES_RESULT result = CreateAgentDataType_From_String(source, EDM_DOUBLE_TYPE, &agentData);
+
+            // assert
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK, result);
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPE_TYPE, EDM_DOUBLE_TYPE, agentData.type);
+            ASSERT_ARE_EQUAL(double, DBL_MIN, agentData.value.edmDouble.value);
+
+            // cleanup
+            Destroy_AGENT_DATA_TYPE(&agentData);
+        }
+
+        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Bad_Text_Fails)
         {
@@ -12239,6 +12292,91 @@ BEGIN_TEST_SUITE(AgentTypeSystem_UnitTests)
 
             // cleanup
             Destroy_AGENT_DATA_TYPE(&agentData);
+        }
+
+        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
+        TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Max_Positive_Value_Succeeds)
+        {
+            // arrange
+            AGENT_DATA_TYPE agentData;
+            const char* source = "3.402823466e+38";
+
+            // act
+            AGENT_DATA_TYPES_RESULT result = CreateAgentDataType_From_String(source, EDM_SINGLE_TYPE, &agentData);
+
+            // assert
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK, result);
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPE_TYPE, EDM_SINGLE_TYPE, agentData.type);
+            ASSERT_ARE_EQUAL(float, (float)FLT_MAX, agentData.value.edmSingle.value);
+
+            // cleanup
+            Destroy_AGENT_DATA_TYPE(&agentData);
+        }
+
+        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
+        TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Min_Negative_Value_Succeeds)
+        {
+            // arrange
+            AGENT_DATA_TYPE agentData;
+            const char* source = "-3.402823466e+38";
+
+            // act
+            AGENT_DATA_TYPES_RESULT result = CreateAgentDataType_From_String(source, EDM_SINGLE_TYPE, &agentData);
+
+            // assert
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK, result);
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPE_TYPE, EDM_SINGLE_TYPE, agentData.type);
+            ASSERT_ARE_EQUAL(float, (FLT_MAX * (-1)), agentData.value.edmSingle.value);
+
+            // cleanup
+            Destroy_AGENT_DATA_TYPE(&agentData);
+        }
+
+        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
+        TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Min_Positive_Value_Succeeds)
+        {
+            // arrange
+            AGENT_DATA_TYPE agentData;
+            const char* source = "1.17549435e-38";
+
+            // act
+            AGENT_DATA_TYPES_RESULT result = CreateAgentDataType_From_String(source, EDM_SINGLE_TYPE, &agentData);
+
+            // assert
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK, result);
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPE_TYPE, EDM_SINGLE_TYPE, agentData.type);
+            ASSERT_ARE_EQUAL(float, (float)FLT_MIN, agentData.value.edmSingle.value);
+
+            // cleanup
+            Destroy_AGENT_DATA_TYPE(&agentData);
+        }
+
+        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
+        TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Overflow_Max_Positive_Value_Fails)
+        {
+            // arrange
+            AGENT_DATA_TYPE agentData;
+            const char* source = "3.5e+38";
+
+            // act
+            AGENT_DATA_TYPES_RESULT result = CreateAgentDataType_From_String(source, EDM_SINGLE_TYPE, &agentData);
+
+            // assert
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
+        }
+
+        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
+        TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Exponential_Overflow_Max_Positive_Value_Fails)
+        {
+            // arrange
+            AGENT_DATA_TYPE agentData;
+            const char* source = "1.0e39";
+
+            // act
+            AGENT_DATA_TYPES_RESULT result = CreateAgentDataType_From_String(source, EDM_SINGLE_TYPE, &agentData);
+
+            // assert
+            ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
         /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */

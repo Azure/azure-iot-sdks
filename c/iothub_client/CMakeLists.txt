@@ -50,6 +50,15 @@ set(iothub_client_h_files
 ./inc/iothubtransport.h
 )
 
+set(iothub_client_h_install_files
+	${iothub_client_ll_transport_h_files}
+	${iothub_client_h_files}
+)
+
+set(iothub_client_libs
+iothub_client
+)
+
 if(${use_http})
 	set(iothub_client_http_transport_c_files
 		${iothub_client_ll_transport_c_files}
@@ -61,6 +70,11 @@ if(${use_http})
 		./inc/iothubtransporthttp.h
 		./inc/iothub_transport_ll.h
 		./inc/iothub_client_private.h
+	)
+	
+	set(iothub_client_h_install_files
+		${iothub_client_h_install_files}
+		${iothub_client_http_transport_h_files}
 	)
 endif()
 
@@ -86,6 +100,11 @@ if(${use_amqp})
 			./inc/iothubtransportamqp.h
 		)	
 	endif()
+	
+	set(iothub_client_h_install_files
+		${iothub_client_h_install_files}
+		${iothub_client_amqp_transport_h_files}
+	)
 endif()
 
 if(${use_mqtt})
@@ -97,6 +116,11 @@ if(${use_mqtt})
 	set(iothub_client_mqtt_transport_h_files
 		${iothub_client_ll_transport_h_files}
 		./inc/iothubtransportmqtt.h
+	)
+	
+	set(iothub_client_h_install_files
+		${iothub_client_h_install_files}
+		${iothub_client_mqtt_transport_h_files}
 	)
 endif()
 
@@ -136,6 +160,10 @@ if(${use_http})
 	)
 	linkSharedUtil(iothub_client_http_transport)
     target_link_libraries(iothub_client_http_transport)
+	set(iothub_client_libs
+		${iothub_client_libs}
+		iothub_client_http_transport
+	)
 endif()
 
 if(${use_amqp})
@@ -146,6 +174,10 @@ if(${use_amqp})
 	)
 	linkSharedUtil(iothub_client_amqp_transport)
     target_link_libraries(iothub_client_amqp_transport)
+	set(iothub_client_libs
+		${iothub_client_libs}
+		iothub_client_amqp_transport
+	)
 endif()
 
 if(${use_mqtt})
@@ -157,6 +189,10 @@ if(${use_mqtt})
 	linkSharedUtil(iothub_client_mqtt_transport)
 	linkMqttLibrary(iothub_client_mqtt_transport)
     target_link_libraries(iothub_client_mqtt_transport)
+	set(iothub_client_libs
+		${iothub_client_libs}
+		iothub_client_mqtt_transport
+	)
 endif()
 
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
@@ -186,3 +222,13 @@ if(NOT IN_OPENWRT)
 # Disable tests for OpenWRT
 add_subdirectory(tests)
 endif()
+
+if(WIN32)
+else()
+    install (TARGETS 
+		${iothub_client_libs} 
+		DESTINATION lib)
+    install (FILES 
+		${iothub_client_h_install_files} 
+		DESTINATION include/azureiot)
+endif (WIN32)
