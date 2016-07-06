@@ -195,6 +195,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHan
     return IOTHUB_CLIENT_OK;
 }
 
+IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context)
+{
+    return IOTHUB_CLIENT_OK;
+}
+
 // "iothub_client_version.h"
 
 const char* IoTHubClient_GetVersionString(void)

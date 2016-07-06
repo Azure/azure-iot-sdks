@@ -40,6 +40,8 @@ def receive_message_callback(message, counter):
 def send_confirmation_callback(message, result, userContext):
     return
 
+def blob_upload_callback(result, userContext):
+    return
 
 class TestExceptionDefinitions(unittest.TestCase):
 
@@ -572,6 +574,24 @@ class TestClassDefinitions(unittest.TestCase):
         result = client.set_option("timeout", "241000")
         self.assertIsNone(result)
         result = client.set_option("timeout", timeout)
+        self.assertIsNone(result)
+        # upload_blob_async
+        destinationFileName = "fname"
+        source = "src"
+        size = 10
+        with self.assertRaises(AttributeError):
+            client.UploadToBlobAsync()
+        with self.assertRaises(Exception):
+            client.upload_blob_async(1)
+        with self.assertRaises(Exception):
+            client.upload_blob_async(blob_upload_callback)
+        with self.assertRaises(Exception):
+            client.upload_blob_async(destinationFileName, blob_upload_callback)
+        with self.assertRaises(Exception):
+            client.upload_blob_async(destinationFileName, source, blob_upload_callback)
+        with self.assertRaises(Exception):
+            client.upload_blob_async(destinationFileName, source, size, send_confirmation_callback)
+        result = client.upload_blob_async(destinationFileName, source, size, send_confirmation_callback, None)
         self.assertIsNone(result)
 
 if __name__ == '__main__':

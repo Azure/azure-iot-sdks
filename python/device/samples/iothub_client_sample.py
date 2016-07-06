@@ -33,6 +33,7 @@ received_count = 0
 # global counters
 receive_callbacks = 0
 send_callbacks = 0
+blob_callbacks = 0
 
 # chose HTTP, AMQP or MQTT as transport protocol
 protocol = IoTHubTransportProvider.AMQP
@@ -84,6 +85,13 @@ def send_confirmation_callback(message, result, user_context):
     print("    Total calls confirmed: %d" % send_callbacks)
 
 
+def blob_upload_confirmation_callback(result, user_context):
+    global blob_callbacks
+    print("Blob upload confirmation[%d] received for message with result = %s" % (user_context, result))
+    blob_callbacks += 1
+    print("    Total calls confirmed: %d" % blob_callbacks)
+
+
 def iothub_client_init():
     # prepare iothub client
     iotHubClient = IoTHubClient(connection_string, protocol)
@@ -119,6 +127,13 @@ def iothub_client_sample_run():
     try:
 
         iotHubClient = iothub_client_init()
+
+        filename= "hello_python_blob.txt"
+        content = "Hello World from Python Blob APi"
+
+        print("IoTHubClient is uploading blob to storage")
+        iotHubClient.upload_blob_async(filename, content, len(content), blob_upload_confirmation_callback, 1001)
+        print("IoTHubClient.upload_blob_async accepted the blob to upload to IoT Hub.")
 
         while True:
             # send a few messages every minute

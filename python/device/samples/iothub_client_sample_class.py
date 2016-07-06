@@ -33,6 +33,7 @@ received_count = 0
 # global counters
 receive_callbacks = 0
 send_callbacks = 0
+blob_callbacks = 0
 
 # String containing Hostname, Device Id & Device Key in the format:
 # "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
@@ -92,6 +93,14 @@ class HubManager(object):
         send_callbacks += 1
         print("    Total calls confirmed: %d" % send_callbacks)
 
+
+    def _blob_upload_confirmation_callback(self, result, user_context):
+        global blob_callbacks
+        print("Blob upload confirmation[%d] received for message with result = %s" % (user_context, result))
+        blob_callbacks += 1
+        print("    Total calls confirmed: %d" % blob_callbacks)
+
+
     def send_event(self, event, properties, send_context):
         if not isinstance(event, IoTHubMessage):
             event = IoTHubMessage(bytearray(event, 'utf8'))
@@ -103,6 +112,13 @@ class HubManager(object):
 
         self.client.send_event_async(
             event, self._send_confirmation_callback, send_context)
+
+
+    def upload_to_blob(self, destinationfilename, source, size, usercontext):
+        self.client.upload_blob_async(
+            destinationfilename, source, size,
+            self._blob_upload_confirmation_callback, usercontext)
+
 
 
 def main(connection_string, protocol):
@@ -117,6 +133,10 @@ def main(connection_string, protocol):
         print(
             "Starting the IoT Hub Python sample using protocol %s..." %
             hub_manager.client_protocol)
+
+        filename= "hello_python_blob.txt"
+        content = "Hello World from Python Blob APi"
+        hub_manager.upload_to_blob(filename, content, len(content), 1001)
 
         while True:
             # send a few messages every minute
