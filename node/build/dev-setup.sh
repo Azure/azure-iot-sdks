@@ -30,6 +30,7 @@ npm link
 
 cd $node_root/device/core
 echo "\n-- Creating links for `pwd` --"
+npm link azure-iot-http-base
 npm link azure-iot-common
 npm link
 [ $? -eq 0 ] || exit $?
