@@ -16,11 +16,11 @@ and removing calls to _DoWork will yield the same results. */
 #ifdef ARDUINO
 #include "AzureIoT.h"
 #else
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/platform.h"
 #include "iothub_client_ll.h"
 #include "iothub_message.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothubtransporthttp.h"
-#include "azure_c_shared_utility/platform.h"
 #endif
 
 #ifdef MBED_BUILD_TIMESTAMP

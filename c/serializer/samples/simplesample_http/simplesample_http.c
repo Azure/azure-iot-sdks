@@ -14,11 +14,11 @@ and removing calls to _DoWork will yield the same results. */
 #ifdef ARDUINO
 #include "AzureIoT.h"
 #else
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/platform.h"
 #include "serializer.h"
 #include "iothub_client_ll.h"
 #include "iothubtransporthttp.h"
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/platform.h"
 #endif
 
 #ifdef MBED_BUILD_TIMESTAMP
@@ -42,7 +42,6 @@ WITH_ACTION(SetAirResistance, int, Position)
 
 END_NAMESPACE(WeatherStation);
 
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES)
 
 EXECUTE_COMMAND_RESULT TurnFanOn(ContosoAnemometer* device)
 {

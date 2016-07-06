@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0.1-8) wily; urgency=low
+azure-iot-sdk-c (0.1.0.1-10) wily; urgency=low
 
   * Initial release
 
@@ -22,5 +22,9 @@ azure-iot-sdk-c (0.1.0.1-8) wily; urgency=low
 
   * Fix tlsio_schannel bug (not all input bytes were being read) (#451ab97)
 
- -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 20 May 2016 17:24:51 +0000
+  * Remove stale lock references (#9449654)
+
+  * C Client responds to a missed ping with the MQTT_CLIENT_NO_PING_RESPONSE message (#78aaa88)
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 17 Jun 2016 17:24:51 +0000
 

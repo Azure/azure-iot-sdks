@@ -77,7 +77,7 @@ However, in the set-up purpose of the sample Azure IoT SDK run, they are not nec
 
     *For information about how to upgrade your version of gcc on Ubuntu 14.04, see <http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04>.*
 
--   Download the Microsoft Azure IoT Device SDK for C on Ubumtu PC by issuing following commands:
+-   Download the Microsoft Azure IoT Device SDK for C on Ubuntu PC by issuing following commands:
 
     ```
     cd ~
@@ -95,6 +95,8 @@ However, in the set-up purpose of the sample Azure IoT SDK run, they are not nec
     ```
 
 -   Sync your Ubuntu machine from Bitjoule Magic Box.
+
+    ***Note:*** *Please enable ssh by running `raspi-config` so that ssh and scp work from a remote machine.*
 
         cd ~/RPiTools/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf
         rsync -rl --safe-links pi@<Bitjoule Magic Box>:/{lib,usr} 
@@ -183,5 +185,5 @@ However, in the set-up purpose of the sample Azure IoT SDK run, they are not nec
 
 
 [setup-devbox-linux]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
-[lnk-setup-iot-hub]: ../../setup_iothub.md
-[lnk-manage-iot-hub]: ../../manage_iot_hub.md
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

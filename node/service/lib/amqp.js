@@ -12,7 +12,7 @@ var translateError = require('./amqp_service_errors.js');
  * @class       module:azure-iothub.Amqp
  * @classdesc   Constructs an {@linkcode Amqp} object that can be used in an application
  *              to connect to IoT Hub instance, using the AMQP protocol.
- * 
+ *
  * @params {Object}  config    The configuration object that should be used to connect to the IoT Hub service.
  * @params {Object}  amqpBase  OPTIONAL: The Base AMQP transport object. Amqp will use azure-iot-common.Amqp if no argument is provided.
  */
@@ -22,16 +22,7 @@ hubName - (string) the name of the IoT Hub instance (without suffix such as .azu
 keyName – (string) the name of a key that can be used to communicate with the IoT Hub instance
 sharedAccessSignature – (string) the key associated with the key name.] */
 function Amqp(config, amqpBase) {
-  var uri = 'amqps://';
-  uri += encodeURIComponent(config.keyName) +
-         '%40sas.root.' +
-         config.hubName +
-         ':' +
-         encodeURIComponent(config.sharedAccessSignature) +
-         '@' +
-         config.host;
-
-  this._amqp = amqpBase ? amqpBase : new Base(uri, true, PackageJson.name + '/' + PackageJson.version);
+  this._amqp = amqpBase ? amqpBase : new Base(true, PackageJson.name + '/' + PackageJson.version);
   this._config = config;
 }
 
@@ -57,7 +48,14 @@ var handleResult = function (errorMessage, done) {
  */
 /*Codes_SRS_NODE_IOTHUB_SERVICE_AMQP_16_019: [The `connect` method shall call the `connect` method of the base AMQP transport and translate its result to the caller into a transport-agnostic object.]*/
 Amqp.prototype.connect = function connect(done) {
-  this._amqp.connect(handleResult('AMQP Transport: Could not connect', done));
+  var uri = 'amqps://' +
+         encodeURIComponent(this._config.keyName) +
+         '%40sas.root.' +
+         this._config.hubName +
+         ':' +
+         encodeURIComponent(this._config.sharedAccessSignature) + '@' + this._config.host;
+
+  this._amqp.connect(uri, undefined, handleResult('AMQP Transport: Could not connect', done));
 };
 
 /**

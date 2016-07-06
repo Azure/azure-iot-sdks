@@ -113,6 +113,8 @@ call %npm-command%
 goto :eof
 
 :cleanup
+set EXITCODE=%ERRORLEVEL%
 call node %node-root%\..\tools\iothub-explorer\iothub-explorer.js %IOTHUB_CONNECTION_STRING% delete %IOTHUB_X509_DEVICE_ID%
 del %IOTHUB_X509_CERTIFICATE%
 del %IOTHUB_X509_KEY%
+exit /b %EXITCODE%

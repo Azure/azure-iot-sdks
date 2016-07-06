@@ -6,6 +6,7 @@
 var ConnectionString = require('azure-iot-common').ConnectionString;
 var Amqp = require('../lib/amqp.js');
 var runTests = require('./_client_common_testrun.js');
+var fs = require('fs');
 
 var host = ConnectionString.parse(process.env.IOTHUB_CONNECTION_STRING).HostName;
 var deviceId = process.env.IOTHUB_DEVICE_ID;
@@ -23,9 +24,20 @@ var badConnStrings = [
   makeConnectionString(host, deviceId, 'bad')
 ];
 
-describe('Over AMQP', function () {
+describe('Over real AMQPS with a Shared Access Key', function () {
   this.timeout(60000);
   runTests(Amqp, connectionString, badConnStrings);
+});
+var x509DeviceId = process.env.IOTHUB_X509_DEVICE_ID;
+var x509Certificate = fs.readFileSync(process.env.IOTHUB_X509_CERTIFICATE);
+var x509Key = fs.readFileSync(process.env.IOTHUB_X509_KEY);
+var x509Passphrase = process.env.IOTHUB_X509_PASSPHRASE;
+var x509ConnectionString = 'HostName=' + host + ';DeviceId=' + x509DeviceId + ';x509=true';
+
+
+describe('Over real AMQPS with an x509 certificate', function() {
+  this.timeout(60000);
+  runTests(Amqp, x509ConnectionString, badConnStrings, x509Certificate, x509Key, x509Passphrase);
 });
 
 module.exports = runTests;

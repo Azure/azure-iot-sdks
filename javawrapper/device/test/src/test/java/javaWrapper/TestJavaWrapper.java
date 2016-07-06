@@ -15,6 +15,7 @@ import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_MESSAGE_HANDLE;
 import javaWrapper.Iothub_client_wrapperLibrary.IOTHUB_MESSAGE_RESULT;
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubEventCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.IotHubMessageCallback;
+import javaWrapper.Iothub_client_wrapperLibrary.IotHubFileUploadCallback;
 import javaWrapper.Iothub_client_wrapperLibrary.MAP_HANDLE;
 import javaWrapper.Iothub_client_wrapperLibrary.MAP_RESULT;
 import javaWrapper.Iothub_client_wrapperLibrary.MapFilterCallback;
@@ -26,7 +27,16 @@ public class TestJavaWrapper
     String connectionString = "fake connection string";
     IotHubClientProtocol protocol = null;
     LoadTestLibrary test = new LoadTestLibrary(true);
-    
+
+    protected static class FileUploadCallback
+            implements IotHubFileUploadCallback
+    {
+        public void execute(int status, Pointer context)
+        {
+
+        }
+    }
+
     protected static class MessageCallback
         implements IotHubMessageCallback
     {
@@ -304,8 +314,22 @@ public class TestJavaWrapper
         result = client.setOption("timeout", "241000");
         
         assertEquals(result, IOTHUB_CLIENT_RESULT.IOTHUB_CLIENT_OK); 
-    } 
-    
+    }
+
+    @Test
+    public void TestUploadToBlobAsync()
+    {
+        DeviceClient client = new DeviceClient(connectionString, IotHubClientProtocol.HTTPS);
+        int result;
+
+        FileUploadCallback fileUploadCallback = new FileUploadCallback();
+        Pointer usercontext = null;
+
+        result = client.uploadToBlobAsync("filename", "content", 7, fileUploadCallback, usercontext);
+
+        assertEquals(result, IOTHUB_CLIENT_RESULT.IOTHUB_CLIENT_OK);
+    }
+
     @Test 
     public void TestSetOptionNullOptionName() 
     { 
