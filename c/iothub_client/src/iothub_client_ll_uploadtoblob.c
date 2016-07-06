@@ -841,8 +841,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
                     }
                     STRING_delete(correlationId);
                 }
-                HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
             }
+            HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
         }
     }
     return result;
