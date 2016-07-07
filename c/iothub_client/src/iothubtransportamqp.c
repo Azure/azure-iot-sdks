@@ -61,16 +61,46 @@ typedef enum CBS_STATE_TAG
     CBS_STATE_AUTHENTICATED
 } CBS_STATE;
 
+typedef enum AMQP_TRANSPORT_CREDENTIAL_TYPE_TAG
+{
+    CREDENTIAL_NOT_BUILD,
+    X509,
+    DEVICE_KEY,
+    DEVICE_SAS_TOKEN,
+}AMQP_TRANSPORT_CREDENTIAL_TYPE;
+
+typedef struct X509_CREDENTIAL_TAG
+{
+    const char* x509certificate;
+    const char* x509privatekey;
+}X509_CREDENTIAL;
+
+typedef union AMQP_TRANSPORT_CREDENTIAL_UNION_TAG
+{
+    // Key associated to the device to be used.
+    STRING_HANDLE deviceKey;
+    
+    // SAS associated to the device to be used.
+    STRING_HANDLE deviceSasToken;
+
+    // X509 
+    X509_CREDENTIAL x509credential;
+}AMQP_TRANSPORT_CREDENTIAL_UNION;
+
+typedef struct AMQP_TRANSPORT_CREDENTIAL_TAG
+{
+    AMQP_TRANSPORT_CREDENTIAL_TYPE credentialType;
+    AMQP_TRANSPORT_CREDENTIAL_UNION credential;
+}AMQP_TRANSPORT_CREDENTIAL;
+
 typedef struct AMQP_TRANSPORT_STATE_TAG
 {
     // FQDN of the IoT Hub.
     STRING_HANDLE iotHubHostFqdn;
     // AMQP port of the IoT Hub.
     int iotHubPort;
-    // Key associated to the device to be used.
-    STRING_HANDLE deviceKey;
-    // SAS associated to the device to be used.
-    STRING_HANDLE deviceSasToken;
+    // contains the credentials to be used
+    AMQP_TRANSPORT_CREDENTIAL credential;
     // Address to which the transport will connect to and send events.
     STRING_HANDLE targetAddress;
     // Address to which the transport will connect to and receive messages from.
@@ -224,32 +254,32 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
     const char* const* propertyValues;
     size_t propertyCount;
 
-    /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_007: [The IoTHub message properties shall be obtained by calling IoTHubMessage_Properties.] */
+    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_007: [The IoTHub message properties shall be obtained by calling IoTHubMessage_Properties.] */
     properties_map = IoTHubMessage_Properties(iothub_message_handle);
     if (properties_map == NULL)
     {
-        /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
         LogError("Failed to get property map from IoTHub message.");
         result = __LINE__;
     }
-    /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_015: [The actual keys and values, as well as the number of properties shall be obtained by calling Map_GetInternals on the handle obtained from IoTHubMessage_Properties.] */
+    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_015: [The actual keys and values, as well as the number of properties shall be obtained by calling Map_GetInternals on the handle obtained from IoTHubMessage_Properties.] */
     else if (Map_GetInternals(properties_map, &propertyKeys, &propertyValues, &propertyCount) != MAP_OK)
     {
-        /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
         LogError("Failed to get the internals of the property map.");
         result = __LINE__;
     }
     else
     {
-        /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_016: [If the number of properties is 0, no uAMQP map shall be created and no application properties shall be set on the uAMQP message.] */
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_016: [If the number of properties is 0, no uAMQP map shall be created and no application properties shall be set on the uAMQP message.] */
         if (propertyCount != 0)
         {
             size_t i;
-            /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_009: [The uAMQP map shall be created by calling amqpvalue_create_map.] */
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_009: [The uAMQP map shall be created by calling amqpvalue_create_map.] */
             AMQP_VALUE uamqp_map = amqpvalue_create_map();
             if (uamqp_map == NULL)
             {
-                /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
                 LogError("Failed to create uAMQP map for the properties.");
                 result = __LINE__;
             }
@@ -257,32 +287,32 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
             {
                 for (i = 0; i < propertyCount; i++)
                 {
-                    /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_010: [A key uAMQP value shall be created by using amqpvalue_create_string.] */
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_010: [A key uAMQP value shall be created by using amqpvalue_create_string.] */
                     AMQP_VALUE map_key_value = amqpvalue_create_string(propertyKeys[i]);
                     if (map_key_value == NULL)
                     {
-                        /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+                        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
                         LogError("Failed to create uAMQP property key value.");
                         break;
                     }
 
-                    /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_011: [A value uAMQP value shall be created by using amqpvalue_create_string.] */
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_011: [A value uAMQP value shall be created by using amqpvalue_create_string.] */
                     AMQP_VALUE map_value_value = amqpvalue_create_string(propertyValues[i]);
                     if (map_value_value == NULL)
                     {
                         amqpvalue_destroy(map_key_value);
-                        /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+                        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
                         LogError("Failed to create uAMQP property key value.");
                         break;
                     }
 
-                    /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_008: [All properties shall be transferred to a uAMQP map.] */
-                    /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_012: [The key/value pair for the property shall be set into the uAMQP property map by calling amqpvalue_map_set_value.] */
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_008: [All properties shall be transferred to a uAMQP map.] */
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_012: [The key/value pair for the property shall be set into the uAMQP property map by calling amqpvalue_map_set_value.] */
                     if (amqpvalue_set_map_value(uamqp_map, map_key_value, map_value_value) != 0)
                     {
                         amqpvalue_destroy(map_key_value);
                         amqpvalue_destroy(map_value_value);
-                        /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+                        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
                         LogError("Failed to create uAMQP property key value.");
                         break;
                     }
@@ -297,10 +327,10 @@ static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_hand
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_013: [After all properties have been filled in the uAMQP map, the uAMQP properties map shall be set on the uAMQP message by calling message_set_application_properties.] */
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_013: [After all properties have been filled in the uAMQP map, the uAMQP properties map shall be set on the uAMQP message by calling message_set_application_properties.] */
                     if (message_set_application_properties(uamqp_message, uamqp_map) != 0)
                     {
-                        /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+                        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
                         LogError("Failed to transfer the message properties to the uAMQP message.");
                         result = __LINE__;
                     }
@@ -333,7 +363,7 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
     /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_155: [uAMQP message properties shall be retrieved using message_get_properties.] */
     if ((api_call_result = message_get_properties(uamqp_message, &uamqp_message_properties)) != 0)
     {
-        /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_156: [If message_get_properties fails, the error shall be notified and ‘on_message_received’ shall continue.] */
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_156: [If message_get_properties fails, the error shall be notified and ‘on_message_received' shall continue.] */
         LogError("Failed to get property properties map from uAMQP message (error code %d).", api_call_result);
         return_value = __LINE__;
     }
@@ -344,7 +374,7 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
         /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_157: [The message-id property shall be read from the uAMQP message by calling properties_get_message_id.] */
         if ((api_call_result = properties_get_message_id(uamqp_message_properties, &uamqp_message_property)) != 0)
         {
-            /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_158: [If properties_get_message_id fails, the error shall be notified and ‘on_message_received’ shall continue.] */
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_158: [If properties_get_message_id fails, the error shall be notified and ‘on_message_received' shall continue.] */
             LogInfo("Failed to get value of uAMQP message 'message-id' property (%d).", api_call_result);
             return_value = __LINE__;
         }
@@ -353,14 +383,14 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
             /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_159: [The message-id value shall be retrieved from the AMQP_VALUE as char* by calling amqpvalue_get_string.] */
             if ((api_call_result = amqpvalue_get_string(uamqp_message_property, &uamqp_message_property_value)) != 0)
             {
-                /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_160: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received’ shall continue.] */
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_160: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received' shall continue.] */
                 LogError("Failed to get value of uAMQP message 'message-id' property (%d).", api_call_result);
                 return_value = __LINE__;
             }
             /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_161: [The message-id property shall be set on the IOTHUB_MESSAGE_HANDLE by calling IoTHubMessage_SetMessageId, passing the value read from the uAMQP message.] */
             else if (IoTHubMessage_SetMessageId(iothub_message_handle, uamqp_message_property_value) != IOTHUB_MESSAGE_OK)
             {
-                /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_162: [If IoTHubMessage_SetMessageId fails, the error shall be notified and ‘on_message_received’ shall continue.] */
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_162: [If IoTHubMessage_SetMessageId fails, the error shall be notified and ‘on_message_received' shall continue.] */
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'message-id' property.");
                 return_value = __LINE__;
             }
@@ -369,7 +399,7 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
         /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_163: [The correlation-id property shall be read from the uAMQP message by calling properties_get_correlation_id.] */
         if ((api_call_result = properties_get_correlation_id(uamqp_message_properties, &uamqp_message_property)) != 0)
         {
-            /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_164: [If properties_get_correlation_id fails, the error shall be notified and ‘on_message_received’ shall continue.] */
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_164: [If properties_get_correlation_id fails, the error shall be notified and ‘on_message_received' shall continue.] */
             LogError("Failed to get value of uAMQP message 'correlation-id' property (%d).", api_call_result);
             return_value = __LINE__;
         }
@@ -378,14 +408,14 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
             /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_165: [The correlation-id value shall be retrieved from the AMQP_VALUE as char* by calling amqpvalue_get_string.] */
             if ((api_call_result = amqpvalue_get_string(uamqp_message_property, &uamqp_message_property_value)) != 0)
             {
-                /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_166: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received’ shall continue.] */
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_166: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received' shall continue.] */
                 LogError("Failed to get value of uAMQP message 'correlation-id' property (%d).", api_call_result);
                 return_value = __LINE__;
             }
             /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_167: [The correlation-id property shall be set on the IOTHUB_MESSAGE_HANDLE by calling IoTHubMessage_SetCorrelationId, passing the value read from the uAMQP message.] */
             else if (IoTHubMessage_SetCorrelationId(iothub_message_handle, uamqp_message_property_value) != IOTHUB_MESSAGE_OK)
             {
-                /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_168: [If IoTHubMessage_SetCorrelationId fails, the error shall be notified and ‘on_message_received’ shall continue.] */
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_168: [If IoTHubMessage_SetCorrelationId fails, the error shall be notified and ‘on_message_received' shall continue.] */
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlation-id' property.");
                 return_value = __LINE__;
             }
@@ -406,18 +436,18 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_170: [The IOTHUB_MESSAGE_HANDLE properties shall be retrieved using IoTHubMessage_Properties.]
     if ((iothub_message_properties_map = IoTHubMessage_Properties(iothub_message_handle)) == NULL)
     {
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_186: [If IoTHubMessage_Properties fails, the error shall be notified and ‘on_message_received’ shall continue.]
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_186: [If IoTHubMessage_Properties fails, the error shall be notified and ‘on_message_received' shall continue.]
         LogError("Failed to get property map from IoTHub message.");
         result = __LINE__;
     }
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_171: [uAMQP message application properties shall be retrieved using message_get_application_properties.]
     else if ((result = message_get_application_properties(uamqp_message, &uamqp_app_properties)) != 0)
     {
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_172: [If message_get_application_properties fails, the error shall be notified and ‘on_message_received’ shall continue.]
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_172: [If message_get_application_properties fails, the error shall be notified and ‘on_message_received' shall continue.]
         LogError("Failed reading the incoming uAMQP message properties (return code %d).", result);
         result = __LINE__;
     }
-    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_187: [If message_get_application_properties succeeds but returns a NULL application properties map (there are no properties), ‘on_message_received’ shall continue normally.]
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_187: [If message_get_application_properties succeeds but returns a NULL application properties map (there are no properties), ‘on_message_received' shall continue normally.]
     else if (uamqp_app_properties == NULL)
     {
         result = 0;
@@ -425,20 +455,20 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_173: [The actual uAMQP message application properties should be extracted from the result of message_get_application_properties using amqpvalue_get_inplace_described_value.]
     else if ((uamqp_app_properties = amqpvalue_get_inplace_described_value(uamqp_app_properties)) == NULL)
     {
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_174: [If amqpvalue_get_inplace_described_value fails, the error shall be notified and ‘on_message_received’ shall continue.]
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_174: [If amqpvalue_get_inplace_described_value fails, the error shall be notified and ‘on_message_received' shall continue.]
         LogError("Failed getting the map of uAMQP message application properties (return code %d).", result);
         result = __LINE__;
     }
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_175: [The number of items in the uAMQP message application properties shall be obtained using amqpvalue_get_map_pair_count.]
     else if ((result = amqpvalue_get_map_pair_count(uamqp_app_properties, &property_count)) != 0)
     {
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_176: [If amqpvalue_get_map_pair_count fails, the error shall be notified and ‘on_message_received’ shall continue.]
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_176: [If amqpvalue_get_map_pair_count fails, the error shall be notified and ‘on_message_received' shall continue.]
         LogError("Failed reading the number of values in the uAMQP property map (return code %d).", result);
         result = __LINE__;
     }
     else
     {
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_177: [‘on_message_received’ shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.]
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_177: [‘on_message_received' shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.]
         size_t i;
         for (i = 0; i < property_count; i++)
         {
@@ -450,7 +480,7 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
             // Codes_SRS_IOTHUBTRANSPORTAMQP_09_178: [The uAMQP application property name and value shall be obtained using amqpvalue_get_map_key_value_pair.]
             if ((result = amqpvalue_get_map_key_value_pair(uamqp_app_properties, i, &map_key_name, &map_key_value)) != 0)
             {
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_179: [If amqpvalue_get_map_key_value_pair fails, the error shall be notified and ‘on_message_received’ shall continue.]
+                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_179: [If amqpvalue_get_map_key_value_pair fails, the error shall be notified and ‘on_message_received' shall continue.]
                 LogError("Failed reading the key/value pair from the uAMQP property map (return code %d).", result);
                 result = __LINE__;
                 break;
@@ -458,7 +488,7 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
             // Codes_SRS_IOTHUBTRANSPORTAMQP_09_180: [The uAMQP application property name shall be extracted as string using amqpvalue_get_string.]
             else if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
             {
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_181: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received’ shall continue.]
+                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_181: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received' shall continue.]
                 LogError("Failed parsing the uAMQP property name (return code %d).", result);
                 result = __LINE__;
                 break;
@@ -466,7 +496,7 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
             // Codes_SRS_IOTHUBTRANSPORTAMQP_09_182: [The uAMQP application property value shall be extracted as string using amqpvalue_get_string.]
             else if ((result = amqpvalue_get_string(map_key_value, &key_value)) != 0)
             {
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_183: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received’ shall continue.]
+                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_183: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received' shall continue.]
                 LogError("Failed parsing the uAMQP property value (return code %d).", result);
                 result = __LINE__;
                 break;
@@ -474,7 +504,7 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
             // Codes_SRS_IOTHUBTRANSPORTAMQP_09_184: [The application property name and value shall be added to IOTHUB_MESSAGE_HANDLE properties using Map_AddOrUpdate.]
             else if (Map_AddOrUpdate(iothub_message_properties_map, key_name, key_value) != MAP_OK)
             {
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_185: [If Map_AddOrUpdate fails, the error shall be notified and ‘on_message_received’ shall continue.]
+                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_185: [If Map_AddOrUpdate fails, the error shall be notified and ‘on_message_received' shall continue.]
                 LogError("Failed to add/update IoTHub message property map.");
                 result = __LINE__;
                 break;
@@ -567,17 +597,17 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
     }
     else
     {
-        /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_153: [The callback ‘on_message_received’ shall read the message-id property from the uAMQP message and set it on the IoT Hub Message if the property is defined.] */
-        /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_154: [The callback ‘on_message_received’ shall read the correlation-id property from the uAMQP message and set it on the IoT Hub Message if the property is defined.] */
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_153: [The callback ‘on_message_received' shall read the message-id property from the uAMQP message and set it on the IoT Hub Message if the property is defined.] */
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_09_154: [The callback ‘on_message_received' shall read the correlation-id property from the uAMQP message and set it on the IoT Hub Message if the property is defined.] */
         if (readPropertiesFromuAMQPMessage(iothub_message, message) != 0)
         {
             LogError("Transport failed reading properties of the message received.");
         }
 
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_169: [The callback ‘on_message_received’ shall read the application properties from the uAMQP message and set it on the IoT Hub Message if any are provided.]
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_169: [The callback ‘on_message_received' shall read the application properties from the uAMQP message and set it on the IoT Hub Message if any are provided.]
         if (readApplicationPropertiesFromuAMQPMessage(iothub_message, message) != 0)
         {
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received’ fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
             LogError("Transport failed reading application properties of the message received.");
             
             result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading application properties");
@@ -768,6 +798,23 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
     return result;
 }
 
+static int handSASTokenToCbs(AMQP_TRANSPORT_INSTANCE* transport_state, STRING_HANDLE sasToken, size_t sas_token_create_time)
+{
+    int result;
+    if (cbs_put_token(transport_state->cbs, CBS_AUDIENCE, STRING_c_str(transport_state->devicesPath), STRING_c_str(sasToken), on_put_token_complete, transport_state) != RESULT_OK)
+    {
+        LogError("Failed applying new SAS token to CBS.");
+        result = __LINE__;
+    }
+    else
+    {
+        transport_state->cbs_state = CBS_STATE_AUTH_IN_PROGRESS;
+        transport_state->current_sas_token_create_time = sas_token_create_time;
+        result = RESULT_OK;
+    }
+    return result;
+}
+
 static int startAuthentication(AMQP_TRANSPORT_INSTANCE* transport_state)
 {
     int result;
@@ -779,38 +826,65 @@ static int startAuthentication(AMQP_TRANSPORT_INSTANCE* transport_state)
 
     STRING_HANDLE newSASToken;
 
-    if (transport_state->deviceSasToken == NULL)
+    switch (transport_state->credential.credentialType)
     {
-        newSASToken = SASToken_Create(transport_state->deviceKey, transport_state->devicesPath, transport_state->sasTokenKeyName, new_expiry_time);
-    }
-    else
-    {
-        newSASToken = STRING_clone(transport_state->deviceSasToken);
-    }
+        default:
+        {
+            result = __LINE__;
+            LogError("internal error, unexpected enum value transport_state->credential.credentialType=%d", transport_state->credential.credentialType);
+            break;
+        }
+        case DEVICE_KEY:
+        {
+            newSASToken = SASToken_Create(transport_state->credential.credential.deviceKey, transport_state->devicesPath, transport_state->sasTokenKeyName, new_expiry_time);
+            if (newSASToken == NULL)
+            {
+                LogError("Could not generate a new SAS token for the CBS.");
+                result = RESULT_FAILURE;
+            }
+            else
+            {
+                if (handSASTokenToCbs(transport_state, newSASToken, sas_token_create_time) != 0)
+                {
+                    LogError("unable to handSASTokenToCbs");
+                    result = RESULT_FAILURE;
+                }
+                else
+                {
+                    result = RESULT_OK;
+                }
 
-    if (newSASToken == NULL)
-    {
-        LogError("Could not generate a new SAS token for the CBS.");
-        result = RESULT_FAILURE;
-    }
-    else if (cbs_put_token(transport_state->cbs, CBS_AUDIENCE, STRING_c_str(transport_state->devicesPath), STRING_c_str(newSASToken), on_put_token_complete, transport_state) != RESULT_OK)
-    {
-        LogError("Failed applying new SAS token to CBS.");
-        result = RESULT_FAILURE;
-    }
-    else
-    {
-        transport_state->cbs_state = CBS_STATE_AUTH_IN_PROGRESS;
-        transport_state->current_sas_token_create_time = sas_token_create_time;
-        result = RESULT_OK;
-    }
+                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_145: [Each new SAS token created shall be deleted from memory immediately after sending it to CBS]
+                STRING_delete(newSASToken);
+            }
+            break;
+        }
+        case DEVICE_SAS_TOKEN:
+        {
+            newSASToken = STRING_clone(transport_state->credential.credential.deviceSasToken);
+            if (newSASToken == NULL)
+            {
+                LogError("Could not generate a new SAS token for the CBS.");
+                result = RESULT_FAILURE;
+            }
+            else
+            {
+                if (handSASTokenToCbs(transport_state, newSASToken, sas_token_create_time) != 0)
+                {
+                    LogError("unable to handSASTokenToCbs");
+                    result = RESULT_FAILURE;
+                }
+                else
+                {
+                    result = RESULT_OK;
+                }
 
-    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_145: [Each new SAS token created shall be deleted from memory immediately after sending it to CBS]
-    if (newSASToken != NULL)
-    {
-        STRING_delete(newSASToken);
+                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_145: [Each new SAS token created shall be deleted from memory immediately after sending it to CBS]
+                STRING_delete(newSASToken);
+            }
+            break;
+        }
     }
-
     return result;
 }
 
@@ -1113,7 +1187,7 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
             {
                 if (addPropertiesTouAMQPMessage(message->messageHandle, amqp_message) != 0)
                 {
-                    /* Codes_SRS_IOTHUBTRANSPORTUAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
                     is_message_error = true;
                 }
                 else
@@ -1161,7 +1235,7 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
 
 static bool isSasTokenRefreshRequired(AMQP_TRANSPORT_INSTANCE* transport_state)
 {
-    if (transport_state->deviceSasToken != NULL)
+    if (transport_state->credential.credentialType == DEVICE_SAS_TOKEN)
     {
         return false;
     }
@@ -1181,12 +1255,43 @@ static void prepareForConnectionRetry(AMQP_TRANSPORT_INSTANCE* transport_state)
 }
 
 
+static void credential_destroy(AMQP_TRANSPORT_INSTANCE* transport_state)
+{
+    switch (transport_state->credential.credentialType)
+    {
+        default:
+        {
+            LogError("internal error: unexpected enum value transport_state->credential.credentialType=%d", transport_state->credential.credentialType);
+            break;
+        }
+        case (CREDENTIAL_NOT_BUILD):
+        {
+            /*nothing to do*/
+            break;
+        }
+        case(X509):
+        {
+            /*nothing to do here, x509certificate and x509privatekey are both NULL*/
+            break;
+        }
+        case(DEVICE_KEY):
+        {
+            STRING_delete(transport_state->credential.credential.deviceKey);
+            break;
+        }
+        case(DEVICE_SAS_TOKEN):
+        {
+            STRING_delete(transport_state->credential.credential.deviceSasToken);
+            break;
+        }
+    }
+}
+
 // API functions
 
 static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONFIG* config)
 {
     AMQP_TRANSPORT_INSTANCE* transport_state = NULL;
-    bool cleanup_required = false;
     size_t deviceIdLength;
 
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_005: [If parameter config (or its fields) is NULL then IoTHubTransportAMQP_Create shall fail and return NULL.] 
@@ -1203,10 +1308,6 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
     else if (config->upperConfig->deviceId == NULL)
     {
         LogError("Invalid configuration (NULL deviceId detected)");
-    }
-    else if (config->upperConfig->deviceKey == NULL && config->upperConfig->deviceSasToken == NULL)
-    {
-        LogError("Invalid configuration (NULL deviceKey/deviceSasToken detected)");
     }
     else if (config->upperConfig->deviceKey != NULL && config->upperConfig->deviceSasToken != NULL)
     {
@@ -1260,10 +1361,10 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
         }
         else
         {
+            bool cleanup_required = false;
+
             transport_state->iotHubHostFqdn = NULL;
             transport_state->iotHubPort = DEFAULT_IOTHUB_AMQP_PORT;
-            transport_state->deviceKey = NULL;
-            transport_state->deviceSasToken = NULL;
             transport_state->devicesPath = NULL;
             transport_state->messageReceiveAddress = NULL;
             transport_state->sasTokenKeyName = NULL;
@@ -1292,6 +1393,8 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
 
             transport_state->waitingToSend = config->waitingToSend;
             DList_InitializeListHead(&transport_state->inProgress);
+
+            transport_state->credential.credentialType = CREDENTIAL_NOT_BUILD;
 
             // Codes_SRS_IOTHUBTRANSPORTAMQP_09_010: [IoTHubTransportAMQP_Create shall create an immutable string, referred to as iotHubHostFqdn, from the following pieces: config->iotHubName + "." + config->iotHubSuffix.] 
             if ((transport_state->iotHubHostFqdn = concat3Params(config->upperConfig->iotHubName, ".", config->upperConfig->iotHubSuffix)) == NULL)
@@ -1327,56 +1430,90 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
                 LogError("Failed to allocate transport_state->sasTokenKeyName.");
                 cleanup_required = true;
             }
-            else if (config->upperConfig->deviceSasToken != NULL)
+            else 
             {
-                if ((transport_state->deviceSasToken = STRING_construct(config->upperConfig->deviceSasToken)) == NULL)
+
+                if (config->upperConfig->deviceSasToken != NULL)
                 {
-                    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_019: [If IoTHubTransportAMQP_Create fails to copy config->deviceKey, the function shall fail and return NULL.]
-                    LogError("Failed to allocate transport_state->deviceSasToken.");
-                    cleanup_required = true;
-            }
-            }
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_018: [IoTHubTransportAMQP_Create shall store a copy of config->deviceKey (passed by upper layer) into the transport’s own deviceKey field.] 
-            else if ((config->upperConfig->deviceKey != NULL) && ((transport_state->deviceKey = STRING_new()) == NULL ||
-                STRING_copy(transport_state->deviceKey, config->upperConfig->deviceKey) != 0))
-            {
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_019: [If IoTHubTransportAMQP_Create fails to copy config->deviceKey, the function shall fail and return NULL.]
-                LogError("Failed to allocate transport_state->deviceKey.");
-                cleanup_required = true;
-            }
-            else
-            {
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_020: [IoTHubTransportAMQP_Create shall set parameter transport_state->sas_token_lifetime with the default value of 3600000 (milliseconds).]
-                transport_state->sas_token_lifetime = DEFAULT_SAS_TOKEN_LIFETIME_MS;
+                    if (config->upperConfig->deviceKey != NULL)
+                    {
+                        LogError("invalid configuration, both deviceSasToken AND deviceKey specified");
+                        cleanup_required = true;
+                    }
+                    else
+                    {
+                        /*only SAS token specified*/
+                        transport_state->credential.credential.deviceSasToken = STRING_construct(config->upperConfig->deviceSasToken);
+                        if (transport_state->credential.credential.deviceSasToken == NULL)
+                        {
+                            LogError("unable to STRING_construct");
+                            cleanup_required = true;
+                        }
+                        else
+                        {
+                            transport_state->credential.credentialType = DEVICE_SAS_TOKEN;
+                        }
+                    }
+                }
+                else
+                {
+                    /*when deviceSasTokem == NULL*/
+                    if (config->upperConfig->deviceKey != NULL)
+                    {
+                        /*it is device key*/
+                        
+                        transport_state->credential.credential.deviceKey = STRING_construct(config->upperConfig->deviceKey);
+                        if (transport_state->credential.credential.deviceKey == NULL)
+                        {
+                            LogError("unable to STRING_construct");
+                            cleanup_required = true;
+                        }
+                        else
+                        {
+                            transport_state->credential.credentialType = DEVICE_KEY;
+                        }
+                    }
+                    else
+                    {
+                        /*Codes_SRS_IOTHUBTRANSPORTAMQP_02_003: [ IoTHubTransportAMQP_Register shall assume a x509 authentication mechanism when both deviceKey and deviceSasToken are NULL. ]*/
+                        /*when both SAS token AND devicekey are NULL*/
+                        transport_state->credential.credentialType = X509;
+                        transport_state->credential.credential.x509credential.x509certificate = NULL;
+                        transport_state->credential.credential.x509credential.x509privatekey = NULL;
+                    }
+                }
 
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_128: [IoTHubTransportAMQP_Create shall set parameter transport_state->sas_token_refresh_time with the default value of sas_token_lifetime/2 (milliseconds).] 
-                transport_state->sas_token_refresh_time = transport_state->sas_token_lifetime / 2;
+                if(transport_state->credential.credentialType != CREDENTIAL_NOT_BUILD )
+                {
+                    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_020: [IoTHubTransportAMQP_Create shall set parameter transport_state->sas_token_lifetime with the default value of 3600000 (milliseconds).]
+                    transport_state->sas_token_lifetime = DEFAULT_SAS_TOKEN_LIFETIME_MS;
 
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_129 : [IoTHubTransportAMQP_Create shall set parameter transport_state->cbs_request_timeout with the default value of 30000 (milliseconds).]
-                transport_state->cbs_request_timeout = DEFAULT_CBS_REQUEST_TIMEOUT_MS;
+                    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_128: [IoTHubTransportAMQP_Create shall set parameter transport_state->sas_token_refresh_time with the default value of sas_token_lifetime/2 (milliseconds).] 
+                    transport_state->sas_token_refresh_time = transport_state->sas_token_lifetime / 2;
+
+                    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_129 : [IoTHubTransportAMQP_Create shall set parameter transport_state->cbs_request_timeout with the default value of 30000 (milliseconds).]
+                    transport_state->cbs_request_timeout = DEFAULT_CBS_REQUEST_TIMEOUT_MS;
+                }
+            }
+
+            if (cleanup_required)
+            {
+                credential_destroy(transport_state);
+                if (transport_state->sasTokenKeyName != NULL)
+                    STRING_delete(transport_state->sasTokenKeyName);
+                if (transport_state->targetAddress != NULL)
+                    STRING_delete(transport_state->targetAddress);
+                if (transport_state->messageReceiveAddress != NULL)
+                    STRING_delete(transport_state->messageReceiveAddress);
+                if (transport_state->devicesPath != NULL)
+                    STRING_delete(transport_state->devicesPath);
+                if (transport_state->iotHubHostFqdn != NULL)
+                    STRING_delete(transport_state->iotHubHostFqdn);
+
+                free(transport_state);
+                transport_state = NULL;
             }
         }
-    }
-
-    if (cleanup_required)
-    {
-        if (transport_state->deviceSasToken != NULL)
-            STRING_delete(transport_state->deviceSasToken);
-        if (transport_state->deviceKey != NULL)
-            STRING_delete(transport_state->deviceKey);
-        if (transport_state->sasTokenKeyName != NULL)
-            STRING_delete(transport_state->sasTokenKeyName);
-        if (transport_state->targetAddress != NULL)
-            STRING_delete(transport_state->targetAddress);
-        if (transport_state->messageReceiveAddress != NULL)
-            STRING_delete(transport_state->messageReceiveAddress);
-        if (transport_state->devicesPath != NULL)
-            STRING_delete(transport_state->devicesPath);
-        if (transport_state->iotHubHostFqdn != NULL)
-            STRING_delete(transport_state->iotHubHostFqdn);
-
-        free(transport_state);
-        transport_state = NULL;
     }
 
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_023: [If IoTHubTransportAMQP_Create succeeds it shall return a non-NULL pointer to the structure that represents the transport.] 
@@ -1408,7 +1545,7 @@ static void IoTHubTransportAMQP_Destroy(TRANSPORT_LL_HANDLE handle)
         STRING_delete(transport_state->targetAddress);
         STRING_delete(transport_state->messageReceiveAddress);
         STRING_delete(transport_state->sasTokenKeyName);
-        STRING_delete(transport_state->deviceKey);
+        credential_destroy(transport_state);
         STRING_delete(transport_state->devicesPath);
         STRING_delete(transport_state->iotHubHostFqdn);
 
@@ -1641,7 +1778,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE ha
             }
             else
             {
-                /* Codes_SRS_IOTHUBTRANSPORTUAMQP_03_001: [If xio_setoption fails, IoTHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_ERROR.] */
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_03_001: [If xio_setoption fails, IoTHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_ERROR.] */
                 if (xio_setoption(transport_state->tls_io, option, value) == 0)
                 {
                     result = IOTHUB_CLIENT_OK;
@@ -1661,70 +1798,74 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE ha
 static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
     IOTHUB_DEVICE_HANDLE result;
-    // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_001: [IoTHubTransportAMQP_Register shall return NULL if device, or waitingToSend are NULL.] 
-    // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_005: [IoTHubTransportAMQP_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.]
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_17_001: [IoTHubTransportAMQP_Register shall return NULL if device, or waitingToSend are NULL.] 
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_17_005: [IoTHubTransportAMQP_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.]
     if ((handle == NULL) || (device == NULL) || (waitingToSend == NULL))
     {
+        LogError("invalid parameter TRANSPORT_LL_HANDLE handle=%p, const IOTHUB_DEVICE_CONFIG* device=%p, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle=%p, PDLIST_ENTRY waitingToSend=%p",
+            handle, device, iotHubClientHandle, waitingToSend);
         result = NULL;
     }
     else
     {
         AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)handle;
 
-        // Codes_SRS_IOTHUBTRANSPORTUAMQP_03_002: [IoTHubTransportAMQP_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.**]
-        if ((device->deviceId == NULL) || (device->deviceSasToken == NULL && device->deviceKey == NULL))
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_03_002: [IoTHubTransportAMQP_Register shall return NULL if deviceId is NULL.**]
+        if (device->deviceId == NULL)
         {
+            LogError("invalid parameter device->deviceId was NULL");
             result = NULL;
         }
-        // Codes_SRS_IOTHUBTRANSPORTUAMQP_03_003: [IoTHubTransportAMQP_Register shall return NULL if both deviceKey and deviceSasToken are not NULL.]
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_03_003: [IoTHubTransportAMQP_Register shall return NULL if both deviceKey and deviceSasToken are not NULL.]
         else if ( (device->deviceSasToken != NULL) && (device->deviceKey != NULL) )
         {
+            LogError("invalid parameter both device->deviceSasToken and device->deviceKey were NULL");
             result = NULL;
         }
         else
         {
             STRING_HANDLE devicesPath = concat3Params(STRING_c_str(transport_state->iotHubHostFqdn), "/devices/", device->deviceId);
-        if (devicesPath == NULL)
-        {
+            if (devicesPath == NULL)
+            {
                 LogError("Could not create devicesPath");
-            result = NULL;
-        }
-        else
-        {
-            // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_002: [IoTHubTransportAMQP_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.] 
-            if (strcmp(STRING_c_str(transport_state->devicesPath), STRING_c_str(devicesPath)) != 0)
-            {
-                LogError("Attemping to add new device to AMQP transport, not allowed.");
-                result = NULL;
-            }
-                else if ((transport_state->deviceSasToken == NULL) && strcmp(STRING_c_str(transport_state->deviceKey), device->deviceKey) != 0)
-            {
-                LogError("Attemping to add new device to AMQP transport, not allowed.");
                 result = NULL;
             }
             else
             {
-                if (transport_state->isRegistered == true)
+                // Codes_SRS_IOTHUBTRANSPORTAMQP_17_002: [IoTHubTransportAMQP_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransportAMQP_Create.] 
+                if (strcmp(STRING_c_str(transport_state->devicesPath), STRING_c_str(devicesPath)) != 0)
                 {
-                        LogError("Transport already has device registered by id: [%s]", device->deviceId);
+                    LogError("Attemping to add new device to AMQP transport, not allowed.");
+                    result = NULL;
+                }
+                else if ((transport_state->credential.credentialType == DEVICE_KEY) && strcmp(STRING_c_str(transport_state->credential.credential.deviceKey), device->deviceKey) != 0)
+                {
+                    LogError("Attemping to add new device to AMQP transport, not allowed.");
                     result = NULL;
                 }
                 else
                 {
-                    transport_state->isRegistered = true;
-                    // Codes_SRS_IOTHUBTRANSPORTUAMQP_17_003: [IoTHubTransportAMQP_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
-                    result = (IOTHUB_DEVICE_HANDLE)handle;
+                    if (transport_state->isRegistered == true)
+                    {
+                        LogError("Transport already has device registered by id: [%s]", device->deviceId);
+                        result = NULL;
+                    }
+                    else
+                    {
+                        transport_state->isRegistered = true;
+                        // Codes_SRS_IOTHUBTRANSPORTAMQP_17_003: [IoTHubTransportAMQP_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE.] 
+                        result = (IOTHUB_DEVICE_HANDLE)handle;
+                    }
                 }
+                STRING_delete(devicesPath);
             }
-            STRING_delete(devicesPath);
         }
-    }
     }
 
     return result;
 }
 
-// Codes_SRS_IOTHUBTRANSPORTUAMQP_17_004: [IoTHubTransportAMQP_Unregister shall return.] 
+// Codes_SRS_IOTHUBTRANSPORTAMQP_17_004: [IoTHubTransportAMQP_Unregister shall return.] 
 static void IoTHubTransportAMQP_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 {
     if (deviceHandle != NULL)
