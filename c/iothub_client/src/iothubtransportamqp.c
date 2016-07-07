@@ -1446,7 +1446,7 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
                         transport_state->credential.credential.deviceSasToken = STRING_construct(config->upperConfig->deviceSasToken);
                         if (transport_state->credential.credential.deviceSasToken == NULL)
                         {
-                            LogError("unable to STRING_construct");
+                            LogError("unable to STRING_construct for deviceSasToken");
                             cleanup_required = true;
                         }
                         else
@@ -1457,7 +1457,7 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
                 }
                 else
                 {
-                    /*when deviceSasTokem == NULL*/
+                    /*when deviceSasToken == NULL*/
                     if (config->upperConfig->deviceKey != NULL)
                     {
                         /*it is device key*/
@@ -1465,7 +1465,7 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
                         transport_state->credential.credential.deviceKey = STRING_construct(config->upperConfig->deviceKey);
                         if (transport_state->credential.credential.deviceKey == NULL)
                         {
-                            LogError("unable to STRING_construct");
+                            LogError("unable to STRING_construct for a deviceKey");
                             cleanup_required = true;
                         }
                         else
