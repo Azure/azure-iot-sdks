@@ -115,20 +115,20 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
         {
         if (notifyData != NULL)
         {
-			const char* messageId;
-			const char* correlationId;
+            const char* messageId;
+            const char* correlationId;
 
-			if ((messageId = IoTHubMessage_GetMessageId(msg)) == NULL)
-			{
-				messageId = "<null>";
-			}
+            if ((messageId = IoTHubMessage_GetMessageId(msg)) == NULL)
+            {
+                messageId = "<null>";
+            }
 
-			if ((correlationId = IoTHubMessage_GetCorrelationId(msg)) == NULL)
-			{
-				correlationId = "<null>";
-			}
+            if ((correlationId = IoTHubMessage_GetCorrelationId(msg)) == NULL)
+            {
+                correlationId = "<null>";
+            }
 
-			printf("Received new message from IoT Hub (message-id: %s, correlation-id: %s)", messageId, correlationId);
+            printf("Received new message from IoT Hub (message-id: %s, correlation-id: %s)", messageId, correlationId);
 
             const char* buffer;
             size_t size;
@@ -315,6 +315,10 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
             iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
             ASSERT_IS_NOT_NULL(iotHubClientHandle);
 
+            // Turn on Log 
+            bool trace = true;
+            (void)IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
+
             msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData->expectedString, strlen(sendData->expectedString));
             ASSERT_IS_NOT_NULL(msgHandle);
 
@@ -402,6 +406,10 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2etests)
 
         iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
         ASSERT_IS_NOT_NULL(iotHubClientHandle);
+
+        // Turn on Log 
+        bool trace = true;
+        (void)IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
 
         IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
         ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);

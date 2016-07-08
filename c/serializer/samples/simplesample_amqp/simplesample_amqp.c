@@ -145,6 +145,10 @@ void simplesample_amqp_run(void)
             srand((unsigned int)time(NULL));
             int avgWindSpeed = 10;
 
+            // Turn on Log 
+            bool trace = true;
+            (void)IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
+
             if (iotHubClientHandle == NULL)
             {
                 (void)printf("Failed on IoTHubClient_Create\r\n");

@@ -785,6 +785,7 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
                 transport_state->connection_establish_time = getSecondsSinceEpoch();
                 transport_state->cbs_state = CBS_STATE_IDLE;
                 connection_set_trace(transport_state->connection, transport_state->is_trace_on);
+                (void)xio_setoption(transport_state->sasl_io, "logtrace", &transport_state->is_trace_on);
                 result = RESULT_OK;
             }
         }
@@ -961,7 +962,9 @@ static void destroyEventSender(AMQP_TRANSPORT_INSTANCE* transport_state)
 
 void on_event_sender_state_changed(void* context, MESSAGE_SENDER_STATE new_state, MESSAGE_SENDER_STATE previous_state)
 {
-    LogInfo("Event sender state changed [%d->%d]", previous_state, new_state);
+    (void)context;
+    (void)new_state;
+    (void)previous_state;
 }
 
 static int createEventSender(AMQP_TRANSPORT_INSTANCE* transport_state)
@@ -1760,7 +1763,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE ha
         }
         else if (strcmp("logtrace", option) == 0)
         {
-            transport_state->is_trace_on = (bool*)value;
+            transport_state->is_trace_on = *((bool*)value);
             if (transport_state->connection != NULL)
             {
                 connection_set_trace(transport_state->connection, transport_state->is_trace_on);
