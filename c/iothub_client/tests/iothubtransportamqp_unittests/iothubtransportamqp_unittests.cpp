@@ -232,6 +232,7 @@ static int test_amqpvalue_get_string_length = 10;
 static AMQP_VALUE test_message_get_application_properties_return = TEST_AMQP_MAP_VALUE;
 
 static int test_amqpvalue_get_map_pair_count = 1;
+static const char* LOG_TRACE_OPTION = "logtrace";
 
 // **  Mocks **
 TYPED_MOCK_CLASS(CIoTHubTransportAMQPMocks, CGlobalMock)
@@ -2341,6 +2342,7 @@ TEST_FUNCTION(AMQP_DoWork_SASToken_create_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2378,6 +2380,7 @@ TEST_FUNCTION(AMQP_DoWork_cbs_put_token_fails)
     EXPECTED_CALL(mocks, cbs_put_token(NULL, NULL, NULL, NULL, NULL, NULL)).SetReturn(1);
     EXPECTED_CALL(mocks, STRING_delete(NULL));
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
@@ -2415,6 +2418,7 @@ TEST_FUNCTION(AMQP_DoWork_CBS_auth_timeout_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2453,6 +2457,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_source_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2496,6 +2501,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_target_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2541,6 +2547,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_link_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2597,6 +2604,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_create_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2654,6 +2662,7 @@ TEST_FUNCTION(AMQP_DoWork_messagesender_open_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2699,6 +2708,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_source_create_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2745,6 +2755,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_target_create_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2793,6 +2804,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_link_create_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2842,6 +2854,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_settle_mode_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2902,6 +2915,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_create_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -2963,6 +2977,7 @@ TEST_FUNCTION(AMQP_DoWork_messagereceiver_open_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -3008,6 +3023,7 @@ TEST_FUNCTION(AMQP_DoWork_expired_SASToken_fails)
     setExpectedCallsForConnectionDestroyUpTo(mocks, &config, STEP_DOWORK_CREATE_CBS);
     setExpectedCallsForRollEventsBackToWaitList(mocks, &config);
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
@@ -3052,6 +3068,7 @@ TEST_FUNCTION(AMQP_DoWork_succeeds_when_2_waiting_to_send_messages_are_in_the_li
     setExpectedCallsForConnectionDoWork(mocks, &config);
 
     EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
 
     // act
     transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
