@@ -7,7 +7,7 @@
   "license": "MIT",
   "main": "e2etests.js",
   "dependencies": {
-    "amqp10": "^3.1.5",
+    "amqp10": "^3.2.1",
     "azure-event-hubs": "0.0.2",
     "azure-iot-common": "1.0.8",
     "azure-iot-device": "1.0.8",
