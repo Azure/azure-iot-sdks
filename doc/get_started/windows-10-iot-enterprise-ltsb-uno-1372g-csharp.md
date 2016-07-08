@@ -40,7 +40,7 @@ This document provides step-by-step guidance on how to connect an UNO-1372G devi
 <a name="Step-2:-PrepareDevice"></a>
 # Step 2: Prepare your Device
 ##  Install Windows 10 IoT Enterprise LTSB on UNO-1372G
--   Create a bootable USB Drive. Please follow this guide on how to create a bootable drive (<https://www.microsoft.com/download/windows-usb-dvd-download-tool>).
+-   Create a bootable USB Drive. Please follow this guide on how to create a bootable drive (<https://www.microsoft.com/en-us/download/windows-usb-dvd-download-tool>).
 -   Insert the bootable USB Drive from the previous step into your UNO-1372G. Turn on your UNO-1372Gdevice and press the **Delete** key.
 -   Change the BIOS Boot option filter to **UEFI and Legacy**.
 -   Change the **Boot Option Priorities** to boot from your USB Drive.
