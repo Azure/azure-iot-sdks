@@ -7,6 +7,6 @@
   "license": "MIT",
   "dependencies": {
     "azure-iothub": "1.0.10",
-    "azure-storage": "^0.7.0"
+    "azure-storage": "^1.1.0"
   }
 }
