@@ -22,7 +22,9 @@
 
 **SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_012: [** `translateError` shall return an `DeviceNotFoundError` if the HTTP response status code is `404` and if the error code within the body of the error response is `DeviceNotFound`. **]**
 
-**SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_007: [** `translateError` shall return an `DeviceAlreadyExistsError` if the HTTP response status code is `412` and if the error code within the body of the error response is `DeviceAlreadyExists`. **]**
+**SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_007: [** `translateError` shall return an `DeviceAlreadyExistsError` if the HTTP response status code is `409`. **]**
+
+**SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_013: [** `translateError` shall return an `InvalidEtagError` if the HTTP response status code is `412`. **]**
 
 **SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_011: [** `translateError` shall return an `ThrottlingError` if the HTTP response status code is `429`. **]**
 
