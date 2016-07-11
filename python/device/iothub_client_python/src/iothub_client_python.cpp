@@ -3,8 +3,8 @@
 // Licensed under the MIT license.See LICENSE file in the project root for full license information.
 
 #ifdef _MSC_VER
-#pragma warning(push) /* This is because boost python has a self variable that hides a global */
-#pragma warning(disable:4459 4100 4121) /* This is because boost python has a self variable that hides a global */
+#pragma warning(push)
+#pragma warning(disable:4459 4100 4121 4244) /* This is because boost python has a self variable that hides a global */
 #endif
 
 #include <boost/python.hpp>

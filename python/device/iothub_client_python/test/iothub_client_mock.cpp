@@ -2,7 +2,17 @@
 // Copyright(c) Microsoft.All rights reserved.
 // Licensed under the MIT license.See LICENSE file in the project root for full license information.
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4244) /* This is because boost python has a cast issue in caller.hpp */
+#endif
+
 #include <boost/python.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <string>
 #include <vector>
 #include <list>
