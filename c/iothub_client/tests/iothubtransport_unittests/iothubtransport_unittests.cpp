@@ -908,7 +908,7 @@ TEST_FUNCTION(IoTHubTransport_StartWorkerThread_two_client_success)
 	///arrange
 
 	auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
-	IOTHUB_CLIENT_RESULT result1 = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+	(void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 
 	mocks.ResetAllCalls();
 
@@ -1034,7 +1034,7 @@ TEST_FUNCTION(IoTHubTransport_SignalEndWorkerThread_success)
 	///arrange
 
 	auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
-	IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+    (void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 	mocks.ResetAllCalls();
 
 	STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_IOTHUB_CLIENT_HANDLE1))
@@ -1064,8 +1064,8 @@ TEST_FUNCTION(IoTHubTransport_SignalEndWorkerThread_2_client_success)
 	///arrange
 
 	auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
-	IOTHUB_CLIENT_RESULT result1 = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
-	IOTHUB_CLIENT_RESULT result2 = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
+    (void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+    (void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 
 	mocks.ResetAllCalls();
 
@@ -1150,7 +1150,7 @@ TEST_FUNCTION(IoTHubTransport_SignalEndWorkerThread_end_thread_client_not_found2
 	///arrange
 
 	auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
-	IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+    (void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 	mocks.ResetAllCalls();
 
 	STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_IOTHUB_CLIENT_HANDLE2))
@@ -1246,7 +1246,7 @@ TEST_FUNCTION(IoTHubTransport_worker_thread_runs_every_1_ms)
 	///arrange
 
 	auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
-	IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+    (void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
 	mocks.ResetAllCalls();
 
 	howManyDoWorkCalls = 2;
@@ -1285,8 +1285,8 @@ TEST_FUNCTION(IoTHubTransport_worker_thread_runs_two_devices_once)
 	///arrange
 
 	auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
-	IOTHUB_CLIENT_RESULT result1 = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
-	IOTHUB_CLIENT_RESULT result2 = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
+    (void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+    (void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 	mocks.ResetAllCalls();
 
 	howManyDoWorkCalls = 1;
@@ -1318,8 +1318,8 @@ TEST_FUNCTION(IoTHubTransport_worker_thread_runs_lock_fails)
 	///arrange
 
 	auto transportHandle = IoTHubTransport_Create(TEST_CONFIG.protocol, TEST_CONFIG.iotHubName, TEST_CONFIG.iotHubSuffix);
-	IOTHUB_CLIENT_RESULT result1 = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
-	IOTHUB_CLIENT_RESULT result2 = IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
+    (void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE1);
+    (void)IoTHubTransport_StartWorkerThread(transportHandle, TEST_IOTHUB_CLIENT_HANDLE2);
 	mocks.ResetAllCalls();
 
 	howManyDoWorkCalls = 1;

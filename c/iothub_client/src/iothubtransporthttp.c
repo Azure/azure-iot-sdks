@@ -1526,7 +1526,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                         }
                                         else
                                         {
-                                            unsigned int statusCode;
+                                            unsigned int statusCode = 0;
                                             HTTPAPIEX_RESULT r;
                                             if (deviceData->deviceSasToken != NULL)
                                             {
@@ -1694,7 +1694,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                     }
                     else
                     {
-                        unsigned int statusCode;
+                        unsigned int statusCode = 0;
                         HTTPAPIEX_RESULT r;
                         if (deviceData->deviceSasToken != NULL)
                         {
@@ -1794,7 +1794,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                 }
                 else
                 {
-                    unsigned int statusCode;
+                    unsigned int statusCode = 0;
                     HTTPAPIEX_RESULT r;
                     if (deviceData->deviceSasToken != NULL)
                     {

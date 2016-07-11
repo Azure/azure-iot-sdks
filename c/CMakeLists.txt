@@ -15,6 +15,21 @@ endif()
 
 include (CTest)
 
+if(MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /wd4232")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4232")
+endif()
+
+IF(WIN32)
+    #windows needs this define
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    # Make warning as error
+    add_definitions(/WX)
+ELSE()
+    # Make warning as error
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+ENDIF(WIN32)
+
 #the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)

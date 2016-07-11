@@ -469,7 +469,7 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
     else
     {
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_177: [‘on_message_received' shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.]
-        size_t i;
+        uint32_t i;
         for (i = 0; i < property_count; i++)
         {
             AMQP_VALUE map_key_name;
@@ -559,6 +559,10 @@ static void on_put_token_complete(void* context, CBS_OPERATION_RESULT operation_
     {
         transportState->cbs_state = CBS_STATE_AUTHENTICATED;
     }
+    else
+    {
+        LogError("CBS reported status %u error: %s", status_code, status_description);
+    }
 }
 
 static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
@@ -643,7 +647,9 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
 
 static XIO_HANDLE getTLSIOTransport(const char* fqdn, int port)
 {
-    TLSIO_CONFIG tls_io_config = { fqdn, port };
+    TLSIO_CONFIG tls_io_config;
+    tls_io_config.hostname = fqdn;
+    tls_io_config.port = port;
     const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
     return xio_create(io_interface_description, &tls_io_config);
 }
@@ -731,7 +737,9 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
     else
     {
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_060: [IoTHubTransportAMQP_DoWork shall create the SASL I / O layer using the xio_create() C Shared Utility API]
-        SASLCLIENTIO_CONFIG sasl_client_config = { transport_state->tls_io, transport_state->sasl_mechanism };
+        SASLCLIENTIO_CONFIG sasl_client_config;
+        sasl_client_config.sasl_mechanism = transport_state->sasl_mechanism;
+        sasl_client_config.underlying_io = transport_state->tls_io;
         if ((transport_state->sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_client_config)) == NULL)
         {
             // Codes_SRS_IOTHUBTRANSPORTAMQP_09_061: [If xio_create() fails creating the SASL I/O layer, IoTHubTransportAMQP_DoWork shall fail and return immediately] 
@@ -1135,8 +1143,8 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
         result = RESULT_FAILURE;
 
         IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message->messageHandle);
-        const unsigned char* messageContent;
-        size_t messageContentSize;
+        const unsigned char* messageContent = NULL;
+        size_t messageContentSize = 0;
         MESSAGE_HANDLE amqp_message = NULL;
         bool is_message_error = false;
 
@@ -1153,7 +1161,7 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_089: [If the event contains a message of type IOTHUBMESSAGE_STRING, IoTHubTransportAMQP_DoWork shall obtain its char* representation using IoTHubMessage_GetString()] 
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_090: [If the event contains a message of type IOTHUBMESSAGE_STRING, IoTHubTransportAMQP_DoWork shall obtain the size of its char* representation using strlen()] 
         else if (contentType == IOTHUBMESSAGE_STRING &&
-            ((messageContent = IoTHubMessage_GetString(message->messageHandle)) == NULL))
+            ((messageContent = (const unsigned char*)IoTHubMessage_GetString(message->messageHandle)) == NULL))
         {
             LogError("Failed getting the STRING representation of the event content to be sent.");
             is_message_error = true;
@@ -1175,7 +1183,7 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
 
             if (contentType == IOTHUBMESSAGE_STRING)
             {
-                messageContentSize = strlen(messageContent);
+                messageContentSize = strlen((const char*)messageContent);
             }
 
             binary_data.bytes = messageContent;

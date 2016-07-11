@@ -99,6 +99,7 @@ static STRING_HANDLE TEST_STRING_HANDLE = (STRING_HANDLE)0x4242;
 
 STRING_HANDLE my_STRING_construct(const char* psz)
 {
+    (void)psz;
     return (STRING_HANDLE)malloc(1);
 }
 
@@ -265,6 +266,7 @@ static const void* my_list_item_get_value(LIST_ITEM_HANDLE item_handle)
 
 static int my_message_get_body_amqp_data(MESSAGE_HANDLE message, size_t index, BINARY_DATA* binary_data)
 {
+    (void)index, message;
     binary_data->bytes = NULL;
     binary_data->length = 1;
     return 0;
@@ -272,13 +274,16 @@ static int my_message_get_body_amqp_data(MESSAGE_HANDLE message, size_t index, B
 
 static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, STRING_HANDLE keyName, size_t expiry)
 {
+    (void)key, scope, keyName, expiry;
     return my_STRING_construct("sas");
 }
 
 static ON_MESSAGE_SENDER_STATE_CHANGED onMessageSenderStateChangedCallback;
 static MESSAGE_SENDER_HANDLE messagesender_create_return = NULL;
+
 MESSAGE_SENDER_HANDLE my_messagesender_create(LINK_HANDLE link, ON_MESSAGE_SENDER_STATE_CHANGED on_message_sender_state_changed, void* context)
 {
+    (void)link, context;
     onMessageSenderStateChangedCallback = on_message_sender_state_changed;
     messagesender_create_return = (MESSAGE_SENDER_HANDLE)malloc(sizeof(MESSAGE_SENDER_HANDLE));
     memset(messagesender_create_return, 0, sizeof(MESSAGE_SENDER_HANDLE));
@@ -296,8 +301,10 @@ void my_messagesender_destroy(MESSAGE_SENDER_HANDLE message_sender)
 static MESSAGE_RECEIVER_HANDLE TEST_MESSAGE_RECEIVER_HANDLE = (MESSAGE_RECEIVER_HANDLE)0x5151;
 static ON_MESSAGE_RECEIVER_STATE_CHANGED onMessageReceiverStateChangedCallback;
 static MESSAGE_RECEIVER_HANDLE messagereceiver_create_return = NULL;
+
 MESSAGE_RECEIVER_HANDLE my_messagereceiver_create(LINK_HANDLE link, ON_MESSAGE_RECEIVER_STATE_CHANGED on_message_receiver_state_changed, void* context)
 {
+    (void)link, context;
     onMessageReceiverStateChangedCallback = on_message_receiver_state_changed;
     messagereceiver_create_return = (MESSAGE_RECEIVER_HANDLE)malloc(sizeof(MESSAGE_RECEIVER_HANDLE));
     memset(messagereceiver_create_return, 0, sizeof(MESSAGE_RECEIVER_HANDLE));
@@ -315,6 +322,7 @@ void my_messagereceiver_destroy(MESSAGE_RECEIVER_HANDLE message_receiver)
 static ON_MESSAGE_SEND_COMPLETE onMessageSendCompleteCallback;
 static int my_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context)
 {
+    (void)message, message_sender, callback_context;
     onMessageSendCompleteCallback = on_message_send_complete;
     return 0;
 }
@@ -322,6 +330,7 @@ static int my_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_H
 static ON_MESSAGE_RECEIVED onMessageReceivedCallback;
 static int my_messagereceiver_open(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, const void* callback_context)
 {
+    (void)message_receiver, callback_context;
     onMessageReceivedCallback = on_message_received;
     return 0;
 }
@@ -331,6 +340,7 @@ static IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK on_feedback_message_received;
 static IOTHUB_FEEDBACK_STATUS_CODE receivedFeedbackStatusCode = IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN;
 void f_on_feedback_message_received(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH* feedbackBatch)
 {
+    (void)context;
     LIST_ITEM_HANDLE feedbackRecord = my_list_get_head_item(feedbackBatch->feedbackRecordList);
     while (feedbackRecord != NULL)
     {
@@ -363,14 +373,13 @@ static const char* TEST_FEEDBACK_RECORD_KEY_DEVICE_GENERATION_ID = "deviceGenera
 static const char* TEST_FEEDBACK_RECORD_KEY_DESCRIPTION = "description";
 static const char* TEST_FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC = "enqueuedTimeUtc";
 
+DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    ASSERT_FAIL("umock_c reported error");
-}
-
-void* my_user_context_callback()
-{
-    return NULL;
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    ASSERT_FAIL(temp_str);
 }
 
 static IOTHUB_SERVICE_CLIENT_AUTH TEST_IOTHUB_SERVICE_CLIENT_AUTH;
@@ -658,7 +667,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     {
-        if (TEST_MUTEX_ACQUIRE(g_testByTest) != 0)
+        if (TEST_MUTEX_ACQUIRE(g_testByTest))
         {
             ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
         }
@@ -840,9 +849,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
     TEST_FUNCTION(IoTHubMessaging_LL_Create_non_happy_path)
     {
         // arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -933,7 +941,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
 
         ///act
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(NULL, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, my_user_context_callback);
+        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(NULL, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)0x4242);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_INVALID_ARG, result);
@@ -1089,7 +1097,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
             .IgnoreArgument(1);
 
         ///act
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, my_user_context_callback);
+        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)0x4242);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, result);
@@ -1146,9 +1154,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
     TEST_FUNCTION(IoTHubMessaging_LL_Open_non_happy_path)
     {
         ///arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         ///arrange
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -1269,7 +1276,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
                 (i != 39)
                 )
             {
-                IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(TEST_IOTHUB_MESSAGING_HANDLE, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, my_user_context_callback);
+                IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(TEST_IOTHUB_MESSAGING_HANDLE, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, NULL);
 
                 ///assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_MESSAGING_OK, result);
@@ -1360,9 +1367,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
     TEST_FUNCTION(IoTHubMessaging_LL_Close_non_happy_path)
     {
         // arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         STRICT_EXPECTED_CALL(messagesender_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -1528,9 +1534,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
     TEST_FUNCTION(IoTHubMessaging_LL_Send_non_happy_path)
     {
         ///arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         size_t doNotFailCalls[] = 
         { 
@@ -1620,7 +1625,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetFeedbackMessageCallback(TEST_IOTHUB_MESSAGING_HANDLE, TEST_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, TEST_VOID_PTR);
 
         ///assert
-        ASSERT_ARE_EQUAL(void_ptr, (void*)TEST_IOTHUB_MESSAGING_DATA.callback_data->feedbackMessageCallback, (void*)TEST_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK);
+        ASSERT_IS_TRUE(TEST_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK == TEST_IOTHUB_MESSAGING_DATA.callback_data->feedbackMessageCallback);
         ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_MESSAGING_DATA.callback_data->feedbackUserContext, TEST_VOID_PTR);
         ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, result);
     }
@@ -1915,7 +1920,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
 
         umock_c_reset_all_calls();
 
@@ -1943,7 +1948,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
 
         receivedFeedbackStatusCode = IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN;
 
@@ -2039,7 +2044,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
 
         receivedFeedbackStatusCode = IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN;
 
@@ -2135,7 +2140,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
 
         receivedFeedbackStatusCode = IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN;
 
@@ -2231,7 +2236,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
 
         receivedFeedbackStatusCode = IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN;
 
@@ -2327,7 +2332,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
 
         receivedFeedbackStatusCode = IOTHUB_FEEDBACK_STATUS_CODE_SUCCESS;
 
@@ -2423,7 +2428,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
 
         receivedFeedbackStatusCode = IOTHUB_FEEDBACK_STATUS_CODE_SUCCESS;
 
@@ -2514,13 +2519,12 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
     TEST_FUNCTION(IoTHubMessaging_LL_FeedbackMessageReceived_non_happy_path)
     {
         ///arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        IOTHUB_MESSAGING_RESULT iothub_messaging_result = IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_SetFeedbackMessageCallback(iothub_messaging_handle, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)1);
 
         umock_c_reset_all_calls();
 

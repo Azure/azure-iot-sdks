@@ -62,7 +62,7 @@ EXECUTE_COMMAND_RESULT SetAirResistance(ContosoAnemometer* device, int Position)
 
 void sendCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
-    int messageTrackingId = (intptr_t)userContextCallback;
+    int messageTrackingId = (int)(intptr_t)userContextCallback;
 
     (void)printf("Message Id: %d Received.\r\n", messageTrackingId);
 

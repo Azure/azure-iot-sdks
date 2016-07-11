@@ -52,6 +52,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(HTTP_HEADERS_RESULT, HTTP_HEADERS_RESULT_VALUES);
 
 static HTTPAPIEX_HANDLE my_HTTPAPIEX_Create(const char* hostName)
 {
+    (void)hostName;
     return (HTTPAPIEX_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -62,6 +63,7 @@ static void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
 
 static BUFFER_HANDLE my_BUFFER_create(const unsigned char* source, size_t size)
 {
+    (void)source, size;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -95,6 +97,7 @@ static void my_STRING_delete(STRING_HANDLE h)
 
 static STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t size)
 {
+    (void)source, size;
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -110,9 +113,13 @@ static TEST_MUTEX_HANDLE g_dllByDll;
 #define X_MS_BLOB_TYPE "x-ms-blob-type"
 #define BLOCK_BLOB "BlockBlob"
 
+DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    ASSERT_FAIL("umock_c reported error");
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    ASSERT_FAIL(temp_str);
 }
 
 static BUFFER_HANDLE testValidBufferHandle; /*assigned in TEST_SUITE_INITIALIZE*/

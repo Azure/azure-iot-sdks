@@ -3495,7 +3495,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                             {
                                 hourOffset = 0;
                                 minOffset = 0;
-                                size_t pos = 0;
 
                                 if (sscanf3d2d(pos2, &hourOffset, &minOffset) == 2)
                                 {

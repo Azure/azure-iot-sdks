@@ -94,7 +94,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     IOTHUB_CLIENT_LL_HANDLE llClientHandle;
     CONTROL_PACKET_TYPE currPacketState;
     XIO_HANDLE xioTransport;
-    int keepAliveValue;
+    uint16_t keepAliveValue;
     uint64_t mqtt_connect_time;
     size_t connectFailCount;
     uint64_t connectTick;
@@ -431,9 +431,11 @@ static void MqttOpCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_
 
 const XIO_HANDLE getIoTransportProvider(const char* fqdn, int port)
 {
-    TLSIO_CONFIG tls_io_config = { fqdn, port };
+    TLSIO_CONFIG tls_io_config;
     const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
-    return (void*)xio_create(io_interface_description, &tls_io_config);
+    tls_io_config.hostname = fqdn;
+    tls_io_config.port = port;
+    return xio_create(io_interface_description, &tls_io_config);
 }
 
 static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
@@ -442,9 +444,11 @@ static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
 
     if (transportState->receiveMessages && !transportState->subscribed)
     {
-        SUBSCRIBE_PAYLOAD subscribe[] = {
-            { STRING_c_str(transportState->mqttMessageTopic), DELIVER_AT_LEAST_ONCE }
-        };
+        SUBSCRIBE_PAYLOAD subscribe[1];
+        
+        subscribe[0].subscribeTopic = STRING_c_str(transportState->mqttMessageTopic);
+        subscribe[0].qosReturn = DELIVER_AT_LEAST_ONCE;
+
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransportMqtt_Subscribe shall call mqtt_client_subscribe to subscribe to the Message Topic.] */
         if (mqtt_client_subscribe(transportState->mqttClient, transportState->packetId++, subscribe, 1) != 0)
         {
@@ -1019,7 +1023,8 @@ static void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
     if (transportState != NULL && transportState->subscribed)
     {
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_020: [IoTHubTransportMqtt_Unsubscribe shall call mqtt_client_unsubscribe to unsubscribe the mqtt message topic.] */
-        const char* unsubscribe[] = { STRING_c_str(transportState->mqttMessageTopic) };
+        const char* unsubscribe[1];
+        unsubscribe[0] = STRING_c_str(transportState->mqttMessageTopic);
         (void)mqtt_client_unsubscribe(transportState->mqttClient, transportState->packetId++, unsubscribe, 1);
         transportState->subscribed = false;
         transportState->receiveMessages = false;
@@ -1205,7 +1210,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE ha
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_037 : [If the option parameter is set to supplied int_ptr keepalive is the same value as the existing keepalive then IoTHubTransportMqtt_SetOption shall do nothing.] */
             if (*keepAliveOption != transportState->keepAliveValue)
             {
-                transportState->keepAliveValue = *keepAliveOption;
+                transportState->keepAliveValue = (uint16_t)(*keepAliveOption);
                 if (transportState->connected)
                 {
                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_038: [If the client is connected when the keepalive is set then IoTHubTransportMqtt_SetOption shall disconnect and reconnect with the specified keepalive value.] */
@@ -1241,6 +1246,8 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE ha
 static IOTHUB_DEVICE_HANDLE IoTHubTransportMqtt_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
     IOTHUB_DEVICE_HANDLE result;
+    (void)iotHubClientHandle;
+
     // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransportMqtt_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.]
     // Codes_SRS_IOTHUB_MQTT_TRANSPORT_17_002: [ IoTHubTransportMqtt_Register shall return NULL if device or waitingToSend are NULL.]
     if ((handle == NULL) || (device == NULL) || (waitingToSend == NULL))

@@ -24,6 +24,10 @@ set(iothub_service_client_h_files
 ../../iothub_client/inc/iothub_message.h
 )
 
+if(MSVC)
+set_source_files_properties(./parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+endif()
+
 include_directories(${SHARED_UTIL_INC_FOLDER})
 
 include_directories(${UAMQP_INC_FOLDER})

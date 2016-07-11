@@ -251,7 +251,6 @@ static char* createDeviceDestinationString(const char* deviceId)
 {
     char* result;
 
-    char* buffer = NULL;
     if (deviceId == NULL)
     {
         LogError("createDeviceDestinationString failed - deviceId cannot be NULL");
@@ -284,6 +283,7 @@ static char* createDeviceDestinationString(const char* deviceId)
 
 static void IoTHubMessaging_LL_SenderStateChanged(void* context, MESSAGE_SENDER_STATE new_state, MESSAGE_SENDER_STATE previous_state)
 {
+    (void)previous_state;
     if (context != NULL)
     {
         /*Codes_SRS_IOTHUBMESSAGING_12_049: [ IoTHubMessaging_LL_SenderStateChanged shall save the new_state to local variable ] */
@@ -309,6 +309,7 @@ static void IoTHubMessaging_LL_SenderStateChanged(void* context, MESSAGE_SENDER_
 
 static void IoTHubMessaging_LL_ReceiverStateChanged(const void* context, MESSAGE_RECEIVER_STATE new_state, MESSAGE_RECEIVER_STATE previous_state)
 {
+    (void)previous_state;
     if (context != NULL)
     {
         /*Codes_SRS_IOTHUBMESSAGING_12_052: [ IoTHubMessaging_LL_ReceiverStateChanged shall save the new_state to local variable ] */
@@ -360,9 +361,6 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
         IOTHUB_MESSAGING* messagingData = (IOTHUB_MESSAGING*)context;
 
         BINARY_DATA binary_data;
-        IOTHUB_MESSAGE_HANDLE iothub_message_handle = NULL;
-        const char* messageString = NULL;
-        const unsigned char* buffer = NULL;
         JSON_Value* root_value = NULL;
         JSON_Object* feedback_object = NULL;
         JSON_Array* feedback_array = NULL;
@@ -453,9 +451,10 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
                                 }
                                 else
                                 {
-                                    for (int i = 0; feedbackRecord->description[i]; i++)
+                                    size_t j;
+                                    for (j = 0; feedbackRecord->description[j]; j++)
                                     {
-                                        feedbackRecord->description[i] = tolower(feedbackRecord->description[i]);
+                                        feedbackRecord->description[j] = (char)tolower(feedbackRecord->description[j]);
                                     }
 
                                     if (strcmp(feedbackRecord->description, "success") == 0)
@@ -1102,7 +1101,10 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
     }
     else
     {
-        BINARY_DATA binary_data = { data, len };
+        BINARY_DATA binary_data;
+
+        binary_data.bytes = data;
+        binary_data.length = len;
 
         /*Codes_SRS_IOTHUBMESSAGING_12_036: [ IoTHubMessaging_LL_SendMessage shall create a uAMQP message by calling message_create ] */
         if ((amqpMessage = message_create()) == NULL)

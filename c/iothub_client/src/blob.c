@@ -176,7 +176,7 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                         }
                                         else
                                         {
-                                            STRING_HANDLE blockIdString = Base64_Encode_Bytes(temp, 6);
+                                            STRING_HANDLE blockIdString = Base64_Encode_Bytes((const unsigned char*)temp, 6);
                                             if (blockIdString == NULL)
                                             {
                                                 /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/
@@ -310,8 +310,8 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                                 else
                                                 {
                                                     /*Codes_SRS_BLOB_02_030: [ Blob_UploadFromSasUri shall call HTTPAPIEX_ExecuteRequest with a PUT operation, passing the new relativePath, httpStatus and httpResponse and the XML string as content. ]*/
-                                                    const unsigned char* s = (const unsigned char*)STRING_c_str(xml);
-                                                    BUFFER_HANDLE xmlAsBuffer = BUFFER_create(s, strlen(s));
+                                                    const char* s = STRING_c_str(xml);
+                                                    BUFFER_HANDLE xmlAsBuffer = BUFFER_create((const unsigned char*)s, strlen(s));
                                                     if (xmlAsBuffer == NULL)
                                                     {
                                                         /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadFromSasUri shall fail and return BLOB_ERROR ]*/

@@ -45,11 +45,13 @@ MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value *, val
 
 static STRING_HANDLE my_STRING_construct(const char* psz)
 {
+    (void)psz;
     return (STRING_HANDLE)malloc(1);
 }
 
 static STRING_HANDLE my_STRING_construct_n(const char* psz, size_t n)
 {
+    (void)psz, n;
     return (STRING_HANDLE)malloc(1);
 }
 
@@ -60,6 +62,7 @@ static STRING_HANDLE my_STRING_new(void)
 
 static STRING_HANDLE my_STRING_from_byte_array(const unsigned char* source, size_t size)
 {
+    (void)source, size;
     return (STRING_HANDLE)malloc(1);
 }
 
@@ -85,6 +88,7 @@ static BUFFER_HANDLE my_BUFFER_new(void)
 
 static BUFFER_HANDLE my_BUFFER_create(const unsigned char* source, size_t size)
 {
+    (void)source, size;
     return (BUFFER_HANDLE)malloc(1);
 }
 
@@ -95,6 +99,7 @@ static void my_BUFFER_delete(BUFFER_HANDLE handle)
 
 static HTTPAPIEX_HANDLE my_HTTPAPIEX_Create(const char* hostName)
 {
+    (void)hostName;
     return (HTTPAPIEX_HANDLE)malloc(1);
 }
 
@@ -105,6 +110,7 @@ static void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
 
 static HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE uriResource, STRING_HANDLE keyName)
 {
+    (void)key, uriResource, keyName;
     return (HTTPAPIEX_SAS_HANDLE)malloc(1);
 }
 
@@ -115,6 +121,7 @@ static void my_HTTPAPIEX_SAS_Destroy(HTTPAPIEX_SAS_HANDLE handle)
 
 static JSON_Value * my_json_parse_string(const char *string)
 {
+    (void)string;
     return (JSON_Value *)malloc(1);
 }
 
@@ -127,6 +134,7 @@ static HTTPAPIEX_RESULT my_HTTPAPIEX_ExecuteRequest(HTTPAPIEX_HANDLE handle, HTT
     HTTP_HEADERS_HANDLE requestHttpHeadersHandle, BUFFER_HANDLE requestContent, unsigned int* statusCode,
     HTTP_HEADERS_HANDLE responseHttpHeadersHandle, BUFFER_HANDLE responseContent)
 {
+    (void)handle, requestType, relativePath, requestHttpHeadersHandle, requestContent, responseHttpHeadersHandle, responseContent;
     if (statusCode != NULL)
     {
         *statusCode = 200; /*success*/
@@ -136,6 +144,7 @@ static HTTPAPIEX_RESULT my_HTTPAPIEX_ExecuteRequest(HTTPAPIEX_HANDLE handle, HTT
 
 static HTTPAPIEX_RESULT my_HTTPAPIEX_SAS_ExecuteRequest(HTTPAPIEX_SAS_HANDLE sasHandle, HTTPAPIEX_HANDLE handle, HTTPAPI_REQUEST_TYPE requestType, const char* relativePath, HTTP_HEADERS_HANDLE requestHttpHeadersHandle, BUFFER_HANDLE requestContent, unsigned int* statusCode, HTTP_HEADERS_HANDLE responseHeadersHandle, BUFFER_HANDLE responseContent)
 {
+    (void)sasHandle, handle, requestType, relativePath, requestHttpHeadersHandle, requestContent, responseHeadersHandle, responseContent;
     if (statusCode != NULL)
     {
         *statusCode = 200;/*success*/
@@ -176,11 +185,13 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE (BLOB_RESULT, BLOB_RESULT_VALUES);
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
 
+DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
-
-void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
+static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    ASSERT_FAIL("umock_c reported error");
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    ASSERT_FAIL(temp_str);
 }
 
 static const TRANSPORT_PROVIDER* provideFAKE(void);
@@ -2727,9 +2738,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_when_step3_httpStatusCode_i
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_deviceKey_unhappypaths)
 {
     ///arrange
-
-    int result = 0;
-    result = umock_c_negative_tests_init();
+    int umockc_result = umock_c_negative_tests_init();
+    ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
     ///arrange
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_DEVICE_KEY);
@@ -3391,9 +3401,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_unhappy_paths)
 {
     ///arrange
-
-    int result = 0;
-    result = umock_c_negative_tests_init();
+    int umockc_result = umock_c_negative_tests_init();
+    ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_X509);
     unsigned char c = '3';

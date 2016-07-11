@@ -42,12 +42,14 @@ END_NAMESPACE(Contoso);
 
 EXECUTE_COMMAND_RESULT AlarmAnomaly(FrdmDevice* frdmDevice, ascii_char_ptr SensorId)
 {
+    (void)frdmDevice;
     (void)printf("Anomaly ALARM from: %s\r\n", SensorId);
     return EXECUTE_COMMAND_SUCCESS;
 }
 
 EXECUTE_COMMAND_RESULT AlarmThreshold(FrdmDevice* frdmDevice, ascii_char_ptr SensorId)
 {
+    (void)frdmDevice;
     (void)printf("Threshold ALARM from: %s\r\n", SensorId);
     return EXECUTE_COMMAND_SUCCESS;
 }

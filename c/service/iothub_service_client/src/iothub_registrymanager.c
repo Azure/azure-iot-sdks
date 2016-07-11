@@ -160,7 +160,7 @@ static BUFFER_HANDLE constructDeviceJson(const IOTHUB_DEVICE* deviceInfo)
         }
         else
         {
-            if ((result = BUFFER_create(serialized_string, strlen(serialized_string))) == NULL)
+            if ((result = BUFFER_create((const unsigned char*)serialized_string, strlen(serialized_string))) == NULL)
             {
                 /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
                 LogError("json_serialize_to_string failed");
@@ -524,7 +524,8 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceListJson(BUFFER_HANDLE jsonBuffe
                     const char* secondaryKey = (char*)json_object_dotget_string(device_object, DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY);
                     const char* generationId = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_GENERATION_ID);
                     const char* eTag = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_ETAG);
-                    const char* connectionState = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE);
+                    /* Bug? connectionState is not filled in */
+                    /*const char* connectionState = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE);*/
                     const char* connectionStateUpdatedTime = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATEUPDATEDTIME);
                     const char* status = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_STATUS);
                     const char* statusReason = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_STATUSREASON);

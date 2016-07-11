@@ -259,7 +259,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
         platform_init();
-        g_iothubAcctInfo = IoTHubAccount_Init(true, "mqtt_e2e_tests");
+        g_iothubAcctInfo = IoTHubAccount_Init(true);
         ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
         platform_init();
     }
