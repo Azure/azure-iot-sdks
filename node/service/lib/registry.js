@@ -9,8 +9,6 @@ var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./registry_http.js');
 var Device = require('./device.js');
 var endpoint = require('azure-iot-common').endpoint;
-// TODO: Remove this hack and update the version to the following in the common module when the service deployment has happened
-var versionQueryString = function() { return '?api-version=2016-04-30'; };
 
 var SharedAccessSignature = require('./shared_access_signature.js');
 
@@ -111,7 +109,7 @@ Registry.prototype.create = function (deviceInfo, done) {
     throw new ArgumentError('The object \'deviceInfo\' is missing the property: deviceId');
   }
   else {
-    var path = endpoint.devicePath(deviceInfo.deviceId) + versionQueryString();
+    var path = endpoint.devicePath(deviceInfo.deviceId) + endpoint.versionQueryString();
     this._transport.createDevice(path, deviceInfo, function (err, body, response) {
       /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_002: [When the create method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
       if (err) {
@@ -144,7 +142,7 @@ Registry.prototype.update = function (deviceInfo, done) {
     throw new ArgumentError('The object \'deviceInfo\' is missing the property: deviceId');
   }
 
-  var path = endpoint.devicePath(deviceInfo.deviceId) + versionQueryString();
+  var path = endpoint.devicePath(deviceInfo.deviceId) + endpoint.versionQueryString();
   this._transport.updateDevice(path, deviceInfo, function (err, body, response) {
     /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_004: [When the update method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
     if (err) {
@@ -177,7 +175,7 @@ Registry.prototype.get = function (deviceId, done) {
   }
 
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_002: [The get method shall request metadata for the device (indicated by the deviceId argument) from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
-  var path = endpoint.devicePath(deviceId) + versionQueryString();
+  var path = endpoint.devicePath(deviceId) + endpoint.versionQueryString();
   this._transport.getDevice(path, function (err, body, response) {
     /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_003: [When the get method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback, plus a Device object representing the device information returned from IoT Hub.]*/
     var dev;
@@ -202,7 +200,7 @@ Registry.prototype.get = function (deviceId, done) {
  *                                object useful for logging or debugging.
  */
 Registry.prototype.list = function (done) {
-  var path = endpoint.devicePath('') + versionQueryString();
+  var path = endpoint.devicePath('') + endpoint.versionQueryString();
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_004: [The list method shall request information about devices from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
   this._transport.listDevices(path, function (err, body, response) {
     var devList = [];
@@ -237,7 +235,7 @@ Registry.prototype.delete = function (deviceId, done) {
     throw new ReferenceError('deviceId is \'' + deviceId + '\'');
   }
 
-  var path = endpoint.devicePath(deviceId) + versionQueryString();
+  var path = endpoint.devicePath(deviceId) + endpoint.versionQueryString();
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_007: [The delete method shall delete the given device from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
   this._transport.deleteDevice(path, function (err, body, response) {
     /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_005: [When the delete method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null).]*/
@@ -265,7 +263,7 @@ Registry.prototype.importDevicesFromBlob = function (inputBlobContainerUri, outp
       'inputBlobContainerUri': <input container Uri given as parameter>,
       'outputBlobContainerUri': <output container Uri given as parameter>
   }] */
-  var path = "/jobs/create" + versionQueryString();
+  var path = "/jobs/create" + endpoint.versionQueryString();
   var importRequest = {
     'type': 'import',
     'inputBlobContainerUri': inputBlobContainerUri,
@@ -294,7 +292,7 @@ Registry.prototype.exportDevicesToBlob = function (outputBlobContainerUri, exclu
   /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_004: [A ReferenceError shall be thrown if outputBlobContainerUri is falsy] */
   if (!outputBlobContainerUri) throw new ReferenceError('outputBlobContainerUri cannot be falsy');
 
-  var path = "/jobs/create" + versionQueryString();
+  var path = "/jobs/create" + endpoint.versionQueryString();
   var exportRequest = {
     'type': 'export',
     'outputBlobContainerUri': outputBlobContainerUri,
@@ -325,7 +323,7 @@ Registry.prototype.exportDevicesToBlob = function (outputBlobContainerUri, exclu
  */
 Registry.prototype.listJobs = function (done) {
   /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_016: [The listJobs method should request a list of active and recent bulk import/export jobs using the transport associated with the Registry instance and give it the correct path URI.] */
-  var path = "/jobs" + versionQueryString();
+  var path = "/jobs" + endpoint.versionQueryString();
   this._transport.listJobs(path, function (err, jobsList) {
     if (err) {
       /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_011: [The ‘done’ callback shall be called with only an error object if the request fails.] */
@@ -349,7 +347,7 @@ Registry.prototype.getJob = function (jobId, done) {
   if (!jobId) throw new ReferenceError('jobId cannot be falsy');
 
   /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_017: [The getJob method should request status information of the bulk import/export job identified by the jobId parameter using the transport associated with the Registry instance and give it the correct path URI.] */
-  var path = "/jobs/" + jobId + versionQueryString();
+  var path = "/jobs/" + jobId + endpoint.versionQueryString();
   this._transport.getJob(path, function (err, jobStatus) {
     if (err) {
       /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_015: [The ‘done’ callback shall be called with only an error object if the request fails.]  */
@@ -373,7 +371,7 @@ Registry.prototype.cancelJob = function (jobId, done) {
   if (!jobId) throw new ReferenceError('jobId cannot be falsy');
 
   /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_018: [The cancelJob method should request cancel the job identified by the jobId parameter using the transport associated with the Registry instance by giving it the correct path URI.] */
-  var path = "/jobs/" + jobId + versionQueryString();
+  var path = "/jobs/" + jobId + endpoint.versionQueryString();
   this._transport.cancelJob(path, function (err) {
     if (err) {
       /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_013: [The ‘done’ callback shall be called with only an error object if the request fails.] */
