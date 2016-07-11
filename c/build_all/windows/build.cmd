@@ -305,6 +305,8 @@ if %MAKE_NUGET_PKG% == yes (
 	)
 )
 popd
+rem invoke the traceabilitytool here instead of the second build step in Jenkins windows_c job
+msbuild /m %build-root%\tools\traceabilitytool\traceabilitytool.sln
 goto :eof
 
 

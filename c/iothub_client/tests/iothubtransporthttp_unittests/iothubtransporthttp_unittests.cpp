@@ -1413,15 +1413,18 @@ static void setupRegisterHappyPathcreate_deviceId(CIoTHubTransportHttpMocks &moc
     }
 }
 
-static void setupRegisterHappyPathcreate_deviceKey(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathcreate_deviceKey(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated, bool is_x509_used=false)
 {
     (void)mocks;
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
-    if (deallocateCreated == true)
+    if(is_x509_used==false)
     {
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
+        if (deallocateCreated == true)
+        {
+            STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+        }
     }
 }
 
@@ -1478,7 +1481,7 @@ static void setupRegisterHappyPathmessageHTTPrelativePath(CIoTHubTransportHttpMo
         .IgnoreArgument(1);
 }
 
-static void setupRegisterHappyPatheventHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPatheventHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated, bool is_x509_used=false)
 {
     (void)mocks;
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
@@ -1497,8 +1500,13 @@ static void setupRegisterHappyPatheventHTTPrequestHeaders(CIoTHubTransportHttpMo
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-to", "/devices/"  TEST_DEVICE_ID  EVENT_ENDPOINT))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
-        .IgnoreArgument(1);
+    
+    if(is_x509_used==false)
+    {
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+            .IgnoreArgument(1);
+    }
+
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Accept", "application/json"))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Connection", "Keep-Alive"))
@@ -1512,14 +1520,17 @@ static void setupRegisterHappyPatheventHTTPrequestHeaders(CIoTHubTransportHttpMo
     }
 }
 
-static void setupRegisterHappyPathmessageHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathmessageHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated, bool is_x509_used=false)
 {
     (void)mocks;
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
-        .IgnoreArgument(1);
+    if(is_x509_used==false)
+    {
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+            .IgnoreArgument(1);
+    }
     if (deallocateCreated == true)
     {
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
@@ -1547,34 +1558,37 @@ static void setupRegisterHappyPathabandonHTTPrelativePathBegin(CIoTHubTransportH
         .IgnoreArgument(1);
 }
 
-static void setupRegisterHappyPathsasObject(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathsasObject(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated, bool is_x509_used=false)
 {
     (void)mocks;
-    STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*uriResource*/
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "/devices/"))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*key*/
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_empty(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(3);
-    if (deallocateCreated)
+    if(is_x509_used==false)
     {
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*uriResource*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*key*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_empty(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .IgnoreArgument(3);
+        if (deallocateCreated)
+        {
+            STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+        }
     }
 }
 
@@ -1592,18 +1606,18 @@ static void setupRegisterHappyPathDeviceListAdd(CIoTHubTransportHttpMocks &mocks
 }
 
 
-static void setupRegisterHappyPath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated, bool is_x509_used=false)
 {
     setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
-    setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+    setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated, is_x509_used);
     setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
     setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
-    setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
-    setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+    setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated, is_x509_used);
+    setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated, is_x509_used);
     setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
-    setupRegisterHappyPathsasObject(mocks, deallocateCreated);
+    setupRegisterHappyPathsasObject(mocks, deallocateCreated, is_x509_used);
     setupRegisterHappyPathDeviceListAdd(mocks, deallocateCreated);
     setupRegisterHappyPatheventConfirmations(mocks, deallocateCreated);
 }
@@ -3819,8 +3833,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_deviceId_null_returns_null)
 
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_015: [ If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
-TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_and_deviceSasToken_null_returns_null)
+//Tests_SRS_TRANSPORTMULTITHTTP_17_015: [ If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are NULL, then IoTHubTransportHttp_Register shall assume a x509 authentication. ]*/
+TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_and_deviceSasToken_succeeds)
 {
     ///arrange
     CIoTHubTransportHttpMocks mocks;
@@ -3832,40 +3846,17 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_and_deviceSasToken_nul
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
     mocks.ResetAllCalls();
 
-    ///act
-    auto devHandle = IoTHubTransportHttp_Register(handle, &myDevice, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
-
-    ///assert
-    ASSERT_IS_NULL(devHandle);
-    mocks.AssertActualAndExpectedCalls();
-
-    ///cleanup
-    IoTHubTransportHttp_Destroy(handle);
-}
-
-/* Tests_SRS_TRANSPORTMULTITHTTP_03_015: [If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are both NOT NULL, then IoTHubTransportHttp_Register shall return NULL.]*/
-TEST_FUNCTION(IoTHubTransportHttp_Register_both_deviceKey_and_deviceSasToken_are_provided_returns_null)
-{
-    ///arrange
-    CIoTHubTransportHttpMocks mocks;
-    IOTHUB_DEVICE_CONFIG myDevice;
-    myDevice.deviceId = TEST_DEVICE_ID;
-    myDevice.deviceKey = TEST_DEVICE_KEY;
-    myDevice.deviceSasToken = TEST_DEVICE_TOKEN;
-
-    auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    mocks.ResetAllCalls();
+    setupRegisterHappyPath(mocks, false, true);
 
     ///act
     auto devHandle = IoTHubTransportHttp_Register(handle, &myDevice, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     ///assert
-    ASSERT_IS_NULL(devHandle);
+    ASSERT_IS_NOT_NULL(devHandle);
     mocks.AssertActualAndExpectedCalls();
 
     ///cleanup
     IoTHubTransportHttp_Destroy(handle);
-
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_143: [ If parameter iotHubClientHandle is NULL, then IoTHubTransportHttp_Register shall return NULL. ]

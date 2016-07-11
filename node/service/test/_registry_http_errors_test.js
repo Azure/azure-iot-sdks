@@ -20,8 +20,10 @@ describe('translateError', function() {
     { statusCode: 404, hubErrorCode: 'IotHubNotFound', statusMessage: 'Not found', expectedErrorType: errors.IotHubNotFoundError },
     /*Tests_SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_012: [`translateError` shall return an `DeviceNotFoundError` if the HTTP response status code is `404` and if the error code within the body of the error response is `DeviceNotFound`.*/
     { statusCode: 404, hubErrorCode: 'DeviceNotFound', statusMessage: 'Not found', expectedErrorType: errors.DeviceNotFoundError },
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_007: [`translateError` shall return an `DeviceAlreadyExistsError` if the HTTP response status code is `412` and if the error code within the body of the error response is `DeviceAlreadyExists`.]*/
-    { statusCode: 412, hubErrorCode: 'DeviceAlreadyExists', statusMessage: 'Precondition failed', expectedErrorType: errors.DeviceAlreadyExistsError },
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_007: [`translateError` shall return an `DeviceAlreadyExistsError` if the HTTP response status code is `409`.]*/
+    { statusCode: 409, hubErrorCode: 'DeviceAlreadyExists', statusMessage: 'Conflict', expectedErrorType: errors.DeviceAlreadyExistsError },
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_013: [`translateError` shall return an `InvalidEtagError` if the HTTP response status code is `412`.]*/
+    { statusCode: 412, hubErrorCode: 'InvalidEtag', statusMessage: 'Precondition failed', expectedErrorType: errors.InvalidEtagError },
     /*Tests_SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_011: [`translateError` shall return an `ThrottlingError` if the HTTP response status code is `429`.]*/
     { statusCode: 429, statusMessage: 'Too many requests', expectedErrorType: errors.ThrottlingError },
     /*Tests_SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_008: [`translateError` shall return an `InternalServerError` if the HTTP response status code is `500`.]*/

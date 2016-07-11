@@ -158,43 +158,53 @@ Amqp.prototype.disconnect = function disconnect(done) {
  * @param {Function}  done      Called when the message is sent or if an error happened.
  */
 Amqp.prototype.send = function send(message, endpoint, to, done) {
-  /*Codes_SRS_NODE_COMMON_AMQP_16_006: [The send method shall construct an AMQP message using information supplied by the caller, as follows:
-  The ‘to’ field of the message should be set to the ‘to’ argument.
-  The ‘body’ of the message should be built using the message argument.] */
-
-  var amqpMessage = AmqpMessage.fromMessage(message);
-  amqpMessage.properties.to = to;
-  if (!this._connected) done(new errors.NotConnectedError('Cannot send while disconnected.'));
-
-  var sendAction = function (sender, msg, done) {
-    sender.send(msg)
-      .then(function (state) {
-        if (done) {
-          var result = new results.MessageEnqueued(state);
-          done(null, result);
-        }
-      })
-      .catch(function (err) {
-        /*Codes_SRS_NODE_IOTHUB_AMQPCOMMON_16_007: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-        if (done) done(err);
-      });
-  };
-
-  if (!this._sender) {
-    this._amqp.createSender(endpoint)
-      .then(function (sender) {
-        this._sender = sender;
-        /*Codes_SRS_NODE_COMMON_AMQP_16_007: [If send encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-        this._sender.on('errorReceived', function (err) {
+  if (!this._connected && done) {
+    done(new errors.NotConnectedError('Cannot send while disconnected.'));
+  } else {  
+    /*Codes_SRS_NODE_COMMON_AMQP_16_006: [The send method shall construct an AMQP message using information supplied by the caller, as follows:
+    The ‘to’ field of the message should be set to the ‘to’ argument.
+    The ‘body’ of the message should be built using the message argument.] */
+  
+    var amqpMessage = AmqpMessage.fromMessage(message);
+    amqpMessage.properties.to = to;
+    var sendAction = function (sender, msg, done) {
+      sender.send(msg)
+        .then(function (state) {
+          if (done) {
+            var result = new results.MessageEnqueued(state);
+            done(null, result);
+          }
+        })
+        .catch(function (err) {
+          /*Codes_SRS_NODE_IOTHUB_AMQPCOMMON_16_007: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
           if (done) done(err);
-          return null;
         });
+    };
 
-        sendAction(this._sender, amqpMessage, done);
-        return null;
-      }.bind(this));
-  } else {
-    sendAction(this._sender, amqpMessage, done);
+    if (!this._sender) {
+      this._amqp.createSender(endpoint)
+        .then(function (sender) {
+          this._sender = sender;
+          /*Codes_SRS_NODE_COMMON_AMQP_16_007: [If send encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
+          this._sender.on('errorReceived', function (err) {
+            if (done) done(err);
+            return null;
+          });
+
+          sendAction(this._sender, amqpMessage, done);
+          return null;
+        }.bind(this))
+        .catch(function(err) {
+          if (done) {
+            /*Codes_SRS_NODE_IOTHUB_AMQPCOMMON_16_007: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
+            var error = new errors.NotConnectedError('AMQP: Could not create sender');
+            error.amqpError = err;
+            done(error);
+          }
+        });
+    } else {
+      sendAction(this._sender, amqpMessage, done);
+    }
   }
 };
 

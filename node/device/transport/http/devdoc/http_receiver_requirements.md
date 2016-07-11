@@ -123,6 +123,12 @@ Host: <config.host>
 
 **SRS_NODE_DEVICE_HTTP_RECEIVER_16_028: [**When successful, `complete` should call the `done` callback with a `null` error object and a result object of type `MessageCompleted`**]** 
 
+### updateSharedAccessSignature(sharedAccessSignature)
+
+**SRS_NODE_DEVICE_HTTP_RECEIVER_16_032: [** `updateSharedAccessSignature` shall throw a `ReferenceError` if the `sharedAccessSignature` argument is falsy. **]**
+
+**SRS_NODE_DEVICE_HTTP_RECEIVER_16_033: [** All subsequent HTTP requests shall use the value of the `sharedAccessSignature` argument in their headers. **]**
+
 ### all HTTP requests
 
 **SRS_NODE_DEVICE_HTTP_RECEIVER_16_031: [** If using a shared access signature for authentication, the following additional header should be used in the HTTP request: 
