@@ -2,7 +2,17 @@
 // Copyright(c) Microsoft.All rights reserved.
 // Licensed under the MIT license.See LICENSE file in the project root for full license information.
 
+#ifdef _MSC_VER
+#pragma warning(push) /* This is because boost python has a self variable that hides a global */
+#pragma warning(disable:4459 4100 4121) /* This is because boost python has a self variable that hides a global */
+#endif
+
 #include <boost/python.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <string>
 #include <vector>
 #include <list>
@@ -35,11 +45,6 @@
 //
 // note: all new allocations throw a std::bad_alloc exception which trigger a MemoryError in Python
 //
-
-// helper to suppress AMQP console messages, comment function to get the output to console
-extern "C"
-void consolelogger_log(unsigned int options, char* format, ...)
-{}
 
 // helper classes for transitions between Python and C++ layer
 
@@ -128,18 +133,18 @@ public:
 
 private:
 
-    std::string CamelToPy(std::string &func)
+    std::string CamelToPy(std::string &_func)
     {
         std::string py;
-        std::string::size_type len = func.length();
+        std::string::size_type len = _func.length();
         for (std::string::size_type i = 0; i < len; i++)
         {
-            char ch = func[i];
+            char ch = _func[i];
             if ((i > 0) && isupper(ch))
             {
                 py.push_back('_');
             }
-            py.push_back(tolower(ch));
+            py.push_back((char)tolower(ch));
         }
         return py;
     }
@@ -858,6 +863,7 @@ public:
 
     IoTHubClient(const IoTHubClient& client)
     {
+        (void)client;
         throw IoTHubClientError(__func__, IOTHUB_CLIENT_ERROR);
     }
 

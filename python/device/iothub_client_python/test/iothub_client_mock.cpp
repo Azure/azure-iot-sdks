@@ -2,8 +2,6 @@
 // Copyright(c) Microsoft.All rights reserved.
 // Licensed under the MIT license.See LICENSE file in the project root for full license information.
 
-#define _CRT_SECURE_NO_WARNINGS
-
 #include <boost/python.hpp>
 #include <string>
 #include <vector>
@@ -53,11 +51,12 @@ MAP_HANDLE Map_Create(MAP_FILTER_CALLBACK mapFilterFunc)
 
 void Map_Destroy(MAP_HANDLE handle)
 {
-    // mockFilterFunc = NULL;
+    (void)handle;
 }
 
 MAP_HANDLE Map_Clone(MAP_HANDLE handle)
 {
+    (void)handle;
     return mockMapHandle;
 }
 
@@ -65,6 +64,7 @@ MAP_RESULT Map_Add(MAP_HANDLE handle, const char* key, const char* value)
 {
     MAP_RESULT result = MAP_OK;
 
+    (void)handle;
     if (mockFilterFunc != NULL)
     {
         result = mockFilterFunc(key, value) ? MAP_FILTER_REJECT : MAP_OK;
@@ -89,6 +89,7 @@ MAP_RESULT Map_AddOrUpdate(MAP_HANDLE handle, const char* key, const char* value
 {
     MAP_RESULT result = MAP_OK;
 
+    (void)handle;
     if (mockFilterFunc != NULL)
     {
         result = mockFilterFunc(key, value) ? MAP_FILTER_REJECT : MAP_OK;
@@ -107,6 +108,7 @@ MAP_RESULT Map_Delete(MAP_HANDLE handle, const char* key)
 {
     MAP_RESULT result = MAP_KEYNOTFOUND;
 
+    (void)handle;
     if (strcmp(mockKey, key) == 0)
     {
         memset(mockKey, 0, sizeof(mockKey));
@@ -119,18 +121,21 @@ MAP_RESULT Map_Delete(MAP_HANDLE handle, const char* key)
 
 MAP_RESULT Map_ContainsKey(MAP_HANDLE handle, const char* key, bool* keyExists)
 {
+    (void)handle;
     *keyExists = strcmp(mockKey, key) == 0;
     return MAP_OK;
 }
 
 MAP_RESULT Map_ContainsValue(MAP_HANDLE handle, const char* value, bool* valueExists)
 {
+    (void)handle;
     *valueExists = strcmp(mockValue, value) == 0;
     return MAP_OK;
 }
 
 const char* Map_GetValueFromKey(MAP_HANDLE handle, const char* key)
 {
+    (void)handle;
     if (strcmp(mockKey, key) == 0)
     {
         return mockValue;
@@ -140,6 +145,7 @@ const char* Map_GetValueFromKey(MAP_HANDLE handle, const char* key)
 
 MAP_RESULT Map_GetInternals(MAP_HANDLE handle, const char*const** keys, const char*const** values, size_t* count)
 {
+    (void)handle;
     *count = 0;
     *keys = mockKeyArray;
     *values = mockValueArray;
@@ -158,40 +164,48 @@ IOTHUB_CLIENT_HANDLE mockClientHandle = (IOTHUB_CLIENT_HANDLE)0x12345678;
 
 IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
+    (void)connectionString, protocol;
     return mockClientHandle;
 }
 
 IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
 {
+    (void)config;
     return mockClientHandle;
 }
 
 void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
 {
+    (void)iotHubClientHandle;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)
 {
+    (void)iotHubClientHandle, eventMessageHandle, eventConfirmationCallback, userContextCallback;
     return IOTHUB_CLIENT_OK;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
+    (void)iotHubClientHandle, iotHubClientStatus;
     return IOTHUB_CLIENT_OK;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void* userContextCallback)
 {
+    (void)iotHubClientHandle, messageCallback, userContextCallback;
     return IOTHUB_CLIENT_OK;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime)
 {
+    (void)iotHubClientHandle, lastMessageReceiveTime;
     return IOTHUB_CLIENT_INDEFINITE_TIME;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value)
 {
+    (void)iotHubClientHandle, optionName, value;
     return IOTHUB_CLIENT_OK;
 }
 
@@ -223,17 +237,19 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char* byt
 IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromString(const char* source)
 {
     mockString = true;
-    strncpy(mockBuffer, source, MOCKMESSAGESIZE);
+    (void)strncpy(mockBuffer, source, MOCKMESSAGESIZE);
     return mockMessageHandle;
 }
 
 IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
+    (void)iotHubMessageHandle;
     return mockMessageHandle;
 }
 
 IOTHUB_MESSAGE_RESULT IoTHubMessage_GetByteArray(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const unsigned char** buffer, size_t* size)
 {
+    (void)iotHubMessageHandle;
     if (mockString)
     {
         return IOTHUB_MESSAGE_INVALID_TYPE;
@@ -245,6 +261,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_GetByteArray(IOTHUB_MESSAGE_HANDLE iotHubMes
 
 const char* IoTHubMessage_GetString(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
+    (void)iotHubMessageHandle;
     if (!mockString)
     {
         return NULL;
@@ -254,16 +271,19 @@ const char* IoTHubMessage_GetString(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 
 IOTHUBMESSAGE_CONTENT_TYPE IoTHubMessage_GetContentType(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
+    (void)iotHubMessageHandle;
     return mockString ? IOTHUBMESSAGE_STRING : IOTHUBMESSAGE_BYTEARRAY;
 }
 
 MAP_HANDLE IoTHubMessage_Properties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
+    (void)iotHubMessageHandle;
     return mockMapHandle;
 }
 
 const char* IoTHubMessage_GetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
+    (void)iotHubMessageHandle;
     if (*mockMessageId == '\0')
     {
         return NULL;
@@ -273,12 +293,14 @@ const char* IoTHubMessage_GetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle
 
 IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* messageId)
 {
-    strncpy(mockMessageId, messageId, MOCKMESSAGESIZE);
+    (void)iotHubMessageHandle;
+    (void)strncpy(mockMessageId, messageId, MOCKMESSAGESIZE);
     return IOTHUB_MESSAGE_OK;
 }
 
 const char* IoTHubMessage_GetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
+    (void)iotHubMessageHandle;
     if (*mockCorrelationId == '\0')
     {
         return NULL;
@@ -288,12 +310,14 @@ const char* IoTHubMessage_GetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHubMessageHa
 
 IOTHUB_MESSAGE_RESULT IoTHubMessage_SetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* correlationId)
 {
-    strncpy(mockCorrelationId, correlationId, MOCKMESSAGESIZE);
+    (void)iotHubMessageHandle;
+    (void)strncpy(mockCorrelationId, correlationId, MOCKMESSAGESIZE);
     return IOTHUB_MESSAGE_OK;
 }
 
 void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
+    (void)iotHubMessageHandle;
 }
 
 // "iothubtransporthttp.h"
