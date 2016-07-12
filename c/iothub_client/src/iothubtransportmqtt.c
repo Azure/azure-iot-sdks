@@ -110,6 +110,19 @@ typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
     DLIST_ENTRY entry;
 } MQTT_MESSAGE_DETAILS_LIST, *PMQTT_MESSAGE_DETAILS_LIST;
 
+static uint16_t get_next_packet_id(PMQTTTRANSPORT_HANDLE_DATA transportState)
+{
+    if (transportState->packetId+1 >= USHRT_MAX)
+    {
+        transportState->packetId = 1;
+    }
+    else
+    {
+        transportState->packetId++;
+    }
+    return transportState->packetId;
+}
+
 static void sendMsgComplete(IOTHUB_MESSAGE_LIST* iothubMsgList, PMQTTTRANSPORT_HANDLE_DATA transportState, IOTHUB_CLIENT_CONFIRMATION_RESULT confirmResult)
 {
     DLIST_ENTRY messageCompleted;
@@ -175,7 +188,7 @@ static int publishMqttMessage(PMQTTTRANSPORT_HANDLE_DATA transportState, MQTT_ME
     }
     else
     {
-        MQTT_MESSAGE_HANDLE mqttMsg = mqttmessage_create(transportState->packetId++, STRING_c_str(msgTopic), DELIVER_AT_LEAST_ONCE, payload, len);
+        MQTT_MESSAGE_HANDLE mqttMsg = mqttmessage_create(get_next_packet_id(transportState), STRING_c_str(msgTopic), DELIVER_AT_LEAST_ONCE, payload, len);
         if (mqttMsg == NULL)
         {
             result = __LINE__;
@@ -450,7 +463,7 @@ static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
         subscribe[0].qosReturn = DELIVER_AT_LEAST_ONCE;
 
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransportMqtt_Subscribe shall call mqtt_client_subscribe to subscribe to the Message Topic.] */
-        if (mqtt_client_subscribe(transportState->mqttClient, transportState->packetId++, subscribe, 1) != 0)
+        if (mqtt_client_subscribe(transportState->mqttClient, get_next_packet_id(transportState), subscribe, 1) != 0)
         {
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.] */
             result = __LINE__;
@@ -1026,7 +1039,7 @@ static void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_020: [IoTHubTransportMqtt_Unsubscribe shall call mqtt_client_unsubscribe to unsubscribe the mqtt message topic.] */
         const char* unsubscribe[1];
         unsubscribe[0] = STRING_c_str(transportState->mqttMessageTopic);
-        (void)mqtt_client_unsubscribe(transportState->mqttClient, transportState->packetId++, unsubscribe, 1);
+        (void)mqtt_client_unsubscribe(transportState->mqttClient, get_next_packet_id(transportState), unsubscribe, 1);
         transportState->subscribed = false;
         transportState->receiveMessages = false;
     }
