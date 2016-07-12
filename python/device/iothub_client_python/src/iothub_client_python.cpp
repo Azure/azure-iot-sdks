@@ -828,6 +828,36 @@ ReceiveMessageCallback(
     return boost::python::extract<IOTHUBMESSAGE_DISPOSITION_RESULT>(returnObject);
 }
 
+typedef struct
+{
+    boost::python::object blobUploadCallback;
+    boost::python::object userContext;
+} BlobUploadContext;
+
+extern "C"
+void
+BlobUploadConfirmationCallback(
+    IOTHUB_CLIENT_FILE_UPLOAD_RESULT result,
+    void* userContextCallback
+    )
+{
+    BlobUploadContext *blobUploadContext = (BlobUploadContext *)userContextCallback;
+    boost::python::object blobUploadCallback = blobUploadContext->blobUploadCallback;
+    boost::python::object userContext = blobUploadContext->userContext;
+    {
+        ScopedGILAcquire acquire;
+        try {
+            blobUploadCallback(result, userContext);
+        }
+        catch (const boost::python::error_already_set)
+        {
+            // Catch and ignore exception that is thrown in Python callback.
+            // There is nothing we can do about it here.
+            PyErr_Print();
+        }
+    }
+    delete blobUploadContext;
+}
 
 class IoTHubClient
 {
@@ -1104,6 +1134,34 @@ public:
         }
     }
 
+    void UploadToBlobAsync(
+        std::string destinationFileName,
+        std::string source,
+        size_t size,
+        boost::python::object& iotHubClientFileUploadCallback,
+        boost::python::object& userContext
+        )
+    {
+        if (!PyCallable_Check(iotHubClientFileUploadCallback.ptr()))
+        {
+            PyErr_SetString(PyExc_TypeError, "upload_to_blob expected type callable");
+            boost::python::throw_error_already_set();
+            return;
+        }
+        BlobUploadContext *blobUploadContext = new BlobUploadContext();
+        blobUploadContext->blobUploadCallback = iotHubClientFileUploadCallback;
+        blobUploadContext->userContext = userContext;
+
+        IOTHUB_CLIENT_RESULT result;
+        {
+            ScopedGILRelease release;
+            result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, destinationFileName.c_str(), (const unsigned char*)source.c_str(), size, BlobUploadConfirmationCallback, blobUploadContext);
+        }
+        if (result != IOTHUB_CLIENT_OK)
+        {
+            throw IoTHubClientError(__func__, result);
+        }
+    }
 #ifdef SUPPORT___STR__
     std::string str() const
     {
@@ -1223,6 +1281,11 @@ BOOST_PYTHON_MODULE(IMPORT_NAME)
         .value("MQTT", MQTT)
         ;
 
+    enum_<IOTHUB_CLIENT_FILE_UPLOAD_RESULT>("IoTHubClientFileUploadResult")
+        .value("OK", FILE_UPLOAD_OK)
+        .value("ERROR", FILE_UPLOAD_ERROR)
+        ;
+
     // classes
     class_<IoTHubMap>("IoTHubMap")
         .def(init<>())
@@ -1264,6 +1327,7 @@ BOOST_PYTHON_MODULE(IMPORT_NAME)
         .def("set_option", &IoTHubClient::SetOption)
         .def("get_send_status", &IoTHubClient::GetSendStatus)
         .def("get_last_message_receive_time", &IoTHubClient::GetLastMessageReceiveTime)
+        .def("upload_blob_async", &IoTHubClient::UploadToBlobAsync)
         // attributes
         .def_readonly("protocol", &IoTHubClient::protocol)
         // Python helpers
