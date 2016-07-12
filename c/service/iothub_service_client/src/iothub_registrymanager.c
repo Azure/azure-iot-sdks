@@ -1037,9 +1037,10 @@ static IOTHUB_REGISTRYMANAGER_RESULT sendHttpRequestCRUD(IOTHUB_REGISTRYMANAGER_
     }
     else 
     {
-        HTTPAPI_REQUEST_TYPE httpApiRequestType;
+        HTTPAPI_REQUEST_TYPE httpApiRequestType = HTTPAPI_REQUEST_GET;
         char relativePath[256];
         unsigned int statusCode;
+        unsigned char is_error = 0;
 
         if ((iotHubRequestMode == IOTHUB_REQUEST_CREATE) || (iotHubRequestMode == IOTHUB_REQUEST_UPDATE))
         {
@@ -1053,50 +1054,62 @@ static IOTHUB_REGISTRYMANAGER_RESULT sendHttpRequestCRUD(IOTHUB_REGISTRYMANAGER_
         {
             httpApiRequestType = HTTPAPI_REQUEST_GET;
         }
-
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_026: [ IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-02-03  ] */
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_053: [ IoTHubRegistryManager_DeleteDevice shall create HTTP DELETE request URL using the given deviceId using the following format : url/devices/[deviceId]?api-version ] */
-        if (createRelativePath(iotHubRequestMode, deviceName, numberOfDevices, relativePath) != IOTHUB_REGISTRYMANAGER_OK)
+        else
         {
-            LogError("Failure creating relative path");
-            result = IOTHUB_REGISTRYMANAGER_ERROR;
+            is_error = 1;
         }
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_014: [ IoTHubRegistryManager_CreateDevice shall create an HTTP PUT request using the created JSON ] */
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_018: [ IoTHubRegistryManager_CreateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_030: [ IoTHubRegistryManager_GetDevice shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ] */
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_047: [ IoTHubRegistryManager_UpdateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_057: [ IoTHubRegistryManager_DeleteDevice shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
-        else if (HTTPAPIEX_SAS_ExecuteRequest(httpExApiSasHandle, httpExApiHandle, httpApiRequestType, relativePath, httpHeader, deviceJsonBuffer, &statusCode, NULL, responseBuffer) != HTTPAPIEX_OK)
+
+        if (is_error)
         {
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_019: [ If any of the HTTPAPI call fails IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
-            LogError("HTTPAPIEX_SAS_ExecuteRequest failed");
+            LogError("Invalid request type");
             result = IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR;
         }
         else
         {
-            if (statusCode > 300)
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_026: [ IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-02-03  ] */
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_053: [ IoTHubRegistryManager_DeleteDevice shall create HTTP DELETE request URL using the given deviceId using the following format : url/devices/[deviceId]?api-version ] */
+            if (createRelativePath(iotHubRequestMode, deviceName, numberOfDevices, relativePath) != IOTHUB_REGISTRYMANAGER_OK)
             {
-                if ((iotHubRequestMode == IOTHUB_REQUEST_CREATE) && (statusCode == 409))
-                {
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ] */
-                    result = IOTHUB_REGISTRYMANAGER_DEVICE_EXIST;
-                }
-                else
-                {
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_021: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ] */
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_032: [ IoTHubRegistryManager_GetDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_ERROR ] */
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_058: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ] */
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_048: [ IoTHubRegistryManager_UpdateDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_ERROR ] */
-                    LogError("Http Failure status code %d.", statusCode);
-                    result = IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR;
-                }
+                LogError("Failure creating relative path");
+                result = IOTHUB_REGISTRYMANAGER_ERROR;
+            }
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_014: [ IoTHubRegistryManager_CreateDevice shall create an HTTP PUT request using the created JSON ] */
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_018: [ IoTHubRegistryManager_CreateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_030: [ IoTHubRegistryManager_GetDevice shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ] */
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_047: [ IoTHubRegistryManager_UpdateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_057: [ IoTHubRegistryManager_DeleteDevice shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
+            else if (HTTPAPIEX_SAS_ExecuteRequest(httpExApiSasHandle, httpExApiHandle, httpApiRequestType, relativePath, httpHeader, deviceJsonBuffer, &statusCode, NULL, responseBuffer) != HTTPAPIEX_OK)
+            {
+                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_019: [ If any of the HTTPAPI call fails IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
+                LogError("HTTPAPIEX_SAS_ExecuteRequest failed");
+                result = IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR;
             }
             else
             {
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_022: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is less or equal than 300 then try to parse the response JSON to deviceInfo ] */
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_059: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_REGISTRYMANAGER_OK ] */
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_049: [ IoTHubRegistryManager_UpdateDevice shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_REGISTRYMANAGER_OK ] */
-                result = IOTHUB_REGISTRYMANAGER_OK;
+                if (statusCode > 300)
+                {
+                    if ((iotHubRequestMode == IOTHUB_REQUEST_CREATE) && (statusCode == 409))
+                    {
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ] */
+                        result = IOTHUB_REGISTRYMANAGER_DEVICE_EXIST;
+                    }
+                    else
+                    {
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_021: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ] */
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_032: [ IoTHubRegistryManager_GetDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_ERROR ] */
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_058: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ] */
+                        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_048: [ IoTHubRegistryManager_UpdateDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_ERROR ] */
+                        LogError("Http Failure status code %d.", statusCode);
+                        result = IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR;
+                    }
+                }
+                else
+                {
+                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_022: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is less or equal than 300 then try to parse the response JSON to deviceInfo ] */
+                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_059: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_REGISTRYMANAGER_OK ] */
+                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_049: [ IoTHubRegistryManager_UpdateDevice shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_REGISTRYMANAGER_OK ] */
+                    result = IOTHUB_REGISTRYMANAGER_OK;
+                }
             }
         }
     }

@@ -473,6 +473,7 @@ static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transportState)
         {
             transportState->currPacketState = PUBLISH_TYPE;
         }
+        result = 0;
     }
     return result;
 }

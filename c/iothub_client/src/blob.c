@@ -160,6 +160,8 @@ BLOB_RESULT Blob_UploadFromSasUri(const char* SASURI, const unsigned char* sourc
                                 {
                                     /*Codes_SRS_BLOB_02_021: [ For every block of 4MB the following operations shall happen: ]*/
                                     unsigned int blockID = 0;
+                                    result = BLOB_ERROR;
+
                                     int isError = 0; /*used to cleanly exit the loop*/
                                     do
                                     {

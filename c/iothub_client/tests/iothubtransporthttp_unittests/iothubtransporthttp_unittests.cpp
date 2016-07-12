@@ -838,12 +838,12 @@ public:
     default:
     {
         /*not expected really*/
-        result = NULL;
+        result2 = NULL;
     }
     }
     MOCK_METHOD_END(const char*, result2)
 
-        MOCK_STATIC_METHOD_1(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
+    MOCK_STATIC_METHOD_1(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
         MAP_HANDLE result2;
     switch ((uintptr_t)iotHubMessageHandle)
     {
@@ -910,6 +910,7 @@ public:
     default:
     {
         /*not expected really*/
+        result2 = NULL;
         ASSERT_FAIL("not expected");
     }
     }
@@ -951,6 +952,9 @@ public:
         result2 = IOTHUBMESSAGE_STRING;
         break;
     }
+    default:
+        result2 = IOTHUBMESSAGE_STRING;
+        break;
     }
     MOCK_METHOD_END(IOTHUBMESSAGE_CONTENT_TYPE, result2)
 
