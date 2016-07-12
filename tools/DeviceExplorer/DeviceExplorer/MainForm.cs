@@ -564,6 +564,11 @@ namespace DeviceExplorer
                 for (var i = 0; i < messagePropertiesGrid.Rows.Count - 1; i++)
                 {
                     var row = messagePropertiesGrid.Rows[i];
+                    if (row.Cells[0].Value == null && row.Cells[1].Value == null)
+                    {
+                        continue;
+                    }
+
                     if (row.Cells[0].Value == null || row.Cells[1].Value == null)
                     {
                         throw new InvalidOperationException("Properties have null key or value.");

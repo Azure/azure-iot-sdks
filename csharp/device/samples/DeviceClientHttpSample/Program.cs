@@ -64,6 +64,12 @@ namespace Microsoft.Azure.Devices.Client.Samples
                     messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
                     Console.WriteLine("\t{0}> Received message: {1}", DateTime.Now.ToLocalTime(), messageData);
 
+                    int propCount = 0;
+                    foreach (var prop in receivedMessage.Properties)
+                    {
+                        Console.WriteLine("\t\tProperty[{0}> Key={1} : Value={2}", propCount++, prop.Key, prop.Value);
+                    }
+
                     await deviceClient.CompleteAsync(receivedMessage);
                 }
 
