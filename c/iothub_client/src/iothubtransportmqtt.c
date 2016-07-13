@@ -28,6 +28,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include <limits.h>
+
 #define SAS_TOKEN_DEFAULT_LIFETIME  3600
 #define SAS_REFRESH_MULTIPLIER      .8
 #define EPOCH_TIME_T_VALUE          0
