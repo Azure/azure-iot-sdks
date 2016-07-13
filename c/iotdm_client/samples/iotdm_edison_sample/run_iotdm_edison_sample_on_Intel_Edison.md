@@ -94,7 +94,7 @@ This setup process requires **cmake** version 2.8.11 or higher and **gcc** versi
 
     ```
     cd ~/azure-iot-sdks/c/build_all/linux
-    ./build.sh --skip-e2e-tests --skip-unittests --no-mqtt --no-amqp --no-http
+    ./build.sh  --skip-unittests --no-mqtt --no-amqp 
     ```
 
 5.  Run the sample
