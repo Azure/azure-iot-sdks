@@ -549,6 +549,7 @@ BEGIN_TEST_SUITE(iothubtransportmqtt)
 
 static void SetupMocksForInitConnection(CIoTHubTransportMqttMocks& mocks)
 {
+    (void)mocks;
     STRICT_EXPECTED_CALL(mocks, get_time(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mocks, STRING_new());
     EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)).ExpectedTimesExactly(4);
@@ -1299,7 +1300,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_mqtt_client_subscribe_return_error_f
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     auto handle = IoTHubTransportMqtt_Create(&config);
-    auto result = IoTHubTransportMqtt_Subscribe(handle);
+    (void)IoTHubTransportMqtt_Subscribe(handle);
     CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
 
@@ -1505,7 +1506,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_invokes_xio_setoption_when_option_no
     auto handle = IoTHubTransportMqtt_Create(&config);
     mocks.ResetAllCalls();
 
-    bool traceOn = true;
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, platform_get_default_tlsio());
     EXPECTED_CALL(mocks, xio_create(NULL, NULL));
@@ -1539,7 +1539,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_xio_create_fail)
     auto handle = IoTHubTransportMqtt_Create(&config);
     mocks.ResetAllCalls();
 
-    bool traceOn = true;
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, platform_get_default_tlsio());
     EXPECTED_CALL(mocks, xio_create(NULL, NULL)).SetReturn((XIO_HANDLE)NULL);
@@ -1570,8 +1569,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_fails_when_xio_setoption_fails)
 
     auto handle = IoTHubTransportMqtt_Create(&config);
     mocks.ResetAllCalls();
-
-    bool traceOn = true;
 
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, platform_get_default_tlsio());
@@ -2002,7 +1999,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_with_1_event_item_with_2_properties_suc
     const size_t propCount = 2;
 
     const char* TOPIC_PROPERTY_VALUE = "devices/thisIsDeviceID/messages/events/propKey1=propValue1&propKey2=propValue2";
-    const char* PROPERTY_VALUE = "propKey1=propValue1&propKey2=propValue2";
 
     const char* keys[propCount] = { "propKey1", "propKey2" };
     const char* values[propCount] = { "propValue1", "propValue2" };
@@ -2074,7 +2070,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_with_1_event_item_with_properties_STRIN
     g_nullMapVariable = false;
 
     const size_t propCount = 1;
-    const char* TOPIC_PROPERTY_VALUE = "devices/thisIsDeviceID/messages/events/propKey1=propValue1";
     const char* PROPERTY_VALUE = "propKey1=propValue1";
     const char* keys[propCount] = { "propKey1" };
     const char* values[propCount] = { "propValue1" };
@@ -2132,7 +2127,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_no_subscribe_succeeds)
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
-    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
     CONNECT_ACK connack;
     connack.isSessionPresent = false;
     connack.returnCode = CONNECTION_ACCEPTED;
@@ -3376,7 +3370,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Register_twice_fails_second_time)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     auto handle = IoTHubTransportMqtt_Create(&config);
-    auto devHandle = IoTHubTransportMqtt_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, config.waitingToSend);
+    (void)IoTHubTransportMqtt_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, config.waitingToSend);
 
     mocks.ResetAllCalls();
 

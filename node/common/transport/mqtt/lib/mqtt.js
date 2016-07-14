@@ -53,7 +53,7 @@ function Mqtt(config, mqttprovider) {
     clientId: config.deviceId,
     username: config.host + '/' + config.deviceId + '/DeviceClientType=' + versionString,
     password: new Buffer(config.sharedAccessSignature),
-    rejectUnauthorized: false,
+    rejectUnauthorized: true,
     reconnectPeriod: 0  // Client will handle reconnection at the higher level.
   };
   debug('username: ' + this._options.username);
@@ -73,7 +73,7 @@ Mqtt.prototype.connect = function (done) {
     var errCallback = function (error) {
       done(error);
     };
-    
+
     this.client.on('error', errCallback);
     this.client.on('close', errCallback);
     this.client.on('offline', errCallback);

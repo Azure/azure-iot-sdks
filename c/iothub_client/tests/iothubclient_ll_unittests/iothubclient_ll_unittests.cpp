@@ -333,6 +333,9 @@ public:
     MOCK_STATIC_METHOD_1(, void, IoTHubClient_LL_UploadToBlob_Destroy, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle)
         BASEIMPLEMENTATION::gballoc_free(handle);
     MOCK_VOID_METHOD_END()
+
+    MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_SetOption, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, option, const void*, value)
+    MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK)
 #endif
 
 };
@@ -388,6 +391,7 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , int, tickcounter_get_curren
 #ifndef DONT_USE_UPLOADTOBLOB
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, IoTHubClient_LL_UploadToBlob_Create, const IOTHUB_CLIENT_CONFIG*, config);
 DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientLLMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_Impl, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientLLMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_SetOption, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, option, const void*, value)
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, IoTHubClient_LL_UploadToBlob_Destroy, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle);
 #endif
 
@@ -3821,29 +3825,84 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_with_NULL_value_fails)
 
 }
 
+#ifndef DONT_USE_UPLOADTOBLOB
+/*these tests are to be run when upload to blob functionality exists*/
+
+/*Tests_SRS_IOTHUBCLIENT_LL_02_099 : [IoTHubClient_LL_SetOption shall return according to the table below]*/
+TEST_FUNCTION(IoTHubClient_LL_SetOption_all_combinations)
+{
+
+    static struct SetOptionTriplet
+    {
+        IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlob_SetOption_return;
+        IOTHUB_CLIENT_RESULT Transport_SetOption_return;
+        IOTHUB_CLIENT_RESULT expected_return;
+    } allCombinations[] = 
+    {
+        { IOTHUB_CLIENT_OK, IOTHUB_CLIENT_OK , IOTHUB_CLIENT_OK},
+        { IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_ERROR },
+        { IOTHUB_CLIENT_OK, IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_OK },
+        { IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_OK , IOTHUB_CLIENT_ERROR },
+        { IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_ERROR },
+        { IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_ERROR },
+        { IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_OK , IOTHUB_CLIENT_OK },
+        { IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_ERROR, IOTHUB_CLIENT_ERROR },
+        { IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_INVALID_ARG, IOTHUB_CLIENT_INVALID_ARG }
+    };
+
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+    IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    
+
+    for (size_t i = 0;i < sizeof(allCombinations) / sizeof(allCombinations[0]);i++)
+    {
+        mocks.ResetAllCalls();
+        EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, "a", "b"))
+            .SetReturn(allCombinations[i].IoTHubClient_UploadToBlob_SetOption_return);
+
+        EXPECTED_CALL(mocks, FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, "a", "b"))
+            .SetReturn(allCombinations[i].Transport_SetOption_return);
+
+        ///act
+        auto result = IoTHubClient_LL_SetOption(handle, "a", "b");
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, allCombinations[i].expected_return, result);
+    }
+
+    ///cleanup
+    IoTHubClient_LL_Destroy(handle);
+    mocks.ResetAllCalls();
+}
+
 /*Tests_SRS_IOTHUBCLIENT_LL_02_038: [Otherwise, IoTHubClient_LL shall call the function _SetOption of the underlying transport and return what that function is returning.] */
-TEST_FUNCTION(IoTHubClient_LL_SetOption_happy_path)
+TEST_FUNCTION(IoTHubClient_LL_SetOption_fails_when_underlying_transport_fails)
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
     IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
     mocks.ResetAllCalls();
 
-    EXPECTED_CALL(mocks, FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, "a", "b"));
+    EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, "a", "b"))
+        .SetReturn(IOTHUB_CLIENT_INVALID_ARG);
+
+    EXPECTED_CALL(mocks, FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, "a", "b"))
+        .SetReturn(IOTHUB_CLIENT_INDEFINITE_TIME);
 
     ///act
     auto result = IoTHubClient_LL_SetOption(handle, "a", "b");
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INDEFINITE_TIME, result);
     mocks.AssertActualAndExpectedCalls();
 
     ///cleanup
     IoTHubClient_LL_Destroy(handle);
 
 }
-
-/*Tests_SRS_IOTHUBCLIENT_LL_02_038: [Otherwise, IoTHubClient_LL shall call the function _SetOption of the underlying transport and return what that function is returning.] */
+#else
+/*these tests are to be run when uploadtoblob is not present*/
 TEST_FUNCTION(IoTHubClient_LL_SetOption_fails_when_underlying_transport_fails)
 {
     ///arrange
@@ -3865,7 +3924,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetOption_fails_when_underlying_transport_fails)
     IoTHubClient_LL_Destroy(handle);
 
 }
-
+#endif
 /*Tests_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClient_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a uint64. ]*/
 TEST_FUNCTION(IoTHubClient_LL_SetOption_messageTimeout_to_zero_after_Create_succeeds)
 {

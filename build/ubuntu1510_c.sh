@@ -5,17 +5,7 @@
 build_root=$(cd "$(dirname "$0")/.." && pwd)
 cd $build_root
 
-# -- Java --
-export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
-cd $build_root/java/device
-mvn verify
-[ $? -eq 0 ] || exit $?
-cd $build_root
-
 # -- C --
-c/build_all/linux/build.sh --run-e2e-tests #-x
+./c/build_all/linux/build.sh --run_valgrind "$@" #-x 
 [ $? -eq 0 ] || exit $?
 
-# -- Node.js --
-build/linux_node.sh
-[ $? -eq 0 ] || exit $?

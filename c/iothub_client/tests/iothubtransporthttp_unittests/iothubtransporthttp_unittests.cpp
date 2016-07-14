@@ -838,12 +838,12 @@ public:
     default:
     {
         /*not expected really*/
-        result = NULL;
+        result2 = NULL;
     }
     }
     MOCK_METHOD_END(const char*, result2)
 
-        MOCK_STATIC_METHOD_1(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
+    MOCK_STATIC_METHOD_1(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)
         MAP_HANDLE result2;
     switch ((uintptr_t)iotHubMessageHandle)
     {
@@ -910,6 +910,7 @@ public:
     default:
     {
         /*not expected really*/
+        result2 = NULL;
         ASSERT_FAIL("not expected");
     }
     }
@@ -951,6 +952,9 @@ public:
         result2 = IOTHUBMESSAGE_STRING;
         break;
     }
+    default:
+        result2 = IOTHUBMESSAGE_STRING;
+        break;
     }
     MOCK_METHOD_END(IOTHUBMESSAGE_CONTENT_TYPE, result2)
 
@@ -1381,7 +1385,7 @@ static void setupCreateHappyPath(CIoTHubTransportHttpMocks &mocks, bool dealloca
     setupCreateHappyPathPerDeviceList(mocks, deallocateCreated);
 }
 
-static void setupRegisterHappyPathNotFoundInList(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathNotFoundInList(CIoTHubTransportHttpMocks &mocks)
 {
     (void)mocks;
     STRICT_EXPECTED_CALL(mocks, VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, TEST_DEVICE_ID))
@@ -1413,15 +1417,18 @@ static void setupRegisterHappyPathcreate_deviceId(CIoTHubTransportHttpMocks &moc
     }
 }
 
-static void setupRegisterHappyPathcreate_deviceKey(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathcreate_deviceKey(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated, bool is_x509_used=false)
 {
     (void)mocks;
 
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
-    if (deallocateCreated == true)
+    if(is_x509_used==false)
     {
-        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
+        if (deallocateCreated == true)
+        {
+            STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+        }
     }
 }
 
@@ -1478,7 +1485,7 @@ static void setupRegisterHappyPathmessageHTTPrelativePath(CIoTHubTransportHttpMo
         .IgnoreArgument(1);
 }
 
-static void setupRegisterHappyPatheventHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPatheventHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated, bool is_x509_used=false)
 {
     (void)mocks;
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
@@ -1497,8 +1504,13 @@ static void setupRegisterHappyPatheventHTTPrequestHeaders(CIoTHubTransportHttpMo
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-to", "/devices/"  TEST_DEVICE_ID  EVENT_ENDPOINT))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
-        .IgnoreArgument(1);
+    
+    if(is_x509_used==false)
+    {
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+            .IgnoreArgument(1);
+    }
+
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Accept", "application/json"))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Connection", "Keep-Alive"))
@@ -1512,14 +1524,17 @@ static void setupRegisterHappyPatheventHTTPrequestHeaders(CIoTHubTransportHttpMo
     }
 }
 
-static void setupRegisterHappyPathmessageHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathmessageHTTPrequestHeaders(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated, bool is_x509_used=false)
 {
     (void)mocks;
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
-        .IgnoreArgument(1);
+    if(is_x509_used==false)
+    {
+        STRICT_EXPECTED_CALL(mocks, HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+            .IgnoreArgument(1);
+    }
     if (deallocateCreated == true)
     {
         STRICT_EXPECTED_CALL(mocks, HTTPHeaders_Free(IGNORED_PTR_ARG))
@@ -1547,44 +1562,47 @@ static void setupRegisterHappyPathabandonHTTPrelativePathBegin(CIoTHubTransportH
         .IgnoreArgument(1);
 }
 
-static void setupRegisterHappyPathsasObject(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathsasObject(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated, bool is_x509_used=false)
 {
     (void)mocks;
-    STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*uriResource*/
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "/devices/"))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*key*/
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, STRING_empty(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument(2)
-        .IgnoreArgument(3);
-    if (deallocateCreated)
+    if(is_x509_used==false)
     {
-        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mocks, URL_EncodeString(TEST_DEVICE_ID));
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*encoded device id*/
             .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_clone(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*uriResource*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat(IGNORED_PTR_ARG, "/devices/"))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_DEVICE_KEY));
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)) /*key*/
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, STRING_empty(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument(1)
+            .IgnoreArgument(2)
+            .IgnoreArgument(3);
+        if (deallocateCreated)
+        {
+            STRICT_EXPECTED_CALL(mocks, HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
+        }
     }
 }
 
-static void setupRegisterHappyPatheventConfirmations(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPatheventConfirmations(CIoTHubTransportHttpMocks &mocks)
 {
     (void)mocks;
     STRICT_EXPECTED_CALL(mocks, DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
 }
 
-static void setupRegisterHappyPathDeviceListAdd(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPathDeviceListAdd(CIoTHubTransportHttpMocks &mocks)
 {
     (void)mocks;
     STRICT_EXPECTED_CALL(mocks, VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
@@ -1592,25 +1610,25 @@ static void setupRegisterHappyPathDeviceListAdd(CIoTHubTransportHttpMocks &mocks
 }
 
 
-static void setupRegisterHappyPath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+static void setupRegisterHappyPath(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated, bool is_x509_used=false)
 {
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
-    setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
+    setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated, is_x509_used);
     setupRegisterHappyPatheventHTTPrelativePath(mocks, deallocateCreated);
     setupRegisterHappyPathmessageHTTPrelativePath(mocks, deallocateCreated);
-    setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
-    setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
+    setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated, is_x509_used);
+    setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated, is_x509_used);
     setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
-    setupRegisterHappyPathsasObject(mocks, deallocateCreated);
-    setupRegisterHappyPathDeviceListAdd(mocks, deallocateCreated);
-    setupRegisterHappyPatheventConfirmations(mocks, deallocateCreated);
+    setupRegisterHappyPathsasObject(mocks, deallocateCreated, is_x509_used);
+    setupRegisterHappyPathDeviceListAdd(mocks);
+    setupRegisterHappyPatheventConfirmations(mocks);
 }
 
 static void setupRegisterHappyPathWithSasToken(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceSasToken(mocks, deallocateCreated);
@@ -1619,9 +1637,8 @@ static void setupRegisterHappyPathWithSasToken(CIoTHubTransportHttpMocks &mocks,
     setupRegisterHappyPatheventHTTPrequestHeaders(mocks, deallocateCreated);
     setupRegisterHappyPathmessageHTTPrequestHeaders(mocks, deallocateCreated);
     setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
-    //setupRegisterHappyPathsasObject(mocks, deallocateCreated);
-    setupRegisterHappyPathDeviceListAdd(mocks, deallocateCreated);
-    setupRegisterHappyPatheventConfirmations(mocks, deallocateCreated);
+    setupRegisterHappyPathDeviceListAdd(mocks);
+    setupRegisterHappyPatheventConfirmations(mocks);
 }
 
 static void setupUnregisterOneDevice(CIoTHubTransportHttpMocks &mocks)
@@ -2332,8 +2349,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_sameDevice_twice_returns_null)
     CIoTHubTransportHttpMocks mocks;
 
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
-    auto devHandle1a = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -2369,7 +2386,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_vector_pushback_fails)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2380,7 +2397,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_vector_pushback_fails)
     setupRegisterHappyPathabandonHTTPrelativePathBegin(mocks, deallocateCreated);
     setupRegisterHappyPathsasObject(mocks, deallocateCreated);
     whenShallVECTOR_push_back_fail = 1;
-    setupRegisterHappyPathDeviceListAdd(mocks, deallocateCreated);
+    setupRegisterHappyPathDeviceListAdd(mocks);
 
     auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
@@ -2402,7 +2419,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_1)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2434,7 +2451,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_2)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2472,7 +2489,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_3)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2514,7 +2531,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_4)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2558,7 +2575,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_5)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2603,7 +2620,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_6)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2651,7 +2668,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_createSASObject_fails_7)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2704,7 +2721,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_1)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2747,7 +2764,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_2)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2786,7 +2803,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_3)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2819,7 +2836,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_abandonHTTPrelativePathBegin_fails_4)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2855,7 +2872,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_1)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2892,7 +2909,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrequestheaders_fails_2)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2923,7 +2940,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_1)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -2978,7 +2995,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_2)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3031,7 +3048,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_3)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3083,7 +3100,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_4)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3133,7 +3150,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_5)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3182,7 +3199,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_6)
     currentSTRING_concat_call = 0;
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3227,7 +3244,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_7)
     currentSTRING_concat_with_STRING_call = 0;
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3269,7 +3286,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_8)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3309,7 +3326,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_9)
     currentSTRING_construct_call = 0;
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3343,7 +3360,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrequestHeaders_fails_10)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3375,7 +3392,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_1)
     currentSTRING_concat_call = 0;
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3416,7 +3433,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_2)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3456,7 +3473,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_3)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3493,7 +3510,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_messageHTTPrelativePath_fails_4)
     currentSTRING_construct_call = 0;
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3524,7 +3541,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_1)
     currentSTRING_concat_call = 0;
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3565,7 +3582,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_2)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3605,7 +3622,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_3)
     currentSTRING_construct_call = 0;
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3634,7 +3651,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_eventHTTPrelativePath_fails_4)
     mocks.ResetAllCalls();
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(mocks, deallocateCreated);
@@ -3672,7 +3689,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceKey_fails)
     currentSTRING_construct_call = 0;
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 
@@ -3700,7 +3717,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceSasToken_fails)
     currentSTRING_construct_call = 0;
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(mocks, deallocateCreated);
 
@@ -3728,7 +3745,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_create_deviceId_fails)
     currentSTRING_construct_call = 0;
 
     bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
     setupRegisterHappyPathAllocHandle(mocks, deallocateCreated);
 
     whenShallSTRING_construct_fail = 1;
@@ -3753,8 +3770,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_deviceHandle_not_allocated)
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
     mocks.ResetAllCalls();
     currentmalloc_call = 0;
-    bool deallocateCreated = true;
-    setupRegisterHappyPathNotFoundInList(mocks, deallocateCreated);
+    setupRegisterHappyPathNotFoundInList(mocks);
 
     whenShallmalloc_fail = 1;
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
@@ -3819,8 +3835,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_deviceId_null_returns_null)
 
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_015: [ If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
-TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_and_deviceSasToken_null_returns_null)
+//Tests_SRS_TRANSPORTMULTITHTTP_17_015: [ If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are NULL, then IoTHubTransportHttp_Register shall assume a x509 authentication. ]*/
+TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_and_deviceSasToken_succeeds)
 {
     ///arrange
     CIoTHubTransportHttpMocks mocks;
@@ -3832,40 +3848,17 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_deviceKey_null_and_deviceSasToken_nul
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
     mocks.ResetAllCalls();
 
-    ///act
-    auto devHandle = IoTHubTransportHttp_Register(handle, &myDevice, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
-
-    ///assert
-    ASSERT_IS_NULL(devHandle);
-    mocks.AssertActualAndExpectedCalls();
-
-    ///cleanup
-    IoTHubTransportHttp_Destroy(handle);
-}
-
-/* Tests_SRS_TRANSPORTMULTITHTTP_03_015: [If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are both NOT NULL, then IoTHubTransportHttp_Register shall return NULL.]*/
-TEST_FUNCTION(IoTHubTransportHttp_Register_both_deviceKey_and_deviceSasToken_are_provided_returns_null)
-{
-    ///arrange
-    CIoTHubTransportHttpMocks mocks;
-    IOTHUB_DEVICE_CONFIG myDevice;
-    myDevice.deviceId = TEST_DEVICE_ID;
-    myDevice.deviceKey = TEST_DEVICE_KEY;
-    myDevice.deviceSasToken = TEST_DEVICE_TOKEN;
-
-    auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    mocks.ResetAllCalls();
+    setupRegisterHappyPath(mocks, false, true);
 
     ///act
     auto devHandle = IoTHubTransportHttp_Register(handle, &myDevice, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     ///assert
-    ASSERT_IS_NULL(devHandle);
+    ASSERT_IS_NOT_NULL(devHandle);
     mocks.AssertActualAndExpectedCalls();
 
     ///cleanup
     IoTHubTransportHttp_Destroy(handle);
-
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_143: [ If parameter iotHubClientHandle is NULL, then IoTHubTransportHttp_Register shall return NULL. ]
@@ -3982,7 +3975,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Unregister_2nd_device_superHappyFunPath)
     ///arrange
     CIoTHubTransportHttpMocks mocks;
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
     auto devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
@@ -4301,7 +4294,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     ///arrange
     CIoTHubTransportHttpMocks mocks;
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -4361,8 +4354,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_2_registered_devices_em
     ///arrange
     CIoTHubTransportHttpMocks mocks;
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
-    auto devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -4569,7 +4562,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_2device_with_2nd_empty_waiti
     unsigned int statusCode200 = 200;
     unsigned int statusCode204 = 204;
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
     auto devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle2);
@@ -4699,8 +4692,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2nd_has_1_event_item_as_string
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend2), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
-    auto devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_IOTHUB_CLIENT_LL_HANDLE2, TEST_CONFIG2.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -8233,7 +8226,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_happy_path_succeeds)
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
     setupDoWorkLoopOnceForOneDevice(mocks);
@@ -8360,7 +8353,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_ht
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -8486,7 +8479,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HT
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -8613,7 +8606,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -8721,7 +8714,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -8817,7 +8810,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -8892,7 +8885,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -8961,7 +8954,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -9023,7 +9016,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -9081,7 +9074,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_Base64_Encode_By
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -9131,7 +9124,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_IoTHubMessage_Ge
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -9180,7 +9173,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -9223,7 +9216,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -9257,7 +9250,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_HTTP_headers_fai
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -9290,7 +9283,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_bigger_than_256K_path
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message4.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -9370,7 +9363,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_almost255_happy_path_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message5.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -9499,7 +9492,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     DList_InsertTailList(&(waitingToSend), &(message2.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -9671,7 +9664,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     DList_InsertTailList(&(waitingToSend), &(message2.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
     setupDoWorkLoopOnceForOneDevice(mocks);
@@ -9831,7 +9824,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     DList_InsertTailList(&(waitingToSend), &(message2.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
     setupDoWorkLoopOnceForOneDevice(mocks);
@@ -9998,7 +9991,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     DList_InsertTailList(&(waitingToSend), &(message5.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
     setupDoWorkLoopOnceForOneDevice(mocks);
@@ -10443,7 +10436,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_properties_succ
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -10498,7 +10491,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_at
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message11.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -10553,7 +10546,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_pa
     CNiceCallComparer<CIoTHubTransportHttpMocks>mocks;
     DList_InsertTailList(&(waitingToSend), &(message12.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     ENABLE_BATCHING();
 
@@ -10582,7 +10575,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_fails_when_Map_GetIn
     CNiceCallComparer<CIoTHubTransportHttpMocks> mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -10754,7 +10747,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_with_properties_succ
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     DList_InsertTailList(&(waitingToSend), &(message7.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -10850,7 +10843,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items)
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     DList_InsertTailList(&(waitingToSend), &(message7.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -10886,7 +10879,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_THRESHOLD1_succeeds)
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         DList_InsertTailList(&(waitingToSend), &(message7.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+        (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
         mocks.ResetAllCalls();
 
@@ -10926,7 +10919,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_send_only_1_when_pro
         DList_InsertTailList(&(waitingToSend), &(message6.entry));
         DList_InsertTailList(&(waitingToSend), &(message7.entry));
         auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-        auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+        (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
         mocks.ResetAllCalls();
 
@@ -12267,7 +12260,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatch
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message1.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -12363,7 +12356,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -12450,7 +12443,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_unbatched_happy_path_at_th
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message11.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -12554,7 +12547,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
     DList_InsertTailList(&(waitingToSend), &(message12.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
 
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -12589,7 +12582,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -12625,7 +12618,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -12727,7 +12720,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -12817,7 +12810,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -12908,7 +12901,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
     setupDoWorkLoopOnceForOneDevice(mocks);
@@ -12978,7 +12971,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13042,7 +13035,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13104,7 +13097,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13162,7 +13155,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13216,7 +13209,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13264,7 +13257,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13305,7 +13298,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13341,7 +13334,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13374,7 +13367,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message9.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13417,7 +13410,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_happy_path_
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13540,7 +13533,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_string
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13604,7 +13597,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_Map_Ge
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13666,7 +13659,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13723,7 +13716,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13777,7 +13770,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13826,7 +13819,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_IoTHub
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -13873,7 +13866,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message10.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -14231,7 +14224,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 
@@ -14333,7 +14326,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
     CIoTHubTransportHttpMocks mocks;
     DList_InsertTailList(&(waitingToSend), &(message6.entry));
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
-    auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
+    (void)IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     mocks.ResetAllCalls();
 

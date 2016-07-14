@@ -250,10 +250,15 @@ HttpReceiver.prototype.setOptions = function (opts) {
 };
 
 /**
- * @method          module:azure-iot-device-http.HttpReceiver#setSharedAccessSignature
+ * @method          module:azure-iot-device-http.HttpReceiver#updateSharedAccessSignature
  * @description     Sets the SAS Token used for authentication with the IoT Hub service when receiving messages.
  */
-HttpReceiver.prototype.setSharedAccessSignature = function (sharedAccessSignature) {
+
+HttpReceiver.prototype.updateSharedAccessSignature = function (sharedAccessSignature) {
+  /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_032: [`updateSharedAccessSignature` shall throw a `ReferenceError` if the `sharedAccessSignature` argument is falsy.]*/
+  if(!sharedAccessSignature) throw new ReferenceError('sharedAccessSignature cannot be \'' + sharedAccessSignature + '\'');
+
+  /*Codes_SRS_NODE_DEVICE_HTTP_RECEIVER_16_033: [All subsequent HTTP requests shall use the value of the `sharedAccessSignature` argument in their headers.]*/
   this._config.sharedAccessSignature = sharedAccessSignature;
 };
 

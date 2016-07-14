@@ -10,7 +10,7 @@ namespace Microsoft.Azure.Devices.Client.Samples
     class Program
     {
 
-        
+
         // String containing Hostname, Device Id & Device Key in one of the following formats:
         //  "HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
         //  "HostName=<iothub_host_name>;CredentialType=SharedAccessSignature;DeviceId=<device_id>;SharedAccessSignature=SharedAccessSignature sr=<iot_host>/devices/<device_id>&sig=<token>&se=<expiry_time>";
@@ -72,6 +72,12 @@ namespace Microsoft.Azure.Devices.Client.Samples
                 {
                     messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
                     Console.WriteLine("\t{0}> Received message: {1}", DateTime.Now.ToLocalTime(), messageData);
+
+                    int propCount = 0;
+                    foreach (var prop in receivedMessage.Properties)
+                    {
+                        Console.WriteLine("\t\tProperty[{0}> Key={1} : Value={2}", propCount++, prop.Key, prop.Value);
+                    }
 
                     await deviceClient.CompleteAsync(receivedMessage);
                 }

@@ -44,6 +44,7 @@ static TEST_MUTEX_HANDLE g_dllByDll;
 
 STRING_HANDLE my_STRING_construct(const char* psz)
 {
+    (void)psz;
     return (STRING_HANDLE)malloc(1);
 }
 
@@ -69,6 +70,7 @@ BUFFER_HANDLE my_BUFFER_new(void)
 
 BUFFER_HANDLE my_BUFFER_create(const unsigned char* source, size_t size)
 {
+    (void)source, size;
     return (BUFFER_HANDLE)malloc(1);
 }
 
@@ -79,6 +81,7 @@ void my_BUFFER_delete(BUFFER_HANDLE handle)
 
 HTTPAPIEX_HANDLE my_HTTPAPIEX_Create(const char* hostName)
 {
+    (void)hostName;
     return (HTTPAPIEX_HANDLE)malloc(1);
 }
 
@@ -89,6 +92,7 @@ void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
 
 HTTPAPIEX_SAS_HANDLE my_HTTPAPIEX_SAS_Create(STRING_HANDLE key, STRING_HANDLE uriResource, STRING_HANDLE keyName)
 {
+    (void)key, uriResource, keyName;
     return (HTTPAPIEX_SAS_HANDLE)malloc(1);
 }
 
@@ -448,9 +452,13 @@ static const char* TEST_HTTP_HEADER_VAL_CONTENT_TYPE = "application/json; charse
 static const char* TEST_HTTP_HEADER_KEY_IFMATCH = "If-Match";
 static const char* TEST_HTTP_HEADER_VAL_IFMATCH = "*";
 
+DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    ASSERT_FAIL("umock_c reported error");
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    ASSERT_FAIL(temp_str);
 }
 
 BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
@@ -601,7 +609,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     {
-        if (TEST_MUTEX_ACQUIRE(g_testByTest) != 0)
+        if (TEST_MUTEX_ACQUIRE(g_testByTest))
         {
             ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
         }
@@ -637,10 +645,10 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
 
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     {
+        umock_c_negative_tests_deinit();
         TEST_MUTEX_RELEASE(g_testByTest);
     }
-#define XXX
-#ifdef XXX
+
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_001: [ If the serviceClientHandle input parameter is NULL IoTHubRegistryManager_Create shall return NULL ] */
     TEST_FUNCTION(IoTHubRegistryManager_Create_return_null_if_input_parameter_serviceClientHandle_is_NULL)
     {
@@ -781,9 +789,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
     TEST_FUNCTION(IoTHubRegistryManager_Create_non_happy_path)
     {
         // arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -1323,9 +1330,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_non_happy_path)
     {
         ///arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -1639,9 +1645,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_non_happy_path)
     {
         ///arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         STRICT_EXPECTED_CALL(BUFFER_new());
 
@@ -1973,9 +1978,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_non_happy_path)
     {
         ///arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         // arrange
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -2199,9 +2203,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
     TEST_FUNCTION(IoTHubRegistryManager_DeleteDevice_non_happy_path)
     {
         ///arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         STRICT_EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
         STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
@@ -2442,8 +2445,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             .SetReturn(TEST_GENERATIONID);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ETAG))
             .SetReturn(TEST_ETAG);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE))
-            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_CONNECTED);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATEUPDATEDTIME))
             .SetReturn(TEST_CONNECTIONSTATEUPDATEDTIME);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS))
@@ -2550,7 +2551,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             list_destroy(deviceList);
         }
     }
-#endif
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_110: [ If the BUFFER_new fails, IoTHubRegistryManager_GetDeviceList shall do clean up and return NULL ]*/
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_070: [ If any of the parson API fails, IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ]*/
@@ -2559,9 +2559,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_non_happy_path)
     {
         ///arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         STRICT_EXPECTED_CALL(BUFFER_new());
 
@@ -2638,8 +2637,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             .SetReturn(TEST_GENERATIONID);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ETAG))
             .SetReturn(TEST_ETAG);
-        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE))
-            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_CONNECTED);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATEUPDATEDTIME))
             .SetReturn(TEST_CONNECTIONSTATEUPDATEDTIME);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS))
@@ -2739,9 +2736,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
                 (i != 37) && /*json_object_get_string*/
                 (i != 38) && /*json_object_get_string*/
                 (i != 39) && /*json_object_get_string*/
-                (i != 40) && /*json_object_get_string*/
-                (i != 56) && /*json_value_free*/
-                (i != 57) /*BUFFER_delete*/
+                (i != 55) && /*json_value_free*/
+                (i != 56) /*BUFFER_delete*/
                 )
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDeviceList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, 10, deviceList);
@@ -2971,9 +2967,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
     TEST_FUNCTION(IoTHubRegistryManager_GetStatistics_non_happy_path)
     {
         ///arrange
-        int result = 0;
-        result = umock_c_negative_tests_init();
-        ASSERT_ARE_EQUAL(int, 0, result);
+        int umockc_result = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         STRICT_EXPECTED_CALL(BUFFER_new());
 

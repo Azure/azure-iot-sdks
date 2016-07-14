@@ -301,4 +301,35 @@ describe('HttpReceiver', function () {
       });
     });
   });
+
+  describe('updateSharedAccessSignature', function() {
+    /*Tests_SRS_NODE_DEVICE_HTTP_RECEIVER_16_032: [** `updateSharedAccessSignature` shall throw a `ReferenceError` if the `sharedAccessSignature` argument is falsy.]*/
+    [null, undefined, ''].forEach(function(invalidSas) {
+      it('throws if sharedAccessSignature is \'' + invalidSas + '\'', function() {
+        var transport = new FakeHttp();
+        var receiver = new HttpReceiver({ deviceId: 'deviceId', sharedAccessSignature: 'sharedAccessSignature' }, transport);
+        assert.throws(function() {
+          receiver.updateSharedAccessSignature(invalidSas);
+        }, ReferenceError);
+      });
+    });
+
+    /*Tests_SRS_NODE_DEVICE_HTTP_RECEIVER_16_033: [** All subsequent HTTP requests shall use the value of the `sharedAccessSignature` argument in their headers.]*/
+    it('uses the new sharedAccessSignature in subsequent HTTP requests', function(done) {
+        var newSignature = 'newSignature';
+        var transport = new FakeHttp();
+        transport.buildRequest = function (method, path, httpHeaders) {
+          assert.equal(httpHeaders.Authorization, newSignature);
+          return {
+            end: function () {
+              done();
+            }
+          };
+        };
+
+        var receiver = new HttpReceiver({ deviceId: 'deviceId', sharedAccessSignature: 'sharedAccessSignature' }, transport);
+        receiver.updateSharedAccessSignature(newSignature);
+        receiver.receive();
+    });
+  });
 });

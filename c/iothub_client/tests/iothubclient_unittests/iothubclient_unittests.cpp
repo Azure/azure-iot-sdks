@@ -259,7 +259,6 @@ public:
     MOCK_METHOD_END(LIST_ITEM_HANDLE, found_item);
     MOCK_STATIC_METHOD_2(, int, list_remove, LIST_HANDLE, list, LIST_ITEM_HANDLE, list_item)
         size_t i;
-    LIST_ITEM_HANDLE found_item = NULL;
     for (i = 0; i < list_item_count; i++)
     {
         if (((LIST_ITEM_HANDLE)list_items[i]) == list_item)
@@ -270,7 +269,7 @@ public:
     if (i < list_item_count)
     {
         free(list_items[i]);
-        memmove(&list_items[i], &list_items[i + 1], (list_item_count - i - 1) * sizeof(TEST_LIST_ITEM*));
+        (void)memmove(&list_items[i], &list_items[i + 1], (list_item_count - i - 1) * sizeof(TEST_LIST_ITEM*));
         list_item_count--;
         if (list_item_count == 0)
         {

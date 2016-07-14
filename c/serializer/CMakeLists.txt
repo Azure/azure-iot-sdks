@@ -74,3 +74,9 @@ if(NOT IN_OPENWRT)
 # Disable tests and samples for OpenWRT
 add_subdirectory(tests)
 endif()
+
+if(WIN32)
+else()
+    install (TARGETS serializer DESTINATION lib)
+    install (FILES ${serializer_h_files} DESTINATION include/azureiot)
+endif (WIN32)

@@ -59,7 +59,6 @@ void feedbackReceivedCallback(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH* feed
         if (feedbackBatch->feedbackRecordList != NULL)
         {
             LIST_ITEM_HANDLE feedbackRecord = list_get_head_item(feedbackBatch->feedbackRecordList);
-            int i = 0;
             while (feedbackRecord != NULL)
             {
                 IOTHUB_SERVICE_FEEDBACK_RECORD* feedback = (IOTHUB_SERVICE_FEEDBACK_RECORD*)list_item_get_value(feedbackRecord);
@@ -126,7 +125,8 @@ void iothub_messaging_ll_sample_run(void)
                         iotHubMessagingResult = IoTHubMessaging_LL_Send(iotHubMessagingHandle, deviceId, messageHandle, sendCompleteCallback, (void*)&i);
                         if (iotHubMessagingResult == IOTHUB_MESSAGING_OK)
                         {
-                            for (int i = 0; i < 100; i++)
+                            int j;
+                            for (j = 0; j < 100; j++)
                             {
                                 IoTHubMessaging_LL_DoWork(iotHubMessagingHandle);
                                 ThreadAPI_Sleep(50);

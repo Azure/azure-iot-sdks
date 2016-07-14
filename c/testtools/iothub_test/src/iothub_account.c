@@ -93,7 +93,7 @@ static HTTP_HEADERS_HANDLE getContentHeaders(bool appendIfMatch)
     return httpHeader;
 }
 
-static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo, const char* callerName)
+static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo)
 {
     int result;
     char deviceGuid[DEVICE_GUID_SIZE];
@@ -133,7 +133,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
 {
     int result;
     int beginName, endName, beginIothub, endIothub, beginHost, endHost, beginKey;
-    int totalLen = strlen(accountInfo->connString);
+    size_t totalLen = strlen(accountInfo->connString);
 
     if (sscanf(accountInfo->connString, "HostName=%n%*[^.]%n.%n%*[^;];%nSharedAccessKeyName=%n%*[^;];%nSharedAccessKey=%n", &beginHost, &endHost, &beginIothub, &endIothub, &beginName, &endName, &beginKey) != 0)
     {
@@ -214,7 +214,7 @@ static const char* getMbedParameter(const char* name)
 }
 #endif
 
-IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice, const char* callerName)
+IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
 {
     IOTHUB_ACCOUNT_INFO* iothub_account_info = malloc(sizeof(IOTHUB_ACCOUNT_INFO));
 	if (iothub_account_info == NULL)
@@ -279,7 +279,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice, const char* cal
                         }
                         else
                         {
-                            if (generateDeviceName(iothub_account_info, "") != 0)
+                            if (generateDeviceName(iothub_account_info) != 0)
                             {
                                 LogError("generateDeviceName failed\r\n");
                                 IoTHubMessaging_LL_Destroy(iothub_account_info->iothub_messaging_handle);

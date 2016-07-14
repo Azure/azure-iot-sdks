@@ -54,7 +54,7 @@ function createCertsAndDevice(done) {
 
 var registry = Registry.fromConnectionString(argv.connectionString);
 registry.get(argv.deviceId, function(err, deviceInfo) {
-  if (!err || err.constructor.name !== 'DeviceNotFoundError') {
+  if (!err) {
     console.log(chalk.red('Device already exists: ' + argv.deviceId));
     process.exit(1);
   } else {

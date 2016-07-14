@@ -139,7 +139,7 @@ Http.parseErrorBody = function parseError (body) {
   try {
     var jsonErr = JSON.parse(body);
     var errParts = jsonErr.Message.split(';');
-    var errMessage = errParts[1].slice(1, -1);
+    var errMessage = errParts[1];
     var errCode = errParts[0].split(':')[1];
 
     if(!!errCode && !!errMessage) {
