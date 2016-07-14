@@ -1,19 +1,3 @@
-<style>
-table, td, th {
-	text-align:left;
-	border:1px solid white;
-	border-collapse: collapse
-}
-p.description {
-	font-style: italic; 
-	color:gray
-}
-</style>
-
-<!-- 
-Last requirement IDs used:
-09: 187
--->
 
 # IoTHubTransportAMQP Requirements
 
@@ -21,10 +5,9 @@ Last requirement IDs used:
  
 ## Overview
 
-<p class='description'>
 This module provides an implementation of the transport layer of the IoT Hub client based on the AMQP API, which implements the AMQP protocol.  
 Access to the static functions described in this document is possible through the set of function pointers provided by the function AMQP_Protocol.  
-</p>
+
    
    
 ## Exposed API
@@ -47,7 +30,7 @@ extern const TRANSPORT_PROVIDER* AMQP_Protocol(void);
     - IoTHubTransportAMQP_GetSendStatus
   
 
- ### IoTHubTransportAMQP_GetHostname
+### IoTHubTransportAMQP_GetHostname
 
  ```c
  STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
@@ -59,7 +42,7 @@ IoTHubTransportAMQP_GetHostname provides a STRING_HANDLE containing the hostname
 **SRS_IOTHUBTRANSPORTAMQP_02_001: [** If parameter `handle` is NULL then `IoTHubTransportAMQP_GetHostname` shall return NULL. **]**
 **SRS_IOTHUBTRANSPORTAMQP_02_002: [**  Otherwise IoTHubTransportAMQP_GetHostname shall return a STRING_HANDLE for the hostname. **]**
   
- ### IoTHubTransportAMQP_Create
+### IoTHubTransportAMQP_Create
 
 
 This function creates all the inner components required by the IoT Hub client to work properly, returning a handle for a structure that represents it.
