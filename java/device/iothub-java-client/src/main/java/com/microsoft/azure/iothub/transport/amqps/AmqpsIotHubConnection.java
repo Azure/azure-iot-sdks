@@ -195,22 +195,19 @@ public final class AmqpsIotHubConnection extends BaseHandler
     public void close()
     {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048 [If the AMQPS connection is already closed, the function shall do nothing.]
-        if (this.state != State.CLOSED)
-        {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to CLOSED.]
-            this.state = State.CLOSED;
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to CLOSED.]
+        this.state = State.CLOSED;
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall close the AMQPS sender and receiver links,
-            // the AMQPS session and the AMQPS connection.]
-            this.sender.close();
-            this.receiver.close();
-            this.session.close();
-            this.connection.close();
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall close the AMQPS sender and receiver links,
+        // the AMQPS session and the AMQPS connection.]
+        this.sender.close();
+        this.receiver.close();
+        this.session.close();
+        this.connection.close();
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
-            this.reactorFuture.cancel(true);
-            this.executorService.shutdown();
-        }
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
+        this.reactorFuture.cancel(true);
+        this.executorService.shutdown();
     }
 
     /**

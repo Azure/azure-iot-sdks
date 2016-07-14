@@ -8,13 +8,13 @@ set build-root=%1
 cd %build-root%
 
 rem -----------------------------------------------------------------------------
-rem -- Make sure current git branch is 'develop'. If it isn't check out that
+rem -- Make sure current git branch is 'master'. If it isn't check out that
 rem -- branch.
 rem -----------------------------------------------------------------------------
 for /f "delims=" %%i in ('git rev-parse --abbrev-ref HEAD') do set current_git_branch=%%i
-if "%current_git_branch%" neq "develop" (
-	echo Switching git branch to 'develop'
-	git checkout develop
+if "%current_git_branch%" neq "master" (
+	echo Switching git branch to 'master'
+	git checkout master
 	if %errorlevel% neq 0 exit /b %errorlevel%
 )
 

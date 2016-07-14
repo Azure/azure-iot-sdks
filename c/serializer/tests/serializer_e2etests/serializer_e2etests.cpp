@@ -107,6 +107,7 @@ BEGIN_TEST_SUITE(serializer_e2etests)
 
     static void iotHubMacroCallBack(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
     {
+        (void)result;
         EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)userContextCallback;
         if (expectedData != NULL)
         {
@@ -133,7 +134,6 @@ BEGIN_TEST_SUITE(serializer_e2etests)
     /*by code convention, context for this function is dereferenceable to EXPECTED_DATA*/
     static void RecvCallback(const void* buffer, size_t size, void* receiveCallbackContext)
     {
-        int result = 0; /*0 means "keep processing"*/
         EXPECTED_RECEIVE_DATA* expectedData = (EXPECTED_RECEIVE_DATA*)receiveCallbackContext;
         if (size == expectedData->compareDataSize)
         {

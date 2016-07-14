@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0.1-10) wily; urgency=low
+azure-iot-sdk-c (0.1.0.1-11) wily; urgency=low
 
   * Initial release
 
@@ -26,5 +26,19 @@ azure-iot-sdk-c (0.1.0.1-10) wily; urgency=low
 
   * C Client responds to a missed ping with the MQTT_CLIENT_NO_PING_RESPONSE message (#78aaa88)
 
- -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 17 Jun 2016 17:24:51 +0000
+  * Updated the default option on build scripts for uploadToBlob to ON for all platforms
+
+  * Updates Azure IoT C SDKs to use a new runtime switchable logging
+
+  * Updates Azure IoT C SDKs to use consolelogger_log as default logger
+
+  * Update IoTHubClient_SendComplete to use IOTHUB_CLIENT_CONFIRMATION_RESULT callback
+
+  * Added initial changes to support using x509 certificates on C client + added HTTP sample
+
+  * Updated the E2E tests to use the new C SDK Service Client
+
+  * Extended Upload to Blob to support files larger than 64MB
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 30 Jun 2016 17:00:00 +0000
 

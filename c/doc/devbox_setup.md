@@ -87,7 +87,7 @@ The following instructions outline how you can build the libraries in Windows:
 
 > Note: To enable support to AMQP over WebSockets, 
   1. Install [OpenSSL 1.0.1 (x86)](https://github.com/openssl/openssl) (tip: build the dll prior to running the following steps); 
-  2. Additionally to instructions on **step 1 above**, create the environment variable **OPENSSL_ROOT_DIR=C:\\OpenSSL** 
+  2. Additionally to instructions on **step 1 above**, create the environment variable **OPENSSL_ROOT_DIR=C:\\OpenSSL** and  **OpenSSLDir=C:\\OpenSSL**
   3. Run the **build\_client.cmd** script with the option ```--use-websockets```.
 
 <a name="linux"/>

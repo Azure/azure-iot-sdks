@@ -1,3 +1,50 @@
+Release for June 30, 2016
+
+# C Device SDK
+- Updated the default option on build scripts for uploadToBlob to ON for all platforms
+- Updates Azure IoT C SDKs to use a new runtime switchable logging
+- Updates Azure IoT C SDKs to use consolelogger_log as default logger
+- Update IoTHubClient_SendComplete to use IOTHUB_CLIENT_CONFIRMATION_RESULT callback
+- Added initial changes to support using x509 certificates on C client + added HTTP sample
+- Updated the E2E tests to use the new C SDK Service Client
+- Extended Upload to Blob to support files larger than 64MB.
+
+# JavaWrapper SDK
+- Added support for blob upload to JavaWrapper device client
+
+# C# Device SDK
+- Added support for x509 certificates on C# device client MQTT transport
+
+# C# Service SDK
+- C# service SDK now has support for UWP (Courtesy of Artur Laksberg)
+
+# NodeJs Device SDK
+- Fixed sample code in readme documentation (GitHub issue #671)
+- Added support for using x509 certificates over AMQP and AMQP over websockets
+
+# NodeJs Service SDK
+- Added support for using x509 certificates
+
+# Python
+- Added support for blob upload to Python device client
+
+# General
+- Updated correct path of samples for C SDK on Linux Get-Started documentation
+- Removed usage of LogInfo/LogError in C E2E tests
+- Consolidated definition of DEFINE_ENUM_STRING into iothub_client_ll.c, removing definition from samples
+- Updated DeviceExplorer to Auto scroll events text box
+- Several documentation updates for Azure IoT certification, Get-Started guides
+
+# Bug fixes
+- Fixed general build bugs for mbed, Windows and Linux platforms
+- Fixed linux build.sh warning regarding unary operator
+- Fixed C SDK samples to send disposition on exit
+- Updated C SDK AMQP over Websockets transport interface to include recent API changes, plus general bug fixes
+- Fixed MBED build scripts to delete existing files from MBED.org repos before updating with new files (fix for deleted fixes not being updated online)
+- Fixed general bugs in Python build scripts on Windows
+
+
+
 # Node.js Device SDK
 - Add support for x509 authentication with HTTP
 - Node.js v6 support

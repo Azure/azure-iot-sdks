@@ -190,12 +190,15 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                 else
                 {
                     int wasIoTHubRequestSuccess = 0; /*!=0 means responseContent has a buffer that should be parsed by parson after executing the below switch*/
+                    /* set the result to error by default */
+                    result = __LINE__;
                     switch (handleData->authorizationScheme)
                     {
                     default:
                     {
                         /*wasIoTHubRequestSuccess takes care of the return value*/
                         LogError("Internal Error: unexpected value in handleData->authorizationScheme = %d", handleData->authorizationScheme);
+                        result = __LINE__;
                         break;
                     }
                     case(X509):
@@ -223,7 +226,6 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                             if (statusCode >= 300)
                             {
                                 result = __LINE__;
-                                wasIoTHubRequestSuccess = 0;
                                 LogError("HTTP code was %u", statusCode);
                             }
                             else
@@ -268,7 +270,6 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                 if (statusCode >= 300)
                                 {
                                     result = __LINE__;
-                                    wasIoTHubRequestSuccess = 0;
                                     LogError("HTTP code was %u", statusCode);
                                 }
                                 else
@@ -810,7 +811,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
                                         {
                                             /*do again snprintf*/
                                             (void)snprintf(requiredString, requiredStringLength + 1, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
-                                            BUFFER_HANDLE toBeTransmitted = BUFFER_create(requiredString, requiredStringLength);
+                                            BUFFER_HANDLE toBeTransmitted = BUFFER_create((const unsigned char*)requiredString, requiredStringLength);
                                             if (toBeTransmitted == NULL)
                                             {
                                                 LogError("unable to BUFFER_create");

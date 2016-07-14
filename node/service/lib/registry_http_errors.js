@@ -39,13 +39,13 @@ var translateError = function translateError(body, response) {
         error = new Error('Not found');
       }
       break;
+    case 409:
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_007: [`translateError` shall return an `DeviceAlreadyExistsError` if the HTTP response status code is `409`.]*/
+      error = new errors.DeviceAlreadyExistsError(message);
+      break;
     case 412:
-      if (errorContent && errorContent.code === 'DeviceAlreadyExists') {
-        /*Codes_SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_007: [`translateError` shall return an `DeviceAlreadyExistsError` if the HTTP response status code is `412` and if the error code within the body of the error response is `DeviceAlreadyExists`.]*/
-        error = new errors.DeviceAlreadyExistsError(message);
-      } else {
-        error = new errors.InvalidEtagError(message);
-      }
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_013: [`translateError` shall return an `InvalidEtagError` if the HTTP response status code is `412`.]*/
+      error = new errors.InvalidEtagError(message);
       break;
     case 429:
       /*Codes_SRS_NODE_IOTHUB_REGISTRY_HTTP_ERRORS_16_011: [`translateError` shall return an `ThrottlingError` if the HTTP response status code is `429`.]*/
