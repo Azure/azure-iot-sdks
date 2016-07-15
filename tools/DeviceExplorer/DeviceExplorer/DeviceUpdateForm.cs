@@ -45,12 +45,28 @@ namespace DeviceExplorer
                         break;
                     }
                 }
+
                 foreach(var device in devices)
                 {
                     if(device.Id == selectedDevice)
                     {
-                        primaryKeyTextBox.Text = device.Authentication.SymmetricKey.PrimaryKey;
-                        secondaryKeyTextBox.Text = device.Authentication.SymmetricKey.SecondaryKey;
+                        if ( (device.Authentication.SymmetricKey != null) && 
+                            ! ((device.Authentication.SymmetricKey.PrimaryKey == null) ||
+                               (device.Authentication.SymmetricKey.SecondaryKey == null)) )
+                        {
+                            primaryLabel.Text = "Primary Key:";
+                            secondaryLabel.Text = "Secondary Key:";
+                            primaryKeyTextBox.Text = device.Authentication.SymmetricKey.PrimaryKey;
+                            secondaryKeyTextBox.Text = device.Authentication.SymmetricKey.SecondaryKey;
+                        }
+                        else if (device.Authentication.X509Thumbprint != null)
+                        {
+                            primaryLabel.Text = "Primary Thumbprint:";
+                            secondaryLabel.Text = "Secondary Thumbprint:";
+                            primaryKeyTextBox.Text = device.Authentication.X509Thumbprint.PrimaryThumbprint;
+                            secondaryKeyTextBox.Text = device.Authentication.X509Thumbprint.SecondaryThumbprint;
+                        }
+
                         lastValidPrimaryKey = primaryKeyTextBox.Text;
                         lastValidSecondaryKey = secondaryKeyTextBox.Text;
                         break;
@@ -83,9 +99,21 @@ namespace DeviceExplorer
 
                 if (updatedDevice != null)
                 {
-                    updatedDevice.Authentication.SymmetricKey.PrimaryKey = primaryKeyTextBox.Text;
-                    updatedDevice.Authentication.SymmetricKey.SecondaryKey = secondaryKeyTextBox.Text;
+                    if ((updatedDevice.Authentication.SymmetricKey != null) &&
+                        !((updatedDevice.Authentication.SymmetricKey.PrimaryKey == null) ||
+                          (updatedDevice.Authentication.SymmetricKey.SecondaryKey == null)))
+                    {
+                        updatedDevice.Authentication.SymmetricKey.PrimaryKey = primaryKeyTextBox.Text;
+                        updatedDevice.Authentication.SymmetricKey.SecondaryKey = secondaryKeyTextBox.Text;
+                    }
+                    else if (updatedDevice.Authentication.X509Thumbprint != null)
+                    {
+                        updatedDevice.Authentication.X509Thumbprint.PrimaryThumbprint = primaryKeyTextBox.Text;
+                        updatedDevice.Authentication.X509Thumbprint.SecondaryThumbprint = secondaryKeyTextBox.Text;
+                    }
+
                     await registryManager.UpdateDeviceAsync(updatedDevice, true);
+
                     using (new CenterDialog(this))
                     {
                         MessageBox.Show("Device updated successfully", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
