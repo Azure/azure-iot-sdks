@@ -215,12 +215,19 @@ linkSharedUtil(iothub_client)
 
 # Don't build samples under Win32 ARM for now
 if(WIN32)
-	if (NOT ${ARCHITECTURE} STREQUAL "ARM")
-		add_subdirectory(samples)
-	endif()
+# Build samples for WEC 2013 for both ARM and x86 processsor types
+  if(WINCE) 
+	add_subdirectory(samples)
+  else()
+    if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+	add_subdirectory(samples)
+    endif()
+  endif()
+	
 else()
 	add_subdirectory(samples)
 endif()
+
 
 if(NOT IN_OPENWRT)
 # Disable tests for OpenWRT

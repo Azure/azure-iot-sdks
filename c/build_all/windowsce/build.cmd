@@ -2,7 +2,7 @@
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 @setlocal EnableExtensions EnableDelayedExpansion
-echo off
+echo on
 
 set current-path=%~dp0
 rem // remove trailing slash
@@ -89,7 +89,8 @@ cmake -DWINCE=TRUE -DCMAKE_SYSTEM_NAME=WindowsCE -DCMAKE_SYSTEM_VERSION=8.0 -DCM
 
 if not %errorlevel%==0 exit /b %errorlevel%
 
-msbuild /m azure_iot_sdks.sln
+rem Only build the HTTP Sample
+rem msbuild /m azure_iot_sdks.sln
 if not %errorlevel%==0 exit /b %errorlevel%
 
 rem -- Copy all libraries to the repo directory to be able to build solutions
