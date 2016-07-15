@@ -176,7 +176,7 @@ Amqp.prototype.updateSharedAccessSignature = function (sharedAccessSignature, do
 };
 
 /**
- * @method          module:azure-iot-device-http.Amqp#setOptions
+ * @method          module:azure-iot-device-amqp.Amqp#setOptions
  * @description     This methods sets the AMQP specific options of the transport.
  *
  * @param {object}        options   Options to set.  Currently for amqp these are the x509 cert, key, and optional passphrase properties. (All strings)
