@@ -18,12 +18,11 @@ var util = require('util');
 /*
  Codes_SRS_NODE_DEVICE_HTTP_12_001: [The Mqtt  shall accept the transport configuration structure
  Codes_SRS_NODE_DEVICE_HTTP_12_002: [The Mqtt  shall store the configuration structure in a member variable
- Codes_SRS_NODE_DEVICE_HTTP_12_003: [The Mqtt  shall create an MqttTransport object and store it in a member variable
 */
 function Mqtt(config) {
   EventEmitter.call(this);
   this._config = config;
-  this._mqtt = new Base(config);
+  this._mqtt = new Base();
 }
 
 util.inherits(Mqtt, EventEmitter);
@@ -36,7 +35,7 @@ util.inherits(Mqtt, EventEmitter);
  */
 /* Codes_SRS_NODE_DEVICE_HTTP_12_004: [The connect method shall call the connect method on MqttTransport */
 Mqtt.prototype.connect = function (done) {
-  this._mqtt.connect(function (err, result) {
+  this._mqtt.connect(this._config, function (err, result) {
     if (err) {
       if (done) done(err);
     } else {
@@ -138,6 +137,32 @@ Mqtt.prototype.updateSharedAccessSignature = function (sharedAccessSignature, do
       done(null, new results.SharedAccessSignatureUpdated(true));
     }
   }.bind(this));
+};
+
+/**
+ * @method          module:azure-iot-device-mqtt.Mqtt#setOptions
+ * @description     This methods sets the MQTT specific options of the transport.
+ *
+ * @param {object}        options   Options to set.  Currently for MQTT these are the x509 cert, key, and optional passphrase properties. (All strings)
+ * @param {Function}      done      The callback to be invoked when `setOptions` completes.
+ */
+
+Mqtt.prototype.setOptions = function (options, done) {
+  /*Codes_SRS_NODE_DEVICE_MQTT_16_011: [The `setOptions` method shall throw a `ReferenceError` if the `options` argument is falsy]*/
+  if (!options) throw new ReferenceError('The options parameter can not be \'' + options + '\'');
+  /*Codes_SRS_NODE_DEVICE_MQTT_16_015: [The `setOptions` method shall throw an `ArgumentError` if the `cert` property is populated but the device uses symmetric key authentication.]*/
+  if (this._config.sharedAccessSignature && options.cert) throw new errors.ArgumentError('Cannot set x509 options on a device that uses symmetric key authentication.');
+
+  /*Codes_SRS_NODE_DEVICE_MQTT_16_012: [The `setOptions` method shall update the existing configuration of the MQTT transport with the content of the `options` object.]*/
+  this._config.x509 = {
+    cert: options.cert,
+    key: options.key,
+    passphrase: options.passphrase
+  };
+
+  /*Codes_SRS_NODE_DEVICE_MQTT_16_013: [If a `done` callback function is passed as a argument, the `setOptions` method shall call it when finished with no arguments.]*/
+  /*Codes_SRS_NODE_DEVICE_MQTT_16_014: [The `setOptions` method shall not throw if the `done` argument is not passed.]*/
+  if (done) done(null);
 };
 
 module.exports = Mqtt;
