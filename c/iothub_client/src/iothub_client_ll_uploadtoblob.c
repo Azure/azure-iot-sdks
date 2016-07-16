@@ -25,13 +25,18 @@
 #include "iothub_client_ll_uploadtoblob.h"
 #include "blob.h"
 
+
 #ifdef WINCE
-int __cdecl snprintf(
-	char *string,
-	size_t count,
-	const char *format,
-	...
-	);
+#include <stdarg.h>
+int snprintf(char * s, size_t n, const char * format, ...)
+{
+	int result;
+	va_list args;
+	va_start(args, format);
+	result = vsprintf(s, format, args);
+	va_end(args);
+	return result;
+}
 #endif
 
 
