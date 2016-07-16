@@ -136,6 +136,34 @@ describe('HttpReceiver', function () {
       });
       receiver.receive();
     });
+
+    it('emits messages only when all requests are done', function(done){
+      var config = { deviceId: "deviceId", hubName: "hubName", host: "hubname.azure-devices.net", sharedAccessSignature: "sas" };
+      var fakeHttp = new FakeHttp();
+      var requestsCount = 0;
+      fakeHttp.buildRequest = function (method, path, httpHeaders, host, sslOptions, done) {
+        requestsCount++;
+        return {
+          end: function () {
+            if (this.messageCount > 0) {
+              this.messageCount--;
+              done(null, "foo", { statusCode: 204 });
+            } else {
+              done(null, "", { statusCode: 204 });
+            }
+          }.bind(this)
+        };
+      };
+
+      var receiver = new HttpReceiver(config, fakeHttp);
+      fakeHttp.setMessageCount(1);
+      receiver.setOptions({ manualPolling: true, drain: true });
+      receiver.on('message', function () {
+        assert.equal(requestsCount, 2);
+        done();
+      });
+      receiver.receive();
+    });
   });
 
   describe('#drain', function () {
