@@ -20,6 +20,7 @@ var ConnectionString = require('azure-iothub').ConnectionString;
 var SharedAccessSignature = require('azure-iothub').SharedAccessSignature;
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var DeviceSAS = require('azure-iot-device').SharedAccessSignature;
+var Util = require('util');
 
 function Count(val) {
   this.val = +val;
@@ -95,6 +96,7 @@ if (!connString) {
   var loc = configLoc();
   try {
     sas = fs.readFileSync(loc.dir + '/' + loc.file, 'utf8');
+    console.log(colorsTmpl('\n{green}Using session file: '+loc.dir + '/' + loc.file + '{/green}'));
   }
   catch (err) { // swallow file not found exception
     if (err.code !== 'ENOENT') throw err;
@@ -320,6 +322,9 @@ function serviceError(err) {
       message = message.slice('Error:'.length);
     }
     console.log(colorsTmpl('\n{bold}{red}Error{/red}{/bold}' + message));
+  }
+  else {
+    console.log(colorsTmpl('\n{bold}{red}Raw error message: ' + Util.inspect(err) + '{/red}{/bold}'));
   }
   process.exit(1);
 }
