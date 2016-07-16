@@ -58,4 +58,5 @@ Before you get started, you should:
 [node-sample-apps]: https://github.com/Azure/azure-iot-sdks/tree/master/node/device/samples
 
 [setup-iothub]: ../setup_iothub.md
+[lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md

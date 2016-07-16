@@ -179,8 +179,8 @@ This section walks you through building, deploying and validating the IoT Client
 
 
 [setup-devbox-linux]: https://github.com/Azure/azure-iot-sdks/blob/master/doc/get_started/node-devbox-setup.md
-[lnk-setup-iot-hub]: ../../setup_iothub.md
-[lnk-manage-iot-hub]: ../../manage_iot_hub.md
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
 [IntelEdisonGettingStarted]: https://software.intel.com/iot/library/edison-getting-started
 [IntelEdisonSerialConnection]: https://software.intel.com/setting-up-serial-terminal-intel-edison-board
 [yocto]: http://www.yoctoproject.org/docs/latest/adt-manual/adt-manual.html
