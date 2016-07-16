@@ -25,6 +25,16 @@
 #include "iothub_client_ll_uploadtoblob.h"
 #include "blob.h"
 
+#ifdef WINCE
+int __cdecl snprintf(
+	char *string,
+	size_t count,
+	const char *format,
+	...
+	);
+#endif
+
+
 /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
 #define FILE_UPLOAD_FAILED_BODY "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"client not able to connect with the server\" }"
 
@@ -32,7 +42,6 @@
     DEVICE_KEY, \
     X509,       \
     SAS_TOKEN
-
 DEFINE_ENUM(AUTHORIZATION_SCHEME, AUTHORIZATION_SCHEME_VALUES);
 
 typedef struct UPLOADTOBLOB_X509_CREDENTIALS_TAG

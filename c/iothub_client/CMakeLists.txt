@@ -163,7 +163,7 @@ IF(WIN32)
   if (WINCE) # Be lax with WEC 2013 compiler
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
-  SET_SOURCE_FILES_PROPERTIES(src/iothub_client.c src/iothubtransport.c src/iothub_client_ll.c src/iothubtransporthttp.c PROPERTIES LANGUAGE CXX)
+  SET_SOURCE_FILES_PROPERTIES(src/iothub_client.c src/iothubtransport.c src/iothub_client_ll.c src/iothubtransporthttp.c src/blob.c PROPERTIES LANGUAGE CXX)
   ENDIF(WINCE)
 
 ENDIF(WIN32)
