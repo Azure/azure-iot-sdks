@@ -27,7 +27,7 @@ and removing calls to _DoWork will yield the same results. */
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "HostName=MyTestHub3.azure-devices.net;DeviceId=MyDevice1;SharedAccessKey=s1ED+IKXUP5VblptBokgbhvusjKJu76cdBjw5ghzSK4=";
 
 static int callbackCounter;
 static bool g_continueRunning;
