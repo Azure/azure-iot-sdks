@@ -2,7 +2,7 @@
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 @setlocal EnableExtensions EnableDelayedExpansion
-echo on
+echo off
 
 set current-path=%~dp0
 rem // remove trailing slash
