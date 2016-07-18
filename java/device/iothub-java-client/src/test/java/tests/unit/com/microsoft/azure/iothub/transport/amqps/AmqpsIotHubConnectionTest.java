@@ -427,8 +427,6 @@ public class AmqpsIotHubConnectionTest {
                 times = 1;
                 new IotHubReactor((Reactor)any);
                 times = 1;
-                mockIotHubReactor.run();
-                times = 1;
             }
         };
     }
