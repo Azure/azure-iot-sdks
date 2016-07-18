@@ -41,7 +41,7 @@ You should have the following items ready before beginning the process:
 7.  To build iotdm\_simple\_sample type the following command:
 
   ```
-  msbuild /m "/p:Configuration=Release;Platform=Win32" iotdm_client\samples\iotdm_simple_sample\iotdm_simple_sample.vcxproj**
+  msbuild /m "/p:Configuration=Release;Platform=Win32" iotdm_client\samples\iotdm_simple_sample\iotdm_simple_sample.vcxproj
   ```
 
   Alternatively, you can open the above project in Visual Studio and build the application using the VS IDE.
