@@ -501,7 +501,6 @@ public class AmqpsIotHubConnectionTest {
 
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false);
 
-        Deencapsulation.setField(connection, "sender", mockSender);
         connection.close();
 
         new Verifications()
