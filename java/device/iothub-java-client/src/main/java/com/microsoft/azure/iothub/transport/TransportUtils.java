@@ -6,7 +6,7 @@ package com.microsoft.azure.iothub.transport;
 public class TransportUtils
 {
     public static String javaDeviceClientIdentifier = "com.microsoft.azure.iothub-java-client/";
-    public static String clientVersion = "1.0.8";
+    public static String clientVersion = "1.0.9";
 
     private static byte[] sleepIntervals = {1, 2, 4, 8, 16, 32, 60};
     /** Generates a reconnection time with an exponential backoff

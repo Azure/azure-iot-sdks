@@ -8,9 +8,9 @@
   "bin": "iothub-explorer.js",
   "dependencies": {
     "azure-event-hubs": "0.0.2",
-    "azure-iot-common": "1.0.9",
-    "azure-iot-device": "1.0.9",
-    "azure-iothub": "1.0.11",
+    "azure-iot-common": "1.0.10",
+    "azure-iot-device": "1.0.10",
+    "azure-iothub": "1.0.12",
     "bluebird": "^3.0.1",
     "colors-tmpl": "^1.0.0",
     "nopt": "^3.0.4",
