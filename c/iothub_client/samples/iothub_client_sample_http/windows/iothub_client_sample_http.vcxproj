@@ -162,16 +162,16 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="packages\Microsoft.Azure.C.SharedUtility.1.0.11\build\native\Microsoft.Azure.C.SharedUtility.targets" Condition="Exists('packages\Microsoft.Azure.C.SharedUtility.1.0.11\build\native\Microsoft.Azure.C.SharedUtility.targets')" />
-    <Import Project="packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.11\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.11\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
-    <Import Project="packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.11\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.11\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" />
+    <Import Project="packages\Microsoft.Azure.C.SharedUtility.1.0.12\build\native\Microsoft.Azure.C.SharedUtility.targets" Condition="Exists('packages\Microsoft.Azure.C.SharedUtility.1.0.12\build\native\Microsoft.Azure.C.SharedUtility.targets')" />
+    <Import Project="packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.12\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.12\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" />
+    <Import Project="packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.12\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets" Condition="Exists('packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.12\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('packages\Microsoft.Azure.C.SharedUtility.1.0.11\build\native\Microsoft.Azure.C.SharedUtility.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.C.SharedUtility.1.0.11\build\native\Microsoft.Azure.C.SharedUtility.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.11\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.11\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.11\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.11\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.C.SharedUtility.1.0.12\build\native\Microsoft.Azure.C.SharedUtility.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.C.SharedUtility.1.0.12\build\native\Microsoft.Azure.C.SharedUtility.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.12\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.IoTHubClient.1.0.12\build\native\Microsoft.Azure.IoTHub.IoTHubClient.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.12\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Azure.IoTHub.HttpTransport.1.0.12\build\native\Microsoft.Azure.IoTHub.HttpTransport.targets'))" />
   </Target>
 </Project>
