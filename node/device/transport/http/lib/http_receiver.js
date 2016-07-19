@@ -168,10 +168,10 @@ HttpReceiver.prototype.receive = function () {
       if (!err) {
         if (body) {
           var msg = this._http.toMessage(res, body);
-          this.emit('message', msg);
           if (this._opts.drain) {
             drainRequester.emit('nextRequest');
           }
+          this.emit('message', msg);
         }
       } else {
         err.response = res;

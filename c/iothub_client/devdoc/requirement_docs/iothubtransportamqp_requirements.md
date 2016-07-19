@@ -18,7 +18,7 @@ extern const TRANSPORT_PROVIDER* AMQP_Protocol(void);
   
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
 
-    - IoTHubTransportAMQP_GetHostname,
+    - IoTHubTransportAMQP_GetHostname, 
     - IoTHubTransportAMQP_SetOption,
     - IoTHubTransportAMQP_Create,
     - IoTHubTransportAMQP_Destroy,
