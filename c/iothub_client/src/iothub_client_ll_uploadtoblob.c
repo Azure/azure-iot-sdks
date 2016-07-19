@@ -28,12 +28,13 @@
 
 #ifdef WINCE
 #include <stdarg.h>
+// Returns number of characters copied.
 int snprintf(char * s, size_t n, const char * format, ...)
 {
 	int result;
 	va_list args;
 	va_start(args, format);
-	result = vsprintf(s, format, args);
+	result = vsnprintf(s, n, format, args);
 	va_end(args);
 	return result;
 }

@@ -27,7 +27,8 @@ and removing calls to _DoWork will yield the same results. */
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "HostName=MyTestHub3.azure-devices.net;DeviceId=MyDevice1;SharedAccessKey=s1ED+IKXUP5VblptBokgbhvusjKJu76cdBjw5ghzSK4=";
+static const char* connectionString = "[device connection string]";
+
 
 static int callbackCounter;
 static bool g_continueRunning;
@@ -94,12 +95,9 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
 static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     EVENT_INSTANCE* eventInstance = (EVENT_INSTANCE*)userContextCallback;
-	#ifdef WINCE
-    (void)printf("Confirmation[%d] received for message tracking id = %u with result = %s\r\n", callbackCounter, eventInstance->messageTrackingId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
-	#else
-	(void)printf("Confirmation[%d] received for message tracking id = %zu with result = %s\r\n", callbackCounter, eventInstance->messageTrackingId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
-    #endif
-
+	
+	(void)printf("Confirmation[%d] received for message tracking id = %u with result = %s\r\n", callbackCounter, eventInstance->messageTrackingId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+	
     /* Some device specific action code goes here... */
     callbackCounter++;
     IoTHubMessage_Destroy(eventInstance->messageHandle);
@@ -184,12 +182,8 @@ void iothub_client_sample_http_run(void)
                             messages[iterator].messageTrackingId = iterator;
 
                             propMap = IoTHubMessage_Properties(messages[iterator].messageHandle);
-                            #ifdef WINCE
                             (void)sprintf_s(propText, sizeof(propText), "PropMsg_%u", iterator);
-							#else
-							(void)sprintf_s(propText, sizeof(propText), "PropMsg_%zu", iterator);
-                            #endif
-                            if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+							if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
                             {
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                             }
@@ -200,12 +194,8 @@ void iothub_client_sample_http_run(void)
                             }
                             else
                             {
-								#ifdef WINCE
 								(void)printf("IoTHubClient_LL_SendEventAsync accepted message [%u] for transmission to IoT Hub.\r\n", iterator);
-								#else
-								(void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", iterator);
-								#endif
-
+							
                             }
 
                         }
@@ -231,6 +221,6 @@ void iothub_client_sample_http_run(void)
 
 int main(void)
 {
-    iothub_client_sample_http_run();
-    return 0;
+   iothub_client_sample_http_run();
+   return 0;
 }
