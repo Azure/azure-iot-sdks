@@ -74,7 +74,7 @@ Connect the STM32 Nucleo based sensor node to your PC using a mini USB cable.
 
 
 ## 3.2 Connect STM32 Nucleo board to a WiFi access point 
-In order to set or to overwrite WiFi access point parameters (SSID and Password), keep pressed USER button in STM32 Nucleo after RESET. If SSID and Password were previously written to NFC, these will be read and used to connect with the Access Point. In order to write parameters to NFC board, an Android mobile equipped with an NFC WriteTag application has to be used (i.e. you can install and use [ST25 application][lnk-android-st25] ). Alternatively WiFi parameters can be configured via Serial Terminal, or directly set in source code by replacing X_CLOUD_SSID, X_CLOUD_KEY in file AzureIOTSDKConfig.h.
+In order to set or to overwrite WiFi access point parameters (SSID and Password), keep pressed USER button in STM32 Nucleo after RESET. If SSID and Password were previously written to NFC, these will be read and used to connect with the Access Point. In order to pass parameters to NFC board, an Android mobile phone equipped with an NFC WriteTag application need to be used (i.e. you can install and use [ST25 application][lnk-android-st25] ). Alternatively WiFi parameters can be configured via Serial Terminal, or directly set in source code by replacing X_CLOUD_SSID, X_CLOUD_KEY in file AzureIOTSDKConfig.h.
 After first setting of WiFi parameters, these are permanently written to FLASH memory and used each time the board is RESET, unless USER button is kept pressed. 
 
 ![][3]
