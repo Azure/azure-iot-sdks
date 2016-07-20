@@ -80,7 +80,10 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         protected virtual void Dispose(bool disposing)
         {
-            
+            if (disposing)
+            {
+                this.InnerHandler?.Dispose();
+            }
         }
 
         public void Dispose()
