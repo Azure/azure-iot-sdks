@@ -275,11 +275,18 @@ namespace Microsoft.Azure.Devices.Client
             }
 
 #if !NETMF
-            if (SharedAccessSignatureParser.IsSharedAccessSignature(this.SharedAccessSignature))
+            if (!string.IsNullOrWhiteSpace(this.SharedAccessSignature))
             {
-                SharedAccessSignatureParser.Parse(this.IotHubName, this.SharedAccessSignature);
+                if (SharedAccessSignatureParser.IsSharedAccessSignature(this.SharedAccessSignature))
+                {
+                    SharedAccessSignatureParser.Parse(this.IotHubName, this.SharedAccessSignature);
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid SharedAccessSignature (SAS)");
+                }
             }
-            
+
             ValidateFormat(this.HostName, HostNamePropertyName, HostNameRegex);
             ValidateFormat(this.DeviceId, DeviceIdPropertyName, DeviceIdRegex);
             ValidateFormatIfSpecified(this.SharedAccessKeyName, SharedAccessKeyNamePropertyName, SharedAccessKeyNameRegex);
