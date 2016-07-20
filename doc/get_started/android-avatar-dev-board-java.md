@@ -19,7 +19,7 @@
 <a name="Build"></a>
 # Step 3: Build and Run the sample
 
-Please find Azure Android java device sample code [here]([android-sample-code]).
+Please find Azure Android java device sample code [here][android-sample-code].
 
 <a name="Step_3_1"/>
 ## 3.1 Modify the Samples for screenless device
@@ -28,7 +28,7 @@ The sample application will require user interaction to click a button on screen
 
 Following is the example of modification:
 
-In [MainActivity.java]([mainactivity-source-code]):
+In [MainActivity.java][mainactivity-source-code]:
 ```java
 public class MainActivity extends AppCompatActivity {
 
@@ -132,5 +132,5 @@ communication between your device and Azure IoT Hub. You will send messages to t
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
-[andriod-sample-code]: https://github.com/Azure/azure-iot-sdks/blob/master/java/device/samples/android-sample
+[android-sample-code]: https://github.com/Azure/azure-iot-sdks/tree/master/java/device/samples/android-sample
 [mainactivity-source-code]: https://github.com/Azure/azure-iot-sdks/blob/master/java/device/samples/android-sample/app/src/main/java/com/iothub/azure/microsoft/com/androidsample/MainActivity.java
