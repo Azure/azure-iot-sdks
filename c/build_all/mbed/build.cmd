@@ -17,13 +17,13 @@ rem -- build (clean) compilembed tool
 rem -----------------------------------------------------------------------------
 
 call "%repo-build-root%\azure-c-shared-utility\tools\compilembed\build.cmd" --clean
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 rem -----------------------------------------------------------------------------
 rem -- build iothub client samples
 rem -----------------------------------------------------------------------------
 
 call %repo-build-root%\iothub_client\build\mbed\build.cmd %*
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 goto :eof

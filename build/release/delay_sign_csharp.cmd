@@ -14,10 +14,10 @@ echo Client Build root is %build-root%
 rem -- Build csharp client for Delay Signing
 set build_error=0
 echo Y | call %build-root%\csharp\device\build\build.cmd --config Release_Delay_Sign
-if %errorlevel% neq 0 set build_error=1
+if !ERRORLEVEL! neq 0 set build_error=1
 
 echo Y | call %build-root%\csharp\service\build\build.cmd --config Release_Delay_Sign
-if %errorlevel% neq 0 set build_error=1
+if !ERRORLEVEL! neq 0 set build_error=1
 
 echo Charp Build Error: %build_error%
 

@@ -40,22 +40,22 @@ rem ********************************
 rem -- Copy the native "win32" dlls to the "tosign" Folder for signing
 
 xcopy /q /y /R %openSSL-build-root%\bin\libeay32.dll %client-build-root%\build\tosign\
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %openSSL-build-root%\bin\ssleay32.dll %client-build-root%\build\tosign\
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Auto-sign the native "win32" dlls placed in the "tosign" Folder
 csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=401 /d="Signing Azure IoT Native Client binaries"
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Copy the signed native "win32" dlls back to their respective build output directories
 
 xcopy /q /y /R %client-build-root%\build\signed\libeay32.dll %openSSL-build-root%\bin\
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R  %client-build-root%\build\signed\ssleay32.dll %openSSL-build-root%\bin\
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Clean directories
 del /F /Q %client-build-root%\build\tosign

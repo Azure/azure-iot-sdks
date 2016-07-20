@@ -87,20 +87,20 @@ set PROCESSOR=arm
 
 cmake -DWINCE=TRUE -DCMAKE_SYSTEM_NAME=WindowsCE -DCMAKE_SYSTEM_VERSION=8.0 -DCMAKE_SYSTEM_PROCESSOR=%PROCESSOR% -DCMAKE_GENERATOR_TOOLSET=CE800 -DCMAKE_GENERATOR_PLATFORM=%SDKNAME% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Duse_amqp=FALSE -Duse_mqtt=FALSE %build-root%
 
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 msbuild /m azure_iot_sdks.sln
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 rem -- Copy all libraries to the repo directory to be able to build solutions
 xcopy /q /y /R "%USERPROFILE%\cmake_ce8\iothub_client\Debug\*.*" "%build-root%\build_output\c\wec2013\debug\*.*"
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R "%USERPROFILE%\cmake_ce8\common\Debug\*.*" "%build-root%\build_output\c\wec2013\debug\*.*"
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R "%USERPROFILE%\cmake_ce8\serializer\Debug\*.*" "%build-root%\build_output\c\wec2013\debug\*.*"
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem currently only debug binaries are built
 xcopy /q /y /R "%USERPROFILE%\cmake_ce8\iothub_client\Release\*.*" "%build-root%\build_output\c\wec2013\release\*.*"
@@ -109,21 +109,21 @@ xcopy /q /y /R "%USERPROFILE%\cmake_ce8\serializer\Release\*.*" "%build-root%\bu
 
 rem Tests can't be executed on the local PC, must run on remote target
 rem ctest -C "debug" -V
-rem if not %errorlevel%==0 exit /b %errorlevel%
+rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 if %build-clean%==1 (
 	
     call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windowsce\iothub_client_sample_http.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
   
     call :clean-a-solution "%build-root%\serializer\samples\simplesample_http\windowsce\simplesample_http.sln"
-    rem if not %errorlevel%==0 exit /b %errorlevel%
+    rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     	
 	  call :clean-a-solution "%build-root%\serializer\samples\remote_monitoring\windowsce\remote_monitoring.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 	
 	  call :clean-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windowsce\temp_sensor_anomaly.sln"
-    if not %errorlevel%==0 exit /b %errorlevel%
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 )
 
@@ -135,13 +135,13 @@ rem ----------------------------------------------------------------------------
 
 
 call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windowsce\iothub_client_sample_http.sln"
- if not %errorlevel%==0 exit /b %errorlevel%
+ if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windowsce\simplesample_http.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windowsce\remote_monitoring.sln"
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 popd
 goto :eof
@@ -198,7 +198,7 @@ if "%~3" neq "" set build-config=%~3
 if "%~4" neq "" set build-platform=%~4
 
 msbuild /m %build-target% "/p:Configuration=%build-config%;Platform=%SDKNAME%" %2
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 goto :eof
 
 
@@ -218,5 +218,5 @@ echo Test DLLs: %test-dlls-list%
 echo.
 vstest.console.exe %test-dlls-list%
 
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 goto :eof

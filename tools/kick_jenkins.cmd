@@ -1,4 +1,7 @@
-@setlocal
+@REM Copyright (c) Microsoft. All rights reserved.
+@REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+@setlocal EnableExtensions EnableDelayedExpansion
 @echo off
 
 set current-path=%~dp0
@@ -12,7 +15,7 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM check that we have java handy
 call :checkExists java
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 REM check that jenkins-cli.jar is in the repository's tools folder
 if not exist %build-root%\tools\jenkins-cli.jar (
@@ -85,9 +88,9 @@ rem -- helper subroutines
 rem -----------------------------------------------------------------------------
 :checkExists
 where %~1 >nul 2>nul
-if not %errorlevel%==0 (
+if not !ERRORLEVEL!==0 (
     echo "%~1" not found. Please make sure that "%~1" is installed and available in the path.
-    exit /b %errorlevel%
+    exit /b !ERRORLEVEL!
 )
 goto :eof
 
