@@ -15,16 +15,16 @@ rem -- build iothub schema client samples
 rem -----------------------------------------------------------------------------
 
 call :compile temp_sensor_anomaly %build-root%\samples\temp_sensor_anomaly\mbed
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 call :compile simplesample_amqp %build-root%\samples\simplesample_amqp\mbed
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 call :compile simplesample_http %build-root%\samples\simplesample_http\mbed
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 call :compile remote_monitoring %build-root%\samples\remote_monitoring\mbed
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 goto:eof
 
@@ -41,7 +41,7 @@ set "cmake_project_bin_path=%project_name%_cmake_build"
 mkdir %cmake_project_bin_path%
 cd %cmake_project_bin_path%
 cmake %project_path%
-set CMAKE_ERROR_CODE=%ERRORLEVEL%
+set CMAKE_ERROR_CODE=!ERRORLEVEL!
 cd ..
 exit /b %CMAKE_ERROR_CODE%
 goto:eof

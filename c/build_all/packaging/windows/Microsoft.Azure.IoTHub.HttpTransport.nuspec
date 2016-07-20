@@ -1,7 +1,7 @@
 <?xml version="1.0"?><package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Microsoft.Azure.IoTHub.HttpTransport</id>
-    <version>1.0.11</version>
+    <version>1.0.12</version>
     <title>Microsoft Azure IoTHub HTTP transport</title>
     <authors>Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
@@ -15,8 +15,8 @@
     <copyright>Copyright 2015</copyright>
     <tags>HTTP Microsoft Azure IoT Native x86 x64 arm native package</tags>
     <dependencies>
-		<dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.11"/>
-        <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.11"/>
+		<dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.12"/>
+        <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.12"/>
     </dependencies>
   </metadata>
     <files>
