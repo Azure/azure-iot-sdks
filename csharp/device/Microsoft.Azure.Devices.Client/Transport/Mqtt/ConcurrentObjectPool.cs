@@ -108,10 +108,10 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                 for (int i = 0; i < poolSize; i++)
                 {
                     Slot slot = this.slots[i];
-                    if (slot.References.Count == 0 && slot.LastAccessedTime < DateTime.UtcNow - this.keepAliveTimeout)
+                    if (slot.Value != null && slot.References.Count == 0 && slot.LastAccessedTime < DateTime.UtcNow - this.keepAliveTimeout)
                     {
                         objectsToCleanup.Add(slot.Value);
-                        this.slots[i].Value = null;
+                        slot.Value = null;
                     }
                 }
             }

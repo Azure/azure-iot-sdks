@@ -46,6 +46,7 @@ namespace DeviceExplorer
                 {
                     devicesDictionary.Add(device.Id, device);
                 }
+
                 this.deviceIDComboBox.DataSource = devicesDictionary.Keys.OrderBy(c => c.ToLower()).ToList();
                 this.selectedDeviceId = this.deviceIDComboBox.SelectedItem.ToString();
                 updateKeysComboBox(this.selectedDeviceId);
@@ -60,16 +61,30 @@ namespace DeviceExplorer
 
         }
 
-        private void updateKeysComboBox(string selectedDevice)
+        private void updateKeysComboBox(string deviceId)
         {
             try
             {
                 // Reconstruct the Device Keys combo box for that selected device
                 List<string> deviceKeys = new List<string>();
-                deviceKeys.Add(devicesDictionary[selectedDevice].Authentication.SymmetricKey.PrimaryKey);
-                deviceKeys.Add(devicesDictionary[selectedDevice].Authentication.SymmetricKey.SecondaryKey);
-                this.deviceKeyComboBox.DataSource = deviceKeys;
-                selectedDeviceKey = this.deviceKeyComboBox.SelectedItem.ToString();
+                var selectedDevice = devicesDictionary[deviceId];
+
+                if ((selectedDevice.Authentication.SymmetricKey != null) &&
+                    !((selectedDevice.Authentication.SymmetricKey.PrimaryKey == null) ||
+                      (selectedDevice.Authentication.SymmetricKey.SecondaryKey == null)))
+                {
+                    deviceKeys.Add(selectedDevice.Authentication.SymmetricKey.PrimaryKey);
+                    deviceKeys.Add(selectedDevice.Authentication.SymmetricKey.SecondaryKey);
+                    this.deviceKeyComboBox.DataSource = deviceKeys;
+                    selectedDeviceKey = this.deviceKeyComboBox.SelectedItem.ToString();
+                }
+                else
+                {
+                    deviceKeys.Add("");
+                    this.deviceKeyComboBox.DataSource = deviceKeys;
+                    selectedDeviceKey = null;
+                    throw new Exception(String.Format("Device {0} uses X509 for authentication and cannot be used with a SAS token.", deviceId));
+                }
             }
             catch (Exception ex)
             {
@@ -96,6 +111,17 @@ namespace DeviceExplorer
         {
             try
             {
+                var selectedDevice = devicesDictionary[this.selectedDeviceId];
+
+                if (selectedDevice.Authentication.X509Thumbprint != null)
+                {
+                    if ( (selectedDevice.Authentication.X509Thumbprint.PrimaryThumbprint != null) ||
+                         (selectedDevice.Authentication.X509Thumbprint.SecondaryThumbprint != null) )
+                    {
+                        throw new Exception("Cannot generate SAS token for device with X509 Authentication!");
+                    }
+                }
+
                 decimal ttlValue = numericUpDown1.Value;
 
                 var sasBuilder = new SharedAccessSignatureBuilder()
@@ -112,7 +138,7 @@ namespace DeviceExplorer
             {
                 using (new CenterDialog(this))
                 {
-                    MessageBox.Show($"Unable to generate SAS. Verify connection strings.\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Unable to generate SAS.\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 

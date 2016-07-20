@@ -1,11 +1,11 @@
 {
   "name": "azure-iot-mqtt-base",
-  "version": "1.0.9",
+  "version": "2.0.0",
   "description": "MQTT operations used by Azure IoT device and service SDKs",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "dependencies": {
-    "azure-iot-common": "1.0.9",
+    "azure-iot-common": "1.0.10",
     "debug": "^2.2.0",
     "mqtt": "^1.5.0"
   },
@@ -24,7 +24,7 @@
     "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test*.js",
     "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
     "test": "npm -s run lint && npm -s run unittest",
-    "check-cover": "istanbul check-coverage --statements 91 --branches 86 --functions 73 --lines 91"
+    "check-cover": "istanbul check-coverage --statements 91 --branches 88 --functions 73 --lines 91"
   },
   "engines": {
     "node": ">= 0.10"

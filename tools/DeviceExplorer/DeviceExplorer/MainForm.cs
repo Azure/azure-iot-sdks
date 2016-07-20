@@ -710,7 +710,7 @@ namespace DeviceExplorer
         {
             if (devicesGridView.SelectedRows.Count > 0)
             {
-                Clipboard.SetText(devicesGridView.Rows[devicesGridView.SelectedRows[0].Index].Cells[3].Value.ToString());
+                Clipboard.SetText(devicesGridView.Rows[devicesGridView.SelectedRows[0].Index].Cells[5].Value.ToString());
             }
         }
 

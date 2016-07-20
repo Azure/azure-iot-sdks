@@ -40,6 +40,7 @@ set MAKE_NUGET_PKG=no
 set CMAKE_DIR=iotsdk_win32
 set build-samples=yes
 set make=yes
+set build_traceabilitytool=0
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -54,6 +55,7 @@ if "%1" equ "--use-websockets" goto arg-use-websockets
 if "%1" equ "--make_nuget" goto arg-build-nuget
 if "%1" equ "--cmake-root" goto arg-cmake-root
 if "%1" equ "--no-make" goto arg-no-make
+if "%1" equ "--build-traceabilitytool" goto arg-build-traceabilitytool
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -110,6 +112,10 @@ goto args-continue
 
 :arg-no-make
 set make=no
+goto args-continue
+
+:arg-build-traceabilitytool
+set build_traceabilitytool=1
 goto args-continue
 
 :args-continue
@@ -304,9 +310,14 @@ if %MAKE_NUGET_PKG% == yes (
 		)
 	)
 )
+
 popd
-rem invoke the traceabilitytool here instead of the second build step in Jenkins windows_c job
-msbuild /m %build-root%\tools\traceabilitytool\traceabilitytool.sln
+
+if %build_traceabilitytool%==1 (
+	rem invoke the traceabilitytool here instead of the second build step in Jenkins windows_c job
+	msbuild /m %build-root%\tools\traceabilitytool\traceabilitytool.sln
+)
+
 goto :eof
 
 
@@ -326,15 +337,17 @@ goto :eof
 :usage
 echo build.cmd [options]
 echo options:
-echo  -c, --clean           delete artifacts from previous build before building
-echo  --config ^<value^>      [Debug] build configuration (e.g. Debug, Release)
-echo  --platform ^<value^>    [Win32] build platform (e.g. Win32, x64, arm, ...)
-echo  --run-e2e-tests       run end-to-end tests
-echo  --run-longhaul-tests  run long-haul tests
-echo  --use-websockets        Enables the support for AMQP over WebSockets.
-echo  --make_nuget ^<value^>  [no] generates the binaries to be used for nuget packaging (e.g. yes, no)
-echo  --cmake-root			Directory to place the cmake files used for building the project
-echo  --no-make             Surpress building the code
+echo  -c, --clean               delete artifacts from previous build before building
+echo  --config ^<value^>        [Debug] build configuration (e.g. Debug, Release)
+echo  --platform ^<value^>      [Win32] build platform (e.g. Win32, x64, arm, ...)
+echo  --make_nuget ^<value^>    [no] generates the binaries to be used for nuget packaging (e.g. yes, no)
+echo  --run-e2e-tests           run end-to-end tests
+echo  --run-longhaul-tests      run long-haul tests
+echo  --use-websockets          Enables the support for AMQP over WebSockets.
+echo  --cmake-root			    Directory to place the cmake files used for building the project
+echo  --no-make                 Surpress building the code
+echo  --build-traceabilitytool  Builds an internal tool (traceabilitytool) to check for requirements/code/test consistency
+echo  --skip-unittests          Skips building and executing unit tests (not advisable)
 
 goto :eof
 

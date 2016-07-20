@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.deviceIDLabel = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
+            this.primaryLabel = new System.Windows.Forms.Label();
+            this.secondaryLabel = new System.Windows.Forms.Label();
             this.primaryKeyTextBox = new System.Windows.Forms.TextBox();
             this.secondaryKeyTextBox = new System.Windows.Forms.TextBox();
             this.updateButton = new System.Windows.Forms.Button();
@@ -42,55 +42,52 @@
             // deviceIDLabel
             // 
             this.deviceIDLabel.AutoSize = true;
-            this.deviceIDLabel.Location = new System.Drawing.Point(53, 31);
-            this.deviceIDLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.deviceIDLabel.Location = new System.Drawing.Point(12, 35);
             this.deviceIDLabel.Name = "deviceIDLabel";
-            this.deviceIDLabel.Size = new System.Drawing.Size(52, 13);
+            this.deviceIDLabel.Size = new System.Drawing.Size(64, 17);
             this.deviceIDLabel.TabIndex = 0;
             this.deviceIDLabel.Text = "DeviceID";
             // 
-            // label3
+            // primaryLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(42, 64);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(62, 13);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "Primary Key";
+            this.primaryLabel.AutoSize = true;
+            this.primaryLabel.Location = new System.Drawing.Point(12, 75);
+            this.primaryLabel.Name = "primaryLabel";
+            this.primaryLabel.Size = new System.Drawing.Size(84, 17);
+            this.primaryLabel.TabIndex = 2;
+            this.primaryLabel.Text = "Primary Key";
             // 
-            // label4
+            // secondaryLabel
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(25, 100);
-            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(79, 13);
-            this.label4.TabIndex = 3;
-            this.label4.Text = "Secondary Key";
+            this.secondaryLabel.AutoSize = true;
+            this.secondaryLabel.Location = new System.Drawing.Point(12, 119);
+            this.secondaryLabel.Name = "secondaryLabel";
+            this.secondaryLabel.Size = new System.Drawing.Size(104, 17);
+            this.secondaryLabel.TabIndex = 3;
+            this.secondaryLabel.Text = "Secondary Key";
             // 
             // primaryKeyTextBox
             // 
-            this.primaryKeyTextBox.Location = new System.Drawing.Point(108, 57);
-            this.primaryKeyTextBox.Margin = new System.Windows.Forms.Padding(2);
+            this.primaryKeyTextBox.Location = new System.Drawing.Point(186, 70);
+            this.primaryKeyTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.primaryKeyTextBox.Name = "primaryKeyTextBox";
-            this.primaryKeyTextBox.Size = new System.Drawing.Size(304, 20);
+            this.primaryKeyTextBox.Size = new System.Drawing.Size(404, 22);
             this.primaryKeyTextBox.TabIndex = 5;
             // 
             // secondaryKeyTextBox
             // 
-            this.secondaryKeyTextBox.Location = new System.Drawing.Point(108, 93);
-            this.secondaryKeyTextBox.Margin = new System.Windows.Forms.Padding(2);
+            this.secondaryKeyTextBox.Location = new System.Drawing.Point(186, 114);
+            this.secondaryKeyTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.secondaryKeyTextBox.Name = "secondaryKeyTextBox";
-            this.secondaryKeyTextBox.Size = new System.Drawing.Size(304, 20);
+            this.secondaryKeyTextBox.Size = new System.Drawing.Size(404, 22);
             this.secondaryKeyTextBox.TabIndex = 6;
             // 
             // updateButton
             // 
-            this.updateButton.Location = new System.Drawing.Point(56, 138);
-            this.updateButton.Margin = new System.Windows.Forms.Padding(2);
+            this.updateButton.Location = new System.Drawing.Point(86, 175);
+            this.updateButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.updateButton.Name = "updateButton";
-            this.updateButton.Size = new System.Drawing.Size(78, 26);
+            this.updateButton.Size = new System.Drawing.Size(104, 32);
             this.updateButton.TabIndex = 7;
             this.updateButton.Text = "Update";
             this.updateButton.UseVisualStyleBackColor = true;
@@ -98,10 +95,10 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(299, 138);
-            this.cancelButton.Margin = new System.Windows.Forms.Padding(2);
+            this.cancelButton.Location = new System.Drawing.Point(410, 175);
+            this.cancelButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(78, 26);
+            this.cancelButton.Size = new System.Drawing.Size(104, 32);
             this.cancelButton.TabIndex = 8;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
@@ -111,17 +108,19 @@
             // 
             this.deviceIDComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.deviceIDComboBox.FormattingEnabled = true;
-            this.deviceIDComboBox.Location = new System.Drawing.Point(110, 23);
+            this.deviceIDComboBox.Location = new System.Drawing.Point(189, 28);
+            this.deviceIDComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.deviceIDComboBox.Name = "deviceIDComboBox";
-            this.deviceIDComboBox.Size = new System.Drawing.Size(302, 21);
+            this.deviceIDComboBox.Size = new System.Drawing.Size(401, 24);
             this.deviceIDComboBox.TabIndex = 9;
             this.deviceIDComboBox.DropDownClosed += new System.EventHandler(this.deviceIDComboBox_DropDownClosed);
             // 
             // restoreButton
             // 
-            this.restoreButton.Location = new System.Drawing.Point(171, 138);
+            this.restoreButton.Location = new System.Drawing.Point(239, 175);
+            this.restoreButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.restoreButton.Name = "restoreButton";
-            this.restoreButton.Size = new System.Drawing.Size(87, 26);
+            this.restoreButton.Size = new System.Drawing.Size(116, 32);
             this.restoreButton.TabIndex = 10;
             this.restoreButton.Text = "Restore";
             this.restoreButton.UseVisualStyleBackColor = true;
@@ -129,20 +128,20 @@
             // 
             // DeviceUpdateForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(427, 197);
+            this.ClientSize = new System.Drawing.Size(603, 242);
             this.Controls.Add(this.restoreButton);
             this.Controls.Add(this.deviceIDComboBox);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.updateButton);
             this.Controls.Add(this.secondaryKeyTextBox);
             this.Controls.Add(this.primaryKeyTextBox);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.label3);
+            this.Controls.Add(this.secondaryLabel);
+            this.Controls.Add(this.primaryLabel);
             this.Controls.Add(this.deviceIDLabel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "DeviceUpdateForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "DeviceUpdateForm";
@@ -155,8 +154,8 @@
         #endregion
 
         private System.Windows.Forms.Label deviceIDLabel;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label primaryLabel;
+        private System.Windows.Forms.Label secondaryLabel;
         private System.Windows.Forms.TextBox primaryKeyTextBox;
         private System.Windows.Forms.TextBox secondaryKeyTextBox;
         private System.Windows.Forms.Button updateButton;

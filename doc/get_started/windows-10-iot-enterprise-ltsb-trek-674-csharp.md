@@ -40,7 +40,7 @@ This document provides step-by-step guidance on how to connect an TREK-674 devic
 <a name="Step-2:-PrepareDevice"></a>
 # Step 2: Prepare your Device
 ##  Install Windows 10 IoT Enterprise LTSB on TREK-674
--   Create a bootable USB Drive. Please follow this guide on how to create a bootable drive (<https://www.microsoft.com/download/windows-usb-dvd-download-tool>).
+-   Create a bootable USB Drive. Please follow this guide on how to create a bootable drive (<https://www.microsoft.com/en-us/download/windows-usb-dvd-download-tool>).
 -   Insert the bootable USB Drive from the previous step into your TREK-674. Turn on your TREK-674device and press the **Delete** key.
 -   Change the BIOS Boot option filter to **UEFI and Legacy**.
 -   Change the **Boot Option Priorities** to boot from your USB Drive.

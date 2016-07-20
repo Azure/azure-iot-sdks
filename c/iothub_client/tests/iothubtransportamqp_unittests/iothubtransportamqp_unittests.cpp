@@ -3130,12 +3130,12 @@ TEST_FUNCTION(AMQP_DoWork_send_one_message_succeeds)
 /* Test_SRS_IOTHUBTRANSPORTAMQP_09_163: [The correlation-id property shall be read from the uAMQP message by calling properties_get_correlation_id.] */
 /* Test_SRS_IOTHUBTRANSPORTAMQP_09_165: [The correlation-id value shall be retrieved from the AMQP_VALUE as char* by calling amqpvalue_get_string.] */
 /* Test_SRS_IOTHUBTRANSPORTAMQP_09_167: [The correlation-id property shall be set on the IOTHUB_MESSAGE_HANDLE by calling IoTHubMessage_SetCorrelationId, passing the value read from the uAMQP message.] */
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_169: [The callback ‘on_message_received' shall read the application properties from the uAMQP message and set it on the IoT Hub Message if any are provided.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_169: [The callback 'on_message_received' shall read the application properties from the uAMQP message and set it on the IoT Hub Message if any are provided.]
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_170: [The IOTHUB_MESSAGE_HANDLE properties shall be retrieved using IoTHubMessage_Properties.]
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_171: [uAMQP message application properties shall be retrieved using message_get_application_properties.]
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_173: [The actual uAMQP message application properties should be extracted from the result of message_get_application_properties using amqpvalue_get_inplace_described_value.]
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_175: [The number of items in the uAMQP message application properties shall be obtained using amqpvalue_get_map_pair_count.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_177: [‘on_message_received' shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_177: ['on_message_received' shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.]
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_178: [The uAMQP application property name and value shall be obtained using amqpvalue_get_map_key_value_pair.]
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_180: [The uAMQP application property name shall be extracted as string using amqpvalue_get_string.]
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_182: [The uAMQP application property value shall be extracted as string using amqpvalue_get_string.]
@@ -3224,8 +3224,8 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_read_properties_succeeds)
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_186: [If IoTHubMessage_Properties fails, the error shall be notified and ‘on_message_received' shall continue.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_186: [If IoTHubMessage_Properties fails, the error shall be notified and 'on_message_received' shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If 'on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
 TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_IoTHubMessage_Properties_fails)
 {
     // arrange
@@ -3282,8 +3282,8 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_IoTHubMessage_Propertie
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_172: [If message_get_application_properties fails, the error shall be notified and ‘on_message_received' shall continue.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_172: [If message_get_application_properties fails, the error shall be notified and 'on_message_received' shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If 'on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
 TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_message_get_application_properties_fails)
 {
     // arrange
@@ -3341,8 +3341,8 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_message_get_application
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_174: [If amqpvalue_get_inplace_described_value fails, the error shall be notified and ‘on_message_received' shall continue.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_174: [If amqpvalue_get_inplace_described_value fails, the error shall be notified and 'on_message_received' shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If 'on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
 TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_inplace_described_value_fails)
 {
     // arrange
@@ -3401,8 +3401,8 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_inplace_d
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_176: [If amqpvalue_get_map_pair_count fails, the error shall be notified and ‘on_message_received' shall continue.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_176: [If amqpvalue_get_map_pair_count fails, the error shall be notified and 'on_message_received' shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If 'on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
 TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_map_pair_count_fails)
 {
     // arrange
@@ -3462,7 +3462,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_map_pair_
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_187: [If message_get_application_properties succeeds but returns a NULL application properties map (there are no properties), ‘on_message_received' shall continue normally.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_187: [If message_get_application_properties succeeds but returns a NULL application properties map (there are no properties), 'on_message_received' shall continue normally.]
 TEST_FUNCTION(AMQP_DoWork_receive_message_NO_app_properties_succeeds)
 {
     // arrange
@@ -3524,7 +3524,7 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_NO_app_properties_succeeds)
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_177: [‘on_message_received' shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_177: ['on_message_received' shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.]
 TEST_FUNCTION(AMQP_DoWork_receive_message_EMPTY_app_properties_succeeds)
 {
     // arrange
@@ -3585,8 +3585,8 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_EMPTY_app_properties_succeeds)
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_179: [If amqpvalue_get_map_key_value_pair fails, the error shall be notified and ‘on_message_received' shall continue.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_179: [If amqpvalue_get_map_key_value_pair fails, the error shall be notified and 'on_message_received' shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If 'on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
 TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_map_key_value_pair_fails)
 {
     // arrange
@@ -3649,8 +3649,8 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_map_key_v
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_181: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received' shall continue.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_181: [If amqpvalue_get_string fails, the error shall be notified and 'on_message_received' shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If 'on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
 TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_string_name_fails)
 {
     // arrange
@@ -3714,8 +3714,8 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_string_na
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_183: [If amqpvalue_get_string fails, the error shall be notified and ‘on_message_received' shall continue.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_183: [If amqpvalue_get_string fails, the error shall be notified and 'on_message_received' shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If 'on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
 TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_string_value_fails)
 {
     // arrange
@@ -3780,8 +3780,8 @@ TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_amqpvalue_get_string_va
     cleanupList(config.waitingToSend);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_185: [If Map_AddOrUpdate fails, the error shall be notified and ‘on_message_received' shall continue.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If ‘on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_185: [If Map_AddOrUpdate fails, the error shall be notified and 'on_message_received' shall continue.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_188: [If 'on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall reject the message.]
 TEST_FUNCTION(AMQP_DoWork_receive_message_app_properties_Map_AddOrUpdate_fails)
 {
     // arrange
@@ -3974,7 +3974,7 @@ TEST_FUNCTION(AMQP_Subscribe_NULL_transport_fails)
 }
 
 // Tests_SRS_IOTHUBTRANSPORTAMQP_09_121: [IoTHubTransportAMQP_DoWork shall create an AMQP message_receiver if transport_state->message_receive is NULL and transport_state->receive_messages is true]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_123: [IoTHubTransportAMQP_DoWork shall create each AMQP message_receiver passing the ‘on_message_received' as the callback function]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_123: [IoTHubTransportAMQP_DoWork shall create each AMQP message_receiver passing the 'on_message_received' as the callback function]
 TEST_FUNCTION(AMQP_Subscribe_and_messagereceiver_create_succeeds)
 {
     // arrange
@@ -5495,4 +5495,161 @@ TEST_FUNCTION(IoTHubTransportAMQP_GetHostname_succeeds)
     ///cleanup
     transport_interface->IoTHubTransport_Destroy(transport);
 }
+
+/*Tests_SRS_IOTHUBTRANSPORTAMQP_02_004: [ If both deviceKey and deviceSasToken fields are NULL then IoTHubTransportAMQP_Create shall assume a x509 authentication. ]*/
+TEST_FUNCTION(IoTHubTransportAMQP_Create_for_x509_succeeds)
+{
+    /// arrange
+    CIoTHubTransportAMQPMocks mocks;
+
+    DLIST_ENTRY wts;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+
+    IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+        TEST_DEVICE_ID, NULL, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME }; /*notice both deviceKey and deviceSasToken are NULL*/
+    IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+    setExpectedCallsForTransportCreateUpTo(mocks, &config, STEP_CREATE_RECEIVE_ADDRESS);
+
+    ///act
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+    ///assert
+    ASSERT_IS_NOT_NULL(transport);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+/*Tests_SRS_IOTHUBTRANSPORTAMQP_02_005: [ IoTHubTransportAMQP_DoWork shall create the connection with the IoT service using connection_create2() AMQP API, passing the TLS I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks) ]*/
+/*Tests_SRS_IOTHUBTRANSPORTAMQP_02_006: [ IoTHubTransportAMQP_DoWork shall not establish a CBS connection. ]*/
+TEST_FUNCTION(IoTHubTransportAMQP_DoWork_x509_doesn_t_do_CBS)
+{
+    // arrange
+    CIoTHubTransportAMQPMocks mocks;
+
+    DLIST_ENTRY wts;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+        TEST_DEVICE_ID, NULL, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME }; /*note: no deviceKey, no deviceSasToken => x509*/
+    IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+    time_t current_time = time(NULL);
+
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+    ASSERT_ARE_EQUAL(int, subscribe_result, 0);
+    mocks.ResetAllCalls();
+
+    setExpectedCallsForTransportDoWorkUpTo(mocks, STEP_DOWORK_GET_TLS_IO, DOWORK_MESSAGERECEIVER_NONE, current_time);
+
+    EXPECTED_CALL(mocks, STRING_c_str(NULL));
+    EXPECTED_CALL(mocks, connection_create2(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL));
+
+    EXPECTED_CALL(mocks, session_create(NULL, NULL, NULL));
+
+    STRICT_EXPECTED_CALL(mocks, session_set_incoming_window(NULL, TEST_INCOMING_WINDOW_SIZE)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, session_set_outgoing_window(NULL, TEST_OUTGOING_WINDOW_SIZE)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
+
+
+
+    EXPECTED_CALL(mocks, connection_set_trace(IGNORED_PTR_ARG, false));
+    EXPECTED_CALL(mocks, xio_setoption(IGNORED_PTR_ARG, LOG_TRACE_OPTION, IGNORED_PTR_ARG));
+
+    setExpectedCallsForCreateMessageReceiver(mocks);
+    setExpectedCallsForCreateEventSender(mocks);
+    STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(config.waitingToSend)).SetReturn(1);
+    setExpectedCallsForConnectionDoWork(mocks);
+
+    // act
+    transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    // assert
+    mocks.AssertActualAndExpectedCalls();
+
+    // cleanup
+    transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+/*Tests_SRS_IOTHUBTRANSPORTAMQP_02_005: [ IoTHubTransportAMQP_DoWork shall create the connection with the IoT service using connection_create2() AMQP API, passing the TLS I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks) ]*/
+
+TEST_FUNCTION(IoTHubTransportAMQP_DoWork_x509_doesn_t_do_CBS_fails_when_connection_create_fails)
+{
+    // arrange
+    CIoTHubTransportAMQPMocks mocks;
+
+    DLIST_ENTRY wts;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+        TEST_DEVICE_ID, NULL, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME }; /*note: no deviceKey, no deviceSasToken => x509*/
+    IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+    time_t current_time = time(NULL);
+
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+    ASSERT_ARE_EQUAL(int, subscribe_result, 0);
+    mocks.ResetAllCalls();
+
+    setExpectedCallsForTransportDoWorkUpTo(mocks, STEP_DOWORK_GET_TLS_IO, DOWORK_MESSAGERECEIVER_NONE, current_time);
+    EXPECTED_CALL(mocks,xio_destroy(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(mocks, STRING_c_str(NULL));
+    EXPECTED_CALL(mocks, connection_create2(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL))
+        .SetFailReturn((CONNECTION_HANDLE)NULL);
+
+    // act
+    transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    // assert
+    mocks.AssertActualAndExpectedCalls();
+
+    // cleanup
+    transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+/*Tests_SRS_IOTHUBTRANSPORTAMQP_02_005: [ IoTHubTransportAMQP_DoWork shall create the connection with the IoT service using connection_create2() AMQP API, passing the TLS I/O layer, IoT Hub FQDN and container ID as parameters (pass NULL for callbacks) ]*/
+TEST_FUNCTION(IoTHubTransportAMQP_DoWork_x509_doesn_t_do_CBS_fails_when_session_create_fails)
+{
+    // arrange
+    CIoTHubTransportAMQPMocks mocks;
+
+    DLIST_ENTRY wts;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+        TEST_DEVICE_ID, NULL, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME }; /*note: no deviceKey, no deviceSasToken => x509*/
+    IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+    time_t current_time = time(NULL);
+
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    int subscribe_result = transport_interface->IoTHubTransport_Subscribe(transport);
+    ASSERT_ARE_EQUAL(int, subscribe_result, 0);
+    mocks.ResetAllCalls();
+
+    setExpectedCallsForTransportDoWorkUpTo(mocks, STEP_DOWORK_GET_TLS_IO, DOWORK_MESSAGERECEIVER_NONE, current_time);
+    EXPECTED_CALL(mocks, xio_destroy(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(mocks, STRING_c_str(NULL));
+    EXPECTED_CALL(mocks, connection_create2(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL));
+    EXPECTED_CALL(mocks, connection_destroy(IGNORED_PTR_ARG));
+
+
+    EXPECTED_CALL(mocks, session_create(NULL, NULL, NULL))
+        .SetFailReturn((SESSION_HANDLE)NULL);
+
+    // act
+    transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    // assert
+    mocks.AssertActualAndExpectedCalls();
+
+    // cleanup
+    transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+
 END_TEST_SUITE(iothubtransportamqp_unittests)

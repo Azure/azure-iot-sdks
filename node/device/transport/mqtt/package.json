@@ -1,13 +1,13 @@
 {
   "name": "azure-iot-device-mqtt",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "MQTT transport for Azure IoT device SDK",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "dependencies": {
     "azure-iot-common": "^1.0.0",
-    "azure-iot-device": "1.0.9",
-    "azure-iot-mqtt-base": "1.0.9"
+    "azure-iot-device": "1.0.10",
+    "azure-iot-mqtt-base": "2.0.0"
   },
   "devDependencies": {
     "chai": "^3.3.0",
@@ -24,7 +24,7 @@
     "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test*.js",
     "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
     "test": "npm -s run lint && npm -s run unittest",
-    "check-cover": "istanbul check-coverage --statements 45 --branches 0 --functions 7 --lines 50"
+    "check-cover": "istanbul check-coverage --statements 54 --branches 40 --functions 14 --lines 55"
   },
   "engines": {
     "node": ">= 0.10"
