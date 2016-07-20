@@ -31,7 +31,7 @@ public class RegistryManagerIT
     private static String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String storageAccountConnectionStringEnvVarName = "STORAGE_ACCOUNT_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
-    private static String storageAccountConnextionString = "";
+    private static String storageAccountConnectionString = "";
     private static String deviceId = "java-crud-e2e-test";
 
     private static Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -51,14 +51,14 @@ public class RegistryManagerIT
             }
             else if (envName.equals(storageAccountConnectionStringEnvVarName.toString()))
             {
-                storageAccountConnextionString = env.get(envName);
+                storageAccountConnectionString = env.get(envName);
             }
         }
 
         String uuid = UUID.randomUUID().toString();
         deviceId = deviceId.concat("-" + uuid);
 
-        CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageAccountConnextionString);
+        CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageAccountConnectionString);
         blobClient = storageAccount.createCloudBlobClient();
 
         // Creating the export storage container and getting its URI
