@@ -91,7 +91,7 @@ rem ----------------------------------------------------------------------------
 
 :clean-a-solution
 call :_run-msbuild "Clean" %1 %2 %3
-echo %errorlevel%
+echo !ERRORLEVEL!
 goto :eof
 
 :build-a-solution
@@ -120,5 +120,5 @@ if "%~3" neq "" set build-config=%~3
 if "%~4" neq "" set build-platform=%~4
 
 msbuild /m %build-target% "/p:Configuration=%build-config%;Platform=%build-platform%" %2
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 goto :eof
