@@ -138,7 +138,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             {
                 throw Fx.Exception.ArgumentNull("message");
             }
-            
+
             var customHeaders = new Dictionary<string, string>(message.SystemProperties.Count + message.Properties.Count);
             foreach (var property in message.SystemProperties)
             {
@@ -151,9 +151,9 @@ namespace Microsoft.Azure.Devices.Client.Transport
             }
 
             return this.httpClientHelper.PostAsync<byte[]>(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceEventPathTemplate, null), 
-                message.GetBytes(), 
-                ExceptionHandlingHelper.GetDefaultErrorMapping(), 
+                GetRequestUri(this.deviceId, CommonConstants.DeviceEventPathTemplate, null),
+                message.GetBytes(),
+                ExceptionHandlingHelper.GetDefaultErrorMapping(),
                 customHeaders,
                 CancellationToken.None);
         }
@@ -178,10 +178,16 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
-            if (disposing)
+            try
             {
-                this.httpClientHelper?.Dispose();
+                if (disposing)
+                {
+                    this.httpClientHelper?.Dispose();
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 
@@ -433,7 +439,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         static IDictionary<string, string> PrepareCustomHeaders(string toHeader, string messageId, string operation)
         {
             var customHeaders = new Dictionary<string, string>
-            {   
+            {
                 { CustomHeaderConstants.To, toHeader },
                 { CustomHeaderConstants.Operation, operation },
             };
@@ -517,7 +523,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 writer.WriteEndArray();
                 // ]
 
-                return sw.ToString();                
+                return sw.ToString();
             }
         }
 
@@ -582,7 +588,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
                     foreach (var property in message.Item2)
                     {
-                        writer.WritePropertyName(property.Key); 
+                        writer.WritePropertyName(property.Key);
                         writer.WriteValue(property.Value);
                     }
 
