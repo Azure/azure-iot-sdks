@@ -24,17 +24,21 @@ import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
+import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMWriter;
 
-import java.io.IOException;
+
+import java.io.*;
 import java.nio.BufferOverflowException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 
 
 /**
@@ -363,9 +367,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_032: [The event handler shall set ANONYMOUS_PEER authentication mode on the domain of the Transport.]
             SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
-            domain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
             transport.ssl(domain);
         }
     }
@@ -633,8 +635,141 @@ public final class AmqpsIotHubConnection extends BaseHandler
     private SslDomain makeDomain(SslDomain.Mode mode)
     {
         SslDomain domain = Proton.sslDomain();
+        String trustedDB = getPemFormat(this.config.getPathToCertificate());
+
+        if (trustedDB != null )
+        {
+            domain.setTrustedCaDb(trustedDB);
+        }
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_032: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport.]
+        if (domain.getTrustedCaDb() != null)
+        {
+           domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
+        }
+        else
+        {
+            throw new IllegalStateException("SSL connection unsecured, could not find certificate");
+        }
         domain.init(mode);
 
         return domain;
     }
+
+    private String getPemFormat(String certPath) {
+        if (!isPemFile(certPath))
+            certPath = convertToPem(certPath);
+        return certPath;
+    }
+
+    private boolean isPemFile(String path) {
+        PEMReader pemReader = null;
+        Reader reader = null;
+        try {
+            reader = new FileReader(path);
+            pemReader = new PEMReader(reader, null);
+
+            for (String line = pemReader.readLine(); line != null; line = pemReader.readLine()) {
+                if (line.contains("-----BEGIN CERTIFICATE-----")) return true;
+            }
+        }
+        catch (IOException e)
+        {
+            throw new IOError(e);
+        }
+        finally
+        {
+            if (pemReader != null) {
+                try {
+                    pemReader.close();
+                } catch (IOException e) {
+                    System.out.println("Couldn't close PEM Reader");
+                }
+            }
+
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    System.out.println("Couldn't close reader");
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private String  convertToPem(String derPath) {
+        FileInputStream in = null;
+        FileWriter writer = null;
+        PEMWriter pemWriter = null;
+
+        try
+        {
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            in = new FileInputStream(derPath);
+            Certificate cert = certFactory.generateCertificate(in);
+            writer = new FileWriter(derPath + ".pem");
+            try {
+                pemWriter = new PEMWriter(writer);
+                pemWriter.writeObject(cert);
+            }
+            catch (IOException e)
+            {
+                throw new IOError(e);
+            }
+
+        }
+        catch (IOException e)
+        {
+            throw new IOError(e);
+        }
+        catch (CertificateException e)
+        {
+            throw new IOError(e);
+        }
+        finally
+        {
+            if(pemWriter != null)
+            {
+                try
+                {
+                    pemWriter.close();
+                }
+                catch(IOException e)
+                {
+                    System.out.println("Couldn't close PEM writer");
+                }
+            }
+
+            if(writer != null)
+            {
+                try
+                {
+                    writer.close();
+                }
+                catch(IOException e)
+                {
+                    System.out.println("Couldn't close writer");
+                }
+            }
+
+            if(in != null)
+            {
+                try
+                {
+                    in.close();
+                }
+                catch(IOException e)
+                {
+                    System.out.println("Couldn't close Input Stream");
+                }
+            }
+
+        }
+
+        return derPath + ".pem" ;
+    }
+
+
 }
+

@@ -142,7 +142,7 @@ public void onConnectionBound(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTION_15_031: [**The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_15_032: [**The event handler shall set ANONYMOUS_PEER authentication mode on the domain of the Transport.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_032: [**The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport.**]**
 
 
 ## onReactorInit
