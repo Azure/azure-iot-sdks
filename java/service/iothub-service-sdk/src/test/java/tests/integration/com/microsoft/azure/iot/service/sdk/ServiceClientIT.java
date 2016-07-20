@@ -8,6 +8,7 @@ package tests.integration.com.microsoft.azure.iot.service.sdk;
 import com.microsoft.azure.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.iot.service.sdk.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -91,6 +92,7 @@ public class ServiceClientIT
         assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
     }
 
+    @Ignore
     @Test
     public void service_client_e2e_amqps_ws() throws Exception
     {
