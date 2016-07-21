@@ -13,7 +13,7 @@ BEGIN_TEST_SUITE(version_unittests)
 
     TEST_FUNCTION(the_version_constant_has_the_expected_value)
     {
-        ASSERT_ARE_EQUAL(char_ptr, "1.0.10", IOTHUB_SDK_VERSION);
+        ASSERT_ARE_EQUAL(char_ptr, "1.0.11", IOTHUB_SDK_VERSION);
     }
 
     /*Tests_SRS_IOTHUBCLIENT_05_001: [IoTHubClient_GetVersionString shall return a pointer to a constant string which indicates the version of IoTHubClient API.]*/

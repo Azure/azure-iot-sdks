@@ -41,42 +41,42 @@ if exist *.nupkg (
 
 rem -- Copy all Win32 files from cmake build directory to the repo directory
 xcopy /q /y /R %build-path%\iotsdk_win32\iothub_client\Debug\*.* %build-path%\iot_sdk_output\c\win32\debug\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %build-path%\iotsdk_win32\serializer\Debug\*.* %build-path%\iot_sdk_output\c\win32\debug\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %build-path%\iotsdk_win32\iothub_client\Release\*.* %build-path%\iot_sdk_output\c\win32\release\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %build-path%\iotsdk_win32\serializer\Release\*.* %build-path%\iot_sdk_output\c\win32\release\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Copy all x64 files from cmake build directory to the repo directory
 xcopy /q /y /R %build-path%\iotsdk_win64\iothub_client\Debug\*.* %build-path%\iot_sdk_output\c\x64\debug\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %build-path%\iotsdk_win64\serializer\Debug\*.* %build-path%\iot_sdk_output\c\x64\debug\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %build-path%\iotsdk_win64\iothub_client\Release\*.* %build-path%\iot_sdk_output\c\x64\release\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %build-path%\iotsdk_win64\serializer\Release\*.* %build-path%\iot_sdk_output\c\x64\release\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Copy all arm files from cmake build directory to the repo directory
 xcopy /q /y /R %build-path%\iotsdk_arm\iothub_client\Debug\*.* %build-path%\iot_sdk_output\c\arm\debug\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %build-path%\iotsdk_arm\serializer\Debug\*.* %build-path%\iot_sdk_output\c\arm\debug\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %build-path%\iotsdk_arm\iothub_client\Release\*.* %build-path%\iot_sdk_output\c\arm\release\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %build-path%\iotsdk_arm\serializer\Release\*.* %build-path%\iot_sdk_output\c\arm\release\*.*
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Package Nuget
 nuget pack Microsoft.Azure.IoTHub.HttpTransport.nuspec

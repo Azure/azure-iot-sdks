@@ -28,27 +28,27 @@ del /F /Q %client-build-root%\build\signed
 
 rem -- Build the DeviceExplorerWithInstaller.sln to ensure both projects are built
 call %client-build-root%\tools\DeviceExplorer\build\build.cmd
-echo ErrorLevel after build.cmd for DeviceExplorer is %errorlevel%
-if not %errorlevel%==0 exit /b %errorlevel%
+echo ErrorLevel after build.cmd for DeviceExplorer is !ERRORLEVEL!
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 devenv %client-build-root%\tools\DeviceExplorer\DeviceExplorerWithInstaller.sln /Build "Release"
-echo ErrorLevel after devenv is %errorlevel%
-if not %errorlevel%==0 exit /b %errorlevel%
+echo ErrorLevel after devenv is !ERRORLEVEL!
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 rem -- Copy the DeviceExplorer.exe file to the "tosign" folder
 xcopy /q /y /R %client-build-root%\tools\DeviceExplorer\DeviceExplorer\bin\Release\DeviceExplorer.exe %client-build-root%\build\tosign\
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Auto-sign the DeviceExplorer.exe
 csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=400 /d="Signing DeviceExplorer.exe"
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Copy back the DeviceExplorer.exe to the build output directory
 xcopy /q /y /R %client-build-root%\build\signed\DeviceExplorer.exe %client-build-root%\tools\DeviceExplorer\DeviceExplorer\bin\Release\
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %client-build-root%\build\signed\DeviceExplorer.exe %client-build-root%\tools\DeviceExplorer\DeviceExplorer\obj\Release\
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Clear directories
 del /F /Q %client-build-root%\build\tosign
@@ -56,20 +56,20 @@ del /F /Q %client-build-root%\build\signed
 
 rem -- Build the DeviceExplorerWithInstaller.sln. Only the SetupDeviceExplorer project will build since both were built before
 devenv %client-build-root%\tools\DeviceExplorer\DeviceExplorerWithInstaller.sln /Build "Release"
-echo ErrorLevel after devenv is %errorlevel%
-if not %errorlevel%==0 exit /b %errorlevel%
+echo ErrorLevel after devenv is !ERRORLEVEL!
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 rem -- Copy the .msi to the "tosign" folder
 xcopy /q /y /R %client-build-root%\tools\DeviceExplorer\SetupDeviceExplorer\Release\SetupDeviceExplorer.msi %client-build-root%\build\tosign\
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Sign the .msi
 csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=400 /d="Signing SetupDeviceExplorer.msi"
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Copy back the .msi to the build output directory
 xcopy /q /y /R %client-build-root%\build\signed\SetupDeviceExplorer.msi %client-build-root%\tools\DeviceExplorer\SetupDeviceExplorer\Release\
-if %errorlevel% neq 0 exit /b %errorlevel%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Clean directories
 del /F /Q %client-build-root%\build\tosign

@@ -200,14 +200,20 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall close the AMQPS sender and receiver links,
         // the AMQPS session and the AMQPS connection.]
-        this.sender.close();
-        this.receiver.close();
-        this.session.close();
-        this.connection.close();
+        if (this.sender != null)
+            this.sender.close();
+        if (this.receiver != null)
+            this.receiver.close();
+        if (this.session != null)
+            this.session.close();
+        if (this.connection != null)
+            this.connection.close();
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
-        this.reactorFuture.cancel(true);
-        this.executorService.shutdown();
+        if (this.reactorFuture != null)
+            this.reactorFuture.cancel(true);
+        if (this.executorService != null)
+            this.executorService.shutdown();
     }
 
     /**

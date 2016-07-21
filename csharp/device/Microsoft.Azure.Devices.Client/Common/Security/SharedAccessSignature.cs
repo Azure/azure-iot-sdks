@@ -125,11 +125,19 @@ namespace Microsoft.Azure.Devices.Client
                 return false;
             }
 
-            IDictionary<string, string> parsedFields = ExtractFieldValues(rawSignature);
-            string signature;
-            bool isSharedAccessSignature = parsedFields.TryGetValue(SharedAccessSignatureConstants.SignatureFieldName, out signature);
+            try
+            {
+                IDictionary<string, string> parsedFields = ExtractFieldValues(rawSignature);
+                string signature;
+                bool isSharedAccessSignature = parsedFields.TryGetValue(SharedAccessSignatureConstants.SignatureFieldName, out signature);
+                return isSharedAccessSignature;
+            }
 
-            return isSharedAccessSignature;
+            catch (FormatException)
+            {
+                return false;
+            }
+
         }
 
         public bool IsExpired()
@@ -176,7 +184,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 throw new ArgumentNullException("targetAddress");
             }
-            
+
             string target = targetAddress.Host + targetAddress.AbsolutePath;
 
             if (!target.StartsWith(this.audience.TrimEnd(new char[] { '/' }), StringComparison.OrdinalIgnoreCase))
@@ -214,7 +222,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 if (field != string.Empty)
                 {
-                    string[] fieldParts = field.Split(new string[]{ SharedAccessSignatureConstants.KeyValueSeparator }, StringSplitOptions.None);
+                    string[] fieldParts = field.Split(new string[] { SharedAccessSignatureConstants.KeyValueSeparator }, StringSplitOptions.None);
                     if (string.Equals(fieldParts[0], SharedAccessSignatureConstants.AudienceFieldName, StringComparison.OrdinalIgnoreCase))
                     {
                         // We need to preserve the casing of the escape characters in the audience,

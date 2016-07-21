@@ -427,8 +427,6 @@ public class AmqpsIotHubConnectionTest {
                 times = 1;
                 new IotHubReactor((Reactor)any);
                 times = 1;
-                mockIotHubReactor.run();
-                times = 1;
             }
         };
     }
@@ -501,7 +499,6 @@ public class AmqpsIotHubConnectionTest {
 
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false);
 
-        Deencapsulation.setField(connection, "sender", mockSender);
         connection.close();
 
         new Verifications()

@@ -119,7 +119,23 @@ cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -Dc
 
 if [ "$make" = true ]
 then
+  # Set the default cores
   CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+  
+  # Make sure there is enough virtual memory on the device to handle more than one job  
+  MINVSPACE="1000000"
+  
+  # Acquire total memory and total swap space setting them to zero in the event the command fails
+  MEMAR=( $(sed -n -e 's/^MemTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' -e 's/^SwapTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' /proc/meminfo) )
+  [ -z "${MEMAR[0]##*[!0-9]*}" ] && MEMAR[0]=0
+  [ -z "${MEMAR[1]##*[!0-9]*}" ] && MEMAR[1]=0
+  
+  let VSPACE=${MEMAR[0]}+${MEMAR[1]}
+
+  if [ "$VSPACE" -lt "$MINVSPACE" ] ; then
+    CORES=1
+  fi
+  
   make --jobs=$CORES
 
   if [[ $run_valgrind == 1 ]] ;

@@ -3,6 +3,6 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-set(sdk_base_path ../../../../..)
+set(shared_util_base_path ../../../../azure-c-shared-utility)
 set(mbed_project_base "iothub_client_sample_http_x509" CACHE STRING "The item being built")
-include (${sdk_base_path}/c/tools/mbed_build/mbedbldtemplate.txt)
+include (${shared_util_base_path}/tools/mbed_build_scripts/mbedbldtemplate.txt)

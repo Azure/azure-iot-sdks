@@ -644,6 +644,14 @@ namespace Microsoft.Azure.Devices.Client
                             ClientCertificate = connectionStringBuilder.Certificate
                         }
                     };
+                case TransportType.Mqtt:
+                    return new ITransportSettings[]
+                    {
+                        new MqttTransportSettings(TransportType.Mqtt) 
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        }
+                    };
                 default:
                     throw new InvalidOperationException("Unsupported Transport {0}".FormatInvariant(transportType));
             }
@@ -663,6 +671,9 @@ namespace Microsoft.Azure.Devices.Client
                         ((Http1TransportSettings)transportSetting).ClientCertificate = connectionStringBuilder.Certificate;
                         break;
                     case TransportType.Mqtt:
+                        ((MqttTransportSettings)transportSetting).ClientCertificate = connectionStringBuilder.Certificate;
+                        break;
+                    default:
                         throw new InvalidOperationException("Unsupported Transport {0}".FormatInvariant(transportSetting.GetTransportType()));
                 }
             }
