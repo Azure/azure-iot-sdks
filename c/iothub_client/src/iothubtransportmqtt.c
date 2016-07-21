@@ -860,6 +860,15 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
         else if ((state->mqttEventTopic = ConstructEventTopic(upperConfig->deviceId)) == NULL)
         {
             LogError("Could not create mqttEventTopic for MQTT");
+            STRING_delete(state->devicesPath);
+            if (state->transport_creds.credential_type == DEVICE_KEY)
+            {
+                STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceKey);
+            }
+            else if (state->transport_creds.credential_type == SAS_TOKEN_FROM_USER)
+            {
+                STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
+            }
             STRING_delete(state->device_id);
             free(state);
             state = NULL;
@@ -867,6 +876,15 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
         else if ((state->mqttMessageTopic = ConstructMessageTopic(upperConfig->deviceId)) == NULL)
         {
             LogError("Could not create mqttMessageTopic for MQTT");
+            STRING_delete(state->devicesPath);
+            if (state->transport_creds.credential_type == DEVICE_KEY)
+            {
+                STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceKey);
+            }
+            else if (state->transport_creds.credential_type == SAS_TOKEN_FROM_USER)
+            {
+                STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
+            }
             STRING_delete(state->mqttEventTopic);
             STRING_delete(state->device_id);
             free(state);
@@ -878,6 +896,15 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
             if (state->mqttClient == NULL)
             {
                 LogError("failure initializing mqtt client.");
+                STRING_delete(state->devicesPath);
+                if (state->transport_creds.credential_type == DEVICE_KEY)
+                {
+                    STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceKey);
+                }
+                else if (state->transport_creds.credential_type == SAS_TOKEN_FROM_USER)
+                {
+                    STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
+                }
                 STRING_delete(state->mqttEventTopic);
                 STRING_delete(state->mqttMessageTopic);
                 STRING_delete(state->device_id);
@@ -892,6 +919,15 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 if ((state->hostAddress = STRING_construct(tempAddress)) == NULL)
                 {
                     LogError("failure constructing host address.");
+                    STRING_delete(state->devicesPath);
+                    if (state->transport_creds.credential_type == DEVICE_KEY)
+                    {
+                        STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceKey);
+                    }
+                    else if (state->transport_creds.credential_type == SAS_TOKEN_FROM_USER)
+                    {
+                        STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
+                    }
                     STRING_delete(state->mqttEventTopic);
                     STRING_delete(state->mqttMessageTopic);
                     STRING_delete(state->device_id);
@@ -900,6 +936,15 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 }
                 else if ((state->configPassedThroughUsername = buildConfigForUsername(upperConfig)) == NULL)
                 {
+                    STRING_delete(state->devicesPath);
+                    if (state->transport_creds.credential_type == DEVICE_KEY)
+                    {
+                        STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceKey);
+                    }
+                    else if (state->transport_creds.credential_type == SAS_TOKEN_FROM_USER)
+                    {
+                        STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
+                    }
                     STRING_delete(state->hostAddress);
                     STRING_delete(state->mqttEventTopic);
                     STRING_delete(state->mqttMessageTopic);

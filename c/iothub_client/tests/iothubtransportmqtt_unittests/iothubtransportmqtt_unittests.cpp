@@ -926,6 +926,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_alloc_return_null_fail)
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, gballoc_free(NULL));
 
     STRICT_EXPECTED_CALL(mocks, tickcounter_create());
@@ -1002,6 +1004,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_hostAddress_fails)
 
     EXPECTED_CALL(mocks, mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
@@ -1108,6 +1112,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_String_construct_fails_fail
 
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(mocks, tickcounter_create());
     STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(TEST_COUNTER_HANDLE));
@@ -1143,6 +1149,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_string_contruct_for_message
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_MQTT_SAS_TOKEN));
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_MQTT_EVENT_TOPIC));
 
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(mocks, tickcounter_create());
@@ -1234,6 +1242,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_mqtt_client_init_Create_fai
 
     EXPECTED_CALL(mocks, mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn((MQTT_CLIENT_HANDLE)NULL);
 
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
