@@ -784,6 +784,17 @@ public:
 
     MOCK_STATIC_METHOD_2(, void, test_iothubclient_send_confirmation_callback, IOTHUB_CLIENT_CONFIRMATION_RESULT, _result, void*, userContextCallback)
     MOCK_VOID_METHOD_END()
+
+    MOCK_STATIC_METHOD_2(, OPTIONHANDLER_RESULT, OptionHandler_FeedOptions, OPTIONHANDLER_HANDLE, handle, void*, destinationHandle)
+    MOCK_METHOD_END(OPTIONHANDLER_RESULT, OPTIONHANDLER_OK)
+
+    MOCK_STATIC_METHOD_1(, void, OptionHandler_Destroy, OPTIONHANDLER_HANDLE, handle)
+        free(handle);
+    MOCK_VOID_METHOD_END()
+
+    MOCK_STATIC_METHOD_1(, OPTIONHANDLER_HANDLE, xio_retrieveoptions, XIO_HANDLE, xio)
+        OPTIONHANDLER_HANDLE result2= (OPTIONHANDLER_HANDLE)malloc(1);
+    MOCK_METHOD_END(OPTIONHANDLER_HANDLE, result2)
 };
 
 // ** End Mocks **
@@ -987,6 +998,11 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , int, session_get_outgo
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, session_destroy, SESSION_HANDLE, session);
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , void, test_iothubclient_send_confirmation_callback, IOTHUB_CLIENT_CONFIRMATION_RESULT, _result, void*, userContextCallback);
+
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubTransportAMQPMocks, , OPTIONHANDLER_RESULT, OptionHandler_FeedOptions, OPTIONHANDLER_HANDLE, handle, void*, destinationHandle);
+
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , void, OptionHandler_Destroy, OPTIONHANDLER_HANDLE, handle);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubTransportAMQPMocks, , OPTIONHANDLER_HANDLE, xio_retrieveoptions, XIO_HANDLE, xio);
 
 // Auxiliary Functions
 
@@ -1282,12 +1298,16 @@ static void setExpectedCallsForTransportDestroy(CIoTHubTransportAMQPMocks& mocks
         EXPECTED_CALL(mocks, cbs_destroy(0));
         EXPECTED_CALL(mocks, session_destroy(0));
         EXPECTED_CALL(mocks, connection_destroy(0));
+        STRICT_EXPECTED_CALL(mocks, xio_retrieveoptions(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         EXPECTED_CALL(mocks, xio_destroy(0));
         EXPECTED_CALL(mocks, saslmechanism_destroy(0));
     }
 
     if (destroyIOtransport)
     {
+        STRICT_EXPECTED_CALL(mocks, xio_retrieveoptions(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
         EXPECTED_CALL(mocks, xio_destroy(0));
     }
 
@@ -1409,6 +1429,8 @@ static void setExpectedCallsForConnectionDestroyUpTo(CIoTHubTransportAMQPMocks& 
         }
         else if (step == STEP_DOWORK_GET_TLS_IO)
         {
+            STRICT_EXPECTED_CALL(mocks, xio_retrieveoptions(IGNORED_PTR_ARG))
+                .IgnoreArgument(1);
             EXPECTED_CALL(mocks, xio_destroy(NULL));
         }
     }
@@ -5595,6 +5617,7 @@ TEST_FUNCTION(IoTHubTransportAMQP_DoWork_x509_doesn_t_do_CBS_fails_when_connecti
     mocks.ResetAllCalls();
 
     setExpectedCallsForTransportDoWorkUpTo(mocks, STEP_DOWORK_GET_TLS_IO, DOWORK_MESSAGERECEIVER_NONE, current_time);
+    EXPECTED_CALL(mocks, xio_retrieveoptions(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks,xio_destroy(IGNORED_PTR_ARG));
 
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
@@ -5631,6 +5654,8 @@ TEST_FUNCTION(IoTHubTransportAMQP_DoWork_x509_doesn_t_do_CBS_fails_when_session_
     mocks.ResetAllCalls();
 
     setExpectedCallsForTransportDoWorkUpTo(mocks, STEP_DOWORK_GET_TLS_IO, DOWORK_MESSAGERECEIVER_NONE, current_time);
+
+    EXPECTED_CALL(mocks, xio_retrieveoptions(IGNORED_PTR_ARG));
     EXPECTED_CALL(mocks, xio_destroy(IGNORED_PTR_ARG));
 
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
