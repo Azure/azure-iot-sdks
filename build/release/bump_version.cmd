@@ -7,5 +7,8 @@
 set build-root=%~dp0..\..
 
 cd %build-root%\build\release\bump_version
+
 call npm install
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+
 node app.js

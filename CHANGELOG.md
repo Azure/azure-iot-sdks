@@ -1,3 +1,56 @@
+Release for July 15, 2016
+# C Device SDK
+Added extra log tracing to AMQP e2etests
+Added specs for x509 on AMQP transport
+
+# C# Device SDK
+Updated samples to list out properties. And fixed issue when both property cells are null.
+
+# Java Device SDK
+Updated Java device client to use built-in IMqttAsyncClient.getPendingDeliveryTokens() to obtain number of in-flight messages instead of own counting
+
+# NodeJs Device SDK
+Bumped amqp10 dependency version to 3.2.1
+
+# JavaWrapper SDK
+Added X509 sample for JavaWrapper
+
+# Python SDK
+Added X509 sample for Python
+Added Python wrapper API for uploadBlob()
+
+# General
+Enabled /W4 on C/Python/JavaWrapper builds, fixed warnings
+Added grid-view to insert properties into CloudToDevice messages on DeviceExplorer
+Added device-specific document for SE-8124 device from Protech
+Added documentation on how to run Avalue EPC-BTCR device running Windows 10 
+Added documentation on how to run C sample on TM5 device running Windows Embedded Standard 7 
+Added documentation on how to run JAVA sample on IDM-IWP-HW-2 device running Windows 7 Professional 
+Added device instructions for IT800 device from Clientron.
+Updated device instructions for Magic Box device from Bitjoule.
+
+# Bug fixes
+Fixed C MQTT transport bug that loses a packet Id
+Updated C MQTT transport packet id to ensure no overflow will happen
+Update instructions for C AMQP over websockets about required environment variables
+Fixed C serializer samples to use unisgned int for messageTrackingId
+Fixed a uploadBlob poorly destroy that happened before its time in C client SDK
+Fix CMAKE install targets and add additional flags to build script
+Replaced all sscanf in the C SDK by a local version of string parser.
+Fixed C# device client AMQP retry logic
+Fixed C# device client WinRT build error
+Added X509 bug fix in IotHubConnectionCache to allow override of C# device client certificate
+Added fix for issue in Java device SDK regarding multiple open sockets during reconnect
+Fixed 409/412 error translation in Node.JS Service SDK
+Fix for GH issue #658 on Node.JS client - rename HttpReceiver.setSharedAccessSignature to HttpReceiver.updateSharedAccessSignature
+Updated Node.JS client to do not try to create an AMQP sender link if the device is not connected (while renewing a token for example)
+Bug fixes on Node.JS dev setup script, and for client to use appropriate server cert validation.
+Removed code that erroneously truncated some error messages
+Update Node.JS readme code sample (GH issue #671)
+Updated/corrected the links in device-specific instructions
+Fixes on documentation for IoT device Certitification
+
+
 Release for June 30, 2016
 
 # C Device SDK

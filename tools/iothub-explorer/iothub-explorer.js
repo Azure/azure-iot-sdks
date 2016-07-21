@@ -357,7 +357,19 @@ function endTime() {
 function connectionString(device) {
   return 'HostName=' + hostname + ';' +
     'DeviceId=' + device.deviceId + ';' +
-    'SharedAccessKey=' + device.authentication.SymmetricKey.primaryKey;
+    constructAuthenticationString(device.authentication);
+}
+
+function constructAuthenticationString(authenticationMechanism) {
+  var authString = '';
+
+  if (authenticationMechanism.SymmetricKey.primaryKey) {
+    authString = 'SharedAccessKey=' + authenticationMechanism.SymmetricKey.primaryKey;
+  } else if (authenticationMechanism.x509Thumbprint.primaryThumbprint || authenticationMechanism.x509Thumbprint.secondaryThumbprint) {
+    authString = 'x509=true';
+  }
+
+  return authString;
 }
 
 function printDevice(device) {

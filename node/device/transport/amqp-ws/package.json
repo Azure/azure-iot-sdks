@@ -1,14 +1,14 @@
 {
   "name": "azure-iot-device-amqp-ws",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "AMQP-over-WebSocket transport for Azure IoT device SDK",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "dependencies": {
-    "azure-iot-common": "1.0.9",
-    "azure-iot-amqp-base": "1.0.9",
-    "azure-iot-device": "1.0.9",
-    "azure-iot-device-amqp": "1.0.9"
+    "azure-iot-common": "1.0.10",
+    "azure-iot-amqp-base": "1.0.10",
+    "azure-iot-device": "1.0.10",
+    "azure-iot-device-amqp": "1.0.10"
   },
   "devDependencies": {
     "chai": "^3.3.0",
