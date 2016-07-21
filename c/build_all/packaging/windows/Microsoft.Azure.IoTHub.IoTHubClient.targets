@@ -14,32 +14,32 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Win32Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'Win32' ) )">
     <Link>
-      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Win32Release" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'Win32' ) )">
     <Link>
-      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Release/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Release/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Win64Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'x64' ) )">
     <Link>
-      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/x64/Debug/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/x64/Debug/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="Win64Release" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'x64' ) )">
     <Link>
-      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/x64/Release/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/x64/Release/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="ArmDebug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'arm' ) )">
     <Link>
-      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/arm/Debug/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/arm/Debug/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Label="ArmRelease" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'arm' ) )">
     <Link>
-      <AdditionalDependencies>winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/arm/Release/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;winhttp.lib;$(MSBuildThisFileDirectory)../../build/native/arm/Release/iothub_client.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <UsingTask TaskName="Microsoft_Azure_IoTHubClient_Contains" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">

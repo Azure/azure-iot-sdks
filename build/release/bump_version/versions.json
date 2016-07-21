@@ -3,7 +3,7 @@
         "device": "1.0.11"
     },
     "c_nuget": {
-        "device": "1.0.12"
+        "device": "1.0.13"
     },
     "csharp": {
         "device": "1.0.15",
@@ -26,9 +26,9 @@
         "device-mqtt": "1.0.10",
         "service": "1.0.12"
     },
-    "c_shared_utility_nuget": "1.0.12",
-    "uamqp_c_nuget": "1.0.13",
-    "umqtt_c_nuget": "1.0.12",
+    "c_shared_utility_nuget": "1.0.13",
+    "uamqp_c_nuget": "1.0.14",
+    "umqtt_c_nuget": "1.0.13",
     "iothub-explorer": "1.0.8",
     "device-explorer": "1.0.8",
     "github-release": "v1.0.6"
