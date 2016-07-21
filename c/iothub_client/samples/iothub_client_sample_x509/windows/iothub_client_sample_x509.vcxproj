@@ -152,10 +152,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\iothub_client_sample__x509.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\iothub_client_sample_http_x509.c" />
+    <ClCompile Include="..\iothub_client_sample_x509.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
