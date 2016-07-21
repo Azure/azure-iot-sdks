@@ -40,7 +40,7 @@ This document provides step-by-step guidance on how to connect an EL20 device ru
 <a name="Step-2:-PrepareDevice"></a>
 # Step 2: Prepare your Device
 ##  Install Windows 8.1 Embedded Industry Enterprise on EL20
--   Create a bootable USB Drive. Please follow this guide on how to create a bootable drive (<https://www.microsoft.com/download/windows-usb-dvd-download-tool>).
+-   Create a bootable USB Drive. Please follow this guide on how to create a bootable drive (<https://www.microsoft.com/en-us/download/windows-usb-dvd-download-tool>).
 -   Insert the bootable USB Drive from the previous step into your EL20. Turn on your EL20 device and press the **Delete** key.
 -   Change the BIOS Boot option filter to **UEFI and Legacy**.
 -   Change the **Boot Option Priorities** to boot from your USB Drive.

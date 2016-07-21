@@ -102,5 +102,5 @@ You should have the following items ready before beginning the process:
   More information regarding the CloudPlug can be found on www.sotec.eu
 
 
-[lnk-setup-iot-hub]: ../../setup_iothub.md
-[lnk-manage-iot-hub]: ../../manage_iot_hub.md
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

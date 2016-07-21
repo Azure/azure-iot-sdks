@@ -48,7 +48,17 @@ If you have successfully [prepared your development environment][devbox-setup] t
 
 1. Start a new instance of the [Device Explorer][device-explorer], select or create a new device, obtain and note the connection string for the device, and begin moitoring under the Data tab.
 
-2. Navigate to the folder containing the executable JAR file for the sample that you wish to run and run the samples as follows:
+2. Build the client first:
+	```
+	{IoT device SDK root}/java/device/>mvn install -DskipTests
+	```
+3. Navigate to the sample of your choice under the "samples" folder.
+4. Build the JAR file using the following maven command:
+	
+	```
+	{IoT device SDK root}/java/device/samples/send-event/>mvn install -DskipTests
+	```
+5. Navigate to the folder containing the executable JAR file for the sample that you wish to run and run the samples as follows:
 
 	The executable JAR file for sending event
 	can be found at:

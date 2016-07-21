@@ -12,7 +12,7 @@ rem ----------------------------------------------------------------------------
 echo Generating Java Device SDK docs...
 cd %build-root%\java\device\iothub-java-client
 call mvn -q javadoc:javadoc
-if not %errorlevel%==0 (
+if not !errorlevel!==0 (
     echo Generating java docs for iothub-java-client failed.
     exit /b %errorlevel%
 )
@@ -30,9 +30,9 @@ rem ----------------------------------------------------------------------------
 echo Generating Java Service SDK docs... 
 cd %build-root%\java\service\iothub-service-sdk
 call mvn -q javadoc:javadoc
-if not %errorlevel%==0 (
+if not !errorlevel!==0 (
     echo Generating java docs for iothub-service-sdk failed.
-    exit /b %errorlevel%
+    exit /b !errorlevel!
 )
 
 rem Move the generated docs to %build-root%\java\service\doc\api_reference
