@@ -209,7 +209,8 @@
     <Compile Include="IotHubSingleTokenConnection.cs" />
     <Compile Include="IotHubDeviceMuxConnection.cs" />
     <Compile Include="IotHubTokenRefresher.cs" />
-    <Compile Include="Transport\FileUploadGetResponse.cs" />
+    <Compile Include="Transport\FileUploadRequest.cs" />
+    <Compile Include="Transport\FileUploadResponse.cs" />
     <Compile Include="Transport\FileUploadNotificationResponse.cs" />
     <Compile Include="Transport\Mqtt\TransientErrorIgnoreStrategy.cs" />
     <Compile Include="Transport\RetryDelegatingHandler.cs" />
