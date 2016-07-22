@@ -59,10 +59,10 @@ public final class HttpsTransport implements IotHubTransport
     public HttpsTransport(DeviceClientConfig config)
     {
         // Codes_SRS_HTTPSTRANSPORT_11_001: [The constructor shall initialize an empty transport queue for adding messages to be sent as a batch.]
-        this.waitingList = new LinkedList<>();
-        this.inProgressList = new LinkedList<>();
+        this.waitingList = new LinkedList<IotHubOutboundPacket>();
+        this.inProgressList = new LinkedList<IotHubOutboundPacket>();
         // Codes_SRS_HTTPSTRANSPORT_11_002: [The constructor shall initialize an empty queue for adding callbacks waiting to be invoked.]
-        this.callbackList = new LinkedList<>();
+        this.callbackList = new LinkedList<IotHubCallbackPacket>();
 
         this.config = config;
 

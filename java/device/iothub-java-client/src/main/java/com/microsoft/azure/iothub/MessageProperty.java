@@ -16,7 +16,7 @@ public final class MessageProperty {
     public static final Set<String> RESERVED_PROPERTY_NAMES;
 
     static {
-        HashSet<String> reservedPropertyNames = new HashSet<>();
+        HashSet<String> reservedPropertyNames = new HashSet<String>();
         reservedPropertyNames.add("message-id");
         reservedPropertyNames.add("iothub-enqueuedtime");
         reservedPropertyNames.add("iothub-messagelocktoken");

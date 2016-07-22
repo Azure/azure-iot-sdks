@@ -76,7 +76,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     private final Boolean useWebSockets;
     protected DeviceClientConfig config;
 
-    private List<ServerListener> listeners = new ArrayList<>();
+    private List<ServerListener> listeners = new ArrayList<ServerListener>();
     private ExecutorService executorService;
 
     /**
@@ -330,7 +330,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         this.sender = this.session.sender(sendTag);
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_028: [The Receiver and Sender links shall have the properties set to client version identifier.]
-        Map<Symbol, Object> properties = new HashMap<>();
+        Map<Symbol, Object> properties = new HashMap<Symbol, Object>();
         properties.put(Symbol.getSymbol(versionIdentifierKey), TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion);
         this.receiver.setProperties(properties);
         this.sender.setProperties(properties);

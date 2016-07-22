@@ -266,7 +266,7 @@ public class HttpsConnection
     protected static byte[] readInputStream(InputStream stream)
             throws IOException
     {
-        ArrayList<Byte> byteBuffer = new ArrayList<>();
+        ArrayList<Byte> byteBuffer = new ArrayList<Byte>();
         int nextByte = -1;
         // read(byte[]) reads the byte into the buffer and returns the number
         // of bytes read, or -1 if the end of the stream has been reached.

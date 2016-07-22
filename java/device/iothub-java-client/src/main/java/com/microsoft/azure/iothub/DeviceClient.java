@@ -16,7 +16,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -72,7 +71,7 @@ public final class DeviceClient implements Closeable
      * The charset used for URL-encoding the device ID in the connection
      * string.
      */
-    public static final Charset CONNECTION_STRING_CHARSET = StandardCharsets.UTF_8;
+    public static final Charset CONNECTION_STRING_CHARSET = Charset.forName("UTF-8");
 
     protected DeviceClientConfig config;
     protected IotHubTransport transport;
@@ -391,7 +390,7 @@ public final class DeviceClient implements Closeable
                         // Codes_SRS_DEVICECLIENT_02_004: [Value needs to have type long].
                         if (value instanceof Long)
                         {
-                            this.RECEIVE_PERIOD_MILLIS = (long) value;
+                            this.RECEIVE_PERIOD_MILLIS = (Long) value;
                         }
                         else
                         {
