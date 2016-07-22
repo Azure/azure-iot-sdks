@@ -7,6 +7,9 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
     class FileUploadNotificationResponse
     {
+        [JsonProperty(PropertyName = "correlationId")]
+        public string CorrelationId { get; set; }
+
         [JsonProperty(PropertyName = "isSuccess")]
         public bool IsSuccess { get; set; }
 

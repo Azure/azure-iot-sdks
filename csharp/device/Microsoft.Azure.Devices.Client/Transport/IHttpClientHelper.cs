@@ -32,11 +32,21 @@ namespace Microsoft.Azure.Devices.Client.Transport
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
             CancellationToken cancellationToken) where T: IETagHolder;
 
+#if WINDOWS_UWP
+        [Windows.Foundation.Metadata.DefaultOverload]
+#endif
         Task PostAsync<T>(
             Uri requestUri, 
             T entity, 
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides, 
             IDictionary<string, string> customHeaders, 
+            CancellationToken cancellationToken);
+
+        Task<T2> PostAsync<T1, T2>(
+            Uri requestUri,
+            T1 entity,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            IDictionary<string, string> customHeaders,
             CancellationToken cancellationToken);
 
         Task DeleteAsync<T>(
