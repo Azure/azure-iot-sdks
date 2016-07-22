@@ -65,7 +65,7 @@ public final class HttpsSingleMessage implements HttpsMessage
         msg.body = Arrays.copyOf(responseBody, responseBody.length);
 
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_006: [The parsed HttpsSingleMessage shall include all valid HTTPS application-defined properties in the response header as message properties.]
-        ArrayList<MessageProperty> properties = new ArrayList<>();
+        ArrayList<MessageProperty> properties = new ArrayList<MessageProperty>();
         Map<String, String> headerFields = response.getHeaderFields();
         for (Map.Entry<String, String> field : headerFields.entrySet())
         {

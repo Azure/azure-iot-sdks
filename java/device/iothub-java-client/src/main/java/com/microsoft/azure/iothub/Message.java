@@ -6,14 +6,13 @@ package com.microsoft.azure.iothub;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Message
 {
     // ----- Constants -----
 
-    public static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
+    public static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = Charset.forName("UTF-8");
 
 
     // ----- Data Fields -----
@@ -60,11 +59,6 @@ public class Message
     /// [Optional] Used when batching on HTTP Default: false.
     /// </summary>
     private Boolean httpBatchSerializeAsString;
-
-    /// <summary>
-    /// [Optional] Used when batching on HTTP Default: UTF-8.
-    /// </summary>
-    private StandardCharsets httpBatchEncoding;
 
     /// <summary>
     /// [Stamped on servicebound messages by IoT Hub] The authenticated id used to send this message.

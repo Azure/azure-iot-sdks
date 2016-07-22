@@ -37,7 +37,7 @@ public class HttpsResponse
         this.body = Arrays.copyOf(body, body.length);
         this.errorReason = errorReason;
 
-        this.headerFields = new HashMap<>();
+        this.headerFields = new HashMap<String, String>();
         for (Map.Entry<String, List<String>> headerField : headerFields
                 .entrySet())
         {
@@ -109,7 +109,7 @@ public class HttpsResponse
      */
     public Map<String, String> getHeaderFields()
     {
-        Map<String, String> headerFieldsCopy = new HashMap<>();
+        Map<String, String> headerFieldsCopy = new HashMap<String, String>();
         for (Map.Entry<String, String> field : this.headerFields.entrySet())
         {
             headerFieldsCopy.put(field.getKey(), field.getValue());

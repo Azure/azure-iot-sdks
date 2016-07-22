@@ -7,7 +7,6 @@ import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.MessageProperty;
 
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 import javax.naming.SizeLimitExceededException;
 
@@ -30,7 +29,7 @@ public final class HttpsBatchMessage implements HttpsMessage
      * The charset used to encode IoT Hub messages. The server will interpret
      * the JSON array using UTF-8 by default according to RFC4627.
      */
-    public static Charset BATCH_CHARSET = StandardCharsets.UTF_8;
+    public static Charset BATCH_CHARSET = Charset.forName("UTF-8");
 
     /** The current batched message body. */
     protected String batchBody;

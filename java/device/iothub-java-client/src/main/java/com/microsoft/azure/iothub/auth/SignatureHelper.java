@@ -6,7 +6,6 @@ package com.microsoft.azure.iothub.auth;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -24,7 +23,7 @@ public final class SignatureHelper
     public static final String RAW_SIGNATURE_FORMAT = "%s\n%s";
 
     /** The charset used for the raw and hashed signature. */
-    public static final Charset SIGNATURE_CHARSET = StandardCharsets.UTF_8;
+    public static final Charset SIGNATURE_CHARSET = Charset.forName("UTF-8");
 
     /**
      * Builds the raw signature.
