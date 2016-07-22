@@ -2445,6 +2445,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             .SetReturn(TEST_GENERATIONID);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ETAG))
             .SetReturn(TEST_ETAG);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE))
+            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_CONNECTED);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATEUPDATEDTIME))
             .SetReturn(TEST_CONNECTIONSTATEUPDATEDTIME);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS))
@@ -2637,6 +2639,8 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             .SetReturn(TEST_GENERATIONID);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_ETAG))
             .SetReturn(TEST_ETAG);
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE))
+            .SetReturn(TEST_DEVICE_JSON_DEFAULT_VALUE_CONNECTED);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATEUPDATEDTIME))
             .SetReturn(TEST_CONNECTIONSTATEUPDATEDTIME);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_STATUS))
@@ -2736,8 +2740,9 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
                 (i != 37) && /*json_object_get_string*/
                 (i != 38) && /*json_object_get_string*/
                 (i != 39) && /*json_object_get_string*/
-                (i != 55) && /*json_value_free*/
-                (i != 56) /*BUFFER_delete*/
+                (i != 40) && /*json_object_get_string*/
+                (i != 56) && /*json_value_free*/
+                (i != 57) /*BUFFER_delete*/
                 )
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDeviceList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, 10, deviceList);
