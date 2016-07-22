@@ -68,6 +68,7 @@ public final class DeviceClient implements Closeable
     /** The shared access key attribute name in a connection string. */
     public static final String SHARED_ACCESS_KEY_ATTRIBUTE = "SharedAccessKey=";
 
+
     /**
      * The charset used for URL-encoding the device ID in the connection
      * string.
@@ -402,12 +403,34 @@ public final class DeviceClient implements Closeable
                 else
                 {
                         // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the client, then it shall throw IllegalArgumentException.]
+                    if (optionName.equals("SetCertificatePath"))
+                        throw new IllegalArgumentException("HTTPs does not support "+ optionName);
+
+                    throw new IllegalArgumentException("optionName is unknown = "+optionName);
+                }
+            }
+            else if (this.transport.getClass() == AmqpsTransport.class)
+            {
+                if(optionName.equals("SetCertificatePath"))
+                {
+                    if(this.state != IotHubClientState.CLOSED)
+                    {
+                        throw new IllegalStateException("setOption only works when the transport is closed");
+                    }
+                    else
+                    {
+                        if (!value.equals(null))
+                            this.config.setPathToCert((String)value);
+                    }
+                }
+                else
+                {
                     throw new IllegalArgumentException("optionName is unknown = "+optionName);
                 }
             }
             else
             {
-                throw new IllegalArgumentException("AMQP does not have setOption");
+                throw new IllegalArgumentException("MQTT does not have setOption");
             }
         }
     }
