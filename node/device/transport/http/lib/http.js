@@ -10,6 +10,8 @@ var PackageJson = require('../package.json');
 var results = require('azure-iot-common').results;
 var translateError = require('./http_errors.js');
 
+var MESSAGE_PROP_HEADER_PREFIX = 'iothub-app-';
+
 /*Codes_SRS_NODE_DEVICE_HTTP_05_009: [When any Http method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
 err - the standard JavaScript Error object, with the Node.js http.ServerResponse object attached as the property response]*/
 /*Codes_SRS_NODE_DEVICE_HTTP_05_010: [When any Http method receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
@@ -97,7 +99,8 @@ Http.prototype.sendEvent = function (message, done) {
 
   for (var i = 0; i < message.properties.count(); i++) {
     var propItem = message.properties.getItem(i);
-    httpHeaders[propItem.key] = propItem.value;
+    /*Codes_SRS_NODE_DEVICE_HTTP_13_001: [ sendEvent shall add message properties as HTTP headers and prefix the key name with the string iothub-app. ]*/
+    httpHeaders[MESSAGE_PROP_HEADER_PREFIX + propItem.key] = propItem.value;
   }
 
   /*Codes_SRS_NODE_DEVICE_HTTP_16_013: [If using x509 authentication the `Authorization` header shall not be set and the x509 parameters shall instead be passed to the underlying transpoort.]*/
@@ -123,7 +126,8 @@ function constructBatchBody(messages) {
       if (propertyIdx > 0)
         property += ',';
       var propItem = message.properties.getItem(propertyIdx);
-      property += '\"' + propItem.key + '\":\"' + propItem.value + '\"';
+      /*Codes_SRS_NODE_DEVICE_HTTP_13_002: [ sendEventBatch shall prefix the key name for all message properties with the string iothub-app. ]*/
+      property += '\"' + MESSAGE_PROP_HEADER_PREFIX + propItem.key + '\":\"' + propItem.value + '\"';
     }
     if (propertyIdx > 0) {
       property += '}';

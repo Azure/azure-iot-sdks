@@ -26,13 +26,109 @@ describe('Http', function () {
 
     receiver = new DummyReceiver();
 
-    transport = new Http({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sas: 'sas.key' });
+    transport = new Http({ host: 'hub.host.name', hubName: 'hub', deviceId: 'deviceId', sharedAccessSignature: 'sas.key' });
     transport._receiver = receiver;
   });
 
   afterEach(function () {
     transport = null;
     receiver = null;
+  });
+
+  describe('#sendEvent', function() {
+    /*Tests_SRS_NODE_DEVICE_HTTP_13_002: [ sendEventBatch shall prefix the key name for all message properties with the string iothub-app. ]*/
+    it('prefixes message properties with iothub-app-', function(done) {
+      // setup test
+      var MockHttp = {
+        buildRequest: function() {}
+      };
+      var spy = sinon.stub(MockHttp, 'buildRequest').returns({
+        write: function() {},
+        end: function() {}
+      });
+      transport._http = MockHttp;
+
+      var msg = new Message("boo");
+      var i;
+      var propsCount = 3;
+      for(i = 1; i <= propsCount; ++i) {
+        msg.properties.add('k' + i.toString(), 'v' + i.toString());
+      }
+
+      // act
+      transport.sendEvent(msg, function() {});
+
+      // assert
+      assert(spy.calledOnce);
+      assert.isOk(spy.args[0]);
+      assert.isOk(spy.args[0][2]);
+      var headers = spy.args[0][2];
+      for(i = 1; i <= propsCount; ++i) {
+        var key = 'iothub-app-k' + i.toString();
+        assert.isOk(headers[key]);
+        assert.strictEqual(headers[key], 'v' + i.toString());
+      }
+
+      // cleanup
+      done();
+    });
+  });
+
+  describe('#sendEventBatch', function() {
+    /*Tests_SRS_NODE_DEVICE_HTTP_13_002: [ sendEventBatch shall prefix the key name for all message properties with the string iothub-app. ]*/
+    it('prefixes message properties with iothub-app-', function(done) {
+      // setup test
+      var MockRequest = {
+        write: function() {},
+        end: function() {}
+      };
+      var requestSpy = sinon.spy(MockRequest, 'write');
+
+      var MockHttp = {
+        buildRequest: function() {}
+      };
+      sinon.stub(MockHttp, 'buildRequest').returns(MockRequest);
+      transport._http = MockHttp;
+
+      // create 3 messages
+      var messageCount = 3, propsCount = 3, msg;
+      var i, j;
+      var messages = [];
+      for(j = 1; j <= messageCount; ++j) {
+        msg = new Message("msg" + j.toString());
+        for(i = 1; i <= propsCount; ++i) {
+          msg.properties.add(
+            'k_' + j.toString() + '_' + i.toString(),
+            'v_' + j.toString() + '_' + i.toString()
+          );
+        }
+        messages.push(msg);
+      }
+
+      // act
+      transport.sendEventBatch(messages, function() {});
+
+      // assert
+      assert(requestSpy.calledOnce);
+      assert.isOk(requestSpy.args[0]);
+      assert.isOk(requestSpy.args[0][0]);
+      var batchMessages = JSON.parse(requestSpy.args[0][0]);
+      assert.isOk(batchMessages);
+      assert.isArray(batchMessages);
+      assert.strictEqual(batchMessages.length, messageCount);
+      for(j = 1; j <= messageCount; ++j) {
+        msg = batchMessages[j - 1];
+        assert.isOk(msg.properties);
+        for(i = 1; i <= propsCount; ++i) {
+          var key = 'iothub-app-k_' + j.toString() + '_' + i.toString();
+          assert.isOk(msg.properties[key]);
+          assert.strictEqual(msg.properties[key], 'v_' + j.toString() + '_' + i.toString());
+        }
+      }
+
+      // cleanup
+      done();
+    });
   });
 
   describe('#setOptions', function () {

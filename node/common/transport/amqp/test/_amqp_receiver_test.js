@@ -36,6 +36,7 @@ describe('AmqpReceiver', function () {
       });
       messageEmitter.emit('message', fakeMessage);
     });
+    
     /* Tests_SRS_NODE_IOTHUB_AMQPRECEIVER_16_003: [The created AmqpReceiver object shall emit a ‘errorReceived’ event when an error is received.]*/
     it('emits an errorReceived event when an error is received', function (done) {
       var errorEmitter = new EventEmitter();
@@ -43,7 +44,43 @@ describe('AmqpReceiver', function () {
       receiver.on('errorReceived', done);
       errorEmitter.emit('errorReceived', null);
     });
+
+    /* Tests_SRS_NODE_IOTHUB_AMQPRECEIVER_13_001: [ If the AMQP message has values in it's applicationProperties property then those shall be added to the properties property of the newly created message object. ] */
+    it('copies application properties from AMQP message to Message properties', function (done) {
+      var messageEmitter = new EventEmitter();
+      var receiver = new AmqpReceiver(messageEmitter);
+      var fakeMessage = {
+        body: 'foo',
+        properties: {
+          to: 'bar'
+        },
+        applicationProperties: {
+          'k1': 'v1',
+          'k2': 'v2',
+          'k3': 'v3'
+        }
+      };
+
+      receiver.on('message', function (msg) {
+        assert.isOk(msg.properties);
+        var count = msg.properties.count();
+        assert.strictEqual(count, 3);
+        for(var i = 1; i <= count; ++i) {
+          var key = 'k' + i.toString();
+          var val = 'v' + i.toString();
+          var item = msg.properties.getItem(i - 1);
+          assert.isOk(item);
+          assert.isOk(item.key);
+          assert.isOk(item.value);
+          assert.strictEqual(item.key, key);
+          assert.strictEqual(item.value, val);
+        }
+        done();
+      });
+      messageEmitter.emit('message', fakeMessage);
+    });
   });
+  
   describe('#complete', function () {
     /*Tests_SRS_NODE_IOTHUB_AMQPRECEIVER_16_006: [If the message object passed as an argument is falsy, a ReferenceError should be thrown] */
     it('throws if message is falsy', function () {
