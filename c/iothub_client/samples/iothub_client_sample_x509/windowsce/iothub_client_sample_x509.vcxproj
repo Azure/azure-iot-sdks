@@ -14,7 +14,7 @@
     <ProjectGUID>{CE8A16FE-6DF9-4F51-B5B4-39853AF1E878}</ProjectGUID>
     <Keyword>Win32Proj</Keyword>
     <Platform>TORADEX_CE800</Platform>
-    <ProjectName>iothub_client_sample_http_x509</ProjectName>
+    <ProjectName>iothub_client_sample_x509</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|TORADEX_CE800'" Label="Configuration">
@@ -86,10 +86,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\iothub_client_sample_http_x509.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\iothub_client_sample_http_x509.c" />
+    <ClCompile Include="..\iothub_client_sample_x509.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -25,6 +25,22 @@
 #include "iothub_client_ll_uploadtoblob.h"
 #include "blob.h"
 
+
+#ifdef WINCE
+#include <stdarg.h>
+// Returns number of characters copied.
+int snprintf(char * s, size_t n, const char * format, ...)
+{
+	int result;
+	va_list args;
+	va_start(args, format);
+	result = vsnprintf(s, n, format, args);
+	va_end(args);
+	return result;
+}
+#endif
+
+
 /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
 #define FILE_UPLOAD_FAILED_BODY "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"client not able to connect with the server\" }"
 
@@ -32,7 +48,6 @@
     DEVICE_KEY, \
     X509,       \
     SAS_TOKEN
-
 DEFINE_ENUM(AUTHORIZATION_SCHEME, AUTHORIZATION_SCHEME_VALUES);
 
 typedef struct UPLOADTOBLOB_X509_CREDENTIALS_TAG
@@ -687,6 +702,9 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, const unsigned char* source, size_t size)
 {
     IOTHUB_CLIENT_RESULT result;
+	BUFFER_HANDLE toBeTransmitted;
+	int requiredStringLength;
+	char* requiredString;
 
     /*Codes_SRS_IOTHUBCLIENT_LL_02_061: [ If handle is NULL then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
     /*Codes_SRS_IOTHUBCLIENT_LL_02_062: [ If destinationFileName is NULL then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
@@ -799,9 +817,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
                                     {
                                         /*must make a json*/
 
-                                        int requiredStringLength = snprintf(NULL, 0, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
+                                        requiredStringLength = snprintf(NULL, 0, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
 
-                                        char* requiredString = malloc(requiredStringLength + 1);
+                                        requiredString = malloc(requiredStringLength + 1);
                                         if (requiredString == 0)
                                         {
                                             LogError("unable to malloc");
@@ -811,7 +829,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
                                         {
                                             /*do again snprintf*/
                                             (void)snprintf(requiredString, requiredStringLength + 1, "{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((httpResponse < 300) ? "true" : "false"), httpResponse, BUFFER_u_char(responseToIoTHub));
-                                            BUFFER_HANDLE toBeTransmitted = BUFFER_create((const unsigned char*)requiredString, requiredStringLength);
+                                            toBeTransmitted = BUFFER_create((const unsigned char*)requiredString, requiredStringLength);
                                             if (toBeTransmitted == NULL)
                                             {
                                                 LogError("unable to BUFFER_create");

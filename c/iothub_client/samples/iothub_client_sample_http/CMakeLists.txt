@@ -21,6 +21,11 @@ IF(WIN32)
 	#windows needs this define
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+
+if (WINCE) # Use C++ as mitigation for C99
+  SET_SOURCE_FILES_PROPERTIES(iothub_client_sample_http.c PROPERTIES LANGUAGE CXX)
+ENDIF()
+
 ENDIF(WIN32)
 
 include_directories(.)
