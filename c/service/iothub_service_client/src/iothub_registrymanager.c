@@ -191,7 +191,6 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceJson(BUFFER_HANDLE jsonBuffer, I
     deviceInfo->secondaryKey = NULL;
     deviceInfo->generationId = NULL;
     deviceInfo->eTag = NULL;
-    deviceInfo->connectionStateUpdatedTime = NULL;
     deviceInfo->connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
     deviceInfo->connectionStateUpdatedTime = NULL;
     deviceInfo->status = IOTHUB_DEVICE_STATUS_DISABLED;
@@ -524,8 +523,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceListJson(BUFFER_HANDLE jsonBuffe
                     const char* secondaryKey = (char*)json_object_dotget_string(device_object, DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY);
                     const char* generationId = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_GENERATION_ID);
                     const char* eTag = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_ETAG);
-                    /* Bug? connectionState is not filled in */
-                    /*const char* connectionState = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE);*/
+                    const char* connectionState = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATE);
                     const char* connectionStateUpdatedTime = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_CONNECTIONSTATEUPDATEDTIME);
                     const char* status = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_STATUS);
                     const char* statusReason = (char*)json_object_get_string(device_object, DEVICE_JSON_KEY_DEVICE_STATUSREASON);
@@ -689,6 +687,10 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceListJson(BUFFER_HANDLE jsonBuffe
                     }
                     else
                     {
+                        if ((connectionState != NULL) && (strcmp(connectionState, DEVICE_JSON_DEFAULT_VALUE_CONNECTED) == 0))
+                        {
+	                        iothubDevice->connectionState = IOTHUB_DEVICE_CONNECTION_STATE_CONNECTED;
+                        }
                         if ((status != NULL) && (strcmp(status, DEVICE_JSON_DEFAULT_VALUE_ENABLED) == 0))
                         {
                             iothubDevice->status = IOTHUB_DEVICE_STATUS_ENABLED;
