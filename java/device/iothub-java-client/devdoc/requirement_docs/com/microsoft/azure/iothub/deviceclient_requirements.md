@@ -129,3 +129,7 @@ Options handled by the client:
 **SRS_DEVICECLIENT_02_003: [**Available only for HTTP.**]**
 
 **SRS_DEVICECLIENT_02_004: [**Value needs to have type long**.]**
+
+**SRS_DEVICECLIENT_02_005: [**"SetCertificatePath" - path to the certificate to verify peer .**]**
+
+**SRS_DEVICECLIENT_02_006: [**Available only for AMQP.**]**

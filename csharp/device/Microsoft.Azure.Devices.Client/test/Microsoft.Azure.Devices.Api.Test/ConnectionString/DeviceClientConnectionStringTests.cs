@@ -144,7 +144,6 @@ namespace Microsoft.Azure.Devices.Client.Test.ConnectionString
 
         [TestMethod]
         [TestCategory("CIT")]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void DeviceClient_ConnectionString_X509Certificate_MqttTest()
         {
             string hostName = "acme.azure-devices.net";

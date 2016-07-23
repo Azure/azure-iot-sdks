@@ -23,6 +23,9 @@ public final class DeviceClientConfig
     public long getTokenValidSecs();
     public int getReadTimeoutMillis();
 
+    public String getPathToCertificate();
+    public void setPathToCert(String pathToCertificate);
+
     public void setMessageCallback(MessageCallback callback, Object context);
 
     public MessageCallback getMessageCallback();
@@ -43,6 +46,8 @@ public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceK
 ** SRS_DEVICECLIENTCONFIG_11_014: [**If the IoT Hub hostname is not valid URI, the constructor shall throw a URISyntaxException.**] **
 
 ** SRS_DEVICECLIENTCONFIG_11_015: [**If the IoT Hub hostname does not contain a '.', the function shall throw an IllegalArgumentException.**] **
+
+** SRS_DEVICECLIENTCONFIG_11_015: [**The constructor shall set the default certificate which can be later modified by the user.**] **
 
 
 ### getIotHubHostname
@@ -88,6 +93,22 @@ public long getMessageValidSecs();
 ```
 
 ** SRS_DEVICECLIENTCONFIG_11_005: [**The function shall return the value of TOKEN_VALID_SECS.**] **
+
+### getPathToCertificate
+
+```java
+public String getPathToCertificate();
+```
+
+** SRS_DEVICECLIENTCONFIG_11_014: [**The function shall return the value of the path to the certificate.**] **
+
+### setPathToCert
+
+```java
+public void setPathToCert(String pathToCertificate);
+```
+
+** SRS_DEVICECLIENTCONFIG_11_015: [**The function shall set the path to the certificate**] **
 
 
 ### setMessageCallback

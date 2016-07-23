@@ -148,12 +148,24 @@ set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this 
 include_directories(../parson)
 include_directories(${SHARED_UTIL_INC_FOLDER})
 
+if (WINCE)
+include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility/windowsce) #windowsce SDK doesn't have stdbool.h
+ENDIF()
+
+
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
 IF(WIN32)
 	#windows needs this define
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+  
+  if (WINCE) # Be lax with WEC 2013 compiler
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
+  SET_SOURCE_FILES_PROPERTIES(src/iothub_client.c src/iothubtransport.c src/iothub_client_ll.c src/iothubtransporthttp.c src/blob.c PROPERTIES LANGUAGE CXX)
+  ENDIF(WINCE)
+
 ENDIF(WIN32)
 
 if(${use_http})
@@ -215,12 +227,19 @@ linkSharedUtil(iothub_client)
 
 # Don't build samples under Win32 ARM for now
 if(WIN32)
-	if (NOT ${ARCHITECTURE} STREQUAL "ARM")
-		add_subdirectory(samples)
-	endif()
+# Build samples for WEC 2013 for both ARM and x86 processsor types
+  if(WINCE) 
+	add_subdirectory(samples)
+  else()
+    if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+	add_subdirectory(samples)
+    endif()
+  endif()
+	
 else()
 	add_subdirectory(samples)
 endif()
+
 
 if(NOT IN_OPENWRT)
 # Disable tests for OpenWRT

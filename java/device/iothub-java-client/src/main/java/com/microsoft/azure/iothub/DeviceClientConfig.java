@@ -30,6 +30,7 @@ public final class DeviceClientConfig
     protected final String iotHubName;
     protected final String deviceId;
     protected final String deviceKey;
+    protected String pathToCertificate;
 
     /**
      * The callback to be invoked if a message is received.
@@ -73,6 +74,18 @@ public final class DeviceClientConfig
         this.iotHubName = iotHubHostname.substring(0, iotHubNameEndIdx);
         this.deviceId = deviceId;
         this.deviceKey = deviceKey;
+        DefaultCertificate cert = new DefaultCertificate();
+        this.pathToCertificate = cert.getDefaultCertificate();
+    }
+
+    /**
+     * Setter for the providing trusted certificate.
+     *
+     * @param pathToCertificate path to the certificate for one way authentication.
+     */
+    public void setPathToCert(String pathToCertificate)
+    {
+        this.pathToCertificate = pathToCertificate;
     }
 
     /**
@@ -194,11 +207,23 @@ public final class DeviceClientConfig
         return DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS;
     }
 
+    /**
+     * Getter for the path to the certificate.
+     *
+     * @return the path to certificate.
+     */
+    public String getPathToCertificate()
+    {
+        return this.pathToCertificate;
+    }
+
     protected DeviceClientConfig()
     {
         this.iotHubHostname = null;
         this.iotHubName = null;
         this.deviceId = null;
         this.deviceKey = null;
+        this.pathToCertificate = null;
     }
+
 }
