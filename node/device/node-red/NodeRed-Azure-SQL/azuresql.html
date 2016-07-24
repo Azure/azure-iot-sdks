@@ -1,0 +1,49 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Azure SQL',{
+        category: 'cloud',
+        color: '#00abec',
+        defaults: {
+            name: {value:"Azure SQL"},
+        },
+        inputs:1,
+        outputs:1,
+        icon: "azuresql.png",
+        label: function() {
+            return this.name||"Azure SQL";
+        },
+        credentials: {
+            serverAddress: { type: "text" },
+            databaseName: { type: "text" },
+            login: { type: "text" },
+            password: { type: "password" },
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="Azure SQL">
+    <div class="form-row">
+        <label for="node-input-serverAddress"><i class="fa fa-bookmark"></i> Server Address </label>
+        <input type="text" id="node-input-serverAddress">
+    </div>
+    <div class="form-row">
+        <label for="node-input-databaseName"><i class="fa fa-bookmark"></i> Database Name</label>
+        <input type="text" id="node-input-databaseName">
+    </div>
+    <div class="form-row">
+        <label for="node-input-login"><i class="fa fa-bookmark"></i> Login</label>
+        <input type="text" id="node-input-login">
+    </div>
+    <div class="form-row">
+        <label for="node-input-password"><i class="fa fa-bookmark"></i> Password</label>
+        <input type="text" id="node-input-password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Azure SQL">
+    <p>A simple node that that makes it easy to work Databases in Azure SQL</p>
+</script>
+

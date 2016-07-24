@@ -1,0 +1,26 @@
+{
+  "name": "node-red-contrib-azure-documentdb",
+  "description": "Connector to Azure DocumentDB on Node-Red",
+  "version": "0.0.3",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+     "dependencies" : { 
+         "documentdb" : "^1.6.0" 
+     }, 
+  "keywords":["node-red", "Azure", "DocumentDB", "NO-SQL", "Document","NOSQL", "NO SQL"],
+  "node-red" :{
+      "nodes" : {
+          "Azure": "azuredocumentdb.js"
+      }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lcarli/NodeRed-Azure-DocumentDB"
+  },
+  "author": {
+    "name": "Lucas Humenhuk",
+    "email": "luhumenh@microsoft.com",
+    "url": "http://nodered.org"
+  }
+}

@@ -1,0 +1,39 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Table Storage',{
+        category: 'cloud',
+        color: '#00abec',
+        defaults: {
+            name: {value:"Azure Table Storage"},
+        },
+        inputs:1,
+        outputs:1,
+        icon: "azurestorage.png",
+        label: function() {
+            return this.name||"Azure Table Storage";
+        },
+        credentials: {
+            accountname: { type: "text" },
+            key: { type: "text" },
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="Table Storage">
+    <div class="form-row">
+        <label for="node-input-accountname"><i class="fa fa-bookmark"></i> Storage Account Name</label>
+        <input type="text" id="node-input-accountname">
+    </div>
+    <div class="form-row">
+        <label for="node-input-key"><i class="fa fa-bookmark"></i> Storage Account Key</label>
+        <input type="text" id="node-input-key">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Table Storage">
+    <p>A simple node that that makes it easy to consume and manage Microsoft Azure Storage Services</p>
+</script>
+

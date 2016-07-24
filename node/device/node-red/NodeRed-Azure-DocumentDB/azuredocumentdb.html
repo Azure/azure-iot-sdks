@@ -1,0 +1,113 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Database',{
+        category: 'cloud',
+        color: '#00abec',
+        defaults: {
+            name: {value:"Azure Document DB - Database"},
+        },
+        inputs:1,
+        outputs:1,
+        icon: "documentdb.png",
+        label: function() {
+            return this.name||"Azure Document DB - Database";
+        },
+        credentials: {
+            endpoint: { type: "text" },
+            authkey: { type: "text" },
+        }
+    });
+
+    RED.nodes.registerType('Collections',{
+        category: 'cloud',
+        color: '#00abec',
+        defaults: {
+            name: {value:"Azure Document DB - Collections"},
+        },
+        inputs:1,
+        outputs:1,
+        icon: "documentdb.png",
+        label: function() {
+            return this.name||"Azure Document DB - Collections";
+        },
+        credentials: {
+            endpoint: { type: "text" },
+            authkey: { type: "text" },
+        }
+    });
+
+    RED.nodes.registerType('Documents',{
+        category: 'cloud',
+        color: '#00abec',
+        defaults: {
+            name: {value:"Azure Document DB - Documents"},
+        },
+        inputs:1,
+        outputs:1,
+        icon: "documentdb.png",
+        label: function() {
+            return this.name||"Azure Document DB - Documents";
+        },
+        credentials: {
+            endpoint: { type: "text" },
+            authkey: { type: "text" },
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="Database">
+    <div class="form-row">
+        <label for="node-input-endpoint"><i class="fa fa-bookmark"></i> DocumentDB Endpoint</label>
+        <input type="text" id="node-input-endpoint">
+    </div>
+    <div class="form-row">
+        <label for="node-input-authkey"><i class="fa fa-bookmark"></i> DocumentDB AuthKey</label>
+        <input type="text" id="node-input-authkey">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Database">
+    <p>A simple node that that makes it easy to work Databases in Azure DocumentDB</p>
+</script>
+
+<script type="text/x-red" data-template-name="Collections">
+    <div class="form-row">
+        <label for="node-input-endpoint"><i class="fa fa-bookmark"></i> DocumentDB Endpoint</label>
+        <input type="text" id="node-input-endpoint">
+    </div>
+    <div class="form-row">
+        <label for="node-input-authkey"><i class="fa fa-bookmark"></i> DocumentDB AuthKey</label>
+        <input type="text" id="node-input-authkey">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Collections">
+    <p>A simple node that that makes it easy to work Collections in Azure DocumentDB</p>
+</script>
+
+<script type="text/x-red" data-template-name="Documents">
+    <div class="form-row">
+        <label for="node-input-endpoint"><i class="fa fa-bookmark"></i> DocumentDB Endpoint</label>
+        <input type="text" id="node-input-endpoint">
+    </div>
+    <div class="form-row">
+        <label for="node-input-authkey"><i class="fa fa-bookmark"></i> DocumentDB AuthKey</label>
+        <input type="text" id="node-input-authkey">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Documents">
+    <p>A simple node that that makes it easy to work documents in Azure DocumentDB</p>
+</script>
+

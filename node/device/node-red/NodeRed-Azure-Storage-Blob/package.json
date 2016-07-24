@@ -1,0 +1,26 @@
+{
+  "name": "node-red-contrib-azure-blob-storage",
+  "description": "Connector to Azure Blob Storage on Node-Red",
+  "version": "0.0.5",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+     "dependencies" : { 
+         "azure-storage" : "^1.0.0" 
+     }, 
+  "keywords":["node-red", "Azure", "Azure Storage", "Storage", "Blob Storage", "Blob"],
+  "node-red" :{
+      "nodes" : {
+          "Azure": "azureblobstorage.js"
+      }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lcarli/NodeRed-Azure-Storage-Blob"
+  },
+  "author": {
+    "name": "Lucas Humenhuk",
+    "email": "luhumenh@microsoft.com",
+    "url": "http://nodered.org"
+  }
+}
