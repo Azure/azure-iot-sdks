@@ -6,94 +6,68 @@ var fs = require('fs');
 var assert = require('chai').assert;
 
 var serviceSdk = require('azure-iothub');
-var deviceSdk = require('azure-iot-device');
+var createDeviceClient = require('./testUtils.js').createDeviceClient;
+var closeDeviceServiceClients = require('./testUtils.js').closeDeviceServiceClients;
 
-var runTests = function (deviceTransport, hubConnectionString, provisionedDevice) {
+var runTests = function (hubConnectionString, deviceTransport, provisionedDevice) {
   describe('Device utilizing ' + provisionedDevice.authenticationDescription + ' authentication, connected over ' + deviceTransport.name + ':', function () {
-
+    this.timeout(120000);
     var serviceClient, deviceClient;
 
     beforeEach(function () {
       serviceClient = serviceSdk.Client.fromConnectionString(hubConnectionString);
-      if (provisionedDevice.hasOwnProperty('primaryKey')) {
-        deviceClient = deviceSdk.Client.fromConnectionString(provisionedDevice.connectionString, deviceTransport);
-      } else if (provisionedDevice.hasOwnProperty('certificate')) {
-        deviceClient = deviceSdk.Client.fromConnectionString(provisionedDevice.connectionString, deviceTransport);
-        var options = {
-          cert: provisionedDevice.certificate,
-          key: provisionedDevice.clientKey,
-        };
-        deviceClient.setOptions(options);
-      } else {
-        deviceClient = deviceSdk.Client.fromSharedAccessSignature(provisionedDevice.connectionString, deviceTransport)
-      }
+      deviceClient = createDeviceClient(deviceTransport, provisionedDevice);
     });
 
     afterEach(function (done) {
-      serviceClient.close(function (err) {
-        if (err) {
+      closeDeviceServiceClients(deviceClient, serviceClient, done);
+    });
+
+    it('device successfully uploads a file and the notification is received by the service', function(done) {
+      var testBlobName = 'e2eblob.txt';
+      var filePath = './test/file_upload.js';
+      fs.stat(filePath, function (err, fileStats) {
+        if(err) {
           done(err);
         } else {
-          serviceClient = null;
-          deviceClient.close(function (err) {
+          var testFileSize = fileStats.size;
+          var fileStream = fs.createReadStream(filePath);
+
+          serviceClient.open(function(err) {
             if (err) {
               done(err);
             } else {
-              deviceClient = null;
-              done();
+              serviceClient.getFileNotificationReceiver(function(err, fileNotificationReceiver) {
+                if (err) {
+                  done(err);
+                } else {
+                  fileNotificationReceiver.on('message', function(msg) {
+                    var notification = JSON.parse(msg.data.toString());
+                    if (notification.deviceId === provisionedDevice.deviceId && notification.blobName === provisionedDevice.deviceId + '/' + testBlobName) {
+                      assert.isString(notification.blobUri);
+                      assert.equal(notification.blobSizeInBytes, testFileSize);
+                      fileNotificationReceiver.complete(msg, function(err) {
+                        done(err);
+                      });
+                    }
+                  });
+
+                  deviceClient.open(function(err) {
+                    if (err) {
+                      done(err);
+                    } else {
+                      deviceClient.uploadToBlob(testBlobName, fileStream, fileStats.size, function(err) {
+                        if(err) {
+                          done(err);
+                        }
+                      });
+                    }
+                  });
+                }
+              });
             }
           });
         }
-      });
-    });
-    describe('File Upload', function() {
-      this.timeout(60000);
-      it('device successfully upload a file and the notification is received by the service', function(done) {
-        var testBlobName = 'e2eblob.txt';
-        var filePath = './README.md';
-        fs.stat(filePath, function (err, fileStats) {
-          if(err) {
-            done(err);
-          } else {
-            var testFileSize = fileStats.size;
-            var fileStream = fs.createReadStream(filePath);
-
-            serviceClient.open(function(err) {
-              if (err) {
-                done(err);
-              } else {
-                serviceClient.getFileNotificationReceiver(function(err, fileNotificationReceiver) {
-                  if (err) {
-                    done(err);
-                  } else {
-                    fileNotificationReceiver.on('message', function(msg) {
-                      var notification = JSON.parse(msg.data.toString());
-                      if (notification.deviceId === provisionedDevice.deviceId && notification.blobName === provisionedDevice.deviceId + '/' + testBlobName) {
-                        assert.isString(notification.blobUri);
-                        assert.equal(notification.blobSizeInBytes, testFileSize);
-                        fileNotificationReceiver.complete(msg, function(err) {
-                          done(err);
-                        });
-                      }
-                    });
-
-                    deviceClient.open(function(err) {
-                      if (err) {
-                        done(err);
-                      } else {
-                        deviceClient.uploadToBlob(testBlobName, fileStream, fileStats.size, function(err) {
-                          if(err) {
-                            done(err);
-                          }
-                        });
-                      }
-                    });
-                  }
-                });
-              }
-            });
-          }
-        });
       });
     });
   });
