@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+    using System.Linq;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using Microsoft.Azure.Devices.Client.Extensions;
@@ -591,6 +592,14 @@ namespace Microsoft.Azure.Devices.Client
             if (source == null)
             {
                 throw Fx.Exception.ArgumentNull("source");
+            }
+            if (blobName.Length > 1024)
+            {
+                throw Fx.Exception.Argument("blobName", "Length cannot exceed 1024 characters");
+            }
+            if (blobName.Split('/').Count() > 254)
+            {
+                throw Fx.Exception.Argument("blobName", "Path segment count cannot exceed 254");
             }
 
             var httpTransport = new HttpTransportHandler(iotHubConnectionString);
