@@ -226,6 +226,7 @@ add_library(iothub_client
 linkSharedUtil(iothub_client)
 
 # Don't build samples under Win32 ARM for now
+if(NOT ${skip_samples})
 if(WIN32)
 # Build samples for WEC 2013 for both ARM and x86 processsor types
   if(WINCE) 
@@ -239,7 +240,7 @@ if(WIN32)
 else()
 	add_subdirectory(samples)
 endif()
-
+endif()
 
 if(NOT IN_OPENWRT)
 # Disable tests for OpenWRT
