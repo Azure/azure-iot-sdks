@@ -679,23 +679,32 @@ static void destroy_hostName(HTTPTRANSPORT_HANDLE_DATA* handleData)
 static bool create_hostName(HTTPTRANSPORT_HANDLE_DATA* handleData, const IOTHUBTRANSPORT_CONFIG* config)
 {
     bool result;
-    handleData->hostName = STRING_construct(config->upperConfig->iotHubName);
-    if (handleData->hostName == NULL)
+    if (config->upperConfig->protocolGatewayHostName != NULL)
     {
-        result = false;
+        handleData->hostName = STRING_construct(config->upperConfig->protocolGatewayHostName);
+        result = (handleData->hostName != NULL);
     }
     else
     {
-        if ((STRING_concat(handleData->hostName, ".") != 0) ||
-            (STRING_concat(handleData->hostName, config->upperConfig->iotHubSuffix) != 0))
+        handleData->hostName = STRING_construct(config->upperConfig->iotHubName);
+
+        if (handleData->hostName == NULL)
         {
-            /*Codes_SRS_TRANSPORTMULTITHTTP_17_006: [ If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL. ] */
-            destroy_hostName(handleData);
             result = false;
         }
         else
         {
-            result = true;
+            if ((STRING_concat(handleData->hostName, ".") != 0) ||
+                (STRING_concat(handleData->hostName, config->upperConfig->iotHubSuffix) != 0))
+            {
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_006: [ If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL. ] */
+                destroy_hostName(handleData);
+                result = false;
+            }
+            else
+            {
+                result = true;
+            }
         }
     }
     return result;

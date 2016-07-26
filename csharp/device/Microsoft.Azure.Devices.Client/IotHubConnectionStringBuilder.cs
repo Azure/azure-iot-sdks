@@ -39,7 +39,8 @@ namespace Microsoft.Azure.Devices.Client
         static readonly string DeviceIdPropertyName = nameof(DeviceId);
         static readonly string SharedAccessKeyNamePropertyName = nameof(SharedAccessKeyName); 
         static readonly string SharedAccessKeyPropertyName = nameof(SharedAccessKey); 
-        static readonly string SharedAccessSignaturePropertyName = nameof(SharedAccessSignature); 
+        static readonly string SharedAccessSignaturePropertyName = nameof(SharedAccessSignature);
+        static readonly string GatewayHostNamePropertyName = nameof(GatewayHostName);
         static readonly string X509CertPropertyName =  "X509Cert";
         static readonly Regex HostNameRegex = new Regex(@"[a-zA-Z0-9_\-\.]+$", regexOptions);
         static readonly Regex DeviceIdRegex = new Regex(@"^[A-Za-z0-9\-:.+%_#*?!(),=@;$']{1,128}$", regexOptions);
@@ -131,6 +132,11 @@ namespace Microsoft.Azure.Devices.Client
         public string SharedAccessKey { get; internal set; }
 
         /// <summary>
+        /// Gets the optional name of the gateway to connect to
+        /// </summary>
+        public string GatewayHostName { get; internal set; }
+
+        /// <summary>
         /// Gets the shared access signature used to connect to the IoT Hub service.
         /// </summary>
         public string SharedAccessSignature { get; internal set; }
@@ -168,6 +174,7 @@ namespace Microsoft.Azure.Devices.Client
             stringBuilder.AppendKeyValuePairIfNotEmpty(SharedAccessKeyPropertyName, this.SharedAccessKey);
             stringBuilder.AppendKeyValuePairIfNotEmpty(SharedAccessSignaturePropertyName, this.SharedAccessSignature);
             stringBuilder.AppendKeyValuePairIfNotEmpty(X509CertPropertyName, this.UsingX509Cert);
+            stringBuilder.AppendKeyValuePairIfNotEmpty(GatewayHostNamePropertyName, this.GatewayHostName);
             if (stringBuilder.Length > 0)
             {
                 stringBuilder.Remove(stringBuilder.Length - 1, 1);
@@ -219,6 +226,12 @@ namespace Microsoft.Azure.Devices.Client
                     // need to handle this differently because shared access key may have special chars such as '=' which break the string split
                     this.SharedAccessSignature = part.Substring(part.IndexOf('=') + 1);
                 }
+                else if (part.IndexOf("GatewayHostName") > -1)
+                {
+                    // Gateway host name
+                    this.GatewayHostName = values[1];
+                }
+
             }
 #else
             IDictionary<string, string> map = iotHubConnectionString.ToDictionary(ValuePairDelimiter, ValuePairSeparator);
@@ -228,7 +241,8 @@ namespace Microsoft.Azure.Devices.Client
             this.SharedAccessKeyName = GetConnectionStringOptionalValue(map, SharedAccessKeyNamePropertyName);
             this.SharedAccessKey = GetConnectionStringOptionalValue(map, SharedAccessKeyPropertyName);
             this.SharedAccessSignature = GetConnectionStringOptionalValue(map, SharedAccessSignaturePropertyName);
-            this.UsingX509Cert =  GetConnectionStringOptionalValueOrDefault<bool>(map, X509CertPropertyName, GetX509, true);
+            this.UsingX509Cert = GetConnectionStringOptionalValueOrDefault<bool>(map, X509CertPropertyName, GetX509, true);
+            this.GatewayHostName = GetConnectionStringOptionalValue(map, GatewayHostNamePropertyName);
 #endif
             this.Validate();
         }
@@ -292,6 +306,7 @@ namespace Microsoft.Azure.Devices.Client
             ValidateFormatIfSpecified(this.SharedAccessKeyName, SharedAccessKeyNamePropertyName, SharedAccessKeyNameRegex);
             ValidateFormatIfSpecified(this.SharedAccessKey, SharedAccessKeyPropertyName, SharedAccessKeyRegex);
             ValidateFormatIfSpecified(this.SharedAccessSignature, SharedAccessSignaturePropertyName, SharedAccessSignatureRegex);
+            ValidateFormatIfSpecified(this.GatewayHostName, GatewayHostNamePropertyName, HostNameRegex);
             ValidateFormatIfSpecified(this.UsingX509Cert.ToString(), X509CertPropertyName, X509CertRegex);
 #endif
         }
