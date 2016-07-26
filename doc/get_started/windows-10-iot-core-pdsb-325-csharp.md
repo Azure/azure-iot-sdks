@@ -1,10 +1,10 @@
 ---
 platform: windows 10 iot core
-device: pdsb 3225
+device: pdsb 325
 language: csharp
 ---
 
-Run a simple Csharp sample on PDSB 3225 device running Windows 10 IoT Core
+Run a simple Csharp sample on PDSB 325 device running Windows 10 IoT Core
 ===
 ---
 
@@ -20,7 +20,7 @@ Run a simple Csharp sample on PDSB 3225 device running Windows 10 IoT Core
 
 **About this document**
 
-This document describes how to connect PDSB 3225 device running Windows 10 IoT Core with Azure IoT SDK. This multi-step process includes:
+This document describes how to connect PDSB 325 device running Windows 10 IoT Core with Azure IoT SDK. This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -34,7 +34,7 @@ You should have the following items ready before beginning the process:
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
--   PDSB 3225 device.
+-   PDSB 325 device.
 
 #### Install Visual Studio 2015 and Tools
 
