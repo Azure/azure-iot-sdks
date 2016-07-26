@@ -243,7 +243,9 @@ endif()
 
 if(NOT IN_OPENWRT)
 # Disable tests for OpenWRT
+if(NOT ${skip_unittests})
 add_subdirectory(tests)
+endif()
 endif()
 
 if(WIN32)
