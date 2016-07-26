@@ -3,7 +3,7 @@
 This Node-RED node adds Azure IoT connectivity to your Node-RED flow.
 
 ## Prerequisites
-To user the Azure IoT Hub Node-RED node, you need to have the following installed on the target machine:
+To use the Azure IoT Hub Node-RED node, you need to have the following installed on the target machine:
 
 - Node.js v0.10 or above. (Check out [Nodejs.org](https://nodejs.org/) for more info)
 - Node-RED. To install Node-RED, run the following command:
