@@ -16,7 +16,9 @@ namespace Microsoft.Azure.Devices.Client
     using System.Runtime.InteropServices.WindowsRuntime;
     using Windows.Storage.Streams;
 #endif
+#if !NETMF
     using PCLCrypto;
+#endif
 
     using System.Text;
 
@@ -115,7 +117,7 @@ namespace Microsoft.Azure.Devices.Client
 
         static string BuildExpiresOn(TimeSpan timeToLive)
         {
-#if MF_FRAMEWORK_VERSION_V4_3 
+#if MF_FRAMEWORK_VERSION_V4_3
             // .NETMF < v4.4 had a know bug with DateTime.Kind: values were always created with DateTimeKind.Local 
             // this requires us to perform an extra step to make a DateTime to be in UTC, otherwise the expiry date will be calculated wrongly
 
@@ -134,6 +136,14 @@ namespace Microsoft.Azure.Devices.Client
             return Convert.ToString(seconds, CultureInfo.InvariantCulture);
 #endif
         }
+#if NETMF
+        static string Sign(string requestString, string key)
+        {
+            // computing SHA256 signature using a managed code library
+            var hmac = SHA.computeHMAC_SHA256(Convert.FromBase64String(key), Encoding.UTF8.GetBytes(requestString));
+            return Convert.ToBase64String(hmac);
+        }
+#else
         static string Sign(string requestString, string key)
         {
             var algorithm = WinRTCrypto.MacAlgorithmProvider.OpenAlgorithm(MacAlgorithm.HmacSha256);
@@ -142,5 +152,6 @@ namespace Microsoft.Azure.Devices.Client
             var mac = hash.GetValueAndReset();
             return Convert.ToBase64String(mac);
         }
+#endif
     }
 }
