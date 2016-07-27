@@ -232,6 +232,12 @@ public class SendReceive
 
         System.out.println("Sending the following event messages: ");
 
+        // Set your token expiry time limit here
+        long time = 2400;
+        client.setOption("SetSASTokenExpiryTime", time);
+
+        System.out.println("Updated token expiry time to " + time);
+
 
         for (int i = 0; i < numRequests; ++i)
         {
