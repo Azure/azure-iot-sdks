@@ -5,7 +5,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
 {
     using Newtonsoft.Json;
 
-    class FileUploadGetResponse
+    class FileUploadResponse
     {
         [JsonProperty(PropertyName = "correlationId")]
         public string CorrelationId { get; set; }
