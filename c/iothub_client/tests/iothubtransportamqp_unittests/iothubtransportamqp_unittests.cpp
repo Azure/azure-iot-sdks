@@ -220,6 +220,11 @@ static bool fail_STRING_construct = false;
 static STRING_HANDLE test_STRING_HANDLE_EMPTY;
 static STRING_HANDLE test_iotHubHostFqdn;
 
+ON_MESSAGE_SENDER_STATE_CHANGED saved_on_message_sender_state_changed_callback;
+void* saved_on_message_sender_state_changed_context;
+ON_MESSAGE_RECEIVER_STATE_CHANGED saved_on_message_receiver_state_changed_callback;
+void* saved_on_message_receiver_state_changed_context;
+
 static ON_MESSAGE_RECEIVED saved_on_message_received_callback;
 static const void* saved_on_message_received_context;
 static BINARY_DATA* saved_message_get_body_amqp_data_binary_data;
@@ -647,10 +652,12 @@ public:
 
     MOCK_STATIC_METHOD_2(, int, message_get_body_type, MESSAGE_HANDLE, message, MESSAGE_BODY_TYPE*, body_type)
         *body_type = test_message_get_body_type;
-    MOCK_METHOD_END(int, 0)
+	MOCK_METHOD_END(int, 0)
 
-    // message_receiver.h
-    MOCK_STATIC_METHOD_3(, MESSAGE_RECEIVER_HANDLE, messagereceiver_create, LINK_HANDLE, link, ON_MESSAGE_RECEIVER_STATE_CHANGED, on_message_receiver_state_changed, void*, context)
+	// message_receiver.h
+	MOCK_STATIC_METHOD_3(, MESSAGE_RECEIVER_HANDLE, messagereceiver_create, LINK_HANDLE, link, ON_MESSAGE_RECEIVER_STATE_CHANGED, on_message_receiver_state_changed, void*, context)
+		saved_on_message_receiver_state_changed_callback = on_message_receiver_state_changed;
+		saved_on_message_receiver_state_changed_context = context;
     MOCK_METHOD_END(MESSAGE_RECEIVER_HANDLE, 0)
 
     MOCK_STATIC_METHOD_1(, void, messagereceiver_destroy, MESSAGE_RECEIVER_HANDLE, message_receiver)
@@ -667,6 +674,8 @@ public:
 
     // message_sender.h
     MOCK_STATIC_METHOD_3(, MESSAGE_SENDER_HANDLE, messagesender_create, LINK_HANDLE, link, ON_MESSAGE_SENDER_STATE_CHANGED, on_message_sender_state_changed, void*, context)
+		saved_on_message_sender_state_changed_callback = on_message_sender_state_changed;
+		saved_on_message_sender_state_changed_context = context;
     MOCK_METHOD_END(MESSAGE_SENDER_HANDLE, 0)
 
     MOCK_STATIC_METHOD_1(, void, messagesender_destroy, MESSAGE_SENDER_HANDLE, message_sender)
@@ -1493,6 +1502,10 @@ static void resetTestSuiteState()
     saved_on_message_received_context = NULL;
     saved_message_get_body_amqp_data_binary_data = NULL;
     test_amqpvalue_get_string_index = 0;
+	saved_on_message_receiver_state_changed_callback = NULL;
+	saved_on_message_receiver_state_changed_context = NULL;
+	saved_on_message_sender_state_changed_callback = NULL;
+	saved_on_message_sender_state_changed_context = NULL;
 }
 
 static time_t addSecondsToTime(time_t reference_time, int seconds_to_add)
@@ -3144,6 +3157,84 @@ TEST_FUNCTION(AMQP_DoWork_send_one_message_succeeds)
     transport_interface->IoTHubTransport_Destroy(transport);
     cleanupList(config.waitingToSend);
 }
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_191: [IoTHubTransportAMQP_DoWork shall create each AMQP message sender tracking its state changes with a callback function]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_192: [If a message sender instance changes its state to MESSAGE_SENDER_STATE_ERROR (first transition only) the connection retry logic shall be triggered]
+TEST_FUNCTION(AMQP_messagesender_ERROR_state_change_triggers_reconnection)
+{
+	// arrange
+	resetTestSuiteState();
+
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, current_time);
+
+	mocks.ResetAllCalls();
+	setExpectedCallsForConnectionDestroyUpTo(mocks, STEP_DOWORK_CREATE_CBS);
+	setExpectedCallsForDestroyEventSender(mocks);
+
+	// act
+	saved_on_message_sender_state_changed_callback(saved_on_message_sender_state_changed_context, MESSAGE_SENDER_STATE_ERROR, MESSAGE_SENDER_STATE_OPEN);
+
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_189: [IoTHubTransportAMQP_DoWork shall create each AMQP message receiver tracking its state changes with a callback function]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_190: [If a message receiver instance changes its state to MESSAGE_RECEIVER_STATE_ERROR (first transition only) the connection retry logic shall be triggered]
+TEST_FUNCTION(AMQP_messagereceiver_ERROR_state_change_triggers_reconnection)
+{
+	// arrange
+	resetTestSuiteState();
+
+	CIoTHubTransportAMQPMocks mocks;
+
+	DLIST_ENTRY wts;
+	BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+	time_t current_time = time(NULL);
+
+	TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+
+	transport_interface->IoTHubTransport_Subscribe(transport);
+	setExpectedCallsForCreateMessageReceiver(mocks);
+	setupSuccessfulDoWorkAndAuthenticate(transport, mocks, current_time);
+
+	mocks.ResetAllCalls();
+	setExpectedCallsForConnectionDestroyUpTo(mocks, STEP_DOWORK_CREATE_CBS);
+	setExpectedCallsForDestroyEventSender(mocks);
+	setExpectedCallsForDestroyMessageReceiver(mocks);
+
+	// act
+	saved_on_message_receiver_state_changed_callback(saved_on_message_receiver_state_changed_context, MESSAGE_RECEIVER_STATE_ERROR, MESSAGE_RECEIVER_STATE_OPEN);
+
+	transport_interface->IoTHubTransport_DoWork(transport, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+	// assert
+	mocks.AssertActualAndExpectedCalls();
+
+	// cleanup
+	transport_interface->IoTHubTransport_Destroy(transport);
+}
+
 
 /* Test_SRS_IOTHUBTRANSPORTAMQP_09_155: [uAMQP message properties shall be retrieved using message_get_properties.] */
 /* Test_SRS_IOTHUBTRANSPORTAMQP_09_157: [The message-id property shall be read from the uAMQP message by calling properties_get_message_id.] */
