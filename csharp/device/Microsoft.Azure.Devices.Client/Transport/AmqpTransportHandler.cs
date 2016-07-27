@@ -172,11 +172,17 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
-            if (disposing)
+            try
             {
-                this.faultTolerantDeviceBoundReceivingLink?.Dispose();
-                this.faultTolerantEventSendingLink?.Dispose();
+                if (disposing)
+                {
+                    this.faultTolerantDeviceBoundReceivingLink?.Dispose();
+                    this.faultTolerantEventSendingLink?.Dispose();
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 

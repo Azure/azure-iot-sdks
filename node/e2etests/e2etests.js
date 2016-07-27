@@ -3,24 +3,50 @@
 
 'use strict';
 
+var errors = require('azure-iot-common').errors;
 var deviceAmqp = require('azure-iot-device-amqp');
+var deviceAmqpWs = require('azure-iot-device-amqp-ws');
 var deviceHttp = require('azure-iot-device-http');
-var ConnectionString = require('azure-iothub').ConnectionString;
+var deviceMqtt = require('azure-iot-device-mqtt');
 
+var device_provision = require('./test/device_provision.js');
 var device_service_tests = require('./test/device_service.js');
 var registry_tests = require('./test/registry.js');
 var file_upload_tests = require('./test/file_upload.js');
+var device_acknowledge_tests = require('./test/device_acknowledge_tests.js');
+var service_client = require('./test/service.js');
+var device_teardown = require('./test/device_teardown.js');
 
-var deviceName = process.env.IOTHUB_DEVICE_ID;
-var deviceKey = process.env.IOTHUB_DEVICE_KEY;
 var hubConnectionString = process.env.IOTHUB_CONNECTION_STRING;
 var storageConnectionString = process.env.STORAGE_CONNECTION_STRING;
-var host = ConnectionString.parse(process.env.IOTHUB_CONNECTION_STRING).HostName;
-var deviceConnectionString = 'HostName=' + host + ';DeviceId=' + deviceName + ';SharedAccessKey=' + deviceKey;
+var generalProtocols = [deviceHttp.Http, deviceMqtt.Mqtt, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs];
+var acknowledgementProtocols = [deviceHttp.Http, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs];
 
-device_service_tests(deviceAmqp.Amqp, hubConnectionString, deviceConnectionString, deviceName, deviceKey);
-device_service_tests(deviceHttp.Http, hubConnectionString, deviceConnectionString, deviceName, deviceKey);
-
-registry_tests(hubConnectionString, storageConnectionString);
-
-file_upload_tests(hubConnectionString, deviceConnectionString, deviceName);
+device_provision(hubConnectionString, function (err, provisionedDevices) {
+  if (err) {
+    console.log('Unable to create the devices needed.');
+  } else {
+    provisionedDevices.forEach(function(deviceToTest) {
+      generalProtocols.forEach(function(protocolToTest) {
+        file_upload_tests(hubConnectionString, protocolToTest, deviceToTest);
+        device_service_tests(hubConnectionString, protocolToTest, deviceToTest);
+      });
+      acknowledgementProtocols.forEach(function (protocolToTest) {
+        device_acknowledge_tests(hubConnectionString, protocolToTest, deviceToTest);
+      });
+    });
+   service_client(hubConnectionString);
+   registry_tests(hubConnectionString, storageConnectionString);
+  }
+  device_teardown(hubConnectionString, provisionedDevices);
+  if (!provisionedDevices || provisionedDevices.length !== 3) {
+    describe('device creation did not', function() {
+      it('completely work', function(done) {
+          done(new errors.ArgumentError(''));
+      });
+    });
+  }
+  /* The FOLLOWING comment directs the jshint linter to assume that run is a global.  run is supplied by the the mocha framework. */
+  /* globals run */
+  run();
+});

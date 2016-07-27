@@ -2,7 +2,7 @@
 <!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>send-receive-sample-http-x509</artifactId>
+  <artifactId>send-receive-sample-x509</artifactId>
   <version>1.0.1</version>
   <developers>
     <developer>
@@ -28,7 +28,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>javaWrapper.SendReceiveHttpX509</mainClass>
+              <mainClass>javaWrapper.SendReceiveX509</mainClass>
             </manifest>
           </archive>
         </configuration>
