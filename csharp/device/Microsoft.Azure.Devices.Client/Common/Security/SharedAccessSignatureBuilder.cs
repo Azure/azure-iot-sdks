@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Devices.Client.Extensions;
 #if !NETMF
     using System.Collections.Generic;
+    using PCLCrypto;
 #endif
     using System.Globalization;
 #if WINDOWS_UWP
@@ -16,7 +17,6 @@ namespace Microsoft.Azure.Devices.Client
     using System.Runtime.InteropServices.WindowsRuntime;
     using Windows.Storage.Streams;
 #endif
-    using PCLCrypto;
 
     using System.Text;
 
@@ -134,6 +134,36 @@ namespace Microsoft.Azure.Devices.Client
             return Convert.ToString(seconds, CultureInfo.InvariantCulture);
 #endif
         }
+
+#if NETMF
+        static string Sign(string requestString, string key)
+        {
+            // computing SHA256 signature using a managed code library
+            var hmac = SHA.computeHMAC_SHA256(Convert.FromBase64String(key), Encoding.UTF8.GetBytes(requestString));
+            return Convert.ToBase64String(hmac);
+
+            // computing SHA256 signature using the .NET Micro Framework classes
+            // this requires that the appropriate assemblies are compiled and available in the .NETMF build it's being used
+            // required assemblies are: Microsoft.SPOT.Cryptoki and System.Security.Cryptography
+            //using (Microsoft.SPOT.Cryptoki.Session openSession = new Microsoft.SPOT.Cryptoki.Session("", Microsoft.SPOT.Cryptoki.MechanismType.SHA256_HMAC))
+            //{
+            //    Microsoft.SPOT.Cryptoki.CryptokiAttribute[] secretKey = new Microsoft.SPOT.Cryptoki.CryptokiAttribute[] 
+            //    { 
+            //        new Microsoft.SPOT.Cryptoki.CryptokiAttribute(Microsoft.SPOT.Cryptoki.CryptokiAttribute.CryptokiType.Class, Microsoft.SPOT.Cryptoki.Utility.ConvertToBytes((int)Microsoft.SPOT.Cryptoki.CryptokiClass.SECRET_KEY)),
+            //        new Microsoft.SPOT.Cryptoki.CryptokiAttribute(Microsoft.SPOT.Cryptoki.CryptokiAttribute.CryptokiType.KeyType, Microsoft.SPOT.Cryptoki.Utility.ConvertToBytes((int)System.Security.Cryptography.CryptoKey.KeyType.GENERIC_SECRET)),
+            //        new Microsoft.SPOT.Cryptoki.CryptokiAttribute(Microsoft.SPOT.Cryptoki.CryptokiAttribute.CryptokiType.Value, Convert.FromBase64String(key)) 
+            //    }; 
+
+            //    System.Security.Cryptography.CryptoKey binKey = System.Security.Cryptography.CryptoKey.LoadKey(openSession, secretKey);
+
+            //    using (System.Security.Cryptography.KeyedHashAlgorithm hmacOpenSSL = new System.Security.Cryptography.KeyedHashAlgorithm(System.Security.Cryptography.KeyedHashAlgorithmType.HMACSHA256, binKey))
+            //    {
+            //        byte[] hmac1 = hmacOpenSSL.ComputeHash(Encoding.UTF8.GetBytes(requestString));
+            //        return Convert.ToBase64String(hmac1);
+            //    }
+            //}
+        }
+#else
         static string Sign(string requestString, string key)
         {
             var algorithm = WinRTCrypto.MacAlgorithmProvider.OpenAlgorithm(MacAlgorithm.HmacSha256);
@@ -142,5 +172,6 @@ namespace Microsoft.Azure.Devices.Client
             var mac = hash.GetValueAndReset();
             return Convert.ToBase64String(mac);
         }
+#endif
     }
 }

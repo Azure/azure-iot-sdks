@@ -4,15 +4,21 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+
+#if !NETMF
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.Serialization;
     using Microsoft.Azure.Devices.Client.Common;
     using Microsoft.Azure.Devices.Client.Extensions;
+#else
+    using System.Collections;
+#endif
 
     static class Utils
     {
+#if !NETMF
         static readonly Dictionary<DeliveryAcknowledgement, string> AckTypeMap = new Dictionary<DeliveryAcknowledgement, string>();
         static readonly Dictionary<string, DeliveryAcknowledgement> AckTypeReverseMap = new Dictionary<string, DeliveryAcknowledgement>(StringComparer.OrdinalIgnoreCase);
 
@@ -31,9 +37,9 @@ namespace Microsoft.Azure.Devices.Client
                 AckTypeReverseMap.Add(memberName, (DeliveryAcknowledgement)field.GetValue(null));
             }
         }
+#endif
 
-
-#if !PCL && !WINDOWS_UWP
+#if !PCL && !WINDOWS_UWP && !NETMF
         public static void ValidateBufferBounds(byte[] buffer, int offset, int size)
         {
             if (buffer == null)
@@ -75,15 +81,8 @@ namespace Microsoft.Azure.Devices.Client
         }
 
 #endif
-        public static DeliveryAcknowledgement ConvertDeliveryAckTypeFromString(string value)
-        {
-            DeliveryAcknowledgement result;
-            if (AckTypeReverseMap.TryGetValue(value, out result))
-            {
-                return result;
-            }
-            throw new NotSupportedException($"Unknown value: '{value}'");
-        }
+
+#if !NETMF
 
         public static string ConvertDeliveryAckTypeToString(DeliveryAcknowledgement value)
         {
@@ -94,5 +93,63 @@ namespace Microsoft.Azure.Devices.Client
             }
             throw new NotSupportedException($"Unknown value: '{value}'");
         }
+
+        public static DeliveryAcknowledgement ConvertDeliveryAckTypeFromString(string value)
+        {
+            DeliveryAcknowledgement result;
+            if (AckTypeReverseMap.TryGetValue(value, out result))
+            {
+                return result;
+            }
+            throw new NotSupportedException($"Unknown value: '{value}'");
+        }
+
+#else
+
+        /* 
+         * Development notes: 
+         * 1) NETMF doesn't have the same reflection goodies of the full framework to browse fields and such
+         * 2) replacing the AckTypeMap and AckTypeReverseMap Dictionaries with an Hastable could work but it takes too much RAM (which is at premium in NETMF)
+         * 3) the best approach is to do this the 'hard' way 
+        */
+
+        public static DeliveryAcknowledgement ConvertDeliveryAckTypeFromString(string value)
+        {
+            switch (value)
+            {
+                case "none":
+                    return DeliveryAcknowledgement.None;
+                case "negative":
+                    return DeliveryAcknowledgement.NegativeOnly;
+                case "positive":
+                    return DeliveryAcknowledgement.PositiveOnly;
+                case "full":
+                    return DeliveryAcknowledgement.Full;
+
+                default:
+                    throw new NotSupportedException("Unknown value: '" + value + "'");
+            }
+        }
+
+        public static string ConvertDeliveryAckTypeToString(DeliveryAcknowledgement value)
+        {
+            switch (value)
+            {
+                case DeliveryAcknowledgement.None:
+                    return "none";
+                case DeliveryAcknowledgement.NegativeOnly:
+                    return "negative";
+                case DeliveryAcknowledgement.PositiveOnly:
+                    return "positive";
+                case DeliveryAcknowledgement.Full:
+                    return "full";
+
+                default:
+                    throw new NotSupportedException("Unknown value: '" + value + "'");
+            }
+        }
+
+#endif
+
     }
 }

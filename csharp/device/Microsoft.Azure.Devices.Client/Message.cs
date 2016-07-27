@@ -541,7 +541,11 @@ namespace Microsoft.Azure.Devices.Client
             return false;
         }
 
+#if NETMF || PCL
+        internal bool IsBodyCalled { get { return 1 == Interlocked.Exchange(ref this.getBodyCalled, 1); } }
+#else
         internal bool IsBodyCalled => Volatile.Read(ref this.getBodyCalled) == 1;
+#endif
 
         void SetGetBodyCalled()
         {
