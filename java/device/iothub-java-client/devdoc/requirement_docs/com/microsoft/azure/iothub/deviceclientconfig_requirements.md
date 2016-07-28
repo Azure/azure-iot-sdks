@@ -11,7 +11,7 @@ Configuration settings for an IoT Hub device client. Validates all user-defined 
 ```java
 public final class DeviceClientConfig
 {
-    public long TOKEN_VALID_SECS = 3600;
+    private long tokenValidSecs = 3600;
     public static final int DEFAULT_READ_TIMEOUT_MILLIS = 240000;
     public static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
 
@@ -92,7 +92,15 @@ public String getDeviceKey();
 public long getMessageValidSecs();
 ```
 
-** SRS_DEVICECLIENTCONFIG_11_005: [**The function shall return the value of TOKEN_VALID_SECS.**] **
+** SRS_DEVICECLIENTCONFIG_11_005: [**The function shall return the value of tokenValidSecs.**] **
+
+### setTokenValidSecs
+
+```java
+public setTokenValidSecs(long expiryTime);
+```
+
+** SRS_DEVICECLIENTCONFIG_25_016: [**The function shall set the value of tokenValidSecs.**] **
 
 ### getPathToCertificate
 
@@ -108,7 +116,7 @@ public String getPathToCertificate();
 public void setPathToCert(String pathToCertificate);
 ```
 
-** SRS_DEVICECLIENTCONFIG_11_015: [**The function shall set the path to the certificate**] **
+** SRS_DEVICECLIENTCONFIG_25_015: [**The function shall set the path to the certificate**] **
 
 
 ### setMessageCallback

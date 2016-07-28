@@ -1,7 +1,6 @@
 
 # IoTHubTransportAMQP Requirements
 
-
  
 ## Overview
 
@@ -232,6 +231,10 @@ The below requirements only apply when authentication type is x509:
 
 **SRS_IOTHUBTRANSPORTAMQP_09_070: [**IoTHubTransportAMQP_DoWork shall create the AMQP message sender using messagesender_create() AMQP API**]**
 
+**SRS_IOTHUBTRANSPORTAMQP_09_191: [**IoTHubTransportAMQP_DoWork shall create each AMQP message sender tracking its state changes with a callback function**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_09_192: [**If a message sender instance changes its state to MESSAGE_SENDER_STATE_ERROR (first transition only) the connection retry logic shall be triggered**]**
+
 **SRS_IOTHUBTRANSPORTAMQP_09_071: [**IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message sender instance fails to be created, flagging the connection to be re-established**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_072: [**IoTHubTransportAMQP_DoWork shall open the AMQP message sender using messagesender_open() AMQP API**]**
@@ -247,6 +250,10 @@ The below requirements only apply when authentication type is x509:
 **SRS_IOTHUBTRANSPORTAMQP_09_141: [**If IoTHubTransportAMQP_DoWork fails to set the settle mode on the AMQP link for receiving messages, the function shall fail and return immediately, flagging the connection to be re-stablished**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_077: [**IoTHubTransportAMQP_DoWork shall create the AMQP message receiver using messagereceiver_create() AMQP API**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_09_189: [**IoTHubTransportAMQP_DoWork shall create each AMQP message receiver tracking its state changes with a callback function**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_09_190: [**If a message receiver instance changes its state to MESSAGE_RECEIVER_STATE_ERROR (first transition only) the connection retry logic shall be triggered**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_078: [**IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message receiver instance fails to be created, flagging the connection to be re-established**]**
 
