@@ -33,13 +33,13 @@ if($v1 -ne $v2) {
     return
 }
 
+if($v1 -ne $v3) {
+    Write-Host "Error: Mismatching assembly versions in files $dotNetFile and $dotNetPCLFile. Check AssemblyInformationalVersion attribute in each file." -foregroundcolor "red"
+    return
+}
+
 $id='Microsoft.Azure.Devices.Client'
-$id2='Microsoft.Azure.Devices.Client.PCL'
 
 echo "Creating NuGet package $id version $v1"
 
-.\NuGet.exe pack "$id.nuspec" -Prop Configuration=Release -Prop id=$id -Prop Version=$v1
-
-echo "Creating NuGet package $id2 version $v1"
-
-.\NuGet.exe pack "$id2.nuspec" -Prop Configuration=Release -Prop id=$id2 -Prop Version=$v1
+.\NuGet.exe pack -Verbosity detailed "$id.nuspec" -Prop Configuration=Release -Prop id=$id -Prop Version=$v1
