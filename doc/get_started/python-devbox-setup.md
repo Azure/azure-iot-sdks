@@ -76,7 +76,7 @@ Important note: The boost libraries can only be used to build for a single Pytho
 3. Run the script `build_client.cmd` in the **python\\build_all\\windows** directory.
 4. After a successful build, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
-To use the iothub_client extension for native code debugging with [Python Tools for Visual Studio] run the script: `build_client.cmd -config Debug` to get the full debug symbol support.
+To use the iothub_client extension for native code debugging with [Python Tools for Visual Studio] run the script: `build_client.cmd --config Debug` to get the full debug symbol support.
 
 <a name="samplecode"/>
 ## Sample applications
