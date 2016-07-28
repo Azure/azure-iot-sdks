@@ -541,7 +541,15 @@ namespace Microsoft.Azure.Devices.Client
             return false;
         }
 
+#if NETMF
+        internal bool IsBodyCalled
+        {
+			// A safe comparison for one that will never actually perform an exchange (maybe not necessary?)
+            get { return Interlocked.CompareExchange(ref this.getBodyCalled, 9999, 9999) == 1; }
+        }
+#else
         internal bool IsBodyCalled => Volatile.Read(ref this.getBodyCalled) == 1;
+#endif
 
         void SetGetBodyCalled()
         {
