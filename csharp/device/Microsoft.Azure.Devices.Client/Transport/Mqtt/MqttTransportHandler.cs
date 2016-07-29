@@ -239,13 +239,19 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
-            if (disposing)
+            try
             {
-                if (this.TryStop())
+                if (disposing)
                 {
-                    this.Cleanup();
+                    if (this.TryStop())
+                    {
+                        this.Cleanup();
+                    }
                 }
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 

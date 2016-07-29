@@ -213,7 +213,7 @@ else()
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_pthreads.c)
 endif()
 
-add_subdirectory(service)
+add_subdirectory(iothub_service_client)
 
 if(${run_e2e_tests} OR ${run_longhaul_tests})
     add_subdirectory(testtools)

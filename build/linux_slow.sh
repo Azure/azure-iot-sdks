@@ -17,5 +17,5 @@ c/build_all/linux/build.sh --run-e2e-tests #-x
 [ $? -eq 0 ] || exit $?
 
 # -- Node.js --
-build/linux_node.sh
+jenkins/linux_node.sh
 [ $? -eq 0 ] || exit $?

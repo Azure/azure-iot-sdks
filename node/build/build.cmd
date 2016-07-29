@@ -87,6 +87,9 @@ if errorlevel 1 goto :cleanup
 call :lint-and-test %node-root%\service
 if errorlevel 1 goto :cleanup
 
+call :lint-and-test %node-root%\e2etests
+if errorlevel 1 goto :cleanup
+
 cd %node-root%\..\tools\iothub-explorer
 call npm -s test
 if errorlevel 1 goto :cleanup

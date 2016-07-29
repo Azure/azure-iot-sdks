@@ -5,10 +5,6 @@
 
 compileAsC99()
 
-if(NOT ${use_http})
-    message(FATAL_ERROR "iothub_client_sample_x509 being generated without HTTP support")
-endif()
-
 set(iothub_client_sample_x509_c_files
 iothub_client_sample_x509.c
 )

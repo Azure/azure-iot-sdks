@@ -49,23 +49,9 @@ cmake -DWINCE=TRUE -DCMAKE_SYSTEM_NAME=WindowsCE -DCMAKE_SYSTEM_VERSION=8.0 -DCM
 
 if not %errorlevel%==0 exit /b %errorlevel%
 
-rem Currently only building of HTTP sample is supported
+rem Currently, only building of HTTP sample is supported
 msbuild "%USERPROFILE%\cmake_ce8\iothub_client\samples\iothub_client_sample_http\iothub_client_sample_http.vcxproj
 if not %errorlevel%==0 exit /b %errorlevel%
 
-rem -- Copy all libraries to the repo directory to be able to build solutions
-xcopy /q /y /R "%USERPROFILE%\cmake_ce8\iothub_client\Debug\*.*" "%build-root%\build_output\c\wec2013\debug\*.*"
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-xcopy /q /y /R "%USERPROFILE%\cmake_ce8\common\Debug\*.*" "%build-root%\build_output\c\wec2013\debug\*.*"
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-xcopy /q /y /R "%USERPROFILE%\cmake_ce8\serializer\Debug\*.*" "%build-root%\build_output\c\wec2013\debug\*.*"
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-rem currently only debug binaries are built
-xcopy /q /y /R "%USERPROFILE%\cmake_ce8\iothub_client\Release\*.*" "%build-root%\build_output\c\wec2013\release\*.*"
-xcopy /q /y /R "%USERPROFILE%\cmake_ce8\common\Release\*.*" "%build-root%\build_output\c\wec2013\release\*.*"
-xcopy /q /y /R "%USERPROFILE%\cmake_ce8\serializer\Release\*.*" "%build-root%\build_output\c\wec2013\release\*.*"
 
 

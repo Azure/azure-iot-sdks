@@ -11,7 +11,7 @@ set(iothub_service_client_c_files
 ./src/iothub_registrymanager.c
 ./src/iothub_messaging_ll.c
 ./src/iothub_service_client_auth.c
-../../iothub_client/src/iothub_message.c
+../iothub_client/src/iothub_message.c
 
 )
 
@@ -21,7 +21,7 @@ set(iothub_service_client_h_files
 ./inc/iothub_registrymanager.h
 ./inc/iothub_messaging_ll.h
 ./inc/iothub_service_client_auth.h
-../../iothub_client/inc/iothub_message.h
+../iothub_client/inc/iothub_message.h
 )
 
 if(MSVC)
@@ -32,7 +32,9 @@ include_directories(${SHARED_UTIL_INC_FOLDER})
 
 include_directories(${UAMQP_INC_FOLDER})
 
-include_directories(${PARSON_INC_FOLDER})
+set(IOTHUB_SERVICE_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "This is the include folder for iothub_service_client" FORCE)
+
+include_directories(${CMAKE_CURRENT_LIST_DIR}/parson ${IOTHUB_SERVICE_CLIENT_INC_FOLDER} ${CMAKE_CURRENT_LIST_DIR}/../iothub_client/inc)
 
 IF(WIN32)
 	#windows needs this define

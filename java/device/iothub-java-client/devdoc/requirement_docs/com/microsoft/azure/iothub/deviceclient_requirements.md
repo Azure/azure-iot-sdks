@@ -126,10 +126,19 @@ Options handled by the client:
 
 **SRS_DEVICECLIENT_02_002: [**"SetMinimumPollingInterval" - time in miliseconds between 2 consecutive polls.**]**
 
-**SRS_DEVICECLIENT_02_003: [**Available only for HTTP.**]**
+**SRS_DEVICECLIENT_02_003: [**Option "SetMinimumPollingInterval" is available only for HTTP.**]**
 
-**SRS_DEVICECLIENT_02_004: [**Value needs to have type long**.]**
+**SRS_DEVICECLIENT_02_004: [**"SetMinimumPollingInterval" needs to have value type long**.]**
 
-**SRS_DEVICECLIENT_02_005: [**"SetCertificatePath" - path to the certificate to verify peer .**]**
+**SRS_DEVICECLIENT_25_005: [**"SetCertificatePath" - path to the certificate to verify peer .**]**
 
-**SRS_DEVICECLIENT_02_006: [**Available only for AMQP.**]**
+**SRS_DEVICECLIENT_25_006: [**"SetCertificatePath" is available only for AMQP.**]**
+
+**SRS_DEVICECLIENT_25_007: [**"SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time .**]**
+
+**SRS_DEVICECLIENT_25_009: [**"SetSASTokenExpiryTime" should have value type long**.]**
+
+**SRS_DEVICECLIENT_25_008: [**"SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT.**]**
+
+**SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport if transport is already open after updating expiry time**.]**
+
