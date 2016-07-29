@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The PCL package is deprecated; it refers to the main package and has no other content -->
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>$id$</id>
+        <version>$Version$</version>
+        <title>Microsoft Azure Devices Client PCL</title>
+        <authors>Microsoft Corp</authors>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <licenseUrl>https://github.com/Azure/azure-iot-sdks/blob/master/LICENSE</licenseUrl>
+        <description>Device SDK for Azure IoT Devices.
+
+Note: This package has been deprecated and is provided for backward compatibility only.
+Use Microsoft.Azure.Devices.Client package which now supports PCL.
+
+        </description>
+        <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</iconUrl>
+        <releaseNotes>Azure IotHub PCL library.</releaseNotes>
+        <copyright>Copyright 2016</copyright>
+        <tags>Microsoft Azure IoT IoTHub Device Client .net HTTP PCL Android iOS</tags>
+        <language>en-US</language>
+        <dependencies>
+            <dependency id="Microsoft.Azure.Devices.Client" version="1.0.15" />
+        </dependencies>
+    </metadata>
+    <files>
+    </files>
+</package>
