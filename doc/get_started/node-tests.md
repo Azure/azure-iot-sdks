@@ -29,9 +29,46 @@ End-to-end tests are used to validate a complete scenario from the device to the
 The end-to-end tests can be found in the `/node/e2etests` folder. 
 
 # Building and running tests
-The build for our Node.js SDK operates in 3 distinct steps:
-1. **Setup the environment:** Because our SDK is released in multiple packages, we rely on `npm link` a lot to create links between our packages in their respective `node_modules` folders instead of installing them from the npm global repository.
-Setting up those links is the role of the `dev-setup.cmd` or `dev-setup.sh` scripts (depending on your OS) contained in the `/node/build` folder. 
-2. **Run all the tests:** Once all links have been created, all the tests are ran using the `build.cmd` or `build.sh` scripts. This script exit code will tell our build system if the build was successful or not.
-3. **Teardown the environment:** Once the tests have ran, and whether the build is successful or not, we tear down the npm links using the `dev-teardown.cmd` or `dev-teardown.sh` scripts.
+## Prerequisites
+- Node.js v0.10 or higher
+- OpenSSL
+
+In most cases on Windows you will also need to define the OPENSSL_CONF environment variable and set it to point to your openssl.cnf file (should be in the OpenSSL folder). If it's not defined, the test setup script will let you know. 
+
+## Create local links between packages
+The purpose of this step is to create links between our packages in their respective `node_modules` folders instead of installing them from the npm global repository. Once this script is done, all package folders within the `node` folder point to each other and you can start running the tests.
+
+This is done by running the following script from a command line prompt:
+```
+node\build\dev-setup.cmd
+```
+or on Mac/Linux:
+```
+node/build/dev-setup.sh
+```
+
+## Run all the tests
+Since the SDK is written using plain javascript there is no compile step, so running the build script from the command line is the easiest way to run the tests in the same way our gated build system would:
+```
+node\build\build.cmd --integration-tests
+```
+or on Mac/Linux
+```
+node\build\build.cmd --integration-tests
+```
+
+The `--integration-tests` flag ensures all tests (including integration and end-to-end) are run. If you omit it, it will run only unit tests.
+
+This script will output the result of all the tests as they run. If a test fails it will show the error. the exit code of this script is `0` if all tests passed, `1` if one or more failed.
+
+## Tear down the environment
+If you want to remove the links created between the package folders, you can clean up your environment by running the teardown script:
+```
+node\build\dev-teardown.cmd
+```
+or on Mac/Linux
+```
+node/build/dev-teardown.sh
+```
+
 
