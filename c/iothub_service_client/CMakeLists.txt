@@ -11,7 +11,7 @@ set(iothub_service_client_c_files
 ./src/iothub_registrymanager.c
 ./src/iothub_messaging_ll.c
 ./src/iothub_service_client_auth.c
-../../iothub_client/src/iothub_message.c
+../iothub_client/src/iothub_message.c
 
 )
 
@@ -21,7 +21,7 @@ set(iothub_service_client_h_files
 ./inc/iothub_registrymanager.h
 ./inc/iothub_messaging_ll.h
 ./inc/iothub_service_client_auth.h
-../../iothub_client/inc/iothub_message.h
+../iothub_client/inc/iothub_message.h
 )
 
 if(MSVC)
