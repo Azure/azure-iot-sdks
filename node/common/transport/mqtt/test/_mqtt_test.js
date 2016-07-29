@@ -12,6 +12,8 @@ var Message = require('azure-iot-common').Message;
 
 describe('Mqtt', function () {
   describe('#constructor', function () {
+    
+    
   });
 
   describe('#connect', function() {
@@ -250,4 +252,4 @@ describe('Mqtt', function () {
       fakemqtt.emit('connect', { connack: true });
     });
   });
-}); 
+});

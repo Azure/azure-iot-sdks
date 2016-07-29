@@ -127,16 +127,12 @@ public class SendEvent
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
-        System.out.println("Updated token expiry time to " + time);
-
         client.open();
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending the "
                 + "following event messages:");
+
 
         for (int i = 0; i < numRequests; ++i)
         {
@@ -161,13 +157,11 @@ public class SendEvent
             }
         }
 
-
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
 
         client.close();
 
         System.out.println("Shutting down...");
-
     }
 }
