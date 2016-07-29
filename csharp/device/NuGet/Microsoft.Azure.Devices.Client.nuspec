@@ -17,6 +17,7 @@
 
             <group>
                 <dependency id="Newtonsoft.Json" version="6.0.8" />
+                <dependency id="PCLCrypto" version="1.0.86" />
             </group>
 
             <group targetFramework="net45" >
@@ -35,7 +36,7 @@
             </group>
 
             <group targetFramework="win8">
-                <dependency id="PCLCrypto" version="1.0.86" /> <!-- TODO: why should PCLCrypto be repeated for every group? -->
+                <dependency id="PCLCrypto" version="1.0.86" /> 
             </group>
             <group targetFramework="wp8">
                 <dependency id="PCLCrypto" version="1.0.86" />
