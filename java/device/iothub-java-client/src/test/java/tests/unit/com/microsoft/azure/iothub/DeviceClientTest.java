@@ -738,7 +738,7 @@ public class DeviceClientTest
         client.setOption("SetMinimumPollingInterval", value);
     }
 
-    //Tests_SRS_DEVICECLIENT_02_002: ["SetMinimumPollingInterval" - time in miliseconds between 2 consecutive polls.] */
+    //Tests_SRS_DEVICECLIENT_02_002: ["SetMinimumPollingInterval" - time in miliseconds between 2 consecutive polls.]
     @Test
     public void setOptionMinimumPollingIntervalSucceeds(
             @Mocked final ScheduledExecutorService mockScheduler,
@@ -761,6 +761,215 @@ public class DeviceClientTest
                mockScheduler.scheduleAtFixedRate((IotHubSendTask) any,
                         anyLong, 3,
                         TimeUnit.MILLISECONDS);
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_009: [**"SetSASTokenExpiryTime" should have value type long.]
+    @Test(expected = IllegalArgumentException.class)
+    public void setOptionSASTokenExpiryTimeWithStringInsteadOfLongFails(
+            @Mocked final HttpsTransport mockTransport)
+            throws IOException, URISyntaxException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.setOption("SetSASTokenExpiryTime", "thisIsNotALong");
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_007: ["SetSASTokenExpiryTime" - time in seconds after which SAS Token expires.]
+    @Test
+    public void setOptionSASTokenExpiryTimeHTTPSucceeds(
+            @Mocked final HttpsTransport mockTransport)
+            throws IOException, URISyntaxException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        long value = 60;
+        client.setOption("SetSASTokenExpiryTime", value);
+
+        client.open();
+
+        new Verifications()
+        {
+            {
+                mockConfig.setTokenValidSecs(60);
+                mockTransport.open();
+                times = 1;
+                mockTransport.close();
+                times = 0;
+
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_007: ["SetSASTokenExpiryTime" - time in seconds after which SAS Token expires.]
+    //Tests_SRS_DEVICECLIENT_25_010: ["SetSASTokenExpiryTime" shall restart the transport if transport is already open after updating expiry time.]
+    @Test
+    public void setOptionSASTokenExpiryTimeAfterClientOpenHTTPSucceeds(
+            @Mocked final HttpsTransport mockTransport)
+            throws IOException, URISyntaxException
+    {
+        new NonStrictExpectations() {
+            {
+                mockTransport.isEmpty();
+                result = true;
+            }
+        };
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+        long value = 60;
+        client.setOption("SetSASTokenExpiryTime", value);
+
+        new Verifications()
+        {
+            {
+                mockTransport.close();
+                times = 1;
+                mockConfig.setTokenValidSecs(60);
+                times = 1;
+                mockTransport.open();
+                times = 2;
+
+            }
+        };
+    }
+    //Tests_SRS_DEVICECLIENT_25_007: ["SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time.]
+    @Test
+    public void setOptionSASTokenExpiryTimeAMQPSucceeds(
+            @Mocked final AmqpsTransport mockTransport)
+            throws IOException, URISyntaxException
+    {
+
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        long value = 60;
+        client.setOption("SetSASTokenExpiryTime", value);
+
+        client.open();
+
+        new Verifications()
+        {
+            {
+                mockConfig.setTokenValidSecs(60);
+                mockTransport.open();
+                times = 1;
+                mockTransport.close();
+                times = 0;
+
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_007: ["SetSASTokenExpiryTime" - time in seconds after which SAS Token expires.]
+    //Tests_SRS_DEVICECLIENT_25_010: ["SetSASTokenExpiryTime" shall restart the transport if transport is already open after updating expiry time.]
+    @Test
+    public void setOptionSASTokenExpiryTimeAfterClientOpenAMQPSucceeds(
+            @Mocked final AmqpsTransport mockTransport)
+            throws IOException, URISyntaxException
+    {
+        new NonStrictExpectations() {
+            {
+                mockTransport.isEmpty();
+                result = true;
+            }
+        };
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+        long value = 60;
+        client.setOption("SetSASTokenExpiryTime", value);
+
+        new Verifications()
+        {
+            {
+                mockTransport.close();
+                times = 1;
+                mockConfig.setTokenValidSecs(60);
+                times = 1;
+                mockTransport.open();
+                times = 2;
+
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_007: [**"SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time.]
+    @Test
+    public void setOptionSASTokenExpiryTimeMQTTSucceeds(
+            @Mocked final MqttTransport mockTransport)
+            throws IOException, URISyntaxException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        long value = 60;
+        client.setOption("SetSASTokenExpiryTime", value);
+
+        client.open();
+
+        new Verifications()
+        {
+            {
+                mockConfig.setTokenValidSecs(60);
+                mockTransport.open();
+                times = 1;
+                mockTransport.close();
+                times = 0;
+
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_007: ["SetSASTokenExpiryTime" - time in seconds after which SAS Token expires.]
+    //Tests_SRS_DEVICECLIENT_25_010: ["SetSASTokenExpiryTime" shall restart the transport if transport is already open after updating expiry time.]
+    @Test
+    public void setOptionSASTokenExpiryTimeAfterClientOpenMQTTSucceeds(
+            @Mocked final MqttTransport mockTransport)
+            throws IOException, URISyntaxException
+    {
+        new NonStrictExpectations() {
+            {
+                mockTransport.isEmpty();
+                result = true;
+            }
+        };
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+        long value = 60;
+        client.setOption("SetSASTokenExpiryTime", value);
+
+        new Verifications()
+        {
+            {
+                mockTransport.close();
+                times = 1;
+                mockConfig.setTokenValidSecs(60);
+                times = 1;
+                mockTransport.open();
+                times = 2;
+
             }
         };
     }

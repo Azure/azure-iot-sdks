@@ -106,7 +106,7 @@ public class DeviceClientConfigTest
         assertThat(testDeviceKey, is(expectedDeviceKey));
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_11_005: [The function shall return the value of TOKEN_VALID_SECS.]
+    // Tests_SRS_DEVICECLIENTCONFIG_11_005: [The function shall return the value of tokenValidSecs.]
     @Test
     public void getMessageValidSecsReturnsConstant() throws URISyntaxException
     {
@@ -117,8 +117,26 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
         long testMessageValidSecs = config.getTokenValidSecs();
 
-        final long expectedMessageValidSecs = config.TOKEN_VALID_SECS;
+        final long expectedMessageValidSecs = 3600;
         assertThat(testMessageValidSecs, is(expectedMessageValidSecs));
+    }
+
+    // Tests_SRS_DEVICECLIENTCONFIG_25_016: [The function shall set the value of tokenValidSecs.]
+    @Test
+    public void getandsetMessageValidSecsReturnsConstant() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+
+        long testsetMessageValidSecs = 60;
+        config.setTokenValidSecs(testsetMessageValidSecs);
+        long testgetMessageValidSecs= config.getTokenValidSecs();
+
+        final long expectedMessageValidSecs = testsetMessageValidSecs;
+        assertThat(testgetMessageValidSecs, is(expectedMessageValidSecs));
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
