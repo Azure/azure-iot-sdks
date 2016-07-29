@@ -76,7 +76,7 @@ echo ****************************************************************
 
 
 REM kick off the build!
-java -jar "%build-root%"\tools\jenkins-cli.jar -s http://azure-iot-sdks-ci.westus.cloudapp.azure.com:8080/ build _integrate-into-develop -p COMMIT_ID=%tracking_name% -p AZURE_REPO=%repo_url% -p BRANCH_TO_MERGE_TO=develop -s -v
+java -jar "%build-root%"\tools\jenkins-cli.jar -s http://azure-iot-sdks-ci.westus.cloudapp.azure.com:8080/ build _anyrepo2M-integrate-into-develop -p COMMIT_ID=%tracking_name% -p AZURE_REPO=%repo_url% -p BRANCH_TO_MERGE_TO=develop -s -v
 
 rem -----------------------------------------------------------------------------
 rem -- done

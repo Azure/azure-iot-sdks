@@ -115,10 +115,6 @@ lint_and_test $node_root/device/transport/mqtt
 lint_and_test $node_root/service
 [ $? -eq 0 ] || cleanup_and_exit $?
 
-lint_and_test $node_root/e2etests
-[ $? -eq 0 ] || cleanup_and_exit $?
-
 cd $node_root/../tools/iothub-explorer
 npm -s test
-
-cleanup_and_exit $?
+[ $? -eq 0 ] || cleanup_and_exit $?

@@ -50,19 +50,16 @@ MAP_HANDLE Map_Create(MAP_FILTER_CALLBACK mapFilterFunc)
 
 void Map_Destroy(MAP_HANDLE handle)
 {
-    (void)handle;
 	// mockFilterFunc = NULL;
 }
 
 MAP_HANDLE Map_Clone(MAP_HANDLE handle)
 {
-    (void)handle;
 	return (MAP_HANDLE)(rand() * 10 + 1);
 }
 
 MAP_RESULT Map_Add(MAP_HANDLE handle, const char* key, const char* value)
 {
-    (void)handle;
 	MAP_RESULT result = MAP_OK;
 
 	if ((key == NULL) || (value == NULL))
@@ -92,7 +89,6 @@ MAP_RESULT Map_Add(MAP_HANDLE handle, const char* key, const char* value)
 
 MAP_RESULT Map_AddOrUpdate(MAP_HANDLE handle, const char* key, const char* value)
 {
-    (void)handle;
 	MAP_RESULT result = MAP_OK;
 
 	if ((key == NULL) || (value == NULL) || (handle == NULL))
@@ -174,7 +170,6 @@ MAP_RESULT Map_GetInternals(MAP_HANDLE handle, const char*const** keys, const ch
 	*count = 0;
 	*keys = mockKeyArray;
 	*values = mockValueArray;
-	(void)handle;
 
 	if (*mockKey != '\0')
 	{
@@ -190,7 +185,6 @@ IOTHUB_CLIENT_HANDLE mockClientHandle = (IOTHUB_CLIENT_HANDLE)0x12345678;
 
 IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    (void)protocol;
 	if (connectionString == NULL)
 	{
 		return NULL;
@@ -201,20 +195,15 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
 
 IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
 {
-    (void)config;
 	return mockClientHandle;
 }
 
 void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
 {
-    (void)iotHubClientHandle;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)
 {
-    (void)eventMessageHandle;
-    (void)eventConfirmationCallback;
-    (void)userContextCallback;
 	if (iotHubClientHandle == NULL)
 	{
 		return IOTHUB_CLIENT_INVALID_ARG;
@@ -225,7 +214,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClie
 
 IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
-    (void)iotHubClientStatus;
 	if (iotHubClientHandle == NULL)
 	{
 		return IOTHUB_CLIENT_INVALID_ARG;
@@ -236,8 +224,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_GetSendStatus(IOTHUB_CLIENT_HANDLE iotHubClien
 
 IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void* userContextCallback)
 {
-    (void)messageCallback;
-    (void)userContextCallback;
 	if (iotHubClientHandle == NULL)
 	{
 		return IOTHUB_CLIENT_INVALID_ARG;
@@ -248,7 +234,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
 
 IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime)
 {
-    (void)lastMessageReceiveTime;
 	if (iotHubClientHandle == NULL)
 	{
 		return IOTHUB_CLIENT_INVALID_ARG;
@@ -269,10 +254,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHan
 
 IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context)
 {
-    (void)size;
-    (void)iotHubClientFileUploadCallback;
-    (void)context;
-
     if ((iotHubClientHandle == NULL) || (destinationFileName == NULL) || (source == NULL))
     {
         return IOTHUB_CLIENT_INVALID_ARG;
@@ -436,7 +417,6 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHu
 
 void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
-    (void)iotHubMessageHandle;
 }
 
 // "iothubtransporthttp.h"
