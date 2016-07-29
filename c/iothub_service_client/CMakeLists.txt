@@ -32,7 +32,7 @@ include_directories(${SHARED_UTIL_INC_FOLDER})
 
 include_directories(${UAMQP_INC_FOLDER})
 
-include_directories(${PARSON_INC_FOLDER})
+include_directories(${CMAKE_CURRENT_LIST_DIR}/parson ${CMAKE_CURRENT_LIST_DIR}/inc ${CMAKE_CURRENT_LIST_DIR}/../iothub_client/inc)
 
 IF(WIN32)
 	#windows needs this define
