@@ -37,7 +37,11 @@ namespace Microsoft.Azure.Devices.Client
             }
 
             this.Audience = builder.HostName;
+#if NETMF
+            this.HostName = builder.GatewayHostName.IsNullOrEmpty() ? builder.HostName : builder.GatewayHostName;
+#else
             this.HostName = String.IsNullOrEmpty(builder.GatewayHostName) ? builder.HostName : builder.GatewayHostName;
+#endif
             this.SharedAccessKeyName = builder.SharedAccessKeyName;
             this.SharedAccessKey = builder.SharedAccessKey;
             this.SharedAccessSignature = builder.SharedAccessSignature; 
