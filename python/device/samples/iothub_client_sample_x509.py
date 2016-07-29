@@ -36,8 +36,8 @@ send_callbacks = 0
 
 protocol = IoTHubTransportProvider.HTTP
 
-# String containing Hostname, Device Id & Device Key in the format:
-# "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
+# String containing Hostname, Device Id in the format:
+# "HostName=<host_name>;DeviceId=<device_id>;x509=true"
 connection_string = "[device connection string]"
 
 msg_txt = "{\"deviceId\": \"myPythonDevice\",\"windSpeed\": %.2f}"
@@ -101,8 +101,9 @@ def iothub_client_init():
     iotHubClient = IoTHubClient(connection_string, protocol)
 
     # HTTP specific settings
-    iotHubClient.set_option("timeout", timeout)
-    iotHubClient.set_option("MinimumPollingTime", minimum_polling_time)
+    if iotHubClient.protocol == IoTHubTransportProvider.HTTP:
+        iotHubClient.set_option("timeout", timeout)
+        iotHubClient.set_option("MinimumPollingTime", minimum_polling_time)
 
     # set the time until a message times out
     iotHubClient.set_option("messageTimeout", message_timeout)
@@ -110,6 +111,10 @@ def iothub_client_init():
     # this brings in x509 privateKey and certificate
     iotHubClient.set_option("x509certificate", x509certificate)
     iotHubClient.set_option("x509privatekey", x509privatekey)
+
+    # to enable MQTT logging set to 1
+    if iotHubClient.protocol == IoTHubTransportProvider.MQTT:
+        iotHubClient.set_option("logtrace", 0)
 
     iotHubClient.set_message_callback(
         receive_message_callback, receive_context)
@@ -128,7 +133,7 @@ def print_last_message_time(iotHubClient):
             print(e)
 
 
-def iothub_client_sample_http_x509_run():
+def iothub_client_sample_x509_run():
 
     try:
 
@@ -199,4 +204,4 @@ if __name__ == '__main__':
     print("    Protocol %s" % protocol)
     print("    Connection string=%s" % connection_string)
 
-    iothub_client_sample_http_x509_run()
+    iothub_client_sample_x509_run()
