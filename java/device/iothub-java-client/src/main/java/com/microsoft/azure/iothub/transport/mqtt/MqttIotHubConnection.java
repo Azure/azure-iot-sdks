@@ -11,6 +11,7 @@ import com.microsoft.azure.iothub.net.IotHubUri;
 import com.microsoft.azure.iothub.transport.State;
 import com.microsoft.azure.iothub.transport.TransportUtils;
 import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class MqttIotHubConnection implements MqttCallback
     // paho mqtt only supports 10 messages in flight at the same time
     private static final int maxInFlightCount = 10;
 
-    private Queue<Message> receivedMessagesQueue  = new LinkedBlockingQueue<>();
+    private Queue<Message> receivedMessagesQueue  = new LinkedBlockingQueue<Message>();
 
     private String publishTopic;
     private String subscribeTopic;
@@ -43,6 +44,7 @@ public class MqttIotHubConnection implements MqttCallback
     private static final int mqttVersion = 4;
     private static final boolean setCleanSession = false;
     private static final int qos = 1;
+    private static final String[] enabledProtocols = new String[]{"TLSv1"};
 
     //string constants
     private static String sslPrefix = "ssl://";
@@ -346,5 +348,24 @@ public class MqttIotHubConnection implements MqttCallback
         this.connectionOptions.setMqttVersion(mqttVersion);
         this.connectionOptions.setUserName(userName);
         this.connectionOptions.setPassword(userPassword.toCharArray());
+        this.setEnabledProtocal(enabledProtocols);
+    }
+    
+    /**
+     * Set the connection options of SocketFactory which only support enabledProtocols
+     * 
+     * @param enabledProtocols the enabled protocol array
+     */
+    private void setEnabledProtocal(String[] enabledProtocols)
+    {
+		SSLSocketFactoryFactory SSLMqttFactory = new SSLSocketFactoryFactory();
+    	ProtocolOverridingSSLSocketFactory sslTLSv1;
+ 		try {
+ 			sslTLSv1 = new ProtocolOverridingSSLSocketFactory(SSLMqttFactory.createSocketFactory(null), enabledProtocols);
+ 	        this.connectionOptions.setSocketFactory(sslTLSv1);
+ 		} catch (MqttSecurityException e) {
+ 			// TODO Auto-generated catch block
+ 			e.printStackTrace();
+ 		}
     }
 }

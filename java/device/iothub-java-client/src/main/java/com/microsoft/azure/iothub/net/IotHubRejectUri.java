@@ -25,7 +25,7 @@ public final class IotHubRejectUri
     public static final Map<String, String> REJECT_QUERY_PARAM;
     static
     {
-        HashMap<String, String> rejectQueryParam = new HashMap<>();
+        HashMap<String, String> rejectQueryParam = new HashMap<String, String>();
         rejectQueryParam.put("?reject", "true");
         REJECT_QUERY_PARAM = Collections.unmodifiableMap(rejectQueryParam);
     }
