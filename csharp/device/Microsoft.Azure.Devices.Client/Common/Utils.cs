@@ -4,41 +4,41 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
-
 #if !NETMF
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
-    using System.Runtime.Serialization;
     using Microsoft.Azure.Devices.Client.Common;
-    using Microsoft.Azure.Devices.Client.Extensions;
-#else
+#endif
+    using Extensions;
     using System.Collections;
+#if NETMF
+    using Exceptions;
 #endif
 
     static class Utils
     {
-#if !NETMF
-        static readonly Dictionary<DeliveryAcknowledgement, string> AckTypeMap = new Dictionary<DeliveryAcknowledgement, string>();
-        static readonly Dictionary<string, DeliveryAcknowledgement> AckTypeReverseMap = new Dictionary<string, DeliveryAcknowledgement>(StringComparer.OrdinalIgnoreCase);
 
-        static Utils()
-        {
 #if PCL
-            IEnumerable<FieldInfo> fields = typeof(DeliveryAcknowledgement).GetRuntimeFields().Where(field => !field.IsStatic);
-#else
-            FieldInfo[] fields = typeof(DeliveryAcknowledgement).GetFields(BindingFlags.Public | BindingFlags.Static);
+        static readonly System.Collections.Generic.Dictionary<DeliveryAcknowledgement, string> AckTypeMap = new System.Collections.Generic.Dictionary<DeliveryAcknowledgement, string>();
+        static readonly System.Collections.Generic.Dictionary<string, DeliveryAcknowledgement> AckTypeReverseMap = new System.Collections.Generic.Dictionary<string, DeliveryAcknowledgement>();
+#elif !NETMF
+        static readonly Hashtable AckTypeMap = new Hashtable();
+        static readonly Hashtable AckTypeReverseMap = new Hashtable();
 #endif
 
-            foreach (FieldInfo field in fields)
+#if !NETMF
+        static Utils()
+        {
+            AckTypeMap.Add(DeliveryAcknowledgement.NegativeOnly, "negative");
+            AckTypeMap.Add(DeliveryAcknowledgement.PositiveOnly, "positive");
+            AckTypeMap.Add(DeliveryAcknowledgement.Full, "full");
+            AckTypeMap.Add(DeliveryAcknowledgement.None, "none");
+
+            foreach (DeliveryAcknowledgement key in AckTypeMap.Keys)
             {
-                string memberName = field.GetCustomAttributes().OfType<EnumMemberAttribute>().Single().Value;
-                AckTypeMap.Add((DeliveryAcknowledgement)field.GetValue(null), memberName);
-                AckTypeReverseMap.Add(memberName, (DeliveryAcknowledgement)field.GetValue(null));
+                AckTypeReverseMap.Add(AckTypeMap[key], key);
             }
         }
 #endif
-
 
 #if !PCL && !WINDOWS_UWP && !NETMF
         public static void ValidateBufferBounds(byte[] buffer, int offset, int size)
@@ -87,22 +87,30 @@ namespace Microsoft.Azure.Devices.Client
 
         public static string ConvertDeliveryAckTypeToString(DeliveryAcknowledgement value)
         {
-            string result;
-            if (AckTypeMap.TryGetValue(value, out result))
+#if PCL
+            if (AckTypeMap.ContainsKey(value))
+#else
+            if (AckTypeMap.Contains(value))
+#endif
             {
-                return result;
+                return (string)AckTypeMap[value];
             }
-            throw new NotSupportedException($"Unknown value: '{value}'");
+
+            throw new NotSupportedException("Unknown value: " + value);
         }
 
         public static DeliveryAcknowledgement ConvertDeliveryAckTypeFromString(string value)
         {
-            DeliveryAcknowledgement result;
-            if (AckTypeReverseMap.TryGetValue(value, out result))
+#if PCL
+            if (AckTypeReverseMap.ContainsKey(value))
+#else
+            if (AckTypeReverseMap.Contains(value))
+#endif
             {
-                return result;
+                return (DeliveryAcknowledgement)AckTypeReverseMap[value];
             }
-            throw new NotSupportedException($"Unknown value: '{value}'");
+
+            throw new NotSupportedException("Unknown value: " + value);
         }
 
 #else

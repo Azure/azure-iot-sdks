@@ -3,17 +3,14 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
-#if !NETMF
-    // NETMF doesn't implement EnumMember attribute
-    using System.Runtime.Serialization;
-#endif
-
     ///////////////////////////////////////////////////////////////////
     /* 
      * NOTE: when adding new items to this enum, make sure to update 
-     * accordingly the NETMF versions of the following methods:
-     * Utils.ConvertDeliveryAckTypeFromString() 
-     * Utils.ConvertDeliveryAckTypeToString()
+     * accordingly the following in Utils:
+     * 1) update items being added/removed to AckTypeMap in the Utils constructor
+     * 2) the NETMF versions of the following methods:
+     *    - Utils.ConvertDeliveryAckTypeFromString() 
+     *    - Utils.ConvertDeliveryAckTypeToString()
     */
     ///////////////////////////////////////////////////////////////////
 
@@ -25,33 +22,21 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Acknowledgment is NOT sent on delivery or failure.
         /// </summary>
-#if !NETMF
-    [EnumMember(Value = "none")]
-#endif
         None,
 
         /// <summary>
         /// Acknowledgment is sent only if delivery fails.
         /// </summary>
-#if !NETMF
-        [EnumMember(Value = "negative")]
-#endif
         NegativeOnly,
 
         /// <summary>
         /// Acknowledgment is sent only on delivery succeeds.
         /// </summary>
-#if !NETMF
-        [EnumMember(Value = "positive")]
-#endif
         PositiveOnly,
 
         /// <summary>
         /// An acknowledgment is sent on delivery success or failure.
         /// </summary>
-#if !NETMF
-        [EnumMember(Value = "full")]
-#endif
         Full
     }
 }

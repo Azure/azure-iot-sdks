@@ -397,17 +397,23 @@ namespace Microsoft.Azure.Devices.Client
             return iotHubName;
         }
 
-#if !NETMF
         static bool GetX509(string input, bool ignoreCase, out bool usingX509Cert)
         {
             usingX509Cert = false;
-            if (string.Equals(input, "true", ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+            bool isMatch;
+
+#if NETMF
+            isMatch = (ignoreCase ? input.ToLower().CompareTo("true") : input.CompareTo("true")) == 0;
+#else
+            isMatch = string.Equals(input, "true", ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+#endif
+
+            if (isMatch)
             {
                 usingX509Cert = true;
             }
 
             return true;
         }
-#endif
     }
 }
