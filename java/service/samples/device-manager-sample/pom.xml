@@ -20,6 +20,8 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
