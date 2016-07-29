@@ -3,28 +3,39 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
+    ///////////////////////////////////////////////////////////////////
+    /* 
+     * NOTE: when adding new items to this enum, make sure to update 
+     * accordingly the following in Utils:
+     * 1) update items being added/removed to AckTypeMap in the Utils constructor
+     * 2) the NETMF versions of the following methods:
+     *    - Utils.ConvertDeliveryAckTypeFromString() 
+     *    - Utils.ConvertDeliveryAckTypeToString()
+    */
+    ///////////////////////////////////////////////////////////////////
+
     /// <summary>
-    /// Specifies the different acknowledgement levels for message delivery.
+    /// Specifies the different acknowledgment levels for message delivery.
     /// </summary>
     public enum DeliveryAcknowledgement
     {
         /// <summary>
-        /// Acknowledgement is NOT sent on delivery or failure.
+        /// Acknowledgment is NOT sent on delivery or failure.
         /// </summary>
         None,
 
         /// <summary>
-        /// Acknowledgement is sent only if delivery fails.
+        /// Acknowledgment is sent only if delivery fails.
         /// </summary>
         NegativeOnly,
 
         /// <summary>
-        /// Acknowledgement is sent only on delivery succeeds.
+        /// Acknowledgment is sent only on delivery succeeds.
         /// </summary>
         PositiveOnly,
 
         /// <summary>
-        /// An acknowledgement is sent on delivery success or failure.
+        /// An acknowledgment is sent on delivery success or failure.
         /// </summary>
         Full
     }
