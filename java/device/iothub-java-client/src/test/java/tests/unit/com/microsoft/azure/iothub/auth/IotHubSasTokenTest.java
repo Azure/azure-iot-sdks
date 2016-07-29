@@ -8,6 +8,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertTrue;
 
+import com.microsoft.azure.iothub.DeviceClient;
 import com.microsoft.azure.iothub.DeviceClientConfig;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.auth.Signature;
@@ -25,10 +26,12 @@ public class IotHubSasTokenTest
 
     // Tests_SRS_IOTHUBSASTOKEN_11_001: [The SAS token shall have the format "SharedAccessSignature sig=<signature>&se=<expiryTime>&sr=<resourceURI>". The params can be in any order.]
     @Test
-    public void sasTokenHasCorrectFormat()
+    public void sasTokenHasCorrectFormat() throws URISyntaxException
     {
         final String resourceUri = "sample-resource-uri";
+        final String iotHubHostname = "sample-iothub-hostname.net";
         final String deviceKey = "sample-device-key";
+        final String deviceId = "sample-device-ID";
         final long expiryTime = 100;
         final String signature = "sample-sig";
         new NonStrictExpectations()
@@ -39,7 +42,7 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token = new IotHubSasToken(resourceUri, deviceKey, expiryTime);
+        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, null), expiryTime);
         String tokenStr = token.toString();
 
         // assert that sig, se and sr exist in the token in any order.
@@ -51,10 +54,12 @@ public class IotHubSasTokenTest
 
     // Tests_SRS_IOTHUBSASTOKEN_11_002: [The expiry time shall be the given expiry time, where it is a UNIX timestamp and indicates the time after which the token becomes invalid.]
     @Test
-    public void expiryTimeSetCorrectly()
+    public void expiryTimeSetCorrectly() throws URISyntaxException
     {
         final String resourceUri = "sample-resource-uri";
+        final String iotHubHostname = "sample-iothub-hostname.net";
         final String deviceKey = "sample-device-key";
+        final String deviceId = "sample-device-ID";
         final long expiryTime = 100;
         final String signature = "sample-sig";
         new NonStrictExpectations()
@@ -65,8 +70,7 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token =
-                new IotHubSasToken(resourceUri, deviceKey, expiryTime);
+        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, null), expiryTime);
         String tokenStr = token.toString();
         // extract the value assigned to se.
         int expiryTimeKeyIdx = tokenStr.indexOf("se=");
@@ -85,48 +89,14 @@ public class IotHubSasTokenTest
         assertThat(testExpiryTimeStr, is(expectedExpiryTimeStr));
     }
 
-    // Tests_SRS_IOTHUBSASTOKEN_11_004: [The resource URI shall be the given resource URI.]
-    @Test
-    public void resourceUriSetCorrectly()
-    {
-        final String resourceUri = "sample-resource-uri";
-        final String deviceKey = "sample-device-key";
-        final long expiryTime = 100;
-        final String signature = "sample-sig";
-        new NonStrictExpectations()
-        {
-            {
-                mockSig.toString();
-                result = signature;
-            }
-        };
-
-        IotHubSasToken token =
-                new IotHubSasToken(resourceUri, deviceKey, expiryTime);
-        String tokenStr = token.toString();
-        // extract value assigned to sr.
-        int resourceUriKeyIdx = tokenStr.indexOf("sr=");
-        int resourceUriStartIdx = resourceUriKeyIdx + 3;
-        int resourceUriEndIdx =
-                tokenStr.indexOf("&", resourceUriStartIdx);
-        if (resourceUriEndIdx == -1)
-        {
-            resourceUriEndIdx = tokenStr.length();
-        }
-        String testResourceUri =
-                tokenStr.substring(resourceUriStartIdx,
-                        resourceUriEndIdx);
-
-        String expectedResourceUri = resourceUri;
-        assertThat(testResourceUri, is(expectedResourceUri));
-    }
-
     // Tests_SRS_IOTHUBSASTOKEN_11_005: [The signature shall be correctly computed and set.]
     // Tests_SRS_IOTHUBSASTOKEN_11_006: [The function shall return the string representation of the SAS token.]
     @Test
-    public void signatureSetCorrectly()
+    public void signatureSetCorrectly() throws URISyntaxException
     {
         final String resourceUri = "sample-resource-uri";
+        final String deviceId = "sample-device-ID";
+        final String iotHubHostname = "sample-iothub-hostname.net";
         final String deviceKey = "sample-device-key";
         final long expiryTime = 100;
         final String signature = "sample-sig";
@@ -139,7 +109,7 @@ public class IotHubSasTokenTest
         };
 
         IotHubSasToken token =
-                new IotHubSasToken(resourceUri, deviceKey, expiryTime);
+                new IotHubSasToken(new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, null), expiryTime);
         String tokenStr = token.toString();
         // extract the value assigned to sig.
         int signatureKeyIdx = tokenStr.indexOf("sig=");
@@ -163,13 +133,15 @@ public class IotHubSasTokenTest
     {
         String iotHubHostname = "sample-iothub-hostname.net";
         String deviceKey = "sample-device-key";
+        String deviceId = "sample-device-ID";
 
         long token_valid_secs = 100;
         long expiryTimeTestErrorRange = 1;
 
         long expiryTimeBaseInSecs = System.currentTimeMillis() / 1000l + token_valid_secs + 1l;
 
-        IotHubSasToken token = new IotHubSasToken(iotHubHostname, deviceKey, expiryTimeBaseInSecs);
+        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, null),
+                                                                expiryTimeBaseInSecs);
 
         String tokenStr = token.toString();
         // extract the value assigned to se.
@@ -185,4 +157,75 @@ public class IotHubSasTokenTest
 
         assertTrue(expiryTimeBaseInSecs <= expiryTimeInSecs && expiryTimeInSecs <= (expiryTimeBaseInSecs + expiryTimeTestErrorRange));
     }
+
+    // Tests_SRS_IOTHUBSASTOKEN_25_007: [**If device key is not provided in config then the SASToken from config shall be used.**]**
+    @Test
+    public void setValidSASTokenCorrectly() throws URISyntaxException
+    {
+        String iotHubHostname = "sample-iothub-hostname.net";
+        String deviceId = "sample-device-ID";
+        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";
+
+        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubHostname, deviceId, null,sastoken), 0);
+        String tokenStr = token.toString();
+        assertTrue(tokenStr ==  sastoken);
+    }
+
+    // Tests_SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
+    //Tests_SRS_IOTHUBSASTOKEN_11_001: [**The SAS token shall have the format `SharedAccessSignature sig=<signature >&se=<expiryTime>&sr=<resourceURI>`. The params can be in any order.**]**
+    @Test(expected = IllegalArgumentException.class)
+    public void doesNotSetInvalidSASToken() throws URISyntaxException
+    {
+        String iotHubHostname = "sample-iothub-hostname.net";
+        String deviceId = "sample-device-ID";
+        String sastoken = "SharedAccessSignature sr =sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig =S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se =1469813873";
+
+        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubHostname, deviceId, null, sastoken), 0);
+        String tokenStr = token.toString();
+        assertTrue(tokenStr !=  sastoken);
+    }
+
+    // Tests_SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
+    //Tests_SRS_IOTHUBSASTOKEN_11_001: [**The SAS token shall have the format `SharedAccessSignature sig=<signature >&se=<expiryTime>&sr=<resourceURI>`. The params can be in any order.**]**
+    @Test(expected = IllegalArgumentException.class)
+    public void doesNotSetSASTokenWithoutSe() throws URISyntaxException
+    {
+        String iotHubHostname = "sample-iothub-hostname.net";
+        String deviceId = "sample-device-ID";
+        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d";
+
+        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubHostname, deviceId, null, sastoken), 0);
+        String tokenStr = token.toString();
+        assertTrue(tokenStr !=  sastoken);
+    }
+
+    // Tests_SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
+    //Tests_SRS_IOTHUBSASTOKEN_11_001: [**The SAS token shall have the format `SharedAccessSignature sig=<signature >&se=<expiryTime>&sr=<resourceURI>`. The params can be in any order.**]**
+    @Test(expected = IllegalArgumentException.class)
+    public void doesNotSetSASTokenWithoutSr() throws URISyntaxException
+    {
+        String iotHubHostname = "sample-iothub-hostname.net";
+        String deviceId = "sample-device-ID";
+        String sastoken = "SharedAccessSignature sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";;
+
+        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubHostname, deviceId, null, sastoken), 0);
+        String tokenStr = token.toString();
+        assertTrue(tokenStr !=  sastoken);
+    }
+
+    // Tests_SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
+    //Tests_SRS_IOTHUBSASTOKEN_11_001: [**The SAS token shall have the format `SharedAccessSignature sig=<signature >&se=<expiryTime>&sr=<resourceURI>`. The params can be in any order.**]**
+    @Test(expected = IllegalArgumentException.class)
+    public void doesNotSetSASTokenWithoutSig() throws URISyntaxException
+    {
+        String iotHubHostname = "sample-iothub-hostname.net";
+        String deviceId = "sample-device-ID";
+        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&se=1469813873";
+
+        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubHostname, deviceId, null,sastoken), 0);
+        String tokenStr = token.toString();
+        assertTrue(tokenStr ==  sastoken);
+    }
+
+
 }
