@@ -198,7 +198,6 @@ public class HttpsIotHubConnectionTest
         final String iotHubHostname = "test-iothubname";
         final String deviceId = "test-device-key";
         final String deviceKey = "test-device-key";
-        final String resourceUri = "test-resource-uri";
         final String tokenStr = "test-token-str";
         new NonStrictExpectations()
         {
@@ -209,9 +208,7 @@ public class HttpsIotHubConnectionTest
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
-                IotHubUri.getResourceUri(iotHubHostname, deviceId);
-                result = resourceUri;
-                new IotHubSasToken(resourceUri, deviceKey, anyLong);
+                new IotHubSasToken(mockConfig, anyLong);
                 result = mockToken;
                 mockToken.toString();
                 result = tokenStr;
@@ -403,7 +400,6 @@ public class HttpsIotHubConnectionTest
         final String iotHubHostname = "test-iothubname";
         final String deviceId = "test-device-key";
         final String deviceKey = "test-device-key";
-        final String resourceUri = "test-resource-uri";
         final String tokenStr = "test-token-str";
         new NonStrictExpectations()
         {
@@ -414,9 +410,7 @@ public class HttpsIotHubConnectionTest
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
-                IotHubUri.getResourceUri(iotHubHostname, deviceId);
-                result = resourceUri;
-                new IotHubSasToken(resourceUri, deviceKey, anyLong);
+                new IotHubSasToken(mockConfig, anyLong);
                 result = mockToken;
                 mockToken.toString();
                 result = tokenStr;
@@ -996,7 +990,6 @@ public class HttpsIotHubConnectionTest
         final String iotHubHostname = "test-iothubname";
         final String deviceId = "test-device-key";
         final String deviceKey = "test-device-key";
-        final String resourceUri = "test-resource-uri";
         final String tokenStr = "test-token-str";
         new NonStrictExpectations()
         {
@@ -1015,9 +1008,7 @@ public class HttpsIotHubConnectionTest
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
-                IotHubUri.getResourceUri(iotHubHostname, deviceId);
-                result = resourceUri;
-                new IotHubSasToken(resourceUri, deviceKey, anyLong);
+                new IotHubSasToken(mockConfig, anyLong);
                 result = mockToken;
                 mockToken.toString();
                 result = tokenStr;

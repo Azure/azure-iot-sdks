@@ -42,7 +42,6 @@ public class AmqpsIotHubConnectionTest {
     final String hubName = "test.iothub";
     final String deviceId = "test-deviceId";
     final String deviceKey = "test-devicekey?&test";
-    final String resourceUri = "test-resource-uri";
     final String amqpPort = "5671";
     final String amqpWebSocketPort = "443";
 
@@ -358,7 +357,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                new IotHubSasToken(anyString, anyString, anyLong);
+                new IotHubSasToken(mockConfig, anyLong);
                 times = 0;
             }
         };
@@ -392,7 +391,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                new IotHubSasToken(anyString, anyString, anyLong);
+                new IotHubSasToken(mockConfig, anyLong);
                 times = 1;
             }
         };
@@ -426,7 +425,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                new IotHubSasToken(anyString, anyString, anyLong);
+                new IotHubSasToken(mockConfig, anyLong);
                 times = 1;
                 new IotHubReactor((Reactor)any);
                 times = 1;
@@ -1329,8 +1328,6 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
-                IotHubUri.getResourceUri(hostName, deviceId);
-                result = resourceUri;
             }
         };
     }

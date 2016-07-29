@@ -15,11 +15,11 @@ public final class DeviceClientConfig
     public static final int DEFAULT_READ_TIMEOUT_MILLIS = 240000;
     public static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
 
-    public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceKey);
-    public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceKey);
+    public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceKey, String sharedAccessToken);
     public String getIotHubName();
     public String getDeviceId();
     public String getDeviceKey();
+    public String getSharedAccessToken();
     public long getTokenValidSecs();
     public int getReadTimeoutMillis();
 
@@ -38,7 +38,7 @@ public final class DeviceClientConfig
 ### DeviceClientConfig
 
 ```java
-public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceKey);
+public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceKey, String sharedAccessToken);
 ```
 
 ** SRS_DEVICECLIENTCONFIG_11_001: [**The constructor shall save the IoT Hub hostname, device ID, and device key.**] **
@@ -47,7 +47,9 @@ public DeviceClientConfig(String iotHubHostname, String deviceId, String deviceK
 
 ** SRS_DEVICECLIENTCONFIG_11_015: [**If the IoT Hub hostname does not contain a '.', the function shall throw an IllegalArgumentException.**] **
 
-** SRS_DEVICECLIENTCONFIG_11_015: [**The constructor shall set the default certificate which can be later modified by the user.**] **
+** SRS_DEVICECLIENTCONFIG_25_017: [**The constructor shall save sharedAccessToken.**] **
+
+** SRS_DEVICECLIENTCONFIG_11_016: [**The constructor shall set the default certificate which can be later modified by the user.**] **
 
 
 ### getIotHubHostname
@@ -84,6 +86,15 @@ public String getDeviceKey();
 ```
 
 ** SRS_DEVICECLIENTCONFIG_11_004: [**The function shall return the device key given in the constructor.**] **
+
+
+### getSharedAccessToken
+
+```java
+public String getSharedAccessToken();
+```
+
+** SRS_DEVICECLIENTCONFIG_25_018: [**The function shall return the SharedAccessToken given in the constructor.**] **
 
 
 ### getMessageValidSecs
