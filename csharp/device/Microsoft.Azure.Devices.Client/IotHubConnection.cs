@@ -285,7 +285,7 @@ namespace Microsoft.Azure.Devices.Client
 #if WINDOWS_UWP
             // System.Reflection.Assembly.GetExecutingAssembly() does not exist for UWP, therefore use a hard-coded version name
             // (This string is picked up by the bump_version script, so don't change the line below)
-            var UWPAssemblyVersion = "1.0.15";
+            var UWPAssemblyVersion = "1.0.16";
             linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, UWPAssemblyVersion);
 #else
             linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, Utils.GetClientVersion());

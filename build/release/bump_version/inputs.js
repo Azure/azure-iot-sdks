@@ -23,7 +23,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "build/release/release_mbed_project.cmd",
+        "filePath": "build/release/release_mbed.cmd",
         "search": "(hg\\_commit\\_message\\=)(\".*\")",
         "replaceString": function(versions) {
             return '$1' + '"' + versions.c.device + '"';
