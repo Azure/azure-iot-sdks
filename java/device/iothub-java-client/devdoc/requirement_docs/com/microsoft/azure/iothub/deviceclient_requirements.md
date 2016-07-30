@@ -146,5 +146,8 @@ Options handled by the client:
 
 **SRS_DEVICECLIENT_25_008: [**"SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT.**]**
 
-**SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport if transport is already open after updating expiry time**.]**
+**SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport
+                                    1. If the device currently uses device key and
+                                    2. If transport is already open
+                               after updating expiry time**.]**
 

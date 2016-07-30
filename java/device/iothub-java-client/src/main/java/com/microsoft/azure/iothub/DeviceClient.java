@@ -423,10 +423,16 @@ public final class DeviceClient implements Closeable
             boolean restart = false;
             if (this.state != IotHubClientState.CLOSED) {
                 try {
-                    // Codes_SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport if transport
-                    // is already open after updating expiry time
-                    restart = true;
-                    this.close();
+                    /* Codes_SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport
+                     *                                  1. If the device currently uses device key and
+                     *                                  2. If transport is already open
+                     *                                 after updating expiry time
+                    */
+                    if (this.config.getDeviceKey() != null)
+                    {
+                        restart = true;
+                        this.close();
+                    }
                 } catch (IOException e) {
 
                     throw new IOError(e);
