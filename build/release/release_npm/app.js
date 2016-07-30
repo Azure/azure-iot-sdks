@@ -32,12 +32,12 @@ function getRepoRoot() {
     });
 }
 
-function ensureCurrentBranchIsDevelop() {
-  return u.isCurrentBranch('develop')
-    .then(function (isDevelop) {
-      return isDevelop ?
+function ensureCurrentBranchIsMaster() {
+  return u.isCurrentBranch('master')
+    .then(function (isMaster) {
+      return isMaster ?
         null :
-        Promise.reject(new Error('Please switch to the \'develop\' branch before running this script.'));
+        Promise.reject(new Error('Please switch to the \'master\' branch before running this script.'));
     });
 }
 
@@ -165,9 +165,9 @@ function getTarballUrl(pkg) {
   return u.getTarballUrl(remoteName, pkg.stagingBranch());
 }
 
-function checkoutDevelop() {
-  console.log('\nReturning to branch \'develop\'...');
-  return u.checkoutBranch('develop');
+function checkoutMaster() {
+  console.log('\nReturning to branch \'master\'...');
+  return u.checkoutBranch('master');
 }
 
 function deleteStagingBranches() {
@@ -182,7 +182,7 @@ function deleteStagingBranches() {
 }
 
 function cleanup() {
-  return checkoutDevelop()
+  return checkoutMaster()
     .then(deleteStagingBranches);
 }
 
@@ -204,7 +204,7 @@ if (process.argv.length < 4) {
 }
 
 getRepoRoot()
-  .then(ensureCurrentBranchIsDevelop)
+  .then(ensureCurrentBranchIsMaster)
   .then(ensureThereAreNoUncommittedChanges)
   .then(ensureWorkingDirectoryIsClean)
   .then(ensureRepoIsTrackingTheGivenRemote)

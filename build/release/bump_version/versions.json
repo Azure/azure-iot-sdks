@@ -29,7 +29,7 @@
     "c_shared_utility_nuget": "1.0.14",
     "uamqp_c_nuget": "1.0.15",
     "umqtt_c_nuget": "1.0.14",
-    "iothub-explorer": "1.0.9",
+    "iothub-explorer": "1.0.10",
     "device-explorer": "1.0.9",
     "github-release": "v1.0.7"
 }
