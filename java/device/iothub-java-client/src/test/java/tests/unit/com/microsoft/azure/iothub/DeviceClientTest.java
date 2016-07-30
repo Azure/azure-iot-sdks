@@ -870,6 +870,8 @@ public class DeviceClientTest
             {
                 mockTransport.isEmpty();
                 result = true;
+                mockConfig.getDeviceKey();
+                result = anyString;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -890,6 +892,45 @@ public class DeviceClientTest
                 times = 1;
                 mockTransport.open();
                 times = 2;
+
+            }
+        };
+    }
+
+    /*Tests_SRS_DEVICECLIENT_25_010: ["SetSASTokenExpiryTime" shall restart the transport
+                                    1. If the device currently uses device key and
+                                    2. If transport is already open
+                                    after updating expiry time.]
+    */
+    @Test
+    public void setOptionSASTokenExpiryTimeAfterClientOpenTransportWithSasTokenSucceeds(
+            @Mocked final HttpsTransport mockTransport)
+            throws IOException, URISyntaxException
+    {
+        new NonStrictExpectations() {
+            {
+                mockTransport.isEmpty();
+                result = true;
+            }
+        };
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessSignature=SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+        long value = 60;
+        client.setOption("SetSASTokenExpiryTime", value);
+
+        new Verifications()
+        {
+            {
+                mockTransport.close();
+                times = 0;
+                mockConfig.setTokenValidSecs(60);
+                times = 1;
+                mockTransport.open();
+                times = 1;
 
             }
         };
@@ -935,6 +976,8 @@ public class DeviceClientTest
             {
                 mockTransport.isEmpty();
                 result = true;
+                mockConfig.getDeviceKey();
+                result = anyString;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -1000,6 +1043,8 @@ public class DeviceClientTest
             {
                 mockTransport.isEmpty();
                 result = true;
+                mockConfig.getDeviceKey();
+                result = anyString;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
