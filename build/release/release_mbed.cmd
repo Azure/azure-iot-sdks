@@ -13,13 +13,13 @@ call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_projec
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_client
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\azure-uamqp-c\build
+call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\azure-uamqp-c\build_all
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\azure-umqtt-c\build
+call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\azure-umqtt-c\build_all
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\build
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\azure-c-shared-utility\build
+call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\azure-c-shared-utility\build_all
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_amqp
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
