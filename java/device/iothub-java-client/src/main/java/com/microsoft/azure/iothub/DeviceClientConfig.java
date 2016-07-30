@@ -164,9 +164,6 @@ public final class DeviceClientConfig
      * Setter for the number of seconds a SAS token should be valid for. A
      * message that arrives at an IoT Hub in time of length greater than this
      * value will be rejected by the IoT Hub.
-     *
-     * @return the number of seconds a message in transit to an IoT Hub is valid
-     * for.
      */
     public void setTokenValidSecs(long expiryTime)
     {
