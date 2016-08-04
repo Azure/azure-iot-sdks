@@ -56,7 +56,6 @@ set PATH=%PATH%;%userprofile%\cmake_%build-platform%\javawrapper\Debug
 REM -- compile javawrapper --
 cd ..\..\device
 call mvn install
-if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\direct_call_of_wrapped_functions\target
 copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\send-receive-sample\target
