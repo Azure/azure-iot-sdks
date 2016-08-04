@@ -120,9 +120,9 @@ This script uses **cmake** to make a folder called "cmake" in your home director
 <a name="windowsce"/>
 ## Set up a Windows Embedded Compact 2013 development environment
 
-- Install [Visual Studio 2013][visual-studio]. You can use the free Community Edition if you meet the licensing requirements.
+- Install [Visual Studio 2015][visual-studio]. You can use the free Community Edition if you meet the licensing requirements.
 Be sure to include Visual C++ and NuGet Package Manager.
-- Install [Application Builder for Windows Embedded Compact 2013][application-builder]
+- Install [Application Builder for Windows Embedded Compact 2013][application-builder] for Visual Studio 2015
 - Install [Toradex Windows Embedded Compact 2013 SDK][toradex-CE8-sdk] or your own SDK.
 - Install [git](http://www.git-scm.com) making sure git.exe can be run from a command line.
 
@@ -139,7 +139,7 @@ with a reference to the name of the SDK and the processor architecture (arm/x86)
 
 You can build the Windows samples to verify that your environment is set up correctly.
 
-1. Open a Visual Studio 2013 Developer command prompt.
+1. Open a Visual Studio 2015 Developer command prompt.
 
 2. Navigate to the **c\\build_all\\windowsce** folder in your local copy of the repository.
 
@@ -149,7 +149,7 @@ You can build the Windows samples to verify that your environment is set up corr
 build.cmd
 ```
 
-This script uses cmake to make a folder called "cmake_ce8" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the solution and run tests.
+This script uses cmake to make a folder called "cmake_ce8" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the HTTP sample.
 
 > Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [running a C sample application on Windows Embedded Compact 2013 on a Toradex module](../../doc/get_started/wince2013-toradex-module-c.md).
 
