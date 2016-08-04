@@ -10,32 +10,12 @@ namespace Microsoft.Azure.Devices.Client
 #endif
     using Extensions;
     using System.Collections;
-#if NETMF
-    using Exceptions;
-#endif
 
     static class Utils
     {
-#if PCL
-        static readonly System.Collections.Generic.Dictionary<DeliveryAcknowledgement, string> AckTypeMap = new System.Collections.Generic.Dictionary<DeliveryAcknowledgement, string>();
-        static readonly System.Collections.Generic.Dictionary<string, DeliveryAcknowledgement> AckTypeReverseMap = new System.Collections.Generic.Dictionary<string, DeliveryAcknowledgement>();
-#else
-        static readonly Hashtable AckTypeMap = new Hashtable();
-        static readonly Hashtable AckTypeReverseMap = new Hashtable();
-#endif
         static Utils()
         {
-            AckTypeMap.Add(DeliveryAcknowledgement.NegativeOnly, "negative");
-            AckTypeMap.Add(DeliveryAcknowledgement.PositiveOnly, "positive");
-            AckTypeMap.Add(DeliveryAcknowledgement.Full, "full");
-            AckTypeMap.Add(DeliveryAcknowledgement.None, "none");
-
-            foreach (DeliveryAcknowledgement key in AckTypeMap.Keys)
-            {
-                AckTypeReverseMap.Add(AckTypeMap[key], key);
-            }
         }
-
 
 #if !PCL && !WINDOWS_UWP && !NETMF
         public static void ValidateBufferBounds(byte[] buffer, int offset, int size)
@@ -81,30 +61,38 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         public static DeliveryAcknowledgement ConvertDeliveryAckTypeFromString(string value)
         {
-#if PCL
-            if (AckTypeReverseMap.ContainsKey(value))
-#else
-            if (AckTypeReverseMap.Contains(value))
-#endif
+            switch (value)
             {
-                return (DeliveryAcknowledgement)AckTypeReverseMap[value];
-            }
+                case "none":
+                    return DeliveryAcknowledgement.None;
+                case "negative":
+                    return DeliveryAcknowledgement.NegativeOnly;
+                case "positive":
+                    return DeliveryAcknowledgement.PositiveOnly;
+                case "full":
+                    return DeliveryAcknowledgement.Full;
 
-            throw new NotSupportedException("Unknown value: " + value);
+                default:
+                    throw new NotSupportedException("Unknown value: '" + value + "'");
+            }
         }
 
         public static string ConvertDeliveryAckTypeToString(DeliveryAcknowledgement value)
         {
-#if PCL
-            if (AckTypeMap.ContainsKey(value))
-#else
-            if (AckTypeMap.Contains(value))
-#endif
+            switch (value)
             {
-                return (string)AckTypeMap[value];
-            }
+                case DeliveryAcknowledgement.None:
+                    return "none";
+                case DeliveryAcknowledgement.NegativeOnly:
+                    return "negative";
+                case DeliveryAcknowledgement.PositiveOnly:
+                    return "positive";
+                case DeliveryAcknowledgement.Full:
+                    return "full";
 
-            throw new NotSupportedException("Unknown value: " + value);
+                default:
+                    throw new NotSupportedException("Unknown value: '" + value + "'");
+            }
         }
     }
 }
