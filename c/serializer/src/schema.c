@@ -15,24 +15,24 @@
 
 DEFINE_ENUM_STRINGS(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
 
-typedef struct PROPERTY_TAG
+typedef struct SCHEMA_PROPERTY_HANDLE_DATA_TAG
 {
     const char* PropertyName;
     const char* PropertyType;
-} PROPERTY;
+} SCHEMA_PROPERTY_HANDLE_DATA;
 
-typedef struct SCHEMA_ACTION_ARGUMENT_TAG
+typedef struct SCHEMA_ACTION_ARGUMENT_HANDLE_DATA_TAG
 {
     const char* Name;
     const char* Type;
-} SCHEMA_ACTION_ARGUMENT;
+} SCHEMA_ACTION_ARGUMENT_HANDLE_DATA;
 
-typedef struct ACTION_TAG
+typedef struct SCHEMA_ACTION_HANDLE_DATA_TAG
 {
     const char* ActionName;
     size_t ArgumentCount;
     SCHEMA_ACTION_ARGUMENT_HANDLE* ArgumentHandles;
-} ACTION;
+} SCHEMA_ACTION_HANDLE_DATA;
 
 typedef struct MODEL_IN_MODEL_TAG
 {
@@ -40,7 +40,7 @@ typedef struct MODEL_IN_MODEL_TAG
     SCHEMA_MODEL_TYPE_HANDLE modelHandle;
 } MODEL_IN_MODEL;
 
-typedef struct MODEL_TYPE_TAG
+typedef struct SCHEMA_MODEL_TYPE_HANDLE_DATA_TAG
 {
     const char* Name;
     SCHEMA_HANDLE SchemaHandle;
@@ -50,29 +50,29 @@ typedef struct MODEL_TYPE_TAG
     size_t ActionCount;
     VECTOR_HANDLE models;
     size_t DeviceCount;
-} MODEL_TYPE;
+} SCHEMA_MODEL_TYPE_HANDLE_DATA;
 
-typedef struct STRUCT_TYPE_TAG
+typedef struct SCHEMA_STRUCT_TYPE_HANDLE_DATA_TAG
 {
     const char* Name;
     SCHEMA_PROPERTY_HANDLE* Properties;
     size_t PropertyCount;
-} STRUCT_TYPE;
+} SCHEMA_STRUCT_TYPE_HANDLE_DATA;
 
-typedef struct SCHEMA_TAG
+typedef struct SCHEMA_HANDLE_DATA_TAG
 {
     const char* Namespace;
     SCHEMA_MODEL_TYPE_HANDLE* ModelTypes;
     size_t ModelTypeCount;
     SCHEMA_STRUCT_TYPE_HANDLE* StructTypes;
     size_t StructTypeCount;
-} SCHEMA;
+} SCHEMA_HANDLE_DATA;
 
 static VECTOR_HANDLE g_schemas = NULL;
 
 static void DestroyProperty(SCHEMA_PROPERTY_HANDLE propertyHandle)
 {
-    PROPERTY* propertyType = (PROPERTY*)propertyHandle;
+    SCHEMA_PROPERTY_HANDLE_DATA* propertyType = (SCHEMA_PROPERTY_HANDLE_DATA*)propertyHandle;
     free((void*)propertyType->PropertyName);
     free((void*)propertyType->PropertyType);
     free(propertyType);
@@ -80,7 +80,7 @@ static void DestroyProperty(SCHEMA_PROPERTY_HANDLE propertyHandle)
 
 static void DestroyActionArgument(SCHEMA_ACTION_ARGUMENT_HANDLE actionArgumentHandle)
 {
-    SCHEMA_ACTION_ARGUMENT* actionArgument = (SCHEMA_ACTION_ARGUMENT*)actionArgumentHandle;
+    SCHEMA_ACTION_ARGUMENT_HANDLE_DATA* actionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE_DATA*)actionArgumentHandle;
     if (actionArgument != NULL)
     {
         free((void*)actionArgument->Name);
@@ -91,7 +91,7 @@ static void DestroyActionArgument(SCHEMA_ACTION_ARGUMENT_HANDLE actionArgumentHa
 
 static void DestroyAction(SCHEMA_ACTION_HANDLE actionHandle)
 {
-    ACTION* action = (ACTION*)actionHandle;
+    SCHEMA_ACTION_HANDLE_DATA* action = (SCHEMA_ACTION_HANDLE_DATA*)actionHandle;
     if (action != NULL)
     {
         size_t j;
@@ -110,7 +110,7 @@ static void DestroyAction(SCHEMA_ACTION_HANDLE actionHandle)
 static void DestroyStruct(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle)
 {
     size_t i;
-    STRUCT_TYPE* structType = (STRUCT_TYPE*)structTypeHandle;
+    SCHEMA_STRUCT_TYPE_HANDLE_DATA* structType = (SCHEMA_STRUCT_TYPE_HANDLE_DATA*)structTypeHandle;
     if (structType != NULL)
     {
         for (i = 0; i < structType->PropertyCount; i++)
@@ -127,7 +127,7 @@ static void DestroyStruct(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle)
 
 static void DestroyModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
 {
-    MODEL_TYPE* modelType = (MODEL_TYPE*)modelTypeHandle;
+    SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
     size_t i;
 
     free((void*)modelType->Name);
@@ -158,7 +158,7 @@ static void DestroyModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
     free(modelType);
 }
 
-static SCHEMA_RESULT AddModelProperty(MODEL_TYPE* modelType, const char* name, const char* type)
+static SCHEMA_RESULT AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType, const char* name, const char* type)
 {
     SCHEMA_RESULT result;
 
@@ -177,7 +177,7 @@ static SCHEMA_RESULT AddModelProperty(MODEL_TYPE* modelType, const char* name, c
         /* Codes_SRS_SCHEMA_99_015:[The property name shall be unique per model, if the same property name is added twice to a model, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
         for (i = 0; i < modelType->PropertyCount; i++)
         {
-            PROPERTY* property = (PROPERTY*)modelType->Properties[i];
+            SCHEMA_PROPERTY_HANDLE_DATA* property = (SCHEMA_PROPERTY_HANDLE_DATA*)modelType->Properties[i];
             if (strcmp(property->PropertyName, name) == 0)
             {
                 break;
@@ -200,10 +200,10 @@ static SCHEMA_RESULT AddModelProperty(MODEL_TYPE* modelType, const char* name, c
             }
             else
             {
-                PROPERTY* newProperty;
+                SCHEMA_PROPERTY_HANDLE_DATA* newProperty;
 
                 modelType->Properties = newProperties;
-                if ((newProperty = (PROPERTY*)malloc(sizeof(PROPERTY))) == NULL)
+                if ((newProperty = (SCHEMA_PROPERTY_HANDLE_DATA*)malloc(sizeof(SCHEMA_PROPERTY_HANDLE_DATA))) == NULL)
                 {
                     /* Codes_SRS_SCHEMA_99_014:[On any other error, Schema_AddModelProperty shall return SCHEMA_ERROR.] */
                     result = SCHEMA_ERROR;
@@ -264,14 +264,14 @@ static bool SchemaHandlesMatch(const SCHEMA_HANDLE* handle, const SCHEMA_HANDLE*
 
 static bool SchemaNamespacesMatch(const SCHEMA_HANDLE* handle, const char* schemaNamespace)
 {
-    const SCHEMA* schema = (SCHEMA*)*handle;
+    const SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)*handle;
     return (strcmp(schema->Namespace, schemaNamespace) == 0);
 }
 
 /* Codes_SRS_SCHEMA_99_001:[Schema_Create shall initialize a schema with a given namespace.] */
 SCHEMA_HANDLE Schema_Create(const char* schemaNamespace)
 {
-    SCHEMA* result;
+    SCHEMA_HANDLE_DATA* result;
 
     /* Codes_SRS_SCHEMA_99_004:[If schemaNamespace is NULL, Schema_Create shall fail.] */
     if (schemaNamespace == NULL)
@@ -282,13 +282,13 @@ SCHEMA_HANDLE Schema_Create(const char* schemaNamespace)
     }
     else
     {
-        if (g_schemas == NULL && (g_schemas = VECTOR_create(sizeof(SCHEMA*) ) ) == NULL)
+        if (g_schemas == NULL && (g_schemas = VECTOR_create(sizeof(SCHEMA_HANDLE_DATA*) ) ) == NULL)
         {
             /* Codes_SRS_SCHEMA_99_003:[On failure, NULL shall be returned.] */
             result = NULL;
             LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
         }
-        else if ((result = (SCHEMA*)malloc(sizeof(SCHEMA))) == NULL)
+        else if ((result = (SCHEMA_HANDLE_DATA*)malloc(sizeof(SCHEMA_HANDLE_DATA))) == NULL)
         {
             /* Codes_SRS_SCHEMA_99_003:[On failure, NULL shall be returned.] */
             LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
@@ -359,7 +359,7 @@ const char* Schema_GetSchemaNamespace(SCHEMA_HANDLE schemaHandle)
     else
     {
         /* Codes_SRS_SCHEMA_99_129: [Schema_GetSchemaNamespace shall return the namespace for the schema identified by schemaHandle.] */
-        result = ((SCHEMA*)schemaHandle)->Namespace;
+        result = ((SCHEMA_HANDLE_DATA*)schemaHandle)->Namespace;
     }
 
     return result;
@@ -370,7 +370,7 @@ void Schema_Destroy(SCHEMA_HANDLE schemaHandle)
     /* Codes_SRS_SCHEMA_99_006:[If the schemaHandle is NULL, Schema_Destroy shall do nothing.] */
     if (schemaHandle != NULL)
     {
-        SCHEMA* schema = (SCHEMA*)schemaHandle;
+        SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)schemaHandle;
         size_t i;
 
         /* Codes_SRS_SCHEMA_99_005:[Schema_Destroy shall free all resources associated with a schema.] */
@@ -391,7 +391,7 @@ void Schema_Destroy(SCHEMA_HANDLE schemaHandle)
         free((void*)schema->Namespace);
         free(schema);
 
-        schema = (SCHEMA*)VECTOR_find_if(g_schemas, (PREDICATE_FUNCTION)SchemaHandlesMatch, &schemaHandle);
+        schema = (SCHEMA_HANDLE_DATA*)VECTOR_find_if(g_schemas, (PREDICATE_FUNCTION)SchemaHandlesMatch, &schemaHandle);
         if (schema != NULL)
         {
             VECTOR_erase(g_schemas, schema, 1);
@@ -419,13 +419,13 @@ SCHEMA_RESULT Schema_DestroyIfUnused(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
         }
         else
         {
-            SCHEMA* schema = (SCHEMA*)schemaHandle;
+            SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)schemaHandle;
             size_t nIndex;
 
             /* Codes_SRS_SCHEMA_07_190: [Schema_DestroyIfUnused shall iterate through the ModuleTypes objects and if all the DeviceCount variables 0 then it will delete the schemaHandle.] */
             for (nIndex = 0; nIndex < schema->ModelTypeCount; nIndex++)
             {
-                MODEL_TYPE* modelType = (MODEL_TYPE*)schema->ModelTypes[nIndex];
+                SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)schema->ModelTypes[nIndex];
                 if (modelType->DeviceCount > 0)
                     break;
             }
@@ -459,8 +459,8 @@ SCHEMA_RESULT Schema_AddDeviceRef(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
     }
     else
     {
-        MODEL_TYPE* model = (MODEL_TYPE*)modelTypeHandle;
-        /* Codes_SRS_SCHEMA_07_188: [If the modelTypeHandle is nonNULL, Schema_AddDeviceRef shall increment the MODEL_TYPE DeviceCount variable.] */
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* model = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
+        /* Codes_SRS_SCHEMA_07_188: [If the modelTypeHandle is nonNULL, Schema_AddDeviceRef shall increment the SCHEMA_MODEL_TYPE_HANDLE_DATA DeviceCount variable.] */
         model->DeviceCount++;
         result = SCHEMA_OK;
     }
@@ -478,7 +478,7 @@ SCHEMA_RESULT Schema_ReleaseDeviceRef(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
     }
     else
     {
-        MODEL_TYPE* model = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* model = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         if (model->DeviceCount > 0)
         {
             /* Codes_SRS_SCHEMA_07_186: [On a nonNULL SCHEMA_MODEL_TYPE_HANDLE if the DeviceCount variable is > 0 then the variable will be decremented.] */
@@ -509,13 +509,13 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
     }
     else
     {
-        SCHEMA* schema = (SCHEMA*)schemaHandle;
+        SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)schemaHandle;
 
         /* Codes_SRS_SCHEMA_99_100: [Schema_CreateModelType shall return SCHEMA_DUPLICATE_ELEMENT if modelName already exists.] */
         size_t i;
         for (i = 0; i < schema->ModelTypeCount; i++)
         {
-            MODEL_TYPE* model = (MODEL_TYPE*)(schema->ModelTypes[i]);
+            SCHEMA_MODEL_TYPE_HANDLE_DATA* model = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)(schema->ModelTypes[i]);
             if (strcmp(model->Name, modelName) == 0)
             {
                 break;
@@ -540,10 +540,10 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
             }
             else
             {
-                MODEL_TYPE* modelType;
+                SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType;
                 schema->ModelTypes = newModelTypes;
 
-                if ((modelType = (MODEL_TYPE*)malloc(sizeof(MODEL_TYPE))) == NULL)
+                if ((modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)malloc(sizeof(SCHEMA_MODEL_TYPE_HANDLE_DATA))) == NULL)
                 {
 
                     /* Codes_SRS_SCHEMA_99_009:[On failure, Schema_CreateModelType shall return NULL.] */
@@ -606,7 +606,7 @@ SCHEMA_HANDLE Schema_GetSchemaForModelType(SCHEMA_MODEL_TYPE_HANDLE modelTypeHan
     else
     {
         /* Codes_SRS_SCHEMA_99_131: [Schema_GetSchemaForModelType returns the schema handle for a given model type.] */
-        result = ((MODEL_TYPE*)modelTypeHandle)->SchemaHandle;
+        result = ((SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle)->SchemaHandle;
     }
 
     return result;
@@ -615,7 +615,7 @@ SCHEMA_HANDLE Schema_GetSchemaForModelType(SCHEMA_MODEL_TYPE_HANDLE modelTypeHan
 /* Codes_SRS_SCHEMA_99_011:[Schema_AddModelProperty shall add one property to the model type identified by modelTypeHandle.] */
 SCHEMA_RESULT Schema_AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, const char* propertyType)
 {
-    return AddModelProperty((MODEL_TYPE*)modelTypeHandle, propertyName, propertyType);
+    return AddModelProperty((SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle, propertyName, propertyType);
 }
 
 SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName)
@@ -631,13 +631,13 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
     }
     else
     {
-        MODEL_TYPE* modelType = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         size_t i;
 
         /* Codes_SRS_SCHEMA_99_105: [The action name shall be unique per model, if the same action name is added twice to a model, Schema_CreateModelAction shall return NULL.] */
         for (i = 0; i < modelType->ActionCount; i++)
         {
-            ACTION* action = (ACTION*)modelType->Actions[i];
+            SCHEMA_ACTION_HANDLE_DATA* action = (SCHEMA_ACTION_HANDLE_DATA*)modelType->Actions[i];
             if (strcmp(action->ActionName, actionName) == 0)
             {
                 break;
@@ -661,11 +661,11 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
             }
             else
             {
-                ACTION* newAction;
+                SCHEMA_ACTION_HANDLE_DATA* newAction;
                 modelType->Actions = newActions;
 
                 /* Codes_SRS_SCHEMA_99_103: [On success, Schema_CreateModelAction shall return a none-NULL SCHEMA_ACTION_HANDLE to the newly created action.] */
-                if ((newAction = (ACTION*)malloc(sizeof(ACTION))) == NULL)
+                if ((newAction = (SCHEMA_ACTION_HANDLE_DATA*)malloc(sizeof(SCHEMA_ACTION_HANDLE_DATA))) == NULL)
                 {
                     /* Codes_SRS_SCHEMA_99_106: [On any other error, Schema_CreateModelAction shall return NULL.]*/
                     result = NULL;
@@ -724,14 +724,14 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
     }
     else
     {
-        ACTION* action = (ACTION*)actionHandle;
+        SCHEMA_ACTION_HANDLE_DATA* action = (SCHEMA_ACTION_HANDLE_DATA*)actionHandle;
 
         /* Codes_SRS_SCHEMA_99_110: [The argument name shall be unique per action, if the same name is added twice to an action, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
         /* Codes_SRS_SCHEMA_99_111: [Schema_AddModelActionArgument shall accept arguments with different names of the same type.]  */
         size_t i;
         for (i = 0; i < action->ArgumentCount; i++)
         {
-            SCHEMA_ACTION_ARGUMENT* actionArgument = (SCHEMA_ACTION_ARGUMENT*)action->ArgumentHandles[i];
+            SCHEMA_ACTION_ARGUMENT_HANDLE_DATA* actionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE_DATA*)action->ArgumentHandles[i];
             if (strcmp((actionArgument->Name), argumentName) == 0)
             {
                 break;
@@ -755,8 +755,8 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
             }
             else
             {
-                SCHEMA_ACTION_ARGUMENT* newActionArgument;
-                if ((newActionArgument = (SCHEMA_ACTION_ARGUMENT*)malloc(sizeof(SCHEMA_ACTION_ARGUMENT))) == NULL)
+                SCHEMA_ACTION_ARGUMENT_HANDLE_DATA* newActionArgument;
+                if ((newActionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE_DATA*)malloc(sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE_DATA))) == NULL)
                 {
                     /* Codes_SRS_SCHEMA_99_112: [On any other error, Schema_ AddModelActionArgumet shall return SCHEMA_ERROR.] */
                     result = SCHEMA_ERROR;
@@ -824,12 +824,12 @@ SCHEMA_PROPERTY_HANDLE Schema_GetModelPropertyByName(SCHEMA_MODEL_TYPE_HANDLE mo
     else
     {
         size_t i;
-        MODEL_TYPE* modelType = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
 
         /* Codes_SRS_SCHEMA_99_036:[Schema_GetModelPropertyByName shall return a non-NULL SCHEMA_PROPERTY_HANDLE corresponding to the model type identified by modelTypeHandle and matching the propertyName argument value.] */
         for (i = 0; i < modelType->PropertyCount; i++)
         {
-            PROPERTY* modelProperty = (PROPERTY*)modelType->Properties[i];
+            SCHEMA_PROPERTY_HANDLE_DATA* modelProperty = (SCHEMA_PROPERTY_HANDLE_DATA*)modelType->Properties[i];
             if (strcmp(modelProperty->PropertyName, propertyName) == 0)
             {
                 break;
@@ -864,7 +864,7 @@ SCHEMA_RESULT Schema_GetModelPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHan
     else
     {
         /* Codes_SRS_SCHEMA_99_089: [Schema_GetModelPropertyCount shall provide the number of properties defined in the model type identified by modelTypeHandle.] */
-        MODEL_TYPE* modelType = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
 
         /* Codes_SRS_SCHEMA_99_090: [The count shall be provided via the out argument propertyCount.]*/
         *propertyCount = modelType->PropertyCount;
@@ -879,7 +879,7 @@ SCHEMA_RESULT Schema_GetModelPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHan
 SCHEMA_PROPERTY_HANDLE Schema_GetModelPropertyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index)
 {
     SCHEMA_PROPERTY_HANDLE result;
-    MODEL_TYPE* modelType = (MODEL_TYPE*)modelTypeHandle;
+    SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
 
     /* Codes_SRS_SCHEMA_99_094: [Schema_GetModelProperty shall return NULL if the index specified is outside the valid range or if modelTypeHandle argument is NULL.] */
     if ((modelTypeHandle == NULL) ||
@@ -912,12 +912,12 @@ SCHEMA_ACTION_HANDLE Schema_GetModelActionByName(SCHEMA_MODEL_TYPE_HANDLE modelT
     else
     {
         size_t i;
-        MODEL_TYPE* modelType = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
 
         /* Codes_SRS_SCHEMA_99_040:[Schema_GetModelActionByName shall return a non-NULL SCHEMA_ACTION_HANDLE corresponding to the model type identified by modelTypeHandle and matching the actionName argument value.] */
         for (i = 0; i < modelType->ActionCount; i++)
         {
-            ACTION* modelAction = (ACTION*)modelType->Actions[i];
+            SCHEMA_ACTION_HANDLE_DATA* modelAction = (SCHEMA_ACTION_HANDLE_DATA*)modelType->Actions[i];
             if (strcmp(modelAction->ActionName, actionName) == 0)
             {
                 break;
@@ -953,7 +953,7 @@ SCHEMA_RESULT Schema_GetModelActionCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandl
     else
     {
         /* Codes_SRS_SCHEMA_99_042:[Schema_GetModelActionCount shall provide the total number of actions defined in a model type identified by the modelTypeHandle.] */
-        MODEL_TYPE* modelType = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
 
         /* Codes_SRS_SCHEMA_99_043:[The count shall be provided via the out argument actionCount.] */
         *actionCount = modelType->ActionCount;
@@ -968,7 +968,7 @@ SCHEMA_RESULT Schema_GetModelActionCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandl
 SCHEMA_ACTION_HANDLE Schema_GetModelActionByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index)
 {
     SCHEMA_ACTION_HANDLE result;
-    MODEL_TYPE* modelType = (MODEL_TYPE*)modelTypeHandle;
+    SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
 
     /* Codes_SRS_SCHEMA_99_048:[Schema_GetModelAction shall return NULL if the index specified is outside the valid range or if modelTypeHandle argument is NULL.] */
     if ((modelType == NULL) ||
@@ -999,7 +999,7 @@ const char* Schema_GetModelActionName(SCHEMA_ACTION_HANDLE actionHandle)
     }
     else
     {
-        ACTION* action = (ACTION*)actionHandle;
+        SCHEMA_ACTION_HANDLE_DATA* action = (SCHEMA_ACTION_HANDLE_DATA*)actionHandle;
         /* Codes_SRS_SCHEMA_99_049:[Schema_GetModelActionName shall return the action name for a given action handle.] */
         result = action->ActionName;
     }
@@ -1020,7 +1020,7 @@ SCHEMA_RESULT Schema_GetModelActionArgumentCount(SCHEMA_ACTION_HANDLE actionHand
     }
     else
     {
-        ACTION* modelAction = (ACTION*)actionHandle;
+        SCHEMA_ACTION_HANDLE_DATA* modelAction = (SCHEMA_ACTION_HANDLE_DATA*)actionHandle;
 
         /* Codes_SRS_SCHEMA_99_051:[Schema_GetModelActionArgumentCount shall provide the number of arguments for a specific schema action identified by actionHandle.] */
         /* Codes_SRS_SCHEMA_99_052:[The argument count shall be provided via the out argument argumentCount.] */
@@ -1047,12 +1047,12 @@ SCHEMA_ACTION_ARGUMENT_HANDLE Schema_GetModelActionArgumentByName(SCHEMA_ACTION_
     else
     {
         /* Codes_SRS_SCHEMA_99_118: [Schema_GetModelActionArgumentByName shall return NULL if unable to find a matching argument or if any of the arguments are NULL.] */
-        ACTION* modelAction = (ACTION*)actionHandle;
+        SCHEMA_ACTION_HANDLE_DATA* modelAction = (SCHEMA_ACTION_HANDLE_DATA*)actionHandle;
         size_t i;
 
         for (i = 0; i < modelAction->ArgumentCount; i++)
         {
-            SCHEMA_ACTION_ARGUMENT* actionArgument = (SCHEMA_ACTION_ARGUMENT*)modelAction->ArgumentHandles[i];
+            SCHEMA_ACTION_ARGUMENT_HANDLE_DATA* actionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE_DATA*)modelAction->ArgumentHandles[i];
             if (strcmp(actionArgument->Name, actionArgumentName) == 0)
             {
                 break;
@@ -1078,7 +1078,7 @@ SCHEMA_ACTION_ARGUMENT_HANDLE Schema_GetModelActionArgumentByName(SCHEMA_ACTION_
 SCHEMA_ACTION_ARGUMENT_HANDLE Schema_GetModelActionArgumentByIndex(SCHEMA_ACTION_HANDLE actionHandle, size_t argumentIndex)
 {
     SCHEMA_ACTION_ARGUMENT_HANDLE result;
-    ACTION* modelAction = (ACTION*)actionHandle;
+    SCHEMA_ACTION_HANDLE_DATA* modelAction = (SCHEMA_ACTION_HANDLE_DATA*)actionHandle;
 
     /* Codes_SRS_SCHEMA_99_056:[Schema_GetModelActionArgument shall return NULL if the index specified is outside the valid range or if the actionHandle argument is NULL.] */
     if ((actionHandle == NULL) ||
@@ -1108,7 +1108,7 @@ const char* Schema_GetActionArgumentName(SCHEMA_ACTION_ARGUMENT_HANDLE actionArg
     else
     {
         /* Codes_SRS_SCHEMA_99_113: [Schema_GetActionArgumentName shall return the argument name identified by the actionArgumentHandle.] */
-        SCHEMA_ACTION_ARGUMENT* actionArgument = (SCHEMA_ACTION_ARGUMENT*)actionArgumentHandle;
+        SCHEMA_ACTION_ARGUMENT_HANDLE_DATA* actionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE_DATA*)actionArgumentHandle;
         result = actionArgument->Name;
     }
     return result;
@@ -1126,7 +1126,7 @@ const char* Schema_GetActionArgumentType(SCHEMA_ACTION_ARGUMENT_HANDLE actionArg
     else
     {
         /* Codes_SRS_SCHEMA_99_115: [Schema_GetActionArgumentType shall return the argument type identified by the actionArgumentHandle.] */
-        SCHEMA_ACTION_ARGUMENT* actionArgument = (SCHEMA_ACTION_ARGUMENT*)actionArgumentHandle;
+        SCHEMA_ACTION_ARGUMENT_HANDLE_DATA* actionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE_DATA*)actionArgumentHandle;
         result = actionArgument->Type;
     }
     return result;
@@ -1135,7 +1135,7 @@ const char* Schema_GetActionArgumentType(SCHEMA_ACTION_ARGUMENT_HANDLE actionArg
 SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, const char* typeName)
 {
     SCHEMA_STRUCT_TYPE_HANDLE result;
-    SCHEMA* schema = (SCHEMA*)schemaHandle;
+    SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)schemaHandle;
 
     /* Codes_SRS_SCHEMA_99_060:[If any of the arguments is NULL, Schema_CreateStructType shall return NULL.] */
     if ((schema == NULL) ||
@@ -1146,13 +1146,13 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
     }
     else
     {
-        STRUCT_TYPE* structType;
+        SCHEMA_STRUCT_TYPE_HANDLE_DATA* structType;
         size_t i;
 
         /* Codes_SRS_SCHEMA_99_061:[If a struct type with the same name already exists, Schema_CreateStructType shall return NULL.] */
         for (i = 0; i < schema->StructTypeCount; i++)
         {
-            structType = (STRUCT_TYPE*)schema->StructTypes[i];
+            structType = (SCHEMA_STRUCT_TYPE_HANDLE_DATA*)schema->StructTypes[i];
             if (strcmp(structType->Name, typeName) == 0)
             {
                 break;
@@ -1176,7 +1176,7 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
             else
             {
                 schema->StructTypes = newStructTypes;
-                if ((structType = (STRUCT_TYPE*)malloc(sizeof(STRUCT_TYPE))) == NULL)
+                if ((structType = (SCHEMA_STRUCT_TYPE_HANDLE_DATA*)malloc(sizeof(SCHEMA_STRUCT_TYPE_HANDLE_DATA))) == NULL)
                 {
                     /* Codes_SRS_SCHEMA_99_066:[On any other error, Schema_CreateStructType shall return NULL.] */
                     result = NULL;
@@ -1235,7 +1235,7 @@ const char* Schema_GetStructTypeName(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle)
     else
     {
         /* Codes_SRS_SCHEMA_99_135: [Schema_GetStructTypeName shall return the name of a struct type identified by the structTypeHandle argument.] */
-        result = ((STRUCT_TYPE*)structTypeHandle)->Name;
+        result = ((SCHEMA_STRUCT_TYPE_HANDLE_DATA*)structTypeHandle)->Name;
     }
     
     return result;
@@ -1255,7 +1255,7 @@ SCHEMA_RESULT Schema_GetStructTypeCount(SCHEMA_HANDLE schemaHandle, size_t* stru
     else
     {
         /* Codes_SRS_SCHEMA_99_137: [Schema_GetStructTypeCount shall provide the number of structs defined in the schema identified by schemaHandle.] */
-        SCHEMA* schema = (SCHEMA*)schemaHandle;
+        SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)schemaHandle;
         /* Codes_SRS_SCHEMA_99_138: [The count shall be provided via the out argument structTypeCount.] */
         *structTypeCount = schema->StructTypeCount;
         /* Codes_SRS_SCHEMA_99_139: [On success, Schema_GetStructTypeCount shall return SCHEMA_OK.] */
@@ -1267,8 +1267,8 @@ SCHEMA_RESULT Schema_GetStructTypeCount(SCHEMA_HANDLE schemaHandle, size_t* stru
 
 SCHEMA_STRUCT_TYPE_HANDLE Schema_GetStructTypeByName(SCHEMA_HANDLE schemaHandle, const char* name)
 {
-    SCHEMA_ACTION_HANDLE result;
-    SCHEMA* schema = (SCHEMA*)schemaHandle;
+    SCHEMA_STRUCT_TYPE_HANDLE result;
+    SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)schemaHandle;
 
     /* Codes_SRS_SCHEMA_99_069:[Schema_GetStructTypeByName shall return NULL if unable to find a matching struct or if any of the arguments are NULL.] */
     if ((schemaHandle == NULL) ||
@@ -1284,7 +1284,7 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_GetStructTypeByName(SCHEMA_HANDLE schemaHandle,
         /* Codes_SRS_SCHEMA_99_068:[Schema_GetStructTypeByName shall return a non-NULL handle corresponding to the struct type identified by the structTypeName in the schemaHandle schema.] */
         for (i = 0; i < schema->StructTypeCount; i++)
         {
-            STRUCT_TYPE* structType = (STRUCT_TYPE*)schema->StructTypes[i];
+            SCHEMA_STRUCT_TYPE_HANDLE_DATA* structType = (SCHEMA_STRUCT_TYPE_HANDLE_DATA*)schema->StructTypes[i];
             if (strcmp(structType->Name, name) == 0)
             {
                 break;
@@ -1309,7 +1309,7 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_GetStructTypeByName(SCHEMA_HANDLE schemaHandle,
 SCHEMA_STRUCT_TYPE_HANDLE Schema_GetStructTypeByIndex(SCHEMA_HANDLE schemaHandle, size_t index)
 {
     SCHEMA_STRUCT_TYPE_HANDLE result;
-    SCHEMA* schema = (SCHEMA*)schemaHandle;
+    SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)schemaHandle;
 
     /* Codes_SRS_SCHEMA_99_143: [Schema_GetStructTypeByIndex shall return NULL if the index specified is outside the valid range or if schemaHandle argument is NULL.] */
     /* Codes_SRS_SCHEMA_99_142: [The index argument is zero based, and the order in which models were added shall be the index in which they will be retrieved.] */
@@ -1344,12 +1344,12 @@ SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeH
     else
     {
         size_t i;
-        STRUCT_TYPE* structType = (STRUCT_TYPE*)structTypeHandle;
+        SCHEMA_STRUCT_TYPE_HANDLE_DATA* structType = (SCHEMA_STRUCT_TYPE_HANDLE_DATA*)structTypeHandle;
 
         /* Codes_SRS_SCHEMA_99_074:[The property name shall be unique per struct type, if the same property name is added twice to a struct type, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
         for (i = 0; i < structType->PropertyCount; i++)
         {
-            PROPERTY* property = (PROPERTY*)structType->Properties[i];
+            SCHEMA_PROPERTY_HANDLE_DATA* property = (SCHEMA_PROPERTY_HANDLE_DATA*)structType->Properties[i];
             if (strcmp(property->PropertyName, propertyName) == 0)
             {
                 break;
@@ -1371,10 +1371,10 @@ SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeH
             }
             else
             {
-                PROPERTY* newProperty;
+                SCHEMA_PROPERTY_HANDLE_DATA* newProperty;
 
                 structType->Properties = newProperties;
-                if ((newProperty = (PROPERTY*)malloc(sizeof(PROPERTY))) == NULL)
+                if ((newProperty = (SCHEMA_PROPERTY_HANDLE_DATA*)malloc(sizeof(SCHEMA_PROPERTY_HANDLE_DATA))) == NULL)
                 {
                     result = SCHEMA_ERROR;
                     LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_RESULT, result));
@@ -1440,11 +1440,11 @@ SCHEMA_PROPERTY_HANDLE Schema_GetStructTypePropertyByName(SCHEMA_STRUCT_TYPE_HAN
     else
     {
         size_t i;
-        STRUCT_TYPE* structType = (STRUCT_TYPE*)structTypeHandle;
+        SCHEMA_STRUCT_TYPE_HANDLE_DATA* structType = (SCHEMA_STRUCT_TYPE_HANDLE_DATA*)structTypeHandle;
 
         for (i = 0; i < structType->PropertyCount; i++)
         {
-            PROPERTY* modelProperty = (PROPERTY*)structType->Properties[i];
+            SCHEMA_PROPERTY_HANDLE_DATA* modelProperty = (SCHEMA_PROPERTY_HANDLE_DATA*)structType->Properties[i];
             if (strcmp(modelProperty->PropertyName, propertyName) == 0)
             {
                 break;
@@ -1480,7 +1480,7 @@ SCHEMA_RESULT Schema_GetStructTypePropertyCount(SCHEMA_STRUCT_TYPE_HANDLE struct
     }
     else
     {
-        STRUCT_TYPE* structType = (STRUCT_TYPE*)structTypeHandle;
+        SCHEMA_STRUCT_TYPE_HANDLE_DATA* structType = (SCHEMA_STRUCT_TYPE_HANDLE_DATA*)structTypeHandle;
 
         /* Codes_SRS_SCHEMA_99_077: [Schema_GetStructTypePropertyCount shall provide the total number of properties defined in a struct type identified by structTypeHandle. The value is provided via the out argument propertyCount.] */
         /* Codes_SRS_SCHEMA_99_081: [The count shall be provided via the out argument propertyCount.] */
@@ -1496,7 +1496,7 @@ SCHEMA_RESULT Schema_GetStructTypePropertyCount(SCHEMA_STRUCT_TYPE_HANDLE struct
 SCHEMA_PROPERTY_HANDLE Schema_GetStructTypePropertyByIndex(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle, size_t index)
 {
     SCHEMA_PROPERTY_HANDLE result;
-    STRUCT_TYPE* structType = (STRUCT_TYPE*)structTypeHandle;
+    SCHEMA_STRUCT_TYPE_HANDLE_DATA* structType = (SCHEMA_STRUCT_TYPE_HANDLE_DATA*)structTypeHandle;
 
     /* Codes_SRS_SCHEMA_99_083: [Schema_ GetStructTypeProperty shall return NULL if the index specified is outside the valid range, if structTypeHandle argument is NULL] */
     if ((structTypeHandle == NULL) ||
@@ -1527,7 +1527,7 @@ const char* Schema_GetPropertyName(SCHEMA_PROPERTY_HANDLE propertyHandle)
     }
     else
     {
-        PROPERTY* propertyType = (PROPERTY*)propertyHandle;
+        SCHEMA_PROPERTY_HANDLE_DATA* propertyType = (SCHEMA_PROPERTY_HANDLE_DATA*)propertyHandle;
 
         /* Codes_SRS_SCHEMA_99_085: [Schema_GetPropertyName shall return the property name identified by the propertyHandle.] */
         result = propertyType->PropertyName;
@@ -1548,7 +1548,7 @@ const char* Schema_GetPropertyType(SCHEMA_PROPERTY_HANDLE propertyHandle)
     }
     else
     {
-        PROPERTY* modelProperty = (PROPERTY*)propertyHandle;
+        SCHEMA_PROPERTY_HANDLE_DATA* modelProperty = (SCHEMA_PROPERTY_HANDLE_DATA*)propertyHandle;
 
         /* Codes_SRS_SCHEMA_99_087: [Schema_GetPropertyType shall return the property type identified by the propertyHandle.] */
         result = modelProperty->PropertyType;
@@ -1570,7 +1570,7 @@ SCHEMA_RESULT Schema_GetModelCount(SCHEMA_HANDLE schemaHandle, size_t* modelCoun
     else
     {
         /* Codes_SRS_SCHEMA_99_120: [Schema_GetModelCount shall provide the number of models defined in the schema identified by schemaHandle.] */
-        SCHEMA* schema = (SCHEMA*)schemaHandle;
+        SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)schemaHandle;
         /* Codes_SRS_SCHEMA_99_121: [The count shall be provided via the out argument modelCount.] */
         *modelCount = schema->ModelTypeCount;
         /* Codes_SRS_SCHEMA_99_122: [On success, Schema_GetModelCount shall return SCHEMA_OK.] */
@@ -1593,11 +1593,11 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelByName(SCHEMA_HANDLE schemaHandle, const
     else
     {
         /* Codes_SRS_SCHEMA_99_124: [Schema_GetModelByName shall return a non-NULL SCHEMA_MODEL_TYPE_HANDLE corresponding to the model identified by schemaHandle and matching the modelName argument value.] */
-        SCHEMA* schema = (SCHEMA*)schemaHandle;
+        SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)schemaHandle;
         size_t i;
         for (i = 0; i < schema->ModelTypeCount; i++)
         {
-            MODEL_TYPE* modelType = (MODEL_TYPE*)schema->ModelTypes[i];
+            SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)schema->ModelTypes[i];
             if (strcmp(modelName, modelType->Name)==0)
             {
                 break;
@@ -1619,7 +1619,7 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelByName(SCHEMA_HANDLE schemaHandle, const
 SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelByIndex(SCHEMA_HANDLE schemaHandle, size_t index)
 {
     SCHEMA_MODEL_TYPE_HANDLE result;
-    SCHEMA* schema = (SCHEMA*)schemaHandle;
+    SCHEMA_HANDLE_DATA* schema = (SCHEMA_HANDLE_DATA*)schemaHandle;
 
     /* Codes_SRS_SCHEMA_99_128: [Schema_GetModelByIndex shall return NULL if the index specified is outside the valid range or if schemaHandle argument is NULL.] */
     /* Codes_SRS_SCHEMA_99_127: [The index argument is zero based, and the order in which models were added shall be the index in which they will be retrieved.] */
@@ -1649,7 +1649,7 @@ const char* Schema_GetModelName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
     }
     else
     {
-        MODEL_TYPE* modelType = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         result = modelType->Name;
     }
     return result;
@@ -1671,7 +1671,7 @@ SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, con
     }
     else
     {
-        MODEL_TYPE* parentModel = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* parentModel = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         MODEL_IN_MODEL temp;
         temp.modelHandle = modelType;
         if (mallocAndStrcpy_s((char**)&(temp.propertyName), propertyName) != 0)
@@ -1710,7 +1710,7 @@ SCHEMA_RESULT Schema_GetModelModelCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle
     }
     else
     {
-        MODEL_TYPE* model = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* model = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         /*Codes_SRS_SCHEMA_99_167: [Schema_GetModelModelCount shall return in parameter modelCount the number of models inserted in the model identified by parameter modelTypeHandle.]*/
         *modelCount = VECTOR_size(model->models);
         /*SRS_SCHEMA_99_168: [If the function succeeds, it shall return SCHEMA_OK.]*/
@@ -1740,7 +1740,7 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelByName(SCHEMA_MODEL_TYPE_HANDLE mod
     }
     else
     {
-        MODEL_TYPE* model = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* model = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         /*Codes_SRS_SCHEMA_99_170: [Schema_GetModelModelByName shall return a handle to the model identified by the property with the name propertyName in the model identified by the handle modelTypeHandle.]*/
         /*Codes_SRS_SCHEMA_99_171: [If Schema_GetModelModelByName is unable to provide the handle it shall return NULL.]*/
         void* temp = VECTOR_find_if(model->models, matchModelName, propertyName);
@@ -1770,7 +1770,7 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelyByIndex(SCHEMA_MODEL_TYPE_HANDLE m
     }
     else
     {
-        MODEL_TYPE* model = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* model = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         size_t nModelsInModel;
         /*Codes_SRS_SCHEMA_99_172: [ Schema_GetModelModelyByIndex shall return a handle to the "index"th model inserted in the model identified by the parameter modelTypeHandle.]*/
         /*Codes_SRS_SCHEMA_99_173: [Schema_GetModelModelyByIndex shall return NULL in the cases when it cannot provide the handle.]*/
@@ -1798,7 +1798,7 @@ const char* Schema_GetModelModelPropertyNameByIndex(SCHEMA_MODEL_TYPE_HANDLE mod
     }
     else
     {
-        MODEL_TYPE* model = (MODEL_TYPE*)modelTypeHandle;
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* model = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         size_t nModelsInModel;
         /*Codes_SRS_SCHEMA_99_175: [Schema_GetModelModelPropertyNameByIndex shall return the name of the property for the "index"th model in the model identified by modelTypeHandle parameter.]*/
         /*Codes_SRS_SCHEMA_99_176: [If Schema_GetModelModelPropertyNameByIndex cannot produce the property name, it shall return NULL.]*/
@@ -1843,7 +1843,7 @@ bool Schema_ModelPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, 
             const char* endPos;
             size_t i;
             size_t modelCount;
-            MODEL_TYPE* modelType = (MODEL_TYPE*)modelTypeHandle;
+            SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
 
             /* Codes_SRS_SCHEMA_99_179: [The propertyPath shall be assumed to be in the format model1/model2/.../propertyName.] */
             slashPos = strchr(propertyPath, '/');
@@ -1888,7 +1888,7 @@ bool Schema_ModelPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, 
                 /* Codes_SRS_SCHEMA_99_178: [The argument propertyPath shall be used to find the leaf property.] */
                 for (i = 0; i < modelType->PropertyCount; i++)
                 {
-                    PROPERTY* property = (PROPERTY*)modelType->Properties[i];
+                    SCHEMA_PROPERTY_HANDLE_DATA* property = (SCHEMA_PROPERTY_HANDLE_DATA*)modelType->Properties[i];
                     if ((strncmp(property->PropertyName, propertyPath, endPos - propertyPath) == 0) &&
                         (strlen(property->PropertyName) == (size_t)(endPos - propertyPath)))
                     {

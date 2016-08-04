@@ -164,7 +164,7 @@ EXECUTE_COMMAND_RESULT alwaysAbandon(TruckType* device)
     return EXECUTE_COMMAND_ERROR;
 }
 
-static const SCHEMA_HANDLE TEST_SCHEMA_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4242;
+static const SCHEMA_HANDLE TEST_SCHEMA_HANDLE = (SCHEMA_HANDLE)0x4242;
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4243;
 static const SCHEMA_STRUCT_TYPE_HANDLE TEST_STRUCT_TYPE = (SCHEMA_STRUCT_TYPE_HANDLE)0x4244;
 static const SCHEMA_ACTION_HANDLE TEST_ACTION_HANDLE = (SCHEMA_ACTION_HANDLE)0x4245;
@@ -469,7 +469,7 @@ public:
     MOCK_STATIC_METHOD_1(, void, Device_Destroy, DEVICE_HANDLE, deviceHandle)
         MOCK_VOID_METHOD_END();
 
-    MOCK_STATIC_METHOD_1(, TRANSACTION_HANDLE, Device_StartTransaction, SCHEMA_MODEL_TYPE_HANDLE, modelHandle)
+    MOCK_STATIC_METHOD_1(, TRANSACTION_HANDLE, Device_StartTransaction, DEVICE_HANDLE, deviceHandle)
     {
     }
     MOCK_METHOD_END(TRANSACTION_HANDLE, (TRANSACTION_HANDLE)0x4455);
@@ -546,7 +546,7 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CCodeFirstMocks, , AGENT_DATA_TYPES_RESULT, Create_
 DECLARE_GLOBAL_MOCK_METHOD_5(CCodeFirstMocks, , DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pPfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , void, Device_Destroy, DEVICE_HANDLE, deviceHandle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CCodeFirstMocks, , DEVICE_RESULT, Device_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyName, const AGENT_DATA_TYPE*, data);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , TRANSACTION_HANDLE, Device_StartTransaction, SCHEMA_MODEL_TYPE_HANDLE, modelHandle);
+DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , TRANSACTION_HANDLE, Device_StartTransaction, DEVICE_HANDLE, deviceHandle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CCodeFirstMocks, , DEVICE_RESULT, Device_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
 DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , DEVICE_RESULT, Device_CancelTransaction, TRANSACTION_HANDLE, transactionHandle);
 DECLARE_GLOBAL_MOCK_METHOD_2(CCodeFirstMocks, , EXECUTE_COMMAND_RESULT, Device_ExecuteCommand, DEVICE_HANDLE, deviceHandle, const char*, command);

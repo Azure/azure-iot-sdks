@@ -59,7 +59,7 @@ public:
     MOCK_METHOD_END(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS)
 
     /* DataPublisher mocks */
-    MOCK_STATIC_METHOD_1(, TRANSACTION_HANDLE, DataPublisher_StartTransaction, SCHEMA_MODEL_TYPE_HANDLE, modelHandle)
+    MOCK_STATIC_METHOD_1(, TRANSACTION_HANDLE, DataPublisher_StartTransaction, DATA_PUBLISHER_HANDLE, modelHandle)
     MOCK_METHOD_END(TRANSACTION_HANDLE, TEST_TRANSACTION_HANDLE);
     MOCK_STATIC_METHOD_3(, DATA_PUBLISHER_RESULT, DataPublisher_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize)
     MOCK_METHOD_END(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK);
@@ -78,7 +78,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, , void, CommandDecoder_Destroy, COMMA
 
 DECLARE_GLOBAL_MOCK_METHOD_6(CDeviceMocks, , EXECUTE_COMMAND_RESULT, DeviceActionCallback, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeActionPath, const char*, actionName, size_t, argCount, const AGENT_DATA_TYPE*, arguments);
 
-DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, , TRANSACTION_HANDLE, DataPublisher_StartTransaction, SCHEMA_MODEL_TYPE_HANDLE, modelHandle)
+DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, , TRANSACTION_HANDLE, DataPublisher_StartTransaction, DATA_PUBLISHER_HANDLE, modelHandle)
 DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, , DATA_PUBLISHER_RESULT, DataPublisher_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize)
 DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, , DATA_PUBLISHER_RESULT, DataPublisher_CancelTransaction, TRANSACTION_HANDLE, transactionHandle)
 DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, , DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyPath, const AGENT_DATA_TYPE*, data)

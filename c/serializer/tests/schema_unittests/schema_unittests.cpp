@@ -1313,7 +1313,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
-        SCHEMA_ACTION_HANDLE result = Schema_GetModelPropertyByIndex(modelTypeHandle, 0);
+        SCHEMA_PROPERTY_HANDLE result = Schema_GetModelPropertyByIndex(modelTypeHandle, 0);
 
         // assert
         ASSERT_IS_NULL(result);
@@ -1331,7 +1331,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         (void)Schema_AddModelProperty(modelTypeHandle, "PropertyName", "PropertyType");
 
         // act
-        SCHEMA_ACTION_HANDLE result = Schema_GetModelPropertyByIndex(modelTypeHandle, 1);
+        SCHEMA_PROPERTY_HANDLE result = Schema_GetModelPropertyByIndex(modelTypeHandle, 1);
 
         // assert
         ASSERT_IS_NULL(result);
@@ -1350,7 +1350,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         (void)Schema_AddModelProperty(modelTypeHandle, "PropertyName", "PropertyType");
 
         // act
-        SCHEMA_ACTION_HANDLE result = Schema_GetModelPropertyByIndex(modelTypeHandle, 0);
+        SCHEMA_PROPERTY_HANDLE result = Schema_GetModelPropertyByIndex(modelTypeHandle, 0);
 
         // assert
         ASSERT_IS_NOT_NULL(result);
@@ -1370,8 +1370,8 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         (void)Schema_AddModelProperty(modelTypeHandle, "PropertyName2", "PropertyType2");
 
         // act
-        SCHEMA_ACTION_HANDLE result1 = Schema_GetModelPropertyByIndex(modelTypeHandle, 0);
-        SCHEMA_ACTION_HANDLE result2 = Schema_GetModelPropertyByIndex(modelTypeHandle, 1);
+        SCHEMA_PROPERTY_HANDLE result1 = Schema_GetModelPropertyByIndex(modelTypeHandle, 0);
+        SCHEMA_PROPERTY_HANDLE result2 = Schema_GetModelPropertyByIndex(modelTypeHandle, 1);
 
         // assert
         ASSERT_IS_NOT_NULL(result1);
@@ -1390,7 +1390,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         // arrange
 
         // act
-        SCHEMA_PROPERTY_HANDLE result = Schema_GetModelActionByName(NULL, "Name");
+        SCHEMA_ACTION_HANDLE result = Schema_GetModelActionByName(NULL, "Name");
 
         // assert
         ASSERT_IS_NULL(result);
@@ -1404,7 +1404,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
-        SCHEMA_PROPERTY_HANDLE result = Schema_GetModelActionByName(modelType, NULL);
+        SCHEMA_ACTION_HANDLE result = Schema_GetModelActionByName(modelType, NULL);
 
         // assert
         ASSERT_IS_NULL(result);
@@ -1422,7 +1422,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         (void)Schema_CreateModelAction(modelType, "ActionName");
 
         // act
-        SCHEMA_PROPERTY_HANDLE result = Schema_GetModelActionByName(modelType, "AnotherName");
+        SCHEMA_ACTION_HANDLE result = Schema_GetModelActionByName(modelType, "AnotherName");
 
         // assert
         ASSERT_IS_NULL(result);
@@ -1440,7 +1440,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         (void)Schema_CreateModelAction(modelType, "ActionName");
 
         // act
-        SCHEMA_PROPERTY_HANDLE result = Schema_GetModelActionByName(modelType, "ActionName");
+        SCHEMA_ACTION_HANDLE result = Schema_GetModelActionByName(modelType, "ActionName");
 
         // assert
         ASSERT_IS_NOT_NULL(result);
@@ -2239,7 +2239,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
     {
         // arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
-        SCHEMA_MODEL_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "Struct");
+        SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "Struct");
 
         // act
         SCHEMA_RESULT result = Schema_AddStructTypeProperty(structType, NULL, "SomeType");
@@ -2520,7 +2520,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         (void)Schema_CreateStructType(schemaHandle, "StructName3");
 
         // act
-        SCHEMA_MODEL_TYPE_HANDLE result = Schema_GetStructTypeByIndex(schemaHandle, 3);
+        SCHEMA_STRUCT_TYPE_HANDLE result = Schema_GetStructTypeByIndex(schemaHandle, 3);
 
         // assert
         ASSERT_IS_NULL(result);
@@ -2540,7 +2540,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         (void)Schema_CreateStructType(schemaHandle, "StructName3");
 
         // act
-        SCHEMA_MODEL_TYPE_HANDLE result = Schema_GetStructTypeByIndex(schemaHandle, 4);
+        SCHEMA_STRUCT_TYPE_HANDLE result = Schema_GetStructTypeByIndex(schemaHandle, 4);
 
         // assert
         ASSERT_IS_NULL(result);
@@ -2560,7 +2560,7 @@ BEGIN_TEST_SUITE(Schema_UnitTests)
         (void)Schema_CreateStructType(schemaHandle, "StructName3");
 
         // act
-        SCHEMA_MODEL_TYPE_HANDLE result = Schema_GetStructTypeByIndex(schemaHandle, 2);
+        SCHEMA_STRUCT_TYPE_HANDLE result = Schema_GetStructTypeByIndex(schemaHandle, 2);
 
         // assert
         ASSERT_IS_NOT_NULL(result);

@@ -900,6 +900,12 @@ CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destin
     return result;
 }
 
+CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...)
+{
+    (void)(destination, destinationSize, numProperties);
+    return CODEFIRST_OK;
+}
+
 EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* command)
 {
     EXECUTE_COMMAND_RESULT result;

@@ -23,12 +23,12 @@ DEFINE_MICROMOCK_ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VAL
 static AGENT_DATA_TYPE              data;
 static const SCHEMA_PROPERTY_HANDLE g_ModelPropertyHandle = (SCHEMA_PROPERTY_HANDLE)0x4243;
 static const DATA_MARSHALLER_HANDLE TEST_DATA_MARSHALLER_HANDLE = (DATA_MARSHALLER_HANDLE)0x4343;
-static const IOTHUB_CLIENT_HANDLE       TEST_IOTHUB_CLIENT_HANDLE = (IOTHUB_CLIENT_HANDLE)0x4444;
+static const SCHEMA_MODEL_TYPE_HANDLE       TEST_SCHEMA_MODEL_TYPE_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4444;
 static bool                         g_DataSentMatches;
 static const DATA_MARSHALLER_VALUE* g_ExpectedDataSentValues;
 
 
-static const SCHEMA_MODEL_TYPE_HANDLE TEST_MODEL_HANDLE = (SCHEMA_PROPERTY_HANDLE)0x4242;
+static const SCHEMA_MODEL_TYPE_HANDLE TEST_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4242;
 
 static DATA_PUBLISHER_HANDLE g_handle = NULL;
 static TRANSACTION_HANDLE g_myTransaction = NULL;
@@ -281,7 +281,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
 
 
             dataPublisherMock.ResetAllCalls();
@@ -317,7 +317,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
             dataPublisherMock.ResetAllCalls();
@@ -367,7 +367,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
@@ -391,7 +391,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
             dataPublisherMock.ResetAllCalls();
 
@@ -491,7 +491,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
@@ -548,7 +548,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             size_t destinationSize;
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
             dataPublisherMock.ResetAllCalls();
@@ -571,7 +571,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             unsigned char* destination;
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
             dataPublisherMock.ResetAllCalls();
@@ -594,7 +594,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
@@ -619,7 +619,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
@@ -654,7 +654,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
@@ -831,7 +831,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
@@ -864,7 +864,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
             dataPublisherMock.ResetAllCalls();
 
@@ -904,7 +904,7 @@ BEGIN_TEST_SUITE(DataPublisher_UnitTests)
         {
             // arrange
             CDataPublisherMock dataPublisherMock;
-            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_IOTHUB_CLIENT_HANDLE, true);
+            DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
             TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
             dataPublisherMock.ResetAllCalls();
 

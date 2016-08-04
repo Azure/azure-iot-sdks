@@ -263,7 +263,7 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
 /*Codes_SRS_SERIALIZER_99_114:[ If CodeFirst_SendAsync fails, SEND shall return IOT_AGENT_SERIALIZE_FAILED.] */
 #define SERIALIZE(destination, destinationSize,...) ((CodeFirst_SendAsync(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__)) == CODEFIRST_OK) ? IOT_AGENT_OK : IOT_AGENT_SERIALIZE_FAILED)
 
-#define SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize,...) ((CodeFirst_SendAsyncReporte(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__)) == CODEFIRST_OK) ? IOT_AGENT_OK : IOT_AGENT_SERIALIZE_FAILED)
+#define SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize,...) ((CodeFirst_SendAsyncReported(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__)) == CODEFIRST_OK) ? IOT_AGENT_OK : IOT_AGENT_SERIALIZE_FAILED)
 
 /**
  * @def   EXECUTE_COMMAND(device, command)

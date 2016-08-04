@@ -12,6 +12,8 @@ function(add_sample_directory whatIsBuilding)
 			   FOLDER "Serializer_Samples")
 endfunction()
 
+add_sample_directory(simple_sample_with_strings)
+
 if(${use_amqp})
 	add_sample_directory(remote_monitoring)
 	add_sample_directory(simplesample_amqp)

@@ -143,7 +143,7 @@ EXECUTE_COMMAND_RESULT test1(TruckType* device, double P1, int P2, float P3, lon
 #define TEST_DEFAULT_SCHEMA_NAMESPACE   ("Test.TruckDemo")
 #define TEST_DEFAULT_MODEL_NAME         ("TruckType")
 
-static const SCHEMA_HANDLE TEST_SCHEMA_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4242;
+static const SCHEMA_HANDLE TEST_SCHEMA_HANDLE = (SCHEMA_HANDLE)0x4242;
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4243;
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_TRUCKTYPE_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4244;
 static const DEVICE_HANDLE TEST_DEVICE_HANDLE = (DEVICE_HANDLE)0x4848;
@@ -515,7 +515,7 @@ public:
     MOCK_STATIC_METHOD_1(, void, Device_Destroy, DEVICE_HANDLE, deviceHandle)
     MOCK_VOID_METHOD_END();
 
-    MOCK_STATIC_METHOD_1(, TRANSACTION_HANDLE, Device_StartTransaction, SCHEMA_MODEL_TYPE_HANDLE, modelHandle)
+    MOCK_STATIC_METHOD_1(, TRANSACTION_HANDLE, Device_StartTransaction, DEVICE_HANDLE, modelHandle)
     {
     }
     MOCK_METHOD_END(TRANSACTION_HANDLE, TEST_TRANSACTION_HANDLE);
@@ -655,7 +655,7 @@ DECLARE_GLOBAL_MOCK_METHOD_5(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Crea
 DECLARE_GLOBAL_MOCK_METHOD_5(CMocksForCodeFirst, , DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pPfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , void, Device_Destroy, DEVICE_HANDLE, deviceHandle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CMocksForCodeFirst, , DEVICE_RESULT, Device_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyName, const AGENT_DATA_TYPE*, data);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , TRANSACTION_HANDLE, Device_StartTransaction, SCHEMA_MODEL_TYPE_HANDLE, modelHandle);
+DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , TRANSACTION_HANDLE, Device_StartTransaction, DEVICE_HANDLE, modelHandle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CMocksForCodeFirst, , DEVICE_RESULT, Device_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
 DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , DEVICE_RESULT, Device_CancelTransaction, TRANSACTION_HANDLE, transactionHandle);
 DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , EXECUTE_COMMAND_RESULT, Device_ExecuteCommand, DEVICE_HANDLE, deviceHandle, const char*, command);
