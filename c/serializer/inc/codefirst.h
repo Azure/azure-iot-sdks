@@ -24,6 +24,7 @@ typedef char* ascii_char_ptr_no_quotes;
 
 typedef enum REFLECTION_TYPE_TAG
 {
+    REFLECTION_REPORTED_PROPERTY_TYPE,
     REFLECTION_STRUCT_TYPE,
     REFLECTION_FIELD_TYPE,
     REFLECTION_PROPERTY_TYPE,
@@ -71,6 +72,17 @@ typedef struct REFLECTION_PROPERTY_TAG
     const char* modelName;
 } REFLECTION_PROPERTY;
 
+
+typedef struct REFLECTION_REPORTED_PROPERTY_TAG
+{
+    const char* name;
+    const char* type;
+    int(*Create_AGENT_DATA_TYPE_from_Ptr)(void* param, AGENT_DATA_TYPE* dest);
+    size_t offset;
+    size_t size;
+    const char* modelName;
+} REFLECTION_REPORTED_PROPERTY;
+
 typedef struct REFLECTION_MODEL_TAG
 {
     const char* name;
@@ -82,6 +94,7 @@ typedef struct REFLECTED_SOMETHING_TAG
     const struct REFLECTED_SOMETHING_TAG* next;
     struct what
     {
+        REFLECTION_REPORTED_PROPERTY reportedProperty;
         REFLECTION_STRUCT structure;
         REFLECTION_FIELD field;
         REFLECTION_PROPERTY property;

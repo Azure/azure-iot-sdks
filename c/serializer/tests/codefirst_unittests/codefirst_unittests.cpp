@@ -689,18 +689,18 @@ typedef struct SimpleDevice_TAG
 
 static const WRAPPER_ARGUMENT setSpeedArguments[] = { { "double", "theSpeed" } };
 
-static const REFLECTED_SOMETHING this_is_double_Property = { REFLECTION_PROPERTY_TYPE, NULL, { { 0 }, { 0 }, { "this_is_double", "double", Create_AGENT_DATA_TYPE_From_Ptr_this_is_double, offsetof(SimpleDevice, this_is_double), sizeof(double), "SimpleDevice"}, { 0 }, { 0 }} };
-static const REFLECTED_SOMETHING this_is_int_Property = { REFLECTION_PROPERTY_TYPE, &this_is_double_Property, { { 0 }, { 0 }, { "this_is_int", "int", Create_AGENT_DATA_TYPE_From_Ptr_this_is_int, offsetof(SimpleDevice, this_is_int), sizeof(int), "SimpleDevice"}, { 0 }, { 0 }} };
-static const REFLECTED_SOMETHING SimpleDevice_Model = { REFLECTION_MODEL_TYPE, &this_is_int_Property, { { 0 }, { 0 }, { 0 }, { 0 }, { "SimpleDevice"}} };
-static const REFLECTED_SOMETHING whereIsMyDevice_Struct = { REFLECTION_STRUCT_TYPE, &SimpleDevice_Model, { { "GeoLocation" }, { 0 }, { 0 }, { 0 }, { 0 }} };
-static const REFLECTED_SOMETHING Lat_Field = { REFLECTION_FIELD_TYPE, &whereIsMyDevice_Struct, { { 0 }, { "Lat", "double", "GeoLocation" }, { 0 }, { 0 }, { 0 }} };
-static const REFLECTED_SOMETHING Long_Field = { REFLECTION_FIELD_TYPE, &Lat_Field, { { 0 }, { "Long", "double", "GeoLocation" }, { 0 }, { 0 }, { 0 }} };
-static const REFLECTED_SOMETHING theCarIsBehindTheVan_Struct = { REFLECTION_STRUCT_TYPE, &Long_Field, { { "theCarIsBehindTheVan" }, { 0 }, { 0 }, { 0 }, { 0 } } };
-static const REFLECTED_SOMETHING Alt_Field = { REFLECTION_FIELD_TYPE, &theCarIsBehindTheVan_Struct, { { 0 }, { "Alt", "int", "theCarIsBehindTheVan" }, { 0 }, { 0 }, { 0 }} };
-static const REFLECTED_SOMETHING whereIsMyCar_Field = { REFLECTION_FIELD_TYPE, &Alt_Field, { { 0 }, { "whereIsMyCar", "GeoLocation", "theCarIsBehindTheVan" }, { 0 }, { 0 }, { 0 }} };
-static const REFLECTED_SOMETHING setSpeed_Action = { REFLECTION_ACTION_TYPE, &whereIsMyCar_Field, { { 0 }, { 0 }, { 0 }, { "setSpeed", 1, setSpeedArguments, NULL, "TruckType" }, { 0 }} };
-static const REFLECTED_SOMETHING reset_Action = { REFLECTION_ACTION_TYPE, &setSpeed_Action, { { 0 }, { 0 }, { 0 }, { "reset", 0, NULL, NULL, "TruckType" }, { 0 }} };
-static const REFLECTED_SOMETHING truckType_Model = { REFLECTION_MODEL_TYPE, &reset_Action, { { 0 }, { 0 }, { 0 }, { 0 }, { "TruckType"}} };
+static const REFLECTED_SOMETHING this_is_double_Property = { REFLECTION_PROPERTY_TYPE, NULL, { { 0 }, { 0 }, { 0 }, { "this_is_double", "double", Create_AGENT_DATA_TYPE_From_Ptr_this_is_double, offsetof(SimpleDevice, this_is_double), sizeof(double), "SimpleDevice"}, { 0 }, { 0 }} };
+static const REFLECTED_SOMETHING this_is_int_Property = { REFLECTION_PROPERTY_TYPE, &this_is_double_Property, { { 0 },{ 0 }, { 0 }, { "this_is_int", "int", Create_AGENT_DATA_TYPE_From_Ptr_this_is_int, offsetof(SimpleDevice, this_is_int), sizeof(int), "SimpleDevice"}, { 0 }, { 0 }} };
+static const REFLECTED_SOMETHING SimpleDevice_Model = { REFLECTION_MODEL_TYPE, &this_is_int_Property, { { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { "SimpleDevice"}} };
+static const REFLECTED_SOMETHING whereIsMyDevice_Struct = { REFLECTION_STRUCT_TYPE, &SimpleDevice_Model, { { 0 }, { "GeoLocation" }, { 0 }, { 0 }, { 0 }, { 0 }} };
+static const REFLECTED_SOMETHING Lat_Field = { REFLECTION_FIELD_TYPE, &whereIsMyDevice_Struct, { { 0 }, { 0 }, { "Lat", "double", "GeoLocation" }, { 0 }, { 0 }, { 0 }} };
+static const REFLECTED_SOMETHING Long_Field = { REFLECTION_FIELD_TYPE, &Lat_Field, { { 0 }, { 0 }, { "Long", "double", "GeoLocation" }, { 0 }, { 0 }, { 0 }} };
+static const REFLECTED_SOMETHING theCarIsBehindTheVan_Struct = { REFLECTION_STRUCT_TYPE, &Long_Field, { { 0 }, { "theCarIsBehindTheVan" }, { 0 }, { 0 }, { 0 }, { 0 } } };
+static const REFLECTED_SOMETHING Alt_Field = { REFLECTION_FIELD_TYPE, &theCarIsBehindTheVan_Struct, { { 0 }, { 0 }, { "Alt", "int", "theCarIsBehindTheVan" }, { 0 }, { 0 }, { 0 }} };
+static const REFLECTED_SOMETHING whereIsMyCar_Field = { REFLECTION_FIELD_TYPE, &Alt_Field, { { 0 }, { 0 }, { "whereIsMyCar", "GeoLocation", "theCarIsBehindTheVan" }, { 0 }, { 0 }, { 0 }} };
+static const REFLECTED_SOMETHING setSpeed_Action = { REFLECTION_ACTION_TYPE, &whereIsMyCar_Field, { { 0 }, { 0 }, { 0 }, { 0 }, { "setSpeed", 1, setSpeedArguments, NULL, "TruckType" }, { 0 }} };
+static const REFLECTED_SOMETHING reset_Action = { REFLECTION_ACTION_TYPE, &setSpeed_Action, { { 0 }, { 0 }, { 0 }, { 0 }, { "reset", 0, NULL, NULL, "TruckType" }, { 0 }} };
+static const REFLECTED_SOMETHING truckType_Model = { REFLECTION_MODEL_TYPE, &reset_Action, { { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { "TruckType"}} };
 const REFLECTED_DATA_FROM_DATAPROVIDER testReflectedData = { &truckType_Model };
 
 
@@ -739,13 +739,13 @@ EXECUTE_COMMAND_RESULT InnerType_reset(void* device, size_t ParameterCount, cons
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_INNERTYPE_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x5555;
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_OUTERTYPE_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x5556;
 
-static const REFLECTED_SOMETHING OuterType_reset_Action = { REFLECTION_ACTION_TYPE, NULL, { { 0 }, { 0 }, { 0 }, { "reset", 0, NULL, OuterType_reset, "OuterType" }, { 0 } } };
-static const REFLECTED_SOMETHING InnerType_reset_Action = { REFLECTION_ACTION_TYPE, &OuterType_reset_Action, { { 0 }, { 0 }, { 0 }, { "reset", 0, NULL, InnerType_reset, "InnerType" }, { 0 } } };
-static const REFLECTED_SOMETHING this_is_int_Property_2 = { REFLECTION_PROPERTY_TYPE, &InnerType_reset_Action, { { 0 }, { 0 }, { "this_is_int", "int", Create_AGENT_DATA_TYPE_From_Ptr_this_is_int, offsetof(InnerType, this_is_int), sizeof(int), "InnerType" }, { 0 }, { 0 } } };
-static const REFLECTED_SOMETHING this_is_double_Property_2 = { REFLECTION_PROPERTY_TYPE, &this_is_int_Property_2, { { 0 }, { 0 }, { "this_is_double", "double", Create_AGENT_DATA_TYPE_From_Ptr_this_is_double, offsetof(InnerType, this_is_double), sizeof(double), "InnerType"}, { 0 }, { 0 }} };
-static const REFLECTED_SOMETHING InnerType_Model = { REFLECTION_MODEL_TYPE, &this_is_double_Property_2, { { 0 }, { 0 }, { 0 }, { 0 }, { "InnerType"}} };
-static const REFLECTED_SOMETHING Inner_Property = { REFLECTION_PROPERTY_TYPE, &InnerType_Model, { { 0 }, { 0 }, { "Inner", "InnerType", Create_AGENT_DATA_TYPE_From_Ptr_this_is_double, offsetof(OuterType, Inner), sizeof(InnerType), "OuterType"}, { 0 }, { 0 }} };
-static const REFLECTED_SOMETHING OuterType_Model = { REFLECTION_MODEL_TYPE, &Inner_Property, { { 0 }, { 0 }, { 0 }, { 0 }, { "OuterType"}} };
+static const REFLECTED_SOMETHING OuterType_reset_Action = { REFLECTION_ACTION_TYPE, NULL, { { 0 }, { 0 }, { 0 }, { 0 }, { "reset", 0, NULL, OuterType_reset, "OuterType" }, { 0 } } };
+static const REFLECTED_SOMETHING InnerType_reset_Action = { REFLECTION_ACTION_TYPE, &OuterType_reset_Action, { { 0 },{ 0 }, { 0 }, { 0 }, { "reset", 0, NULL, InnerType_reset, "InnerType" }, { 0 } } };
+static const REFLECTED_SOMETHING this_is_int_Property_2 = { REFLECTION_PROPERTY_TYPE, &InnerType_reset_Action, { { 0 },{ 0 }, { 0 }, { "this_is_int", "int", Create_AGENT_DATA_TYPE_From_Ptr_this_is_int, offsetof(InnerType, this_is_int), sizeof(int), "InnerType" }, { 0 }, { 0 } } };
+static const REFLECTED_SOMETHING this_is_double_Property_2 = { REFLECTION_PROPERTY_TYPE, &this_is_int_Property_2, { { 0 },{ 0 }, { 0 }, { "this_is_double", "double", Create_AGENT_DATA_TYPE_From_Ptr_this_is_double, offsetof(InnerType, this_is_double), sizeof(double), "InnerType"}, { 0 }, { 0 }} };
+static const REFLECTED_SOMETHING InnerType_Model = { REFLECTION_MODEL_TYPE, &this_is_double_Property_2, { { 0 },{ 0 }, { 0 }, { 0 }, { 0 }, { "InnerType"}} };
+static const REFLECTED_SOMETHING Inner_Property = { REFLECTION_PROPERTY_TYPE, &InnerType_Model, { { 0 },{ 0 }, { 0 }, { "Inner", "InnerType", Create_AGENT_DATA_TYPE_From_Ptr_this_is_double, offsetof(OuterType, Inner), sizeof(InnerType), "OuterType"}, { 0 }, { 0 }} };
+static const REFLECTED_SOMETHING OuterType_Model = { REFLECTION_MODEL_TYPE, &Inner_Property, { { 0 },{ 0 }, { 0 }, { 0 }, { 0 }, { "OuterType"}} };
 const REFLECTED_DATA_FROM_DATAPROVIDER testModelInModelReflectedData = { &OuterType_Model };
 
 

@@ -193,6 +193,9 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
  */
 #define WITH_DATA(type, name) MODEL_PROPERTY(type, name)
 
+
+#define WITH_REPORTED_PROPERTY(type, name) MODEL_REPORTED_PROPERTY(type, name)
+
 /**
  * @def   WITH_ACTION(name, ...)
  * The ::WITH_ACTION macro allows declaring a model action.
@@ -204,6 +207,7 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
  */
 /*Codes_SRS_SERIALIZER_99_039:[WITH_ACTION shall declare an action of the current data provider called as the first macro parameter(name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on.]*/
 #define WITH_ACTION(name, ...)  MODEL_ACTION(name, __VA_ARGS__)
+
 
 /**
  * @def   GET_MODEL_HANDLE(schemaNamespace, modelName)
@@ -259,6 +263,8 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
 /*Codes_SRS_SERIALIZER_99_114:[ If CodeFirst_SendAsync fails, SEND shall return IOT_AGENT_SERIALIZE_FAILED.] */
 #define SERIALIZE(destination, destinationSize,...) ((CodeFirst_SendAsync(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__)) == CODEFIRST_OK) ? IOT_AGENT_OK : IOT_AGENT_SERIALIZE_FAILED)
 
+#define SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize,...) ((CodeFirst_SendAsyncReporte(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__)) == CODEFIRST_OK) ? IOT_AGENT_OK : IOT_AGENT_SERIALIZE_FAILED)
+
 /**
  * @def   EXECUTE_COMMAND(device, command)
  * Any action that is declared in a model must also have an implementation as
@@ -310,6 +316,9 @@ WITH_DATA(x, y), WITH_DATA(x2, y2) to a list of arguments consumed by the macro 
 x, y, x2, y2
 Actions are discarded, since no marshalling will be done for those when sending state data */
 #define TO_AGENT_DT_EXPAND_MODEL_PROPERTY(x, y) ,x,y
+
+#define TO_AGENT_DT_EXPAND_MODEL_REPORTED_PROPERTY(x, y) ,x,y
+
 #define TO_AGENT_DT_EXPAND_MODEL_ACTION(...) 
 
 #define TO_AGENT_DT_EXPAND_ELEMENT_ARGS(N, ...) TO_AGENT_DT_EXPAND_##__VA_ARGS__
@@ -358,19 +367,24 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define REFLECTED_LIST_HEAD(name) \
     static const REFLECTED_DATA_FROM_DATAPROVIDER ALL_REFLECTED(name) = { &C2(REFLECTED_, C1(DEC(__COUNTER__))) };
 #define REFLECTED_STRUCT(name) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_STRUCT_TYPE,   &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {TOSTRING(name)}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_STRUCT_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {TOSTRING(name)}, {0}, {0}, {0}, {0}} };
 #define REFLECTED_FIELD(XstructName, XfieldType, XfieldName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_FIELD_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {TOSTRING(XfieldName), TOSTRING(XfieldType), TOSTRING(XstructName)}, {0}, {0}, {0} } };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_FIELD_TYPE,                &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {TOSTRING(XfieldName), TOSTRING(XfieldType), TOSTRING(XstructName)}, {0}, {0}, {0} } };
 #define REFLECTED_MODEL(name) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_MODEL_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {TOSTRING(name)} } };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_MODEL_TYPE,                &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {TOSTRING(name)} } };
 #define REFLECTED_PROPERTY(type, name, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE, &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE,             &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}} };
+#define REFLECTED_REPORTED_PROPERTY(type, name, modelName) \
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_REPORTED_PROPERTY_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}} };
 #define REFLECTED_ACTION(name, argc, argv, fn, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,   &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {TOSTRING(name), (0 ? (uintptr_t)("", "") : argc), argv, fn, TOSTRING(modelName)}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {TOSTRING(name), (0 ? (uintptr_t)("", "") : argc), argv, fn, TOSTRING(modelName)}, {0}} };
 #define REFLECTED_END_OF_LIST \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, __COUNTER__) = { REFLECTION_NOTHING, NULL, { {0}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, __COUNTER__) = {          REFLECTION_NOTHING,                   NULL,                                       { {0}, {0}, {0}, {0}, {0}, {0}} };
 
 #define EXPAND_MODEL_PROPERTY(type, name) EXPAND_ARGS(MODEL_PROPERTY, type, name)
+
+#define EXPAND_MODEL_REPORTED_PROPERTY(type, name) EXPAND_ARGS(MODEL_REPORTED_PROPERTY, type, name)
+
 #define EXPAND_MODEL_ACTION(...) EXPAND_ARGS(MODEL_ACTION, __VA_ARGS__)
 
 #define BUILD_MODEL_STRUCT(elem) INSERT_FIELD_FOR_##elem
@@ -383,10 +397,18 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 #define INSERT_FIELD_INTO_STRUCT(x, y) x y;
 #define INSERT_FIELD_FOR_MODEL_PROPERTY(type, name) INSERT_FIELD_INTO_STRUCT(type, name)
+
+/*REPORTED_PROPERTY is not different than regular WITH_DATA*/
+#define INSERT_FIELD_FOR_MODEL_REPORTED_PROPERTY(type, name) INSERT_FIELD_INTO_STRUCT(type, name)
+
 #define INSERT_FIELD_FOR_MODEL_ACTION(name, ...) /* action isn't a part of the model struct */
 
 #define CREATE_MODEL_PROPERTY(modelName, type, name) \
     IMPL_PROPERTY(type, name, modelName)
+
+#define CREATE_MODEL_REPORTED_PROPERTY(modelName, type, name) \
+    IMPL_REPORTED_PROPERTY(type, name, modelName)
+
 
 #define IMPL_PROPERTY(propertyType, propertyName, modelName) \
     static int Create_AGENT_DATA_TYPE_From_Ptr_##propertyName(void* param, AGENT_DATA_TYPE* dest) \
@@ -394,6 +416,14 @@ Actions are discarded, since no marshalling will be done for those when sending 
         return C1(ToAGENT_DATA_TYPE_##propertyType)(dest, *(propertyType*)param); \
     } \
     REFLECTED_PROPERTY(propertyType, propertyName, modelName)
+
+#define IMPL_REPORTED_PROPERTY(propertyType, propertyName, modelName) \
+    static int Create_AGENT_DATA_TYPE_From_Ptr_##propertyName(void* param, AGENT_DATA_TYPE* dest) \
+    { \
+        return C1(ToAGENT_DATA_TYPE_##propertyType)(dest, *(propertyType*)param); \
+    } \
+    REFLECTED_REPORTED_PROPERTY(propertyType, propertyName, modelName)
+
 
 #define CREATE_MODEL_ACTION(modelName, actionName, ...) \
     DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(modelName##actionName, 1); \
