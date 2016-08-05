@@ -354,7 +354,7 @@ void f_on_feedback_message_received(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH
 #include "azure_c_shared_utility/gballoc.h"
 #undef ENABLE_MOCKS
 
-static const char* TEST_DEVCIEID = "theDeviceId";
+static const char* TEST_DEVICE_ID = "theDeviceId";
 static const char* TEST_PRIMARYKEY = "thePrimaryKey";
 static const char* TEST_SECONDARYKEY = "theSecondaryKey";
 static const char* TEST_GENERATIONID = "theGenerationId";
@@ -448,7 +448,7 @@ static LINK_HANDLE TEST_LINK_HANDLE = (LINK_HANDLE)0x4949;
 static IOTHUB_SEND_COMPLETE_CALLBACK TEST_IOTHUB_SEND_COMPLETE_CALLBACK = (IOTHUB_SEND_COMPLETE_CALLBACK)0x5353;
 static BINARY_DATA TEST_BINARY_DATA_INST;
 static PROPERTIES_HANDLE TEST_PROPERTIES_HANDLE = (PROPERTIES_HANDLE)0x5656;
-static MESSAGE_HANDLE TEST_MESSAGE_HANDLE = (MESSAGE_HANDLE)05757;
+static MESSAGE_HANDLE TEST_MESSAGE_HANDLE = (MESSAGE_HANDLE)0x5858;
 static IOTHUB_OPEN_COMPLETE_CALLBACK TEST_IOTHUB_OPEN_COMPLETE_CALLBACK;
 static IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK TEST_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK = (IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK)0x6060;
 static MESSAGE_SENDER_STATE TEST_MESSAGE_SENDER_STATE = (MESSAGE_SENDER_STATE)0x6161;
@@ -1842,7 +1842,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVCIEID, TEST_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVICE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
         
         umock_c_reset_all_calls();
 
@@ -1866,7 +1866,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVCIEID, TEST_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVICE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
 
         umock_c_reset_all_calls();
 
@@ -1894,7 +1894,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVCIEID, TEST_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVICE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
 
         umock_c_reset_all_calls();
 

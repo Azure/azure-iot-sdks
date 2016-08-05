@@ -20,11 +20,11 @@ DEFINE_ENUM_STRINGS(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
 #define LOG_DATA_MARSHALLER_ERROR \
     LogError("(result = %s)", ENUM_TO_STRING(DATA_MARSHALLER_RESULT, result));
 
-typedef struct DATA_MARSHALLER_INSTANCE_TAG
+typedef struct DATA_MARSHALLER_HANDLE_DATA_TAG
 {
     SCHEMA_MODEL_TYPE_HANDLE ModelHandle;
     bool IncludePropertyPath;
-} DATA_MARSHALLER_INSTANCE;
+} DATA_MARSHALLER_HANDLE_DATA;
 
 static int NoCloneFunction(void** destination, const void* source)
 {
@@ -39,8 +39,7 @@ static void NoFreeFunction(void* value)
 
 DATA_MARSHALLER_HANDLE DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath)
 {
-    DATA_MARSHALLER_HANDLE result;
-    DATA_MARSHALLER_INSTANCE* dataMarshallerInstance;
+    DATA_MARSHALLER_HANDLE_DATA* result;
 
     /*Codes_SRS_DATA_MARSHALLER_99_019:[ DataMarshaller_Create shall return NULL if any argument is NULL.]*/
     if (
@@ -50,7 +49,7 @@ DATA_MARSHALLER_HANDLE DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
         result = NULL;
         LogError("(result = %s)", ENUM_TO_STRING(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_ARG));
     }
-    else if ((dataMarshallerInstance = (DATA_MARSHALLER_INSTANCE*)malloc(sizeof(DATA_MARSHALLER_INSTANCE))) == NULL)
+    else if ((result = (DATA_MARSHALLER_HANDLE_DATA*)malloc(sizeof(DATA_MARSHALLER_HANDLE_DATA))) == NULL)
     {
         /* Codes_SRS_DATA_MARSHALLER_99_048:[On any other errors not explicitly specified, DataMarshaller_Create shall return NULL.] */
         result = NULL;
@@ -59,11 +58,9 @@ DATA_MARSHALLER_HANDLE DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
     else
     {
         /*everything ok*/
-        dataMarshallerInstance->ModelHandle = modelHandle;
-        dataMarshallerInstance->IncludePropertyPath = includePropertyPath;
-
         /*Codes_SRS_DATA_MARSHALLER_99_018:[ DataMarshaller_Create shall create a new DataMarshaller instance and on success it shall return a non NULL handle.]*/
-        result = dataMarshallerInstance;
+        result->ModelHandle = modelHandle;
+        result->IncludePropertyPath = includePropertyPath;
     }
     return result;
 }
@@ -74,14 +71,14 @@ void DataMarshaller_Destroy(DATA_MARSHALLER_HANDLE dataMarshallerHandle)
     if (dataMarshallerHandle != NULL)
     {
         /* Codes_SRS_DATA_MARSHALLER_99_022:[ DataMarshaller_Destroy shall free all resources associated with the dataMarshallerHandle argument.] */
-        DATA_MARSHALLER_INSTANCE* dataMarshallerInstance = (DATA_MARSHALLER_INSTANCE*)dataMarshallerHandle;
+        DATA_MARSHALLER_HANDLE_DATA* dataMarshallerInstance = (DATA_MARSHALLER_HANDLE_DATA*)dataMarshallerHandle;
         free(dataMarshallerInstance);
     }
 }
 
 DATA_MARSHALLER_RESULT DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarshallerHandle, size_t valueCount, const DATA_MARSHALLER_VALUE* values, unsigned char** destination, size_t* destinationSize)
 {
-    DATA_MARSHALLER_INSTANCE* dataMarshallerInstance = (DATA_MARSHALLER_INSTANCE*)dataMarshallerHandle;
+    DATA_MARSHALLER_HANDLE_DATA* dataMarshallerInstance = (DATA_MARSHALLER_HANDLE_DATA*)dataMarshallerHandle;
     DATA_MARSHALLER_RESULT result;
     MULTITREE_HANDLE treeHandle;
 

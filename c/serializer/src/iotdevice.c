@@ -17,14 +17,14 @@
 #define LOG_DEVICE_ERROR \
     LogError("(result = %s)", ENUM_TO_STRING(DEVICE_RESULT, result))
 
-typedef struct DEVICE_TAG
+typedef struct DEVICE_HANDLE_DATA_TAG
 {
     SCHEMA_MODEL_TYPE_HANDLE model;
     DATA_PUBLISHER_HANDLE dataPublisherHandle;
-    pPfDeviceActionCallback deviceActionCallback;
+    pfDeviceActionCallback deviceActionCallback;
     void* callbackUserContext;
     COMMAND_DECODER_HANDLE commandDecoderHandle;
-} DEVICE;
+} DEVICE_HANDLE_DATA;
 
 DEFINE_ENUM_STRINGS(DEVICE_RESULT, DEVICE_RESULT_VALUES);
 
@@ -40,7 +40,7 @@ static EXECUTE_COMMAND_RESULT DeviceInvokeAction(void* actionCallbackContext, co
     }
     else
     {
-        DEVICE* device = (DEVICE*)actionCallbackContext;
+        DEVICE_HANDLE_DATA* device = (DEVICE_HANDLE_DATA*)actionCallbackContext;
 
         /* Codes_SRS_DEVICE_01_052: [When the action callback passed to CommandDecoder is called, Device shall call the appropriate user callback associated with the device handle.] */
         /* Codes_SRS_DEVICE_01_055: [The value passed in callbackUserContext when creating the device shall be passed to the callback as the value for the callbackUserContext argument.] */
@@ -50,7 +50,7 @@ static EXECUTE_COMMAND_RESULT DeviceInvokeAction(void* actionCallbackContext, co
     return result;
 }
 
-DEVICE_RESULT Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pPfDeviceActionCallback deviceActionCallback, void* callbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
+DEVICE_RESULT Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* callbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
 {
     DEVICE_RESULT result;
 
@@ -62,7 +62,7 @@ DEVICE_RESULT Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pPfDeviceActio
     }
     else
     {
-        DEVICE* device = (DEVICE*)malloc(sizeof(DEVICE));
+        DEVICE_HANDLE_DATA* device = (DEVICE_HANDLE_DATA*)malloc(sizeof(DEVICE_HANDLE_DATA));
         if (device == NULL)
         {
             /* Codes_SRS_DEVICE_05_015: [If an error occurs while trying to create the device, Device_Create shall return DEVICE_ERROR.] */
@@ -118,7 +118,7 @@ void Device_Destroy(DEVICE_HANDLE deviceHandle)
     /* Codes_SRS_DEVICE_03_007: [Device_Destroy will not do anything if deviceHandle is NULL.] */
     if (deviceHandle != NULL)
     {
-        DEVICE* device = (DEVICE*)deviceHandle;
+        DEVICE_HANDLE_DATA* device = (DEVICE_HANDLE_DATA*)deviceHandle;
 
         DataPublisher_Destroy(device->dataPublisherHandle);
         CommandDecoder_Destroy(device->commandDecoderHandle);
@@ -139,7 +139,7 @@ TRANSACTION_HANDLE Device_StartTransaction(DEVICE_HANDLE deviceHandle)
     }
     else
     {
-        DEVICE* deviceInstance = (DEVICE*)deviceHandle;
+        DEVICE_HANDLE_DATA* deviceInstance = (DEVICE_HANDLE_DATA*)deviceHandle;
 
         /* Codes_SRS_DEVICE_01_034: [Device_StartTransaction shall invoke DataPublisher_StartTransaction for the DataPublisher handle associated with the deviceHandle argument.] */
         /* Codes_SRS_DEVICE_01_043: [On success, Device_StartTransaction shall return a non NULL handle.] */
@@ -249,7 +249,7 @@ EXECUTE_COMMAND_RESULT Device_ExecuteCommand(DEVICE_HANDLE deviceHandle, const c
     else
     {
         /*Codes_SRS_DEVICE_02_013: [Otherwise, Device_ExecuteCommand shall call CommandDecoder_ExecuteCommand and return what CommandDecoder_ExecuteCommand is returning.] */
-        DEVICE* device = (DEVICE*)deviceHandle;
+        DEVICE_HANDLE_DATA* device = (DEVICE_HANDLE_DATA*)deviceHandle;
         result = CommandDecoder_ExecuteCommand(device->commandDecoderHandle, command);
     }
     return result;

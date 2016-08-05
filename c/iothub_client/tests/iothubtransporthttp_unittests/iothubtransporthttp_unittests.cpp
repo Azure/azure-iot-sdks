@@ -10237,7 +10237,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_waitingToSend_not_empty_success)
 
     IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(contains3, 1);
     IOTHUB_MESSAGE_LIST newEntry;
-    newEntry.messageHandle = &newEntry;
+    newEntry.messageHandle = eventMessageHandle;
     DList_InsertTailList(&(waitingToSend), &(newEntry.entry));
 
     mocks.ResetAllCalls();
@@ -10273,7 +10273,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_deviceData_is_not_found_fails)
 
     IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(contains3, 1);
     IOTHUB_MESSAGE_LIST newEntry;
-    newEntry.messageHandle = &newEntry;
+    newEntry.messageHandle = eventMessageHandle;
     DList_InsertTailList(&(waitingToSend), &(newEntry.entry));
 
     mocks.ResetAllCalls();

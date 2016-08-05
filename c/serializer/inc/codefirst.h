@@ -135,7 +135,7 @@ extern CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace);
 extern void CodeFirst_Deinit(void);
 extern SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata);
 
-extern EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(void* deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues);
+extern EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues);
 
 extern EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* command);
 

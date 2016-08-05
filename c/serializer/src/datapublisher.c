@@ -26,23 +26,22 @@ DEFINE_ENUM_STRINGS(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES)
 /* Codes_SRS_DATA_PUBLISHER_99_067:[ Before any call to DataPublisher_SetMaxBufferSize, the default max buffer size shall be equal to 10KB.] */
 static size_t maxBufferSize_ = DEFAULT_MAX_BUFFER_SIZE;
 
-typedef struct DATA_PUBLISHER_INSTANCE_TAG
+typedef struct DATA_PUBLISHER_HANDLE_DATA_TAG
 {
     DATA_MARSHALLER_HANDLE DataMarshallerHandle;
     SCHEMA_MODEL_TYPE_HANDLE ModelHandle;
-} DATA_PUBLISHER_INSTANCE;
+} DATA_PUBLISHER_HANDLE_DATA;
 
-typedef struct TRANSACTION_TAG
+typedef struct TRANSACTION_HANDLE_DATA_TAG
 {
-    DATA_PUBLISHER_INSTANCE* DataPublisherInstance;
+    DATA_PUBLISHER_HANDLE_DATA* DataPublisherInstance;
     size_t ValueCount;
     DATA_MARSHALLER_VALUE* Values;
-} TRANSACTION;
+} TRANSACTION_HANDLE_DATA;
 
 DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath)
 {
-    DATA_PUBLISHER_HANDLE result;
-    DATA_PUBLISHER_INSTANCE* dataPublisherInstance;
+    DATA_PUBLISHER_HANDLE_DATA* result;
 
     /* Codes_SRS_DATA_PUBLISHER_99_042:[ If a NULL argument is passed to it, DataPublisher_Create shall return NULL.] */
     if (
@@ -52,7 +51,7 @@ DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle,
         result = NULL;
         LogError("(result = %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG));
     }
-    else if ((dataPublisherInstance = (DATA_PUBLISHER_INSTANCE*)malloc(sizeof(DATA_PUBLISHER_INSTANCE))) == NULL)
+    else if ((result = (DATA_PUBLISHER_HANDLE_DATA*)malloc(sizeof(DATA_PUBLISHER_HANDLE_DATA))) == NULL)
     {
         /* Codes_SRS_DATA_PUBLISHER_99_047:[ For any other error not specified here, DataPublisher_Create shall return NULL.] */
         result = NULL;
@@ -62,9 +61,9 @@ DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle,
     {
         /* Codes_SRS_DATA_PUBLISHER_99_043:[ DataPublisher_Create shall initialize and hold a handle to a DataMarshaller instance.] */
         /* Codes_SRS_DATA_PUBLISHER_01_001: [DataPublisher_Create shall pass the includePropertyPath argument to DataMarshaller_Create.] */
-        if ((dataPublisherInstance->DataMarshallerHandle = DataMarshaller_Create(modelHandle, includePropertyPath)) == NULL)
+        if ((result->DataMarshallerHandle = DataMarshaller_Create(modelHandle, includePropertyPath)) == NULL)
         {
-            free(dataPublisherInstance);
+            free(result);
 
             /* Codes_SRS_DATA_PUBLISHER_99_044:[ If the creation of the DataMarshaller instance fails, DataPublisher_Create shall return NULL.] */
             result = NULL;
@@ -72,10 +71,8 @@ DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle,
         }
         else
         {
-            dataPublisherInstance->ModelHandle = modelHandle;
-
             /* Codes_SRS_DATA_PUBLISHER_99_041:[ DataPublisher_Create shall create a new DataPublisher instance and return a non-NULL handle in case of success.] */
-            result = dataPublisherInstance;
+            result->ModelHandle = modelHandle;
         }
     }
 
@@ -86,7 +83,7 @@ void DataPublisher_Destroy(DATA_PUBLISHER_HANDLE dataPublisherHandle)
 {
     if (dataPublisherHandle != NULL)
     {
-        DATA_PUBLISHER_INSTANCE* dataPublisherInstance = (DATA_PUBLISHER_INSTANCE*)dataPublisherHandle;
+        DATA_PUBLISHER_HANDLE_DATA* dataPublisherInstance = (DATA_PUBLISHER_HANDLE_DATA*)dataPublisherHandle;
         DataMarshaller_Destroy(dataPublisherInstance->DataMarshallerHandle);
         
         free(dataPublisherHandle);
@@ -95,7 +92,7 @@ void DataPublisher_Destroy(DATA_PUBLISHER_HANDLE dataPublisherHandle)
 
 TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPublisherHandle)
 {
-    TRANSACTION* transaction;
+    TRANSACTION_HANDLE_DATA* transaction;
 
     /* Codes_SRS_DATA_PUBLISHER_99_038:[ If DataPublisher_StartTransaction is called with a NULL argument it shall return NULL.] */
     if (dataPublisherHandle == NULL)
@@ -106,7 +103,7 @@ TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPubl
     else
     {
         /* Codes_SRS_DATA_PUBLISHER_99_007:[ A call to DataPublisher_StartTransaction shall start a new transaction.] */
-        transaction = (TRANSACTION*)malloc(sizeof(TRANSACTION));
+        transaction = (TRANSACTION_HANDLE_DATA*)malloc(sizeof(TRANSACTION_HANDLE_DATA));
         if (transaction == NULL)
         {
             LogError("Allocating transaction failed (Error code: %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_ERROR));
@@ -115,7 +112,7 @@ TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPubl
         {
             transaction->ValueCount = 0;
             transaction->Values = NULL;
-            transaction->DataPublisherInstance = (DATA_PUBLISHER_INSTANCE*)dataPublisherHandle;
+            transaction->DataPublisherInstance = (DATA_PUBLISHER_HANDLE_DATA*)dataPublisherHandle;
         }
     }
 
@@ -145,7 +142,7 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted(TRANSACTION_HANDLE transac
     }
     else
     {
-        TRANSACTION* transaction = (TRANSACTION*)transactionHandle;
+        TRANSACTION_HANDLE_DATA* transaction = (TRANSACTION_HANDLE_DATA*)transactionHandle;
         AGENT_DATA_TYPE* propertyValue;
 
         if (!Schema_ModelPropertyByPathExists(transaction->DataPublisherInstance->ModelHandle, propertyPath))
@@ -254,7 +251,7 @@ DATA_PUBLISHER_RESULT DataPublisher_EndTransaction(TRANSACTION_HANDLE transactio
     }
     else
     {
-        TRANSACTION* transaction = (TRANSACTION*)transactionHandle;
+        TRANSACTION_HANDLE_DATA* transaction = (TRANSACTION_HANDLE_DATA*)transactionHandle;
 
         if (transaction->ValueCount == 0)
         {
@@ -295,7 +292,7 @@ DATA_PUBLISHER_RESULT DataPublisher_CancelTransaction(TRANSACTION_HANDLE transac
     }
     else
     {
-        TRANSACTION* transaction = (TRANSACTION*)transactionHandle;
+        TRANSACTION_HANDLE_DATA* transaction = (TRANSACTION_HANDLE_DATA*)transactionHandle;
         size_t i;
 
         /* Codes_SRS_DATA_PUBLISHER_99_015:[ DataPublisher_CancelTransaction shall dispose of any resources associated with the transaction.] */

@@ -35,7 +35,7 @@ typedef struct DATA_MARSHALLER_VALUE_TAG
     const AGENT_DATA_TYPE* Value;
 } DATA_MARSHALLER_VALUE;
 
-typedef void* DATA_MARSHALLER_HANDLE;
+typedef struct DATA_MARSHALLER_HANDLE_DATA_TAG* DATA_MARSHALLER_HANDLE;
 
 extern DATA_MARSHALLER_HANDLE DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath);
 extern void DataMarshaller_Destroy(DATA_MARSHALLER_HANDLE dataMarshallerHandle);

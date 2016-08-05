@@ -19,12 +19,12 @@
 
 DEFINE_ENUM_STRINGS(COMMANDDECODER_RESULT, COMMANDDECODER_RESULT_VALUES);
 
-typedef struct COMMAND_DECODER_INSTANCE_TAG
+typedef struct COMMAND_DECODER_HANDLE_DATA_TAG
 {
     SCHEMA_MODEL_TYPE_HANDLE ModelHandle;
     ACTION_CALLBACK_FUNC ActionCallback;
     void* ActionCallbackContext;
-} COMMAND_DECODER_INSTANCE;
+} COMMAND_DECODER_HANDLE_DATA;
 
 static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agentDataType, MULTITREE_HANDLE node, const char* edmTypeName)
 {
@@ -169,7 +169,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
     return result;
 }
 
-static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_INSTANCE* commandDecoderInstance, SCHEMA_HANDLE schemaHandle, SCHEMA_MODEL_TYPE_HANDLE modelHandle, const char* relativeActionPath, const char* actionName, MULTITREE_HANDLE commandNode)
+static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance, SCHEMA_HANDLE schemaHandle, SCHEMA_MODEL_TYPE_HANDLE modelHandle, const char* relativeActionPath, const char* actionName, MULTITREE_HANDLE commandNode)
 {
     EXECUTE_COMMAND_RESULT result;
     char tempStr[128];
@@ -292,7 +292,7 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_INSTAN
     return result;
 }
 
-static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_INSTANCE* commandDecoderInstance, SCHEMA_HANDLE schemaHandle, const char* actionPath, MULTITREE_HANDLE commandNode)
+static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance, SCHEMA_HANDLE schemaHandle, const char* actionPath, MULTITREE_HANDLE commandNode)
 {
     EXECUTE_COMMAND_RESULT result;
     char* relativeActionPath;
@@ -377,7 +377,7 @@ static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_INS
     return result;
 }
 
-static EXECUTE_COMMAND_RESULT DecodeCommand(COMMAND_DECODER_INSTANCE* commandDecoderInstance, MULTITREE_HANDLE commandNode)
+static EXECUTE_COMMAND_RESULT DecodeCommand(COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance, MULTITREE_HANDLE commandNode)
 {
     EXECUTE_COMMAND_RESULT result;
     SCHEMA_HANDLE schemaHandle;
@@ -422,7 +422,7 @@ static EXECUTE_COMMAND_RESULT DecodeCommand(COMMAND_DECODER_INSTANCE* commandDec
 EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE handle, const char* command)
 {
     EXECUTE_COMMAND_RESULT result;
-    COMMAND_DECODER_INSTANCE* commandDecoderInstance = (COMMAND_DECODER_INSTANCE*)handle;
+    COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance = (COMMAND_DECODER_HANDLE_DATA*)handle;
     /*Codes_SRS_COMMAND_DECODER_01_010: [If either the buffer or the receiveCallbackContext argument is NULL, the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     if (
         (command == NULL) ||
@@ -481,7 +481,7 @@ EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE hand
 
 COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext)
 {
-    COMMAND_DECODER_INSTANCE* result;
+    COMMAND_DECODER_HANDLE_DATA* result;
     /* Codes_SRS_COMMAND_DECODER_99_019:[ For all exposed APIs argument validity checks shall precede other checks.] */
     /* Codes_SRS_COMMAND_DECODER_01_003: [If any of the arguments modelHandle is NULL, CommandDecoder_Create shall return NULL.]*/
     if (
@@ -495,7 +495,7 @@ COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
     else
     {
         /* Codes_SRS_COMMAND_DECODER_01_001: [CommandDecoder_Create shall create a new instance of a CommandDecoder.] */
-        result = malloc(sizeof(COMMAND_DECODER_INSTANCE));
+        result = malloc(sizeof(COMMAND_DECODER_HANDLE_DATA));
         if (result == NULL)
         {
             /* Codes_SRS_COMMAND_DECODER_01_004: [If any error is encountered during CommandDecoder_Create CommandDecoder_Create shall return NULL.] */
@@ -517,7 +517,7 @@ void CommandDecoder_Destroy(COMMAND_DECODER_HANDLE commandDecoderHandle)
     /* Codes_SRS_COMMAND_DECODER_01_007: [If CommandDecoder_Destroy is called with a NULL handle, CommandDecoder_Destroy shall do nothing.] */
     if (commandDecoderHandle != NULL)
     {
-        COMMAND_DECODER_INSTANCE* commandDecoderInstance = (COMMAND_DECODER_INSTANCE*)commandDecoderHandle;
+        COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance = (COMMAND_DECODER_HANDLE_DATA*)commandDecoderHandle;
 
         /* Codes_SRS_COMMAND_DECODER_01_005: [CommandDecoder_Destroy shall free all resources associated with the commandDecoderHandle instance.] */
         free(commandDecoderInstance);

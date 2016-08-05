@@ -358,7 +358,7 @@ BEGIN_TEST_SUITE(IoTDevice_UnitTests)
         CDeviceMocks deviceMocks;
         AGENT_DATA_TYPE ag;
         AutoDevice device(CreateDeviceWithName_());
-        TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(device.Handle());
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(device.Handle());
         deviceMocks.ResetAllCalls();
 
         STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_PublishTransacted(transaction, "p", &ag));
@@ -370,7 +370,7 @@ BEGIN_TEST_SUITE(IoTDevice_UnitTests)
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, result);
         deviceMocks.AssertActualAndExpectedCalls();
 
-        Device_CancelTransaction(device.Handle());
+        Device_CancelTransaction(transaction);
     }
 
     /* Tests_SRS_DEVICE_01_037: [If any argument is NULL, Device_PublishTransacted shall return DEVICE_INVALID_ARG.] */
@@ -394,7 +394,7 @@ BEGIN_TEST_SUITE(IoTDevice_UnitTests)
         CDeviceMocks deviceMocks;
         AGENT_DATA_TYPE ag;
         AutoDevice device(CreateDeviceWithName_());
-        TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(device.Handle());
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(device.Handle());
         deviceMocks.ResetAllCalls();
 
         // act
@@ -404,7 +404,7 @@ BEGIN_TEST_SUITE(IoTDevice_UnitTests)
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
         deviceMocks.AssertActualAndExpectedCalls();
 
-        Device_CancelTransaction(device.Handle());
+        Device_CancelTransaction(transaction);
     }
 
     /* Tests_SRS_DEVICE_01_037: [If any argument is NULL, Device_PublishTransacted shall return DEVICE_INVALID_ARG.] */
@@ -413,7 +413,7 @@ BEGIN_TEST_SUITE(IoTDevice_UnitTests)
         // arrange
         CDeviceMocks deviceMocks;
         AutoDevice device(CreateDeviceWithName_());
-        TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(device.Handle());
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(device.Handle());
         deviceMocks.ResetAllCalls();
 
         // act
@@ -423,7 +423,7 @@ BEGIN_TEST_SUITE(IoTDevice_UnitTests)
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
         deviceMocks.AssertActualAndExpectedCalls();
 
-        Device_CancelTransaction(device.Handle());
+        Device_CancelTransaction(transaction);
     }
 
     /* Tests_SRS_DEVICE_01_049: [When DataPublisher_PublishTransacted fails, Device_PublishTransacted shall return DEVICE_DATA_PUBLISHER_FAILED.] */
@@ -433,7 +433,7 @@ BEGIN_TEST_SUITE(IoTDevice_UnitTests)
         CDeviceMocks deviceMocks;
         AGENT_DATA_TYPE ag;
         AutoDevice device(CreateDeviceWithName_());
-        TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(device.Handle());
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(device.Handle());
         deviceMocks.ResetAllCalls();
 
         STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_PublishTransacted(transaction, "p", &ag))
@@ -446,7 +446,7 @@ BEGIN_TEST_SUITE(IoTDevice_UnitTests)
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_DATA_PUBLISHER_FAILED, result);
         deviceMocks.AssertActualAndExpectedCalls();
 
-        Device_CancelTransaction(device.Handle());
+        Device_CancelTransaction(transaction);
     }
 
     /* Device_EndTransaction */

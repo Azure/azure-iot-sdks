@@ -30,7 +30,7 @@ extern "C" {
 
 /* Codes_SRS_COMMAND_DECODER_99_001:[ The CommandDecoder module shall expose the following API:] */
 
-typedef void* COMMAND_DECODER_HANDLE;
+typedef struct COMMAND_DECODER_HANDLE_DATA_TAG* COMMAND_DECODER_HANDLE;
 typedef EXECUTE_COMMAND_RESULT(*ACTION_CALLBACK_FUNC)(void* actionCallbackContext, const char* relativeActionPath, const char* actionName, size_t argCount, const AGENT_DATA_TYPE* args);
 
 extern COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext);

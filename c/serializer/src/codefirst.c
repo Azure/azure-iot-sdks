@@ -329,7 +329,7 @@ static const REFLECTED_SOMETHING* FindChildModelInCodeFirstMetadata(const REFLEC
     return result;
 }
 
-EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(void* deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues)
+EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues)
 {
     EXECUTE_COMMAND_RESULT result;
     DEVICE_HEADER_DATA* deviceHeader = (DEVICE_HEADER_DATA*)callbackUserContext;

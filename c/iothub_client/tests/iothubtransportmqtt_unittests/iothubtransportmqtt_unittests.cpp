@@ -2956,7 +2956,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetSendStatus_waitingToSend_not_empty_success)
 
     IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG);
     IOTHUB_MESSAGE_LIST newEntry;
-    newEntry.messageHandle = &newEntry;
+    newEntry.messageHandle = eventMessageHandle;
     DList_InsertTailList(config.waitingToSend, &(newEntry.entry));
 
     mocks.ResetAllCalls();

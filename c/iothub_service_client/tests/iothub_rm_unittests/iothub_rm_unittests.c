@@ -360,7 +360,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 #include "iothub_registrymanager.h"
 #include "iothub_service_client_auth.h"
 
-static const char* TEST_DEVCIEID = "theDeviceId";
+static const char* TEST_DEVICE_ID = "theDeviceId";
 static const char* TEST_PRIMARYKEY = "thePrimaryKey";
 static const char* TEST_SECONDARYKEY = "theSecondaryKey";
 static const char* TEST_GENERATIONID = "theGenerationId";
@@ -628,16 +628,16 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
         TEST_IOTHUB_REGISTRYMANAGER.keyName = TEST_SHAREDACCESSKEYNAME;
         TEST_IOTHUB_REGISTRYMANAGER.sharedAccessKey = TEST_SHAREDACCESSKEY;
 
-        TEST_IOTHUB_REGISTRY_DEVICE_CREATE.deviceId = TEST_DEVCIEID;
+        TEST_IOTHUB_REGISTRY_DEVICE_CREATE.deviceId = TEST_DEVICE_ID;
         TEST_IOTHUB_REGISTRY_DEVICE_CREATE.primaryKey = TEST_PRIMARYKEY;
         TEST_IOTHUB_REGISTRY_DEVICE_CREATE.secondaryKey = TEST_SECONDARYKEY;
 
-        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.deviceId = TEST_DEVCIEID;
+        TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.deviceId = TEST_DEVICE_ID;
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.primaryKey = TEST_PRIMARYKEY;
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.secondaryKey = TEST_SECONDARYKEY;
         TEST_IOTHUB_REGISTRY_DEVICE_UPDATE.status = IOTHUB_DEVICE_STATUS_DISABLED;
 
-        TEST_IOTHUB_DEVICE.deviceId = TEST_DEVCIEID;
+        TEST_IOTHUB_DEVICE.deviceId = TEST_DEVICE_ID;
         TEST_IOTHUB_DEVICE.primaryKey = TEST_PRIMARYKEY;
         TEST_IOTHUB_DEVICE.secondaryKey = TEST_SECONDARYKEY;
         TEST_IOTHUB_DEVICE.status = IOTHUB_DEVICE_STATUS_DISABLED;
@@ -964,7 +964,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
         STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
             .SetReturn(TEST_JSON_OBJECT);
 
-        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVCIEID));
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
@@ -1036,7 +1036,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             .SetReturn(TEST_JSON_OBJECT);
 
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
-            .SetReturn(TEST_DEVCIEID);
+            .SetReturn(TEST_DEVICE_ID);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY))
             .SetReturn(TEST_PRIMARYKEY);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY))
@@ -1146,7 +1146,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
         STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
             .SetReturn(TEST_JSON_OBJECT);
 
-        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVCIEID));
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
@@ -1241,7 +1241,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
         STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
             .SetReturn(TEST_JSON_OBJECT);
 
-        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVCIEID));
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
@@ -1342,7 +1342,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
         STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
             .SetReturn(TEST_JSON_OBJECT);
 
-        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVCIEID));
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
@@ -1456,7 +1456,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
         ///arrange
 
         ///act
-        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(NULL, TEST_DEVCIEID, &TEST_IOTHUB_DEVICE);
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(NULL, TEST_DEVICE_ID, &TEST_IOTHUB_DEVICE);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_INVALID_ARG, result);
@@ -1543,7 +1543,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             .SetReturn(TEST_JSON_OBJECT);
 
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
-            .SetReturn(TEST_DEVCIEID);
+            .SetReturn(TEST_DEVICE_ID);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY))
             .SetReturn(TEST_PRIMARYKEY);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY))
@@ -1615,7 +1615,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
 
         ///act
         IOTHUB_DEVICE deviceInfo;
-        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVCIEID, &deviceInfo);
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, &deviceInfo);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
@@ -1707,7 +1707,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             .SetReturn(TEST_JSON_OBJECT);
 
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
-            .SetReturn(TEST_DEVCIEID);
+            .SetReturn(TEST_DEVICE_ID);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY))
             .SetReturn(TEST_PRIMARYKEY);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY))
@@ -1816,7 +1816,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
                 (i != 52) /*BUFFER_delete*/
                 )
             {
-                IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVCIEID, deviceInfo);
+                IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, deviceInfo);
 
                 /// assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
@@ -1889,7 +1889,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
         STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
             .SetReturn(TEST_JSON_OBJECT);
 
-        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVCIEID));
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
@@ -1991,7 +1991,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
         STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
             .SetReturn(TEST_JSON_OBJECT);
 
-        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVCIEID));
+        STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME, TEST_DEVICE_ID));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY, TEST_PRIMARYKEY));
         STRICT_EXPECTED_CALL(json_object_dotset_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY, TEST_SECONDARYKEY));
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
@@ -2186,7 +2186,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             .IgnoreArgument(1);
 
         ///act
-        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVCIEID);
+        IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID);
 
         ///assert
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
@@ -2273,7 +2273,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
                 (i != 18) /*STRING_delete*/
                 )
             {
-                IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVCIEID);
+                IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID);
 
                 /// assert
                 ASSERT_ARE_NOT_EQUAL(int, IOTHUB_REGISTRYMANAGER_OK, result);
@@ -2436,7 +2436,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             .SetReturn(TEST_JSON_OBJECT);
 
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
-            .SetReturn(TEST_DEVCIEID);
+            .SetReturn(TEST_DEVICE_ID);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY))
             .SetReturn(TEST_PRIMARYKEY);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY))
@@ -2630,7 +2630,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_unittests)
             .SetReturn(TEST_JSON_OBJECT);
 
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_NAME))
-            .SetReturn(TEST_DEVCIEID);
+            .SetReturn(TEST_DEVICE_ID);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_PRIMARY_KEY))
             .SetReturn(TEST_PRIMARYKEY);
         STRICT_EXPECTED_CALL(json_object_dotget_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DEVICE_SECONDARY_KEY))

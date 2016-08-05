@@ -6,6 +6,7 @@
 #include <crtdbg.h>
 #endif
 
+#include <cstddef>
 #include "testrunnerswitcher.h"
 #include "codefirst.h"
 #include "macro_utils.h"
@@ -508,7 +509,7 @@ public:
     MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
 
     /* Device mocks */
-    MOCK_STATIC_METHOD_5(, DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pPfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle)
+    MOCK_STATIC_METHOD_5(, DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle)
         *deviceHandle = TEST_DEVICE_HANDLE;
         g_InvokeActionCallbackArgument = callbackUserContext;
     MOCK_METHOD_END(DEVICE_RESULT, DEVICE_OK);
@@ -652,7 +653,7 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Crea
 DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , void, Destroy_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData);
 DECLARE_GLOBAL_MOCK_METHOD_5(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_Members, AGENT_DATA_TYPE*, agentData, const char*, typeName, size_t, nMembers, const char* const *, memberNames, const AGENT_DATA_TYPE*, memberValues);
 
-DECLARE_GLOBAL_MOCK_METHOD_5(CMocksForCodeFirst, , DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pPfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle);
+DECLARE_GLOBAL_MOCK_METHOD_5(CMocksForCodeFirst, , DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , void, Device_Destroy, DEVICE_HANDLE, deviceHandle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CMocksForCodeFirst, , DEVICE_RESULT, Device_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyName, const AGENT_DATA_TYPE*, data);
 DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , TRANSACTION_HANDLE, Device_StartTransaction, DEVICE_HANDLE, modelHandle);

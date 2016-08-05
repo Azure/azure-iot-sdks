@@ -15,7 +15,7 @@ extern "C"
 #include <stddef.h>
 #endif
 
-typedef void* MULTITREE_HANDLE;
+typedef struct MULTITREE_HANDLE_DATA_TAG* MULTITREE_HANDLE;
 
 #define MULTITREE_RESULT_VALUES           \
     MULTITREE_OK,                         \
