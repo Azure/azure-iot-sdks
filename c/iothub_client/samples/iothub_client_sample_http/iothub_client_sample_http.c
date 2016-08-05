@@ -16,6 +16,7 @@ and removing calls to _DoWork will yield the same results. */
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "iothub_client_ll.h"
+#include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
 #endif
@@ -95,9 +96,9 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
 static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     EVENT_INSTANCE* eventInstance = (EVENT_INSTANCE*)userContextCallback;
-	
-	(void)printf("Confirmation[%d] received for message tracking id = %zu with result = %s\r\n", callbackCounter, eventInstance->messageTrackingId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
-	
+    
+    (void)printf("Confirmation[%d] received for message tracking id = %zu with result = %s\r\n", callbackCounter, eventInstance->messageTrackingId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    
     /* Some device specific action code goes here... */
     callbackCounter++;
     IoTHubMessage_Destroy(eventInstance->messageHandle);
@@ -142,7 +143,7 @@ void iothub_client_sample_http_run(void)
                 printf("failure to set option \"timeout\"\r\n");
             }
 
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
+            if (IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_MIN_POLLING_TIME, &minimumPollingTime) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"MinimumPollingTime\"\r\n");
             }
@@ -183,7 +184,7 @@ void iothub_client_sample_http_run(void)
 
                             propMap = IoTHubMessage_Properties(messages[iterator].messageHandle);
                             (void)sprintf_s(propText, sizeof(propText), "PropMsg_%zu", iterator);
-							if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+                            if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
                             {
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                             }
@@ -194,8 +195,8 @@ void iothub_client_sample_http_run(void)
                             }
                             else
                             {
-								(void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", iterator);
-							
+                                (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", iterator);
+                            
                             }
 
                         }

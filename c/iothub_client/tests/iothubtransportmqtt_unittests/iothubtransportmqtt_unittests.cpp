@@ -23,6 +23,7 @@
 
 #include "iothubtransportmqtt.h"
 #include "iothub_client_private.h"
+#include "iothub_client_options.h"
 
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/tlsio.h"
@@ -55,9 +56,6 @@ static const char* TEST_MQTT_SAS_TOKEN = "thisIsIotHubName.thisIsIotHubSuffix/de
 static const char* TEST_HOST_NAME = "thisIsIotHubName.thisIsIotHubSuffix";
 static const char* TEST_EMPTY_STRING = "";
 static const char* TEST_SAS_TOKEN = "Test_SAS_Token_value";
-static const char* LOG_TRACE_OPTION = "logtrace";
-static const char* KEEP_ALIVE_OPTION = "keepalive";
-static const char* X509_CERT_OPTION = "x509certificate";
 static const char* X509_CERT_CERTIFICATE = "-----BEGIN CERTIFICATE-----MIID-----END CERTIFICATE-----";
 static const char* X509_PRIVATE_KEY_OPTION = "x509privatekey";
 static const char* X509_PRIVATE_KEY = "-----BEGIN RSA PRIVATE KEY-----MIIE-----END RSA PRIVATE KEY-----";
@@ -1749,7 +1747,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_value_NULL_fail)
     mocks.ResetAllCalls();
 
     // act
-    auto result = IoTHubTransportMqtt_SetOption(handle, LOG_TRACE_OPTION, NULL);
+    auto result = IoTHubTransportMqtt_SetOption(handle, OPTION_LOG_TRACE, NULL);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
@@ -1772,7 +1770,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_x509Certificate_no_509_fail)
     mocks.ResetAllCalls();
 
     // act
-    auto result = IoTHubTransportMqtt_SetOption(handle, X509_CERT_OPTION, X509_CERT_CERTIFICATE);
+    auto result = IoTHubTransportMqtt_SetOption(handle, OPTION_X509_CERT, X509_CERT_CERTIFICATE);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
@@ -1818,11 +1816,11 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_x509Certificate_succeed)
     EXPECTED_CALL(mocks, STRING_c_str(NULL));
     EXPECTED_CALL(mocks, platform_get_default_tlsio());
     EXPECTED_CALL(mocks, xio_create(NULL, NULL));
-    STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, X509_CERT_OPTION, X509_CERT_CERTIFICATE))
+    STRICT_EXPECTED_CALL(mocks, xio_setoption(NULL, OPTION_X509_CERT, X509_CERT_CERTIFICATE))
         .IgnoreArgument(1);
 
     // act
-    auto result = IoTHubTransportMqtt_SetOption(handle, X509_CERT_OPTION, X509_CERT_CERTIFICATE);
+    auto result = IoTHubTransportMqtt_SetOption(handle, OPTION_X509_CERT, X509_CERT_CERTIFICATE);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -1877,7 +1875,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_succeed)
     bool traceOn = true;
 
     // act
-    auto result = IoTHubTransportMqtt_SetOption(handle, LOG_TRACE_OPTION, &traceOn);
+    auto result = IoTHubTransportMqtt_SetOption(handle, OPTION_LOG_TRACE, &traceOn);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -1902,7 +1900,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_keepAlive_succeed)
     int keepAlive = 10;
 
     // act
-    auto result = IoTHubTransportMqtt_SetOption(handle, KEEP_ALIVE_OPTION, &keepAlive);
+    auto result = IoTHubTransportMqtt_SetOption(handle, OPTION_KEEP_ALIVE, &keepAlive);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -1936,7 +1934,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_keepAlive_previous_connection_succee
     int keepAlive = 10;
 
     // act
-    auto result = IoTHubTransportMqtt_SetOption(handle, KEEP_ALIVE_OPTION, &keepAlive);
+    auto result = IoTHubTransportMqtt_SetOption(handle, OPTION_KEEP_ALIVE, &keepAlive);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -1958,7 +1956,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_keepAlive_same_value_succeed)
     auto handle = IoTHubTransportMqtt_Create(&config);
 
     int keepAlive = 30;
-    auto result = IoTHubTransportMqtt_SetOption(handle, KEEP_ALIVE_OPTION, &keepAlive);
+    auto result = IoTHubTransportMqtt_SetOption(handle, OPTION_KEEP_ALIVE, &keepAlive);
 
     CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
@@ -1966,7 +1964,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Setoption_keepAlive_same_value_succeed)
     mocks.ResetAllCalls();
 
     // act
-    result = IoTHubTransportMqtt_SetOption(handle, KEEP_ALIVE_OPTION, &keepAlive);
+    result = IoTHubTransportMqtt_SetOption(handle, OPTION_KEEP_ALIVE, &keepAlive);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
