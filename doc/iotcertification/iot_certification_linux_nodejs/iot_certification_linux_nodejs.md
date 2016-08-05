@@ -151,7 +151,7 @@ This section walks you through building, deploying and validating the IoT Client
 -   Download the SDK to the board by issuing the following command in
     PuTTY:
 
-        git clone https://github.com/Azure/azure-iot-sdks.git
+        git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 
 -   Verify that you now have a copy of the source code under the directory ~/azure-iot-sdks.
 
@@ -188,7 +188,7 @@ This section walks you through building, deploying and validating the IoT Client
 
         npm install azure-iot-device-mqtt	
 
--   To update samples run the following command on device.
+-   To update sample, run the following command on device.
 
         cd ~/azure-iot-sdks/node/device/samples
         nano simple_sample_device.js
@@ -247,8 +247,6 @@ In this section you will run the Azure IoT client SDK samples to validate commun
     ![Simple_Sample_result_DeviceExplorer](images/3_3_1_03.png)
 
 
-**Note:** The registry_sample.js sample will create and delete a device. In order to see it in the DeviceExplorer tool you will need to refresh your devices before the sample finishes running.
-
 ### 3.3.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your
@@ -284,6 +282,7 @@ Package following artifacts from your device:
     (explicitly highlighting the new steps for customers). Please use the template available [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/templates/template-linux-nodejs.md>) to create your device-specific instructions.
     
     As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
+
 <a name="Share"></a>
 ## 4.2 Share package with Engineering Support
 
