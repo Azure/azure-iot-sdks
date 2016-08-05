@@ -18,7 +18,6 @@
 #include "azure_c_shared_utility/platform.h"
 #include "iothubtransporthttp.h"
 #endif
-#include "iothub_client_options.h"
 
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
@@ -104,7 +103,7 @@ void iothub_client_sample_http_setoptions(IOTHUB_CLIENT_HANDLE iothubClient, uns
         printf("failure to set option \"timeout\" on [%p]\r\n", iothubClient);
     }
 
-    if (IoTHubClient_SetOption(iothubClient, OPTION_MIN_POLLING_TIME, &minimumPollingTime) != IOTHUB_CLIENT_OK)
+    if (IoTHubClient_SetOption(iothubClient, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
     {
         printf("failure to set option \"MinimumPollingTime\"on [%p]\r\n", iothubClient);
     }
