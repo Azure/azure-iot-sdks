@@ -29,6 +29,7 @@
 #include "azure_uamqp_c/saslclientio.h"
 
 #include "iothub_client_ll.h"
+#include "iothub_client_options.h"
 #include "iothub_client_private.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_version.h"
@@ -857,7 +858,7 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
                             transport_state->connection_establish_time = getSecondsSinceEpoch();
                             transport_state->cbs.cbs_state = CBS_STATE_IDLE;
                             connection_set_trace(transport_state->connection, transport_state->is_trace_on);
-                            (void)xio_setoption(transport_state->cbs.sasl_io, "logtrace", &transport_state->is_trace_on);
+                            (void)xio_setoption(transport_state->cbs.sasl_io, OPTION_LOG_TRACE, &transport_state->is_trace_on);
                             result = RESULT_OK;
                         }
                     }
@@ -899,7 +900,7 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
 
                         transport_state->connection_establish_time = getSecondsSinceEpoch();
                         connection_set_trace(transport_state->connection, transport_state->is_trace_on);
-                        (void)xio_setoption(transport_state->tls_io, "logtrace", &transport_state->is_trace_on);
+                        (void)xio_setoption(transport_state->tls_io, OPTION_LOG_TRACE, &transport_state->is_trace_on);
                         result = RESULT_OK;
                     }
                 }
@@ -1085,21 +1086,21 @@ static void destroyEventSender(AMQP_TRANSPORT_INSTANCE* transport_state)
 
 void on_event_sender_state_changed(void* context, MESSAGE_SENDER_STATE new_state, MESSAGE_SENDER_STATE previous_state)
 {
-	if (context != NULL)
-	{
-		AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)context;
+    if (context != NULL)
+    {
+        AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)context;
 
-		if (transport_state->is_trace_on)
-		{
-			LogInfo("Event sender state changed [%d->%d]", previous_state, new_state);
-		}
+        if (transport_state->is_trace_on)
+        {
+            LogInfo("Event sender state changed [%d->%d]", previous_state, new_state);
+        }
 
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_192: [If a message sender instance changes its state to MESSAGE_SENDER_STATE_ERROR (first transition only) the connection retry logic shall be triggered]
-		if (new_state != previous_state && new_state == MESSAGE_SENDER_STATE_ERROR)
-		{
-			transport_state->connection_state = AMQP_MANAGEMENT_STATE_ERROR;
-		}
-	}
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_192: [If a message sender instance changes its state to MESSAGE_SENDER_STATE_ERROR (first transition only) the connection retry logic shall be triggered]
+        if (new_state != previous_state && new_state == MESSAGE_SENDER_STATE_ERROR)
+        {
+            transport_state->connection_state = AMQP_MANAGEMENT_STATE_ERROR;
+        }
+    }
 }
 
 static int createEventSender(AMQP_TRANSPORT_INSTANCE* transport_state)
@@ -1136,7 +1137,7 @@ static int createEventSender(AMQP_TRANSPORT_INSTANCE* transport_state)
             attachDeviceClientTypeToLink(transport_state->sender_link);
 
             // Codes_SRS_IOTHUBTRANSPORTAMQP_09_070: [IoTHubTransportAMQP_DoWork shall create the AMQP message sender using messagesender_create() AMQP API] 
-			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_191: [IoTHubTransportAMQP_DoWork shall create each AMQP message sender tracking its state changes with a callback function]
+            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_191: [IoTHubTransportAMQP_DoWork shall create each AMQP message sender tracking its state changes with a callback function]
             if ((transport_state->message_sender = messagesender_create(transport_state->sender_link, on_event_sender_state_changed, (void*)transport_state)) == NULL)
             {
                 // Codes_SRS_IOTHUBTRANSPORTAMQP_09_071: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message sender instance fails to be created, flagging the connection to be re-established] 
@@ -1193,21 +1194,21 @@ static int destroyMessageReceiver(AMQP_TRANSPORT_INSTANCE* transport_state)
 
 void on_message_receiver_state_changed(const void* context, MESSAGE_RECEIVER_STATE new_state, MESSAGE_RECEIVER_STATE previous_state)
 {
-	if (context != NULL)
-	{
-		AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)context;
+    if (context != NULL)
+    {
+        AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)context;
 
-		if (transport_state->is_trace_on)
-		{
-			LogInfo("Message receiver state changed [%d->%d]", previous_state, new_state);
-		}
+        if (transport_state->is_trace_on)
+        {
+            LogInfo("Message receiver state changed [%d->%d]", previous_state, new_state);
+        }
 
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_190: [If a message_receiver instance changes its state to MESSAGE_RECEIVER_STATE_ERROR (first transition only) the connection retry logic shall be triggered]
-		if (new_state != previous_state && new_state == MESSAGE_RECEIVER_STATE_ERROR)
-		{
-			transport_state->connection_state = AMQP_MANAGEMENT_STATE_ERROR;
-		}
-	}
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_190: [If a message_receiver instance changes its state to MESSAGE_RECEIVER_STATE_ERROR (first transition only) the connection retry logic shall be triggered]
+        if (new_state != previous_state && new_state == MESSAGE_RECEIVER_STATE_ERROR)
+        {
+            transport_state->connection_state = AMQP_MANAGEMENT_STATE_ERROR;
+        }
+    }
 }
 
 static int createMessageReceiver(AMQP_TRANSPORT_INSTANCE* transport_state, IOTHUB_CLIENT_LL_HANDLE iothub_client_handle)
@@ -1250,7 +1251,7 @@ static int createMessageReceiver(AMQP_TRANSPORT_INSTANCE* transport_state, IOTHU
             attachDeviceClientTypeToLink(transport_state->receiver_link);
 
             // Codes_SRS_IOTHUBTRANSPORTAMQP_09_077: [IoTHubTransportAMQP_DoWork shall create the AMQP message receiver using messagereceiver_create() AMQP API] 
-			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_189: [IoTHubTransportAMQP_DoWork shall create each AMQP message_receiver tracking its state changes with a callback function]
+            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_189: [IoTHubTransportAMQP_DoWork shall create each AMQP message_receiver tracking its state changes with a callback function]
             if ((transport_state->message_receiver = messagereceiver_create(transport_state->receiver_link, on_message_receiver_state_changed, (void*)transport_state)) == NULL)
             {
                 // Codes_SRS_IOTHUBTRANSPORTAMQP_09_078: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message receiver instance fails to be created, flagging the connection to be re-established] 
@@ -1959,24 +1960,24 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE ha
         AMQP_TRANSPORT_INSTANCE* transport_state = (AMQP_TRANSPORT_INSTANCE*)handle;
 
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_048: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "sas_token_lifetime", returning IOTHUB_CLIENT_OK] 
-        if (strcmp("sas_token_lifetime", option) == 0)
+        if (strcmp(OPTION_SAS_TOKEN_LIFETIME, option) == 0)
         {
             transport_state->cbs.sas_token_lifetime = *((size_t*)value);
             result = IOTHUB_CLIENT_OK;
         }
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_049: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "sas_token_refresh_time", returning IOTHUB_CLIENT_OK] 
-        else if (strcmp("sas_token_refresh_time", option) == 0)
+        else if (strcmp(OPTION_SAS_TOKEN_REFRESH_TIME, option) == 0)
         {
             transport_state->cbs.sas_token_refresh_time = *((size_t*)value);
             result = IOTHUB_CLIENT_OK;
         }
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_148: [IotHubTransportAMQP_SetOption shall save and apply the value if the option name is "cbs_request_timeout", returning IOTHUB_CLIENT_OK] 
-        else if (strcmp("cbs_request_timeout", option) == 0)
+        else if (strcmp(OPTION_CBS_REQUEST_TIMEOUT, option) == 0)
         {
             transport_state->cbs.cbs_request_timeout = *((size_t*)value);
             result = IOTHUB_CLIENT_OK;
         }
-        else if (strcmp("logtrace", option) == 0)
+        else if (strcmp(OPTION_LOG_TRACE, option) == 0)
         {
             transport_state->is_trace_on = *((bool*)value);
             if (transport_state->connection != NULL)
@@ -1986,13 +1987,13 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE ha
             result = IOTHUB_CLIENT_OK;
         }
         /*Codes_SRS_IOTHUBTRANSPORTAMQP_02_007: [ If optionName is x509certificate and the authentication method is not x509 then IoTHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
-        else if ((strcmp("x509certificate", option) == 0) && (transport_state->credential.credentialType != X509))
+        else if ((strcmp(OPTION_X509_CERT, option) == 0) && (transport_state->credential.credentialType != X509))
         {
             LogError("x509certificate specified, but authentication method is not x509");
             result = IOTHUB_CLIENT_INVALID_ARG;
         }
         /*Codes_SRS_IOTHUBTRANSPORTAMQP_02_008: [ If optionName is x509privatekey and the authentication method is not x509 then IoTHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
-        else if ((strcmp("x509privatekey", option) == 0) && (transport_state->credential.credentialType != X509))
+        else if ((strcmp(OPTION_X509_PRIVATE_KEY, option) == 0) && (transport_state->credential.credentialType != X509))
         {
             LogError("x509privatekey specified, but authentication method is not x509");
             result = IOTHUB_CLIENT_INVALID_ARG;
