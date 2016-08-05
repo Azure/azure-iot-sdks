@@ -15,11 +15,13 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
     var serviceClient, deviceClient;
 
     beforeEach(function () {
+      this.timeout(20000);
       serviceClient = serviceSdk.Client.fromConnectionString(hubConnectionString);
       deviceClient = createDeviceClient(deviceTransport, provisionedDevice);
     });
 
     afterEach(function (done) {
+      this.timeout(20000);
       closeDeviceServiceClients(deviceClient, serviceClient, done);
     });
 
