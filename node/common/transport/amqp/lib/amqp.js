@@ -122,9 +122,9 @@ Amqp.prototype.connect = function connect(uri, sslOptions, done) {
  * @param {Function}   disconnectCallback   Called when the connection disconnected.
  */
 Amqp.prototype.setDisconnectHandler = function (disconnectCallback) {
-  this._amqp.on('connection:closed', function (err) {
+  this._amqp.on('connection:closed', function () {
     this._connected = false;
-    disconnectCallback(err);
+    disconnectCallback('amqp10: connection closed');
   }.bind(this));
 };
 

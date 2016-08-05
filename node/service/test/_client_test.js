@@ -101,6 +101,41 @@ describe('Client', function () {
       }, ReferenceError);
     });
   });
+
+  describe('#open', function() {
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_004: [The `disconnect` event shall be emitted when the client is disconnected from the server.]*/
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_002: [If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.]*/
+    it('subscribes to the \'disconnect\' event once connected', function(done) {
+      var simulatedAmqp = new SimulatedAmqp();
+      var client = new Client(simulatedAmqp);
+      client.open(function() {
+        client.on('disconnect', function() {
+          done();
+        });
+
+        simulatedAmqp.emit('disconnect');
+      });
+    });
+  });
+
+  describe('#close', function() {
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_003: [The `close` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
+    it('unsubscribes for the \'disconnect\' event when disconnecting', function(done) {
+      var simulatedAmqp = new SimulatedAmqp();
+      var client = new Client(simulatedAmqp);
+      var disconnectReceived = false;
+      client.open(function() {
+        client.on('disconnect', function() {
+          disconnectReceived = true;
+        });
+        client.close(function() {
+          simulatedAmqp.emit('disconnect');
+          assert.isFalse(disconnectReceived);
+          done();
+        });
+      });
+    });
+  });
 });
 
 describe('Over simulated AMQP', function () {

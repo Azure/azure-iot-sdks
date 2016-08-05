@@ -6,15 +6,19 @@
 var errors = require('azure-iot-common').errors;
 var results = require('azure-iot-common').results;
 var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 var AmqpReceiver = require('azure-iot-amqp-base').AmqpReceiver;
 
 function SimulatedAmqp() {
+  EventEmitter.call(this);
   this._config = {
     sharedAccessSignature: 'ok'
   };
   this._receiver = new AmqpReceiver(new EventEmitter());
   this.FeedbackReceiver = AmqpReceiver;
 }
+
+util.inherits(SimulatedAmqp, EventEmitter);
 
 SimulatedAmqp.prototype.connect = function connect(done) {
   if (!!done) done();
