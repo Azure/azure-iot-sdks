@@ -3,7 +3,10 @@
 
 'use strict';
 
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
+var results = require('azure-iot-common').results;
 var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./amqp.js');
 var Message = require('azure-iot-common').Message;
@@ -22,6 +25,7 @@ var SharedAccessSignature = require('./shared_access_signature.js');
   * @prop {AmqpReceiver} FeedbackReceiver
  */
 function Client(transport) {
+  EventEmitter.call(this);
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_001: [The Client constructor shall throw ReferenceError if the transport argument is falsy.]*/
   if (!transport) throw new ReferenceError('transport is \'' + transport + '\'');
   this._transport = transport;
@@ -33,6 +37,8 @@ function Client(transport) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_033: [getFeedbackReceiver shall return the same instance of Client.FeedbackReceiver every time it is called with a given instance of Client.]*/
   Object.defineProperty(this, 'FeedbackReceiver', { value: transport.FeedbackReceiver });
 }
+
+util.inherits(Client, EventEmitter);
 
 /**
  * @method            module:azure-iothub.Client.fromConnectionString
@@ -103,6 +109,13 @@ Client.fromSharedAccessSignature = function fromSharedAccessSignature(sharedAcce
   return new Client(new Transport(config));
 };
 
+Client.prototype._disconnectHandler = function (reason) {
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_004: [** The `disconnect` event shall be emitted when the client is disconnected from the server.]*/
+  var evt = new results.Disconnected();
+  evt.reason = reason;
+  this.emit('disconnect', evt);
+};
+
 /**
  * @method            module:azure-iothub.Client#open
  * @description       Opens the connection to an IoT hub.
@@ -118,7 +131,16 @@ Client.prototype.open = function open(done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_010: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_011: [Otherwise the argument err shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_012: [If the connection is already open when open is called, it shall have no effect—that is, the done callback shall be invoked immediately with a null argument.]*/
-  this._transport.connect(done);
+  var self = this;
+  this._transport.connect(function(err, result) {
+    if (err) {
+      done(err);
+    } else {
+      /*Codes_SRS_NODE_IOTHUB_CLIENT_16_002: [If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.]*/
+      self._transport.on('disconnect', self._disconnectHandler.bind(self));
+      done(null, result);
+    }
+  });
 };
 
 /**
@@ -136,7 +158,15 @@ Client.prototype.close = function close(done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_023: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_024: [Otherwise the argument err shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_025: [If the connection is not open when close is called, it shall have no effect— that is, the done callback shall be invoked immediately with null arguments.]*/
-  this._transport.disconnect(done);
+  this._transport.disconnect(function (err, result) {
+      if (err) {
+        done(err);
+      } else {
+        /*Codes_SRS_NODE_IOTHUB_CLIENT_16_003: [The `close` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
+        this._transport.removeAllListeners('disconnect');
+        done(null, result);
+      }
+    }.bind(this));
 };
 
 /**
