@@ -13,6 +13,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 
 #include "iothub_client_ll.h"
+#include "iothub_client_options.h"
 #include "iothub_client_private.h"
 #include "iothubtransportmqtt.h"
 #include "azure_umqtt_c/mqtt_client.h"
@@ -1319,13 +1320,13 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE ha
     {
         MQTTTRANSPORT_HANDLE_DATA* transportState = (MQTTTRANSPORT_HANDLE_DATA*)handle;
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_031: [If the option parameter is set to "logtrace" then the value shall be a bool_ptr and the value will determine if the mqtt client log is on or off.] */
-        if (strcmp("logtrace", option) == 0)
+        if (strcmp(OPTION_LOG_TRACE, option) == 0)
         {
             bool* traceVal = (bool*)value;
             mqtt_client_set_trace(transportState->mqttClient, *traceVal, *traceVal);
             result = IOTHUB_CLIENT_OK;
         }
-        else if (strcmp("keepalive", option) == 0)
+        else if (strcmp(OPTION_KEEP_ALIVE, option) == 0)
         {
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_036: [If the option parameter is set to "keepalive" then the value shall be a int_ptr and the value will determine the mqtt keepalive time that is set for pings.] */
             int* keepAliveOption = (int*)value;
@@ -1342,13 +1343,13 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE ha
             result = IOTHUB_CLIENT_OK;
         }
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_039: [If the option parameter is set to "x509certificate" then the value shall be a const char of the certificate to be used for x509.] */
-        else if ((strcmp("x509certificate", option) == 0) && (transportState->transport_creds.credential_type != X509))
+        else if ((strcmp(OPTION_X509_CERT, option) == 0) && (transportState->transport_creds.credential_type != X509))
         {
             LogError("x509certificate specified, but authentication method is not x509");
             result = IOTHUB_CLIENT_INVALID_ARG;
         }
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_040: [If the option parameter is set to "x509privatekey" then the value shall be a const char of the RSA Private Key to be used for x509.] */
-        else if ((strcmp("x509privatekey", option) == 0) && (transportState->transport_creds.credential_type != X509))
+        else if ((strcmp(OPTION_X509_PRIVATE_KEY, option) == 0) && (transportState->transport_creds.credential_type != X509))
         {
             LogError("x509privatekey specified, but authentication method is not x509");
             result = IOTHUB_CLIENT_INVALID_ARG;

@@ -122,9 +122,9 @@ Amqp.prototype.connect = function connect(uri, sslOptions, done) {
  * @param {Function}   disconnectCallback   Called when the connection disconnected.
  */
 Amqp.prototype.setDisconnectHandler = function (disconnectCallback) {
-  this._amqp.on('connection:closed', function (err) {
+  this._amqp.on('connection:closed', function () {
     this._connected = false;
-    disconnectCallback(err);
+    disconnectCallback('amqp10: connection closed');
   }.bind(this));
 };
 
@@ -174,6 +174,7 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
             var result = new results.MessageEnqueued(state);
             done(null, result);
           }
+          return null;
         })
         .catch(function (err) {
           /*Codes_SRS_NODE_IOTHUB_AMQPCOMMON_16_007: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
@@ -232,6 +233,7 @@ Amqp.prototype._setupReceiverLink = function setupReceiverLink(endpoint, done) {
       this._receivers[endpoint] = new AmqpReceiver(receiver);
       debug('AmqpReceiver object created for endpoint: ' + endpoint);
       done(null, this._receivers[endpoint]);
+      return null;
     }.bind(this))
     .catch(function (err) {
       if (done) done(err);

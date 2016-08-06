@@ -25,9 +25,9 @@
     "yargs": "^4.7.1"
   },
   "devDependencies": {
-    "chai": "^3.3.0",
-    "jshint": "^2.8.0",
-    "mocha": "^2.3.3"
+    "chai": "^3.5.0",
+    "jshint": "^2.9.2",
+    "mocha": "^3.0.1"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",

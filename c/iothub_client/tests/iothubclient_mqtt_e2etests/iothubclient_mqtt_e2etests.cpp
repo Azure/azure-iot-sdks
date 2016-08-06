@@ -11,6 +11,7 @@
 #include "micromockcharstararenullterminatedstrings.h"
 
 #include "iothub_client.h"
+#include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothubtransportmqtt.h"
 
@@ -308,7 +309,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
             // Turn on Log 
             bool trace = true;
-            IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
+            IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
 
             msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData->expectedString, strlen(sendData->expectedString));
             ASSERT_IS_NOT_NULL_WITH_MSG(msgHandle, "Error Creating IoTHubMEssage From Byte Array.");
@@ -398,7 +399,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2etests)
 
         // Turn on Log 
         bool trace = true;
-        IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
+        IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
 
         IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
         ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);

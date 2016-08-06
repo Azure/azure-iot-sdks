@@ -18,6 +18,7 @@
 #include "azure_c_shared_utility/httpapiexsas.h"
 
 #include "iothub_client_ll.h"
+#include "iothub_client_options.h"
 #include "iothub_client_private.h"
 #include "iothub_client_version.h"
 #include "iothub_transport_ll.h"
@@ -31,12 +32,12 @@
 // Returns number of characters copied.
 int snprintf(char * s, size_t n, const char * format, ...)
 {
-	int result;
-	va_list args;
-	va_start(args, format);
-	result = vsnprintf(s, n, format, args);
-	va_end(args);
-	return result;
+    int result;
+    va_list args;
+    va_start(args, format);
+    result = vsnprintf(s, n, format, args);
+    va_end(args);
+    return result;
 }
 #endif
 
@@ -702,9 +703,9 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, const unsigned char* source, size_t size)
 {
     IOTHUB_CLIENT_RESULT result;
-	BUFFER_HANDLE toBeTransmitted;
-	int requiredStringLength;
-	char* requiredString;
+    BUFFER_HANDLE toBeTransmitted;
+    int requiredStringLength;
+    char* requiredString;
 
     /*Codes_SRS_IOTHUBCLIENT_LL_02_061: [ If handle is NULL then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
     /*Codes_SRS_IOTHUBCLIENT_LL_02_062: [ If destinationFileName is NULL then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
@@ -739,8 +740,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
                 /*transmit the x509certificate and x509privatekey*/
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
                 (!(
-                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, "x509certificate", handleData->credentials.x509credentials.x509certificate) == HTTPAPIEX_OK) &&
-                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, "x509privatekey", handleData->credentials.x509credentials.x509privatekey) == HTTPAPIEX_OK)
+                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_CERT, handleData->credentials.x509credentials.x509certificate) == HTTPAPIEX_OK) &&
+                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, handleData->credentials.x509credentials.x509privatekey) == HTTPAPIEX_OK)
                 ))
                 )
             {
@@ -926,7 +927,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)handle;
 
         /*Codes_SRS_IOTHUBCLIENT_LL_02_100: [ x509certificate - then value then is a null terminated string that contains the x509 certificate. ]*/
-        if (strcmp(optionName, "x509certificate") == 0)
+        if (strcmp(optionName, OPTION_X509_CERT) == 0)
         {
             /*Codes_SRS_IOTHUBCLIENT_LL_02_109: [ If the authentication scheme is NOT x509 then IoTHubClient_LL_UploadToBlob_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
             if (handleData->authorizationScheme != X509)
@@ -958,7 +959,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
             }
         }
         /*Codes_SRS_IOTHUBCLIENT_LL_02_101: [ x509privatekey - then value is a null terminated string that contains the x509 privatekey. ]*/
-        else if (strcmp(optionName, "x509privatekey") == 0)
+        else if (strcmp(optionName, OPTION_X509_PRIVATE_KEY) == 0)
         {
             /*Codes_SRS_IOTHUBCLIENT_LL_02_109: [ If the authentication scheme is NOT x509 then IoTHubClient_LL_UploadToBlob_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
             if (handleData->authorizationScheme != X509)
