@@ -18,7 +18,6 @@ and removing calls to _DoWork will yield the same results. */
 #include "azure_c_shared_utility/platform.h"
 #include "serializer.h"
 #include "iothub_client_ll.h"
-#include "iothub_client_options.h"
 #include "iothubtransporthttp.h"
 #endif
 
@@ -168,7 +167,7 @@ void simplesample_http_run(void)
                 unsigned int minimumPollingTime = 9;
                 ContosoAnemometer* myWeather;
 
-                if (IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_MIN_POLLING_TIME, &minimumPollingTime) != IOTHUB_CLIENT_OK)
+                if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
                 {
                     printf("failure to set option \"MinimumPollingTime\"\r\n");
                 }

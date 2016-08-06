@@ -16,7 +16,6 @@ and removing calls to _DoWork will yield the same results. */
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "iothub_client_ll.h"
-#include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
 #endif
@@ -143,7 +142,7 @@ void iothub_client_sample_http_run(void)
                 printf("failure to set option \"timeout\"\r\n");
             }
 
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_MIN_POLLING_TIME, &minimumPollingTime) != IOTHUB_CLIENT_OK)
+            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
             {
                 printf("failure to set option \"MinimumPollingTime\"\r\n");
             }

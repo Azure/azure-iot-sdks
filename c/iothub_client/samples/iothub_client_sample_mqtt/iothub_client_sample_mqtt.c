@@ -5,7 +5,6 @@
 #include <stdlib.h>
 
 #include "iothub_client.h"
-#include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -115,7 +114,7 @@ void iothub_client_sample_mqtt_run(void)
         else
         {
             bool traceOn = true;
-            IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
+            IoTHubClient_LL_SetOption(iotHubClientHandle, "logtrace", &traceOn);
 
 #ifdef MBED_BUILD_TIMESTAMP
             // For mbed add the certificate information
