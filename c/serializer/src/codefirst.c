@@ -190,7 +190,7 @@ static CODEFIRST_RESULT buildModelTypes(SCHEMA_HANDLE schemaHandle, const REFLEC
             {
                 /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
                 result = CODEFIRST_SCHEMA_ERROR;
-                LogError("create mdoel failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
+                LogError("create model failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
                 goto out;
             }
         }
@@ -900,9 +900,9 @@ CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destin
     return result;
 }
 
-CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...)
+CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numReportedProperties, ...)
 {
-    (void)(destination, destinationSize, numProperties);
+    (void)(destination, destinationSize, numReportedProperties);
     return CODEFIRST_OK;
 }
 

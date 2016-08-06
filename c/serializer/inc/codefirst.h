@@ -143,7 +143,7 @@ extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLEC
 extern void CodeFirst_DestroyDevice(void* device);
 
 extern CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...);
-extern CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...);
+extern CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numReportedProperties, ...);
 
 extern AGENT_DATA_TYPE_TYPE CodeFirst_GetPrimitiveType(const char* typeName);
 

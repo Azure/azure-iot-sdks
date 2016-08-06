@@ -26,18 +26,20 @@ extern "C" {
 
 DEFINE_ENUM(DEVICE_RESULT, DEVICE_RESULT_VALUES)
 
+#include "azure_c_shared_utility/umock_c_prod.h"
+
 typedef struct DEVICE_HANDLE_DATA_TAG* DEVICE_HANDLE;
 typedef EXECUTE_COMMAND_RESULT (*pfDeviceActionCallback)(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t argCount, const AGENT_DATA_TYPE* args);
 
-extern DEVICE_RESULT Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* callbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle);
-extern void Device_Destroy(DEVICE_HANDLE deviceHandle);
+MOCKABLE_FUNCTION(,DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle);
+MOCKABLE_FUNCTION(, void, Device_Destroy, DEVICE_HANDLE, deviceHandle);
 
-extern TRANSACTION_HANDLE Device_StartTransaction(DEVICE_HANDLE deviceHandle);
-extern DEVICE_RESULT Device_PublishTransacted(TRANSACTION_HANDLE transactionHandle, const char* propertyPath, const AGENT_DATA_TYPE* data);
-extern DEVICE_RESULT Device_EndTransaction(TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize);
-extern DEVICE_RESULT Device_CancelTransaction(TRANSACTION_HANDLE transactionHandle);
+MOCKABLE_FUNCTION(,TRANSACTION_HANDLE, Device_StartTransaction, DEVICE_HANDLE, deviceHandle);
+MOCKABLE_FUNCTION(,DEVICE_RESULT, Device_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyPath, const AGENT_DATA_TYPE*, data);
+MOCKABLE_FUNCTION(,DEVICE_RESULT, Device_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
+MOCKABLE_FUNCTION(,DEVICE_RESULT, Device_CancelTransaction, TRANSACTION_HANDLE, transactionHandle);
 
-extern EXECUTE_COMMAND_RESULT Device_ExecuteCommand(DEVICE_HANDLE deviceHandle, const char* command);
+MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, Device_ExecuteCommand, DEVICE_HANDLE, deviceHandle, const char*, command);
 #ifdef __cplusplus
 }
 #endif

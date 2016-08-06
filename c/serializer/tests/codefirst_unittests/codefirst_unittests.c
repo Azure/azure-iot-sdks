@@ -1,26 +1,72 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
 #include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
+
+void* my_gballoc_malloc(size_t t)
+{
+    return malloc(t);
+}
+
+void my_gballoc_free(void * t)
+{
+    free(t);
+}
+
+
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
 
+
+#ifdef __cplusplus
 #include <cstddef>
+#include <cstdint>
+#include <cinttypes>
+#include <string> /*TODO: errr... remove*/
+#else
+#include <stddef.h>
+#include <stdint.h>
+#include <inttypes.h>
+#endif
+
+#include "umock_c.h"
+#include "umocktypes_charptr.h"
+#include "umocktypes_bool.h"
+#include "umocktypes_stdint.h"
+
+#include "umock_c_negative_tests.h"
+
+#include "azure_c_shared_utility/strings.h"
+#include "strings.c"
+
+#define ENABLE_MOCKS
+#include "agenttypesystem.h"
+#include "schema.h"
+#include "iotdevice.h"
+#undef ENABLE_MOCKS
+
 #include "testrunnerswitcher.h"
 #include "codefirst.h"
 #include "macro_utils.h"
-#include "micromock.h"
-#include "micromockcharstararenullterminatedstrings.h"
-#include "schema.h"
-#include <cstdint>
+
 #include "c_bool_size.h"
-#include <string>
-#include "azure_c_shared_utility/strings.h"
+
 #include "serializer.h"
 
 
-DEFINE_MICROMOCK_ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
+//TEST_DEFINE_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
+//TEST_DEFINE_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
+
+DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 BEGIN_NAMESPACE(DummyDataProvider)
 
@@ -131,13 +177,13 @@ EXECUTE_COMMAND_RESULT test1(TruckType* device, double P1, int P2, float P3, lon
     DummyDataProvider_test1_P8 = P8;
     DummyDataProvider_test1_P9 = P9;
     DummyDataProvider_test1_P10 = P10;
-    strcpy_s(DummyDataProvider_test1_P11, P11_MAX_SIZE, P11);
+    strcpy(DummyDataProvider_test1_P11,  P11);
     DummyDataProvider_test1_P12 = P12;
     DummyDataProvider_test1_P13 = P13;
     DummyDataProvider_test1_P14.size = P14.size;
     DummyDataProvider_test1_P14.data = (unsigned char*)malloc(P14.size);
     memcpy(DummyDataProvider_test1_P14.data, P14.data, P14.size);
-    strcpy_s(DummyDataProvider_test1_P15, P15_MAX_SIZE, P15);
+    strcpy(DummyDataProvider_test1_P15, P15);
     return EXECUTE_COMMAND_SUCCESS;
 }
 
@@ -182,211 +228,195 @@ static  AGENT_DATA_TYPE* Destroy_AGENT_DATA_TYPE_agentData = NULL;
 #define TEST_CALLBACK_CONTEXT   ((void*)0x4247)
 #define TEST_COMMAND "this be some command"
 
-std::ostream& operator<<(std::ostream& left, const EDM_DATE_TIME_OFFSET dateTimeOffset)
+static char* umockvalue_stringify_EDM_DATE_TIME_OFFSET(const EDM_DATE_TIME_OFFSET* dateTimeOffset)
 {
-    return left << "struct tm = (" <<
-        dateTimeOffset.dateTime.tm_year << "-" <<
-        dateTimeOffset.dateTime.tm_mon << "-" <<
-        dateTimeOffset.dateTime.tm_mday << " " <<
-        dateTimeOffset.dateTime.tm_hour << ":" <<
-        dateTimeOffset.dateTime.tm_min << ":" <<
-        dateTimeOffset.dateTime.tm_sec << " ) " <<
-        dateTimeOffset.hasFractionalSecond << " " <<
-        dateTimeOffset.fractionalSecond << " " <<
-        dateTimeOffset.hasTimeZone << " " <<
-        dateTimeOffset.timeZoneHour << " " <<
-        dateTimeOffset.timeZoneMinute;
-}
-
-std::wostream& operator<<(std::wostream& left, const EDM_DATE_TIME_OFFSET dateTimeOffset)
-{
-    return left << L"struct tm = (" <<
-        dateTimeOffset.dateTime.tm_year << L"-" <<
-        dateTimeOffset.dateTime.tm_mon << L"-" <<
-        dateTimeOffset.dateTime.tm_mday << L" " <<
-        dateTimeOffset.dateTime.tm_hour << L":" <<
-        dateTimeOffset.dateTime.tm_min << L":" <<
-        dateTimeOffset.dateTime.tm_sec << L" ) " <<
-        dateTimeOffset.hasFractionalSecond << L" " <<
-        dateTimeOffset.fractionalSecond << L" " <<
-        dateTimeOffset.hasTimeZone << L" " <<
-        dateTimeOffset.timeZoneHour << L" " <<
-        dateTimeOffset.timeZoneMinute;
-}
-
-static bool operator==(EDM_DATE_TIME_OFFSET left, EDM_DATE_TIME_OFFSET right)
-{
-    return memcmp(&left, &right, sizeof(left)) == 0;
-}
-
-static int EDM_DATE_TIME_OFFSET_Compare(EDM_DATE_TIME_OFFSET left, EDM_DATE_TIME_OFFSET right)
-{
-    return (memcmp(&left, &right, sizeof(EDM_DATE_TIME_OFFSET)) != 0);
-}
-
-static void EDM_DATE_TIME_OFFSET_ToString(char* string, size_t bufferSize, EDM_DATE_TIME_OFFSET val)
-{
-    (void)bufferSize;
-    std::ostringstream o;
-    o << val;
-    strcpy(string, o.str().c_str());
-}
-
-std::ostream& operator<<(std::ostream& left, const EDM_GUID edmGuid)
-{
-    return left << std::hex <<
-        edmGuid.GUID[0] <<
-        edmGuid.GUID[1] <<
-        edmGuid.GUID[2] <<
-        edmGuid.GUID[3] <<
-        "-" <<
-        edmGuid.GUID[4] <<
-        edmGuid.GUID[5] <<
-        "-" <<
-        edmGuid.GUID[6] <<
-        edmGuid.GUID[7] <<
-        "-" <<
-        edmGuid.GUID[8] <<
-        edmGuid.GUID[9] <<
-        edmGuid.GUID[10] <<
-        edmGuid.GUID[11] <<
-        edmGuid.GUID[12] <<
-        edmGuid.GUID[13] <<
-        edmGuid.GUID[14] <<
-        edmGuid.GUID[15];
-}
-
-std::ostream& operator<<(std::ostream& left, const EDM_BINARY edmBinary)
-{
-    left << std::hex;
-    for (size_t i = 0; i < edmBinary.size; i++)
+    size_t needed = snprintf(NULL, 0, "struct tm = ( %d-%d-%d %d:%d:%d ) %" PRIu8 " %" PRIu64 " %" PRIu8 " %" PRIu8 " %" PRIu8,
+        dateTimeOffset->dateTime.tm_year,
+        dateTimeOffset->dateTime.tm_mon,
+        dateTimeOffset->dateTime.tm_mday,
+        dateTimeOffset->dateTime.tm_hour,
+        dateTimeOffset->dateTime.tm_min,
+        dateTimeOffset->dateTime.tm_sec,
+        dateTimeOffset->hasFractionalSecond,
+        dateTimeOffset->fractionalSecond,
+        dateTimeOffset->hasTimeZone,
+        dateTimeOffset->timeZoneHour,
+        dateTimeOffset->timeZoneMinute);
+    char* result = (char*)my_gballoc_malloc(needed + 1);
+    if (result == NULL)
     {
-        left << edmBinary.data[i];
-    }
-    return left;
-}
-
-std::wostream& operator<<(std::wostream& left, const EDM_GUID edmGuid)
-{
-    return left << std::hex <<
-        edmGuid.GUID[0] <<
-        edmGuid.GUID[1] <<
-        edmGuid.GUID[2] <<
-        edmGuid.GUID[3] <<
-        L"-" <<
-        edmGuid.GUID[4] <<
-        edmGuid.GUID[5] <<
-        "-" <<
-        edmGuid.GUID[6] <<
-        edmGuid.GUID[7] <<
-        L"-" <<
-        edmGuid.GUID[8] <<
-        edmGuid.GUID[9] <<
-        edmGuid.GUID[10] <<
-        edmGuid.GUID[11] <<
-        edmGuid.GUID[12] <<
-        edmGuid.GUID[13] <<
-        edmGuid.GUID[14] <<
-        edmGuid.GUID[15];
-}
-
-std::wostream& operator<<(std::wostream& left, const EDM_BINARY edmBinary)
-{
-    left << std::hex;
-    for (size_t i = 0; i < edmBinary.size; i++)
-    {
-        left << edmBinary.data[i];
-    }
-    return left;
-}
-
-static bool operator==(EDM_GUID left, EDM_GUID right)
-{
-    return memcmp(&left, &right, sizeof(left)) == 0;
-}
-
-static bool operator==(EDM_BINARY left, EDM_BINARY right)
-{
-    if (left.size != right.size)
-    {
-        return false;
+        ASSERT_FAIL("failed to malloc");
     }
     else
     {
-        return memcmp(left.data, right.data, left.size) == 0;
+        (void)snprintf(result, needed+1, "struct tm = ( %d-%d-%d %d:%d:%d ) %" PRIu8 " %" PRIu64 " %" PRIu8 " %" PRIu8 " %" PRIu8,
+            dateTimeOffset->dateTime.tm_year,
+            dateTimeOffset->dateTime.tm_mon,
+            dateTimeOffset->dateTime.tm_mday,
+            dateTimeOffset->dateTime.tm_hour,
+            dateTimeOffset->dateTime.tm_min,
+            dateTimeOffset->dateTime.tm_sec,
+            dateTimeOffset->hasFractionalSecond,
+            dateTimeOffset->fractionalSecond,
+            dateTimeOffset->hasTimeZone,
+            dateTimeOffset->timeZoneHour,
+            dateTimeOffset->timeZoneMinute);
     }
+    return result;
 }
 
-static int EDM_GUID_Compare(EDM_GUID left, EDM_GUID right)
+
+static int umockvalue_are_equal_EDM_DATE_TIME_OFFSET(const EDM_DATE_TIME_OFFSET *left, const EDM_DATE_TIME_OFFSET*right)
 {
-    return (memcmp(&left, &right, sizeof(EDM_GUID)) != 0);
+    return (memcmp(&left, &right, sizeof(left)) == 0);
 }
 
-/*retuns !=0 if they are equal*/
-static int EDM_BINARY_Compare(EDM_BINARY left, EDM_BINARY right)
+static int umockvalue_copy_EDM_DATE_TIME_OFFSET(EDM_DATE_TIME_OFFSET*destination, const EDM_DATE_TIME_OFFSET*source)
 {
-    return !((left.size == right.size) && (memcmp(left.data, right.data, left.size) == 0));
+    memcpy(destination, source, sizeof(EDM_DATE_TIME_OFFSET));
+    return 0;
 }
 
-
-static void EDM_GUID_ToString(char* string, size_t bufferSize, EDM_GUID val)
+static void umockvalue_free_EDM_DATE_TIME_OFFSET(EDM_DATE_TIME_OFFSET*value)
 {
-    (void)bufferSize;
-    std::ostringstream o;
-    o << val;
-    strcpy(string, o.str().c_str());
+    my_gballoc_free(value);
 }
 
-static void EDM_BINARY_ToString(char* string, size_t bufferSize, EDM_BINARY val)
+static int umockvalue_are_equal_EDM_GUID(const EDM_GUID *left, const EDM_GUID*right)
 {
-    (void)bufferSize;
-    std::ostringstream o;
-    o << val;
-    strcpy(string, o.str().c_str());
+    return (memcmp(&left, &right, sizeof(left)) == 0);
 }
 
-static int bool_Compare(bool left, bool right)
-{
-    return left != right;
-}
-
-static void bool_ToString(char* string, size_t bufferSize, bool val)
-{
-    (void)bufferSize;
-    (void)strcpy(string, val?"true":"false");
-}
-
-
-#ifdef CPP_UNITTEST
-    template <> static std::wstring Microsoft::VisualStudio::CppUnitTestFramework::ToString < EDM_DATE_TIME_OFFSET >(const EDM_DATE_TIME_OFFSET & q)
+static char* umockvalue_stringify_EDM_BINARY(const EDM_BINARY* b)
+{   
+    char* result = (char*)malloc(b->size * 5 + 1);/*every byte is "0xDD " plus 1 '\0' at the end of the string*/
+    if (result == NULL)
     {
-        std::wstring result;
-        std::wostringstream o;
-        o << q;
-        return o.str();
+        ASSERT_FAIL("cannot malloc");
     }
-
-    template <> static std::wstring Microsoft::VisualStudio::CppUnitTestFramework::ToString < EDM_GUID >(const EDM_GUID & q)
+    else
     {
-        std::wstring result;
-        std::wostringstream o;
-        o << q;
-        return o.str();
+        size_t i;
+        for (i = 0;i < b->size;i++)
+        {
+            unsigned char hn = b->data[i] >> 4; /*hn = high nibble*/
+            unsigned char ln = b->data[i] & 0x0F;
+
+            result[i + 0] = '0';
+            result[i + 1] = 'x';
+            result[i + 2] = (hn) >= 10 ? ('A' - 10 + hn) : ('0' + hn);
+            result[i + 3] = (ln) >= 10 ? ('A' - 10 + ln) : ('0' + ln);
+            result[i + 4] = ' ';
+        }
+        result[b->size * 5] = '\0';
     }
-
-    template <> static std::wstring Microsoft::VisualStudio::CppUnitTestFramework::ToString < EDM_BINARY >(const EDM_BINARY& q)
-    {
-        std::wstring result;
-        std::wostringstream o;
-        o << q;
-        return o.str();
-    
+    return result;
 }
-#endif
 
-DEFINE_MICROMOCK_ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ENUM_VALUES)
+static void EDM_BINARY_ToString(char* s, size_t t, EDM_BINARY e)
+{
+    (void)t;
+    strcpy(s, umockvalue_stringify_EDM_BINARY(&e));
+}
 
-static MICROMOCK_MUTEX_HANDLE g_testByTest;
+static int umockvalue_are_equal_EDM_BINARY(const EDM_BINARY *left, const EDM_BINARY*right)
+{
+    return (memcmp(&left, &right, sizeof(left)) == 0);
+}
+
+static int EDM_BINARY_Compare(EDM_BINARY e, EDM_BINARY fe)
+{
+    return umockvalue_are_equal_EDM_BINARY(&e, &fe);
+}
+
+static AGENT_DATA_TYPES_RESULT my_Create_AGENT_DATA_TYPE_from_DOUBLE(AGENT_DATA_TYPE* agentData, double v)
+{
+    (void)v;
+    Create_AGENT_DATA_TYPE_from_DOUBLE_agentData = agentData;
+    return AGENT_DATA_TYPES_OK;
+}
+
+static DEVICE_RESULT my_Device_PublishTransacted(TRANSACTION_HANDLE transactionHandle, const char* propertyName, const AGENT_DATA_TYPE* data)
+{
+    (void)transactionHandle;
+    if (
+        (
+        (strcmp(propertyName, "this_is_double") == 0) &&
+            (data != Create_AGENT_DATA_TYPE_from_DOUBLE_agentData)
+            )
+        /*the below cannot be checked easily because there are 2 types (int, int32_t) setting the same CReate_AGET_DATA_TYPE_from_SINT32_agentData*/
+        /*same goes for long and sint64_t*/
+        /*(
+        (strcmp(propertyName, "this_is_int") == 0) &&
+        (data != Create_AGENT_DATA_TYPE_from_DOUBLE_agentData)
+        )*/
+        ||
+        (
+        (strcmp(propertyName, "this_is_float") == 0) &&
+            (data != Create_AGENT_DATA_TYPE_from_FLOAT_agentData)
+            )
+        ||
+        (
+        (strcmp(propertyName, "this_is_sint8_t") == 0) &&
+            (data != Create_AGENT_DATA_TYPE_from_SINT8_agentData)
+            )
+        ||
+        (
+        (strcmp(propertyName, "this_is_uint8_t") == 0) &&
+            (data != Create_AGENT_DATA_TYPE_from_UINT8_agentData)
+            )
+        ||
+        (
+        (strcmp(propertyName, "this_is_int16_t") == 0) &&
+            (data != Create_AGENT_DATA_TYPE_from_SINT16_agentData)
+            )
+        ||
+        (
+        (strcmp(propertyName, "this_is_bool") == 0) &&
+            (data != Create_EDM_BOOLEAN_from_int_agentData)
+            )
+        ||
+        (
+        (strcmp(propertyName, "this_is_ascii_char_ptr") == 0) &&
+            (data != Create_AGENT_DATA_TYPE_from_charz_agentData)
+            )
+        ||
+        (
+        (strcmp(propertyName, "this_is_ascii_char_ptr_no_quotes") == 0) &&
+            (data != Create_AGENT_DATA_TYPE_from_charz_no_quotes_agentData)
+            )
+        ||
+        (
+        (strcmp(propertyName, "this_is_EdmDateTimeOffset") == 0) &&
+            (data != Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_agentData)
+            )
+        )
+    {
+        ASSERT_FAIL("where did you get that AGENT_DATA_TYPE?");
+    }
+    Device_PublishTransacted_agentData = data;
+    return DEVICE_OK;
+}
+
+static void my_Destroy_AGENT_DATA_TYPE(AGENT_DATA_TYPE* agentData)
+{
+    Destroy_AGENT_DATA_TYPE_agentData = agentData;
+}
+
+static AGENT_DATA_TYPES_RESULT my_Create_AGENT_DATA_TYPE_from_SINT32(AGENT_DATA_TYPE* agentData, int32_t v)
+{
+    (void)(v);
+    Create_AGENT_DATA_TYPE_from_SINT32_agentData = agentData;
+    return AGENT_DATA_TYPES_OK;
+}
+
+TEST_DEFINE_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_ENUM_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_ENUM_VALUES);
+TEST_DEFINE_ENUM_TYPE(DEVICE_RESULT, DEVICE_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(DEVICE_RESULT, DEVICE_RESULT_VALUES);
+
+static TEST_MUTEX_HANDLE g_testByTest;
+static TEST_MUTEX_HANDLE g_dllByDll;
 
 static char someChars[] = { "someChars" };
 static char someMoreChars[] = { "someMoreChars" };
@@ -398,288 +428,6 @@ static EDM_DATE_TIME_OFFSET someEdmDateTimeOffset;
 static EDM_GUID someEdmGuid;
 static EDM_BINARY someEdmBinary;
 static void* g_InvokeActionCallbackArgument;
-
-TYPED_MOCK_CLASS(CMocksForCodeFirst, CGlobalMock)
-{
-public:
-    MOCK_STATIC_METHOD_2(, int, Create_AGENT_DATA_TYPE_From_Ptr_this_is_double, void*, param, AGENT_DATA_TYPE*, dest)
-        Create_AGENT_DATA_TYPE_from_DOUBLE_agentData = dest;
-    MOCK_METHOD_END(int, 0);
-
-    MOCK_STATIC_METHOD_2(, int, Create_AGENT_DATA_TYPE_From_Ptr_this_is_int, void*, param, AGENT_DATA_TYPE*, dest)
-        Create_AGENT_DATA_TYPE_from_SINT32_agentData = dest;
-    MOCK_METHOD_END(int, 0);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_EDM_BOOLEAN_from_int, AGENT_DATA_TYPE*, agentData, int, v)
-    {
-        Create_EDM_BOOLEAN_from_int_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_UINT8, AGENT_DATA_TYPE*, agentData, uint8_t, v)
-    {
-        Create_AGENT_DATA_TYPE_from_UINT8_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_DOUBLE, AGENT_DATA_TYPE*, agentData, double, v)
-    {
-        Create_AGENT_DATA_TYPE_from_DOUBLE_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT16, AGENT_DATA_TYPE*, agentData, int16_t, v)
-    {
-        Create_AGENT_DATA_TYPE_from_SINT16_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT32, AGENT_DATA_TYPE*, agentData, int32_t, v)
-    {
-        Create_AGENT_DATA_TYPE_from_SINT32_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT64, AGENT_DATA_TYPE*, agentData, int64_t, v)
-    {
-        Create_AGENT_DATA_TYPE_from_SINT64_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT8, AGENT_DATA_TYPE*, agentData, int8_t, v)
-    {
-        Create_AGENT_DATA_TYPE_from_SINT8_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_FLOAT, AGENT_DATA_TYPE*, agentData, float, v)
-    {
-        Create_AGENT_DATA_TYPE_from_FLOAT_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_charz, AGENT_DATA_TYPE*, agentData, const char*, v)
-    {
-        Create_AGENT_DATA_TYPE_from_charz_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_charz_no_quotes, AGENT_DATA_TYPE*, agentData, const char*, v)
-    {
-        Create_AGENT_DATA_TYPE_from_charz_no_quotes_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET, AGENT_DATA_TYPE*, agentData, EDM_DATE_TIME_OFFSET, v)
-    {
-        Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_EDM_GUID, AGENT_DATA_TYPE*, agentData, EDM_GUID, v)
-    {
-        Create_AGENT_DATA_TYPE_from_EDM_GUID_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_EDM_BINARY, AGENT_DATA_TYPE*, agentData, EDM_BINARY, v)
-    {
-        Create_AGENT_DATA_TYPE_from_EDM_BINARY_agentData = agentData;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    MOCK_STATIC_METHOD_1(, void, Destroy_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData)
-    {
-        Destroy_AGENT_DATA_TYPE_agentData = agentData;
-    }
-    MOCK_VOID_METHOD_END()
-
-    MOCK_STATIC_METHOD_5(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_Members, AGENT_DATA_TYPE*, agentData, const char*, typeName, size_t, nMembers, const char* const *, memberNames, const AGENT_DATA_TYPE*, memberValues)
-    {
-        size_t i;
-        Create_AGENT_DATA_TYPE_from_Members_agentData = agentData;
-        //save the names
-        //shall assume that no name is longer than 100 characters.
-        for (i = 0; i < nMembers; i++)
-        {
-            strcpy(Create_AGENT_DATA_TYPE_from_Members_names[i], memberNames[i]);
-            Create_AGENT_DATA_TYPE_from_Members_values[i] = memberValues + i;
-        }
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK);
-
-    /* Device mocks */
-    MOCK_STATIC_METHOD_5(, DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle)
-        *deviceHandle = TEST_DEVICE_HANDLE;
-        g_InvokeActionCallbackArgument = callbackUserContext;
-    MOCK_METHOD_END(DEVICE_RESULT, DEVICE_OK);
-    MOCK_STATIC_METHOD_1(, void, Device_Destroy, DEVICE_HANDLE, deviceHandle)
-    MOCK_VOID_METHOD_END();
-
-    MOCK_STATIC_METHOD_1(, TRANSACTION_HANDLE, Device_StartTransaction, DEVICE_HANDLE, modelHandle)
-    {
-    }
-    MOCK_METHOD_END(TRANSACTION_HANDLE, TEST_TRANSACTION_HANDLE);
-
-    MOCK_STATIC_METHOD_3(, DEVICE_RESULT, Device_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize)
-    {
-    }
-    MOCK_METHOD_END(DEVICE_RESULT, DEVICE_OK);
-
-    MOCK_STATIC_METHOD_1(, DEVICE_RESULT, Device_CancelTransaction, TRANSACTION_HANDLE, transactionHandle)
-    {
-    }
-    MOCK_METHOD_END(DEVICE_RESULT, DEVICE_OK);
-
-    MOCK_STATIC_METHOD_3(, DEVICE_RESULT, Device_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyName, const AGENT_DATA_TYPE*, data)
-    {
-        if (
-            (
-                (strcmp(propertyName, "this_is_double") == 0) &&
-                (data != Create_AGENT_DATA_TYPE_from_DOUBLE_agentData)
-            )
-            /*the below cannot be checked easily because there are 2 types (int, int32_t) setting the same CReate_AGET_DATA_TYPE_from_SINT32_agentData*/
-            /*same goes for long and sint64_t*/
-            /*(
-                (strcmp(propertyName, "this_is_int") == 0) &&
-                (data != Create_AGENT_DATA_TYPE_from_DOUBLE_agentData)
-            )*/
-            ||
-            (
-                (strcmp(propertyName, "this_is_float") == 0) &&
-                (data != Create_AGENT_DATA_TYPE_from_FLOAT_agentData)
-            )
-            ||
-            (
-            (strcmp(propertyName, "this_is_sint8_t") == 0) &&
-            (data != Create_AGENT_DATA_TYPE_from_SINT8_agentData)
-            )
-            ||
-            (
-                (strcmp(propertyName, "this_is_uint8_t") == 0) &&
-                (data != Create_AGENT_DATA_TYPE_from_UINT8_agentData)
-            )
-            ||
-            (
-                (strcmp(propertyName, "this_is_int16_t") == 0) &&
-                (data != Create_AGENT_DATA_TYPE_from_SINT16_agentData)
-            )
-            ||
-            (
-                (strcmp(propertyName, "this_is_bool") == 0) &&
-                (data != Create_EDM_BOOLEAN_from_int_agentData)
-            )
-            ||
-            (
-                (strcmp(propertyName, "this_is_ascii_char_ptr") == 0) &&
-                (data != Create_AGENT_DATA_TYPE_from_charz_agentData)
-            )
-            ||
-            (
-            (strcmp(propertyName, "this_is_ascii_char_ptr_no_quotes") == 0) &&
-            (data != Create_AGENT_DATA_TYPE_from_charz_no_quotes_agentData)
-            )
-            ||
-            (
-                (strcmp(propertyName, "this_is_EdmDateTimeOffset") == 0) &&
-                (data != Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_agentData)
-            )
-        )
-        {
-            ASSERT_FAIL("where did you get that AGENT_DATA_TYPE?");
-        }
-        Device_PublishTransacted_agentData = data;
-    }
-    MOCK_METHOD_END(DEVICE_RESULT, DEVICE_OK);
-
-    MOCK_STATIC_METHOD_2(, EXECUTE_COMMAND_RESULT, Device_ExecuteCommand, DEVICE_HANDLE, deviceHandle, const char*, command);
-    MOCK_METHOD_END(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS);
-
-    MOCK_STATIC_METHOD_1(, DEVICE_RESULT, Device_SendAll, DEVICE_HANDLE, deviceHandle)
-    MOCK_METHOD_END(DEVICE_RESULT, DEVICE_OK);
-
-    MOCK_STATIC_METHOD_1(, DEVICE_RESULT, Device_DrainCommands, DEVICE_HANDLE, deviceHandle)
-    MOCK_METHOD_END(DEVICE_RESULT, DEVICE_OK);
-
-
-    /* Schema mocks */
-    MOCK_STATIC_METHOD_1(, SCHEMA_HANDLE, Schema_GetSchemaByNamespace, const char*, schemaNamespace)
-    MOCK_METHOD_END(SCHEMA_HANDLE, NULL);
-    MOCK_STATIC_METHOD_1(, SCHEMA_HANDLE, Schema_Create, const char*, schemaNamespace)
-    MOCK_METHOD_END(SCHEMA_HANDLE, TEST_SCHEMA_HANDLE);
-    MOCK_STATIC_METHOD_2(, SCHEMA_MODEL_TYPE_HANDLE, Schema_CreateModelType, SCHEMA_HANDLE, schemaHandle, const char*, modelName)
-    MOCK_METHOD_END(SCHEMA_MODEL_TYPE_HANDLE, TEST_MODEL_HANDLE);
-    MOCK_STATIC_METHOD_2(, SCHEMA_STRUCT_TYPE_HANDLE, Schema_CreateStructType, SCHEMA_HANDLE, schemaHandle, const char*, structTypeName)
-    MOCK_METHOD_END(SCHEMA_STRUCT_TYPE_HANDLE, TEST_STRUCT_TYPE_HANDLE);
-    MOCK_STATIC_METHOD_3(, SCHEMA_RESULT, Schema_AddStructTypeProperty, SCHEMA_STRUCT_TYPE_HANDLE, structTypeHandle, const char*, propertyName, const char*, propertyType)
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
-    MOCK_STATIC_METHOD_3(, SCHEMA_RESULT, Schema_AddModelProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, const char*, propertyType)
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
-    MOCK_STATIC_METHOD_2(, SCHEMA_ACTION_HANDLE, Schema_CreateModelAction, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName)
-    MOCK_METHOD_END(SCHEMA_ACTION_HANDLE, TEST1_ACTION_HANDLE);
-    MOCK_STATIC_METHOD_3(, SCHEMA_RESULT, Schema_AddModelActionArgument, SCHEMA_ACTION_HANDLE, actionHandle, const char*, argumentName, const char*, argumentType)
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
-    MOCK_STATIC_METHOD_1(, void, Schema_Destroy, SCHEMA_HANDLE, schemaHandle);
-    MOCK_VOID_METHOD_END();
-    MOCK_STATIC_METHOD_1(, const char*, Schema_GetModelName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
-    MOCK_METHOD_END(const char*, TEST_MODEL_NAME);
-    MOCK_STATIC_METHOD_2(, SCHEMA_MODEL_TYPE_HANDLE, Schema_GetModelByName, SCHEMA_HANDLE, schemaHandle, const char*, modelName);
-    MOCK_METHOD_END(SCHEMA_MODEL_TYPE_HANDLE, (SCHEMA_MODEL_TYPE_HANDLE)NULL);
-    MOCK_STATIC_METHOD_3(, SCHEMA_RESULT, Schema_AddModelModel, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, SCHEMA_MODEL_TYPE_HANDLE, modelType)
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
-    MOCK_STATIC_METHOD_1(, SCHEMA_RESULT, Schema_ReleaseDeviceRef, SCHEMA_MODEL_TYPE_HANDLE, modelHandle)
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
-    MOCK_STATIC_METHOD_1(, SCHEMA_RESULT, Schema_AddDeviceRef, SCHEMA_MODEL_TYPE_HANDLE, schemaHandle)
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
-    MOCK_STATIC_METHOD_1(, SCHEMA_HANDLE, Schema_GetSchemaForModelType, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
-    MOCK_METHOD_END(SCHEMA_HANDLE, (SCHEMA_HANDLE)NULL);
-    MOCK_STATIC_METHOD_1(, SCHEMA_RESULT, Schema_DestroyIfUnused, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
-};
-
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_EDM_BOOLEAN_from_int, AGENT_DATA_TYPE*, agentData, int, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_UINT8, AGENT_DATA_TYPE*, agentData, uint8_t, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_DOUBLE, AGENT_DATA_TYPE*, agentData, double, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT16, AGENT_DATA_TYPE*, agentData, int16_t, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT32, AGENT_DATA_TYPE*, agentData, int32_t, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT64, AGENT_DATA_TYPE*, agentData, int64_t, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT8, AGENT_DATA_TYPE*, agentData, int8_t, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_FLOAT, AGENT_DATA_TYPE*, agentData, float, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_charz, AGENT_DATA_TYPE*, agentData, const char*, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_charz_no_quotes, AGENT_DATA_TYPE*, agentData, const char*, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET, AGENT_DATA_TYPE*, agentData, EDM_DATE_TIME_OFFSET, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_EDM_GUID, AGENT_DATA_TYPE*, agentData, EDM_GUID, v);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_EDM_BINARY, AGENT_DATA_TYPE*, agentData, EDM_BINARY, v);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , void, Destroy_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData);
-DECLARE_GLOBAL_MOCK_METHOD_5(CMocksForCodeFirst, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_Members, AGENT_DATA_TYPE*, agentData, const char*, typeName, size_t, nMembers, const char* const *, memberNames, const AGENT_DATA_TYPE*, memberValues);
-
-DECLARE_GLOBAL_MOCK_METHOD_5(CMocksForCodeFirst, , DEVICE_RESULT, Device_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, pfDeviceActionCallback, deviceActionCallback, void*, callbackUserContext, bool, includePropertyPath, DEVICE_HANDLE*, deviceHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , void, Device_Destroy, DEVICE_HANDLE, deviceHandle);
-DECLARE_GLOBAL_MOCK_METHOD_3(CMocksForCodeFirst, , DEVICE_RESULT, Device_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyName, const AGENT_DATA_TYPE*, data);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , TRANSACTION_HANDLE, Device_StartTransaction, DEVICE_HANDLE, modelHandle);
-DECLARE_GLOBAL_MOCK_METHOD_3(CMocksForCodeFirst, , DEVICE_RESULT, Device_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , DEVICE_RESULT, Device_CancelTransaction, TRANSACTION_HANDLE, transactionHandle);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , EXECUTE_COMMAND_RESULT, Device_ExecuteCommand, DEVICE_HANDLE, deviceHandle, const char*, command);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , DEVICE_RESULT, Device_SendAll, DEVICE_HANDLE, deviceHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , DEVICE_RESULT, Device_DrainCommands, DEVICE_HANDLE, deviceHandle);
-
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , SCHEMA_HANDLE, Schema_GetSchemaByNamespace, const char*, schemaNamespace);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , SCHEMA_HANDLE, Schema_Create, const char*, schemaNamespace);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , SCHEMA_MODEL_TYPE_HANDLE, Schema_CreateModelType, SCHEMA_HANDLE, schemaHandle, const char*, modelName);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , SCHEMA_STRUCT_TYPE_HANDLE, Schema_CreateStructType, SCHEMA_HANDLE, schemaHandle, const char*, structTypeName);
-DECLARE_GLOBAL_MOCK_METHOD_3(CMocksForCodeFirst, , SCHEMA_RESULT, Schema_AddStructTypeProperty, SCHEMA_STRUCT_TYPE_HANDLE, structTypeHandle, const char*, propertyName, const char*, propertyType);
-DECLARE_GLOBAL_MOCK_METHOD_3(CMocksForCodeFirst, , SCHEMA_RESULT, Schema_AddModelProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, const char*, propertyType);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , SCHEMA_ACTION_HANDLE, Schema_CreateModelAction, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName);
-DECLARE_GLOBAL_MOCK_METHOD_3(CMocksForCodeFirst, , SCHEMA_RESULT, Schema_AddModelActionArgument, SCHEMA_ACTION_HANDLE, actionHandle, const char*, argumentName, const char*, argumentType);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , void, Schema_Destroy, SCHEMA_HANDLE, schemaHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , const char*, Schema_GetModelName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
-DECLARE_GLOBAL_MOCK_METHOD_2(CMocksForCodeFirst, , SCHEMA_MODEL_TYPE_HANDLE, Schema_GetModelByName, SCHEMA_HANDLE, schemaHandle, const char*, modelName);
-DECLARE_GLOBAL_MOCK_METHOD_3(CMocksForCodeFirst, , SCHEMA_RESULT, Schema_AddModelModel, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, SCHEMA_MODEL_TYPE_HANDLE, modelType);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , SCHEMA_RESULT, Schema_AddDeviceRef, SCHEMA_MODEL_TYPE_HANDLE, modelHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , SCHEMA_RESULT, Schema_ReleaseDeviceRef, SCHEMA_MODEL_TYPE_HANDLE, modelHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , SCHEMA_HANDLE, Schema_GetSchemaForModelType, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CMocksForCodeFirst, , SCHEMA_RESULT, Schema_DestroyIfUnused, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
-
 
 typedef struct SimpleDevice_TAG
 {
@@ -702,7 +450,7 @@ static const REFLECTED_SOMETHING whereIsMyCar_Field = { REFLECTION_FIELD_TYPE, &
 static const REFLECTED_SOMETHING setSpeed_Action = { REFLECTION_ACTION_TYPE, &whereIsMyCar_Field, { { 0 }, { 0 }, { 0 }, { 0 }, { "setSpeed", 1, setSpeedArguments, NULL, "TruckType" }, { 0 }} };
 static const REFLECTED_SOMETHING reset_Action = { REFLECTION_ACTION_TYPE, &setSpeed_Action, { { 0 }, { 0 }, { 0 }, { 0 }, { "reset", 0, NULL, NULL, "TruckType" }, { 0 }} };
 static const REFLECTED_SOMETHING truckType_Model = { REFLECTION_MODEL_TYPE, &reset_Action, { { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { "TruckType"}} };
-const REFLECTED_DATA_FROM_DATAPROVIDER testReflectedData = { &truckType_Model };
+static const REFLECTED_DATA_FROM_DATAPROVIDER testReflectedData = { &truckType_Model };
 
 
 typedef struct InnerType_TAG
@@ -752,7 +500,20 @@ const REFLECTED_DATA_FROM_DATAPROVIDER testModelInModelReflectedData = { &OuterT
 
 static unsigned char edmBinarySource[] = { 1, 42, 43, 44, 1 };
 
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
+static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
+{
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    ASSERT_FAIL(temp_str);
+}
+
+static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceActionCallback deviceActionCallback, void* callbackUserContext, bool includePropertyPath, DEVICE_HANDLE* deviceHandle)
+{
+    (void)(includePropertyPath, deviceActionCallback, modelHandle);
+    *deviceHandle = TEST_DEVICE_HANDLE;
+    g_InvokeActionCallbackArgument = callbackUserContext;
+    return DEVICE_OK;
+}
 
 BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
@@ -760,23 +521,81 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
-        g_testByTest = MicroMockCreateMutex();
+        g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
+
+        (void)umock_c_init(on_umock_c_error);
+        
+        (void)umocktypes_bool_register_types();
+
+        (void)umocktypes_charptr_register_types();
+        (void)umocktypes_stdint_register_types();
+
+
+        REGISTER_GLOBAL_MOCK_HOOK(Device_Create, my_Device_Create);
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(pfDeviceActionCallback, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(DEVICE_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(TRANSACTION_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_STRUCT_TYPE_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_HANDLE, void*);
+        
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelName, TEST_MODEL_NAME);
+        REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_DOUBLE, my_Create_AGENT_DATA_TYPE_from_DOUBLE);
+
+        REGISTER_UMOCK_VALUE_TYPE(EDM_DATE_TIME_OFFSET,
+            umockvalue_stringify_EDM_DATE_TIME_OFFSET,
+            umockvalue_are_equal_EDM_DATE_TIME_OFFSET,
+            umockvalue_copy_EDM_DATE_TIME_OFFSET, 
+            umockvalue_free_EDM_DATE_TIME_OFFSET
+        );
+        
+        REGISTER_TYPE(DEVICE_RESULT, DEVICE_RESULT);
+        REGISTER_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT);
+        REGISTER_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT);
+        REGISTER_TYPE(SCHEMA_RESULT, SCHEMA_RESULT);
+        REGISTER_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT);
+        
+
+        REGISTER_GLOBAL_MOCK_HOOK(Device_PublishTransacted, my_Device_PublishTransacted);
+        REGISTER_GLOBAL_MOCK_HOOK(Destroy_AGENT_DATA_TYPE, my_Destroy_AGENT_DATA_TYPE);
+        
+        REGISTER_GLOBAL_MOCK_RETURN(Device_EndTransaction, DEVICE_OK);
+
+        REGISTER_GLOBAL_MOCK_RETURN(Device_StartTransaction, TEST_TRANSACTION_HANDLE);
+        REGISTER_GLOBAL_MOCK_RETURN(Device_CancelTransaction, DEVICE_OK);
+        REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_SINT32, my_Create_AGENT_DATA_TYPE_from_SINT32);
+
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_Create, TEST_SCHEMA_HANDLE);
+
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_CreateStructType, TEST_STRUCT_TYPE_HANDLE);
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_AddStructTypeProperty, SCHEMA_OK);
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_CreateModelType, TEST_MODEL_HANDLE);
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelByName, (SCHEMA_MODEL_TYPE_HANDLE)NULL);
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_AddModelProperty, SCHEMA_OK);
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_CreateModelAction, TEST1_ACTION_HANDLE);
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_AddModelModel, SCHEMA_OK);
     }
+
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
-        MicroMockDestroyMutex(g_testByTest);
-        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
+        umock_c_deinit();
 
+        TEST_MUTEX_DESTROY(g_testByTest);
+        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     {
-        if (!MicroMockAcquireMutex(g_testByTest))
+        if (TEST_MUTEX_ACQUIRE(g_testByTest))
         {
             ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
         }
+
+        umock_c_reset_all_calls();
+
 
         someEdmDateTimeOffset.dateTime.tm_year = 2014 - 1900;
         someEdmDateTimeOffset.dateTime.tm_mon = 1 - 1;
@@ -860,25 +679,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
         arrayOfAgentDataType[14].value.edmStringNoQuotes.chars = someMoreChars;
         arrayOfAgentDataType[14].value.edmStringNoQuotes.length = strlen(someMoreChars);
 
-        CMocksForCodeFirst mocks;
-        mocks.SetPerformAutomaticCallComparison(AUTOMATIC_CALL_COMPARISON_OFF);
         (void)CodeFirst_Init(NULL);
 
     }
 
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     {
+        
         free(DummyDataProvider_test1_P14.data);
         DummyDataProvider_test1_P14.data = NULL;
         DummyDataProvider_test1_P14.size = 0;
 
-        CMocksForCodeFirst mocks;
-        mocks.SetPerformAutomaticCallComparison(AUTOMATIC_CALL_COMPARISON_OFF);
         CodeFirst_Deinit();
-        if (!MicroMockReleaseMutex(g_testByTest))
-        {
-            ASSERT_FAIL("failure in test framework at ReleaseMutex");
-        }
+        TEST_MUTEX_RELEASE(g_testByTest);
     }
 
     TEST_FUNCTION(C_CPLUSPLUS_SANITY_CHECKS)
@@ -895,12 +708,12 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     /*Tests_CODEFIRST_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.]*/
     TEST_FUNCTION(CodeFirst_Init_succeds)
     {
-        CMocksForCodeFirst mocks;
+        
 
         ///arrange
         CODEFIRST_RESULT result;
         CodeFirst_Deinit();
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
         result = CodeFirst_Init(NULL);
@@ -913,11 +726,10 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_Init_after_Init_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         CODEFIRST_RESULT result;
         (void)CodeFirst_Init(NULL);
 
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
         result = CodeFirst_Init(NULL);
@@ -932,27 +744,26 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_with_NULL_action_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, NULL, "",  NULL, 1, &someDouble); 
+        EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, NULL, "",  NULL, 1, &someDouble);
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
     }
 
+
     /*Tests_SRS_CODEFIRST_99_066:[ If actionName, relativeActionPath or deviceHandle is NULL then EXECUTE_COMMAND_ERROR shall be returned*/
     TEST_FUNCTION(CodeFirst_InvokeAction_with_NULL_DeviceHandle_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
-        mocks.ResetAllCalls();
+            
 
         ///act
-       auto result = CodeFirst_InvokeAction(NULL, NULL, "", "reset", 1, &someDouble);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(NULL, NULL, "", "reset", 1, &someDouble);
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
@@ -962,17 +773,16 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_With_NULL_Relative_Path_Fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, NULL, "reset", 0, NULL);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, NULL, "reset", 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -982,15 +792,14 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_When_Not_Initialized_Fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         CodeFirst_Deinit();
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, NULL, "", "reset", 1, &someDouble);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, NULL, "", "reset", 1, &someDouble);
 
         ///assert
-       ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
     }
 
     /*Tests_SRS_CODEFIRST_99_067:[ If parameterCount is greater than zero and parameterValues is NULL then EXECUTE_COMMAND_ERROR shall be returned.]*/
@@ -998,34 +807,32 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_with_NULL_parameterValues_and_positive_count_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, NULL, "", "reset", 1, NULL);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, NULL, "", "reset", 1, NULL);
 
         ///assert
-       ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
     }
 
     /*Tests_SRS_CODEFIRST_99_078:[If such a function is not found then the function shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_with_unknown_actions_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "asjnhfaslk", 1, &someDouble);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "asjnhfaslk", 1, &someDouble);
 
         ///assert
-       ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1039,20 +846,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_calls_reset_action_succeeds)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "reset", 0, NULL);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "reset", 0, NULL);
 
         ///assert
-       ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
-        ASSERT_ARE_EQUAL(bool, true, DummyDataProvider_reset_wasCalled);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
+        ASSERT_IS_TRUE(DummyDataProvider_reset_wasCalled);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1065,20 +871,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_setSpeed_action_with_insuficcient_parameters_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "setSpeed", 0, NULL);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "setSpeed", 0, NULL);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_setSpeed_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_setSpeed_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1091,18 +896,17 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_setSpeed_action_with_NULL_ParameterValues_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "setSpeed", 1, NULL);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "setSpeed", 1, NULL);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_setSpeed_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_setSpeed_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1115,20 +919,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_setSpeed_action_with_too_many_parameters_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "setSpeed", 2, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "setSpeed", 2, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_setSpeed_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_setSpeed_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1142,20 +945,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_setSpeed_with_invalid_type_for_Parameter1_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "setSpeed", 1, &someInt32);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "setSpeed", 1, &someInt32);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_setSpeed_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_setSpeed_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1171,21 +973,20 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_setSpeed_succeeds)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "setSpeed", 1, &someDouble);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "setSpeed", 1, &someDouble);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, true, DummyDataProvider_setSpeed_wasCalled);
+        ASSERT_IS_TRUE(DummyDataProvider_setSpeed_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
         ASSERT_ARE_EQUAL(double, 0.42, DummyDataProvider_setSpeed_theSpeed);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1197,20 +998,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_insufficient_parameters_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 13, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 13, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1221,20 +1021,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_too_many_parameters_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 16, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 16, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1245,18 +1044,17 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_NULL_parameterValues_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 11, NULL);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 11, NULL);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1268,20 +1066,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[0].type = EDM_INT32_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1293,20 +1090,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[1].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1318,20 +1114,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[2].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1343,20 +1138,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[3].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1368,20 +1162,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[4].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1393,20 +1186,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[5].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1418,20 +1210,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[6].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1443,20 +1234,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[7].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1468,20 +1258,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[8].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1493,20 +1282,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[9].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1518,20 +1306,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[10].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1543,20 +1330,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     {
         ///arrange
         arrayOfAgentDataType[11].type = EDM_DOUBLE_TYPE;
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 12, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, false, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_FALSE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1569,18 +1355,17 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_succeeds)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE,  &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 15, arrayOfAgentDataType);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "test1", 15, arrayOfAgentDataType);
 
         ///assert
-        ASSERT_ARE_EQUAL(bool, true, DummyDataProvider_test1_wasCalled);
+        ASSERT_IS_TRUE(DummyDataProvider_test1_wasCalled);
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
         ASSERT_ARE_EQUAL(double, 42.0, DummyDataProvider_test1_P1);
         ASSERT_ARE_EQUAL(int, 4, DummyDataProvider_test1_P2);
@@ -1591,13 +1376,13 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
         ASSERT_ARE_EQUAL(int, 5, DummyDataProvider_test1_P7);
         ASSERT_ARE_EQUAL(int, 6, DummyDataProvider_test1_P8);
         ASSERT_ARE_EQUAL(int, 7, (int)DummyDataProvider_test1_P9);
-        ASSERT_ARE_EQUAL(bool, true, DummyDataProvider_test1_P10);
+        ASSERT_IS_TRUE(DummyDataProvider_test1_P10);
         ASSERT_ARE_EQUAL(char_ptr, "someChars", DummyDataProvider_test1_P11);
-        ASSERT_ARE_EQUAL(EDM_DATE_TIME_OFFSET, someEdmDateTimeOffset, DummyDataProvider_test1_P12);
-        ASSERT_ARE_EQUAL(EDM_GUID, someEdmGuid, DummyDataProvider_test1_P13);
-        ASSERT_ARE_EQUAL(EDM_BINARY, someEdmBinary, DummyDataProvider_test1_P14);
+        ASSERT_IS_TRUE(umockvalue_are_equal_EDM_DATE_TIME_OFFSET(&someEdmDateTimeOffset, &DummyDataProvider_test1_P12)==0);
+        ASSERT_IS_TRUE(umockvalue_are_equal_EDM_GUID(&someEdmGuid, &DummyDataProvider_test1_P13)==0);
+        ASSERT_IS_TRUE(umockvalue_are_equal_EDM_BINARY(&someEdmBinary, &DummyDataProvider_test1_P14)==0);
         ASSERT_ARE_EQUAL(char_ptr, "someMoreChars", DummyDataProvider_test1_P15);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1610,20 +1395,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_For_A_Child_Model_Passes_The_OuterType_Instance_To_The_Callback)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testModelInModelReflectedData, sizeof(OuterType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "reset", 0, NULL);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "reset", 0, NULL);
 
         ///assert
-       ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
         ASSERT_ARE_EQUAL(void_ptr, device, OuterType_reset_device);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1636,22 +1420,21 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_For_A_Child_Model_Passes_The_InnerType_Instance_To_The_Callback)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testModelInModelReflectedData, sizeof(OuterType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inner", "reset", 0, NULL);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inner", "reset", 0, NULL);
 
 
 
         ///assert
-       ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
         ASSERT_ARE_EQUAL(void_ptr, &device->Inner, InnerType_reset_device);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1661,19 +1444,18 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_For_A_Child_Model_And_The_Model_Is_Not_Found_Fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testModelInModelReflectedData, sizeof(OuterType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inne", "reset", 0, NULL);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inne", "reset", 0, NULL);
 
         ///assert
-       ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1683,19 +1465,18 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_For_A_Child_Model_And_The_Model_Is_Not_Found_Because_Path_Too_Deep_Fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testModelInModelReflectedData, sizeof(OuterType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inner/FakeInner", "reset", 0, NULL);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inner/FakeInner", "reset", 0, NULL);
 
         ///assert
-       ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1705,19 +1486,18 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_InvokeAction_For_A_Child_Model_And_The_Action_Is_Not_Found_Fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         (void)CodeFirst_Init(NULL);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testModelInModelReflectedData, sizeof(OuterType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
 
         ///act
-       auto result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inner", "rst", 0, NULL);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inner", "rst", 0, NULL);
 
         ///assert
-       ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1729,7 +1509,6 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CreateDevice_With_NULL_Model_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
 
         // act
         void* result = CodeFirst_CreateDevice(NULL, &DummyDataProvider_allReflected, 1, false);
@@ -1746,11 +1525,10 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_false_Succeeds_1)
     {
         // arrange
-        CMocksForCodeFirst mocks;
 
-        STRICT_EXPECTED_CALL(mocks, Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
             .IgnoreArgument(3).IgnoreArgument(5);
-        STRICT_EXPECTED_CALL(mocks, Schema_AddDeviceRef(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -1758,7 +1536,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_IS_NOT_NULL(result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(result);
@@ -1767,11 +1545,10 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_false_Succeeds_2)
     {
         // arrange
-        CMocksForCodeFirst mocks;
 
-        STRICT_EXPECTED_CALL(mocks, Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
             .IgnoreArgument(3).IgnoreArgument(5);
-        STRICT_EXPECTED_CALL(mocks, Schema_AddDeviceRef(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -1779,7 +1556,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_IS_NOT_NULL(result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(result);
@@ -1789,11 +1566,10 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_true_Succeeds)
     {
         // arrange
-        CMocksForCodeFirst mocks;
 
-        STRICT_EXPECTED_CALL(mocks, Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, true, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, true, IGNORED_PTR_ARG))
             .IgnoreArgument(3).IgnoreArgument(5);
-        STRICT_EXPECTED_CALL(mocks, Schema_AddDeviceRef(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -1801,7 +1577,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_IS_NOT_NULL(result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(result);
@@ -1811,9 +1587,8 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(When_Device_Create_Fails_Then_CodeFirst_CreateDevice_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
 
-        STRICT_EXPECTED_CALL(mocks, Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
             .IgnoreArgument(3).IgnoreArgument(5).SetReturn(DEVICE_ERROR);
 
         // act
@@ -1827,9 +1602,8 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CreateDevice_When_The_Module_Is_Not_Initialized_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         CodeFirst_Deinit();
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         // act
         void* result = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
@@ -1844,7 +1618,6 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_DestroyDevice_With_NULL_Argument_Does_Nothing)
     {
         // arrange
-        CMocksForCodeFirst mocks;
 
         // act
         CodeFirst_DestroyDevice(NULL);
@@ -1858,15 +1631,14 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_DestroyDevice_With_Valid_Argument_Destroys_The_Device)
     {
         // arrange
-        CMocksForCodeFirst mocks;
 
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_Destroy(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_ReleaseDeviceRef(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_Destroy(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_ReleaseDeviceRef(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(mocks, Schema_DestroyIfUnused(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_DestroyIfUnused(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -1882,18 +1654,17 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_0_NumProperties_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
         unsigned char* destination;
         size_t destinationSize;
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         // act
         CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 0, device);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1913,19 +1684,18 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_Succeeds)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
         unsigned char* destination;
         size_t destinationSize;
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
         device->this_is_double = 42.0;
@@ -1935,7 +1705,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1955,22 +1725,21 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_2_Properties_Succeeds)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
         device->this_is_double = 42.0;
@@ -1983,7 +1752,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -1993,11 +1762,10 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(When_StartTransaction_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE))
             .SetReturn((TRANSACTION_HANDLE)NULL);
         device->this_is_double = 42.0;
         unsigned char* destination;
@@ -2008,7 +1776,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2018,17 +1786,16 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(When_PublishTransacted_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3).SetReturn(DEVICE_ERROR);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
         device->this_is_double = 42.0;
         unsigned char* destination;
         size_t destinationSize;
@@ -2038,7 +1805,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2048,22 +1815,21 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(When_PublishTransacted_Fails_For_The_2nd_Property_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument(3).SetReturn(DEVICE_ERROR);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
         device->this_is_double = 42.0;
         device->this_is_int = 1;
         unsigned char* destination;
@@ -2074,27 +1840,26 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
     }
-
+    
     /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(When_EndTransacted_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .SetReturn(DEVICE_ERROR);
@@ -2107,7 +1872,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2117,9 +1882,8 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(When_An_Invalid_Pointer_Is_Passed_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         device->this_is_double = 42.0;
         unsigned char* destination;
@@ -2130,7 +1894,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2140,13 +1904,12 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(When_A_Pointer_Within_The_Device_Block_But_Mismatched_Is_Passed_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
         device->this_is_double = 42.0;
         unsigned char* destination;
         size_t destinationSize;
@@ -2156,7 +1919,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2166,15 +1929,14 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(When_Creating_The_Agent_Data_Type_Fails_Then_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0))
             .SetReturn(AGENT_DATA_TYPES_ERROR);
-        STRICT_EXPECTED_CALL(mocks, Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
         device->this_is_double = 42.0;
         unsigned char* destination;
         size_t destinationSize;
@@ -2184,7 +1946,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_AGENT_DATA_TYPE_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2194,20 +1956,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(When_Creating_The_Agent_Data_Type_Fails_For_The_2nd_Property_Then_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0))
             .SetReturn(AGENT_DATA_TYPES_ERROR);
-        STRICT_EXPECTED_CALL(mocks, Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
         device->this_is_double = 42.0;
         unsigned char* destination;
         size_t destinationSize;
@@ -2217,7 +1978,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_AGENT_DATA_TYPE_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2227,18 +1988,17 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(Properties_From_2_Different_Devices_Make_CodeFirst_SendAsync_Fail)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device1 = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
         SimpleDevice* device2 = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
         device1->this_is_double = 42.0;
         device2->this_is_double = 42.0;
         unsigned char* destination;
@@ -2249,7 +2009,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device1);
@@ -2270,17 +2030,16 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_Succeeds_2)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
         device->this_is_double = 42.0;
@@ -2292,7 +2051,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2312,22 +2071,21 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_2_Properties_Succeeds_2)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
         device->this_is_double = 42.0;
@@ -2340,7 +2098,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2351,21 +2109,21 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_The_Entire_Device_State)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
         device->this_is_double = 42.0;
@@ -2378,7 +2136,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2388,15 +2146,15 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_When_Create_Agent_Data_Type_For_The_First_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_PTR_ARG)))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)))
             .SetReturn(AGENT_DATA_TYPES_ERROR);
-        STRICT_EXPECTED_CALL(mocks, Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
         device->this_is_double = 42.0;
         device->this_is_int = 1;
         unsigned char* destination;
@@ -2407,7 +2165,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_AGENT_DATA_TYPE_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2417,18 +2175,18 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_When_Publish_For_The_First_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument(3)
             .SetReturn(DEVICE_ERROR);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
         device->this_is_double = 42.0;
         device->this_is_int = 1;
         unsigned char* destination;
@@ -2439,7 +2197,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2449,19 +2207,18 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_When_Create_Agent_Data_Type_For_The_Second_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_PTR_ARG)))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)))
             .SetReturn(AGENT_DATA_TYPES_ERROR);
-        STRICT_EXPECTED_CALL(mocks, Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
         device->this_is_double = 42.0;
         device->this_is_int = 1;
         unsigned char* destination;
@@ -2472,7 +2229,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_AGENT_DATA_TYPE_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2482,22 +2239,21 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_When_Publish_For_The_Second_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3)
             .SetReturn(DEVICE_ERROR);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(TEST_TRANSACTION_HANDLE));
         device->this_is_double = 42.0;
         device->this_is_int = 1;
         unsigned char* destination;
@@ -2508,7 +2264,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2519,17 +2275,16 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CodeFirst_SendAsync_Can_Send_A_Property_From_A_Child_Model)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflectedData, sizeof(OuterType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_OUTERTYPE_MODEL_HANDLE)).SetReturn("OuterType");
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "Inner/this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_OUTERTYPE_MODEL_HANDLE)).SetReturn("OuterType");
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "Inner/this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
         device->Inner.this_is_double = 42.0;
@@ -2541,7 +2296,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2552,17 +2307,16 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CodeFirst_SendAsync_Can_Send_The_Last_Property_From_A_Child_Model_With_2_Properties)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflectedData, sizeof(OuterType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_OUTERTYPE_MODEL_HANDLE)).SetReturn("OuterType");
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_PTR_ARG)));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "Inner/this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_OUTERTYPE_MODEL_HANDLE)).SetReturn("OuterType");
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "Inner/this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(TEST_TRANSACTION_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
         device->Inner.this_is_int = 1;
@@ -2574,27 +2328,27 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
     }
 
+
     /* Tests_SRS_CODEFIRST_04_002: [If CodeFirst_SendAsync receives destination or destinationSize NULL, CodeFirst_SendAsync shall return Invalid Argument.]*/
     TEST_FUNCTION(CodeFirst_SendAsync_With_NULL_destination_and_NonNulldestinationSize_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
         size_t destinationSize;
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         // act
         CODEFIRST_RESULT result = CodeFirst_SendAsync(NULL, &destinationSize, 1, &device->this_is_double);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2604,17 +2358,16 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_nonNULL_destination_and_NulldestinationSize_Fails)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
         unsigned char* destination;
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         // act
         CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, NULL, 1, &device->this_is_double);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2624,19 +2377,18 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_CallBackAndUserContext_Succeeds)
     {
         // arrange
-        CMocksForCodeFirst mocks;
         SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_StartTransaction(TEST_DEVICE_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(mocks, Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(mocks, Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(TEST_TRANSACTION_HANDLE, "this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument(3);
-        EXPECTED_CALL(mocks, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
         unsigned char* destination;
         size_t destinationSize;
-        STRICT_EXPECTED_CALL(mocks, Device_EndTransaction(TEST_TRANSACTION_HANDLE, &destination, &destinationSize));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(TEST_TRANSACTION_HANDLE, &destination, &destinationSize));
         device->this_is_double = 42.0;
 
 
@@ -2645,7 +2397,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         CodeFirst_DestroyDevice(device);
@@ -2655,83 +2407,83 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     /* Tests_SRS_CODEFIRST_99_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.] */
     TEST_FUNCTION(CodeFirst_RegisterSchema_succeeds)
     {
-        CMocksForCodeFirst mocks;
         static const SCHEMA_STRUCT_TYPE_HANDLE TEST_CAR_BEHIND_VAN_HANDLE = (SCHEMA_STRUCT_TYPE_HANDLE)0x7001;
 
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_GetSchemaByNamespace("TestSchema"));
-        STRICT_EXPECTED_CALL(mocks, Schema_Create("TestSchema"));
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateStructType(TEST_SCHEMA_HANDLE, "GeoLocation"));
-        STRICT_EXPECTED_CALL(mocks, Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Lat", "double"));
-        STRICT_EXPECTED_CALL(mocks, Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Long", "double"));
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateStructType(TEST_SCHEMA_HANDLE, "theCarIsBehindTheVan"))
+        STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "theCarIsBehindTheVan"))
             .SetReturn(TEST_CAR_BEHIND_VAN_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_AddStructTypeProperty(TEST_CAR_BEHIND_VAN_HANDLE, "Alt", "int"));
-        STRICT_EXPECTED_CALL(mocks, Schema_AddStructTypeProperty(TEST_CAR_BEHIND_VAN_HANDLE, "whereIsMyCar", "GeoLocation"));
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelType(TEST_SCHEMA_HANDLE, "TruckType"))
+        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_CAR_BEHIND_VAN_HANDLE, "whereIsMyCar", "GeoLocation"));
+        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_CAR_BEHIND_VAN_HANDLE, "Alt", "int"));
+        STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "GeoLocation"));
+        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Long", "double"));
+        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Lat", "double"));
+        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "TruckType"))
             .SetReturn(TEST_TRUCKTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelType(TEST_SCHEMA_HANDLE, "SimpleDevice"));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_TRUCKTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "SimpleDevice")).SetReturn(TEST_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int")).SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(mocks, Schema_AddModelProperty(TEST_MODEL_HANDLE, "this_is_int", "int"));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double")).SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(mocks, Schema_AddModelProperty(TEST_MODEL_HANDLE, "this_is_double", "double"));
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelAction(TEST_TRUCKTYPE_MODEL_HANDLE, "setSpeed"))
-            .SetReturn(SETSPEED_ACTION_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_AddModelActionArgument(SETSPEED_ACTION_HANDLE, "theSpeed", "double"));
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelAction(TEST_TRUCKTYPE_MODEL_HANDLE, "reset"))
+        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "SimpleDevice"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_TRUCKTYPE_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_TRUCKTYPE_MODEL_HANDLE, "reset"))
             .SetReturn(RESET_ACTION_HANDLE);
+        
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_TRUCKTYPE_MODEL_HANDLE, "setSpeed"))
+            .SetReturn(SETSPEED_ACTION_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_AddModelActionArgument(SETSPEED_ACTION_HANDLE, "theSpeed", "double"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "SimpleDevice")).SetReturn(TEST_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int")).SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_MODEL_HANDLE, "this_is_int", "int"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double")).SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_MODEL_HANDLE, "this_is_double", "double"));
 
         ///act
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
 
         ///assert
+        
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
     }
 
     /* Tests_SRS_CODEFIRST_99_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.] */
     TEST_FUNCTION(CodeFirst_RegisterSchema_With_Model_In_Model_succeeds)
     {
-        CMocksForCodeFirst mocks;
         static const SCHEMA_STRUCT_TYPE_HANDLE TEST_CAR_BEHIND_VAN_HANDLE = (SCHEMA_STRUCT_TYPE_HANDLE)0x7001;
 
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_GetSchemaByNamespace("TestSchema"));
-        STRICT_EXPECTED_CALL(mocks, Schema_Create("TestSchema"));
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelType(TEST_SCHEMA_HANDLE, "InnerType"))
-            .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelType(TEST_SCHEMA_HANDLE, "OuterType"))
+        STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "OuterType"))
             .SetReturn(TEST_OUTERTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType"))
+        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "InnerType"))
             .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double"));
-        STRICT_EXPECTED_CALL(mocks, Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_double", "double"));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
-        STRICT_EXPECTED_CALL(mocks, Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_int", "int"));
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "OuterType"))
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "OuterType"))
             .SetReturn(TEST_OUTERTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType"))
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType"))
             .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_AddModelModel(TEST_OUTERTYPE_MODEL_HANDLE, "Inner", TEST_INNERTYPE_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelAction(TEST_OUTERTYPE_MODEL_HANDLE, "reset"));
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelAction(TEST_INNERTYPE_MODEL_HANDLE, "reset"));
-
+        STRICT_EXPECTED_CALL(Schema_AddModelModel(TEST_OUTERTYPE_MODEL_HANDLE, "Inner", TEST_INNERTYPE_MODEL_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_OUTERTYPE_MODEL_HANDLE, "reset"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType"))
+            .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double"));
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_double", "double"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_int", "int"));
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_INNERTYPE_MODEL_HANDLE, "reset"));
+        
         ///act
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testModelInModelReflectedData);
 
         ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
     }
 
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_Create_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
-        CMocksForCodeFirst mocks;
 
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_GetSchemaByNamespace("TestSchema"));
-        STRICT_EXPECTED_CALL(mocks, Schema_Create("TestSchema"))
+        STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"))
             .SetReturn((SCHEMA_HANDLE)NULL);
 
         ///act
@@ -2744,13 +2496,11 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_CreateModelType_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
-        CNiceCallComparer<CMocksForCodeFirst> mocks;
-
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_Create("TestSchema"));
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelType(TEST_SCHEMA_HANDLE, TEST_DEFAULT_MODEL_NAME))
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, TEST_DEFAULT_MODEL_NAME))
             .SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(mocks, Schema_Destroy(TEST_SCHEMA_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
@@ -2762,14 +2512,12 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_AddModelProperty_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
-        CNiceCallComparer<CMocksForCodeFirst> mocks;
-
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "SimpleDevice")).SetReturn(TEST_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_AddModelProperty(TEST_MODEL_HANDLE, "this_is_int", "int"))
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "SimpleDevice")).SetReturn(TEST_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_MODEL_HANDLE, "this_is_int", "int"))
             .SetReturn(SCHEMA_ERROR);
-        STRICT_EXPECTED_CALL(mocks, Schema_Destroy(TEST_SCHEMA_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
@@ -2781,13 +2529,11 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_CreateModelAction_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
-        CNiceCallComparer<CMocksForCodeFirst> mocks;
-
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelAction(TEST_MODEL_HANDLE, "setSpeed"))
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_MODEL_HANDLE, "setSpeed"))
             .SetReturn((SCHEMA_ACTION_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(mocks, Schema_Destroy(TEST_SCHEMA_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
@@ -2799,15 +2545,13 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_AddModelActionArgument_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
-        CNiceCallComparer<CMocksForCodeFirst> mocks;
-
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateModelAction(TEST_MODEL_HANDLE, "setSpeed"))
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_MODEL_HANDLE, "setSpeed"))
             .SetReturn(SETSPEED_ACTION_HANDLE);
-        STRICT_EXPECTED_CALL(mocks, Schema_AddModelActionArgument(SETSPEED_ACTION_HANDLE, "theSpeed", "double"))
+        STRICT_EXPECTED_CALL(Schema_AddModelActionArgument(SETSPEED_ACTION_HANDLE, "theSpeed", "double"))
             .SetReturn(SCHEMA_ERROR);
-        STRICT_EXPECTED_CALL(mocks, Schema_Destroy(TEST_SCHEMA_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
@@ -2819,13 +2563,11 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_CreateStructType_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
-        CNiceCallComparer<CMocksForCodeFirst> mocks;
-
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_Create("TestSchema"));
-        STRICT_EXPECTED_CALL(mocks, Schema_CreateStructType(TEST_SCHEMA_HANDLE, "GeoLocation"))
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn((SCHEMA_STRUCT_TYPE_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(mocks, Schema_Destroy(TEST_SCHEMA_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
@@ -2837,13 +2579,11 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_AddStructTypeProperty_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
-        CNiceCallComparer<CMocksForCodeFirst> mocks;
-
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_Create("TestSchema"));
-        STRICT_EXPECTED_CALL(mocks, Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Lat", "double"))
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Lat", "double"))
             .SetReturn(SCHEMA_ERROR);
-        STRICT_EXPECTED_CALL(mocks, Schema_Destroy(TEST_SCHEMA_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
@@ -2855,12 +2595,10 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_GetModelByName_Returns_NULL_RegisterSchema_Fails)
     {
-        CNiceCallComparer<CMocksForCodeFirst> mocks;
-
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType"))
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType"))
             .SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(mocks, Schema_Destroy(TEST_SCHEMA_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
         SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
@@ -2872,10 +2610,9 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     /* Tests_SRS_CODEFIRST_99_121:[If the schema has already been registered, CodeFirst_RegisterSchema shall return its handle.] */
     TEST_FUNCTION(When_Schema_Was_Already_Registered_CodeFirst_Returns_Its_Handle)
     {
-        CMocksForCodeFirst mocks;
 
         ///arrange
-        STRICT_EXPECTED_CALL(mocks, Schema_GetSchemaByNamespace("TestSchema"))
+        STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"))
             .SetReturn((SCHEMA_HANDLE)TEST_SCHEMA_HANDLE);
 
         ///act
@@ -2903,16 +2640,15 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_ExecuteCommand_With_NULL_command_fails)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
-        auto result = CodeFirst_ExecuteCommand(device, NULL);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_ExecuteCommand(device, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
         CodeFirst_DestroyDevice(device);
@@ -2923,15 +2659,14 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_ExecuteCommand_fails_when_it_does_not_find_the_device)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
-        auto result = CodeFirst_ExecuteCommand((unsigned char*)NULL +1, TEST_COMMAND);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_ExecuteCommand((unsigned char*)NULL +1, TEST_COMMAND);
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
     }
@@ -2940,19 +2675,18 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_ExecuteCommand_calls_Device_ExecuteCommand)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_ExecuteCommand(IGNORED_PTR_ARG, TEST_COMMAND))
+        STRICT_EXPECTED_CALL(Device_ExecuteCommand(IGNORED_PTR_ARG, TEST_COMMAND))
             .IgnoreArgument(1);
 
         ///act
-        auto result = CodeFirst_ExecuteCommand(device, TEST_COMMAND);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_ExecuteCommand(device, TEST_COMMAND);
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
         CodeFirst_DestroyDevice(device);
@@ -2962,20 +2696,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_ExecuteCommand_calls_Device_ExecuteCommand_can_returns_EXECUTE_COMMAND_FAILED)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_ExecuteCommand(IGNORED_PTR_ARG, TEST_COMMAND))
+        STRICT_EXPECTED_CALL(Device_ExecuteCommand(IGNORED_PTR_ARG, TEST_COMMAND))
             .IgnoreArgument(1)
             .SetReturn(EXECUTE_COMMAND_FAILED);
 
         ///act
-        auto result = CodeFirst_ExecuteCommand(device, TEST_COMMAND);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_ExecuteCommand(device, TEST_COMMAND);
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_FAILED, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
         CodeFirst_DestroyDevice(device);
@@ -2985,20 +2718,19 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_ExecuteCommand_calls_Device_ExecuteCommand_can_returns_EXECUTE_COMMAND_ERROR)
     {
         ///arrange
-        CMocksForCodeFirst mocks;
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
-        mocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mocks, Device_ExecuteCommand(IGNORED_PTR_ARG, TEST_COMMAND))
+        STRICT_EXPECTED_CALL(Device_ExecuteCommand(IGNORED_PTR_ARG, TEST_COMMAND))
             .IgnoreArgument(1)
             .SetReturn(EXECUTE_COMMAND_ERROR);
 
         ///act
-        auto result = CodeFirst_ExecuteCommand(device, TEST_COMMAND);
+        EXECUTE_COMMAND_RESULT result = CodeFirst_ExecuteCommand(device, TEST_COMMAND);
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
         CodeFirst_DestroyDevice(device);
