@@ -1,0 +1,26 @@
+{
+  "name": "iothub-diagnostics",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "async": "^2.0.0",
+    "azure-event-hubs": "^0.0.2",
+    "azure-iot-common": "^1.0.10",
+    "azure-iot-device": "^1.0.10",
+    "azure-iot-device-amqp": "^1.0.9",
+    "azure-iot-device-amqp-ws": "^1.0.11",
+    "azure-iot-device-http": "^1.0.10",
+    "azure-iot-device-mqtt": "^1.0.10",
+    "azure-iothub": "^1.0.12",
+    "net-ping": "^1.2.0",
+    "node-uuid": "^1.4.7",
+    "winston": "^2.2.0"
+  },
+  "author": "IOT-SRE",
+  "license": "ISC"
+}
