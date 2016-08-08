@@ -19,11 +19,11 @@ receiver.on('response', function(status, requestId, body) {
 
 **SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_001: [** The `MqttTwinReceiver` constructor shall accept an MQTT client object **]**
 
-**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_002: [** The `MqttTwinReceiver` constructor shall throw if the MQTT client object is falsy **]**
+**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_002: [** The `MqttTwinReceiver` constructor shall throw `ReferenceError` if the MQTT client object is falsy **]**
 
 ### response event
 
-**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_003: [** When a listener is added for the `response` event, the appropriate topic should be subscribed to. **]**
+**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_003: [** When a listener is added for the `response` event, the appropriate topic shall be asynchronously subscribed to. **]**
 
 **SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_009: [** The subscribed topic for `response` events shall be '$iothub/twin/res/#' **]**
 
@@ -31,11 +31,7 @@ receiver.on('response', function(status, requestId, body) {
 
 **SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_005: [** When there are no more listeners for the `response` event, the topic should be unsubscribed **]**
 
-**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_006: [** When a `response` event is emitted, the first parameter shall be the twin status code **]**
-
-**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_007: [** When a `response` event is emitted, the second paramter shall be the twin request id that corresponds with this respons **]**e
-
-**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_008: [** When a `response` event is emitted, the third parameter shall be the body of the response **]**
+**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_006: [** When a `response` event is emitted, the parameter shall be an object which contains `status`, `requestId` and `body` members **]** 
 
 **SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_010: [** The topic which receives the response shall be formatted as '$iothub/twin/res/{status}/?$rid={request id}' **]**
 
@@ -55,7 +51,7 @@ receiver.on('response', function(status, requestId, body) {
 
 ### post event
 
-**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_018: [** When a listener is added to the post event, the appropriate topic should be subscribed to. **]**
+**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_018: [** When a listener is added to the post event, the appropriate topic shall be asynchronously subscribed to. **]**
 
 **SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_019: [** The subscribed topic for post events shall be $iothub/twin/POST/desired **]**
 
@@ -63,4 +59,10 @@ receiver.on('response', function(status, requestId, body) {
 
 **SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_021: [** When there are no more listeners for the post event, the topic should be unsubscribed. **]**
 
-**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_022: [** When a post event it emitted, the parameter shal be the body of the message **]**
+**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_022: [** When a post event it emitted, the parameter shall be the body of the message **]**
+
+### error event
+
+**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_023: [** If the `error` event is subscribed to, an error event shall be emitted if any asynchronous subscribing operations fails. **]**
+
+**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_024: [** When the `error` event is emitted, the first parameter shall be an error object obtained via the MQTT `translateErrror` module. **]**
