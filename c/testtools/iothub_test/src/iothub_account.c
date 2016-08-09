@@ -292,6 +292,18 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
                             IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result;
                             IOTHUB_REGISTRY_DEVICE_CREATE deviceCreateInfo;
                             IOTHUB_DEVICE deviceInfo;
+							deviceInfo.deviceId = NULL;
+							deviceInfo.primaryKey = NULL;
+							deviceInfo.secondaryKey = NULL;
+							deviceInfo.generationId = NULL;
+							deviceInfo.eTag = NULL;
+							deviceInfo.connectionStateUpdatedTime = NULL;
+							deviceInfo.statusReason = NULL;
+							deviceInfo.statusUpdatedTime = NULL;
+							deviceInfo.lastActivityTime = NULL;
+							deviceInfo.configuration = NULL;
+							deviceInfo.deviceProperties = NULL;
+							deviceInfo.serviceProperties = NULL;
 
                             deviceCreateInfo.deviceId = iothub_account_info->deviceId;
                             deviceCreateInfo.primaryKey = "";

@@ -29,6 +29,8 @@ void my_gballoc_free(void* ptr)
 #include "umocktypes.h"
 #include "umocktypes_c.h"
 
+#include "iothub_client_options.h"
+
 #define ENABLE_MOCKS
 
 #include "azure_c_shared_utility/httpapiex.h"
@@ -3115,12 +3117,12 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
         .CaptureReturn(&iotHubHttpApiExHandle)
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "x509certificate", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_X509_CERT, IGNORED_PTR_ARG))
         .ValidateArgumentValue_handle(&iotHubHttpApiExHandle)
         .IgnoreArgument(3)
         .SetReturn(HTTPAPIEX_OK);
 
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "x509privatekey", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_X509_PRIVATE_KEY, IGNORED_PTR_ARG))
         .ValidateArgumentValue_handle(&iotHubHttpApiExHandle)
         .IgnoreArgument(3)
         .SetReturn(HTTPAPIEX_OK);
@@ -3413,12 +3415,12 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_passes_x509_information_to_HTTPAPIEX_
         .CaptureReturn(&iotHubHttpApiExHandle)
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "x509certificate", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_X509_CERT, IGNORED_PTR_ARG))
         .ValidateArgumentValue_handle(&iotHubHttpApiExHandle)
         .IgnoreArgument(3)
         .SetReturn(HTTPAPIEX_OK);
 
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "x509privatekey", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_X509_PRIVATE_KEY, IGNORED_PTR_ARG))
         .ValidateArgumentValue_handle(&iotHubHttpApiExHandle)
         .IgnoreArgument(3)
         .SetReturn(HTTPAPIEX_OK);
@@ -3750,7 +3752,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_with_NULL_handle_fails)
     ///arrange
 
     ///act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(NULL, "x509certificate", "here be some certificate");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(NULL, OPTION_X509_CERT, "here be some certificate");
 
     ///assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
@@ -3768,7 +3770,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509certificate_succeeds)
         .IgnoreArgument_destination();
 
     ///act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, "x509certificate", "here be some certificate");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_CERT, "here be some certificate");
 
     ///assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -3789,7 +3791,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509privatekey_succeeds)
         .IgnoreArgument_destination();
 
     ///act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, "x509privatekey", "here be some pk");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_PRIVATE_KEY, "here be some pk");
 
     ///assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -3823,7 +3825,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509cerfiticate_with_device
     umock_c_reset_all_calls();
 
     ///act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, "x509certificate", "here be some cert");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_CERT, "here be some cert");
 
     ///assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
@@ -3840,7 +3842,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509privatekey_with_devicek
     umock_c_reset_all_calls();
 
     ///act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, "x509privatekey", "here be some pk pk pk!");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_PRIVATE_KEY, "here be some pk pk pk!");
 
     ///assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
@@ -3861,7 +3863,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509certificate_fails_when_
         .SetReturn(__LINE__);
 
     ///act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, "x509certificate", "here be some certificate");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_CERT, "here be some certificate");
     
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -3884,7 +3886,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509privatekey_fails_when_s
         .SetReturn(__LINE__);
 
     ///act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, "x509privatekey", "here be some priv key");
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_PRIVATE_KEY, "here be some priv key");
 
     ///assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);

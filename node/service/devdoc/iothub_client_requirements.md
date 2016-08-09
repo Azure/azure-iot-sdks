@@ -66,7 +66,9 @@ The open method opens a connection to the IoT Hub service.
 
 **SRS_NODE_IOTHUB_CLIENT_05_011: [**Otherwise the argument `err` shall have an `amqpError` property containing implementation-specific response information for use in logging and troubleshooting.**]**  
 
-**SRS_NODE_IOTHUB_CLIENT_05_012: [**If the connection is already open when `open` is called, it shall have no effect—that is, the `done` callback shall be invoked immediately with a null argument.**]** 
+**SRS_NODE_IOTHUB_CLIENT_05_012: [**If the connection is already open when `open` is called, it shall have no effect—that is, the `done` callback shall be invoked immediately with a null argument.**]**
+
+**SRS_NODE_IOTHUB_CLIENT_16_002: [** If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.**]**
 
 ###send(devceId, message, done)
 The `send` method sends a cloud-to-device message to the service, intended for delivery to the given device.
@@ -114,3 +116,9 @@ The `close` method closes the connection opened by open.
 **SRS_NODE_IOTHUB_CLIENT_05_024: [**Otherwise the argument `err` shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.**]**  
 
 **SRS_NODE_IOTHUB_CLIENT_05_025: [**If the connection is not open when close is called, it shall have no effect— that is, the `done` callback shall be invoked immediately with `null` arguments.**]**
+
+**SRS_NODE_IOTHUB_CLIENT_16_003: [** The `close` method shall remove the listener that has been attached to the transport `disconnect` event. **]**
+
+### Events
+#### disconnect
+**SRS_NODE_IOTHUB_CLIENT_16_004: [** The `disconnect` event shall be emitted when the client is disconnected from the server. **]**

@@ -531,7 +531,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "node/device/core/readme.md",
+        "filePath": "node/device/readme.md",
         "search": "(http\\:\\/\\/azure.github.io\\/azure-iot-sdks\\/node\\/api_reference\\/azure-iot-device\\/).*(\\/index.html)",
         "replaceString": function(versions) {
             return '$1' + versions.node.device + '$2';

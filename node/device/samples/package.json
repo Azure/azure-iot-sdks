@@ -12,7 +12,7 @@
     "azure-iot-device-mqtt": "1.0.11"
   },
   "devDependencies": {
-    "jshint": "^2.8.0"
+    "jshint": "^2.9.2"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",

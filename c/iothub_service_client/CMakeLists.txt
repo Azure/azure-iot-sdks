@@ -1,7 +1,12 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists for iothub_test
+#this is CMakeLists for iothub_service_client
+
+if(NOT ${use_http})
+    message("iothub service client needs HTTP support - use_http option was ${use_http}")
+    return()
+endif()
 
 compileAsC99()
 
