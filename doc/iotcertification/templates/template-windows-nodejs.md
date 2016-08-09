@@ -37,16 +37,22 @@ This document describes how to connect {enter your device name here} device runn
 
 You should have the following items ready before beginning the process:
 
+
 -   [Prepare your development environment][setup-devbox-linux]
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
--   Computer with Git client installed 
+-   Computer with Git client installed
 -   {enter your device name here} device.
 -   {{Please specify if any other software(s) or hardware(s) are required.}}
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
 
+-   Install OpenSSL at **C:\OpenSSL** location and perform following actions:
+    -   Add `C:\OpenSSL\` to the **PATH** environment variable
+	-   Search for the location of file 'openssl.cnf' inside the OpenSSL directory.
+	-   Create a new environment variable **OPENSSL_CONF** and set its value as absolute path of the file `openssl.cnf`.
+	
 -   {{Write down the instructions required to setup, configure and connect your device. Please use external links when possible pointing to your own page with device preparation steps.}}
 
 <a name="Build"></a>
@@ -55,85 +61,35 @@ You should have the following items ready before beginning the process:
 <a name="Load"></a>
 ## 3.1 Load the Azure IoT bits and prerequisites on device
 
--   Open a PuTTY session and connect to the device.
+-   Create environment variable `IOTHUB_CONNECTION_STRING` and set its value as your **IoTHub connection string** which you got in [Step 1](#Prerequisites).
 
--   Choose your commands in next steps based on the OS running on your device.
+-   Open a Node.js command prompt.
+		
+-   Check all environment variables are properly set.
 
--   Run following command to check if NodeJS is already installed
-
-        node --version
-
-    If version is **0.12.x or greater**, then skip next step of installing prerequisite packages. Else uninstall it by issuing following command from command line on the device.{{***Keep the command set based on your OS and remove the rest.***}}
-
-    {{**Debian or Ubuntu**}}
-
-        sudo apt-get remove nodejs
-
-    {{**Fedora**}}
-
-        sudo dnf remove nodejs
-
-    {{**Any Other Linux OS**}}
-
-        Use equivalent commands on the target OS
-
--   Install the prerequisite packages by issuing the following commands from the command line on the device. Choose your commands based on the OS running on your device.{{***Keep the command set based on your OS and remove the rest.***}}
-
-    {{**Debian or Ubuntu**}}
-
-        curl -sL https://deb.nodesource.com/setup_4.x | sudo bash -
-
-        sudo apt-get install -y nodejs
-
-    {{**Fedora**}}
-
-        wget http://nodejs.org/dist/v4.2.1/node-v4.2.1-linux-x64.tar.gz
-
-        tar xvf node-v4.2.1-linux-x64.tar.gz
-
-        sudo mv node-v4.2.1-linux-x64 /opt
-
-        echo "export PATH=\$PATH:/opt/node-v4.2.1-linux-x64/bin" >> ~/.bashrc
-
-        source ~/.bashrc
-
-    {{**Any Other Linux OS**}}
-
-        Use equivalent commands on the target OS
-
-     {{***If any other software is required, please specify here the command(s) for installing same.***}}
-     
-    **Note:** To test successful installation of Node JS, try to fetch its version information by running following command:
-
-        node --version
-
--   Download the SDK to the board by issuing the following command in
-    PuTTY:
+        echo %PATH%
+        echo %OPENSSL_CONF%
+        echo %IOTHUB_CONNECTION_STRING%
+	
+-   Download the SDK 
 
         git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 
--   Verify that you now have a copy of the source code under the directory ~/azure-iot-sdks.
 
 <a name="BuildSamples"></a>
 ## 3.2 Build the samples
 
--   To validate the source code run the following commands on the device.
+-   To validate the source code run the following commands on Node.js command prompt on Device.
 
-        export IOTHUB_CONNECTION_STRING='<iothub_connection_string>'
-
-    Replace the `<iothub_connection_string>` placeholder with IoTHub Connection String you got in [Step 1](#Prerequisites).    
-
--   Run the following commands 
-
-        cd ~/azure-iot-sdks/node
-        build/dev-setup.sh
-        build/build.sh | tee LogFile.txt
+        cd azure-iot-sdks\node
+        build\dev-setup.cmd
+        build\build.cmd > LogFile.txt
 
     ***Note:*** *LogFile.txt in above command should be replaced with a file name where build output will be written.*
 
 -   Install npm package to run sample.
 
-        cd ~/azure-iot-sdks/node/device/samples
+		cd \azure-iot-sdks\node\device\samples
 
     **For AMQP Protocol:**
 	
@@ -147,52 +103,45 @@ You should have the following items ready before beginning the process:
 
         npm install azure-iot-device-mqtt	
 
--   To update sample, run the following command on device.
+-   Update the sample to set the protocol.
 
-        cd ~/azure-iot-sdks/node/device/samples
-        nano simple_sample_device.js
+        cd azure-iot-sdks\node\device\samples
+        notepad simple_sample_device.js
 
--   This launches a console-based text editor. Scroll down to the
-    protocol information.
-    
--   Find the below code:
+-   This launches a text editor. Scroll down to the protocol information and find the below code:
 
         var Protocol = require('azure-iot-device-amqp').Amqp;
 	
-    The default protocol used is AMQP. Code for other protocols(HTTP/MQTT) are mentioned just below the above line in the script.
+    The default protocol used is AMQP. Code for other protocols(HTTP/MQTT) are mentioned just below the above line in the script. 
     Uncomment the line as per the protocol you want to use.
 
-
--   Scroll down to the connection information.
-    Find the following place holder for IoT connection string:
+-   Scroll down to the connection information and find following placeholder for IoT connection string:
 
         var connectionString = "[IoT Device Connection String]";
 
 -   Replace the above placeholder with device connection string. You can get this from DeviceExplorer as explained in [Step 1](#Prerequisites), that you copied into Notepad.
 
--   Save your changes by pressing Ctrl+O and when nano prompts you to save it as the same file, just press ENTER.
+-   Save your changes and close the notepad.
 
--   Press Ctrl+X to exit nano.
-
--   Run the following command before leaving the **~/azure-iot-sdks/node/device/samples** directory
+-   Run the following command on Node.js command prompt before leaving the **azure-iot-sdks\node\device\samples** directory
 
         npm link azure-iot-device
 
 <a name="Run"></a>
+
 ## 3.3 Run and Validate the Samples
 
-### 3.3.1 Send Device Events to IOT Hub
+### 3.3.1 Send Device Events to IoT Hub
 
 -   Run the sample by issuing following command and verify that data has been successfully sent and received.
 
-        node ~/azure-iot-sdks/node/device/samples/simple_sample_device.js
+        node azure-iot-sdks\node\device\samples\simple_sample_device.js
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application.
 
 ### 3.3.2 Receive messages from IoT Hub
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to send cloud-to-device messages to the application.
-
 
 [setup-devbox-linux]: https://github.com/Azure/azure-iot-sdks/blob/master/doc/get_started/node-devbox-setup.md
 [lnk-setup-iot-hub]: ../../setup_iothub.md
