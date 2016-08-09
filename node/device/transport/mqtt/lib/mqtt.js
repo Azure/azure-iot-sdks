@@ -165,4 +165,26 @@ Mqtt.prototype.setOptions = function (options, done) {
   if (done) done(null);
 };
 
+/**
+ * @method          module:azure-iot-device-mqtt.Mqtt#sendTwinRequest
+ * @description     Send a device-twin specific messager to the IoT Hub instance
+ *
+ * @param {String}        method    name of the method to invoke ('PUSH', 'PATCH', etc)
+ * @param {String}        resource  name of the resource to act on (e.g. 'properties/reported')
+ * @param {Object}        properties  object containing name value pairs for request properties (e.g. { 'rid' : 10, 'index' : 17 })
+ * @param {String}        body  body of request
+ * @param {Function}      the callback to be invoked when this function completes.
+ */
+Mqtt.prototype.sendTwinRequest = function(method, resource, properties, body, done) {
+};
+
+/**
+ * @method          module:azure-iot-device-mqtt.Mqtt#getTwinReceiver
+ * @description     Get a receiver object that handles C2D device-twin traffic
+ *
+ * @param {Function}      the callback to be invoked when this function completes.
+ */
+Mqtt.prototype.getTwinReceiver = function(done) {
+};
+
 module.exports = Mqtt;
