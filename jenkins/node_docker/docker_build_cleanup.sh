@@ -11,5 +11,3 @@ docker-compose -f $dockerdir/docker-compose.yml ps -q | xargs docker rm -f
 
 # Remove temporary images used by containers
 docker images -q nodebuild | xargs docker rmi
-
-exit 1
