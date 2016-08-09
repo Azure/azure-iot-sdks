@@ -15,7 +15,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "iotdevice.h"
 
-DEFINE_ENUM_STRINGS(CODEFIRST_RESULT, CODEFIRST_ENUM_VALUES)
+DEFINE_ENUM_STRINGS(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES)
 DEFINE_ENUM_STRINGS(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES)
 
 #define LOG_CODEFIRST_ERROR \
@@ -902,7 +902,7 @@ CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destin
 
 CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numReportedProperties, ...)
 {
-    (void)(destination, destinationSize, numReportedProperties);
+    
     return CODEFIRST_OK;
 }
 

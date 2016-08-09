@@ -227,13 +227,13 @@ extern CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination,
 
 CodeFirst_SendAsyncReported starts, publishes and finishes a device transaction.
 
-**SRS_CODEFIRST_02_018: [** If parameter `destination`, `destinationSize` or any of the values passed through ... is `NULL` then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
+**SRS_CODEFIRST_02_018: [** If parameter `destination`, `destinationSize` or any of the values passed through va_args is `NULL` then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
 
-**SRS_CODEFIRST_02_019: [** If values passed through ... do not belong to the same device then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR`. **]**
+**SRS_CODEFIRST_02_019: [** If values passed through va_args do not belong to the same device then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR`. **]**
 
-**SRS_CODEFIRST_02_020: [** If values passed through ... are not all of type REFLECTED_REPORTED_PROPERTY then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
+**SRS_CODEFIRST_02_020: [** If values passed through va_args are not all of type REFLECTED_REPORTED_PROPERTY then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
 
-**SRS_CODEFIRST_02_021: [** If the value passed through ... is a complete model instance, then `CodeFirst_SendAsyncReported` shall send all the reported properties of that device. **]**
+**SRS_CODEFIRST_02_021: [** If the value passed through va_args is a complete model instance, then `CodeFirst_SendAsyncReported` shall send all the reported properties of that device. **]**
 
 **SRS_CODEFIRST_02_022: [** `CodeFirst_SendAsyncReported` shall start a transaction by calling `Device_StartTransaction`. **]**
 
@@ -245,6 +245,7 @@ CodeFirst_SendAsyncReported starts, publishes and finishes a device transaction.
 
 **SRS_CODEFIRST_02_026: [** `CodeFirst_SendAsyncReported' shall call `Device_EndTransaction` to end the transaction. **]**
 
-**SRS_CODEFIRST_02_027: [** If any error occurs, `CodeFirst_SendAsyncReported` shall fail, cancel the transaction by calling `Device_CancelTransaction`, and return an error code. **]**
-Error codes related to Device API shall return `CODEFIRST_INVALID_ARG`, all other errors shall return `CODEFIRST_ERROR`.
+**SRS_CODEFIRST_02_027: [** If any error occurs, `CodeFirst_SendAsyncReported` shall fail, cancelling the transaction by calling `Device_CancelTransaction`, 
+returning `CODEFIRST_DEVICE_FAILED` if the error pertains to usage of Device APIs or returning `CODEFIRST_ERROR` in all other cases **]**
+
 

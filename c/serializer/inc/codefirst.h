@@ -113,7 +113,7 @@ typedef struct REFLECTED_DATA_FROM_DATAPROVIDER_TAG
 #define ADDRESS_OF_ALL_REFLECTED(schemaNamespace) & C2(schemaNamespace, _allReflected),
 #define DECLARE_EXTERN_CONST_DATAPROVIDER_DATA(x) extern const REFLECTED_DATA_FROM_DATAPROVIDER ALL_REFLECTED(x);
 
-#define CODEFIRST_ENUM_VALUES                  \
+#define CODEFIRST_RESULT_VALUES                \
 CODEFIRST_OK,                                  \
 CODEFIRST_INVALID_ARG,                         \
 CODEFIRST_ALREADY_INIT,                        \
@@ -129,7 +129,7 @@ CODEFIRST_DEVICE_FAILED,                       \
 CODEFIRST_DEVICE_PUBLISH_FAILED,               \
 CODEFIRST_NOT_A_PROPERTY
 
-DEFINE_ENUM(CODEFIRST_RESULT, CODEFIRST_ENUM_VALUES)
+DEFINE_ENUM(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES)
 
 extern CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace);
 extern void CodeFirst_Deinit(void);
