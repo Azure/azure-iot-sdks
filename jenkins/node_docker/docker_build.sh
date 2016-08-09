@@ -6,7 +6,7 @@ echo ${IOTHUB_CONNECTION_STRING?Error \$IOTHUB_CONNECTION_STRING is not defined.
 echo ${STORAGE_CONNECTION_STRING?Error \$STORAGE_CONNECTION_STRING is not defined.}
 
 build_root=$(cd "$(dirname "$0")/../.." && pwd)
-dockerdir=$build_root/build/node_docker
+dockerdir=$build_root/jenkins/node_docker
 envdir=$dockerdir/env
 
 mkdir $envdir
