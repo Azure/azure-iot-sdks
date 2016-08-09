@@ -28,7 +28,10 @@ docker-compose  -f $dockerdir/docker-compose.yml ps -q | xargs docker inspect -f
 # Compute exit code: count the number of containers for which the exit code was not 0
 BUILD_EXIT_CODE=$(docker-compose -f $dockerdir/docker-compose.yml ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | grep -v 0 | wc -l)
 
+# Remove containers used during build
 docker-compose -f $dockerdir/docker-compose.yml ps -q | xargs docker rm
+
+# Remove temporary images used by containers
 docker images -q nodebuild | xargs docker rmi
 
 exit $BUILD_EXIT_CODE
