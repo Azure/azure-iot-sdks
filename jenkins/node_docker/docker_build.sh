@@ -6,7 +6,7 @@ echo ${IOTHUB_CONNECTION_STRING?Error \$IOTHUB_CONNECTION_STRING is not defined.
 echo ${STORAGE_CONNECTION_STRING?Error \$STORAGE_CONNECTION_STRING is not defined.}
 
 build_root=$(cd "$(dirname "$0")/../.." && pwd)
-dockerdir=$build_root/build/node_docker
+dockerdir=$build_root/jenkins/node_docker
 envdir=$dockerdir/env
 
 mkdir $envdir
@@ -27,8 +27,5 @@ docker-compose -f $dockerdir/docker-compose.yml up --force-recreate
 docker-compose  -f $dockerdir/docker-compose.yml ps -q | xargs docker inspect -f '{{ .Config.Image }} finished with ExitCode {{ .State.ExitCode }}'
 # Compute exit code: count the number of containers for which the exit code was not 0
 BUILD_EXIT_CODE=$(docker-compose -f $dockerdir/docker-compose.yml ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | grep -v 0 | wc -l)
-
-docker-compose -f $dockerdir/docker-compose.yml ps -q | xargs docker rm
-docker images -q nodebuild | xargs docker rmi
 
 exit $BUILD_EXIT_CODE
