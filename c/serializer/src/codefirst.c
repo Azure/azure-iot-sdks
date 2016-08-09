@@ -902,7 +902,7 @@ CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destin
 
 CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numReportedProperties, ...)
 {
-    
+    (void)(destination, destinationSize, numReportedProperties);
     return CODEFIRST_OK;
 }
 
