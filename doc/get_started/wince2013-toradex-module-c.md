@@ -67,9 +67,9 @@ These instructions apply to [Colibri Modules][colibri-modules] running the [Wind
 ```
   services refresh NTP0:
 ```  
-6. In **Solution Explorer**, right-click the **simplesample_http** project, click **Properties**, then select **Configuration Properties\Debugging** to build and then insert the ip address of your target device in the **IP Address** field. Select **OK** to save your changes.
+6. In **Solution Explorer**, right-click the **iothub_client_sample_http** project, click **Properties**, then select **Configuration Properties\Debugging** to build and then insert the ip address of your target device in the **IP Address** field. Select **OK** to save your changes.
 
-7. In **Solution Explorer**, right-click the **simplesample_http** project, click **Debug**, and then click **Start new instance** to build and run the sample. The console displays messages as the application sends device-to-cloud messages to IoT Hub.
+7. In **Solution Explorer**, right-click the **iothub_client_sample_http** project, click **Debug**, and then click **Start new instance** to build and run the sample. The console displays messages as the application sends device-to-cloud messages to IoT Hub.
 
 8. See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the **iothub_client_sample_http** application and how to send cloud-to-device messages to the **iothub_client_sample_http** application.
 
