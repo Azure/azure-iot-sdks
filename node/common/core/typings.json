@@ -1,0 +1,8 @@
+{
+  "name": "azure-iot-common",
+  "main": "commond.t.s",
+  "dependencies": {},
+  "globalDependencies": {
+    "node": "registry:dt/node#6.0.0+20160807145350"
+  }
+}
