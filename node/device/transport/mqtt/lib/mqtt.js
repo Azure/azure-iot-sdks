@@ -175,7 +175,7 @@ Mqtt.prototype.setOptions = function (options, done) {
  * @param {String}        body  body of request
  * @param {Function}      the callback to be invoked when this function completes.
  */
-Mqtt.prototype.sendTwinRequest = function(method, resource, properties, body, done) {
+Mqtt.prototype.sendTwinRequest = function() { // method, resource, properties, body, done) {
 };
 
 /**
@@ -184,7 +184,7 @@ Mqtt.prototype.sendTwinRequest = function(method, resource, properties, body, do
  *
  * @param {Function}      the callback to be invoked when this function completes.
  */
-Mqtt.prototype.getTwinReceiver = function(done) {
+Mqtt.prototype.getTwinReceiver = function() { // done) {
 };
 
 module.exports = Mqtt;

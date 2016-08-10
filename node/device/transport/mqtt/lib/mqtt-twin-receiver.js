@@ -14,6 +14,7 @@ var util = require('util');
  *
  */
 function MqttTwinReceiver(config) {
+  this._config = config;
   EventEmitter.call(this);
 }
 
