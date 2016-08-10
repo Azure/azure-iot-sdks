@@ -5,6 +5,7 @@
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
+#include <stdarg.h>
 #include "azure_c_shared_utility/gballoc.h"
 
 #include "codefirst.h"
@@ -902,8 +903,147 @@ CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destin
 
 CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numReportedProperties, ...)
 {
-    (void)(destination, destinationSize, numReportedProperties);
-    return CODEFIRST_OK;
+    CODEFIRST_RESULT result;
+    if ((destination == NULL) || (destinationSize == NULL))
+    {
+        /*Codes_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
+        LogError("invalid argument unsigned char** destination=%p, size_t* destinationSize=%p", destination, destinationSize);
+        result = CODEFIRST_INVALID_ARG;
+    }
+    else
+    {
+        {
+            DEVICE_HEADER_DATA* deviceHeader = NULL;
+            size_t i;
+            TRANSACTION_HANDLE transaction = NULL;
+            va_list ap;
+
+            va_start(ap, numReportedProperties);
+
+            for (i = 0; i < numReportedProperties; i++)
+            {
+                void* value = (void*)va_arg(ap, void*);
+                /*Codes_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
+                if (value == NULL)
+                {
+
+                }
+                DEVICE_HEADER_DATA* currentValueDeviceHeader = FindDevice(value);
+                if (currentValueDeviceHeader == NULL)
+                {
+                    result = CODEFIRST_INVALID_ARG;
+                    LOG_CODEFIRST_ERROR;
+                    break;
+                }
+                else if ((deviceHeader != NULL) &&
+                    (currentValueDeviceHeader != deviceHeader))
+                {
+                    result = CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR;
+                    LOG_CODEFIRST_ERROR;
+                    break;
+                }
+                else if ((deviceHeader == NULL) &&
+                    ((transaction = Device_StartTransaction(currentValueDeviceHeader->DeviceHandle)) == NULL))
+                {
+                    result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                    LOG_CODEFIRST_ERROR;
+                    break;
+                }
+                else
+                {
+                    deviceHeader = currentValueDeviceHeader;
+
+                    if (value == ((unsigned char*)deviceHeader->data))
+                    {
+                        result = SendAllDeviceProperties(deviceHeader, transaction);
+                        if (result != CODEFIRST_OK)
+                        {
+                            LOG_CODEFIRST_ERROR;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        const REFLECTED_SOMETHING* propertyReflectedData;
+                        const char* modelName;
+                        STRING_HANDLE valuePath;
+
+                        if ((valuePath = STRING_new()) == NULL)
+                        {
+                            result = CODEFIRST_ERROR;
+                            LOG_CODEFIRST_ERROR;
+                            break;
+                        }
+                        else
+                        {
+                            if ((modelName = Schema_GetModelName(deviceHeader->ModelHandle)) == NULL)
+                            {
+                                result = CODEFIRST_ERROR;
+                                LOG_CODEFIRST_ERROR;
+                                STRING_delete(valuePath);
+                                break;
+                            }
+                            else if ((propertyReflectedData = FindValue(deviceHeader, value, modelName, 0, valuePath)) == NULL)
+                            {
+                                result = CODEFIRST_INVALID_ARG;
+                                LOG_CODEFIRST_ERROR;
+                                STRING_delete(valuePath);
+                                break;
+                            }
+                            else
+                            {
+                                AGENT_DATA_TYPE agentDataType;
+                                if (propertyReflectedData->what.property.Create_AGENT_DATA_TYPE_from_Ptr(value, &agentDataType) != AGENT_DATA_TYPES_OK)
+                                {
+                                    result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
+                                    LOG_CODEFIRST_ERROR;
+                                    STRING_delete(valuePath);
+                                    break;
+                                }
+                                else
+                                {
+                                    if (Device_PublishTransacted(transaction, STRING_c_str(valuePath), &agentDataType) != DEVICE_OK)
+                                    {
+                                        Destroy_AGENT_DATA_TYPE(&agentDataType);
+                                        result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                                        LOG_CODEFIRST_ERROR;
+                                        STRING_delete(valuePath);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        STRING_delete(valuePath);
+                                    }
+
+                                    Destroy_AGENT_DATA_TYPE(&agentDataType);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (i < numReportedProperties)
+            {
+                if (transaction != NULL)
+                {
+                    (void)Device_CancelTransaction(transaction);
+                }
+            }
+            else if (Device_EndTransaction(transaction, destination, destinationSize) != DEVICE_OK)
+            {
+                result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                LOG_CODEFIRST_ERROR;
+            }
+            else
+            {
+                result = CODEFIRST_OK;
+            }
+
+            va_end(ap);
+        }
+    }
+    return result;
 }
 
 EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* command)
