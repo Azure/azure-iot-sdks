@@ -583,10 +583,10 @@ public:
         saved_properties_get_correlation_id_value = correlation_id_value;
     MOCK_METHOD_END(int, 0)
 
-        MOCK_STATIC_METHOD_2(, int, properties_set_correlation_id, PROPERTIES_HANDLE, properties, AMQP_VALUE, correlation_id_value)
-        MOCK_METHOD_END(int, 0)
+    MOCK_STATIC_METHOD_2(, int, properties_set_correlation_id, PROPERTIES_HANDLE, properties, AMQP_VALUE, correlation_id_value)
+    MOCK_METHOD_END(int, 0)
 
-        MOCK_STATIC_METHOD_2(, int, message_get_properties, MESSAGE_HANDLE, message, PROPERTIES_HANDLE*, properties)
+    MOCK_STATIC_METHOD_2(, int, message_get_properties, MESSAGE_HANDLE, message, PROPERTIES_HANDLE*, properties)
         *properties = saved_message_get_properties_properties;
     MOCK_METHOD_END(int, 0)
 
@@ -1283,7 +1283,6 @@ static void setAddPropertiesTouAMQPMessage(CIoTHubTransportAMQPMocks& mocks)
     STRICT_EXPECTED_CALL(mocks, IoTHubMessage_GetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE));
     EXPECTED_CALL(mocks, message_set_properties(TEST_EVENT_MESSAGE_HANDLE, TEST_UAMQP_PROPERTIES));
     STRICT_EXPECTED_CALL(mocks, properties_destroy(IGNORED_PTR_ARG)).IgnoreArgument(1);
-
 }
 
 static void setExpectedCallsForSendPendingEvents_SingleEvent(CIoTHubTransportAMQPMocks& mocks, IOTHUBMESSAGE_CONTENT_TYPE message_type)
@@ -4576,7 +4575,6 @@ TEST_FUNCTION(AMQP_DoWork_encodes_two_properties_on_an_IoTHub_Message_before_giv
     transport_interface->IoTHubTransport_Destroy(transport);
     cleanupList(config.waitingToSend);
 }
-
     /***
     Tests_SRS_IOTHUBTRANSPORTAMQP_25_193: [**IoTHubTransportAMQP_DoWork shall set the AMQP the message-id and correlation-id if found to the UAMQP message before passing down**]**
     Tests_**SRS_IOTHUBTRANSPORTAMQP_25_194: [**Uamqp message properties shall be retrieved using message_get_properties to update message-id/Correlation-Id **]**
