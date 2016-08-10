@@ -331,8 +331,8 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
 	{
 		return NULL;
 	}
-	
-	return IoTHubClient_Create(mockConfig);
+
+	return mockMessageHandle;
 }
 
 IOTHUB_MESSAGE_RESULT IoTHubMessage_GetByteArray(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const unsigned char** buffer, size_t* size)
