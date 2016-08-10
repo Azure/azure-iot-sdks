@@ -6,7 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "amqp10": "^3.2.1",
-    "amqp10-transport-ws": "^0.0.3",
+    "amqp10-transport-ws": "^0.0.4",
     "azure-iot-common": "1.0.11",
     "debug": "^2.2.0"
   },
