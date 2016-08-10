@@ -1,0 +1,11 @@
+{
+  "name": "azure-iot-amqp-base",
+  "main": "index.d.ts",
+  "dependencies": {
+    "amqp10": "registry:npm/amqp10#3.1.4+20160601175358"
+  },
+  "globalDependencies": {
+    "es2015-promise": "registry:env/es2015-promise#1.0.0+20160526151700",
+    "node": "registry:dt/node#6.0.0+20160807145350"
+  }
+}
