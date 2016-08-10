@@ -264,8 +264,90 @@ static void rollEventsBackToWaitList(AMQP_TRANSPORT_INSTANCE* transport_state)
     }
 }
 
-
+/*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_193: [**IoTHubTransportAMQP_DoWork shall set the AMQP the message-id and correlation-id if found to the UAMQP message before passing down**]***/
 static int addPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, MESSAGE_HANDLE uamqp_message)
+{
+    int result = RESULT_OK;
+    const char* messageId;
+    const char* correlationId;
+    PROPERTIES_HANDLE uamqp_message_properties;
+    int api_call_result;
+
+    /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_194: [**Uamqp message properties shall be retrieved using message_get_properties to update message-id/Correlation-Id **]***/
+    if ((api_call_result = message_get_properties(uamqp_message, &uamqp_message_properties)) != 0)
+    {
+        LogError("Failed to get properties map from uAMQP message (error code %d).", api_call_result);
+        result = __LINE__;
+    }
+    /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_195: [**If UAMQP message properties were not present then new properties shall be created using properties_create()**]***/
+    else if (uamqp_message_properties == NULL &&
+        (uamqp_message_properties = properties_create()) == NULL)
+    {
+        LogError("Failed to create properties map for uAMQP message (error code %d).", api_call_result);
+        result = __LINE__;
+    }
+    else
+    {
+        /***Codes_SRS_IOTHUBTRANSPORTAMQP_25_200: [**As message - id is optional field, if it is not set by the client, processing shall ignore and continue normally**] * */
+        /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_196: [**Message-id from the IotHub Client shall be read using IoTHubMessage_GetMessageId()**]***/
+        if ((messageId = IoTHubMessage_GetMessageId(iothub_message_handle)) != NULL)
+        {
+            AMQP_VALUE uamqp_message_id;
+            /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_197: [**Uamqp message id shall be created using amqpvalue_create_string()**]***/
+            if ((uamqp_message_id = amqpvalue_create_string(messageId)) == NULL)
+            {
+                LogError("Failed to create an AMQP_VALUE for the messageId property value.");
+                result = __LINE__;
+            }
+            else
+            {
+                /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_198: [**Message id would be set to Uamqp using properties_set_message_id()**]***/
+                if ((api_call_result = properties_set_message_id(uamqp_message_properties, uamqp_message_id)) != 0)
+                {
+                    LogInfo("Failed to set value of uAMQP message 'message-id' property (%d).", api_call_result);
+                    result = __LINE__;
+                }
+                /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_199: [**Uamqp value used for message id shall be destroyed using amqpvalue_destroy() upon completion of its use**]***/
+                amqpvalue_destroy(uamqp_message_id);
+            }
+        }
+        /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_205: [**As Correlation-id is optional field, if it is not set by the client, processing shall ignore and continue normally**]***/
+        /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_201: [**Correlation-id from the IotHub Client shall be read using IoTHubMessage_GetCorrelationId()**]***/
+        if ((correlationId = IoTHubMessage_GetCorrelationId(iothub_message_handle)) != NULL)
+        {
+            AMQP_VALUE uamqp_correlation_id;
+            /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_202: [**Uamqp value for Correlation id shall be created using amqpvalue_create_string()**]***/
+            if ((uamqp_correlation_id = amqpvalue_create_string(correlationId)) == NULL)
+            {
+                LogError("Failed to create an AMQP_VALUE for the messageId property value.");
+                result = __LINE__;
+            }
+            else
+            {
+                /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_203: [**Correlation id would be set to Uamqp using properties_set_correlation_id()**]***/
+                if ((api_call_result = properties_set_correlation_id(uamqp_message_properties, uamqp_correlation_id)) != 0)
+                {
+                    LogInfo("Failed to set value of uAMQP message 'message-id' property (%d).", api_call_result);
+                    result = __LINE__;
+                }
+                /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_204: [**Uamqp value used for Correlation id shall be destroyed using amqpvalue_destroy() upon completion of its use**]***/
+                amqpvalue_destroy(uamqp_correlation_id);
+            }
+        }
+        /*Codes_**SRS_IOTHUBTRANSPORTAMQP_25_206: [**Modified Uamqp properties shall be set using message_set_properties()**]***/
+        if ((api_call_result = message_set_properties(uamqp_message, uamqp_message_properties)) != 0)
+        {
+            LogError("Failed to set properties map on uAMQP message (error code %d).", api_call_result);
+            result = __LINE__;
+        }
+    }
+
+    properties_destroy(uamqp_message_properties);
+
+    return result;
+}
+
+static int addApplicationPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, MESSAGE_HANDLE uamqp_message)
 {
     int result;
     MAP_HANDLE properties_map;
@@ -1350,6 +1432,11 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
                     /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
                     is_message_error = true;
                 }
+				else if (addApplicationPropertiesTouAMQPMessage(message->messageHandle, amqp_message) != 0)
+				{
+					/* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+					is_message_error = true;
+				}
                 else
                 {
                     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_097: [IoTHubTransportAMQP_DoWork shall pass the encoded AMQP message to AMQP for sending (along with on_message_send_complete callback) using messagesender_send()] 
