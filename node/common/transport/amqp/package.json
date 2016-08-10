@@ -6,15 +6,15 @@
   "license": "MIT",
   "dependencies": {
     "amqp10": "^3.2.1",
-    "amqp10-transport-ws": "^0.0.3",
+    "amqp10-transport-ws": "^0.0.4",
     "azure-iot-common": "1.0.11",
     "debug": "^2.2.0"
   },
   "devDependencies": {
-    "chai": "^3.3.0",
-    "istanbul": "^0.4.2",
-    "jshint": "^2.8.0",
-    "mocha": "^2.3.3"
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.4",
+    "jshint": "^2.9.2",
+    "mocha": "^3.0.1"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",
@@ -24,7 +24,7 @@
     "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test*.js",
     "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
     "test": "npm -s run lint && npm -s run unittest",
-    "check-cover": "istanbul check-coverage --statements 61 --branches 45 --functions 37 --lines 62"
+    "check-cover": "istanbul check-coverage --statements 61 --branches 45 --functions 37 --lines 61"
   },
   "engines": {
     "node": ">= 0.10"

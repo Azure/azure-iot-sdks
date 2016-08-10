@@ -18,6 +18,7 @@
 #define DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName; 
 
 #include "iothubtransporthttp.h"
+#include "iothub_client_options.h"
 #include "iothub_client_version.h"
 #include "iothub_client_private.h"
 
@@ -5319,7 +5320,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     unsigned int thisIs20Seconds = 20;
     auto handle = IoTHubTransportHttp_Create(&TEST_CONFIG);
 
-    (void)IoTHubTransportHttp_SetOption(handle, "MinimumPollingTime", &thisIs20Seconds);
+    (void)IoTHubTransportHttp_SetOption(handle, OPTION_MIN_POLLING_TIME, &thisIs20Seconds);
     auto devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_CONFIG.waitingToSend);
 
     (void)IoTHubTransportHttp_Subscribe(devHandle);
@@ -10237,7 +10238,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_waitingToSend_not_empty_success)
 
     IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(contains3, 1);
     IOTHUB_MESSAGE_LIST newEntry;
-    newEntry.messageHandle = &newEntry;
+    newEntry.messageHandle = (IOTHUB_MESSAGE_HANDLE)&newEntry;
     DList_InsertTailList(&(waitingToSend), &(newEntry.entry));
 
     mocks.ResetAllCalls();
@@ -10273,7 +10274,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_deviceData_is_not_found_fails)
 
     IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(contains3, 1);
     IOTHUB_MESSAGE_LIST newEntry;
-    newEntry.messageHandle = &newEntry;
+    newEntry.messageHandle = (IOTHUB_MESSAGE_HANDLE) &newEntry;
     DList_InsertTailList(&(waitingToSend), &(newEntry.entry));
 
     mocks.ResetAllCalls();

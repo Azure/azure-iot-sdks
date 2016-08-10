@@ -1842,7 +1842,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVCIEID, TEST_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVCIEID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
         
         umock_c_reset_all_calls();
 
@@ -1866,7 +1866,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVCIEID, TEST_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVCIEID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
 
         umock_c_reset_all_calls();
 
@@ -1894,7 +1894,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_unittests)
         ///arrange
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
         (void)IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)1);
-        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVCIEID, TEST_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
+        (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVCIEID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)1);
 
         umock_c_reset_all_calls();
 

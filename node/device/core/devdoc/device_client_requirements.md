@@ -63,7 +63,7 @@ client.sendEvent(new Message('hello world'), print);
 #### close(done)
 **SRS_NODE_DEVICE_CLIENT_16_001: [** The `close` function shall call the transport's `disconnect` function if it exists. **]**
 
-**SRS_NODE_DEVICE_CLIENT_16_046: [** The `disconnect` method shall remove the listener that has been attached to the transport `disconnect` event. **]**
+**SRS_NODE_DEVICE_CLIENT_16_046: [** The `close` method shall remove the listener that has been attached to the transport `disconnect` event. **]**
 
 #### sendEvent(message, done)
 The `sendEvent` method sends an event message to the IoT Hub as the device indicated in the constructor argument.

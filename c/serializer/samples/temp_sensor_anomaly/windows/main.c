@@ -8,6 +8,7 @@
 #include "schemalib.h"
 #include "serializer.h"
 #include "schemaserializer.h"
+#include "iothub_client_options.h"
 #include "iothub_client_ll.h"
 
 static const char* connectionString = "[device connection string]";
@@ -145,7 +146,7 @@ int main(void)
                 // is 25 minutes. For more information, see:
                 // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
                 unsigned int minimumPollingTime = 9;
-                if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
+                if (IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_MIN_POLLING_TIME, &minimumPollingTime) != IOTHUB_CLIENT_OK)
                 {
                     printf("failure to set option \"MinimumPollingTime\"\r\n");
                 }
