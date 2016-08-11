@@ -241,11 +241,12 @@ CodeFirst_SendAsyncReported starts, publishes and finishes a device transaction.
 
 **SRS_CODEFIRST_02_024: [** `CodeFirst_SendAsyncReported` shall call `Device_PublishTransacted` for every `AGENT_DATA_TYPE` converted from `REPORTED_PROPERTY`. **]**
 
-**SRS_CODEFIRST_02_025: [** `CodeFirst_SendAsyncReported' shall compute for every `AGENT_DATA_TYPE` the valuePath. **]**
+**SRS_CODEFIRST_02_025: [** `CodeFirst_SendAsyncReported` shall compute for every `AGENT_DATA_TYPE` the valuePath. **]**
 
-**SRS_CODEFIRST_02_026: [** `CodeFirst_SendAsyncReported' shall call `Device_EndTransaction` to end the transaction. **]**
+**SRS_CODEFIRST_02_026: [** `CodeFirst_SendAsyncReported` shall call `Device_EndTransaction` to end the transaction. **]**
 
 **SRS_CODEFIRST_02_027: [** If any error occurs, `CodeFirst_SendAsyncReported` shall fail, cancelling the transaction by calling `Device_CancelTransaction`, 
 returning `CODEFIRST_DEVICE_FAILED` if the error pertains to usage of Device APIs or returning `CODEFIRST_ERROR` in all other cases **]**
 
+**SRS_CODEFIRST_02_028: [** `CodeFirst_SendAsyncReported` shall return `CODEFIRST_OK` when it succeeds. **]**
 
