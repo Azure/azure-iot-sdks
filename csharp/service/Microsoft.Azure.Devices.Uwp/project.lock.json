@@ -277,13 +277,13 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/8.0.3": {
+      "Newtonsoft.Json/6.0.8": {
         "type": "package",
         "compile": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "PCLCrypto/1.0.86": {
@@ -2193,13 +2193,13 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/8.0.3": {
+      "Newtonsoft.Json/6.0.8": {
         "type": "package",
         "compile": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "PCLCrypto/1.0.86": {
@@ -3959,13 +3959,13 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/8.0.3": {
+      "Newtonsoft.Json/6.0.8": {
         "type": "package",
         "compile": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "PCLCrypto/1.0.86": {
@@ -5723,13 +5723,13 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/8.0.3": {
+      "Newtonsoft.Json/6.0.8": {
         "type": "package",
         "compile": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "PCLCrypto/1.0.86": {
@@ -7489,13 +7489,13 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/8.0.3": {
+      "Newtonsoft.Json/6.0.8": {
         "type": "package",
         "compile": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "PCLCrypto/1.0.86": {
@@ -9253,13 +9253,13 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/8.0.3": {
+      "Newtonsoft.Json/6.0.8": {
         "type": "package",
         "compile": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "PCLCrypto/1.0.86": {
@@ -11019,13 +11019,13 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/8.0.3": {
+      "Newtonsoft.Json/6.0.8": {
         "type": "package",
         "compile": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
+          "lib/netcore45/Newtonsoft.Json.dll": {}
         }
       },
       "PCLCrypto/1.0.86": {
@@ -13142,11 +13142,11 @@
         "ref/xamarinmac20/_._"
       ]
     },
-    "Newtonsoft.Json/8.0.3": {
-      "sha512": "KGsYQdS2zLH+H8x2cZaSI7e+YZ4SFIbyy1YJQYl6GYBWjf5o4H1A68nxyq+WTyVSOJQ4GqS/DiPE+UseUizgMg==",
+    "Newtonsoft.Json/6.0.8": {
+      "sha512": "7ut47NDedTW19EbL0JpFDYUP62fcuz27hJrehCDNajdCS5NtqL+E39+7Um3OkNc2wl2ym7K8Ln5eNuLus6mVGQ==",
       "type": "package",
       "files": [
-        "Newtonsoft.Json.8.0.3.nupkg.sha512",
+        "Newtonsoft.Json.6.0.8.nupkg.sha512",
         "Newtonsoft.Json.nuspec",
         "lib/net20/Newtonsoft.Json.dll",
         "lib/net20/Newtonsoft.Json.xml",
@@ -13156,10 +13156,12 @@
         "lib/net40/Newtonsoft.Json.xml",
         "lib/net45/Newtonsoft.Json.dll",
         "lib/net45/Newtonsoft.Json.xml",
+        "lib/netcore45/Newtonsoft.Json.dll",
+        "lib/netcore45/Newtonsoft.Json.xml",
         "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.dll",
         "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.xml",
-        "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll",
-        "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.xml",
+        "lib/portable-net45+wp80+win8+wpa81+aspnetcore50/Newtonsoft.Json.dll",
+        "lib/portable-net45+wp80+win8+wpa81+aspnetcore50/Newtonsoft.Json.xml",
         "tools/install.ps1"
       ]
     },
@@ -15721,7 +15723,7 @@
     "": [
       "Microsoft.Azure.Amqp >= 1.1.5",
       "Microsoft.NETCore.UniversalWindowsPlatform >= 5.0.0",
-      "Newtonsoft.Json >= 8.0.3",
+      "Newtonsoft.Json >= 6.0.8",
       "PCLCrypto >= 1.0.86"
     ],
     "UAP,Version=v10.0": []
