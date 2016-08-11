@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "async": "^2.0.0",
-    "azure-event-hubs": "^0.0.2",
+    "azure-event-hubs": "^0.0.3",
     "azure-iot-common": "^1.0.10",
     "azure-iot-device": "^1.0.10",
     "azure-iot-device-amqp": "^1.0.9",
