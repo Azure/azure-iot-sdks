@@ -4,8 +4,8 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
-    using System.Reflection;
 #if !NETMF
+    using System.Reflection;
     using Microsoft.Azure.Devices.Client.Common;
 #endif
     using Extensions;
@@ -16,13 +16,16 @@ namespace Microsoft.Azure.Devices.Client
 
     static class Utils
     {
+
 #if PCL
         static readonly System.Collections.Generic.Dictionary<DeliveryAcknowledgement, string> AckTypeMap = new System.Collections.Generic.Dictionary<DeliveryAcknowledgement, string>();
         static readonly System.Collections.Generic.Dictionary<string, DeliveryAcknowledgement> AckTypeReverseMap = new System.Collections.Generic.Dictionary<string, DeliveryAcknowledgement>();
-#else
+#elif !NETMF
         static readonly Hashtable AckTypeMap = new Hashtable();
         static readonly Hashtable AckTypeReverseMap = new Hashtable();
 #endif
+
+#if !NETMF
         static Utils()
         {
             AckTypeMap.Add(DeliveryAcknowledgement.NegativeOnly, "negative");
@@ -35,7 +38,7 @@ namespace Microsoft.Azure.Devices.Client
                 AckTypeReverseMap.Add(AckTypeMap[key], key);
             }
         }
-
+#endif
 
 #if !PCL && !WINDOWS_UWP && !NETMF
         public static void ValidateBufferBounds(byte[] buffer, int offset, int size)
@@ -79,19 +82,8 @@ namespace Microsoft.Azure.Devices.Client
         }
 
 #endif
-        public static DeliveryAcknowledgement ConvertDeliveryAckTypeFromString(string value)
-        {
-#if PCL
-            if (AckTypeReverseMap.ContainsKey(value))
-#else
-            if (AckTypeReverseMap.Contains(value))
-#endif
-            {
-                return (DeliveryAcknowledgement)AckTypeReverseMap[value];
-            }
 
-            throw new NotSupportedException("Unknown value: " + value);
-        }
+#if !NETMF
 
         public static string ConvertDeliveryAckTypeToString(DeliveryAcknowledgement value)
         {
@@ -106,5 +98,67 @@ namespace Microsoft.Azure.Devices.Client
 
             throw new NotSupportedException("Unknown value: " + value);
         }
+
+        public static DeliveryAcknowledgement ConvertDeliveryAckTypeFromString(string value)
+        {
+#if PCL
+            if (AckTypeReverseMap.ContainsKey(value))
+#else
+            if (AckTypeReverseMap.Contains(value))
+#endif
+            {
+                return (DeliveryAcknowledgement)AckTypeReverseMap[value];
+            }
+
+            throw new NotSupportedException("Unknown value: " + value);
+        }
+
+#else
+
+        /* 
+         * Development notes: 
+         * 1) NETMF doesn't have the same reflection goodies of the full framework to browse fields and such
+         * 2) replacing the AckTypeMap and AckTypeReverseMap Dictionaries with an Hastable could work but it takes too much RAM (which is at premium in NETMF)
+         * 3) the best approach is to do this the 'hard' way 
+        */
+
+        public static DeliveryAcknowledgement ConvertDeliveryAckTypeFromString(string value)
+        {
+            switch (value)
+            {
+                case "none":
+                    return DeliveryAcknowledgement.None;
+                case "negative":
+                    return DeliveryAcknowledgement.NegativeOnly;
+                case "positive":
+                    return DeliveryAcknowledgement.PositiveOnly;
+                case "full":
+                    return DeliveryAcknowledgement.Full;
+
+                default:
+                    throw new NotSupportedException("Unknown value: '" + value + "'");
+            }
+        }
+
+        public static string ConvertDeliveryAckTypeToString(DeliveryAcknowledgement value)
+        {
+            switch (value)
+            {
+                case DeliveryAcknowledgement.None:
+                    return "none";
+                case DeliveryAcknowledgement.NegativeOnly:
+                    return "negative";
+                case DeliveryAcknowledgement.PositiveOnly:
+                    return "positive";
+                case DeliveryAcknowledgement.Full:
+                    return "full";
+
+                default:
+                    throw new NotSupportedException("Unknown value: '" + value + "'");
+            }
+        }
+
+#endif
+
     }
 }
