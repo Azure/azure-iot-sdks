@@ -107,7 +107,7 @@ You might get an error message at this step(return code 127), but the certificat
 - Run the sample **/tmp/simplesample_http**
 - See [Manage IoT Hub][lnk-manage-iothub] for information about the tools you can use to monitor the messages your device sends to your IoT hub and to send commands to your devices.
 
-***Note: To send a command to the device from iothub-explorer or DeviceExplorer, the command should be like {"Name":"TurnFanOff", "Parameters":{}}***
+***Note: To send a command to the device from iothub-explorer or DeviceExplorer, the command should be like {"Name":"TurnFanOff","Parameters":{}}***
 
 [setup-devbox-linux]: ../../c/doc/devbox_setup.md
 [setup-iothub]: ../setup_iothub.md
