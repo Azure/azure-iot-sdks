@@ -67,8 +67,8 @@ namespace Microsoft.Azure.Devices
             Outcome disposeOutcome;
             try
             {
-                ReceivingAmqpLink deviceBoundReceivingLink = await faultTolerantReceivingLink.GetReceivingLinkAsync();
-                disposeOutcome = await deviceBoundReceivingLink.DisposeMessageAsync(deliveryTag, outcome, batchable, IotHubConnection.DefaultOperationTimeout);
+                ReceivingAmqpLink deviceBoundReceivingLink = await faultTolerantReceivingLink.GetReceivingLinkAsync().ConfigureAwait(false);
+                disposeOutcome = await deviceBoundReceivingLink.DisposeMessageAsync(deliveryTag, outcome, batchable, IotHubConnection.DefaultOperationTimeout).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -99,7 +99,7 @@ namespace Microsoft.Azure.Devices
         {
             using (var reader = new StreamReader(amqpMessage.BodyStream, Encoding.UTF8))
             {
-                string jsonString = await reader.ReadToEndAsync();
+                string jsonString = await reader.ReadToEndAsync().ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<T>(jsonString);
             }
         }

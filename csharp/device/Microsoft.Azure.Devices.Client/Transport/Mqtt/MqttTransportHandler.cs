@@ -146,21 +146,21 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             {
                 return;
             }
-            await this.OpenAsync();
+            await this.OpenAsync().ConfigureAwait(false);
         }
 
         public override async Task SendEventAsync(Message message)
         {
             this.EnsureValidState();
 
-            await this.channel.WriteAndFlushAsync(message);
+            await this.channel.WriteAndFlushAsync(message).ConfigureAwait(false);
         }
 
         public override async Task SendEventAsync(IEnumerable<Message> messages)
         {
             foreach (Message message in messages)
             {
-                await this.SendEventAsync(message);
+                await this.SendEventAsync(message).ConfigureAwait(false);
             }
         }
 
@@ -170,10 +170,10 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
             if (this.State != TransportState.Receiving)
             {
-                await this.SubscribeAsync();
+                await this.SubscribeAsync().ConfigureAwait(false);
             }
 
-            if (!await this.receivingSemaphore.WaitAsync(timeout, this.disconnectAwaitersCancellationSource.Token))
+            if (!await this.receivingSemaphore.WaitAsync(timeout, this.disconnectAwaitersCancellationSource.Token).ConfigureAwait(false))
             {
                 return null;
             }
@@ -224,7 +224,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                 this.completionQueue.Dequeue();
                 completeOperationCompletion = this.channel.WriteAndFlushAsync(actualLockToken);
             }
-            await completeOperationCompletion;
+            await completeOperationCompletion.ConfigureAwait(false);
         }
 
         public override Task AbandonAsync(string lockToken)
@@ -259,7 +259,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         {
             if (this.TryStop())
             {
-                await this.closeRetryPolicy.ExecuteAsync(this.CleanupAsync);
+                await this.closeRetryPolicy.ExecuteAsync(this.CleanupAsync).ConfigureAwait(false);
             }
             else
             {
@@ -319,7 +319,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                         throw new ArgumentOutOfRangeException();
                 }
 
-                await this.closeRetryPolicy.ExecuteAsync(this.CleanupAsync);
+                await this.closeRetryPolicy.ExecuteAsync(this.CleanupAsync).ConfigureAwait(false);
             }
             catch (Exception ex) when (!ex.IsFatal())
             {
@@ -354,7 +354,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             {
                 try
                 {
-                    this.channel = await this.channelFactory(this.serverAddress, ProtocolGatewayPort);
+                    this.channel = await this.channelFactory(this.serverAddress, ProtocolGatewayPort).ConfigureAwait(false);
                 }
                 catch (Exception ex) when (!ex.IsFatal())
                 {
@@ -371,16 +371,16 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                     }
                     if (this.channel.Active)
                     {
-                        await this.channel.WriteAsync(DisconnectPacket.Instance);
+                        await this.channel.WriteAsync(DisconnectPacket.Instance).ConfigureAwait(false);
                     }
                     if (this.channel.Open)
                     {
-                        await this.channel.CloseAsync();
+                        await this.channel.CloseAsync().ConfigureAwait(false);
                     }
                 });
             }
 
-            await this.connectCompletion.Task;
+            await this.connectCompletion.Task.ConfigureAwait(false);
         }
 
         bool TryStop()
@@ -412,7 +412,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         {
             if (this.TryStateTransition(TransportState.Open, TransportState.Subscribing))
             {
-                await this.channel.WriteAsync(new SubscribePacket());
+                await this.channel.WriteAsync(new SubscribePacket()).ConfigureAwait(false);
                 if (this.TryStateTransition(TransportState.Subscribing, TransportState.Receiving))
                 {
                     if (this.subscribeCompletionSource.TryComplete())
@@ -421,7 +421,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                     }
                 }
             }
-            await this.subscribeCompletionSource.Task;
+            await this.subscribeCompletionSource.Task.ConfigureAwait(false);
         }
 
         Func<IPAddress, int, Task<IChannel>> CreateChannelFactory(IotHubConnectionString iotHubConnectionString, MqttTransportSettings settings)
@@ -461,11 +461,11 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             Func<Task> currentCleanupFunc = this.cleanupFunc;
             this.cleanupFunc = async () =>
             {
-                await cleanupTask();
+                await cleanupTask().ConfigureAwait(false);
 
                 if (currentCleanupFunc != null)
                 {
-                    await currentCleanupFunc();
+                    await currentCleanupFunc().ConfigureAwait(false);
                 }
             };
         }
@@ -474,7 +474,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         {
             try
             {
-                await this.closeRetryPolicy.ExecuteAsync(this.CleanupAsync);
+                await this.closeRetryPolicy.ExecuteAsync(this.CleanupAsync).ConfigureAwait(false);
             }
             catch (Exception ex) when (!ex.IsFatal())
             {

@@ -229,7 +229,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             fileUploadRequest,
             ExceptionHandlingHelper.GetDefaultErrorMapping(),
             null,
-            CancellationToken.None);
+            CancellationToken.None).ConfigureAwait(false);
 
             string putString = String.Format("https://{0}/{1}/{2}{3}",
                 fileUploadResponse.HostName,
@@ -244,7 +244,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 // 2. Use SAS URI to send data to Azure Storage Blob (PUT)
                 CloudBlockBlob blob = new CloudBlockBlob(new Uri(putString));
                 var uploadTask = blob.UploadFromStreamAsync(source);
-                await uploadTask;
+                await uploadTask.ConfigureAwait(false);
 
                 notification.CorrelationId = fileUploadResponse.CorrelationId;
                 notification.IsSuccess = uploadTask.IsCompleted;
@@ -257,7 +257,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                     notification,
                     ExceptionHandlingHelper.GetDefaultErrorMapping(),
                     null,
-                    CancellationToken.None);
+                    CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -271,7 +271,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                     notification,
                     ExceptionHandlingHelper.GetDefaultErrorMapping(),
                     null,
-                    CancellationToken.None);
+                    CancellationToken.None).ConfigureAwait(false);
 
                 throw ex;
             }
@@ -300,7 +300,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 ExceptionHandlingHelper.GetDefaultErrorMapping(),
                 customHeaders,
                 true,
-                CancellationToken.None);
+                CancellationToken.None).ConfigureAwait(false);
 
             if (responseMessage.StatusCode == HttpStatusCode.NoContent)
             {
@@ -332,7 +332,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             IEnumerable<string> sequenceNumber;
             responseMessage.Headers.TryGetValues(CustomHeaderConstants.SequenceNumber, out sequenceNumber);
 
-            var byteContent = await responseMessage.Content.ReadAsByteArrayAsync();
+            var byteContent = await responseMessage.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
 
             var message = byteContent != null ? new Message(byteContent) : new Message();
 

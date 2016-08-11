@@ -94,14 +94,14 @@ namespace Microsoft.Azure.Devices
 
         public override async Task OpenAsync()
         {
-            await this.GetSendingLinkAsync();
-            await this.feedbackReceiver.OpenAsync();
+            await this.GetSendingLinkAsync().ConfigureAwait(false);
+            await this.feedbackReceiver.OpenAsync().ConfigureAwait(false);
         }
 
         public async override Task CloseAsync()
         {
-            await this.feedbackReceiver.CloseAsync();
-            await this.iotHubConnection.CloseAsync();
+            await this.feedbackReceiver.CloseAsync().ConfigureAwait(false);
+            await this.iotHubConnection.CloseAsync().ConfigureAwait(false);
         }
 
         public async override Task SendAsync(string deviceId, Message message)
@@ -122,8 +122,8 @@ namespace Microsoft.Azure.Devices
                 amqpMessage.Properties.To = "/devices/" + WebUtility.UrlEncode(deviceId) + "/messages/deviceBound";
                 try
                 {
-                    SendingAmqpLink sendingLink = await this.GetSendingLinkAsync();
-                    outcome = await sendingLink.SendMessageAsync(amqpMessage, IotHubConnection.GetNextDeliveryTag(ref this.sendingDeliveryTag), AmqpConstants.NullBinary, this.OperationTimeout);
+                    SendingAmqpLink sendingLink = await this.GetSendingLinkAsync().ConfigureAwait(false);
+                    outcome = await sendingLink.SendMessageAsync(amqpMessage, IotHubConnection.GetNextDeliveryTag(ref this.sendingDeliveryTag), AmqpConstants.NullBinary, this.OperationTimeout).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
@@ -181,7 +181,7 @@ namespace Microsoft.Azure.Devices
             SendingAmqpLink sendingLink;
             if (!this.faultTolerantSendingLink.TryGetOpenedObject(out sendingLink))
             {
-                sendingLink = await this.faultTolerantSendingLink.GetOrCreateAsync(this.OpenTimeout);
+                sendingLink = await this.faultTolerantSendingLink.GetOrCreateAsync(this.OpenTimeout).ConfigureAwait(false);
             }
 
             return sendingLink;

@@ -364,16 +364,16 @@ namespace Microsoft.Azure.Devices.Common
 
             if (task.IsCompleted || (timeout == Timeout.InfiniteTimeSpan && token == CancellationToken.None))
             {
-                await task;
+                await task.ConfigureAwait(false);
                 return;
             }
 
             using (var cts = CancellationTokenSource.CreateLinkedTokenSource(token))
             {
-                if (task == await Task.WhenAny(task, CreateDelayTask(timeout, cts.Token)))
+                if (task == await Task.WhenAny(task, CreateDelayTask(timeout, cts.Token)).ConfigureAwait(false))
                 {
                     cts.Cancel();
-                    await task;
+                    await task.ConfigureAwait(false);
                 }
             }
         }
@@ -400,16 +400,16 @@ namespace Microsoft.Azure.Devices.Common
 
             if (task.IsCompleted || (timeout == Timeout.InfiniteTimeSpan && token == CancellationToken.None))
             {
-                await task;
+                await task.ConfigureAwait(false);
                 return;
             }
 
             using (var cts = CancellationTokenSource.CreateLinkedTokenSource(token))
             {
-                if (task == await Task.WhenAny(task, CreateDelayTask(timeout, cts.Token)))
+                if (task == await Task.WhenAny(task, CreateDelayTask(timeout, cts.Token)).ConfigureAwait(false))
                 {
                     cts.Cancel();
-                    await task;
+                    await task.ConfigureAwait(false);
                     return;
                 }
             }
@@ -439,15 +439,15 @@ namespace Microsoft.Azure.Devices.Common
 
             if (task.IsCompleted || (timeout == Timeout.InfiniteTimeSpan && token == CancellationToken.None))
             {
-                return await task;
+                return await task.ConfigureAwait(false);
             }
 
             using (var cts = CancellationTokenSource.CreateLinkedTokenSource(token))
             {
-                if (task == await Task.WhenAny(task, CreateDelayTask(timeout, cts.Token)))
+                if (task == await Task.WhenAny(task, CreateDelayTask(timeout, cts.Token)).ConfigureAwait(false))
                 {
                     cts.Cancel();
-                    return await task;
+                    return await task.ConfigureAwait(false);
                 }
             }
 
@@ -458,7 +458,7 @@ namespace Microsoft.Azure.Devices.Common
         {
             try
             {
-                await Task.Delay(timeout, token);
+                await Task.Delay(timeout, token).ConfigureAwait(false);
             }
             catch (TaskCanceledException)
             {

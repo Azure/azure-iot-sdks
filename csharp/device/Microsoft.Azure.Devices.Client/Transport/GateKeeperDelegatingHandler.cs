@@ -42,8 +42,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         /// <returns>The receive message or null if there was no message until the specified time has elapsed</returns>
         public override async Task<Message> ReceiveAsync()
         {
-            await this.EnsureOpenedAsync(false);
-            return await base.ReceiveAsync();
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            return await base.ReceiveAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -53,8 +53,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         public override async Task<Message> ReceiveAsync(TimeSpan timeout)
         {
             TimeoutHelper.ThrowIfNegativeArgument(timeout);
-            await this.EnsureOpenedAsync(false);
-            return await base.ReceiveAsync(timeout);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            return await base.ReceiveAsync(timeout).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -63,8 +63,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         /// <returns>The lock identifier for the previously received message</returns>
         public override async Task CompleteAsync(string lockToken)
         {
-            await this.EnsureOpenedAsync(false);
-            await base.CompleteAsync(lockToken);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await base.CompleteAsync(lockToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -73,8 +73,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         /// <returns>The previously received message</returns>
         public override async Task AbandonAsync(string lockToken)
         {
-            await this.EnsureOpenedAsync(false);
-            await base.AbandonAsync(lockToken);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await base.AbandonAsync(lockToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -83,8 +83,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         /// <returns>The previously received message</returns>
         public override async Task RejectAsync(string lockToken)
         {
-            await this.EnsureOpenedAsync(false);
-            await base.RejectAsync(lockToken);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await base.RejectAsync(lockToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -93,8 +93,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         /// <returns>The message containing the event</returns>
         public override async Task SendEventAsync(Message message)
         {
-            await this.EnsureOpenedAsync(false);
-            await base.SendEventAsync(message);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await base.SendEventAsync(message).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -103,8 +103,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         /// <returns>The task containing the event</returns>
         public override async Task SendEventAsync(IEnumerable<Message> messages)
         {
-            await this.EnsureOpenedAsync(false);
-            await base.SendEventAsync(messages);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await base.SendEventAsync(messages).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             if (!this.TryCloseGate())
             {
-                await base.CloseAsync();
+                await base.CloseAsync().ConfigureAwait(false);
             }
         }
 

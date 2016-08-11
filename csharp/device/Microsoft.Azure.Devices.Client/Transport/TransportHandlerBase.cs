@@ -78,8 +78,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
         public async Task<Message> ReceiveAsync(TimeSpan timeout)
         {
             TimeoutHelper.ThrowIfNegativeArgument(timeout);
-            await this.EnsureOpenedAsync(false);
-            return await this.OnReceiveAsync(timeout);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            return await this.OnReceiveAsync(timeout).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -93,8 +93,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 throw Fx.Exception.ArgumentNull("lockToken");
             }
 
-            await this.EnsureOpenedAsync(false);
-            await this.OnCompleteAsync(lockToken);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await this.OnCompleteAsync(lockToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -108,8 +108,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 throw Fx.Exception.ArgumentNull("message");
             }
 
-            await this.EnsureOpenedAsync(false);
-            await this.OnCompleteAsync(message);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await this.OnCompleteAsync(message).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -123,8 +123,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 throw Fx.Exception.ArgumentNull("lockToken");
             }
 
-            await this.EnsureOpenedAsync(false);
-            await this.OnAbandonAsync(lockToken);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await this.OnAbandonAsync(lockToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -138,8 +138,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 throw Fx.Exception.ArgumentNull("message");
             }
 
-            await this.EnsureOpenedAsync(false);
-            await this.OnAbandonAsync(message);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await this.OnAbandonAsync(message).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -153,8 +153,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 throw Fx.Exception.ArgumentNull("lockToken");
             }
 
-            await this.EnsureOpenedAsync(false);
-            await this.OnRejectAsync(lockToken);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await this.OnRejectAsync(lockToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -168,8 +168,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 throw Fx.Exception.ArgumentNull("message");
             }
 
-            await this.EnsureOpenedAsync(false);
-            await this.OnRejectAsync(message);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await this.OnRejectAsync(message).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -183,8 +183,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 throw Fx.Exception.ArgumentNull("message");
             }
 
-            await this.EnsureOpenedAsync(false);
-            await this.OnSendEventAsync(message);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await this.OnSendEventAsync(message).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -198,8 +198,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 throw Fx.Exception.ArgumentNull("messages");
             }
 
-            await this.EnsureOpenedAsync(false);
-            await this.OnSendEventAsync(messages);
+            await this.EnsureOpenedAsync(false).ConfigureAwait(false);
+            await this.OnSendEventAsync(messages).ConfigureAwait(false);
         }
 
         protected Task EnsureOpenedAsync(bool explicitOpen)

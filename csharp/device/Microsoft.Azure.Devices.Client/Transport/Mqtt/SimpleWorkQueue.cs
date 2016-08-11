@@ -135,7 +135,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                 while (queue.Count > 0 && this.State != States.Aborted)
                 {
                     TWork workItem = queue.Dequeue();
-                    await this.DoWorkAsync(context, workItem);
+                    await this.DoWorkAsync(context, workItem).ConfigureAwait(false);
                 }
 
                 switch (this.State)

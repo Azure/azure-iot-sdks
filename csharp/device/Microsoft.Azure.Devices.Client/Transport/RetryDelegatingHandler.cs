@@ -57,7 +57,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             try
             {
                 var sendState = new SendMessageState();
-                await this.retryPolicy.ExecuteAsync(() => this.SendMessageWithRetryAsync(sendState, message, () => base.SendEventAsync(message)));
+                await this.retryPolicy.ExecuteAsync(() => this.SendMessageWithRetryAsync(sendState, message, () => base.SendEventAsync(message))).ConfigureAwait(false);
             }
             catch (IotHubClientTransientException ex)
             {
@@ -71,7 +71,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             {
                 var sendState = new SendMessageState();
                 IEnumerable<Message> messageList = messages as IList<Message> ?? messages.ToList();
-                await this.retryPolicy.ExecuteAsync(() => this.SendMessageWithRetryAsync(sendState, messageList, () => base.SendEventAsync(messageList)));
+                await this.retryPolicy.ExecuteAsync(() => this.SendMessageWithRetryAsync(sendState, messageList, () => base.SendEventAsync(messageList))).ConfigureAwait(false);
             }
             catch (IotHubClientTransientException ex)
             {
@@ -83,7 +83,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             try
             {
-                return await this.retryPolicy.ExecuteAsync(() => base.ReceiveAsync());
+                return await this.retryPolicy.ExecuteAsync(() => base.ReceiveAsync()).ConfigureAwait(false);
             }
             catch (IotHubClientTransientException ex)
             {
@@ -96,7 +96,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             try
             {
-                return await this.retryPolicy.ExecuteAsync(() => base.ReceiveAsync(timeout));
+                return await this.retryPolicy.ExecuteAsync(() => base.ReceiveAsync(timeout)).ConfigureAwait(false);
             }
             catch (IotHubClientTransientException ex)
             {
@@ -109,7 +109,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             try
             {
-                await this.retryPolicy.ExecuteAsync(() => base.CompleteAsync(lockToken));
+                await this.retryPolicy.ExecuteAsync(() => base.CompleteAsync(lockToken)).ConfigureAwait(false);
             }
             catch (IotHubClientTransientException ex)
             {
@@ -121,7 +121,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             try
             {
-                await this.retryPolicy.ExecuteAsync(() => base.AbandonAsync(lockToken));
+                await this.retryPolicy.ExecuteAsync(() => base.AbandonAsync(lockToken)).ConfigureAwait(false);
             }
             catch (IotHubClientTransientException ex)
             {
@@ -133,7 +133,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             try
             {
-                await this.retryPolicy.ExecuteAsync(() => base.RejectAsync(lockToken));
+                await this.retryPolicy.ExecuteAsync(() => base.RejectAsync(lockToken)).ConfigureAwait(false);
             }
             catch (IotHubClientTransientException ex)
             {
@@ -145,7 +145,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             try
             {
-                await this.retryPolicy.ExecuteAsync(() => base.OpenAsync(explicitOpen));
+                await this.retryPolicy.ExecuteAsync(() => base.OpenAsync(explicitOpen)).ConfigureAwait(false);
             }
             catch (IotHubClientTransientException ex)
             {
@@ -171,13 +171,13 @@ namespace Microsoft.Azure.Devices.Client.Transport
                     message.TryResetBody(messageStreamPosition);
                 }
 
-                await TryExecuteActionAsync(sendState, action);
+                await TryExecuteActionAsync(sendState, action).ConfigureAwait(false);
                 return;
             }
 
             EnsureStreamsAreInOriginalState(sendState, messages);
 
-            await TryExecuteActionAsync(sendState, action);
+            await TryExecuteActionAsync(sendState, action).ConfigureAwait(false);
         }
 
         async Task SendMessageWithRetryAsync(SendMessageState sendState, Message message, Func<Task> action)
@@ -187,13 +187,13 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 sendState.InitialStreamPosition = message.BodyStream.CanSeek ? message.BodyStream.Position : UndeterminedPosition;
                 message.TryResetBody(sendState.InitialStreamPosition);
 
-                await TryExecuteActionAsync(sendState, action);
+                await TryExecuteActionAsync(sendState, action).ConfigureAwait(false);
                 return;
             }
 
             EnsureStreamIsInOriginalState(sendState, message);
 
-            await TryExecuteActionAsync(sendState, action);
+            await TryExecuteActionAsync(sendState, action).ConfigureAwait(false);
         }
 
         static void EnsureStreamsAreInOriginalState(SendMessageState sendState, IEnumerable<Message> messages)
@@ -239,7 +239,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             sendState.Iteration++;
             try
             {
-                await action();
+                await action().ConfigureAwait(false);
             }
             catch (IotHubClientTransientException ex)
             {

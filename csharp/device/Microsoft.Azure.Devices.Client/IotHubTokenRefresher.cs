@@ -49,13 +49,13 @@ namespace Microsoft.Azure.Devices.Client
                 this.audience,
                 this.connectionString.AmqpEndpoint.AbsoluteUri,
                 AccessRightsStringArray,
-                timeout);
+                timeout).ConfigureAwait(false);
             this.SendCbsTokenLoopAsync(expiresAtUtc, timeout).Fork();
         }
 
         async Task SendCbsTokenLoopAsync(DateTime expiryTimeUtc, TimeSpan timeout)
         {
-            bool continueSendingTokens = await WaitUntilNextTokenSendTime(expiryTimeUtc);
+            bool continueSendingTokens = await WaitUntilNextTokenSendTime(expiryTimeUtc).ConfigureAwait(false);
 
             if (!continueSendingTokens)
             {
@@ -82,9 +82,9 @@ namespace Microsoft.Azure.Devices.Client
                                  this.audience,
                                  this.connectionString.AmqpEndpoint.AbsoluteUri,
                                  AccessRightsStringArray,
-                                 timeout);
+                                 timeout).ConfigureAwait(false);
 
-                            continueSendingTokens = await WaitUntilNextTokenSendTime(expiresAtUtc);
+                            continueSendingTokens = await WaitUntilNextTokenSendTime(expiresAtUtc).ConfigureAwait(false);
                             if (!continueSendingTokens)
                             {
                                 break;
@@ -97,7 +97,7 @@ namespace Microsoft.Azure.Devices.Client
                                 throw;
                             }
 
-                            await Task.Delay(RefreshTokenRetryInterval);
+                            await Task.Delay(RefreshTokenRetryInterval).ConfigureAwait(false);
                         }
                     }
                     else
@@ -126,7 +126,7 @@ namespace Microsoft.Azure.Devices.Client
                 return false;
             }
 
-            await Task.Delay(waitTime);
+            await Task.Delay(waitTime).ConfigureAwait(false);
             return true;
         }
 

@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         public override async Task OpenAsync(bool explicitOpen)
         {
-            await this.TryOpenPrioritizedTransportsAsync(explicitOpen);
+            await this.TryOpenPrioritizedTransportsAsync(explicitOpen).ConfigureAwait(false);
         }
 
         async Task TryOpenPrioritizedTransportsAsync(bool explicitOpen)
@@ -49,7 +49,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                     this.InnerHandler = this.transportHandlerFactory(this.iotHubConnectionString, transportSetting);
 
                     // Try to open a connection with this transport
-                    await base.OpenAsync(explicitOpen);
+                    await base.OpenAsync(explicitOpen).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
@@ -57,7 +57,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                     {
                         if (this.InnerHandler != null)
                         {
-                            await this.CloseAsync();
+                            await this.CloseAsync().ConfigureAwait(false);
                         }
                     }
                     catch (Exception ex) when (!ex.IsFatal())

@@ -79,14 +79,14 @@ namespace Microsoft.Azure.Amqp.Transport
                 if (args.Buffer != null)
                 {
                     var arraySegment = new ArraySegment<byte>(args.Buffer, args.Offset, args.Count);
-                    await this.webSocket.SendAsync(arraySegment, WebSocketMessageType.Binary, true, this.writeCancellationTokenSource.Token);
+                    await this.webSocket.SendAsync(arraySegment, WebSocketMessageType.Binary, true, this.writeCancellationTokenSource.Token).ConfigureAwait(false);
                 }
                 else
                 {
                     foreach (ByteBuffer byteBuffer in args.ByteBufferList)
                     {
                         await this.webSocket.SendAsync(new ArraySegment<byte>(byteBuffer.Buffer, byteBuffer.Offset, byteBuffer.Length),
-                            WebSocketMessageType.Binary, true, this.writeCancellationTokenSource.Token);
+                            WebSocketMessageType.Binary, true, this.writeCancellationTokenSource.Token).ConfigureAwait(false);
                     }
                 }
 
@@ -140,7 +140,7 @@ namespace Microsoft.Azure.Amqp.Transport
             try
             {
                 WebSocketReceiveResult receiveResult = await this.webSocket.ReceiveAsync(
-                    new ArraySegment<byte>(args.Buffer, args.Offset, args.Count), CancellationToken.None);
+                    new ArraySegment<byte>(args.Buffer, args.Offset, args.Count), CancellationToken.None).ConfigureAwait(false);
 
                 succeeded = true;
                 return receiveResult.Count;
@@ -193,7 +193,7 @@ namespace Microsoft.Azure.Amqp.Transport
 
                 using (var cancellationTokenSource = new CancellationTokenSource(timeout))
                 {
-                    await this.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, cancellationTokenSource.Token);
+                    await this.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, cancellationTokenSource.Token).ConfigureAwait(false);
                 }
             }
             catch (Exception e)
