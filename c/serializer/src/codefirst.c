@@ -719,10 +719,10 @@ static const REFLECTED_SOMETHING* FindReportedProperty(DEVICE_HEADER_DATA* devic
     if (result != NULL)
     {
         /* Codes_SRS_CODEFIRST_99_133:[CodeFirst_SendAsync shall allow sending of properties that are part of a child model.] */
-        if (result->what.property.offset < valueOffset)
+        if (result->what.reportedProperty.offset < valueOffset)
         {
             /* find recursively the property in the inner model, if there is one */
-            result = FindValue(deviceHeader, value, result->what.property.type, startOffset + result->what.property.offset, valuePath);
+            result = FindReportedProperty(deviceHeader, value, result->what.reportedProperty.type, startOffset + result->what.reportedProperty.offset, valuePath);
         }
     }
 
@@ -1023,6 +1023,7 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
                     LOG_CODEFIRST_ERROR;
                     break;
                 }
+                /*Codes_SRS_CODEFIRST_02_019: [ If values passed through va_args do not belong to the same device then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR. ]*/
                 else if ((deviceHeader != NULL) &&
                     (currentValueDeviceHeader != deviceHeader))
                 {
@@ -1066,15 +1067,10 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
                         }
                         else
                         {
-                            if ((modelName = Schema_GetModelName(deviceHeader->ModelHandle)) == NULL)
-                            {
-                                result = CODEFIRST_ERROR;
-                                LOG_CODEFIRST_ERROR;
-                                STRING_delete(valuePath);
-                                break;
-                            }
+                            modelName = Schema_GetModelName(deviceHeader->ModelHandle);
+
                             /*Codes_SRS_CODEFIRST_02_025: [ CodeFirst_SendAsyncReported shall compute for every AGENT_DATA_TYPE the valuePath. ]*/
-                            else if ((propertyReflectedData = FindReportedProperty(deviceHeader, value, modelName, 0, valuePath)) == NULL)
+                            if ((propertyReflectedData = FindReportedProperty(deviceHeader, value, modelName, 0, valuePath)) == NULL)
                             {
                                 result = CODEFIRST_INVALID_ARG;
                                 LOG_CODEFIRST_ERROR;
@@ -1083,41 +1079,31 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
                             }
                             else
                             {
-                                if (propertyReflectedData->type != REFLECTION_REPORTED_PROPERTY_TYPE)
+                                AGENT_DATA_TYPE agentDataType;
+                                /*Codes_SRS_CODEFIRST_02_023: [ CodeFirst_SendAsyncReported shall convert all REPORTED_PROPERTY model components to AGENT_DATA_TYPE. ]*/
+                                if (propertyReflectedData->what.reportedProperty.Create_AGENT_DATA_TYPE_from_Ptr(value, &agentDataType) != AGENT_DATA_TYPES_OK)
                                 {
-                                    /*TODO: coverage for this line is problematic and might not be possible at all since FindReportedProperty is already checking thats*/
-                                    LogError("argument number %zu passed through variable arguments is not a REPORTED PROPERTY", i);
-                                    result = CODEFIRST_INVALID_ARG;
+                                    result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
+                                    LOG_CODEFIRST_ERROR;
+                                    STRING_delete(valuePath);
                                     break;
                                 }
                                 else
                                 {
-                                    AGENT_DATA_TYPE agentDataType;
-                                    /*Codes_SRS_CODEFIRST_02_023: [ CodeFirst_SendAsyncReported shall convert all REPORTED_PROPERTY model components to AGENT_DATA_TYPE. ]*/
-                                    if (propertyReflectedData->what.property.Create_AGENT_DATA_TYPE_from_Ptr(value, &agentDataType) != AGENT_DATA_TYPES_OK)
+                                    /*Codes_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
+                                    if (Device_PublishTransacted(transaction, STRING_c_str(valuePath), &agentDataType) != DEVICE_OK)
                                     {
-                                        result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
+                                        Destroy_AGENT_DATA_TYPE(&agentDataType);
+                                        result = CODEFIRST_DEVICE_PUBLISH_FAILED;
                                         LOG_CODEFIRST_ERROR;
                                         STRING_delete(valuePath);
                                         break;
                                     }
                                     else
                                     {
-                                        /*Codes_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
-                                        if (Device_PublishTransacted(transaction, STRING_c_str(valuePath), &agentDataType) != DEVICE_OK)
-                                        {
-                                            Destroy_AGENT_DATA_TYPE(&agentDataType);
-                                            result = CODEFIRST_DEVICE_PUBLISH_FAILED;
-                                            LOG_CODEFIRST_ERROR;
-                                            STRING_delete(valuePath);
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            STRING_delete(valuePath);
-                                        }
-                                        Destroy_AGENT_DATA_TYPE(&agentDataType);
+                                        STRING_delete(valuePath);
                                     }
+                                    Destroy_AGENT_DATA_TYPE(&agentDataType);
                                 }
                             }
                         }
