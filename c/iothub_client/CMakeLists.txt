@@ -11,18 +11,18 @@ set(iothub_client_ll_transport_c_files
 ./src/iothub_message.c
 ./src/iothub_client_ll.c
 ./src/blob.c
-../parson/parson.c
 )
 
-if(MSVC)
-set_source_files_properties(../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-endif()
-
 if(NOT ${dont_use_uploadtoblob})
-set(iothub_client_ll_transport_c_files 
-    ${iothub_client_ll_transport_c_files}
-    ./src/iothub_client_ll_uploadtoblob.c
-    )
+    set(iothub_client_ll_transport_c_files 
+        ${iothub_client_ll_transport_c_files}
+        ../parson/parson.c
+        ./src/iothub_client_ll_uploadtoblob.c
+        )
+
+    if(MSVC)
+        set_source_files_properties(../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+    endif()
 endif()
 
 
@@ -32,12 +32,12 @@ set(iothub_client_ll_transport_h_files
 ./inc/iothub_client_version.h
 ./inc/iothub_transport_ll.h
 ./inc/blob.h
-../parson/parson.h
 )
 
 if(NOT ${dont_use_uploadtoblob})
     set(iothub_client_ll_transport_h_files 
         ${iothub_client_ll_transport_h_files}
+        ../parson/parson.h
         ./inc/iothub_client_ll_uploadtoblob.h
     )
 endif()
@@ -146,7 +146,10 @@ endif()
 
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
-include_directories(../parson)
+if(NOT ${dont_use_uploadtoblob})
+    include_directories(../parson)
+endif()
+
 include_directories(${SHARED_UTIL_INC_FOLDER})
 
 if (WINCE)
